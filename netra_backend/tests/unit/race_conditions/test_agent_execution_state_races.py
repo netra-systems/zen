@@ -31,7 +31,8 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - tests are migrating away
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker, ExecutionState
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import IsolatedEnvironment
@@ -74,7 +75,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
     
     def _create_state_tracking_execute(self):
         """Create agent execute method that tracks state changes."""
-        async def execute(state: DeepAgentState, run_id: str, websocket_enabled: bool = True):
+        async def execute(user_execution_context: UserExecutionContext, run_id: str, websocket_enabled: bool = True):
             execution_id = f"exec_{run_id}_{int(time.time() * 1000)}"
             
             # Record execution start
