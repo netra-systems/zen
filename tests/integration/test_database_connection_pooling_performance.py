@@ -253,7 +253,10 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
             async with active_operations_lock:
                 active_operations.add(operation_id)
                 current_active = len(active_operations)
-                stress_metrics["peak_concurrent_operations"] = max(\n                    stress_metrics["peak_concurrent_operations"],\n                    current_active\n                )
+                stress_metrics["peak_concurrent_operations"] = max(
+                    stress_metrics["peak_concurrent_operations"],
+                    current_active
+                )
             
             result = {"operation_id": operation_id, "success": False, "error": None}
             
