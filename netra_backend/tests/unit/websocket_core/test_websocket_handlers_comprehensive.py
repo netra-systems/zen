@@ -92,6 +92,10 @@ class WebSocketTestMixin:
 class TestMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
     """Test MessageHandler protocol compliance."""
     
+    def setup_method(self):
+        """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
+    
     async def test_base_message_handler_initialization(self):
         """Test BaseMessageHandler properly initializes with supported types."""
         # Test initialization with multiple message types
@@ -217,6 +221,7 @@ class TestTypingHandler(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.handler = TypingHandler()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_123"
@@ -292,6 +297,7 @@ class TestHeartbeatHandler(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.handler = HeartbeatHandler()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_123"
@@ -390,6 +396,7 @@ class TestAgentRequestHandler(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.handler = AgentRequestHandler()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_123"
@@ -486,6 +493,7 @@ class TestUserMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.handler = UserMessageHandler()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_123"
@@ -597,6 +605,7 @@ class TestJsonRpcHandler(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.handler = JsonRpcHandler()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_123"
@@ -715,6 +724,7 @@ class TestErrorHandler(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.handler = ErrorHandler()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_123"
@@ -799,6 +809,7 @@ class TestBatchMessageHandler(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.batch_config = BatchConfig(
             max_batch_size=5,
             max_wait_time=1.0,
@@ -938,6 +949,7 @@ class TestMessageRouter(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         self.router = MessageRouter()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_123"
@@ -1166,6 +1178,7 @@ class TestGlobalFunctions(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for each test method."""
+        super().setup_method()  # Initialize SSOT base test case
         # Reset global router state
         import netra_backend.app.websocket_core.handlers as handlers_module
         handlers_module._message_router = None
@@ -1283,6 +1296,7 @@ class TestWebSocketHandlersIntegration(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for integration tests."""
+        super().setup_method()  # Initialize SSOT base test case
         self.router = MessageRouter()
         self.mock_websocket = self._create_mock_websocket()
         self.user_id = "test_user_integration"
@@ -1442,6 +1456,7 @@ class TestGoldenPathCriticalScenarios(SSotBaseTestCase, WebSocketTestMixin):
     
     def setup_method(self):
         """Setup for Golden Path critical tests."""
+        super().setup_method()  # Initialize SSOT base test case
         self.router = MessageRouter()
         self.mock_websocket = self._create_mock_websocket()
         self.enterprise_user_id = "enterprise_user_456"
