@@ -151,15 +151,32 @@ class StartAgentHandler(BaseMessageHandler):
     
     async def _setup_thread_and_run(self, user_id: str, user_request: str) -> tuple[str, str]:
         """Setup thread and run for agent processing"""
-        async with get_unit_of_work() as uow:
-            thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
-            if not thread:
-                # Use session-based context for error handling
-                context = get_user_execution_context(user_id=user_id)
-                manager = await create_websocket_manager(context)
-                await manager.send_error(user_id, "Failed to create or retrieve thread")
-                return None, None
-            return await self._create_message_and_run(uow, thread, user_request, user_id)
+        # CRITICAL FIX: Ensure database is initialized before using UnitOfWork
+        try:
+            from netra_backend.app.db.postgres import initialize_postgres, async_session_factory
+            
+            # Check if database is initialized, if not initialize it
+            if async_session_factory is None:
+                logger.info("Database not initialized, initializing PostgreSQL...")
+                initialize_postgres()
+                
+            async with get_unit_of_work() as uow:
+                thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
+                if not thread:
+                    # Use session-based context for error handling
+                    context = get_user_execution_context(user_id=user_id)
+                    manager = await create_websocket_manager(context)
+                    await manager.send_error(user_id, "Failed to create or retrieve thread")
+                    return None, None
+                return await self._create_message_and_run(uow, thread, user_request, user_id)
+                
+        except Exception as db_error:
+            logger.error(f"Database setup failed in WebSocket handler: {db_error}")
+            # Use session-based context for error handling
+            context = get_user_execution_context(user_id=user_id)
+            manager = await create_websocket_manager(context)
+            await manager.send_error(user_id, f"Database initialization failed: {str(db_error)}")
+            return None, None
     
     async def _create_message_and_run(self, uow, thread, user_request: str, user_id: str) -> tuple[str, str]:
         """Create user message and run in database"""
