@@ -78,7 +78,8 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
     def setup_method(self, method):
         """Set up method-level fixtures."""
         super().setup_method(method)
-        self.registry = ToolRegistry(allow_override=False)
+        # Create scoped registry to avoid conflicts
+        self.registry = ToolRegistry(scope_id=f"test_{method.__name__}")
         logger.info(f"🧪 Starting unit test: {method.__name__}")
     
     def test_pydantic_basemodel_detection_and_rejection(self):
@@ -108,7 +109,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             logger.error("❌ CURRENT STATE BUG: BaseModel instance was accepted as tool")
             
             # Check if this generated "modelmetaclass" name
-            registered_tools = list(self.registry._registry.keys())
+            registered_tools = list(self.registry._items.keys())
             if "modelmetaclass" in registered_tools:
                 pytest.fail("REPRODUCED BUG: BaseModel instance created 'modelmetaclass' registration")
             
@@ -298,7 +299,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             logger.error(f"❌ CURRENT STATE BUG: {len(registration_attempts)} BaseModel(s) accepted as tools")
             
             # Check if this caused "modelmetaclass" registrations
-            registered_names = list(self.registry._registry.keys())
+            registered_names = list(self.registry._items.keys())
             if "modelmetaclass" in registered_names:
                 pytest.fail("REPRODUCED: Multiple BaseModel registration created 'modelmetaclass' conflict")
         
@@ -339,12 +340,12 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         
         # Verify tools can be retrieved
         for tool in valid_tools:
-            retrieved_tool = self.registry.get_tool(tool.name)
+            retrieved_tool = self.registry.get(tool.name)
             assert retrieved_tool is not None, f"Could not retrieve valid tool '{tool.name}'"
             assert retrieved_tool is tool, f"Retrieved different instance for '{tool.name}'"
         
         # Verify registry state
-        registered_count = len(self.registry._registry)
+        registered_count = len(self.registry._items)
         expected_count = len(valid_tools)
         assert registered_count == expected_count, f"Expected {expected_count} tools, got {registered_count}"
         
@@ -375,8 +376,8 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         """
         logger.info("🧪 Testing duplicate registration prevention")
         
-        # Create registry with duplicate prevention enabled
-        registry = ToolRegistry(allow_override=False)
+        # Create registry with duplicate prevention enabled (use scoped registry)
+        registry = ToolRegistry(scope_id="duplicate_test")
         
         tool1 = ValidTestTool()
         tool2 = ValidTestTool()  # Same name as tool1
@@ -419,8 +420,8 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         logger.info("🧪 Testing registry scoping isolation")
         
         # Create multiple registries to simulate user isolation
-        registry1 = ToolRegistry(allow_override=False)
-        registry2 = ToolRegistry(allow_override=False)
+        registry1 = ToolRegistry(scope_id="isolation_test_1")
+        registry2 = ToolRegistry(scope_id="isolation_test_2")
         
         # Verify they are different instances
         assert id(registry1) != id(registry2), "Registries should be different instances"
@@ -442,15 +443,15 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
                 pytest.fail(f"Unexpected error during registry isolation test: {e}")
         
         # Verify isolation - each registry should only see its own tool
-        tool1_retrieved = registry1.get_tool(tool1.name)
-        tool2_retrieved = registry2.get_tool(tool2.name)
+        tool1_retrieved = registry1.get(tool1.name)
+        tool2_retrieved = registry2.get(tool2.name)
         
         assert tool1_retrieved is tool1, "Registry1 should return its own tool instance"
         assert tool2_retrieved is tool2, "Registry2 should return its own tool instance"
         
         # Verify tools are not visible across registries
-        assert registry1.get_tool(tool2.name) is None or registry1.get_tool(tool2.name) is tool1
-        assert registry2.get_tool(tool1.name) is None or registry2.get_tool(tool1.name) is tool2
+        assert registry1.get(tool2.name) is None or registry1.get(tool2.name) is tool1
+        assert registry2.get(tool1.name) is None or registry2.get(tool1.name) is tool2
         
         logger.info("✅ Registry scoping isolation working correctly")
     
@@ -460,26 +461,27 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         """
         logger.info("🧪 Testing override behavior control")
         
-        # Test with allow_override=False (default)
-        strict_registry = ToolRegistry(allow_override=False)
+        # Test with strict registry (default behavior)
+        strict_registry = ToolRegistry(scope_id="strict_test")
         tool1 = ValidTestTool()
         tool2 = ValidTestTool()  # Same name
         
         strict_registry.register(tool1.name, tool1)
         
-        # Should fail with allow_override=False
+        # Should fail with default behavior (no overrides)
         with pytest.raises((ValueError, RuntimeError)):
             strict_registry.register(tool2.name, tool2)
         
-        # Test with allow_override=True
-        permissive_registry = ToolRegistry(allow_override=True)
+        # Create a registry that allows overrides by accessing the parent class
+        from netra_backend.app.core.registry.universal_registry import UniversalRegistry
+        permissive_registry = UniversalRegistry("PermissiveToolRegistry", allow_override=True)
         
         permissive_registry.register(tool1.name, tool1)
         # Should succeed with allow_override=True
         permissive_registry.register(tool2.name, tool2)
         
         # Should have the second tool now
-        retrieved = permissive_registry.get_tool(tool1.name)
+        retrieved = permissive_registry.get(tool1.name)
         assert retrieved is tool2, "Override should have replaced the original tool"
         
         logger.info("✅ Override behavior control working correctly")
