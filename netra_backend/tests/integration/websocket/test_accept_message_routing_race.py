@@ -56,8 +56,8 @@ from netra_backend.app.websocket_core.utils import (
 )
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 
-# Test Framework Imports
-from test_framework.ssot.integration_test_base import BaseIntegrationTest
+# Test Framework Imports - FIXED: Use correct base integration test import
+from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 

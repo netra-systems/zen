@@ -52,12 +52,12 @@ from test_framework.ssot.e2e_auth_helper import (
     create_authenticated_user_context
 )
 
-# Application imports using absolute paths
-from netra_backend.app.core.unified_websocket_manager import UnifiedWebSocketManager
+# Application imports using absolute paths - FIXED: Use SSOT WebSocket imports
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.websocket_core.websocket_event_emitter import WebSocketEventEmitter
-from netra_backend.app.database.database_manager import DatabaseManager
-from netra_backend.app.cache.redis_manager import RedisManager
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.redis_manager import RedisManager
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ensure_user_id
 
@@ -68,7 +68,6 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.real_services,
     pytest.mark.golden_path,
-    pytest.mark.websocket_events,
     pytest.mark.mission_critical
 ]
 
