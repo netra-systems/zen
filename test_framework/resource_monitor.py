@@ -50,7 +50,9 @@ try:
     from docker.errors import DockerException, APIError
 except ImportError:
     docker = None
-    warnings.warn("docker-py not available - Docker API monitoring disabled")
+    DockerException = Exception  # Fallback for type hints and exception handling
+    APIError = Exception  # Fallback for type hints and exception handling
+    warnings.warn("docker package not available - Docker API monitoring disabled", UserWarning)
 
 # CLAUDE.md compliance: Use IsolatedEnvironment for all environment access
 try:
@@ -79,9 +81,27 @@ except ImportError:
     import subprocess
     from typing import Any
     def execute_docker_command(cmd_args: list) -> Any:
-        """Fallback Docker command execution."""
-        result = subprocess.run(['docker'] + cmd_args, capture_output=True, text=True)
-        return result
+        """
+        Fallback Docker command execution.
+        
+        Args:
+            cmd_args: List of command arguments (including 'docker' as first element)
+        
+        Returns:
+            subprocess.CompletedProcess with returncode, stdout, stderr
+        """
+        try:
+            # cmd_args already includes 'docker', so use it directly
+            result = subprocess.run(cmd_args, capture_output=True, text=True, timeout=30)
+            return result
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
+            logger.warning(f"Docker command execution failed: {e}")
+            # Return a failed result object
+            class FailedResult:
+                returncode = 1
+                stdout = ""
+                stderr = str(e)
+            return FailedResult()
 
 logger = logging.getLogger(__name__)
 
@@ -292,7 +312,7 @@ class DockerResourceMonitor:
     def _initialize_docker(self) -> bool:
         """Initialize Docker client with error handling."""
         if not docker:
-            logger.warning("Docker SDK not available - Docker monitoring disabled")
+            logger.info("Docker SDK not available - Docker monitoring disabled (install with: pip install docker)")
             return False
             
         try:
@@ -300,8 +320,9 @@ class DockerResourceMonitor:
             self.docker_client.ping()
             logger.debug("Docker client initialized successfully")
             return True
-        except DockerException as e:
-            logger.error(f"Failed to initialize Docker client: {e}")
+        except Exception as e:
+            # Catch all exceptions - DockerException, ConnectionError, etc.
+            logger.warning(f"Failed to initialize Docker client (Docker daemon may not be running): {e}")
             self.docker_client = None
             return False
 
