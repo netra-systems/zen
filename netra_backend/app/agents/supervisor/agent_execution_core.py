@@ -326,6 +326,15 @@ class AgentExecutionCore:
                         step_number=2
                     )
                 
+                # CRITICAL FIX: Send additional thinking event to show progress 
+                if self.websocket_bridge:
+                    await self.websocket_bridge.notify_agent_thinking(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        reasoning=f"Setting up tools and preparing execution environment...",
+                        step_number=3
+                    )
+                
                 # CRITICAL: This is where agent.execute() is called
                 result = await agent.execute(state, context.run_id, True)
                 
@@ -335,7 +344,15 @@ class AgentExecutionCore:
                         run_id=context.run_id,
                         agent_name=context.agent_name,
                         reasoning=f"Completed analysis and preparing response...",
-                        step_number=3
+                        step_number=4
+                    )
+                    
+                    # CRITICAL FIX: Send final thinking event before completion
+                    await self.websocket_bridge.notify_agent_thinking(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        reasoning=f"Finalizing results and preparing to deliver response...",
+                        step_number=5
                     )
                 
                 # Send final heartbeat if heartbeat is enabled
@@ -427,6 +444,24 @@ class AgentExecutionCore:
                     agent.execution_engine.set_websocket_bridge(self.websocket_bridge, context.run_id)
                     websocket_set = True
                     logger.info(f"✅ WebSocket bridge set on execution engine of {agent.__class__.__name__}")
+            
+            # Method 4: CRITICAL FIX - Ensure tool dispatcher has WebSocket manager
+            if hasattr(state, 'tool_dispatcher') and state.tool_dispatcher:
+                try:
+                    # Set WebSocket manager on tool dispatcher if it supports it
+                    if hasattr(state.tool_dispatcher, 'set_websocket_manager'):
+                        # Get the websocket manager from the bridge
+                        websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None) or getattr(self.websocket_bridge, '_websocket_manager', None)
+                        if websocket_manager:
+                            state.tool_dispatcher.set_websocket_manager(websocket_manager)
+                            websocket_set = True
+                            logger.info(f"✅ WebSocket manager set on tool dispatcher for agent {agent.__class__.__name__}")
+                        else:
+                            logger.warning(f"⚠️ WebSocket manager not found in bridge for tool dispatcher setup")
+                    else:
+                        logger.debug(f"Tool dispatcher does not support set_websocket_manager method")
+                except Exception as e:
+                    logger.error(f"Failed to set WebSocket manager on tool dispatcher: {e}")
             
             if not websocket_set:
                 logger.warning(f"⚠️ Could not set WebSocket bridge on agent {agent.__class__.__name__} - no compatible method found")
