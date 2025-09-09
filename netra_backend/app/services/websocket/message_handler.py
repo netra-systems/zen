@@ -151,7 +151,16 @@ class StartAgentHandler(BaseMessageHandler):
     
     async def _setup_thread_and_run(self, user_id: str, user_request: str) -> tuple[str, str]:
         """Setup thread and run for agent processing"""
-        async with get_unit_of_work() as uow:
+        # CRITICAL FIX: Ensure database is initialized before using UnitOfWork
+        try:
+            from netra_backend.app.db.postgres import initialize_postgres, async_session_factory
+            
+            # Check if database is initialized, if not initialize it
+            if async_session_factory is None:
+                logger.info("Database not initialized, initializing PostgreSQL...")
+                initialize_postgres()
+                
+            async with get_unit_of_work() as uow:
             thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
             if not thread:
                 # Use session-based context for error handling
