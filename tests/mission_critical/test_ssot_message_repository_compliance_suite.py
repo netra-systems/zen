@@ -29,9 +29,16 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # SSOT Imports - Absolute imports only
+import sys
+from pathlib import Path
+
+# Add project root to path for imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.database import SSotDatabaseHelper
+from test_framework.ssot.database import DatabaseTestUtility
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.logging_config import central_logger
@@ -39,7 +46,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestSSotMessageRepositoryCompliance(SSotBaseTestCase):
+class TestSSotMessageRepositoryCompliance:
     """
     Mission Critical Test Suite: SSOT Message Repository Compliance
     
@@ -48,14 +55,12 @@ class TestSSotMessageRepositoryCompliance(SSotBaseTestCase):
     """
     
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs) if hasattr(super(), '__init__') else None
         self.message_repository = MessageRepository()
-        self.db_helper = SSotDatabaseHelper()
+        self.db_helper = DatabaseTestUtility(service="netra_backend")
         
-    async def asyncSetUp(self):
+    async def setup_method(self):
         """Setup for each test with clean database state."""
-        await super().asyncSetUp()
-        
         # Ensure we have a test thread for message operations
         self.test_thread_id = f"thread_{uuid.uuid4().hex[:8]}"
         
@@ -64,10 +69,9 @@ class TestSSotMessageRepositoryCompliance(SSotBaseTestCase):
         
         logger.info(f"SSOT Test Setup Complete - Thread ID: {self.test_thread_id}")
         
-    async def asyncTearDown(self):
+    async def teardown_method(self):
         """Clean up test data."""
         await self._cleanup_test_data()
-        await super().asyncTearDown()
         
     async def _cleanup_test_data(self):
         """Remove test data from database."""
@@ -110,11 +114,12 @@ class TestSSotMessageRepositoryCompliance(SSotBaseTestCase):
             
             # 2. Create message using TEST FRAMEWORK (which has SSOT violation)
             # This will use the violating code path in test_framework/ssot/database.py:596
-            violation_message = await self.db_helper.create_message(
+            violation_message = await self.db_helper.create_test_message(
+                session=session,
                 thread_id=self.test_thread_id,
                 role="user", 
-                content="Test framework violation message",
-                metadata={"test_source": "test_framework"}
+                content=[{"type": "text", "text": {"value": "Test framework violation message"}}],
+                metadata_={"test_source": "test_framework"}
             )
             
             # 3. CRITICAL COMPARISON - These should be IDENTICAL in structure
