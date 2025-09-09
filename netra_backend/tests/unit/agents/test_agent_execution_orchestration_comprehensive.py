@@ -136,7 +136,7 @@ class TestActionsToMeetGoalsSubAgent(SSotBaseTestCase):
             request_id=RequestID(str(uuid4())),
             thread_id=ThreadID("test-thread-123"),
             run_id=RunID(str(uuid4())),
-            metadata={"test_context": True}
+            agent_context={"test_context": True}
         )
 
     @pytest.fixture
@@ -150,8 +150,8 @@ class TestActionsToMeetGoalsSubAgent(SSotBaseTestCase):
     @pytest.fixture
     def user_context_with_optimization_data(self, authenticated_user_context):
         """User context populated with optimization insights for action planning."""
-        context = authenticated_user_context
-        context.metadata.update({
+        # Since UserExecutionContext is frozen, create a new one with updated data
+        optimization_data = {
             "user_request": "Help me reduce cloud costs by 30%",
             "optimizations_result": OptimizationsResult(
                 optimization_strategies=[
@@ -169,8 +169,16 @@ class TestActionsToMeetGoalsSubAgent(SSotBaseTestCase):
                 recommendations=["Implement auto-scaling policies"],
                 confidence_score=0.90
             )
-        })
-        return context
+        }
+        optimization_data.update(authenticated_user_context.agent_context)
+        
+        return UserExecutionContext(
+            user_id=authenticated_user_context.user_id,
+            request_id=authenticated_user_context.request_id,
+            thread_id=authenticated_user_context.thread_id,
+            run_id=authenticated_user_context.run_id,
+            agent_context=optimization_data
+        )
 
     @pytest.mark.asyncio
     async def test_validate_preconditions_with_complete_context(
@@ -204,11 +212,17 @@ class TestActionsToMeetGoalsSubAgent(SSotBaseTestCase):
         applying reasonable defaults to maintain user experience quality.
         """
         # Set up context with missing optimization data but valid user request
-        context = authenticated_user_context
-        context.metadata.update({
-            "user_request": "Help me optimize my infrastructure"
-            # Missing: optimizations_result, data_result
-        })
+        # Since context is frozen, create a new one
+        context = UserExecutionContext(
+            user_id=authenticated_user_context.user_id,
+            request_id=authenticated_user_context.request_id,
+            thread_id=authenticated_user_context.thread_id,
+            run_id=authenticated_user_context.run_id,
+            agent_context={
+                "user_request": "Help me optimize my infrastructure"
+                # Missing: optimizations_result, data_result
+            }
+        )
         
         # Execute precondition validation
         is_valid = await actions_agent.validate_preconditions(context)
@@ -344,7 +358,7 @@ class TestBaseAgentExecutionMethods(SSotBaseTestCase):
             request_id=RequestID(str(uuid4())),
             thread_id=ThreadID("test-execution-123"), 
             run_id=RunID(str(uuid4())),
-            metadata={"test_execution": True}
+            agent_context={"test_execution": True}
         )
 
     @pytest.mark.asyncio
