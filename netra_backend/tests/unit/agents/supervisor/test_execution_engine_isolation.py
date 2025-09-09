@@ -97,13 +97,14 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
             contexts.append(context)
         return contexts
     
-    def _create_test_agent_context(self, user_context: UserExecutionContext, agent_name: str = "test_agent") -> AgentExecutionContext:
+    def _create_test_agent_context(self, user_context: UserExecutionContext, agent_name: str = "test_agent", max_retries: int = 3) -> AgentExecutionContext:
         """Create test agent execution context."""
         return AgentExecutionContext(
             agent_name=agent_name,
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
+            max_retries=max_retries,
             metadata={'test_scenario': 'isolation_testing'}
         )
     
@@ -399,7 +400,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
     async def test_user_notification_systems_error_handling(self):
         """Test user notification systems for execution errors."""
         user_context = self.user_contexts[0]
-        agent_context = self._create_test_agent_context(user_context, "error_test_agent")
+        agent_context = self._create_test_agent_context(user_context, "error_test_agent", max_retries=0)
         
         # Create engine
         engine = ExecutionEngine._init_from_factory(
@@ -933,7 +934,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
     async def test_error_handling_business_logic(self):
         """Test error handling preserves business logic and user experience."""
         user_context = self.user_contexts[0]
-        agent_context = self._create_test_agent_context(user_context, "business_logic_agent")
+        agent_context = self._create_test_agent_context(user_context, "business_logic_agent", max_retries=0)
         
         engine = ExecutionEngine._init_from_factory(
             self.mock_registry,

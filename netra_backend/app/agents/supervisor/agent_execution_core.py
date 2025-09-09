@@ -653,14 +653,15 @@ class AgentExecutionCore:
                     logger.info(f"✅ WebSocket bridge set on execution engine of {agent.__class__.__name__}")
             
             # Method 4: CRITICAL FIX - Ensure tool dispatcher has WebSocket manager
-            if hasattr(state, 'tool_dispatcher') and state.tool_dispatcher:
+            tool_dispatcher = user_execution_context.agent_context.get('tool_dispatcher')
+            if tool_dispatcher:
                 try:
                     # Set WebSocket manager on tool dispatcher if it supports it
-                    if hasattr(state.tool_dispatcher, 'set_websocket_manager'):
+                    if hasattr(tool_dispatcher, 'set_websocket_manager'):
                         # Get the websocket manager from the bridge
                         websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None) or getattr(self.websocket_bridge, '_websocket_manager', None)
                         if websocket_manager:
-                            state.tool_dispatcher.set_websocket_manager(websocket_manager)
+                            tool_dispatcher.set_websocket_manager(websocket_manager)
                             websocket_set = True
                             logger.info(f"✅ WebSocket manager set on tool dispatcher for agent {agent.__class__.__name__}")
                         else:
@@ -770,7 +771,7 @@ class AgentExecutionCore:
         metric_record = {
             'execution_id': exec_id,
             'agent_name': agent_name,
-            'user_id': getattr(state, 'user_id', None),
+            'user_id': getattr(user_execution_context, 'user_id', None),
         }
         
         # Write individual metrics with per-metric error handling
