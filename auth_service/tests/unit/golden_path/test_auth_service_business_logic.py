@@ -93,19 +93,30 @@ class TestAuthServiceBusinessLogic:
     @patch('auth_service.auth_core.database.repository.AuthUserRepository')
     def test_user_login_business_validation(self, mock_user_repository):
         """Test user login validation follows business logic."""
-        # Setup mock repository
-        mock_user = User(
-            id="login-business-user",
-            email="login@company.com",
-            name="Login User",
-            password_hash="$hashed_password",
-            is_active=True
-        )
-        mock_user_repository.return_value.get_by_email.return_value = mock_user
+        # Setup mock repository to return a user with proper structure for database user
+        from auth_service.auth_core.database.models import AuthUser
+        from datetime import datetime, UTC
         
-        # Mock password verification - patch the method on AuthService instance
-        with patch.object(AuthService, 'verify_password') as mock_verify:
-            mock_verify.return_value = True
+        # Create a mock database user that matches what the repository would return
+        mock_db_user = AuthUser(
+            id="login-business-user",
+            email="login@company.com", 
+            full_name="Login User",
+            hashed_password="$argon2id$v=19$m=65536,t=3,p=4$test$hash",  # Proper argon2 hash format
+            auth_provider="local",
+            is_active=True,
+            is_verified=True,
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC)
+        )
+        
+        # Mock the repository instance and its methods
+        mock_repo_instance = mock_user_repository.return_value
+        mock_repo_instance.get_by_email.return_value = mock_db_user
+        
+        # Mock password verification to succeed
+        with patch.object(AuthService, 'password_hasher') as mock_hasher:
+            mock_hasher.verify.return_value = None  # argon2 verify doesn't return anything on success
             
             auth_service = AuthService()
             login_request = UserLogin(
@@ -113,16 +124,38 @@ class TestAuthServiceBusinessLogic:
                 password="correct_password"
             )
             
-            # Business Rule: Valid login should succeed
-            # Note: This test validates business logic structure
-            # Actual implementation would call auth_service.login(login_request)
+            # Business Rule: Test actual login business logic by calling the real method
+            # This ensures we test the actual authentication flow
+            import asyncio
             
-            # Validate login request structure
-            assert login_request.email == "login@company.com", "Login must specify email"
-            assert login_request.password == "correct_password", "Login must specify password"
+            async def test_login_flow():
+                # Call the actual login method which should trigger repository calls
+                result = await auth_service.login(
+                    email=login_request.email,
+                    password=login_request.password
+                )
+                return result
             
-            # Validate user retrieval logic
-            mock_user_repository.return_value.get_by_email.assert_called_with("login@company.com")
+            # Execute the async login test
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                login_result = loop.run_until_complete(test_login_flow())
+                
+                # Business Rule: Valid login should return a result
+                assert login_result is not None, "Valid login should return login response"
+                assert hasattr(login_result, 'access_token'), "Login result should contain access token"
+                assert hasattr(login_result, 'user_id'), "Login result should contain user ID"
+                
+                # Validate that repository was called as part of business logic
+                mock_repo_instance.get_by_email.assert_called_with("login@company.com")
+                
+                # Validate login request structure (business validation)
+                assert login_request.email == "login@company.com", "Login must specify email"
+                assert login_request.password == "correct_password", "Login must specify password"
+                
+            finally:
+                loop.close()
 
     def test_token_validation_business_security(self):
         """Test token validation enforces business security requirements."""
