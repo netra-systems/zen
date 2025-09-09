@@ -226,7 +226,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         
         # Test Redis validation with grace period
         start_time = time.time()
-        redis_ready = validator._validate_redis_readiness()
+        redis_ready = await validator._validate_redis_readiness()
         validation_elapsed = time.time() - start_time
         
         # Grace period should be applied (500ms)
