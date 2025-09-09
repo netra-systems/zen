@@ -224,7 +224,7 @@ class MockWebSocketManager:
             # Queue the final assistant message
             assistant_message = {
                 "type": "assistant_message",
-                "content": result.get("result", "Mock agent execution completed successfully"),
+                "content": result.get("result", "Based on your AI infrastructure analysis, I recommend cost optimization strategies saving $15,000/month through model selection optimization and caching improvements."),
                 "thread_id": user_context.get("thread_id"),
                 "run_id": user_context.get("run_id"),
                 "timestamp": datetime.now(timezone.utc).isoformat()
@@ -412,12 +412,22 @@ class MockAgentExecutionEngine:
             
             # 4. Final completion
             await asyncio.sleep(0.1)
+            # Generate realistic business value response with optimization recommendations
+            mock_business_response = (
+                "Based on your AI infrastructure analysis, I recommend the following cost optimization strategies:\n\n"
+                "1. **Model Selection Optimization**: Switch from GPT-4 to GPT-3.5-turbo for 70% of tasks, saving $15,000/month\n"
+                "2. **Usage Pattern Analysis**: Implement caching for repeated queries, reducing API calls by 40%\n"
+                "3. **Cost Forecasting**: Your current $50K/month spend can be reduced to $32K/month\n"
+                "4. **Infrastructure Efficiency**: Batch processing can reduce costs by 25%\n\n"
+                "These optimizations provide actionable insights for immediate cost reduction while maintaining performance quality."
+            )
+            
             result = {
                 "execution_id": self.execution_id,
                 "status": "completed",
                 "tools_executed": len(tools_executed),
                 "execution_time": time.time() - execution_start,
-                "result": "Mock agent execution completed successfully"
+                "result": mock_business_response
             }
             
             await self.websocket_manager.emit_agent_event("agent_completed", result)
