@@ -237,6 +237,14 @@ except ImportError:
     ServiceStatus = None
     ServiceMode = None
 
+# Pytest-cov availability detection for coverage support
+try:
+    import pytest_cov
+    PYTEST_COV_AVAILABLE = True
+except ImportError:
+    PYTEST_COV_AVAILABLE = False
+    pytest_cov = None
+
 
 class UnifiedTestRunner:
     """Modern test runner with category-based execution and progress tracking."""
@@ -2174,13 +2182,16 @@ class UnifiedTestRunner:
         #     env_marker = f'env_{args.env}'
         #     cmd_parts.extend(["-m", env_marker])
         
-        # Add coverage options
-        if not args.no_coverage:
+        # Add coverage options - only if pytest-cov is available
+        if not args.no_coverage and PYTEST_COV_AVAILABLE:
             cmd_parts.extend([
                 "--cov=.",
                 "--cov-report=html",
                 "--cov-report=term-missing"
             ])
+        elif not args.no_coverage and not PYTEST_COV_AVAILABLE:
+            # Log that coverage is being skipped due to missing pytest-cov
+            print(f"[WARNING] Coverage requested but pytest-cov not available - skipping coverage for {service}:{category_name}")
         
         # Add parallelization
         if args.parallel:
