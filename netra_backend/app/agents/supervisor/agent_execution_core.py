@@ -2,6 +2,9 @@
 
 CRITICAL: This module adds execution tracking, heartbeat monitoring, and error boundaries
 to prevent silent agent deaths.
+
+CRITICAL REMEDIATION: Enhanced with comprehensive timeout management and circuit breakers
+to prevent agent execution pipeline blocking that prevents users from receiving AI responses.
 """
 
 import asyncio
@@ -34,14 +37,25 @@ from netra_backend.app.core.logging_context import (
 )
 from netra_backend.app.logging_config import central_logger
 
+# CRITICAL REMEDIATION: Import timeout management for preventing execution blocking
+from netra_backend.app.agents.execution_timeout_manager import (
+    get_timeout_manager,
+    TimeoutConfig,
+    CircuitBreakerOpenError
+)
+
 logger = central_logger.get_logger(__name__)
 
 
 class AgentExecutionCore:
-    """Enhanced agent execution with death detection and recovery."""
+    """Enhanced agent execution with death detection and recovery.
     
-    # Timeout configuration
-    DEFAULT_TIMEOUT = 30.0  # 30 seconds default
+    CRITICAL REMEDIATION: Enhanced with comprehensive timeout management and circuit breakers
+    to prevent agent execution pipeline blocking that prevents users from receiving AI responses.
+    """
+    
+    # CRITICAL REMEDIATION: Reduced timeout configuration for faster feedback
+    DEFAULT_TIMEOUT = 25.0  # Reduced from 30s for faster feedback
     HEARTBEAT_INTERVAL = 5.0  # Send heartbeat every 5 seconds
     
     def __init__(self, registry: 'AgentRegistry', websocket_bridge: Optional['AgentWebSocketBridge'] = None):
@@ -50,6 +64,10 @@ class AgentExecutionCore:
         self.execution_tracker = get_execution_tracker()
         # trace_persistence removed - no longer needed
         self.persistence = None
+        
+        # CRITICAL REMEDIATION: Initialize timeout manager for preventing execution blocking
+        self.timeout_manager = get_timeout_manager()
+        logger.info(f"AgentExecutionCore initialized with timeout manager (default_timeout: {self.DEFAULT_TIMEOUT}s)")
         
     async def execute_agent(
         self, 
