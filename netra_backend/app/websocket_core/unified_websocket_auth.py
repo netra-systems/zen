@@ -128,10 +128,13 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         # Headers can be spoofed by attackers, so only allow them in safe environments
         is_production = current_env in ['production', 'prod'] or 'prod' in google_project.lower()
         
-        # In production, ONLY environment variables can enable E2E bypass (never headers)
+        # CRITICAL SECURITY: Production environments NEVER allow E2E bypass
         if is_production:
-            allow_e2e_bypass = is_e2e_via_env  # Only env vars in production
+            allow_e2e_bypass = False  # NEVER allow bypass in production
             security_mode = "production_strict"
+            if is_e2e_via_headers or is_e2e_via_env:
+                logger.warning(f"SECURITY: E2E bypass attempt blocked in production environment "
+                             f"(project: {google_project}, service: {k_service})")
         else:
             # In non-production, allow both headers and env vars for E2E testing
             allow_e2e_bypass = is_e2e_via_headers or is_e2e_via_env
