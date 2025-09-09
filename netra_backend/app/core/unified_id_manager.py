@@ -734,6 +734,7 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^mock-[a-zA-Z]+-\w+$',         # mock-user-test
         r'^concurrent_user_\d+$',        # concurrent_user_0
         r'^user_\d+$',                   # user_0, user_1
+        r'^thread-\d+$',                 # thread-456, thread-123 (CRITICAL: Golden Path test format)
         r'^[a-zA-Z]+-[a-zA-Z]+-\d+$',    # test-user-123, mock-connection-456
         r'^[a-zA-Z]+_\d+$',              # user_123, session_456
         r'^[a-zA-Z]+_[a-zA-Z]+_\d+$',    # test_user_123, mock_session_456
