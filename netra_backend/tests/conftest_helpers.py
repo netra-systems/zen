@@ -36,7 +36,7 @@ def _setup_performance_llm_mocks(mock_manager):
 def _setup_websocket_interface_compatibility(manager):
     """Setup WebSocket interface compatibility."""
     if not hasattr(manager, 'send_message'):
-        manager.send_message == manager.send_message_to_user
+        manager.send_message = manager.send_message_to_user
 
 def _setup_websocket_test_mocks(manager):
     """Setup WebSocket test mocks to prevent actual operations."""
@@ -46,6 +46,16 @@ def _setup_websocket_test_mocks(manager):
     manager.send_to_thread = AsyncMock(return_value = True)
     # Mock: Async component isolation for testing without real async operations
     manager.send_message_to_user = AsyncMock(return_value = True)
+
+def create_mock_websocket():
+    """Create mock WebSocket for unit testing WebSocket handlers."""
+    from unittest.mock import Mock, AsyncMock
+    mock_websocket = Mock()
+    mock_websocket.send_json = AsyncMock()
+    mock_websocket.send_text = AsyncMock()
+    mock_websocket.close = AsyncMock()
+    mock_websocket.client_state = Mock()
+    return mock_websocket
 
 def _create_real_tool_dispatcher():
     """Create real tool dispatcher instance."""
@@ -64,7 +74,7 @@ def _create_real_tool_dispatcher():
 def _create_mock_tool_dispatcher():
     """Create mock tool dispatcher."""
     # Mock: Generic component isolation for controlled unit testing
-    mock_dispatcher == MagicMock()
+    mock_dispatcher = MagicMock()
     _setup_tool_dispatcher_mocks(mock_dispatcher)
     return mock_dispatcher
 
@@ -89,7 +99,7 @@ def _import_base_agent_classes():
     if env.get("TEST_COLLECTION_MODE"):
         return {}
     
-    agents == {}
+    agents = {}
     try:
         from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
         agents['data'] = DataSubAgent
@@ -99,7 +109,7 @@ def _import_base_agent_classes():
     
     try:
         from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
-        agents['triage'] = TriageSubAgent
+        agents['triage'] = UnifiedTriageAgent
     except ImportError as e:
         import warnings
         warnings.warn(f"Cannot import TriageSubAgent: {e}")
@@ -112,7 +122,7 @@ def _import_additional_agent_classes():
     if env.get("TEST_COLLECTION_MODE"):
         return {}
     
-    agents == {}
+    agents = {}
     try:
         from netra_backend.app.agents.optimizations_core_sub_agent import (
             OptimizationsCoreSubAgent,

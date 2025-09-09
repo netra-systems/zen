@@ -19,7 +19,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger as logger
 
 
-class TestContextValidationError(Exception):
+class ContextValidationError(Exception):
     """Raised when test-only code is called from non-test context."""
     pass
 
@@ -178,7 +178,7 @@ class TestContextValidator:
             strict_mode: If True, requires both environment and file checks to pass
         
         Raises:
-            TestContextValidationError: If not in valid test context
+            ContextValidationError: If not in valid test context
         """
         is_test_env = TestContextValidator.is_test_environment()
         is_test_file = TestContextValidator.is_test_file()
@@ -201,7 +201,7 @@ class TestContextValidator:
                 logger.error("ACTION REQUIRED: Fix calling code or remove @test_decorator")
                 logger.error("=" * 80)
                 
-                raise TestContextValidationError(
+                raise ContextValidationError(
                     f"Test-only function '{function_name}' called from non-test context. "
                     f"Test environment: {is_test_env}, Test file: {is_test_file}. "
                     f"This violates test isolation principles and is forbidden."
@@ -218,7 +218,7 @@ class TestContextValidator:
                 logger.error(f"Context Info: {context_info}")
                 logger.error("=" * 80)
                 
-                raise TestContextValidationError(
+                raise ContextValidationError(
                     f"Test-only function '{function_name}' called from non-test context. "
                     f"Context info: {context_info}"
                 )
@@ -271,11 +271,11 @@ def test_decorator(
                 TestContextValidator.validate_test_context(function_name, strict_mode=strict)
                 logger.debug(f"[TestContext] Validated test context for {function_name}")
                 
-            except TestContextValidationError as e:
+            except ContextValidationError as e:
                 if message:
                     custom_message = f"{message}. Original error: {str(e)}"
                     logger.error(f"[TestContext] Custom validation failure: {custom_message}")
-                    raise TestContextValidationError(custom_message) from e
+                    raise ContextValidationError(custom_message) from e
                 else:
                     raise
             
@@ -399,7 +399,7 @@ def validate_no_test_imports_in_production():
         logger.error("ACTION REQUIRED: Remove test imports from production code")
         logger.error("=" * 80)
         
-        raise TestContextValidationError(f"Found {len(violations)} test import violations in production code")
+        raise ContextValidationError(f"Found {len(violations)} test import violations in production code")
     
     logger.info("[TestContext] No test import violations found in production code")
 
@@ -460,6 +460,6 @@ __all__ = [
     'mark_test_only',
     'TestOnlyMixin',
     'TestContextValidator',
-    'TestContextValidationError',
+    'ContextValidationError',
     'validate_no_test_imports_in_production'
 ]
