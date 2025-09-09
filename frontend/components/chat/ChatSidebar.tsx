@@ -48,7 +48,7 @@ export const ChatSidebar: React.FC = () => {
   // Use the proper thread switching hook
   const { switchToThread, state: threadSwitchState } = useThreadSwitching();
 
-  // Create thread click handler using the hook with improved race condition handling
+  // Create thread click handler using the hook properly without double-wrapping
   const handleThreadClick = useCallback(async (threadId: string) => {
     // Prevent switching if already on the same thread
     if (threadId === activeThreadId) {
@@ -61,28 +61,34 @@ export const ChatSidebar: React.FC = () => {
       return;
     }
 
-    // Check if an operation is already in progress for this thread
-    if (ThreadOperationManager.isOperationInProgress('switch', threadId)) {
-      console.warn(`Thread switch to ${threadId} already in progress`);
-      return;
-    }
-
     // Check if we're already loading this specific thread
     if (threadSwitchState.isLoading && threadSwitchState.loadingThreadId === threadId) {
       console.warn(`Already loading thread ${threadId}`);
       return;
     }
+
+    // Check if an operation is already in progress using the ThreadOperationManager directly
+    // This prevents starting a duplicate operation before the hook even tries
+    if (ThreadOperationManager.isOperationInProgress('switch', threadId)) {
+      console.warn(`Thread switch to ${threadId} already in progress - skipping`);
+      return;
+    }
     
     try {
-      // If another thread is loading, use force flag to cancel it and switch immediately
-      const shouldForce = threadSwitchState.isLoading && threadSwitchState.loadingThreadId !== threadId;
+      // Determine if we should force the operation
+      // Force is needed when switching from one loading thread to another
+      const shouldForce = threadSwitchState.isLoading && 
+                         threadSwitchState.loadingThreadId !== null &&
+                         threadSwitchState.loadingThreadId !== threadId;
       
-      // Use the switchToThread hook directly with force option if needed
+      // Use the switchToThread hook which already handles ThreadOperationManager internally
+      // DO NOT wrap this in another ThreadOperationManager.startOperation call!
       const success = await switchToThread(threadId, {
         clearMessages: true,
         showLoadingIndicator: true,
         updateUrl: true,
-        force: shouldForce // This will cancel any pending operation and switch immediately
+        force: shouldForce, // This will be passed to ThreadOperationManager inside the hook
+        skipDuplicateCheck: true // Skip duplicate check since we already checked above
       });
       
       if (success) {
@@ -91,17 +97,24 @@ export const ChatSidebar: React.FC = () => {
           type: 'switch_thread',
           payload: { thread_id: threadId }
         });
-      } else {
-        // Log error but don't show to user if it's just a mutex block
-        const error = threadSwitchState.error;
-        if (error && !error.message?.includes('Operation already in progress')) {
-          console.error('Failed to switch thread:', error);
+      } else if (threadSwitchState.error) {
+        // Only log real errors, not mutex blocks
+        const errorMessage = threadSwitchState.error.message || '';
+        if (!errorMessage.includes('Operation already in progress') && 
+            !errorMessage.includes('debounced') &&
+            !errorMessage.includes('aborted')) {
+          console.error('Failed to switch thread:', threadSwitchState.error);
         }
       }
     } catch (error) {
-      // Silently ignore "Operation already in progress" errors
-      if (error instanceof Error && !error.message.includes('Operation already in progress')) {
-        console.error('Error switching thread:', error);
+      // Handle unexpected errors only
+      if (error instanceof Error) {
+        const errorMessage = error.message;
+        if (!errorMessage.includes('Operation already in progress') && 
+            !errorMessage.includes('debounced') &&
+            !errorMessage.includes('aborted')) {
+          console.error('Unexpected error switching thread:', error);
+        }
       }
     }
   }, [activeThreadId, isProcessing, threadSwitchState, sendMessage, switchToThread]);

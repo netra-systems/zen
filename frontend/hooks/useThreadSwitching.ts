@@ -48,6 +48,7 @@ export interface ThreadSwitchingOptions {
   readonly updateUrl?: boolean;
   readonly skipUrlUpdate?: boolean;
   readonly force?: boolean;
+  readonly skipDuplicateCheck?: boolean;
 }
 
 /**
@@ -143,7 +144,8 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
         {
           timeoutMs: options.timeoutMs || DEFAULT_OPTIONS.timeoutMs,
           retryAttempts: 2,
-          force: options.force
+          force: options.force,
+          skipDuplicateCheck: options.skipDuplicateCheck
         }
       );
       
