@@ -23,7 +23,7 @@ import time
 from typing import Dict, List, Any
 from datetime import datetime, timezone
 
-from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, authenticated_user_context, create_test_user_with_auth
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context, create_test_user_with_auth
 import logging
 
 logger = logging.getLogger(__name__)

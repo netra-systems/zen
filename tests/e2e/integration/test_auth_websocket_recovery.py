@@ -32,7 +32,8 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.helpers.auth_helpers import (
     WebSocketAuthTester,
     TokenExpiryTester,
-    MessagePreservationTester,
+    # DISABLED: MessagePreservationTester - class not found, needs implementation
+    # MessagePreservationTester,
     AuthTestConfig,
     skip_if_services_unavailable,
     assert_auth_performance

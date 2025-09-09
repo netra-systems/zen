@@ -25,7 +25,8 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 
 from test_framework.service_dependencies import requires_services
-from tests.e2e.admin_audit_trail_validator import AdminAuditTrailValidator
+# DISABLED: AdminAuditTrailValidator - module not found, needs implementation
+# from tests.e2e.admin_audit_trail_validator import AdminAuditTrailValidator
 from tests.e2e.admin_user_management_tester import AdminUserManagementTester
 from tests.e2e.auth_flow_manager import AuthCompleteFlowManager
 
