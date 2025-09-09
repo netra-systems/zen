@@ -45,6 +45,7 @@ from netra_backend.app.tools.tool_dispatcher import ToolDispatcher
 from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
+from netra_backend.app.llm.llm_manager import LLMManager
 from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env
 
@@ -111,8 +112,9 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_tool_chain_user")
         user_id = UserID(str(uuid.uuid4()))
         
-        # Initialize components
-        agent_registry = AgentRegistry()
+        # Initialize components with SSOT patterns
+        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
+        agent_registry = AgentRegistry(llm_manager)
         execution_engine = ExecutionEngine()
         tool_dispatcher = ToolDispatcher()
         enhanced_tool_engine = EnhancedToolExecutionEngine()
@@ -461,8 +463,9 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_error_recovery_user")
         user_id = UserID(str(uuid.uuid4()))
         
-        # Initialize components
-        agent_registry = AgentRegistry()
+        # Initialize components with SSOT patterns
+        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
+        agent_registry = AgentRegistry(llm_manager)
         execution_engine = ExecutionEngine()
         enhanced_tool_engine = EnhancedToolExecutionEngine()
         websocket_manager = WebSocketManager()
@@ -781,8 +784,9 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_parallel_user")
         user_id = UserID(str(uuid.uuid4()))
         
-        # Initialize components
-        agent_registry = AgentRegistry()
+        # Initialize components with SSOT patterns
+        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
+        agent_registry = AgentRegistry(llm_manager)
         execution_engine = ExecutionEngine()
         enhanced_tool_engine = EnhancedToolExecutionEngine()
         websocket_manager = WebSocketManager()
@@ -1123,8 +1127,9 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_dynamic_user")
         user_id = UserID(str(uuid.uuid4()))
         
-        # Initialize components
-        agent_registry = AgentRegistry()
+        # Initialize components with SSOT patterns
+        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
+        agent_registry = AgentRegistry(llm_manager)
         execution_engine = ExecutionEngine()
         enhanced_tool_engine = EnhancedToolExecutionEngine()
         websocket_manager = WebSocketManager()
@@ -1445,8 +1450,9 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         auth_context = await create_authenticated_user_context("test_timeout_user")
         user_id = UserID(str(uuid.uuid4()))
         
-        # Initialize components
-        agent_registry = AgentRegistry()
+        # Initialize components with SSOT patterns
+        llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
+        agent_registry = AgentRegistry(llm_manager)
         execution_engine = ExecutionEngine()
         enhanced_tool_engine = EnhancedToolExecutionEngine()
         websocket_manager = WebSocketManager()

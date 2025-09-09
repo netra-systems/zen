@@ -2822,3 +2822,1212 @@ class TestCoreStateMachineIntegration(BaseIntegrationTest):
             'graceful_degradation': True,
             'service_continuity': True
         }, 'resilience')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_022_recovery_from_error_states_to_operational_states(self, real_services_fixture):
+        """
+        Test recovery from error states to operational states with full validation.
+        
+        Business Value: Ensures system can recover from failures and resume
+        normal operations, maintaining service availability and user experience.
+        """
+        user_data = await self.create_test_user_context(real_services_fixture, {
+            'email': 'error_recovery_test@netra.ai',
+            'name': 'Error Recovery Test User',
+            'is_active': True
+        })
+        user_id = ensure_user_id(user_data['id'])
+        
+        # Test 1: Recovery from FAILED state
+        connection_id_1 = f"test_failed_recovery_{int(time.time())}"
+        state_machine_1 = ConnectionStateMachine(connection_id_1, user_id)
+        
+        # Setup to operational then force failure
+        state_machine_1.transition_to(ApplicationConnectionState.ACCEPTED, "setup")
+        state_machine_1.transition_to(ApplicationConnectionState.AUTHENTICATED, "setup")
+        state_machine_1.transition_to(ApplicationConnectionState.PROCESSING_READY, "setup")
+        
+        # Force failure
+        state_machine_1.force_failed_state("simulated_critical_failure")
+        assert state_machine_1.current_state == ApplicationConnectionState.FAILED
+        assert not state_machine_1.can_process_messages()
+        
+        # Track recovery process
+        recovery_transitions = []
+        
+        def track_recovery(transition_info):
+            recovery_transitions.append({
+                'from': transition_info.from_state,
+                'to': transition_info.to_state,
+                'reason': transition_info.reason
+            })
+        
+        state_machine_1.add_state_change_callback(track_recovery)
+        
+        # Begin recovery sequence
+        recovery_1 = state_machine_1.transition_to(ApplicationConnectionState.CONNECTING, "recovery_attempt")
+        assert recovery_1, "Should allow recovery from FAILED to CONNECTING"
+        
+        recovery_2 = state_machine_1.transition_to(ApplicationConnectionState.ACCEPTED, "recovery_handshake")
+        assert recovery_2, "Should progress through recovery"
+        
+        recovery_3 = state_machine_1.transition_to(ApplicationConnectionState.AUTHENTICATED, "recovery_auth")
+        assert recovery_3, "Should complete authentication in recovery"
+        
+        recovery_4 = state_machine_1.transition_to(ApplicationConnectionState.SERVICES_READY, "recovery_services")
+        assert recovery_4, "Should restore services"
+        
+        recovery_5 = state_machine_1.transition_to(ApplicationConnectionState.PROCESSING_READY, "recovery_complete")
+        assert recovery_5, "Should reach operational state"
+        
+        # Verify full recovery
+        assert state_machine_1.current_state == ApplicationConnectionState.PROCESSING_READY
+        assert state_machine_1.is_operational
+        assert state_machine_1.can_process_messages()
+        
+        # Verify recovery was tracked
+        assert len(recovery_transitions) == 5
+        recovery_states = [t['to'] for t in recovery_transitions]
+        expected_recovery = [
+            ApplicationConnectionState.CONNECTING,
+            ApplicationConnectionState.ACCEPTED,
+            ApplicationConnectionState.AUTHENTICATED,
+            ApplicationConnectionState.SERVICES_READY,
+            ApplicationConnectionState.PROCESSING_READY
+        ]
+        assert recovery_states == expected_recovery
+        
+        # Test 2: Recovery with partial failures during recovery
+        connection_id_2 = f"test_partial_recovery_{int(time.time())}"
+        state_machine_2 = ConnectionStateMachine(connection_id_2, user_id)
+        
+        # Force to failed state
+        state_machine_2.force_failed_state("initial_failure")
+        
+        # Attempt recovery with some failures
+        state_machine_2.transition_to(ApplicationConnectionState.CONNECTING, "recovery_start")
+        state_machine_2.transition_to(ApplicationConnectionState.ACCEPTED, "recovery_accepted")
+        
+        # Simulate failure during recovery
+        invalid_attempt = state_machine_2.transition_to(ApplicationConnectionState.PROCESSING_READY, "invalid_jump")
+        assert not invalid_attempt, "Should not allow invalid jumps during recovery"
+        
+        # Continue proper recovery
+        state_machine_2.transition_to(ApplicationConnectionState.AUTHENTICATED, "recovery_auth")
+        state_machine_2.transition_to(ApplicationConnectionState.SERVICES_READY, "recovery_services")
+        state_machine_2.transition_to(ApplicationConnectionState.PROCESSING_READY, "recovery_final")
+        
+        # Should successfully recover despite the failed attempt
+        assert state_machine_2.can_process_messages()
+        
+        # Test 3: Multiple failure and recovery cycles
+        connection_id_3 = f"test_multiple_recovery_cycles_{int(time.time())}"
+        state_machine_3 = ConnectionStateMachine(connection_id_3, user_id)
+        
+        recovery_cycles = []
+        
+        for cycle in range(3):
+            # Setup to operational
+            state_machine_3.transition_to(ApplicationConnectionState.ACCEPTED, f"cycle_{cycle}_setup")
+            state_machine_3.transition_to(ApplicationConnectionState.AUTHENTICATED, f"cycle_{cycle}_setup")
+            state_machine_3.transition_to(ApplicationConnectionState.PROCESSING_READY, f"cycle_{cycle}_setup")
+            
+            # Verify operational
+            assert state_machine_3.can_process_messages()
+            
+            # Force failure
+            state_machine_3.force_failed_state(f"cycle_{cycle}_failure")
+            assert state_machine_3.current_state == ApplicationConnectionState.FAILED
+            
+            # Record failure time
+            failure_time = time.time()
+            
+            # Recover
+            state_machine_3.transition_to(ApplicationConnectionState.CONNECTING, f"cycle_{cycle}_recovery")
+            
+            # Record recovery time
+            recovery_time = time.time()
+            
+            recovery_cycles.append({
+                'cycle': cycle,
+                'failure_time': failure_time,
+                'recovery_time': recovery_time,
+                'recovery_duration': recovery_time - failure_time
+            })
+            
+            # Complete recovery for next cycle (except last)
+            if cycle < 2:
+                # Reset for next cycle
+                state_machine_3._current_state = ApplicationConnectionState.CONNECTING
+                state_machine_3._transition_failures = 0
+        
+        # Verify all cycles completed
+        assert len(recovery_cycles) == 3
+        
+        # Test 4: Recovery with degraded intermediate state
+        connection_id_4 = f"test_degraded_recovery_{int(time.time())}"
+        state_machine_4 = ConnectionStateMachine(connection_id_4, user_id)
+        
+        # Setup to degraded state (simulating partial failure)
+        state_machine_4.transition_to(ApplicationConnectionState.ACCEPTED, "setup")
+        state_machine_4.transition_to(ApplicationConnectionState.AUTHENTICATED, "setup")
+        state_machine_4.transition_to(ApplicationConnectionState.SERVICES_READY, "setup")
+        state_machine_4.transition_to(ApplicationConnectionState.PROCESSING_READY, "setup")
+        state_machine_4.transition_to(ApplicationConnectionState.DEGRADED, "service_degradation")
+        
+        # Verify degraded state is operational but limited
+        assert state_machine_4.is_operational
+        assert state_machine_4.can_process_messages()
+        
+        # Recover from degraded to full operational
+        degraded_recovery = state_machine_4.transition_to(ApplicationConnectionState.PROCESSING_READY, "degraded_recovery")
+        assert degraded_recovery, "Should recover from degraded to full operational"
+        
+        # Verify full recovery
+        assert state_machine_4.current_state == ApplicationConnectionState.PROCESSING_READY
+        assert state_machine_4.can_process_messages()
+        
+        # Test 5: Registry integration with recovery scenarios
+        registry = ConnectionStateMachineRegistry()
+        
+        # Create multiple connections for recovery testing
+        recovery_test_connections = []
+        for i in range(5):
+            conn_id = f"registry_recovery_test_{i}_{int(time.time())}"
+            machine = registry.register_connection(conn_id, user_id)
+            
+            # Setup and then fail
+            machine.transition_to(ApplicationConnectionState.ACCEPTED, "setup")
+            machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "setup")
+            machine.force_failed_state(f"test_failure_{i}")
+            
+            recovery_test_connections.append(conn_id)
+        
+        # Verify all are in failed state
+        failed_connections = registry.get_connections_by_state(ApplicationConnectionState.FAILED)
+        assert len(failed_connections) == 5
+        
+        # Recover all connections
+        for i, conn_id in enumerate(recovery_test_connections):
+            machine = registry.get_connection_state_machine(conn_id)
+            
+            # Different recovery paths for variety
+            if i % 2 == 0:
+                # Full recovery
+                machine.transition_to(ApplicationConnectionState.CONNECTING, "batch_recovery")
+                machine.transition_to(ApplicationConnectionState.ACCEPTED, "batch_recovery")
+                machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "batch_recovery")
+                machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "batch_recovery")
+            else:
+                # Partial recovery to degraded mode
+                machine.transition_to(ApplicationConnectionState.CONNECTING, "partial_recovery")
+                machine.transition_to(ApplicationConnectionState.ACCEPTED, "partial_recovery")
+                machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "partial_recovery")
+                machine.transition_to(ApplicationConnectionState.DEGRADED, "partial_recovery")
+        
+        # Verify recovery distribution
+        stats_after_recovery = registry.get_registry_stats()
+        assert stats_after_recovery['operational_connections'] == 5  # All should be operational
+        
+        processing_ready_count = len(registry.get_connections_by_state(ApplicationConnectionState.PROCESSING_READY))
+        degraded_count = len(registry.get_connections_by_state(ApplicationConnectionState.DEGRADED))
+        
+        assert processing_ready_count == 3  # 3 full recoveries (indices 0, 2, 4)
+        assert degraded_count == 2  # 2 partial recoveries (indices 1, 3)
+        
+        # Test 6: Recovery metrics and history validation
+        connection_id_5 = f"test_recovery_metrics_{int(time.time())}"
+        state_machine_5 = ConnectionStateMachine(connection_id_5, user_id)
+        
+        # Setup, fail, and recover with detailed tracking
+        state_machine_5.transition_to(ApplicationConnectionState.ACCEPTED, "initial_setup")
+        state_machine_5.transition_to(ApplicationConnectionState.PROCESSING_READY, "initial_ready")
+        
+        # Record metrics before failure
+        pre_failure_metrics = state_machine_5.get_metrics()
+        
+        # Force failure
+        state_machine_5.force_failed_state("metrics_test_failure")
+        
+        # Record failure metrics
+        failure_metrics = state_machine_5.get_metrics()
+        assert failure_metrics['failed_transitions'] > pre_failure_metrics['failed_transitions']
+        
+        # Perform recovery
+        state_machine_5.transition_to(ApplicationConnectionState.CONNECTING, "metrics_recovery")
+        state_machine_5.transition_to(ApplicationConnectionState.ACCEPTED, "metrics_recovery")
+        state_machine_5.transition_to(ApplicationConnectionState.PROCESSING_READY, "metrics_recovery")
+        
+        # Record post-recovery metrics
+        post_recovery_metrics = state_machine_5.get_metrics()
+        
+        # Verify metrics progression
+        assert post_recovery_metrics['total_transitions'] > failure_metrics['total_transitions']
+        assert post_recovery_metrics['is_operational']
+        assert post_recovery_metrics['is_ready_for_messages']
+        
+        # Verify history includes recovery
+        history = state_machine_5.get_state_history()
+        recovery_history = [h for h in history if "recovery" in h.reason]
+        assert len(recovery_history) >= 3  # At least 3 recovery transitions
+        
+        # Cleanup registry connections
+        for conn_id in recovery_test_connections:
+            registry.unregister_connection(conn_id)
+        
+        self.assert_business_value_delivered({
+            'error_state_recovery': True,
+            'service_restoration': True,
+            'resilience_validation': True
+        }, 'resilience')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_023_state_machine_with_real_user_context_and_sessions(self, real_services_fixture):
+        """
+        Test state machine integration with real user context and session management.
+        
+        Business Value: Validates that state machines work correctly with actual
+        user sessions, ensuring proper multi-user isolation and session persistence.
+        """
+        # Create multiple users for realistic testing
+        users = []
+        for i in range(3):
+            user_data = await self.create_test_user_context(real_services_fixture, {
+                'email': f'user_context_test_{i}@netra.ai',
+                'name': f'User Context Test {i}',
+                'is_active': True
+            })
+            users.append(user_data)
+        
+        # Create sessions for each user
+        user_sessions = []
+        for user_data in users:
+            session_data = await self.create_test_session(real_services_fixture, user_data['id'])
+            user_sessions.append({
+                'user': user_data,
+                'session': session_data
+            })
+        
+        registry = ConnectionStateMachineRegistry()
+        
+        # Test 1: State machine with user context validation
+        user_session_0 = user_sessions[0]
+        user_id_0 = ensure_user_id(user_session_0['user']['id'])
+        session_key_0 = user_session_0['session']['session_key']
+        
+        connection_id_1 = f"test_user_context_{int(time.time())}"
+        state_machine_1 = registry.register_connection(connection_id_1, user_id_0)
+        
+        # Track transitions with user context
+        user_context_transitions = []
+        
+        def track_user_context_transitions(transition_info):
+            user_context_transitions.append({
+                'user_id': str(user_id_0),
+                'session_key': session_key_0,
+                'from_state': transition_info.from_state,
+                'to_state': transition_info.to_state,
+                'timestamp': transition_info.timestamp
+            })
+        
+        state_machine_1.add_state_change_callback(track_user_context_transitions)
+        
+        # Progress through states with user context
+        state_machine_1.transition_to(ApplicationConnectionState.ACCEPTED, f"user_{user_id_0}_accepted")
+        state_machine_1.transition_to(ApplicationConnectionState.AUTHENTICATED, f"user_{user_id_0}_authenticated")
+        state_machine_1.transition_to(ApplicationConnectionState.PROCESSING_READY, f"user_{user_id_0}_ready")
+        
+        # Verify user context is preserved
+        assert len(user_context_transitions) == 3
+        for transition in user_context_transitions:
+            assert transition['user_id'] == str(user_id_0)
+            assert transition['session_key'] == session_key_0
+        
+        # Verify session is still valid in database
+        cached_session = await real_services_fixture["redis"].get(session_key_0)
+        assert cached_session is not None, "User session should remain valid"
+        
+        # Test 2: Multiple users with separate state machines
+        multi_user_connections = []
+        
+        for i, user_session in enumerate(user_sessions):
+            user_id = ensure_user_id(user_session['user']['id'])
+            session_key = user_session['session']['session_key']
+            
+            connection_id = f"multi_user_conn_{i}_{int(time.time())}"
+            state_machine = registry.register_connection(connection_id, user_id)
+            
+            # Setup state machine with user-specific progression
+            state_machine.transition_to(ApplicationConnectionState.ACCEPTED, f"user_{i}_setup")
+            state_machine.transition_to(ApplicationConnectionState.AUTHENTICATED, f"user_{i}_auth")
+            
+            # Different final states for each user
+            if i == 0:
+                state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, f"user_{i}_ready")
+            elif i == 1:
+                state_machine.transition_to(ApplicationConnectionState.SERVICES_READY, f"user_{i}_services")
+                state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, f"user_{i}_ready")
+                state_machine.transition_to(ApplicationConnectionState.PROCESSING, f"user_{i}_processing")
+            else:  # i == 2
+                state_machine.transition_to(ApplicationConnectionState.SERVICES_READY, f"user_{i}_services")
+                state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, f"user_{i}_ready")
+                state_machine.transition_to(ApplicationConnectionState.DEGRADED, f"user_{i}_degraded")
+            
+            multi_user_connections.append({
+                'connection_id': connection_id,
+                'state_machine': state_machine,
+                'user_id': user_id,
+                'session_key': session_key,
+                'expected_final_state': [
+                    ApplicationConnectionState.PROCESSING_READY,
+                    ApplicationConnectionState.PROCESSING,
+                    ApplicationConnectionState.DEGRADED
+                ][i]
+            })
+        
+        # Verify user isolation
+        for i, conn_data in enumerate(multi_user_connections):
+            state_machine = conn_data['state_machine']
+            expected_state = conn_data['expected_final_state']
+            
+            assert state_machine.current_state == expected_state
+            assert state_machine.user_id == conn_data['user_id']
+            
+            # Verify no cross-user contamination
+            for j, other_conn in enumerate(multi_user_connections):
+                if i != j:
+                    assert state_machine.user_id != other_conn['user_id']
+        
+        # Test 3: Session persistence during state transitions
+        user_session_1 = user_sessions[1]
+        user_id_1 = ensure_user_id(user_session_1['user']['id'])
+        session_key_1 = user_session_1['session']['session_key']
+        
+        connection_id_2 = f"test_session_persistence_{int(time.time())}"
+        state_machine_2 = registry.register_connection(connection_id_2, user_id_1)
+        
+        # Verify initial session state
+        initial_session = await real_services_fixture["redis"].get(session_key_1)
+        assert initial_session is not None
+        
+        # Progress through states while monitoring session
+        session_checks = []
+        
+        state_progression = [
+            ApplicationConnectionState.ACCEPTED,
+            ApplicationConnectionState.AUTHENTICATED,
+            ApplicationConnectionState.SERVICES_READY,
+            ApplicationConnectionState.PROCESSING_READY,
+            ApplicationConnectionState.PROCESSING,
+            ApplicationConnectionState.IDLE
+        ]
+        
+        for state in state_progression:
+            state_machine_2.transition_to(state, f"session_test_{state.value}")
+            
+            # Check session persistence after each transition
+            current_session = await real_services_fixture["redis"].get(session_key_1)
+            session_checks.append({
+                'state': state,
+                'session_valid': current_session is not None
+            })
+        
+        # Verify session remained valid throughout
+        for check in session_checks:
+            assert check['session_valid'], f"Session should remain valid in state {check['state'].value}"
+        
+        # Test 4: User context with connection failures and recovery
+        user_session_2 = user_sessions[2]
+        user_id_2 = ensure_user_id(user_session_2['user']['id'])
+        session_key_2 = user_session_2['session']['session_key']
+        
+        connection_id_3 = f"test_user_failure_recovery_{int(time.time())}"
+        state_machine_3 = registry.register_connection(connection_id_3, user_id_2)
+        
+        # Setup to operational
+        state_machine_3.transition_to(ApplicationConnectionState.ACCEPTED, "failure_test_setup")
+        state_machine_3.transition_to(ApplicationConnectionState.AUTHENTICATED, "failure_test_setup")
+        state_machine_3.transition_to(ApplicationConnectionState.PROCESSING_READY, "failure_test_setup")
+        
+        # Verify user data before failure
+        pre_failure_user = await real_services_fixture["postgres"].fetchrow(
+            "SELECT id, email, is_active FROM auth.users WHERE id = $1", user_id_2
+        )
+        assert pre_failure_user is not None
+        assert pre_failure_user['is_active'] is True
+        
+        # Force failure
+        state_machine_3.force_failed_state("user_context_failure_test")
+        
+        # Verify user data integrity during failure
+        during_failure_user = await real_services_fixture["postgres"].fetchrow(
+            "SELECT id, email, is_active FROM auth.users WHERE id = $1", user_id_2
+        )
+        assert during_failure_user is not None
+        assert during_failure_user['is_active'] is True  # User should remain active
+        
+        # Verify session during failure
+        during_failure_session = await real_services_fixture["redis"].get(session_key_2)
+        assert during_failure_session is not None, "Session should persist during connection failure"
+        
+        # Recover connection
+        state_machine_3.transition_to(ApplicationConnectionState.CONNECTING, "user_recovery")
+        state_machine_3.transition_to(ApplicationConnectionState.ACCEPTED, "user_recovery")
+        state_machine_3.transition_to(ApplicationConnectionState.AUTHENTICATED, "user_recovery")
+        state_machine_3.transition_to(ApplicationConnectionState.PROCESSING_READY, "user_recovery")
+        
+        # Verify user data after recovery
+        post_recovery_user = await real_services_fixture["postgres"].fetchrow(
+            "SELECT id, email, is_active FROM auth.users WHERE id = $1", user_id_2
+        )
+        assert post_recovery_user is not None
+        assert post_recovery_user['is_active'] is True
+        
+        # Test 5: Registry statistics with user context
+        stats = registry.get_registry_stats()
+        
+        # Should have multiple connections from different users
+        total_expected = 1 + len(multi_user_connections) + 1 + 1  # 6 total connections
+        assert stats['total_connections'] == total_expected
+        
+        # Verify operational connections
+        operational_connections = registry.get_all_operational_connections()
+        operational_count = len(operational_connections)
+        
+        # Count expected operational connections
+        expected_operational = 0
+        for conn_data in multi_user_connections:
+            if ApplicationConnectionState.is_operational(conn_data['expected_final_state']):
+                expected_operational += 1
+        
+        # Add other operational connections
+        expected_operational += 1  # state_machine_1 (PROCESSING_READY)
+        expected_operational += 1  # state_machine_2 (IDLE)  
+        expected_operational += 1  # state_machine_3 (PROCESSING_READY after recovery)
+        
+        assert operational_count == expected_operational
+        
+        # Test 6: User context cleanup and session management
+        
+        # Close one user's connection
+        connection_to_close = multi_user_connections[0]
+        connection_to_close['state_machine'].transition_to(ApplicationConnectionState.CLOSING, "user_disconnect")
+        connection_to_close['state_machine'].transition_to(ApplicationConnectionState.CLOSED, "user_disconnect")
+        
+        # Verify user session remains valid even after connection closure
+        post_close_session = await real_services_fixture["redis"].get(connection_to_close['session_key'])
+        assert post_close_session is not None, "User session should persist after connection closure"
+        
+        # Verify user data integrity
+        post_close_user = await real_services_fixture["postgres"].fetchrow(
+            "SELECT id, email, is_active FROM auth.users WHERE id = $1", 
+            connection_to_close['user_id']
+        )
+        assert post_close_user is not None
+        assert post_close_user['is_active'] is True
+        
+        # Cleanup closed connections
+        cleanup_count = registry.cleanup_closed_connections()
+        assert cleanup_count == 1, "Should clean up one closed connection"
+        
+        # Verify user data still intact after cleanup
+        final_user_check = await real_services_fixture["postgres"].fetchrow(
+            "SELECT id, email, is_active FROM auth.users WHERE id = $1",
+            connection_to_close['user_id']
+        )
+        assert final_user_check is not None
+        assert final_user_check['is_active'] is True
+        
+        # Cleanup remaining connections for test isolation
+        for conn_data in multi_user_connections[1:]:  # Skip the already closed one
+            registry.unregister_connection(conn_data['connection_id'])
+        
+        registry.unregister_connection(connection_id_1)
+        registry.unregister_connection(connection_id_2)
+        registry.unregister_connection(connection_id_3)
+        
+        self.assert_business_value_delivered({
+            'user_context_integration': True,
+            'session_persistence': True,
+            'multi_user_isolation': True
+        }, 'user_experience')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_024_connection_state_machine_lifecycle_with_real_message_processing(self, real_services_fixture):
+        """
+        Test complete connection state machine lifecycle with real message processing simulation.
+        
+        Business Value: Validates end-to-end connection lifecycle with message
+        processing capabilities, ensuring reliable chat functionality delivery.
+        """
+        user_data = await self.create_test_user_context(real_services_fixture, {
+            'email': 'lifecycle_test@netra.ai',
+            'name': 'Lifecycle Test User',
+            'is_active': True
+        })
+        user_id = ensure_user_id(user_data['id'])
+        session_data = await self.create_test_session(real_services_fixture, user_id)
+        
+        registry = ConnectionStateMachineRegistry()
+        
+        # Test 1: Complete lifecycle with message processing simulation
+        connection_id = f"test_lifecycle_complete_{int(time.time())}"
+        state_machine = registry.register_connection(connection_id, user_id)
+        
+        # Track all lifecycle events
+        lifecycle_events = []
+        processed_messages = []
+        
+        def track_lifecycle_events(transition_info):
+            lifecycle_events.append({
+                'timestamp': transition_info.timestamp,
+                'from_state': transition_info.from_state,
+                'to_state': transition_info.to_state,
+                'reason': transition_info.reason,
+                'can_process': state_machine.can_process_messages(),
+                'is_operational': state_machine.is_operational
+            })
+        
+        state_machine.add_state_change_callback(track_lifecycle_events)
+        
+        # Simulate real message processing during state transitions
+        async def simulate_message_processing(message_type, content):
+            if state_machine.can_process_messages():
+                message = {
+                    'id': f"msg_{len(processed_messages)}_{int(time.time())}",
+                    'type': message_type,
+                    'content': content,
+                    'user_id': str(user_id),
+                    'connection_id': connection_id,
+                    'state_when_processed': state_machine.current_state.value,
+                    'timestamp': datetime.now(timezone.utc).isoformat()
+                }
+                processed_messages.append(message)
+                
+                # Store message in Redis for persistence
+                message_key = f"processed_message:{message['id']}"
+                await real_services_fixture["redis"].set(
+                    message_key, 
+                    json.dumps(message),
+                    ex=3600
+                )
+                return True
+            return False
+        
+        # Phase 1: Connection establishment
+        assert not await simulate_message_processing("connection_test", "Should not process yet")
+        
+        state_machine.transition_to(ApplicationConnectionState.ACCEPTED, "websocket_handshake_complete")
+        assert not await simulate_message_processing("handshake_test", "Still not ready")
+        
+        # Phase 2: Authentication
+        state_machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "user_authentication_success")
+        assert not await simulate_message_processing("auth_test", "Authentication complete but not ready")
+        
+        # Phase 3: Services initialization
+        state_machine.transition_to(ApplicationConnectionState.SERVICES_READY, "all_services_initialized")
+        assert not await simulate_message_processing("services_test", "Services ready but not processing ready")
+        
+        # Phase 4: Processing readiness
+        state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "ready_for_message_processing")
+        assert await simulate_message_processing("readiness_test", "First message - system ready!")
+        
+        # Phase 5: Active message processing
+        state_machine.transition_to(ApplicationConnectionState.PROCESSING, "active_message_processing")
+        
+        # Process multiple messages in active state
+        messages_to_process = [
+            ("user_message", "Hello, I need help with cost optimization"),
+            ("agent_request", "Start cost analysis agent"),
+            ("tool_execution", "Analyze AWS bill data"),
+            ("agent_response", "Found 3 optimization opportunities"),
+            ("user_response", "Please proceed with recommendations")
+        ]
+        
+        for msg_type, content in messages_to_process:
+            success = await simulate_message_processing(msg_type, content)
+            assert success, f"Should process {msg_type} in PROCESSING state"
+        
+        # Phase 6: Idle state
+        state_machine.transition_to(ApplicationConnectionState.IDLE, "processing_session_complete")
+        assert await simulate_message_processing("idle_test", "Can still process in idle state")
+        
+        # Phase 7: Degraded mode
+        state_machine.transition_to(ApplicationConnectionState.DEGRADED, "network_quality_degraded")
+        assert await simulate_message_processing("degraded_test", "Processing with reduced quality")
+        
+        # Phase 8: Recovery to full operational
+        state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "network_quality_restored")
+        assert await simulate_message_processing("recovery_test", "Back to full capability")
+        
+        # Phase 9: Graceful shutdown
+        state_machine.transition_to(ApplicationConnectionState.CLOSING, "user_initiated_disconnect")
+        assert not await simulate_message_processing("closing_test", "Should not process while closing")
+        
+        state_machine.transition_to(ApplicationConnectionState.CLOSED, "connection_terminated")
+        assert not await simulate_message_processing("closed_test", "Should not process when closed")
+        
+        # Verify complete lifecycle tracking
+        assert len(lifecycle_events) == 9  # All state transitions
+        
+        # Verify message processing only occurred in operational states
+        operational_message_count = len([msg for msg in processed_messages 
+                                       if msg['state_when_processed'] in [
+                                           'processing_ready', 'processing', 'idle', 'degraded'
+                                       ]])
+        
+        total_expected_messages = 1 + len(messages_to_process) + 1 + 1 + 1  # 9 total
+        assert len(processed_messages) == total_expected_messages
+        assert operational_message_count == total_expected_messages
+        
+        # Verify message persistence in Redis
+        for message in processed_messages:
+            message_key = f"processed_message:{message['id']}"
+            stored_message = await real_services_fixture["redis"].get(message_key)
+            assert stored_message is not None
+            stored_data = json.loads(stored_message)
+            assert stored_data['user_id'] == str(user_id)
+            assert stored_data['connection_id'] == connection_id
+        
+        # Test 2: Lifecycle with failure and recovery
+        connection_id_2 = f"test_lifecycle_failure_{int(time.time())}"
+        state_machine_2 = registry.register_connection(connection_id_2, user_id)
+        
+        failure_recovery_messages = []
+        
+        async def track_failure_recovery_messages(msg_type, content):
+            if state_machine_2.can_process_messages():
+                failure_recovery_messages.append({
+                    'type': msg_type,
+                    'content': content,
+                    'state': state_machine_2.current_state.value
+                })
+                return True
+            return False
+        
+        # Setup to operational
+        state_machine_2.transition_to(ApplicationConnectionState.ACCEPTED, "setup")
+        state_machine_2.transition_to(ApplicationConnectionState.AUTHENTICATED, "setup")
+        state_machine_2.transition_to(ApplicationConnectionState.PROCESSING_READY, "setup")
+        
+        # Process some messages successfully
+        await track_failure_recovery_messages("pre_failure", "Processing before failure")
+        await track_failure_recovery_messages("pre_failure_2", "Another message before failure")
+        
+        # Simulate failure
+        state_machine_2.force_failed_state("simulated_network_failure")
+        
+        # Attempt message processing during failure (should fail)
+        failure_msg_success = await track_failure_recovery_messages("during_failure", "Should not process")
+        assert not failure_msg_success
+        
+        # Recover from failure
+        state_machine_2.transition_to(ApplicationConnectionState.CONNECTING, "recovery_attempt")
+        state_machine_2.transition_to(ApplicationConnectionState.ACCEPTED, "recovery_handshake")
+        state_machine_2.transition_to(ApplicationConnectionState.AUTHENTICATED, "recovery_auth")
+        state_machine_2.transition_to(ApplicationConnectionState.PROCESSING_READY, "recovery_complete")
+        
+        # Resume message processing after recovery
+        await track_failure_recovery_messages("post_recovery", "First message after recovery")
+        await track_failure_recovery_messages("post_recovery_2", "System fully operational again")
+        
+        # Verify message processing pattern
+        assert len(failure_recovery_messages) == 4  # 2 before failure + 2 after recovery
+        
+        pre_failure_msgs = [msg for msg in failure_recovery_messages if 'pre_failure' in msg['type']]
+        post_recovery_msgs = [msg for msg in failure_recovery_messages if 'post_recovery' in msg['type']]
+        
+        assert len(pre_failure_msgs) == 2
+        assert len(post_recovery_msgs) == 2
+        
+        # Test 3: Multiple concurrent lifecycles
+        concurrent_connections = []
+        
+        for i in range(3):
+            conn_id = f"concurrent_lifecycle_{i}_{int(time.time())}"
+            machine = registry.register_connection(conn_id, user_id)
+            
+            concurrent_connections.append({
+                'connection_id': conn_id,
+                'state_machine': machine,
+                'messages_processed': []
+            })
+        
+        # Progress all connections through different lifecycle paths
+        lifecycle_paths = [
+            # Path 1: Normal full lifecycle
+            [
+                (ApplicationConnectionState.ACCEPTED, "path1_accepted"),
+                (ApplicationConnectionState.AUTHENTICATED, "path1_auth"),
+                (ApplicationConnectionState.PROCESSING_READY, "path1_ready"),
+                (ApplicationConnectionState.PROCESSING, "path1_processing"),
+                (ApplicationConnectionState.IDLE, "path1_idle")
+            ],
+            # Path 2: Degraded mode path
+            [
+                (ApplicationConnectionState.ACCEPTED, "path2_accepted"),
+                (ApplicationConnectionState.AUTHENTICATED, "path2_auth"),
+                (ApplicationConnectionState.PROCESSING_READY, "path2_ready"),
+                (ApplicationConnectionState.DEGRADED, "path2_degraded")
+            ],
+            # Path 3: Rapid transitions
+            [
+                (ApplicationConnectionState.ACCEPTED, "path3_accepted"),
+                (ApplicationConnectionState.AUTHENTICATED, "path3_auth"),
+                (ApplicationConnectionState.SERVICES_READY, "path3_services"),
+                (ApplicationConnectionState.PROCESSING_READY, "path3_ready")
+            ]
+        ]
+        
+        for i, (conn_data, path) in enumerate(zip(concurrent_connections, lifecycle_paths)):
+            machine = conn_data['state_machine']
+            
+            for state, reason in path:
+                machine.transition_to(state, reason)
+                
+                # Process a message at each operational state
+                if machine.can_process_messages():
+                    conn_data['messages_processed'].append({
+                        'state': state.value,
+                        'message': f"concurrent_msg_{i}_{len(conn_data['messages_processed'])}"
+                    })
+        
+        # Verify all concurrent lifecycles worked independently
+        for i, conn_data in enumerate(concurrent_connections):
+            assert len(conn_data['messages_processed']) > 0
+            
+            # Verify no cross-contamination
+            for msg in conn_data['messages_processed']:
+                assert f"concurrent_msg_{i}" in msg['message']
+        
+        # Test 4: Lifecycle performance metrics
+        connection_id_3 = f"test_lifecycle_performance_{int(time.time())}"
+        state_machine_3 = registry.register_connection(connection_id_3, user_id)
+        
+        # Time complete lifecycle
+        lifecycle_start = time.time()
+        
+        performance_states = [
+            ApplicationConnectionState.ACCEPTED,
+            ApplicationConnectionState.AUTHENTICATED,
+            ApplicationConnectionState.SERVICES_READY,
+            ApplicationConnectionState.PROCESSING_READY,
+            ApplicationConnectionState.PROCESSING,
+            ApplicationConnectionState.IDLE,
+            ApplicationConnectionState.CLOSING,
+            ApplicationConnectionState.CLOSED
+        ]
+        
+        state_timings = []
+        
+        for state in performance_states:
+            state_start = time.time()
+            state_machine_3.transition_to(state, f"performance_test_{state.value}")
+            state_end = time.time()
+            
+            state_timings.append({
+                'state': state.value,
+                'duration': state_end - state_start
+            })
+        
+        lifecycle_end = time.time()
+        total_lifecycle_duration = lifecycle_end - lifecycle_start
+        
+        # Verify performance is reasonable
+        assert total_lifecycle_duration < 1.0, "Complete lifecycle should complete quickly in test"
+        
+        # Each individual state transition should be very fast
+        for timing in state_timings:
+            assert timing['duration'] < 0.1, f"State transition to {timing['state']} took too long"
+        
+        # Cleanup Redis messages
+        for message in processed_messages:
+            message_key = f"processed_message:{message['id']}"
+            await real_services_fixture["redis"].delete(message_key)
+        
+        # Cleanup registry
+        registry.cleanup_closed_connections()
+        for conn_data in concurrent_connections:
+            registry.unregister_connection(conn_data['connection_id'])
+        registry.unregister_connection(connection_id_2)
+        registry.unregister_connection(connection_id_3)
+        
+        self.assert_business_value_delivered({
+            'complete_lifecycle_validation': True,
+            'message_processing_integration': True,
+            'end_to_end_functionality': True
+        }, 'comprehensive')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_025_end_to_end_state_machine_integration_with_real_websocket_events(self, real_services_fixture):
+        """
+        Test comprehensive end-to-end state machine integration with real WebSocket events.
+        
+        Business Value: Validates complete integration of state machine with WebSocket
+        event system, ensuring mission-critical chat functionality works end-to-end.
+        """
+        user_data = await self.create_test_user_context(real_services_fixture, {
+            'email': 'e2e_websocket_test@netra.ai',
+            'name': 'E2E WebSocket Test User',
+            'is_active': True
+        })
+        user_id = ensure_user_id(user_data['id'])
+        session_data = await self.create_test_session(real_services_fixture, user_id)
+        
+        # Create comprehensive test environment
+        registry = ConnectionStateMachineRegistry()
+        
+        # Mock WebSocket event system to simulate real WebSocket events
+        class WebSocketEventSystem:
+            def __init__(self):
+                self.events_sent = []
+                self.event_subscriptions = {}
+                self.connection_status = {}
+                
+            def register_connection(self, connection_id):
+                self.connection_status[connection_id] = 'connected'
+                
+            def send_event(self, connection_id, event_type, data):
+                if self.connection_status.get(connection_id) == 'connected':
+                    event = {
+                        'connection_id': connection_id,
+                        'event_type': event_type,
+                        'data': data,
+                        'timestamp': datetime.now(timezone.utc).isoformat()
+                    }
+                    self.events_sent.append(event)
+                    return True
+                return False
+                
+            def get_events_for_connection(self, connection_id):
+                return [e for e in self.events_sent if e['connection_id'] == connection_id]
+        
+        websocket_events = WebSocketEventSystem()
+        
+        # Test 1: Complete WebSocket event integration with state machine
+        connection_id = f"test_e2e_websocket_{int(time.time())}"
+        state_machine = registry.register_connection(connection_id, user_id)
+        websocket_events.register_connection(connection_id)
+        
+        # Track state transitions and corresponding WebSocket events
+        state_event_correlation = []
+        
+        def track_state_websocket_correlation(transition_info):
+            # Simulate sending WebSocket events based on state transitions
+            event_data = {
+                'user_id': str(user_id),
+                'connection_id': connection_id,
+                'from_state': transition_info.from_state.value if transition_info.from_state else None,
+                'to_state': transition_info.to_state.value,
+                'reason': transition_info.reason
+            }
+            
+            # Send appropriate WebSocket events for each state
+            if transition_info.to_state == ApplicationConnectionState.ACCEPTED:
+                websocket_events.send_event(connection_id, 'connection_accepted', event_data)
+            elif transition_info.to_state == ApplicationConnectionState.AUTHENTICATED:
+                websocket_events.send_event(connection_id, 'user_authenticated', event_data)
+            elif transition_info.to_state == ApplicationConnectionState.PROCESSING_READY:
+                websocket_events.send_event(connection_id, 'ready_for_messages', event_data)
+            elif transition_info.to_state == ApplicationConnectionState.PROCESSING:
+                websocket_events.send_event(connection_id, 'agent_started', event_data)
+            elif transition_info.to_state == ApplicationConnectionState.IDLE:
+                websocket_events.send_event(connection_id, 'agent_completed', event_data)
+            elif transition_info.to_state == ApplicationConnectionState.DEGRADED:
+                websocket_events.send_event(connection_id, 'connection_degraded', event_data)
+            elif transition_info.to_state == ApplicationConnectionState.CLOSED:
+                websocket_events.send_event(connection_id, 'connection_closed', event_data)
+                websocket_events.connection_status[connection_id] = 'disconnected'
+            
+            state_event_correlation.append({
+                'state_transition': transition_info,
+                'events_sent_count': len(websocket_events.get_events_for_connection(connection_id))
+            })
+        
+        state_machine.add_state_change_callback(track_state_websocket_correlation)
+        
+        # Execute complete end-to-end flow
+        e2e_flow = [
+            (ApplicationConnectionState.ACCEPTED, "websocket_handshake_complete"),
+            (ApplicationConnectionState.AUTHENTICATED, "user_authentication_success"),
+            (ApplicationConnectionState.SERVICES_READY, "all_services_initialized"),
+            (ApplicationConnectionState.PROCESSING_READY, "ready_for_message_processing"),
+            (ApplicationConnectionState.PROCESSING, "agent_execution_started"),
+            (ApplicationConnectionState.IDLE, "agent_execution_completed"),
+            (ApplicationConnectionState.PROCESSING, "new_agent_started"),
+            (ApplicationConnectionState.IDLE, "second_agent_completed"),
+            (ApplicationConnectionState.DEGRADED, "network_quality_issue"),
+            (ApplicationConnectionState.PROCESSING_READY, "network_recovered"),
+            (ApplicationConnectionState.CLOSING, "user_disconnect_request"),
+            (ApplicationConnectionState.CLOSED, "connection_terminated")
+        ]
+        
+        for target_state, reason in e2e_flow:
+            state_machine.transition_to(target_state, reason)
+            
+            # Small delay to simulate real-world timing
+            await asyncio.sleep(0.01)
+        
+        # Verify WebSocket event correlation
+        connection_events = websocket_events.get_events_for_connection(connection_id)
+        
+        # Should have sent events for key state transitions
+        expected_events = [
+            'connection_accepted',
+            'user_authenticated', 
+            'ready_for_messages',
+            'agent_started',      # First agent
+            'agent_completed',    # First agent
+            'agent_started',      # Second agent
+            'agent_completed',    # Second agent
+            'connection_degraded',
+            'connection_closed'
+        ]
+        
+        actual_event_types = [e['event_type'] for e in connection_events]
+        for expected_event in expected_events:
+            assert expected_event in actual_event_types, f"Missing WebSocket event: {expected_event}"
+        
+        # Verify event data integrity
+        for event in connection_events:
+            assert event['data']['user_id'] == str(user_id)
+            assert event['data']['connection_id'] == connection_id
+            assert 'from_state' in event['data']
+            assert 'to_state' in event['data']
+        
+        # Test 2: Mission-critical WebSocket events for agent execution
+        connection_id_2 = f"test_agent_events_{int(time.time())}"
+        state_machine_2 = registry.register_connection(connection_id_2, user_id)
+        websocket_events.register_connection(connection_id_2)
+        
+        # Simulate agent execution with all required WebSocket events
+        critical_agent_events = []
+        
+        def track_critical_agent_events(transition_info):
+            # Simulate the 5 mission-critical WebSocket events for agent execution
+            if transition_info.to_state == ApplicationConnectionState.PROCESSING:
+                # Agent execution started
+                for event_type in ['agent_started', 'agent_thinking']:
+                    event_sent = websocket_events.send_event(
+                        connection_id_2, 
+                        event_type,
+                        {
+                            'user_id': str(user_id),
+                            'agent_type': 'cost_optimizer',
+                            'execution_id': f"exec_{len(critical_agent_events)}"
+                        }
+                    )
+                    if event_sent:
+                        critical_agent_events.append(event_type)
+                
+                # Simulate tool execution
+                for tool_event in ['tool_executing', 'tool_completed']:
+                    event_sent = websocket_events.send_event(
+                        connection_id_2,
+                        tool_event,
+                        {
+                            'user_id': str(user_id),
+                            'tool_name': 'aws_cost_analyzer',
+                            'tool_result': 'analysis_complete' if tool_event == 'tool_completed' else 'in_progress'
+                        }
+                    )
+                    if event_sent:
+                        critical_agent_events.append(tool_event)
+            
+            elif transition_info.to_state == ApplicationConnectionState.IDLE:
+                # Agent execution completed
+                event_sent = websocket_events.send_event(
+                    connection_id_2,
+                    'agent_completed',
+                    {
+                        'user_id': str(user_id),
+                        'result': 'optimization_recommendations_ready',
+                        'savings_potential': '$1,250/month'
+                    }
+                )
+                if event_sent:
+                    critical_agent_events.append('agent_completed')
+        
+        state_machine_2.add_state_change_callback(track_critical_agent_events)
+        
+        # Setup to operational state
+        state_machine_2.transition_to(ApplicationConnectionState.ACCEPTED, "agent_test_setup")
+        state_machine_2.transition_to(ApplicationConnectionState.AUTHENTICATED, "agent_test_setup")
+        state_machine_2.transition_to(ApplicationConnectionState.PROCESSING_READY, "agent_test_setup")
+        
+        # Execute agent workflow
+        state_machine_2.transition_to(ApplicationConnectionState.PROCESSING, "start_cost_optimizer_agent")
+        state_machine_2.transition_to(ApplicationConnectionState.IDLE, "cost_optimizer_complete")
+        
+        # Verify all 5 critical WebSocket events were sent
+        required_agent_events = [
+            'agent_started',
+            'agent_thinking', 
+            'tool_executing',
+            'tool_completed',
+            'agent_completed'
+        ]
+        
+        for required_event in required_agent_events:
+            assert required_event in critical_agent_events, f"Missing critical agent event: {required_event}"
+        
+        # Test 3: Multi-user WebSocket event isolation
+        multi_user_test_data = []
+        
+        for i in range(3):
+            # Create separate user for each connection
+            user_data_i = await self.create_test_user_context(real_services_fixture, {
+                'email': f'multi_user_websocket_{i}@netra.ai',
+                'name': f'Multi User WebSocket {i}',
+                'is_active': True
+            })
+            
+            connection_id_i = f"multi_user_conn_{i}_{int(time.time())}"
+            state_machine_i = registry.register_connection(connection_id_i, user_data_i['id'])
+            websocket_events.register_connection(connection_id_i)
+            
+            multi_user_test_data.append({
+                'user_id': user_data_i['id'],
+                'connection_id': connection_id_i,
+                'state_machine': state_machine_i,
+                'events_for_user': []
+            })
+        
+        # Execute concurrent WebSocket event flows for different users
+        for i, user_test_data in enumerate(multi_user_test_data):
+            state_machine = user_test_data['state_machine']
+            connection_id = user_test_data['connection_id']
+            user_id = user_test_data['user_id']
+            
+            # Setup callback to track events for this specific user
+            def make_user_event_tracker(user_data):
+                def track_user_events(transition_info):
+                    event_sent = websocket_events.send_event(
+                        user_data['connection_id'],
+                        f"user_{user_data['connection_id'][-1]}_state_change",
+                        {
+                            'user_id': str(user_data['user_id']),
+                            'state': transition_info.to_state.value,
+                            'unique_marker': f"user_{user_data['connection_id'][-1]}_event"
+                        }
+                    )
+                    if event_sent:
+                        user_data['events_for_user'].append(transition_info.to_state.value)
+                return track_user_events
+            
+            state_machine.add_state_change_callback(make_user_event_tracker(user_test_data))
+            
+            # Different workflow for each user
+            if i == 0:
+                # User 0: Full workflow
+                state_machine.transition_to(ApplicationConnectionState.ACCEPTED, "user0_flow")
+                state_machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "user0_flow")
+                state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "user0_flow")
+                state_machine.transition_to(ApplicationConnectionState.PROCESSING, "user0_flow")
+                state_machine.transition_to(ApplicationConnectionState.IDLE, "user0_flow")
+            elif i == 1:
+                # User 1: Partial workflow
+                state_machine.transition_to(ApplicationConnectionState.ACCEPTED, "user1_flow")
+                state_machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "user1_flow")
+                state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "user1_flow")
+            else:  # i == 2
+                # User 2: Degraded workflow
+                state_machine.transition_to(ApplicationConnectionState.ACCEPTED, "user2_flow")
+                state_machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "user2_flow")
+                state_machine.transition_to(ApplicationConnectionState.DEGRADED, "user2_flow")
+        
+        # Verify user event isolation
+        for i, user_test_data in enumerate(multi_user_test_data):
+            user_events = websocket_events.get_events_for_connection(user_test_data['connection_id'])
+            
+            # Verify all events for this user contain correct user_id
+            for event in user_events:
+                assert event['data']['user_id'] == str(user_test_data['user_id'])
+                assert f"user_{i}_event" in event['data']['unique_marker']
+            
+            # Verify no cross-user event contamination
+            for j, other_user_data in enumerate(multi_user_test_data):
+                if i != j:
+                    other_user_events = websocket_events.get_events_for_connection(other_user_data['connection_id'])
+                    for event in other_user_events:
+                        assert event['data']['user_id'] != str(user_test_data['user_id'])
+        
+        # Test 4: WebSocket event persistence and recovery
+        connection_id_3 = f"test_event_persistence_{int(time.time())}"
+        state_machine_3 = registry.register_connection(connection_id_3, user_id)
+        websocket_events.register_connection(connection_id_3)
+        
+        # Store events in Redis for persistence
+        persistent_events = []
+        
+        def persist_websocket_events(transition_info):
+            event_data = {
+                'connection_id': connection_id_3,
+                'user_id': str(user_id),
+                'state_transition': {
+                    'from': transition_info.from_state.value if transition_info.from_state else None,
+                    'to': transition_info.to_state.value,
+                    'reason': transition_info.reason
+                },
+                'timestamp': transition_info.timestamp.isoformat()
+            }
+            
+            # Store in Redis
+            asyncio.create_task(
+                real_services_fixture["redis"].lpush(
+                    f"websocket_events:{connection_id_3}",
+                    json.dumps(event_data)
+                )
+            )
+            
+            persistent_events.append(event_data)
+        
+        state_machine_3.add_state_change_callback(persist_websocket_events)
+        
+        # Execute flow with event persistence
+        persistence_flow = [
+            ApplicationConnectionState.ACCEPTED,
+            ApplicationConnectionState.AUTHENTICATED,
+            ApplicationConnectionState.PROCESSING_READY,
+            ApplicationConnectionState.PROCESSING,
+            ApplicationConnectionState.DEGRADED,  # Simulate failure
+            ApplicationConnectionState.PROCESSING_READY,  # Recovery
+            ApplicationConnectionState.IDLE
+        ]
+        
+        for state in persistence_flow:
+            state_machine_3.transition_to(state, f"persistence_test_{state.value}")
+            await asyncio.sleep(0.01)  # Allow Redis operations to complete
+        
+        # Verify event persistence in Redis
+        await asyncio.sleep(0.1)  # Ensure all async operations complete
+        stored_events = await real_services_fixture["redis"].lrange(f"websocket_events:{connection_id_3}", 0, -1)
+        
+        assert len(stored_events) == len(persistence_flow)
+        
+        for stored_event_json in stored_events:
+            stored_event = json.loads(stored_event_json)
+            assert stored_event['connection_id'] == connection_id_3
+            assert stored_event['user_id'] == str(user_id)
+            assert 'state_transition' in stored_event
+        
+        # Cleanup
+        await real_services_fixture["redis"].delete(f"websocket_events:{connection_id_3}")
+        
+        # Cleanup registry
+        registry.cleanup_closed_connections()
+        for user_test_data in multi_user_test_data:
+            registry.unregister_connection(user_test_data['connection_id'])
+        registry.unregister_connection(connection_id_2)
+        registry.unregister_connection(connection_id_3)
+        
+        self.assert_business_value_delivered({
+            'end_to_end_websocket_integration': True,
+            'mission_critical_event_delivery': True,
+            'multi_user_event_isolation': True,
+            'complete_chat_functionality': True
+        }, 'comprehensive')
