@@ -239,13 +239,79 @@ class RequestScopedSessionFactory:
         
         session = None
         try:
-            # Create session using the single source of truth
-            # get_db() is decorated with @asynccontextmanager, so we use async with
-            async with get_db() as db_session:
-                session = db_session
-                
-                # Tag session for validation and monitoring
-                self._tag_session(session, user_id, request_id, thread_id, session_id)
+            # CRITICAL FIX: Use get_system_db() for system users to bypass authentication
+            # System users don't have JWT tokens but represent legitimate internal operations
+            if user_id == "system" or (user_id and user_id.startswith("system")):
+                logger.info(f"Using system database session for user {user_id} - bypassing authentication")
+                from netra_backend.app.database import get_system_db
+                async with get_system_db() as db_session:
+                    session = db_session
+                    
+                    # Tag session for validation and monitoring
+                    self._tag_session(session, user_id, request_id, thread_id, session_id)
+                    
+                    # Register session for monitoring
+                    await self._register_session(session_id, session_metrics, session)
+                    
+                    session_metrics.state = SessionState.ACTIVE
+                    session_metrics.mark_activity()
+                    
+                    # ENHANCED DEBUG: Session creation success with full context
+                    creation_context = {
+                        "session_id": session_id,
+                        "user_id": user_id,
+                        "request_id": request_id,
+                        "thread_id": thread_id,
+                        "session_state": session_metrics.state.value,
+                        "active_sessions_count": len(self._active_sessions),
+                        "user_type": "system_user",
+                        "authentication_bypass": True,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                    
+                    logger.info(
+                        f"✅ SUCCESS: Created SYSTEM database session {session_id} for user {user_id} (auth bypassed). "
+                        f"Context: {creation_context}"
+                    )
+                    
+                    # Yield the system session
+                    yield session
+                    
+            else:
+                # Create session using the single source of truth for regular users
+                # get_db() is decorated with @asynccontextmanager, so we use async with
+                async with get_db() as db_session:
+                    session = db_session
+                    
+                    # Tag session for validation and monitoring
+                    self._tag_session(session, user_id, request_id, thread_id, session_id)
+                    
+                    # Register session for monitoring
+                    await self._register_session(session_id, session_metrics, session)
+                    
+                    session_metrics.state = SessionState.ACTIVE
+                    session_metrics.mark_activity()
+                    
+                    # ENHANCED DEBUG: Session creation success with full context
+                    creation_context = {
+                        "session_id": session_id,
+                        "user_id": user_id,
+                        "request_id": request_id,
+                        "thread_id": thread_id,
+                        "session_state": session_metrics.state.value,
+                        "active_sessions_count": len(self._active_sessions),
+                        "user_type": "regular_user",
+                        "authentication_bypass": False,
+                        "timestamp": datetime.now(timezone.utc).isoformat()
+                    }
+                    
+                    logger.info(
+                        f"✅ SUCCESS: Created request-scoped session {session_id} for user {user_id}. "
+                        f"Context: {creation_context}"
+                    )
+                    
+                    # Yield the regular session
+                    yield session
                 
                 # Register session for monitoring
                 await self._register_session(session_id, session_metrics, session)
