@@ -132,6 +132,8 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         if is_production:
             allow_e2e_bypass = False  # NEVER allow bypass in production
             security_mode = "production_strict"
+            logger.warning(f"SECURITY DEBUG: Production detected - blocking E2E bypass "
+                         f"(env={current_env}, project={google_project}, is_prod={is_production})")
             if is_e2e_via_headers or is_e2e_via_env:
                 logger.warning(f"SECURITY: E2E bypass attempt blocked in production environment "
                              f"(project: {google_project}, service: {k_service})")
@@ -141,6 +143,7 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
             security_mode = "development_permissive"
         
         # Create E2E context if bypass is allowed based on security mode
+        logger.warning(f"SECURITY DEBUG: allow_e2e_bypass={allow_e2e_bypass}, is_production={is_production}")
         if allow_e2e_bypass:
             e2e_context = {
                 "is_e2e_testing": True,
