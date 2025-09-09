@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import random
 
 # SSOT Imports - Type Safety Compliance
-from shared.types.core_types import UserID, ConnectionID, ensure_user_id
+from shared.types import UserID, ConnectionID, MessageID, ensure_user_id
 from shared.isolated_environment import get_env
 
 # Test Framework Imports
@@ -54,9 +54,6 @@ from netra_backend.app.websocket_core.connection_state_machine import (
     ConnectionStateMachine
 )
 
-# Define MessageID type locally since it doesn't exist in shared.types yet
-from typing import NewType
-MessageID = NewType('MessageID', str)
 
 
 def generate_test_message_id() -> MessageID:

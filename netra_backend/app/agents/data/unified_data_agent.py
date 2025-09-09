@@ -999,6 +999,54 @@ class UnifiedDataAgent(BaseAgent):
             "suggestion": f"Try using one of: {', '.join(available_types)}"
         }
     
+    def _generate_fallback_data(self, metrics: List[str], count: int) -> List[Dict[str, Any]]:
+        """Generate fallback sample data for testing.
+        
+        This method is kept for backward compatibility with existing tests.
+        In production, the agent uses transparent error handling instead of fallback data.
+        
+        Args:
+            metrics: List of metric names to include in data
+            count: Number of records to generate
+            
+        Returns:
+            List of sample data records with specified metrics
+        """
+        import random
+        from datetime import datetime, timezone, timedelta
+        
+        data = []
+        base_time = datetime.now(timezone.utc) - timedelta(hours=count)
+        
+        for i in range(count):
+            record = {
+                "timestamp": (base_time + timedelta(minutes=i * 5)).isoformat()
+            }
+            
+            # Generate realistic sample values for common metrics
+            for metric in metrics:
+                if metric == "latency_ms":
+                    record[metric] = random.randint(10, 500)
+                elif metric == "throughput":
+                    record[metric] = random.randint(100, 1000)
+                elif metric == "success_rate":
+                    record[metric] = random.uniform(0.9, 1.0)
+                elif metric == "error_rate":
+                    record[metric] = random.uniform(0.0, 0.1)
+                elif metric == "cost_cents":
+                    record[metric] = random.randint(1, 50)
+                elif metric == "tokens_input":
+                    record[metric] = random.randint(50, 200)
+                elif metric == "tokens_output":
+                    record[metric] = random.randint(20, 100)
+                else:
+                    # Generic numeric value for unknown metrics
+                    record[metric] = random.uniform(0, 100)
+            
+            data.append(record)
+        
+        return data
+
     async def cleanup(self) -> None:
         """Clean up agent resources."""
         try:

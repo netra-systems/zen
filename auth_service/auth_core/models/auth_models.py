@@ -219,3 +219,14 @@ class OAuthCallbackRequest(BaseModel):
     code_verifier: Optional[str] = None
     code_challenge: Optional[str] = None
     redirect_uri: Optional[str] = None
+
+class UserCreate(BaseModel):
+    """User creation/registration request model"""
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    name: str = Field(min_length=1, max_length=255)
+    
+class UserLogin(BaseModel):
+    """Simple user login model (alias for test compatibility)"""
+    email: EmailStr
+    password: str
