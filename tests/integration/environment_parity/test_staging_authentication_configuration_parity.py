@@ -107,7 +107,11 @@ class TestStagingAuthenticationConfigurationParity:
         problematic_files = []
         
         for deps_file in dependencies_files:
-            content = deps_file.read_text()
+            try:
+                content = deps_file.read_text(encoding='utf-8')
+            except UnicodeDecodeError:
+                # Fallback to latin-1 if utf-8 fails
+                content = deps_file.read_text(encoding='latin-1')
             
             # Check for hardcoded "system" user_id patterns
             if 'user_id="system"' in content or "user_id='system'" in content:
@@ -121,7 +125,7 @@ class TestStagingAuthenticationConfigurationParity:
             "System operations should use proper service authentication or dynamic user context."
         )
 
-    def test_system_user_authentication_with_real_services(self, isolated_env):
+    async def test_system_user_authentication_with_real_services(self, isolated_env):
         """
         Test system user authentication with real services running.
         
