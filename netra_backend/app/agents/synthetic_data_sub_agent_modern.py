@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.core.unified_error_handler import agent_error_handler as ExecutionErrorHandler

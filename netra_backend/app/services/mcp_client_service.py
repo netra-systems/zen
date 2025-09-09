@@ -8,7 +8,7 @@ import asyncio
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.exceptions_service import ServiceError
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import MCPServerStatus
 from netra_backend.app.schemas.mcp_client import MCPServerConfig
@@ -38,7 +38,7 @@ class MCPClientService(IMCPClientService):
         """Register an external MCP server."""
         try:
             config = MCPServerConfig(**server_config)
-            async with get_db_session() as db:
+            async with get_db() as db:
                 server = await self.server_repo.create_server(db, config)
                 logger.info(f"Registered MCP server: {config.name}")
                 return True
@@ -63,7 +63,7 @@ class MCPClientService(IMCPClientService):
     
     async def _connect_to_server_internal(self, server_name: str) -> Dict[str, Any]:
         """Internal connection method with database operations."""
-        async with get_db_session() as db:
+        async with get_db() as db:
             server = await self.server_repo.get_server_by_name(db, server_name)
             if not server:
                 raise ServiceError(f"Server '{server_name}' not found")
@@ -80,7 +80,7 @@ class MCPClientService(IMCPClientService):
     async def list_servers(self) -> List[Dict[str, Any]]:
         """List all registered MCP servers."""
         try:
-            async with get_db_session() as db:
+            async with get_db() as db:
                 servers = await self.server_repo.list_servers(db)
                 return [self._server_to_dict(server) for server in servers]
         except Exception as e:
@@ -121,7 +121,7 @@ class MCPClientService(IMCPClientService):
     
     async def _execute_tool_internal(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Internal tool execution method."""
-        async with get_db_session() as db:
+        async with get_db() as db:
             return await self.tool_executor.execute_tool(
                 db, server_name, tool_name, arguments
             )
@@ -132,7 +132,7 @@ class MCPClientService(IMCPClientService):
     
     async def fetch_resource(self, server_name: str, uri: str) -> Dict[str, Any]:
         """Fetch a specific resource from an MCP server."""
-        async with get_db_session() as db:
+        async with get_db() as db:
             return await self.resource_manager.fetch_resource(db, server_name, uri)
     
     async def clear_cache(self, server_name: Optional[str] = None):
