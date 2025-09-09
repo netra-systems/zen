@@ -75,6 +75,8 @@ test-results/
 # Coverage HTML reports (generated artifacts)
 reports/coverage/html/
 htmlcov/
+coverage.json
+coverage.xml
 
 # Database
 *.db
