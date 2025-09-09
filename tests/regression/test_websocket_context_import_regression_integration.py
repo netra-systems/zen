@@ -208,7 +208,7 @@ class TestWebSocketContextIntegrationRegression:
         """
         # Simulate agent-WebSocket bridge code pattern
         def create_websocket_context_for_agent(websocket, user_context):
-            \"\"\"Simulate agent bridge context creation pattern.\"\"\"
+            """Simulate agent bridge context creation pattern."""
             # This is the kind of code that would break with the regression
             try:
                 # Agent bridge might expect to import WebSocketRequestContext
