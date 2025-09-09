@@ -1,26 +1,46 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-09 15:39:41
+**Generated:** 2025-09-09 15:40:21
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 0
+- **Total Tests:** 1
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.09 seconds
+- **Duration:** 30.17 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
+### CRITICAL Priority Tests
+
+| Test Name | Status | Duration | File |
+|-----------|--------|----------|------|
+| test_023_streaming_partial_results_real | FAIL failed | 29.983s | test_priority1_critical.py |
+
+## Failed Tests Details
+
+### FAILED: test_023_streaming_partial_results_real
+- **File:** /Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_priority1_critical.py
+- **Duration:** 29.983s
+- **Error:** /opt/homebrew/lib/python3.13/site-packages/pytest_asyncio/plugin.py:426: in runtest
+    super().runtest()
+/opt/homebrew/lib/python3.13/site-packages/pytest_asyncio/plugin.py:642: in inner
+    _loop.run_until_complete(task)
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py:712: in run_until_complete
+    self.run_forever()
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/ba...
+
 ## Pytest Output Format
 
 ```
+test_priority1_critical.py::test_023_streaming_partial_results_real FAILED
 
 ==================================================
-0 passed, 0 failed in 0.09s
+0 passed, 1 failed in 30.17s
 ```
 
 ## Test Coverage Matrix
