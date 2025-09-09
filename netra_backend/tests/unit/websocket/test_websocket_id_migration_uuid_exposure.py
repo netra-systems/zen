@@ -48,7 +48,7 @@ class TestWebSocketIdMigrationUuidExposure:
     the migration need from uuid.uuid4() to UnifiedIdGenerator.
     """
 
-    def test_connection_info_uses_uuid4_pattern_EXPECTED_FAILURE(self):
+    def test_connection_info_uses_unified_id_generator(self):
         """
         DESIGNED TO FAIL: Expose uuid.uuid4() usage in ConnectionInfo default factory.
         
@@ -78,7 +78,7 @@ class TestWebSocketIdMigrationUuidExposure:
         assert len(set(connection_ids)) == len(connection_ids), \
             "UUID4 pattern allows potential ID collisions"
 
-    def test_websocket_message_uses_uuid4_pattern_EXPECTED_FAILURE(self):
+    def test_websocket_message_uses_unified_id_generator(self):
         """
         DESIGNED TO FAIL: Expose uuid.uuid4() usage in WebSocketMessage message_id.
         
@@ -115,7 +115,7 @@ class TestWebSocketIdMigrationUuidExposure:
         assert len(set(message_ids)) == len(message_ids), \
             "UUID4 pattern allows potential message ID collisions"
 
-    def test_websocket_context_uses_uuid4_pattern_EXPECTED_FAILURE(self):
+    def test_websocket_context_uses_unified_id_generator(self):
         """
         DESIGNED TO FAIL: Expose uuid.uuid4() usage in WebSocketRequestContext.
         
@@ -186,7 +186,7 @@ class TestWebSocketIdMigrationUuidExposure:
                 assert manager_id.startswith(expected_pattern), \
                     f"Expected manager ID pattern '{expected_pattern}', got: {manager_id}"
 
-    def test_websocket_utils_generate_ids_EXPECTED_FAILURE(self):
+    def test_websocket_utils_generate_ids_unified_generator(self):
         """
         DESIGNED TO FAIL: Expose uuid.uuid4() usage in websocket_core.utils functions.
         
