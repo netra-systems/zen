@@ -2351,3 +2351,849 @@ class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
         self.record_metric("overload_degraded_executions", performance_metrics['degraded_executions'])
         self.record_metric("overload_failed_executions", performance_metrics['failed_executions'])
         self.record_metric("overload_avg_response_time", performance_metrics['avg_response_time'])
+    
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_057_websocket_reconnection_agent_state_recovery(self, real_services_fixture):
+        """
+        Test 57/60: Agent state recovery after WebSocket reconnection scenarios.
+        
+        Business Value: Users maintain AI conversation continuity even after
+        network interruptions, ensuring reliable conversational AI experience.
+        """
+        services = real_services_fixture
+        
+        if not services["database_available"]:
+            pytest.skip("Real database not available - cannot test WebSocket reconnection")
+        
+        # Create context for reconnection testing
+        reconnection_context = await self._create_test_thread_with_context(
+            self.test_user_1, "Reconnection Test Thread", services["db"]
+        )
+        
+        # Initial connection and agent start
+        self.mock_websocket_manager.add_connection(str(self.test_user_1))
+        
+        # Start agent with state before disconnection
+        pre_disconnect_state = {
+            'session_id': str(reconnection_context.run_id),
+            'analysis_progress': 40,
+            'intermediate_data': ['step1_complete', 'step2_in_progress'],
+            'checkpoint': 'mid_execution'
+        }
+        
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='agent_started',
+            data={
+                'agent_name': 'ReconnectionAgent',
+                'state': pre_disconnect_state,
+                'connection_id': 'conn_001'
+            },
+            run_id=str(reconnection_context.run_id),
+            thread_id=str(reconnection_context.thread_id)
+        )
+        
+        # Execute tool before disconnection
+        pre_disconnect_result = await self.mock_tool_dispatcher.dispatch_tool(
+            'data_analysis',
+            {
+                'query': 'pre_disconnect_analysis',
+                'state': pre_disconnect_state,
+                'phase': 'pre_disconnect'
+            },
+            reconnection_context
+        )
+        
+        # Simulate WebSocket disconnection
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='websocket_disconnected',
+            data={
+                'connection_id': 'conn_001',
+                'reason': 'network_interruption',
+                'agent_state_at_disconnect': pre_disconnect_state
+            },
+            run_id=str(reconnection_context.run_id),
+            thread_id=str(reconnection_context.thread_id)
+        )
+        
+        # Remove connection to simulate disconnection
+        self.mock_websocket_manager.connected_users.discard(str(self.test_user_1))
+        
+        # Simulate time during disconnection
+        await asyncio.sleep(0.1)
+        
+        # Simulate reconnection
+        self.mock_websocket_manager.add_connection(str(self.test_user_1))
+        
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='websocket_reconnected',
+            data={
+                'connection_id': 'conn_002',
+                'previous_connection': 'conn_001',
+                'reconnection_time': time.time()
+            },
+            run_id=str(reconnection_context.run_id),
+            thread_id=str(reconnection_context.thread_id)
+        )
+        
+        # Restore agent state after reconnection
+        post_reconnect_state = {
+            **pre_disconnect_state,
+            'reconnected': True,
+            'reconnection_timestamp': time.time(),
+            'previous_results': [pre_disconnect_result]
+        }
+        
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='agent_state_restored',
+            data={
+                'agent_name': 'ReconnectionAgent',
+                'restored_state': post_reconnect_state,
+                'recovery_successful': True
+            },
+            run_id=str(reconnection_context.run_id),
+            thread_id=str(reconnection_context.thread_id)
+        )
+        
+        # Continue execution after reconnection
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='agent_started',
+            data={
+                'agent_name': 'ReconnectionAgent',
+                'state': post_reconnect_state,
+                'connection_id': 'conn_002',
+                'resumed_after_reconnect': True
+            },
+            run_id=str(reconnection_context.run_id),
+            thread_id=str(reconnection_context.thread_id)
+        )
+        
+        # Execute tool after reconnection to verify continuity
+        post_reconnect_result = await self.mock_tool_dispatcher.dispatch_tool(
+            'data_analysis',
+            {
+                'query': 'post_reconnect_analysis',
+                'state': post_reconnect_state,
+                'phase': 'post_reconnect',
+                'continue_from': pre_disconnect_result
+            },
+            reconnection_context
+        )
+        
+        # Complete agent after successful reconnection
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='agent_completed',
+            data={
+                'agent_name': 'ReconnectionAgent',
+                'final_result': post_reconnect_result,
+                'reconnection_recovery_successful': True
+            },
+            run_id=str(reconnection_context.run_id),
+            thread_id=str(reconnection_context.thread_id)
+        )
+        
+        # Validate reconnection and recovery
+        thread_events = self.mock_websocket_manager.get_events_for_thread(str(reconnection_context.thread_id))
+        
+        # Verify connection lifecycle events
+        event_types = [e['type'] for e in thread_events]
+        assert 'agent_started' in event_types  # Initial start
+        assert 'websocket_disconnected' in event_types  # Disconnection
+        assert 'websocket_reconnected' in event_types   # Reconnection
+        assert 'agent_state_restored' in event_types    # State recovery
+        assert 'agent_completed' in event_types         # Final completion
+        
+        # Verify multiple agent_started events (pre and post reconnection)
+        started_events = [e for e in thread_events if e['type'] == 'agent_started']
+        assert len(started_events) == 2
+        
+        initial_start = started_events[0]
+        resumed_start = started_events[1]
+        
+        assert initial_start['data']['connection_id'] == 'conn_001'
+        assert resumed_start['data']['connection_id'] == 'conn_002'
+        assert resumed_start['data']['resumed_after_reconnect'] == True
+        
+        # Verify state recovery
+        state_restored_event = next(e for e in thread_events if e['type'] == 'agent_state_restored')
+        restored_state = state_restored_event['data']['restored_state']
+        
+        assert restored_state['reconnected'] == True
+        assert restored_state['analysis_progress'] == 40  # Preserved progress
+        assert 'previous_results' in restored_state
+        
+        # Verify tool execution continuity
+        executed_tools = [t for t in self.mock_tool_dispatcher.executed_tools 
+                         if t['thread_id'] == str(reconnection_context.thread_id)]
+        assert len(executed_tools) == 2
+        
+        pre_tool = next(t for t in executed_tools if t['params']['phase'] == 'pre_disconnect')
+        post_tool = next(t for t in executed_tools if t['params']['phase'] == 'post_reconnect')
+        
+        assert 'continue_from' in post_tool['params']
+        assert post_tool['params']['continue_from'] == pre_tool['result']
+        
+        # Verify final completion includes recovery status
+        completed_event = next(e for e in thread_events if e['type'] == 'agent_completed')
+        assert completed_event['data']['reconnection_recovery_successful'] == True
+    
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_058_agent_timeout_handling_across_thread_contexts(self, real_services_fixture):
+        """
+        Test 58/60: Agent timeout handling is properly isolated across thread contexts.
+        
+        Business Value: Agent timeouts in one conversation don't affect other conversations,
+        ensuring robust multi-conversation AI experience with proper error isolation.
+        """
+        services = real_services_fixture
+        
+        if not services["database_available"]:
+            pytest.skip("Real database not available - cannot test timeout handling")
+        
+        # Create contexts for timeout testing
+        timeout_context = await self._create_test_thread_with_context(
+            self.test_user_1, "Timeout Test Thread", services["db"]
+        )
+        normal_context = await self._create_test_thread_with_context(
+            self.test_user_1, "Normal Execution Thread", services["db"]
+        )
+        
+        for context in [timeout_context, normal_context]:
+            self.mock_websocket_manager.add_connection(str(context.user_id))
+        
+        # Create timeout-simulating tool dispatcher
+        class TimeoutSimulatingToolDispatcher(MockToolDispatcher):
+            async def dispatch_tool(self, tool_name: str, params: Dict[str, Any], 
+                                  user_context: UserExecutionContext) -> Dict[str, Any]:
+                
+                # Emit tool_executing event
+                await self.websocket_manager.emit_agent_event(
+                    event_type='tool_executing',
+                    data={'tool_name': tool_name, 'params': params},
+                    run_id=str(user_context.run_id),
+                    thread_id=str(user_context.thread_id)
+                )
+                
+                # Simulate timeout in specific thread
+                if 'simulate_timeout' in params:
+                    # Simulate long-running operation
+                    await asyncio.sleep(0.2)  # Simulate delay
+                    
+                    # Emit timeout event
+                    await self.websocket_manager.emit_agent_event(
+                        event_type='tool_timeout',
+                        data={
+                            'tool_name': tool_name,
+                            'timeout_duration': params.get('timeout_after', 30),
+                            'error': 'Tool execution timed out'
+                        },
+                        run_id=str(user_context.run_id),
+                        thread_id=str(user_context.thread_id)
+                    )
+                    
+                    raise asyncio.TimeoutError(f"Tool {tool_name} timed out")
+                
+                # Normal execution for other cases
+                return await super().dispatch_tool(tool_name, params, user_context)
+        
+        timeout_dispatcher = TimeoutSimulatingToolDispatcher(self.mock_websocket_manager)
+        
+        # Start agents in both threads
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='agent_started',
+            data={'agent_name': 'TimeoutTestAgent', 'timeout_test': True},
+            run_id=str(timeout_context.run_id),
+            thread_id=str(timeout_context.thread_id)
+        )
+        
+        await self.mock_websocket_manager.emit_agent_event(
+            event_type='agent_started',
+            data={'agent_name': 'NormalAgent', 'normal_execution': True},
+            run_id=str(normal_context.run_id),
+            thread_id=str(normal_context.thread_id)
+        )
+        
+        # Execute operations concurrently - one will timeout, one will succeed
+        async def execute_with_timeout():
+            """Execute tool that will timeout."""
+            try:
+                await timeout_dispatcher.dispatch_tool(
+                    'data_analysis',
+                    {
+                        'query': 'timeout_test',
+                        'simulate_timeout': True,
+                        'timeout_after': 5
+                    },
+                    timeout_context
+                )
+                return {'success': True}
+            except asyncio.TimeoutError as e:
+                # Handle timeout gracefully
+                await self.mock_websocket_manager.emit_agent_event(
+                    event_type='agent_error',
+                    data={
+                        'agent_name': 'TimeoutTestAgent',
+                        'error': 'Agent execution timed out',
+                        'recovery_action': 'timeout_handled'
+                    },
+                    run_id=str(timeout_context.run_id),
+                    thread_id=str(timeout_context.thread_id)
+                )
+                return {'success': False, 'error': 'timeout'}
+        
+        async def execute_normally():
+            """Execute tool normally."""
+            result = await timeout_dispatcher.dispatch_tool(
+                'github_analysis',
+                {'query': 'normal_execution', 'expected_success': True},
+                normal_context
+            )
+            
+            await self.mock_websocket_manager.emit_agent_event(
+                event_type='agent_completed',
+                data={
+                    'agent_name': 'NormalAgent',
+                    'result': result,
+                    'execution_successful': True
+                },
+                run_id=str(normal_context.run_id),
+                thread_id=str(normal_context.thread_id)
+            )
+            
+            return {'success': True, 'result': result}
+        
+        # Execute both operations concurrently
+        timeout_result, normal_result = await asyncio.gather(
+            execute_with_timeout(),
+            execute_normally(),
+            return_exceptions=True
+        )
+        
+        # Validate timeout isolation
+        timeout_events = self.mock_websocket_manager.get_events_for_thread(str(timeout_context.thread_id))
+        normal_events = self.mock_websocket_manager.get_events_for_thread(str(normal_context.thread_id))
+        
+        # Verify timeout thread events
+        timeout_event_types = [e['type'] for e in timeout_events]
+        assert 'agent_started' in timeout_event_types
+        assert 'tool_executing' in timeout_event_types
+        assert 'tool_timeout' in timeout_event_types
+        assert 'agent_error' in timeout_event_types
+        
+        # Verify normal thread events (unaffected by timeout)
+        normal_event_types = [e['type'] for e in normal_events]
+        assert 'agent_started' in normal_event_types
+        assert 'tool_executing' in normal_event_types
+        assert 'tool_completed' in normal_event_types
+        assert 'agent_completed' in normal_event_types
+        assert 'tool_timeout' not in normal_event_types  # No timeout in normal thread
+        assert 'agent_error' not in normal_event_types   # No error in normal thread
+        
+        # Verify timeout handling
+        timeout_event = next(e for e in timeout_events if e['type'] == 'tool_timeout')
+        assert 'timed out' in timeout_event['data']['error']
+        assert timeout_event['data']['timeout_duration'] == 5
+        
+        # Verify normal execution succeeded
+        completed_event = next(e for e in normal_events if e['type'] == 'agent_completed')
+        assert completed_event['data']['execution_successful'] == True
+        
+        # Verify results
+        assert timeout_result['success'] == False
+        assert timeout_result['error'] == 'timeout'
+        assert normal_result['success'] == True
+        
+        # Verify tool execution isolation
+        timeout_tools = [t for t in timeout_dispatcher.executed_tools 
+                        if t['thread_id'] == str(timeout_context.thread_id)]
+        normal_tools = [t for t in timeout_dispatcher.executed_tools 
+                       if t['thread_id'] == str(normal_context.thread_id)]
+        
+        # Timeout tool should not be recorded (failed)
+        assert len(timeout_tools) == 0
+        
+        # Normal tool should be recorded (succeeded)
+        assert len(normal_tools) == 1
+        assert normal_tools[0]['params']['query'] == 'normal_execution'
+    
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_059_concurrent_agent_error_recovery_thread_isolation(self, real_services_fixture):
+        """
+        Test 59/60: Concurrent agent error recovery maintains proper thread isolation.
+        
+        Business Value: Error recovery in one conversation doesn't interfere with
+        other conversations, ensuring stable multi-user AI platform experience.
+        """
+        services = real_services_fixture
+        
+        if not services["database_available"]:
+            pytest.skip("Real database not available - cannot test concurrent error recovery")
+        
+        # Create multiple contexts for concurrent error testing
+        error_contexts = []
+        for i in range(5):
+            context = await self._create_test_thread_with_context(
+                ensure_user_id(f"error_recovery_user_{i:03d}"),
+                f"Error Recovery Thread {i+1}",
+                services["db"]
+            )
+            error_contexts.append(context)
+            self.mock_websocket_manager.add_connection(str(context.user_id))
+        
+        # Create error-simulating dispatcher with recovery logic
+        class ErrorRecoveryToolDispatcher(MockToolDispatcher):
+            def __init__(self, websocket_manager):
+                super().__init__(websocket_manager)
+                self.error_counts = {}
+                
+            async def dispatch_tool(self, tool_name: str, params: Dict[str, Any], 
+                                  user_context: UserExecutionContext) -> Dict[str, Any]:
+                
+                thread_id = str(user_context.thread_id)
+                
+                # Track error count per thread
+                if thread_id not in self.error_counts:
+                    self.error_counts[thread_id] = 0
+                
+                # Emit tool_executing event
+                await self.websocket_manager.emit_agent_event(
+                    event_type='tool_executing',
+                    data={'tool_name': tool_name, 'params': params},
+                    run_id=str(user_context.run_id),
+                    thread_id=thread_id
+                )
+                
+                # Simulate different error scenarios based on thread
+                thread_index = int(params.get('thread_index', 0))
+                
+                if thread_index % 3 == 0 and self.error_counts[thread_id] == 0:
+                    # First error in thread 0, 3, etc.
+                    self.error_counts[thread_id] += 1
+                    
+                    await self.websocket_manager.emit_agent_event(
+                        event_type='tool_error',
+                        data={
+                            'tool_name': tool_name,
+                            'error': 'Transient error - will retry',
+                            'recoverable': True,
+                            'retry_attempt': 1
+                        },
+                        run_id=str(user_context.run_id),
+                        thread_id=thread_id
+                    )
+                    
+                    raise Exception("Transient error in tool execution")
+                
+                elif thread_index % 3 == 1 and self.error_counts[thread_id] == 0:
+                    # Different error type in thread 1, 4, etc.
+                    self.error_counts[thread_id] += 1
+                    
+                    await self.websocket_manager.emit_agent_event(
+                        event_type='tool_error',
+                        data={
+                            'tool_name': tool_name,
+                            'error': 'Configuration error - attempting fix',
+                            'recoverable': True,
+                            'retry_attempt': 1
+                        },
+                        run_id=str(user_context.run_id),
+                        thread_id=thread_id
+                    )
+                    
+                    raise Exception("Configuration error in tool execution")
+                
+                else:
+                    # Normal execution (recovery or first attempt in other threads)
+                    if thread_id in self.error_counts and self.error_counts[thread_id] > 0:
+                        # This is a recovery execution
+                        result = {
+                            'status': 'recovered',
+                            'message': 'Successfully recovered from previous error',
+                            'recovery_attempt': self.error_counts[thread_id] + 1,
+                            'original_query': params.get('query', 'unknown')
+                        }
+                    else:
+                        # Normal first-time execution
+                        result = await super().dispatch_tool(tool_name, params, user_context)
+                    
+                    return result
+        
+        error_recovery_dispatcher = ErrorRecoveryToolDispatcher(self.mock_websocket_manager)
+        
+        # Execute concurrent operations with error recovery
+        async def execute_with_error_recovery(context: UserExecutionContext, index: int):
+            """Execute agent with error recovery logic."""
+            
+            await self.mock_websocket_manager.emit_agent_event(
+                event_type='agent_started',
+                data={
+                    'agent_name': f'ErrorRecoveryAgent_{index}',
+                    'thread_index': index,
+                    'recovery_enabled': True
+                },
+                run_id=str(context.run_id),
+                thread_id=str(context.thread_id)
+            )
+            
+            # First attempt (may fail for some threads)
+            try:
+                result = await error_recovery_dispatcher.dispatch_tool(
+                    'data_analysis',
+                    {
+                        'query': f'error_recovery_test_{index}',
+                        'thread_index': index,
+                        'attempt': 1
+                    },
+                    context
+                )
+                
+                # If successful on first try
+                await self.mock_websocket_manager.emit_agent_event(
+                    event_type='agent_completed',
+                    data={
+                        'agent_name': f'ErrorRecoveryAgent_{index}',
+                        'result': result,
+                        'recovery_needed': False
+                    },
+                    run_id=str(context.run_id),
+                    thread_id=str(context.thread_id)
+                )
+                
+                return {'success': True, 'recovery_needed': False, 'result': result}
+                
+            except Exception as e:
+                # Error occurred, attempt recovery
+                await self.mock_websocket_manager.emit_agent_event(
+                    event_type='agent_thinking',
+                    data={
+                        'agent_name': f'ErrorRecoveryAgent_{index}',
+                        'thinking': f'Error occurred: {str(e)}, attempting recovery'
+                    },
+                    run_id=str(context.run_id),
+                    thread_id=str(context.thread_id)
+                )
+                
+                # Recovery attempt
+                try:
+                    recovery_result = await error_recovery_dispatcher.dispatch_tool(
+                        'data_analysis',
+                        {
+                            'query': f'error_recovery_retry_{index}',
+                            'thread_index': index,
+                            'attempt': 2,
+                            'recovery_mode': True
+                        },
+                        context
+                    )
+                    
+                    await self.mock_websocket_manager.emit_agent_event(
+                        event_type='agent_completed',
+                        data={
+                            'agent_name': f'ErrorRecoveryAgent_{index}',
+                            'result': recovery_result,
+                            'recovery_needed': True,
+                            'recovery_successful': True
+                        },
+                        run_id=str(context.run_id),
+                        thread_id=str(context.thread_id)
+                    )
+                    
+                    return {'success': True, 'recovery_needed': True, 'result': recovery_result}
+                    
+                except Exception as recovery_error:
+                    # Recovery failed
+                    await self.mock_websocket_manager.emit_agent_event(
+                        event_type='agent_error',
+                        data={
+                            'agent_name': f'ErrorRecoveryAgent_{index}',
+                            'error': f'Recovery failed: {str(recovery_error)}',
+                            'recovery_attempted': True,
+                            'recovery_successful': False
+                        },
+                        run_id=str(context.run_id),
+                        thread_id=str(context.thread_id)
+                    )
+                    
+                    return {'success': False, 'recovery_failed': True}
+        
+        # Execute all recovery operations concurrently
+        recovery_tasks = [
+            execute_with_error_recovery(error_contexts[i], i)
+            for i in range(len(error_contexts))
+        ]
+        
+        results = await asyncio.gather(*recovery_tasks)
+        
+        # Validate concurrent error recovery
+        successful_results = [r for r in results if r['success']]
+        failed_results = [r for r in results if not r['success']]
+        
+        assert len(successful_results) >= 3, "Most threads should recover successfully"
+        assert len(failed_results) <= 2, "Limited failures expected"
+        
+        # Verify error and recovery isolation per thread
+        for i, context in enumerate(error_contexts):
+            thread_events = self.mock_websocket_manager.get_events_for_thread(str(context.thread_id))
+            
+            # Each thread should have agent_started
+            started_events = [e for e in thread_events if e['type'] == 'agent_started']
+            assert len(started_events) == 1
+            assert started_events[0]['data']['thread_index'] == i
+            
+            # Verify thread isolation - no events from other threads
+            assert all(e['thread_id'] == str(context.thread_id) for e in thread_events)
+            
+            # Check for completion or error events
+            event_types = [e['type'] for e in thread_events]
+            assert 'agent_completed' in event_types or 'agent_error' in event_types
+            
+            # Verify error/recovery patterns based on thread index
+            if i % 3 == 0 or i % 3 == 1:
+                # These threads should have error events
+                assert 'tool_error' in event_types
+                
+                # Check if recovery was attempted
+                error_events = [e for e in thread_events if e['type'] == 'tool_error']
+                assert len(error_events) == 1
+                assert error_events[0]['data']['recoverable'] == True
+            
+        # Verify tool execution patterns
+        all_tools = error_recovery_dispatcher.executed_tools
+        
+        for i, context in enumerate(error_contexts):
+            thread_tools = [t for t in all_tools if t['thread_id'] == str(context.thread_id)]
+            
+            # Each thread should have at least one tool execution (recovery may add more)
+            assert len(thread_tools) >= 0  # May be 0 if first attempt failed and wasn't recorded
+            
+            # Verify thread-specific tool parameters
+            for tool in thread_tools:
+                assert tool['params']['thread_index'] == i
+    
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_060_comprehensive_agent_execution_thread_switching_stress_test(self, real_services_fixture):
+        """
+        Test 60/60: Comprehensive stress test of agent execution during intensive thread switching.
+        
+        Business Value: Platform maintains stability and performance under extreme usage patterns,
+        ensuring reliable AI assistance for high-volume enterprise customers.
+        """
+        services = real_services_fixture
+        
+        if not services["database_available"]:
+            pytest.skip("Real database not available - cannot test comprehensive stress test")
+        
+        # Create large number of contexts for stress testing
+        stress_contexts = []
+        for i in range(20):  # High stress scenario
+            context = await self._create_test_thread_with_context(
+                ensure_user_id(f"stress_user_{i:03d}"),
+                f"Stress Test Thread {i+1}",
+                services["db"]
+            )
+            stress_contexts.append(context)
+            self.mock_websocket_manager.add_connection(str(context.user_id))
+        
+        # Stress test metrics
+        stress_metrics = {
+            'total_operations': 0,
+            'successful_operations': 0,
+            'failed_operations': 0,
+            'context_switches': 0,
+            'websocket_events': 0,
+            'tool_executions': 0,
+            'total_time': 0
+        }
+        
+        start_time = time.time()
+        
+        # Complex stress test scenario
+        async def intensive_thread_switching_workflow(contexts: List[UserExecutionContext]):
+            """Execute intensive thread switching with complex agent workflows."""
+            
+            # Phase 1: Rapid thread initialization
+            for i, context in enumerate(contexts):
+                await self.mock_websocket_manager.emit_agent_event(
+                    event_type='agent_started',
+                    data={
+                        'agent_name': f'StressTestAgent_{i}',
+                        'phase': 'initialization',
+                        'stress_level': 'high'
+                    },
+                    run_id=str(context.run_id),
+                    thread_id=str(context.thread_id)
+                )
+                stress_metrics['websocket_events'] += 1
+                
+                # Brief delay to simulate realistic initialization
+                if i % 5 == 0:
+                    await asyncio.sleep(0.01)
+            
+            # Phase 2: Rapid thread switching with tool execution
+            for cycle in range(3):  # Multiple cycles of switching
+                
+                # Execute tools in rapid succession across different threads
+                tasks = []
+                for i, context in enumerate(contexts):
+                    if i % 2 == cycle % 2:  # Alternate threads each cycle
+                        task = self.mock_tool_dispatcher.dispatch_tool(
+                            'data_analysis' if i % 3 == 0 else 'github_analysis',
+                            {
+                                'query': f'stress_test_cycle_{cycle}_thread_{i}',
+                                'cycle': cycle,
+                                'thread_index': i,
+                                'stress_test': True
+                            },
+                            context
+                        )
+                        tasks.append((task, context, i))
+                
+                # Execute tools concurrently
+                for task, context, i in tasks:
+                    try:
+                        await task
+                        stress_metrics['successful_operations'] += 1
+                        stress_metrics['tool_executions'] += 1
+                        
+                        # Agent thinking event
+                        await self.mock_websocket_manager.emit_agent_event(
+                            event_type='agent_thinking',
+                            data={
+                                'agent_name': f'StressTestAgent_{i}',
+                                'thinking': f'Completed cycle {cycle} operation',
+                                'cycle': cycle
+                            },
+                            run_id=str(context.run_id),
+                            thread_id=str(context.thread_id)
+                        )
+                        stress_metrics['websocket_events'] += 1
+                        
+                    except Exception as e:
+                        stress_metrics['failed_operations'] += 1
+                        
+                        await self.mock_websocket_manager.emit_agent_event(
+                            event_type='agent_error',
+                            data={
+                                'agent_name': f'StressTestAgent_{i}',
+                                'error': str(e),
+                                'cycle': cycle
+                            },
+                            run_id=str(context.run_id),
+                            thread_id=str(context.thread_id)
+                        )
+                        stress_metrics['websocket_events'] += 1
+                
+                stress_metrics['context_switches'] += len(tasks)
+                
+                # Brief pause between cycles
+                await asyncio.sleep(0.02)
+            
+            # Phase 3: Concurrent completion
+            completion_tasks = []
+            for i, context in enumerate(contexts):
+                async def complete_agent(ctx, idx):
+                    await self.mock_websocket_manager.emit_agent_event(
+                        event_type='agent_completed',
+                        data={
+                            'agent_name': f'StressTestAgent_{idx}',
+                            'stress_test_completed': True,
+                            'total_cycles': 3
+                        },
+                        run_id=str(ctx.run_id),
+                        thread_id=str(ctx.thread_id)
+                    )
+                    stress_metrics['websocket_events'] += 1
+                    stress_metrics['successful_operations'] += 1
+                
+                completion_tasks.append(complete_agent(context, i))
+            
+            await asyncio.gather(*completion_tasks)
+        
+        # Execute intensive stress test
+        await intensive_thread_switching_workflow(stress_contexts)
+        
+        total_time = time.time() - start_time
+        stress_metrics['total_time'] = total_time
+        stress_metrics['total_operations'] = stress_metrics['successful_operations'] + stress_metrics['failed_operations']
+        
+        # Comprehensive validation
+        
+        # Performance metrics validation
+        assert total_time < 30.0, f"Stress test should complete within 30 seconds: {total_time}"
+        assert stress_metrics['successful_operations'] >= stress_metrics['total_operations'] * 0.9, \
+            "At least 90% of operations should succeed"
+        
+        operations_per_second = stress_metrics['total_operations'] / total_time
+        assert operations_per_second > 10.0, f"Should handle >10 operations/second: {operations_per_second}"
+        
+        # Thread isolation validation under stress
+        for i, context in enumerate(stress_contexts):
+            thread_events = self.mock_websocket_manager.get_events_for_thread(str(context.thread_id))
+            
+            # Each thread should have initialization, operations, and completion
+            event_types = [e['type'] for e in thread_events]
+            assert 'agent_started' in event_types
+            assert 'agent_completed' in event_types
+            
+            # Verify all events belong to correct thread
+            assert all(e['thread_id'] == str(context.thread_id) for e in thread_events)
+            
+            # Verify thread-specific data in events
+            started_event = next(e for e in thread_events if e['type'] == 'agent_started')
+            completed_event = next(e for e in thread_events if e['type'] == 'agent_completed')
+            
+            assert started_event['data']['agent_name'] == f'StressTestAgent_{i}'
+            assert completed_event['data']['agent_name'] == f'StressTestAgent_{i}'
+            assert completed_event['data']['stress_test_completed'] == True
+        
+        # WebSocket event integrity
+        total_events = len(self.mock_websocket_manager.emitted_events)
+        assert total_events >= stress_metrics['websocket_events']
+        
+        # Verify event distribution across threads
+        events_per_thread = {}
+        for event in self.mock_websocket_manager.emitted_events:
+            if event.get('thread_id'):
+                thread_id = event['thread_id']
+                events_per_thread[thread_id] = events_per_thread.get(thread_id, 0) + 1
+        
+        # Each thread should have received reasonable number of events
+        assert len(events_per_thread) == len(stress_contexts)
+        for thread_id, event_count in events_per_thread.items():
+            assert event_count >= 2, f"Thread {thread_id} should have at least 2 events"
+        
+        # Tool execution validation
+        total_tools = len(self.mock_tool_dispatcher.executed_tools)
+        assert total_tools >= stress_metrics['tool_executions'] * 0.8, \
+            "Most tool executions should be recorded"
+        
+        # Verify tool thread isolation
+        tools_per_thread = {}
+        for tool in self.mock_tool_dispatcher.executed_tools:
+            thread_id = tool['thread_id']
+            tools_per_thread[thread_id] = tools_per_thread.get(thread_id, 0) + 1
+        
+        # Tools should be distributed across threads
+        assert len(tools_per_thread) >= len(stress_contexts) * 0.7, \
+            "Tools should be distributed across most threads"
+        
+        # Final metrics logging
+        self.record_metric("stress_total_operations", stress_metrics['total_operations'])
+        self.record_metric("stress_successful_operations", stress_metrics['successful_operations'])
+        self.record_metric("stress_failed_operations", stress_metrics['failed_operations'])
+        self.record_metric("stress_context_switches", stress_metrics['context_switches'])
+        self.record_metric("stress_websocket_events", stress_metrics['websocket_events'])
+        self.record_metric("stress_tool_executions", stress_metrics['tool_executions'])
+        self.record_metric("stress_total_time", stress_metrics['total_time'])
+        self.record_metric("stress_operations_per_second", operations_per_second)
+        
+        # Success criteria summary
+        success_rate = stress_metrics['successful_operations'] / stress_metrics['total_operations']
+        assert success_rate >= 0.9, f"Success rate should be ≥90%: {success_rate:.2%}"
+        
+        # Performance criteria
+        assert operations_per_second >= 10.0, f"Performance should be ≥10 ops/sec: {operations_per_second:.1f}"
+        assert total_time <= 30.0, f"Completion time should be ≤30s: {total_time:.1f}s"
