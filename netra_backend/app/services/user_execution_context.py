@@ -26,9 +26,10 @@ user requests.
 
 import uuid
 import copy
+import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Union, TYPE_CHECKING
+from typing import Any, Dict, Optional, Union, TYPE_CHECKING, List, Callable
 import logging
 from contextlib import asynccontextmanager
 
@@ -118,6 +119,9 @@ class UserExecutionContext:
     # Hierarchical operation tracking
     operation_depth: int = field(default=0)
     parent_request_id: Optional[str] = field(default=None)
+    
+    # Resource cleanup management
+    cleanup_callbacks: List[Callable] = field(default_factory=list, repr=False, compare=False)
     
     def __post_init__(self):
         """Comprehensive validation after initialization."""
@@ -572,6 +576,43 @@ class UserExecutionContext:
         logger.debug(f"Context isolation verified for request_id={self.request_id}")
         return True
     
+    async def cleanup(self) -> None:
+        """Clean up resources associated with this context.
+        
+        This method executes all registered cleanup callbacks in reverse order (LIFO)
+        to ensure proper resource cleanup and prevent memory leaks.
+        
+        **Compatibility Note**: This method provides compatibility with the execution
+        factory pattern while maintaining the managed_user_context design.
+        
+        Raises:
+            Exception: If any cleanup callback fails (logged but not re-raised)
+        """
+        if not self.cleanup_callbacks:
+            logger.debug(f"No cleanup callbacks for context {self.request_id}")
+            return
+            
+        logger.debug(f"🧹 Running {len(self.cleanup_callbacks)} cleanup callbacks for context {self.request_id}")
+        
+        # Execute cleanup callbacks in reverse order (LIFO)
+        for i, callback in enumerate(reversed(self.cleanup_callbacks)):
+            try:
+                if asyncio.iscoroutinefunction(callback):
+                    await callback()
+                else:
+                    callback()
+                logger.debug(f"✅ Cleanup callback {i+1}/{len(self.cleanup_callbacks)} executed successfully")
+            except Exception as e:
+                logger.error(
+                    f"❌ Cleanup callback {i+1}/{len(self.cleanup_callbacks)} failed: {e}",
+                    exc_info=True
+                )
+                # Continue with other callbacks even if one fails
+        
+        # Clear all callbacks after execution
+        self.cleanup_callbacks.clear()
+        logger.debug(f"🧹 Cleanup completed for context {self.request_id}")
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert context to dictionary for serialization and logging.
         
@@ -943,6 +984,12 @@ async def managed_user_context(
         )
         raise
     finally:
+        # Execute registered cleanup callbacks first
+        try:
+            await context.cleanup()
+        except Exception as e:
+            logger.warning(f"Error during cleanup callbacks: {e}")
+        
         # Cleanup database session if requested
         if cleanup_db_session and context.db_session:
             try:
