@@ -63,6 +63,7 @@ from netra_backend.app.websocket_core import (
     MessageType,
     WebSocketConfig
 )
+from netra_backend.app.websocket_core.unified_websocket_auth import get_websocket_authenticator
 from netra_backend.app.websocket_core.utils import (
     is_websocket_connected, 
     is_websocket_connected_and_ready, 
@@ -1927,11 +1928,21 @@ async def websocket_health_check():
         
         factory = get_websocket_manager_factory()
         ws_stats = factory.get_factory_stats()
+        factory_metrics = ws_stats.get("factory_metrics", {})
+        current_state = ws_stats.get("current_state", {})
+        
+        # Extract metrics with proper field names
+        active_connections = current_state.get("active_managers", 0)
+        total_connections = factory_metrics.get("total_connections_managed", 0)
+        messages_sent = factory_metrics.get("messages_sent_total", 0)
+        messages_received = factory_metrics.get("messages_received_total", 0) 
+        errors_handled = factory_metrics.get("errors_handled", 0)
+        
         metrics["websocket"] = {
-            "active_connections": ws_stats["active_connections"],
-            "total_connections": ws_stats["total_connections"], 
-            "messages_processed": ws_stats["messages_sent"] + ws_stats["messages_received"],
-            "error_rate": ws_stats["errors_handled"] / max(1, ws_stats["total_connections"])
+            "active_connections": active_connections,
+            "total_connections": total_connections, 
+            "messages_processed": messages_sent + messages_received,
+            "error_rate": errors_handled / max(1, total_connections)
         }
     except Exception as e:
         errors.append(f"websocket_manager: {str(e)}")
