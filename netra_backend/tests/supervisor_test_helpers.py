@@ -242,23 +242,6 @@ def create_supplier_data(supplier_id: str, name: str, reliability: float) -> Dic
         "reliability": reliability
     }
 
-# Demo service testing helpers
-def create_demo_service_mocks():
-    """Create mocks for demo service tests."""
-    return {
-        # Mock: LLM service isolation for fast testing without API calls or rate limits
-        'llm_manager': AsyncMock(spec=LLMManager),
-        # Mock: Tool dispatcher isolation for agent testing without real tool execution
-        'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
-    }
-
-def create_demo_data(metrics: Dict[str, Any], recommendations: List[str]) -> Dict[str, Any]:
-    """Create demo data structure."""
-    return {
-        "metrics": metrics,
-        "recommendations": recommendations
-    }
-
 # Utility testing helpers
 async def run_concurrent_tasks(tasks: List, max_concurrent: int = 5) -> List[Any]:
     """Run tasks concurrently with limit."""

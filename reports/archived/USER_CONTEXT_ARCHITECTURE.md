@@ -1,14 +1,26 @@
-# User Context Architecture - Multi-Level Diagram
+# User Context Architecture - Factory-Based Isolation Patterns
 
 ## Overview
-This document presents the new user context architecture with Factory patterns and execution isolation at multiple levels of detail.
+This document serves as the authoritative guide to Netra's Factory-based isolation patterns that ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users.
+
+**Business Impact:** $500K+ ARR depends on this architecture working correctly - it enables the core chat functionality that delivers AI value to users.
+
+**Key Principles:**
+- **Factory Pattern Enforcement:** No direct instantiation of execution engines, WebSocket emitters, or tool dispatchers
+- **Request-Scoped Isolation:** Every request gets its own isolated execution context and components
+- **User-Specific Resource Limits:** Per-user concurrency control and automatic cleanup
+- **Real-Time WebSocket Events:** Critical events (agent_started, tool_executing, etc.) enable chat UX
+- **Immutable Context Design:** UserExecutionContext is frozen to prevent accidental state modification
+- **Comprehensive Validation:** Fail-fast validation prevents placeholder values and data corruption
 
 ## Related Documentation
-- **[Documentation Hub](./docs/index.md)** - Central documentation index
-- **[Agent Architecture Disambiguation Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies component relationships
-- **[Golden Agent Index](./docs/GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
-- **[WebSocket Thread Association Learning](./SPEC/learnings/websocket_thread_association_critical_20250903.xml)** - Critical thread routing patterns
+- **[Documentation Hub](../docs/index.md)** - Central documentation index
+- **[Agent Architecture Disambiguation Guide](../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies component relationships
+- **[Golden Agent Index](../docs/GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
+- **[WebSocket Thread Association Learning](../SPEC/learnings/websocket_thread_association_critical_20250903.xml)** - Critical thread routing patterns
 - **[Tool Dispatcher Migration Guide](./TOOL_DISPATCHER_MIGRATION_GUIDE.md)** - Migration to request-scoped dispatchers
+- **[Configuration Architecture](../docs/configuration_architecture.md)** - Environment and configuration management
+- **[String Literals Index](../docs/STRING_LITERALS_USAGE_GUIDE.md)** - Critical configuration values protection
 
 ## High-Level Architecture Overview
 
@@ -19,48 +31,71 @@ graph TB
         WS_Client[WebSocket Client]
     end
     
-    subgraph "API Gateway"
+    subgraph "API Gateway & Auth"
         Route[Agent Route Handler]
-        Auth[Authentication]
+        Auth[JWT Authentication]
+        CORS[CORS Middleware]
     end
     
-    subgraph "Factory Layer - Request Isolation"
+    subgraph "Factory Layer - Per-Request Isolation"
         EEF[ExecutionEngineFactory]
-        WSBF[WebSocketBridgeFactory]
-        TEF[ToolExecutorFactory]
+        WSBF[WebSocketBridgeFactory] 
+        UTDF[UnifiedToolDispatcherFactory]
+        UCF[UserContextFactory]
     end
     
-    subgraph "Execution Layer - Per-User"
-        IEE[IsolatedExecutionEngine]
+    subgraph "Execution Layer - User-Isolated Instances"
+        UEE[UserExecutionEngine]
         UWE[UserWebSocketEmitter]
         UTD[UnifiedToolDispatcher]
+        UEC[UserExecutionContext]
     end
     
-    subgraph "Infrastructure - Shared/Immutable"
+    subgraph "Agent Layer - Per-User State"
         AR[AgentRegistry]
+        AEC[AgentExecutionCore]
+        WSN[WebSocketNotifier]
+    end
+    
+    subgraph "Infrastructure - Shared Services"
         DB[Database Pool]
-        Cache[Cache Layer]
+        Redis[Redis Cache]
+        LLM[LLM Manager]
+        CP[Connection Pool]
     end
     
     UI --> Route
     WS_Client --> Route
     Route --> Auth
-    Auth --> EEF
+    Auth --> CORS
+    CORS --> UCF
     
-    EEF --> IEE
+    UCF --> EEF
+    EEF --> UEE
     WSBF --> UWE
-    TEF --> UTD
+    UTDF --> UTD
     
-    IEE --> AR
-    IEE --> DB
-    UWE --> Cache
+    UEE --> UEC
+    UEE --> AR
+    UEE --> AEC
+    
+    UWE --> WSN
+    UWE --> CP
+    
+    UTD --> UEC
+    
+    AR --> LLM
+    AEC --> DB
+    WSN --> Redis
     
     style EEF fill:#90EE90
-    style WSBF fill:#90EE90
-    style TEF fill:#90EE90
-    style IEE fill:#87CEEB
+    style WSBF fill:#90EE90  
+    style UTDF fill:#90EE90
+    style UCF fill:#90EE90
+    style UEE fill:#87CEEB
     style UWE fill:#87CEEB
     style UTD fill:#87CEEB
+    style UEC fill:#FFE4B5
 ```
 
 ## Detailed Factory Pattern Architecture
@@ -69,50 +104,62 @@ graph TB
 graph LR
     subgraph "Request Lifecycle"
         REQ[HTTP Request]
+        AUTH[JWT Authentication]
         CTX[UserExecutionContext Creation]
-        FACT[Factory Instantiation]
-        EXEC[Execution]
-        CLEAN[Cleanup]
+        FACT[Factory Orchestration]
+        EXEC[User-Isolated Execution]
+        CLEAN[Resource Cleanup]
     end
     
     subgraph "Factory Components"
         subgraph "ExecutionEngineFactory"
-            EEF_Config[ExecutionFactoryConfig]
-            EEF_Metrics[Factory Metrics]
-            EEF_Semaphores[User Semaphores]
-            EEF_Contexts[Active Contexts]
+            EEF_WS[WebSocket Bridge Validation]
+            EEF_Semaphores[User Concurrency Control]
+            EEF_Metrics[Engine Lifecycle Tracking]
+            EEF_Cleanup[Automatic Cleanup Loop]
         end
         
         subgraph "WebSocketBridgeFactory"
-            WSF_Config[WebSocketFactoryConfig]
-            WSF_Pool[Connection Pool]
-            WSF_Contexts[User WS Contexts]
-            WSF_Health[Health Monitor]
+            WSF_Context[UserWebSocketContext]
+            WSF_Pool[Connection Pool Access]
+            WSF_Emitter[Per-User Event Emitter]
+            WSF_Health[Connection Health Monitor]
         end
         
-        subgraph "ToolExecutorFactory"
-            TEF_Registry[Tool Registry]
-            TEF_Validator[Tool Validator]
-            TEF_Engine[Execution Engine]
-            TEF_Permissions[Permission Service]
+        subgraph "UnifiedToolDispatcherFactory"
+            UTDF_Registry[Unified Tool Registry]
+            UTDF_Permissions[User Permission Check]
+            UTDF_Events[WebSocket Event Integration]
+            UTDF_Isolation[Request-Scoped Isolation]
+        end
+        
+        subgraph "UserContextFactory"
+            UCF_Validation[Context Validation]
+            UCF_Isolation[Metadata Isolation]
+            UCF_Children[Child Context Creation]
+            UCF_Audit[Audit Trail Setup]
         end
     end
     
-    REQ --> CTX
+    REQ --> AUTH
+    AUTH --> CTX
     CTX --> FACT
-    FACT --> EEF_Config
-    FACT --> WSF_Config
-    FACT --> TEF_Registry
+    FACT --> EEF_WS
+    FACT --> WSF_Context
+    FACT --> UTDF_Registry
+    FACT --> UCF_Validation
     
     EEF_Metrics --> EXEC
     WSF_Health --> EXEC
-    TEF_Engine --> EXEC
+    UTDF_Events --> EXEC
+    UCF_Audit --> EXEC
     
     EXEC --> CLEAN
     
-    style EEF_Config fill:#FFE4B5
-    style WSF_Config fill:#FFE4B5
-    style TEF_Registry fill:#FFE4B5
+    style EEF_WS fill:#FFE4B5
+    style WSF_Context fill:#FFE4B5
+    style UTDF_Registry fill:#FFE4B5
+    style UCF_Validation fill:#FFE4B5
 ```
 
 ## UserExecutionContext Deep Dive
@@ -120,36 +167,97 @@ graph LR
 ```mermaid
 classDiagram
     class UserExecutionContext {
+        <<frozen dataclass>>
         +String user_id
-        +String request_id  
         +String thread_id
-        +String run_id
-        +String session_id
-        +DateTime created_at
-        +Dict metadata
+        +String run_id  
+        +String request_id
         +Optional~AsyncSession~ db_session
         +Optional~String~ websocket_client_id
+        +DateTime created_at
+        +Dict~String,Any~ agent_context
+        +Dict~String,Any~ audit_metadata
+        +Int operation_depth
+        +Optional~String~ parent_request_id
         
-        +create_child_context(operation_name)
-        +create_child_context(child_suffix)
-        +with_db_session(db_session)
-        +with_websocket_connection(connection_id)
-        +verify_isolation()
-        +to_dict()
-        +get_correlation_id()
-        +_validate_required_ids()
+        +from_request() UserExecutionContext
+        +from_fastapi_request() UserExecutionContext
+        +from_request_supervisor() UserExecutionContext
+        +create_child_context(operation_name) UserExecutionContext
+        +with_db_session(db_session) UserExecutionContext
+        +with_websocket_connection(connection_id) UserExecutionContext
+        +verify_isolation() Bool
+        +to_dict() Dict
+        +get_correlation_id() String
+        +get_audit_trail() Dict
+        +_validate_required_fields()
         +_validate_no_placeholder_values()
-        +_validate_metadata()
+        +_validate_id_consistency()
+        +_validate_metadata_isolation()
+        +_initialize_audit_trail()
     }
     
-    class ChildExecutionContext {
-        +String parent_request_id
-        +String operation_name
-        +Int operation_depth
-        +Dict inherited_metadata
+    class UserExecutionEngine {
+        +UserExecutionContext context
+        +AgentInstanceFactory agent_factory
+        +UserWebSocketEmitter websocket_emitter
+        +String engine_id
+        +DateTime created_at
+        +Dict active_runs
+        +Bool _shutdown
         
-        +get_parent_context()
-        +get_operation_hierarchy()
+        +execute_agent(context, state) AgentExecutionResult
+        +execute_agent_pipeline() AgentExecutionResult
+        +get_user_context() UserExecutionContext
+        +get_user_execution_stats() Dict
+        +is_active() Bool
+        +cleanup()
+    }
+    
+    class ExecutionEngineFactory {
+        +AgentWebSocketBridge _websocket_bridge
+        +Dict _active_engines
+        +AsyncLock _engine_lock
+        +Dict _factory_metrics
+        +Int _max_engines_per_user
+        +Float _engine_timeout_seconds
+        
+        +create_for_user(context) UserExecutionEngine
+        +user_execution_scope(context) AsyncContextManager
+        +cleanup_engine(engine)
+        +get_factory_metrics() Dict
+        +shutdown()
+    }
+    
+    class UserWebSocketEmitter {
+        +UserWebSocketContext user_context
+        +UserWebSocketConnection connection
+        +Dict delivery_config
+        +WebSocketBridgeFactory factory
+        +Dict _pending_events
+        +List _event_batch
+        +Bool _shutdown
+        
+        +notify_agent_started(agent_name, run_id)
+        +notify_agent_thinking(agent_name, run_id, thinking)
+        +notify_tool_executing(agent_name, run_id, tool_name, input)
+        +notify_tool_completed(agent_name, run_id, tool_name, output)
+        +notify_agent_completed(agent_name, run_id, result)
+        +notify_agent_error(agent_name, run_id, error)
+        +cleanup()
+    }
+    
+    class UnifiedToolDispatcher {
+        +UserExecutionContext user_context
+        +ToolRegistry tool_registry
+        +PermissionService permission_service
+        +WebSocketEventEmitter websocket_emitter
+        +DispatchStrategy strategy
+        
+        +dispatch_tool(request) ToolDispatchResponse
+        +validate_permissions(tool_name, user_id) Bool
+        +_execute_with_monitoring(tool, input)
+        +cleanup()
     }
     
     class InvalidContextError {
@@ -157,39 +265,22 @@ classDiagram
         +String message
     }
     
-    class IsolatedExecutionEngine {
-        +UserExecutionContext user_context
-        +AgentRegistry agent_registry
-        +UserWebSocketEmitter websocket_emitter
-        +Semaphore execution_semaphore
-        +Float execution_timeout
-        
-        +execute_agent_pipeline()
-        +_execute_with_monitoring()
-        +_init_user_components()
-        +cleanup()
-        +get_status()
+    class ContextIsolationError {
+        <<exception>>
+        +String message
     }
     
-    class UserWebSocketEmitter {
-        +UserWebSocketContext ws_context
-        +Queue event_queue
-        +List sent_events
-        +List failed_events
-        
-        +notify_agent_started()
-        +notify_agent_completed()
-        +notify_agent_error()
-        +send_event()
-        +cleanup()
-    }
+    UserExecutionContext --> InvalidContextError : throws
+    UserExecutionContext --> ContextIsolationError : throws
     
-    UserExecutionContext --> ChildExecutionContext : creates
-    UserExecutionContext ..> InvalidContextError : throws
-    ChildExecutionContext --> UserExecutionContext : inherits from
-    IsolatedExecutionEngine --> UserExecutionContext
-    IsolatedExecutionEngine --> UserWebSocketEmitter
-    UserWebSocketEmitter --> UserWebSocketContext
+    ExecutionEngineFactory --> UserExecutionEngine : creates
+    UserExecutionEngine --> UserExecutionContext : uses
+    UserExecutionEngine --> UserWebSocketEmitter : uses
+    
+    UserWebSocketEmitter --> UserExecutionContext : references
+    UnifiedToolDispatcher --> UserExecutionContext : uses
+    
+    UserExecutionContext --> UserExecutionContext : creates child
 ```
 
 ## Context Hierarchy and Child Context Flow
@@ -282,77 +373,103 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Client
-    participant API as API Route
-    participant Auth
+    participant API as Agent Route
+    participant Auth as JWT Auth
+    participant UCF as UserContextFactory
     participant EEF as ExecutionEngineFactory
-    participant WSF as WebSocketBridgeFactory
-    participant IEE as IsolatedExecutionEngine
+    participant WSBF as WebSocketBridgeFactory
+    participant UEE as UserExecutionEngine
     participant UWE as UserWebSocketEmitter
+    participant UTD as UnifiedToolDispatcher
     participant Agent
     participant SubAgent as Child Agent
     participant DB
     
-    Client->>API: POST /agent/execute
-    API->>Auth: Verify user token
-    Auth-->>API: user_id, session_id
+    Client->>API: POST /agents/execute
+    API->>Auth: Validate JWT token
+    Auth-->>API: user_id, permissions
     
     rect rgb(200, 255, 200)
-        Note over API,EEF: Context Creation Phase
-        API->>API: Create UserExecutionContext
-        Note right of API: user_id, request_id,<br/>thread_id, session_id, run_id
+        Note over API,UCF: User Context Creation Phase
+        API->>UCF: from_fastapi_request()
+        UCF->>UCF: Validate IDs and metadata isolation
+        UCF->>UCF: Initialize audit trail
+        UCF-->>API: UserExecutionContext
+        Note right of UCF: Immutable context with<br/>user_id, thread_id, run_id<br/>request_id, audit metadata
     end
     
     rect rgb(255, 230, 200)
-        Note over EEF,WSF: Factory Instantiation Phase
-        API->>EEF: create_execution_engine(context)
-        EEF->>EEF: Check resource limits
-        EEF->>EEF: Get/create user semaphore
+        Note over EEF,WSBF: Factory Orchestration Phase
+        API->>EEF: create_for_user(user_context)
+        EEF->>EEF: Enforce user concurrency limits (max 2)
+        EEF->>EEF: Validate WebSocket bridge availability
         
-        EEF->>WSF: create_user_emitter(user_id)
-        WSF->>WSF: Create UserWebSocketContext
-        WSF-->>EEF: UserWebSocketEmitter
+        EEF->>WSBF: create_user_emitter(user_id, thread_id, connection_id)
+        WSBF->>WSBF: Validate real WebSocket connection exists
+        WSBF->>WSBF: Create UserWebSocketContext with event queue
+        WSBF-->>EEF: UserWebSocketEmitter with delivery guarantees
         
-        EEF->>IEE: new IsolatedExecutionEngine
-        EEF-->>API: IsolatedExecutionEngine
+        EEF->>UEE: new UserExecutionEngine(context, websocket_emitter)
+        EEF->>EEF: Register in active_engines registry
+        EEF-->>API: UserExecutionEngine
     end
     
     rect rgb(200, 200, 255)
-        Note over IEE,Agent: Execution Phase
-        API->>IEE: execute_agent_pipeline()
-        IEE->>UWE: notify_agent_started()
-        UWE->>Client: WebSocket: agent_started
+        Note over UEE,Agent: User-Isolated Execution Phase
+        API->>UEE: execute_agent_pipeline()
+        UEE->>UWE: notify_agent_started(agent_name, run_id)
+        UWE->>UWE: Queue event in user-specific queue
+        UWE->>Client: WebSocket: agent_started event
         
-        IEE->>Agent: Execute with user context
-        Agent->>DB: Query with user isolation
-        DB-->>Agent: User-specific data
-
+        UEE->>UTD: Create request-scoped tool dispatcher
+        UTD->>UTD: Validate user permissions
+        
+        UEE->>Agent: Execute with isolated UserExecutionContext
+        Agent->>UTD: dispatch_tool("query_database", params)
+        UTD->>UWE: notify_tool_executing()
+        UWE->>Client: WebSocket: tool_executing event
+        UTD->>DB: Execute with user context isolation
+        DB-->>UTD: User-scoped results
+        UTD->>UWE: notify_tool_completed()
+        UWE->>Client: WebSocket: tool_completed event
+        UTD-->>Agent: Tool results
+        
         Note over Agent,SubAgent: Child Context Creation
-        Agent->>Agent: create_child_context("sub_operation")
+        Agent->>Agent: create_child_context("data_analysis")
+        Note right of Agent: Creates new request_id<br/>operation_depth = 1<br/>parent_request_id set
         Agent->>SubAgent: Execute with child context
-        SubAgent->>UWE: notify_agent_started(child_request_id)
+        SubAgent->>UWE: notify_agent_started(child_run_id)
         UWE->>Client: WebSocket: child agent_started
         
-        SubAgent->>DB: Query with child context isolation
-        DB-->>SubAgent: Child-specific data
-        SubAgent->>UWE: notify_agent_completed(child_request_id)
+        SubAgent->>UTD: dispatch_tool() with child context
+        UTD->>DB: Query with child context isolation
+        DB-->>UTD: Child-scoped data
+        UTD-->>SubAgent: Child results
+        SubAgent->>UWE: notify_agent_completed(child_run_id)
         UWE->>Client: WebSocket: child agent_completed
-        SubAgent-->>Agent: Child results
-
-        Agent-->>IEE: Result
+        SubAgent-->>Agent: Child operation results
         
-        IEE->>UWE: notify_agent_completed()
-        UWE->>Client: WebSocket: agent_completed
-        IEE-->>API: AgentExecutionResult
+        Agent->>UWE: notify_agent_thinking("Analyzing results...")
+        UWE->>Client: WebSocket: agent_thinking event
+        
+        Agent-->>UEE: AgentExecutionResult
+        UEE->>UWE: notify_agent_completed(agent_name, run_id)
+        UWE->>Client: WebSocket: agent_completed event
+        UEE-->>API: Final AgentExecutionResult
     end
     
     rect rgb(255, 200, 200)
-        Note over API,UWE: Cleanup Phase
-        API->>IEE: cleanup()
-        IEE->>IEE: Clear active_runs (including child contexts)
-        IEE->>UWE: cleanup()
-        UWE->>UWE: Clear event_queue
-        IEE->>EEF: cleanup_context(request_id)
-        EEF->>EEF: Remove from active_contexts
+        Note over API,UWE: Resource Cleanup Phase
+        API->>UEE: cleanup()
+        UEE->>UEE: Clear active_runs (all contexts)
+        UEE->>UTD: cleanup()
+        UTD->>UTD: Clear tool registry and permissions
+        UEE->>UWE: cleanup()
+        UWE->>UWE: Signal shutdown and drain event queue
+        UWE->>UWE: Cancel background processor task
+        UEE->>EEF: cleanup_engine(engine)
+        EEF->>EEF: Remove from active_engines registry
+        EEF->>EEF: Update factory metrics
     end
 ```
 
@@ -360,59 +477,79 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph "UnifiedToolDispatcher Architecture"
-        UTD[UnifiedToolDispatcher]
+    subgraph "UnifiedToolDispatcherFactory - Request-Scoped Creation"
+        UTDF[UnifiedToolDispatcherFactory]
         
-        subgraph "Core Components"
-            TR[ToolRegistry]
-            TV[ToolValidator]
-            TEE[ToolExecutionEngine]
-            PS[PermissionService]
+        subgraph "Factory Validation"
+            FV_AUTH[Authentication Check]
+            FV_PERM[Permission Validation]
+            FV_CONTEXT[Context Isolation Verify]
+            FV_STRATEGY[Dispatch Strategy Selection]
         end
         
-        subgraph "User Context"
-            UC[UserExecutionContext]
-            UID[user_id]
-            RID[request_id]
-            TID[thread_id]
-        end
-        
-        subgraph "WebSocket Integration"
-            WSE[WebSocketEventEmitter]
-            EQ[Event Queue]
-            EN[Event Notifications]
-        end
-        
-        subgraph "Tool Execution"
-            TE[Tool Execute]
-            TM[Tool Metrics]
-            TL[Tool Logging]
-            TC[Tool Cleanup]
+        subgraph "Per-Request Tool Dispatcher Instance"
+            UTD[UnifiedToolDispatcher]
+            
+            subgraph "Request-Scoped Components"
+                UTR[Unified Tool Registry]
+                PS[Permission Service]
+                WEE[WebSocket Event Emitter]
+                TM[Tool Metrics Collector]
+            end
+            
+            subgraph "User Context Integration"
+                UEC[UserExecutionContext]
+                UCR[User Context Resolver]
+                ATE[Audit Trail Enhancer]
+            end
+            
+            subgraph "Execution Pipeline"
+                TV[Tool Validator]
+                TEE[Tool Execution Engine]
+                EMH[Error Management Handler]
+                RCM[Resource Cleanup Manager]
+            end
         end
     end
     
-    UTD --> TR
+    UTDF --> FV_AUTH
+    UTDF --> FV_PERM
+    UTDF --> FV_CONTEXT
+    UTDF --> FV_STRATEGY
+    
+    FV_AUTH --> UTD
+    FV_PERM --> UTD
+    FV_CONTEXT --> UTD
+    FV_STRATEGY --> UTD
+    
+    UTD --> UTR
+    UTD --> PS
+    UTD --> WEE
+    UTD --> TM
+    
+    UTD --> UEC
+    UTD --> UCR
+    UTD --> ATE
+    
     UTD --> TV
     UTD --> TEE
-    UTD --> PS
+    UTD --> EMH
+    UTD --> RCM
     
-    UTD --> UC
-    UC --> UID
-    UC --> RID
-    UC --> TID
+    UEC --> UCR
+    UCR --> ATE
     
-    UTD --> WSE
-    WSE --> EQ
-    WSE --> EN
+    TV --> TEE
+    TEE --> WEE
+    WEE --> TM
     
-    TEE --> TE
-    TEE --> TM
-    TEE --> TL
-    TEE --> TC
+    TEE --> EMH
+    EMH --> RCM
     
-    style UTD fill:#DDA0DD
-    style UC fill:#98FB98
-    style WSE fill:#FFB6C1
+    style UTDF fill:#DDA0DD
+    style UTD fill:#98FB98
+    style UEC fill:#FFE4B5
+    style WEE fill:#FFB6C1
 ```
 
 ## Resource Management & Lifecycle
@@ -508,6 +645,170 @@ graph LR
     WS_M --> WS_HB
 ```
 
+## Multi-User Concurrent Execution Patterns
+
+```mermaid
+graph TB
+    subgraph "Concurrent User Isolation - 10+ Users"
+        subgraph "User A Request Flow"
+            UA_CTX[UserExecutionContext A]
+            UA_ENG[UserExecutionEngine A]
+            UA_WS[UserWebSocketEmitter A]
+            UA_TOOLS[ToolDispatcher A]
+        end
+        
+        subgraph "User B Request Flow (Simultaneous)"
+            UB_CTX[UserExecutionContext B]
+            UB_ENG[UserExecutionEngine B]
+            UB_WS[UserWebSocketEmitter B]
+            UB_TOOLS[ToolDispatcher B]
+        end
+        
+        subgraph "User C Request Flow (Simultaneous)"
+            UC_CTX[UserExecutionContext C]
+            UC_ENG[UserExecutionEngine C]
+            UC_WS[UserWebSocketEmitter C]
+            UC_TOOLS[ToolDispatcher C]
+        end
+        
+        subgraph "Shared Infrastructure (Thread-Safe)"
+            DB_POOL[Database Connection Pool]
+            REDIS[Redis Cache]
+            LLM_MGR[LLM Manager]
+            AG_REG[Agent Registry]
+        end
+        
+        subgraph "Factory Resource Management"
+            EEF_SEM[User Semaphores<br/>Max 2 per user]
+            WSF_POOL[WebSocket Connection Pool]
+            CLEANUP[Background Cleanup Loop]
+            METRICS[Factory Metrics]
+        end
+    end
+    
+    UA_CTX --> UA_ENG
+    UA_ENG --> UA_WS
+    UA_ENG --> UA_TOOLS
+    
+    UB_CTX --> UB_ENG
+    UB_ENG --> UB_WS
+    UB_ENG --> UB_TOOLS
+    
+    UC_CTX --> UC_ENG
+    UC_ENG --> UC_WS
+    UC_ENG --> UC_TOOLS
+    
+    UA_ENG --> DB_POOL
+    UB_ENG --> DB_POOL
+    UC_ENG --> DB_POOL
+    
+    UA_WS --> REDIS
+    UB_WS --> REDIS
+    UC_WS --> REDIS
+    
+    UA_TOOLS --> LLM_MGR
+    UB_TOOLS --> LLM_MGR
+    UC_TOOLS --> LLM_MGR
+    
+    UA_ENG --> AG_REG
+    UB_ENG --> AG_REG
+    UC_ENG --> AG_REG
+    
+    EEF_SEM --> UA_ENG
+    EEF_SEM --> UB_ENG
+    EEF_SEM --> UC_ENG
+    
+    WSF_POOL --> UA_WS
+    WSF_POOL --> UB_WS
+    WSF_POOL --> UC_WS
+    
+    CLEANUP --> METRICS
+    
+    style UA_CTX fill:#FFE4E1
+    style UB_CTX fill:#E1F5FE
+    style UC_CTX fill:#E8F5E8
+    style EEF_SEM fill:#FFF3E0
+    style WSF_POOL fill:#F3E5F5
+```
+
+## Agent Execution Order and WebSocket Event Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant WS as WebSocket
+    participant API
+    participant UEE as UserExecutionEngine
+    participant Data as DataAgent
+    participant Opt as OptimizationAgent
+    participant Rep as ReportAgent
+    
+    Note over User,Rep: CRITICAL: Agent Execution Order - Data BEFORE Optimization
+    
+    User->>API: Execute multi-agent workflow
+    API->>UEE: execute_agent_pipeline(["data", "optimization", "report"])
+    
+    rect rgb(200, 255, 200)
+        Note over UEE,Data: Phase 1: Data Analysis (Required First)
+        UEE->>WS: agent_started("DataAgent")
+        WS->>User: "Data analysis starting..."
+        
+        UEE->>Data: execute() with UserExecutionContext
+        Data->>WS: agent_thinking("Analyzing data patterns...")
+        WS->>User: "DataAgent is analyzing patterns"
+        
+        Data->>WS: tool_executing("database_query")
+        WS->>User: "DataAgent is querying database"
+        Data->>WS: tool_completed("database_query", results)
+        WS->>User: "Database query completed"
+        
+        Data-->>UEE: DataAnalysisResult
+        UEE->>WS: agent_completed("DataAgent", results)
+        WS->>User: "Data analysis complete"
+    end
+    
+    rect rgb(255, 230, 200)
+        Note over UEE,Opt: Phase 2: Optimization (Depends on Data)
+        UEE->>WS: agent_started("OptimizationAgent")
+        WS->>User: "Optimization starting..."
+        
+        UEE->>Opt: execute() with data results + UserExecutionContext
+        Opt->>WS: agent_thinking("Optimizing based on data...")
+        WS->>User: "OptimizationAgent is optimizing"
+        
+        Opt->>WS: tool_executing("optimization_engine")
+        WS->>User: "Running optimization algorithms"
+        Opt->>WS: tool_completed("optimization_engine", optimizations)
+        WS->>User: "Optimization complete"
+        
+        Opt-->>UEE: OptimizationResult
+        UEE->>WS: agent_completed("OptimizationAgent", optimizations)
+        WS->>User: "Optimization analysis complete"
+    end
+    
+    rect rgb(200, 200, 255)
+        Note over UEE,Rep: Phase 3: Report Generation (Final Phase)
+        UEE->>WS: agent_started("ReportAgent")
+        WS->>User: "Report generation starting..."
+        
+        UEE->>Rep: execute() with data + optimization results + UserExecutionContext
+        Rep->>WS: agent_thinking("Generating comprehensive report...")
+        WS->>User: "ReportAgent is generating report"
+        
+        Rep->>WS: tool_executing("report_generator")
+        WS->>User: "Creating final report"
+        Rep->>WS: tool_completed("report_generator", report)
+        WS->>User: "Report generation complete"
+        
+        Rep-->>UEE: ComprehensiveReport
+        UEE->>WS: agent_completed("ReportAgent", final_report)
+        WS->>User: "Complete workflow finished"
+    end
+    
+    UEE-->>API: Final workflow results
+    API-->>User: Complete response with all results
+```
+
 ## Security & Isolation Boundaries
 
 ```mermaid
@@ -561,32 +862,99 @@ graph TB
     style SAN fill:#95E77E
 ```
 
-## Key Benefits of New Architecture
+## Critical WebSocket Events for Chat Business Value
 
-1. **Complete User Isolation**: Each request gets its own execution context
-2. **No Shared State**: Eliminates race conditions and cross-user data leakage
-3. **Resource Management**: Per-user limits prevent resource exhaustion
-4. **Clean Lifecycle**: Automatic cleanup prevents memory leaks
-5. **Observable**: Comprehensive metrics for monitoring
-6. **Scalable**: Supports 10+ concurrent users reliably
-7. **Secure**: Multiple isolation boundaries and permission checks
-8. **Maintainable**: Single source of truth, clear separation of concerns
+```mermaid
+flowchart LR
+    subgraph "Required WebSocket Events - Business Critical"
+        AS[agent_started]
+        AT[agent_thinking]
+        TE[tool_executing]
+        TC[tool_completed]
+        AC[agent_completed]
+        AE[agent_error]
+    end
+    
+    subgraph "User Experience Impact"
+        AS --> UX1["User sees AI started"]
+        AT --> UX2["Real-time reasoning visibility"]
+        TE --> UX3["Tool usage transparency"]
+        TC --> UX4["Tool results display"]
+        AC --> UX5["Final response ready"]
+        AE --> UX6["Error handling"]
+    end
+    
+    subgraph "Business Value"
+        UX1 --> BV1["Engagement"]
+        UX2 --> BV2["Trust Building"]
+        UX3 --> BV3["Process Transparency"]
+        UX4 --> BV4["Actionable Insights"]
+        UX5 --> BV5["Completion Clarity"]
+        UX6 --> BV6["Reliability"]
+    end
+    
+    style AS fill:#90EE90
+    style AT fill:#87CEEB
+    style TE fill:#DDA0DD
+    style TC fill:#F0E68C
+    style AC fill:#FFA07A
+    style AE fill:#FFB6C1
+```
+
+**MISSION CRITICAL:** These WebSocket events MUST be sent during agent execution or chat functionality is broken. Missing events = lost $500K+ ARR.
+
+## Key Benefits of Factory-Based Architecture
+
+1. **Complete User Isolation**: Each request gets its own UserExecutionContext and execution engine
+2. **No Shared State**: Factory pattern eliminates singleton-based race conditions and cross-user data leakage
+3. **Resource Management**: Per-user concurrency limits (max 2 engines per user) prevent resource exhaustion
+4. **Clean Lifecycle**: ExecutionEngineFactory automatic cleanup loop prevents memory leaks
+5. **Observable**: Comprehensive factory metrics and WebSocket event monitoring
+6. **Scalable**: Supports 10+ concurrent users with bounded resource usage
+7. **Secure**: Multiple isolation boundaries, request-scoped permission checks, and audit trails
+8. **Maintainable**: Single source of truth factories, clear separation of concerns
 9. **Hierarchical Context Management**: Child contexts enable sub-agent isolation while maintaining traceability
-10. **Operation Traceability**: Full parent-child relationship tracking with metadata inheritance
+10. **Operation Traceability**: Full parent-child relationship tracking with metadata inheritance and audit trails
 11. **Flexible Agent Orchestration**: Supports complex multi-level agent workflows with proper isolation
+12. **Real-time User Feedback**: Per-user WebSocket emitters ensure correct event delivery
+13. **Request-Scoped Tools**: UnifiedToolDispatcherFactory ensures tool execution isolation
+14. **Fail-Fast Validation**: Comprehensive context validation prevents placeholder values and data corruption
 
 ## Migration from Singleton Pattern
 
-The new architecture replaces dangerous singleton patterns:
-- `ExecutionEngine` singleton → `IsolatedExecutionEngine` per request
-- `WebSocketBridge` singleton → `UserWebSocketEmitter` per user
-- Global tool dispatcher → `UnifiedToolDispatcher` with user context
-- Shared state dictionaries → Isolated `UserExecutionContext`
+The factory-based architecture replaces dangerous singleton patterns:
+- `ExecutionEngine` singleton → `UserExecutionEngine` per request via `ExecutionEngineFactory`
+- `WebSocketBridge` singleton → `UserWebSocketEmitter` per user via `WebSocketBridgeFactory`
+- Global tool dispatcher → Request-scoped `UnifiedToolDispatcher` via `UnifiedToolDispatcherFactory`
+- Shared state dictionaries → Immutable frozen `UserExecutionContext` with deep-copy isolation
+- Global agent registry → Per-request agent instances with user context integration
 
 ## Factory Configuration
 
 All factories support environment-based configuration:
-- `EXECUTION_MAX_CONCURRENT_PER_USER`: User concurrency limit (default: 5)
-- `EXECUTION_TIMEOUT_SECONDS`: Execution timeout (default: 30s)
+
+### ExecutionEngineFactory Configuration
+- `max_engines_per_user`: User concurrency limit (default: 2)
+- `engine_timeout_seconds`: Engine lifetime limit (default: 300s / 5 minutes)
+- `cleanup_interval`: Background cleanup frequency (default: 60s)
+
+### WebSocketBridgeFactory Configuration
 - `WEBSOCKET_MAX_EVENTS_PER_USER`: Event queue size (default: 1000)
-- `WEBSOCKET_HEARTBEAT_INTERVAL`: Connection health check (default: 30s)
+- `WEBSOCKET_EVENT_TIMEOUT`: Event timeout (default: 30.0s)
+- `WEBSOCKET_HEARTBEAT_INTERVAL`: Connection health check (default: 30.0s)
+- `WEBSOCKET_MAX_RECONNECT_ATTEMPTS`: Max reconnection attempts (default: 3)
+- `WEBSOCKET_DELIVERY_RETRIES`: Event delivery retries (default: 3)
+- `WEBSOCKET_DELIVERY_TIMEOUT`: Delivery timeout (default: 5.0s)
+- `WEBSOCKET_ENABLE_COMPRESSION`: Event compression (default: true)
+- `WEBSOCKET_ENABLE_BATCHING`: Event batching (default: true)
+
+### UnifiedToolDispatcherFactory Configuration
+- Request-scoped instances (no global configuration needed)
+- Per-request permission validation
+- User context-based security boundaries
+
+### UserExecutionContext Validation
+- Forbidden placeholder values: `registry`, `placeholder`, `default`, `temp`, `none`, `null`, etc.
+- Forbidden patterns: `placeholder_`, `registry_`, `default_`, `temp_`, `example_`, etc.
+- ID format validation using UnifiedIDManager
+- Metadata isolation with deep-copy protection

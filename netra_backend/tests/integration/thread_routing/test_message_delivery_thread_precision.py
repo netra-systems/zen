@@ -28,7 +28,7 @@ from unittest.mock import patch
 from collections import defaultdict
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.fixtures.lightweight_services import lightweight_services_fixture
 from test_framework.fixtures.isolated_environment import isolated_env
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
@@ -39,7 +39,6 @@ from shared.types.core_types import (
 
 # Full stack components for message routing
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.websocket.message_handler import MessageHandlerService
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.utils import generate_websocket_id
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -67,17 +66,17 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_precise_message_delivery_to_correct_threads(self, real_services_fixture, isolated_env):
+    async def test_precise_message_delivery_to_correct_threads(self, lightweight_services_fixture, isolated_env):
         """Test messages are delivered only to the correct target thread."""
         
         # Check infrastructure availability
-        if not real_services_fixture["database_available"]:
-            pytest.skip("Real database not available - run with --real-services")
+        if not lightweight_services_fixture["database_available"]:
+            pytest.skip("Database not available")
         
         if not redis:
             pytest.skip("Redis not available - install redis package")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -100,7 +99,6 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
         # Create users and threads
         users_threads_data = {}
         thread_service = ThreadService()
-        message_handler = MessageHandlerService()
         
         for user_idx in range(user_count):
             user_id = ensure_user_id(str(uuid.uuid4()))
@@ -255,13 +253,13 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_message_ordering_and_sequence_integrity(self, real_services_fixture, isolated_env):
+    async def test_thread_message_ordering_and_sequence_integrity(self, lightweight_services_fixture, isolated_env):
         """Test message ordering and sequence integrity within threads."""
         
-        if not real_services_fixture["database_available"]:
-            pytest.skip("Real database not available - run with --real-services")
+        if not lightweight_services_fixture["database_available"]:
+            pytest.skip("Database not available")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -499,17 +497,17 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_full_stack_message_routing_websocket_integration(self, real_services_fixture, isolated_env):
+    async def test_full_stack_message_routing_websocket_integration(self, lightweight_services_fixture, isolated_env):
         """Test end-to-end message routing through WebSocket to database with thread precision."""
         
         # Check all infrastructure components
-        if not real_services_fixture["database_available"]:
-            pytest.skip("Real database not available - run with --real-services")
+        if not lightweight_services_fixture["database_available"]:
+            pytest.skip("Database not available")
         
         if not redis:
             pytest.skip("Redis not available - install redis package")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         

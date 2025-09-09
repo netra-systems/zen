@@ -394,15 +394,42 @@ class AgentWebSocketBridge(MonitorableComponent):
             return False
     
     async def _start_health_monitoring(self) -> None:
-        """Start background health monitoring task."""
+        """Start background health monitoring task with enhanced error handling."""
         if self._health_check_task is None or self._health_check_task.done():
             self._health_check_task = asyncio.create_task(self._health_monitoring_loop())
-            # Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"
-            self._health_check_task.add_done_callback(
-                lambda t: logger.error(f"Health monitoring failed: {t.exception()}") 
-                if t.exception() else logger.debug("Health monitoring task completed")
-            )
-            logger.debug("Health monitoring task started")
+            
+            def handle_health_task_completion(task):
+                """Handle health monitoring task completion/failure safely."""
+                try:
+                    if task.exception():
+                        logger.error(f"Health monitoring failed: {task.exception()}", exc_info=True)
+                        # Don't let health monitoring failure crash the service - critical fix for line 403 errors
+                        # Schedule restart after delay to recover from transient issues
+                        asyncio.create_task(self._restart_health_monitoring_after_delay())
+                    else:
+                        logger.debug("Health monitoring task completed normally")
+                except Exception as callback_error:
+                    # Ultimate safety net - health monitoring callback cannot crash service (503 error fix)
+                    logger.error(f"CRITICAL: Health monitoring callback error: {callback_error}")
+                    try:
+                        # Attempt graceful recovery without crashing the service
+                        asyncio.create_task(self._restart_health_monitoring_after_delay(delay=60))
+                    except Exception:
+                        # Last resort - log but don't propagate to prevent service crash
+                        logger.critical("Health monitoring system failure - operating without health checks")
+            
+            self._health_check_task.add_done_callback(handle_health_task_completion)
+            logger.debug("Health monitoring task started with enhanced error handling")
+    
+    async def _restart_health_monitoring_after_delay(self, delay: int = 30) -> None:
+        """Restart health monitoring after failure with delay to prevent tight restart loops."""
+        try:
+            await asyncio.sleep(delay)
+            logger.info(f"Restarting health monitoring after {delay}s delay following failure")
+            await self._start_health_monitoring()
+        except Exception as e:
+            # Even restart attempts should not crash the service
+            logger.error(f"Failed to restart health monitoring: {e}")
     
     async def health_check(self) -> HealthStatus:
         """

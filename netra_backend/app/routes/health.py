@@ -881,3 +881,127 @@ async def get_redis_health() -> Dict[str, Any]:
                 "ping": False
             }
         }
+
+
+@router.get("/startup")
+@router.head("/startup")
+async def startup_health(request: Request, db: AsyncSession = Depends(get_request_scoped_db_session)) -> Dict[str, Any]:
+    """
+    Comprehensive startup health check for Cloud Run startup probe.
+    
+    This endpoint is specifically designed for Cloud Run startup probes and implements
+    a more thorough readiness check than the standard health endpoint. It verifies:
+    1. Database initialization and table existence
+    2. Redis connection stability
+    3. WebSocket manager readiness
+    4. Service startup completion
+    
+    CRITICAL: This endpoint fixes the Cloud Run 503 WebSocket errors by ensuring
+    proper service initialization timing and prevents health checks from starting
+    before all required services are ready.
+    
+    Returns 200 when ready, 503 when still initializing or unhealthy.
+    """
+    logger.info("Startup health check initiated")
+    
+    try:
+        # Check if basic health is available first
+        basic_health = await health_interface.get_health_status(HealthLevel.BASIC)
+        
+        if not basic_health.get("healthy", False):
+            logger.warning(f"Basic health check failed: {basic_health}")
+            return Response(
+                content=json.dumps({
+                    "status": "not_ready",
+                    "reason": "basic_health_failed", 
+                    "details": basic_health,
+                    "timestamp": time.time()
+                }),
+                status_code=503,
+                headers={"Content-Type": "application/json"}
+            )
+        
+        # Enhanced startup checks for Cloud Run environment
+        startup_checks = {}
+        all_ready = True
+        
+        # 1. Database readiness with retry logic (critical for 503 fix)
+        try:
+            # Verify database tables exist (prevents startup failures from missing migrations)
+            await asyncio.wait_for(_check_database_connection(db), timeout=10.0)
+            startup_checks["database"] = {"status": "ready", "message": "Database connection and tables verified"}
+        except Exception as e:
+            logger.error(f"Database startup check failed: {e}")
+            startup_checks["database"] = {"status": "not_ready", "error": str(e)}
+            all_ready = False
+        
+        # 2. Redis connection stability (prevents race conditions)
+        try:
+            await asyncio.wait_for(_check_redis_connection(), timeout=5.0)
+            startup_checks["redis"] = {"status": "ready", "message": "Redis connection stable"}
+        except Exception as e:
+            logger.warning(f"Redis startup check failed: {e}")
+            startup_checks["redis"] = {"status": "not_ready", "error": str(e)}
+            # Redis is non-critical for startup in some environments
+            if unified_config_manager.get_config().environment not in ["staging", "development"]:
+                all_ready = False
+        
+        # 3. WebSocket readiness check (prevents 503 WebSocket upgrade failures)
+        try:
+            websocket_status = await _check_gcp_websocket_readiness()
+            if websocket_status.get("websocket_ready", False):
+                startup_checks["websocket"] = {"status": "ready", "message": "WebSocket services initialized"}
+            else:
+                startup_checks["websocket"] = {"status": "not_ready", "details": websocket_status}
+                all_ready = False
+        except Exception as e:
+            logger.error(f"WebSocket startup check failed: {e}")
+            startup_checks["websocket"] = {"status": "not_ready", "error": str(e)}
+            all_ready = False
+        
+        # 4. Service startup completion check
+        try:
+            from netra_backend.app.smd import SMD
+            if hasattr(SMD, '_startup_complete') and SMD._startup_complete:
+                startup_checks["startup_module"] = {"status": "ready", "message": "Service startup complete"}
+            else:
+                startup_checks["startup_module"] = {"status": "not_ready", "message": "Service startup in progress"}
+                all_ready = False
+        except Exception as e:
+            logger.warning(f"Startup module check failed: {e}")
+            startup_checks["startup_module"] = {"status": "unknown", "error": str(e)}
+        
+        # Build response
+        if all_ready:
+            logger.info("Startup health check passed - service ready")
+            return {
+                "status": "ready",
+                "message": "Service fully initialized and ready for traffic",
+                "timestamp": time.time(),
+                "checks": startup_checks,
+                "version": "1.0.0"
+            }
+        else:
+            logger.warning(f"Startup health check failed - service not ready: {startup_checks}")
+            return Response(
+                content=json.dumps({
+                    "status": "not_ready", 
+                    "message": "Service initialization in progress",
+                    "timestamp": time.time(),
+                    "checks": startup_checks
+                }),
+                status_code=503,
+                headers={"Content-Type": "application/json"}
+            )
+            
+    except Exception as e:
+        logger.error(f"Startup health check exception: {e}", exc_info=True)
+        return Response(
+            content=json.dumps({
+                "status": "error",
+                "message": f"Startup health check failed: {str(e)}",
+                "timestamp": time.time()
+            }),
+            status_code=503,
+            headers={"Content-Type": "application/json"}
+        )

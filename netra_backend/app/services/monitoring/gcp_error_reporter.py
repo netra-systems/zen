@@ -10,6 +10,7 @@ CRITICAL: This module ensures errors are visible in GCP Cloud Run error reportin
 """
 
 import asyncio
+import logging
 import os
 import sys
 import traceback
@@ -36,7 +37,7 @@ except ImportError:
 
 
 class GCPErrorReporter:
-    """Singleton GCP Error Reporter for centralized error reporting."""
+    """Singleton GCP Error Reporter for centralized error reporting with Client Manager integration."""
     
     _instance: Optional['GCPErrorReporter'] = None
     _initialized: bool = False
@@ -49,6 +50,7 @@ class GCPErrorReporter:
     def __init__(self):
         if not self._initialized:
             self.client: Optional[error_reporting.Client] = None
+            self.client_manager: Optional['GCPClientManager'] = None  # Integration with Client Manager
             self.enabled = self._should_enable()
             self._rate_limit_counter = 0
             self._rate_limit_max = 100  # Max errors per minute
@@ -58,6 +60,11 @@ class GCPErrorReporter:
                 self._initialize_client()
             
             GCPErrorReporter._initialized = True
+    
+    def set_client_manager(self, client_manager: 'GCPClientManager') -> None:
+        """Set the client manager for proper lifecycle management."""
+        self.client_manager = client_manager
+        logger.debug("GCP Client Manager set for error reporter")
     
     def _should_enable(self) -> bool:
         """Check if GCP error reporting should be enabled."""
@@ -183,7 +190,7 @@ class GCPErrorReporter:
     async def report_error(self, 
                           error: Exception, 
                           context: Optional[Dict[str, Any]] = None) -> bool:
-        """Report an error to GCP Error Reporting with business context.
+        """Report an error to GCP Error Reporting with enhanced client manager integration.
         
         Args:
             error: The exception to report
@@ -192,7 +199,7 @@ class GCPErrorReporter:
         Returns:
             bool: True if error was reported successfully, False otherwise
         """
-        if not self.enabled or not self.client:
+        if not self.enabled:
             logger.debug(f"GCP error reporting not enabled, skipping: {type(error).__name__}")
             return False
         
@@ -201,6 +208,16 @@ class GCPErrorReporter:
             return False
         
         try:
+            # Use client manager if available for better client lifecycle management
+            if self.client_manager:
+                client = await self.client_manager.get_error_reporting_client_async()
+            else:
+                client = self.client
+            
+            if not client:
+                logger.debug("No GCP client available for error reporting")
+                return False
+            
             # Extract context information
             user_id = None
             http_context = None
@@ -211,6 +228,10 @@ class GCPErrorReporter:
                 http_context = context.get('http_context')
                 # Copy all context as extra context
                 extra_context.update(context)
+            
+            # Add enhanced context for client manager integration
+            extra_context['client_source'] = 'client_manager' if self.client_manager else 'direct'
+            extra_context['integration_version'] = 'v2_enhanced'
             
             # Report the exception with context
             self.report_exception(
@@ -226,6 +247,81 @@ class GCPErrorReporter:
         except Exception as e:
             logger.error(f"Failed to report error to GCP: {e}")
             return False
+
+
+class GCPErrorLoggingHandler(logging.Handler):
+    """Custom logging handler that integrates with GCP Error Reporting.
+    
+    This handler intercepts ERROR and CRITICAL level logs and automatically
+    creates GCP Error objects with full context preservation.
+    """
+    
+    def __init__(self, gcp_reporter: GCPErrorReporter):
+        super().__init__()
+        self.gcp_reporter = gcp_reporter
+        self.setLevel(logging.ERROR)  # Only handle ERROR and above
+    
+    def emit(self, record: logging.LogRecord):
+        """Convert log record to GCP Error and report.
+        
+        Args:
+            record: Python logging record to process
+        """
+        if not self.gcp_reporter.enabled or not self.gcp_reporter.client:
+            return
+        
+        try:
+            # Create exception from log record
+            if record.exc_info:
+                # Use actual exception if available
+                exception = record.exc_info[1]
+            else:
+                # Create synthetic exception for the message
+                class LoggedError(Exception):
+                    pass
+                exception = LoggedError(record.getMessage())
+            
+            # Extract context from log record
+            extra_context = {
+                'logger_name': record.name,
+                'log_level': record.levelname,
+                'filename': record.filename,
+                'line_number': record.lineno,
+                'function_name': record.funcName,
+                'module': record.module,
+                'integration_source': 'gcp_logging_handler'
+            }
+            
+            # Add any extra fields from log record
+            if hasattr(record, '__dict__'):
+                for key, value in record.__dict__.items():
+                    if key not in ['name', 'levelname', 'levelno', 'pathname', 'filename',
+                                   'module', 'lineno', 'funcName', 'created', 'msecs',
+                                   'relativeCreated', 'thread', 'threadName', 'processName',
+                                   'process', 'msg', 'args', 'exc_info', 'exc_text', 'stack_info']:
+                        extra_context[key] = str(value) if value is not None else None
+            
+            # Get context from context variable
+            ctx = request_context.get()
+            user_id = ctx.get('user_id')
+            http_context = ctx.get('http_context')
+            
+            # Merge context
+            if ctx:
+                extra_context.update(ctx)
+            
+            # Report to GCP with full context
+            self.gcp_reporter.report_exception(
+                exception=exception,
+                user=user_id,
+                http_context=http_context,
+                extra_context=extra_context
+            )
+            
+        except Exception as e:
+            # Don't let error reporting failures break logging
+            # Use direct loguru to avoid recursion
+            logger.error(f"GCP Logging Handler failed to report error: {e}")
 
 
 # Singleton instance
@@ -349,7 +445,7 @@ def gcp_reportable(reraise: bool = True,
 
 
 def install_exception_handlers(app=None):
-    """Install global exception handlers for GCP error reporting.
+    """Install global exception handlers and logging handler for GCP error reporting.
     
     Args:
         app: Optional FastAPI/Starlette app instance
@@ -398,6 +494,15 @@ def install_exception_handlers(app=None):
     except RuntimeError:
         # No event loop yet, will be set up later
         pass
+    
+    # Install GCP Logging Handler to Python's logging system
+    # This ensures logger.error() calls create GCP Error objects
+    reporter = get_error_reporter()
+    if reporter.enabled:
+        gcp_handler = GCPErrorLoggingHandler(reporter)
+        # Add to root logger to catch all logger.error() calls
+        logging.getLogger().addHandler(gcp_handler)
+        logger.info("GCP Logging Handler installed for Python logging integration")
     
     # If FastAPI/Starlette app provided, add middleware
     if app:

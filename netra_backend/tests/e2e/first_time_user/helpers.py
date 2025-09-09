@@ -19,7 +19,6 @@ import pytest
 
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.services.cost_calculator import CostCalculatorService
-from netra_backend.app.services.demo_service import DemoService
 
 @dataclass
 class FirstTimeUserMetrics:
@@ -39,7 +38,6 @@ class FirstTimeUserTestHelpers:
         """Create comprehensive conversion test environment"""
         env = {
             "auth_client": FirstTimeUserTestHelpers._create_auth_client_mock(),
-            "demo_service": FirstTimeUserTestHelpers._create_demo_service_mock(),
             "websocket_manager": FirstTimeUserTestHelpers._create_websocket_mock(),
             "metrics_tracker": FirstTimeUserMetrics(signup_time=datetime.now(timezone.utc))
         }
@@ -53,14 +51,6 @@ class FirstTimeUserTestHelpers:
         auth_client.validate_token = AsyncMock(return_value={"valid": True, "user_id": "test-user"})
         return auth_client
 
-    @staticmethod
-    def _create_demo_service_mock():
-        """Create demo service with real optimization scenarios"""
-        demo_service = AsyncMock(spec=DemoService)
-        demo_service.calculate_roi = AsyncMock()
-        demo_service.get_optimization_preview = AsyncMock()
-        demo_service.run_scenario = AsyncMock()
-        return demo_service
 
     @staticmethod
     def _create_websocket_mock():

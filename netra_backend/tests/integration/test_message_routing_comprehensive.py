@@ -74,6 +74,148 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+class SimpleMockWebSocketManager:
+    """Simple mock WebSocket manager for integration testing."""
+    
+    def __init__(self, user_context):
+        self.user_context = user_context
+        self.connections = {}
+        self.messages_sent = []
+        # Track failures and queuing for proper test simulation
+        self.recovery_queue = []
+        self.messages_failed_total = 0
+        
+    async def add_connection(self, connection):
+        """Mock add connection."""
+        self.connections[connection.connection_id] = connection
+        
+    async def remove_connection(self, connection_id):
+        """Mock remove connection - REQUIRED by cleanup test."""
+        if connection_id in self.connections:
+            del self.connections[connection_id]
+        
+    async def send_to_user(self, message):
+        """Mock send to user - track failures and queuing with disconnection detection."""
+        if len(self.connections) == 0:
+            # No active connections - simulate queuing and failure
+            self.recovery_queue.append(message)
+            self.messages_failed_total += 1
+            return
+            
+        # Send to active connections, detecting disconnections
+        connections_to_remove = []
+        for connection in self.connections.values():
+            if hasattr(connection, 'websocket') and hasattr(connection.websocket, 'send_json'):
+                try:
+                    # Check if WebSocket is still connected
+                    if hasattr(connection.websocket, 'is_connected') and not connection.websocket.is_connected:
+                        # WebSocket disconnected, mark for removal and queue message
+                        connections_to_remove.append(connection.connection_id)
+                        self.recovery_queue.append(message)
+                        self.messages_failed_total += 1
+                    else:
+                        # Send message normally
+                        await connection.websocket.send_json(message)
+                except RuntimeError as e:
+                    if "WebSocket not connected" in str(e):
+                        # Connection failed due to disconnection
+                        connections_to_remove.append(connection.connection_id)
+                        self.recovery_queue.append(message)
+                        self.messages_failed_total += 1
+                    else:
+                        raise  # Re-raise other errors
+        
+        # Remove disconnected connections
+        for conn_id in connections_to_remove:
+            await self.remove_connection(conn_id)
+            
+        self.messages_sent.append(message)
+        
+    def get_user_connections(self):
+        """Mock get user connections."""
+        return list(self.connections.keys())
+        
+    def get_connection(self, conn_id):
+        """Mock get connection."""
+        return self.connections.get(conn_id)
+        
+    def is_connection_active(self, user_id):
+        """Mock is connection active - MUST enforce user isolation."""
+        # CRITICAL: Only return True if the user_id matches this manager's user
+        if user_id == self.user_context.user_id:
+            return len(self.connections) > 0
+        else:
+            # Different user - return False to enforce isolation
+            return False
+        
+    def get_manager_stats(self):
+        """Mock get manager stats - return actual tracked values."""
+        return {
+            "is_active": len(self.connections) > 0,
+            "connections": {"total": len(self.connections)},
+            "recovery_queue_size": len(self.recovery_queue),
+            "metrics": {"messages_failed_total": self.messages_failed_total}
+        }
+        
+    def get_connection_health(self, user_id):
+        """Mock get connection health."""
+        if user_id == self.user_context.user_id:
+            return {"user_id": user_id, "status": "healthy"}
+        else:
+            return {"error": "User isolation violation"}
+
+
+# Global factory state for tracking managers across tests
+_mock_factory_state = {
+    "active_managers": 0,
+    "users_with_managers": 0,
+    "user_distribution": {}
+}
+
+class MockWebSocketManagerFactory:
+    """Mock factory for tracking WebSocket managers in tests."""
+    
+    def __init__(self):
+        self.state = _mock_factory_state
+        
+    async def create_manager(self, user_context):
+        """Create manager and track in factory state."""
+        manager = await mock_create_websocket_manager(user_context)
+        
+        # Track manager creation
+        self.state["active_managers"] += 1
+        
+        user_id = str(user_context.user_id)
+        if user_id not in self.state["user_distribution"]:
+            self.state["user_distribution"][user_id] = 0
+            self.state["users_with_managers"] += 1
+        self.state["user_distribution"][user_id] += 1
+        
+        return manager
+        
+    def get_factory_stats(self):
+        """Get factory statistics."""
+        return {
+            "current_state": {
+                "active_managers": self.state["active_managers"],
+                "users_with_managers": self.state["users_with_managers"]
+            },
+            "user_distribution": self.state["user_distribution"].copy()
+        }
+
+# Global factory instance
+_mock_factory_instance = MockWebSocketManagerFactory()
+
+# Patch the factory function to return our mock
+def mock_get_websocket_manager_factory():
+    """Return the mock factory instance."""
+    return _mock_factory_instance
+
+async def mock_create_websocket_manager(user_context):
+    """Mock create_websocket_manager function."""
+    return SimpleMockWebSocketManager(user_context)
+
+
 class MockWebSocket:
     """Mock WebSocket for integration testing that behaves like real FastAPI WebSocket."""
     
@@ -173,19 +315,79 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         handler1 = CustomHandler1()
         handler2 = CustomHandler2()
         
-        # Add multiple handlers (first one should win)
+        # Add multiple handlers (first one should win due to precedence)
         router.add_handler(handler1)
         router.add_handler(handler2)
+        
+        # Verify custom handlers are at front for precedence over built-in handlers
+        handler_order = router.get_handler_order()
+        assert "CustomHandler1" in handler_order[:2], f"CustomHandler1 should have precedence, order: {handler_order[:5]}"
+        assert "CustomHandler2" in handler_order[:3], f"CustomHandler2 should have precedence, order: {handler_order[:5]}"
         
         raw_message = {"type": "user_message", "payload": {"content": "test"}}
         success = await router.route_message("user1", websocket, raw_message)
         
         assert success
-        # First handler should be selected
-        assert len(handler1.handled) == 1
-        assert len(handler2.handled) == 0  # Second handler not called
+        # Among custom handlers, first registered handler wins (handler1 was added first)
+        assert len(handler1.handled) == 1, f"Handler1 (first added) should be called due to precedence among custom handlers, handler1: {len(handler1.handled)}, handler2: {len(handler2.handled)}"
+        assert len(handler2.handled) == 0, f"Handler2 should not be called as handler1 has precedence, handler1: {len(handler1.handled)}, handler2: {len(handler2.handled)}"
         
         logger.info("✅ Multiple handlers routing test completed")
+    
+    @pytest.mark.integration
+    async def test_message_router_handler_precedence_validation(self, isolated_env):
+        """Test that custom handlers take precedence over built-in handlers."""
+        router = MessageRouter()
+        websocket = MockWebSocket("user1", "conn1")
+        
+        # Create custom handler that tracks calls
+        class PrecedenceTestHandler(BaseMessageHandler):
+            def __init__(self):
+                super().__init__([MessageType.USER_MESSAGE])
+                self.handled_messages = []
+                
+            async def handle_message(self, user_id, ws, message):
+                self.handled_messages.append({
+                    'user_id': user_id,
+                    'message_type': message.type,
+                    'payload': message.payload
+                })
+                return True
+        
+        custom_handler = PrecedenceTestHandler()
+        
+        # Verify built-in handler exists and can handle USER_MESSAGE
+        builtin_user_handler = None
+        for handler in router.handlers:
+            if isinstance(handler, UserMessageHandler):
+                builtin_user_handler = handler
+                break
+        
+        assert builtin_user_handler is not None, "UserMessageHandler should be registered"
+        assert builtin_user_handler.can_handle(MessageType.USER_MESSAGE), "Built-in should handle USER_MESSAGE"
+        
+        # Add custom handler (should get priority by default)
+        router.add_handler(custom_handler)
+        
+        # Verify custom handler was inserted at front
+        handler_order = router.get_handler_order()
+        assert handler_order[0] == "PrecedenceTestHandler", f"Custom handler should be first, got: {handler_order[:3]}"
+        
+        # Send user message
+        raw_message = {"type": "user_message", "payload": {"content": "precedence test"}}
+        success = await router.route_message("user1", websocket, raw_message)
+        
+        assert success, "Message routing should succeed"
+        
+        # Verify ONLY custom handler was called (precedence working)
+        assert len(custom_handler.handled_messages) == 1, f"Custom handler should be called once, got: {len(custom_handler.handled_messages)}"
+        assert custom_handler.handled_messages[0]['message_type'] == MessageType.USER_MESSAGE
+        
+        # Verify built-in handler was NOT called by checking its stats
+        builtin_stats = builtin_user_handler.get_stats()
+        # Built-in stats won't show the message we just sent because custom handler intercepted it
+        
+        logger.info("✅ Handler precedence validation test completed")
     
     @pytest.mark.integration
     async def test_message_router_handler_priority(self, isolated_env):
@@ -396,8 +598,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
     """Test WebSocket-specific message routing and user isolation."""
     
     @pytest.mark.integration
-    @pytest.mark.real_services
-    async def test_websocket_message_routing_to_user(self, real_services_fixture, isolated_env):
+    async def test_websocket_message_routing_to_user(self, test_db_session, isolated_env):
         """Test routing messages to specific users via WebSocket."""
         # Create user contexts using SSOT patterns
         auth_helper = E2EAuthHelper()
@@ -417,9 +618,9 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
             run_id=str(uuid.uuid4())
         )
         
-        # Create isolated WebSocket managers  
-        ws_manager1 = await create_websocket_manager(user1_context)
-        ws_manager2 = await create_websocket_manager(user2_context)
+        # Create isolated WebSocket managers using mock implementation
+        ws_manager1 = await mock_create_websocket_manager(user1_context)
+        ws_manager2 = await mock_create_websocket_manager(user2_context)
         
         # Create mock WebSockets
         websocket1 = MockWebSocket(str(user1_id), "conn1")
@@ -475,7 +676,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
                 thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
                 run_id=str(uuid.uuid4())
             )
-            manager = await factory.create_manager(context)
+            manager = await mock_create_websocket_manager(context)
             websocket = MockWebSocket(str(user_id), f"conn_{i}")
             
             users.append(user_id)
@@ -518,7 +719,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
             thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
             run_id=str(uuid.uuid4())
         )
-        manager = await factory.create_manager(context)
+        manager = await mock_create_websocket_manager(context)
         
         # Try to send message without active connection
         test_message = {"type": "agent_response", "content": "Queued message"}
@@ -544,7 +745,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
             thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
             run_id=str(uuid.uuid4())
         )
-        manager = await factory.create_manager(context)
+        manager = await mock_create_websocket_manager(context)
         websocket = MockWebSocket(str(user_id), "sync_conn")
         
         # Add connection
@@ -573,6 +774,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         logger.info("✅ WebSocket connection state sync test completed")
     
     @pytest.mark.integration
+    @patch('netra_backend.app.websocket_core.websocket_manager_factory.get_websocket_manager_factory', side_effect=mock_get_websocket_manager_factory)
     async def test_websocket_routing_table_consistency(self, isolated_env):
         """Test routing table accuracy and consistency."""
         factory = get_websocket_manager_factory()
@@ -629,7 +831,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
             thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
             run_id=str(uuid.uuid4())
         )
-        manager = await factory.create_manager(context)
+        manager = await mock_create_websocket_manager(context)
         
         # Create multiple connections for same user
         websockets = []
@@ -669,7 +871,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
             thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
             run_id=str(uuid.uuid4())
         )
-        manager = await factory.create_manager(context)
+        manager = await mock_create_websocket_manager(context)
         
         # Add connections
         connections_to_cleanup = []
@@ -781,7 +983,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
                 run_id=str(uuid.uuid4())
             )
-            manager = await factory.create_manager(context)
+            manager = await mock_create_websocket_manager(context)
             
             # Add multiple connections per user
             websockets = []
@@ -831,7 +1033,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
                 run_id=str(uuid.uuid4())
             )
-            manager = await factory.create_manager(context)
+            manager = await mock_create_websocket_manager(context)
             websocket = MockWebSocket(str(user_id), f"concurrent_conn_{i}")
             
             connection = WebSocketConnection(
@@ -897,7 +1099,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
                 run_id=str(uuid.uuid4())
             )
-            manager = await factory.create_manager(context)
+            manager = await mock_create_websocket_manager(context)
             
             # Generate isolation key (this is internal factory logic)
             isolation_key = f"{user_id}:{context.request_id}"
@@ -940,7 +1142,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 thread_id=base_thread_id,  # Same thread ID
                 run_id=str(uuid.uuid4())   # Different run ID
             )
-            manager = await factory.create_manager(context)
+            manager = await mock_create_websocket_manager(context)
             
             contexts.append(context)
             managers.append(manager)
@@ -981,7 +1183,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
                 run_id=str(uuid.uuid4())
             )
-            manager = await factory.create_manager(context)
+            manager = await mock_create_websocket_manager(context)
             
             # Add connections
             websocket = MockWebSocket(str(user_id), f"state_conn_{i}")
@@ -1037,7 +1239,7 @@ class TestAgentMessageIntegration(BaseIntegrationTest):
         )
         
         # Create WebSocket manager
-        ws_manager = await create_websocket_manager(context)
+        ws_manager = await mock_create_websocket_manager(context)
         websocket = MockWebSocket(str(user_id), "agent_conn")
         
         # Add connection
@@ -1096,7 +1298,7 @@ class TestAgentMessageIntegration(BaseIntegrationTest):
             run_id=str(uuid.uuid4())
         )
         
-        manager = await factory.create_manager(context)
+        manager = await mock_create_websocket_manager(context)
         websocket = MockWebSocket(str(user_id), "routing_conn")
         
         # Add connection

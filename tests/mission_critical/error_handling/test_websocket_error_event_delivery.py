@@ -261,7 +261,7 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
             # Test 4: Error Recovery and Continued Event Delivery
             print("\n🔄 Test 4: Error Recovery and Continued Event Delivery")
             
-            recovery_successful = await self.test_error_recovery_patterns(websocket_connection)
+            recovery_successful = await self._test_error_recovery_patterns(websocket_connection)
             
             # Test Results Summary
             print("\n📊 WEBSOCKET ERROR EVENT DELIVERY RESULTS")
@@ -410,7 +410,7 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
         print(f"   ✅ Error context validation passed")
         return True
     
-    async def test_error_recovery_patterns(self, websocket_connection) -> bool:
+    async def _test_error_recovery_patterns(self, websocket_connection) -> bool:
         """Test that WebSocket connection can recover from errors and continue delivering events."""
         print("Testing error recovery patterns...")
         

@@ -319,7 +319,7 @@ class TestIsolatedWebSocketManagerComprehensive:
         
         message = {"type": "test_message", "data": "test_data"}
         
-        await manager.send_to_user(message)
+        await manager.send_to_user(user_context.user_id, message)
         
         # Verify message was sent
         websocket_connection.websocket.send_json.assert_called_once()
@@ -333,7 +333,7 @@ class TestIsolatedWebSocketManagerComprehensive:
         
         message = {"type": "test_message", "data": "test_data"}
         
-        await manager.send_to_user(message)
+        await manager.send_to_user(user_context.user_id, message)
         
         # Should add to recovery queue
         assert len(manager._message_recovery_queue) == 1
@@ -353,7 +353,7 @@ class TestIsolatedWebSocketManagerComprehensive:
         
         message = {"type": "test_message", "data": "test_data"}
         
-        await manager.send_to_user(message)
+        await manager.send_to_user(user_context.user_id, message)
         
         # Connection should be removed after error
         assert len(manager._connections) == 0
@@ -373,7 +373,7 @@ class TestIsolatedWebSocketManagerComprehensive:
         
         message = {"type": "test_message", "data": "test_data"}
         
-        await manager.send_to_user(message)
+        await manager.send_to_user(user_context.user_id, message)
         
         # Connection should be removed
         assert len(manager._connections) == 0
@@ -388,7 +388,7 @@ class TestIsolatedWebSocketManagerComprehensive:
         message = {"type": "test_message", "data": "test_data"}
         
         with pytest.raises(RuntimeError, match="WebSocket manager .* is no longer active"):
-            await manager.send_to_user(message)
+            await manager.send_to_user(user_context.user_id, message)
 
     @pytest.mark.asyncio
     async def test_emit_critical_event_success(self, user_context, websocket_connection):

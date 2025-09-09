@@ -11,6 +11,7 @@ RUN apk add --no-cache \
     musl-dev \
     libffi-dev \
     postgresql-dev \
+    lz4-dev \
     && rm -rf /var/cache/apk/*
 
 # Set working directory
@@ -40,6 +41,7 @@ RUN apk add --no-cache \
     libpq \
     curl \
     tini \
+    lz4-libs \
     && rm -rf /var/cache/apk/*
 
 # Create non-root user and directories in single layer

@@ -385,16 +385,34 @@ class AuthService:
         """Register a test user in memory"""
         import uuid
         
-        # Check if user already exists
+        # Check if user already exists - for testing purposes, update the existing user
         if email in self._test_users:
-            raise ValueError("User with this email already registered")
+            existing_user = self._test_users[email]
+            # Hash the new password using existing password_hasher for consistency
+            password_hash = self.password_hasher.hash(password)
+            
+            # Update the existing user with new password
+            self._test_users[email].update({
+                "password_hash": password_hash,
+                "name": "Test User",
+                "created_at": datetime.now(UTC).isoformat()
+            })
+            
+            return {
+                "user_id": existing_user["id"],
+                "email": email,
+                "message": "Test user updated successfully"
+            }
         
         user_id = str(uuid.uuid4())
+        
+        # Hash password using existing password_hasher for consistency with authenticate_user
+        password_hash = self.password_hasher.hash(password)
         
         self._test_users[email] = {
             "id": user_id,
             "email": email,
-            "password": password,
+            "password_hash": password_hash,  # Store as 'password_hash' for consistency
             "name": "Test User",
             "created_at": datetime.now(UTC).isoformat()
         }
@@ -775,13 +793,18 @@ class AuthService:
             # Check test users store first
             if email in self._test_users:
                 stored_user = self._test_users[email]
-                if stored_user["password"] == password:
+                try:
+                    # Use password hasher for consistent verification
+                    self.password_hasher.verify(stored_user["password_hash"], password)
                     return {
                         "id": stored_user["id"],
                         "email": email,
                         "name": stored_user.get("name", "Test User"),
                         "permissions": ["read", "write"]
                     }
+                except Exception:
+                    # Password verification failed, return None
+                    return None
             
             # Fallback for testing
             hashed = hashlib.sha256(password.encode()).hexdigest()

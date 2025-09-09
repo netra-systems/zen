@@ -870,17 +870,37 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
         
         return False
     
-    async def send_to_user(self, message: Dict[str, Any]) -> None:
+    async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
         """
         Send a message to all connections for this user.
         
+        PROTOCOL COMPLIANCE: Implements WebSocketManagerProtocol.send_to_user()
+        with user isolation validation.
+        
         Args:
+            user_id: Target user ID (must match this manager's user context)
             message: Message to send
             
         Raises:
+            ValueError: If user_id doesn't match this manager's user context
             RuntimeError: If manager is not active
         """
         self._validate_active()
+        
+        # SECURITY: Validate that the requested user_id matches this manager's user
+        manager_user_id = str(self.user_context.user_id)
+        target_user_id = str(user_id)
+        
+        if target_user_id != manager_user_id:
+            logger.critical(
+                f"SECURITY VIOLATION: Attempted to send message to user {target_user_id} "
+                f"from isolated manager for user {manager_user_id[:8]}... "
+                f"This violates user isolation requirements."
+            )
+            raise ValueError(
+                f"Cannot send message to user {target_user_id} from manager for user {manager_user_id}. "
+                f"This violates user isolation - use the correct manager instance for the target user."
+            )
         
         async with self._manager_lock:
             connection_ids = list(self._connection_ids)
@@ -998,7 +1018,7 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
         }
         
         try:
-            await self.send_to_user(message)
+            await self.send_to_user(self.user_context.user_id, message)
             logger.debug(
                 f"Successfully emitted critical event {event_type} "
                 f"to user {self.user_context.user_id[:8]}..."
@@ -1202,14 +1222,14 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
             # In isolated manager, check if this thread belongs to our user
             if hasattr(self.user_context, 'thread_id') and self.user_context.thread_id == thread_id:
                 # Send to our user
-                await self.send_to_user(message)
+                await self.send_to_user(self.user_context.user_id, message)
                 logger.debug(f"Sent thread message to user {self.user_context.user_id[:8]}... via thread {thread_id}")
                 return True
             else:
                 # Check if any of our connections match this thread
                 for connection in self._connections.values():
                     if hasattr(connection, 'thread_id') and connection.thread_id == thread_id:
-                        await self.send_to_user(message)
+                        await self.send_to_user(self.user_context.user_id, message)
                         logger.debug(f"Sent thread message to user {self.user_context.user_id[:8]}... via connection thread {thread_id}")
                         return True
                 

@@ -28,7 +28,7 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import patch, AsyncMock
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.fixtures.lightweight_services import lightweight_services_fixture
 from test_framework.fixtures.isolated_environment import isolated_env
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
@@ -67,13 +67,13 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_invalid_thread_id_handling(self, real_services_fixture, isolated_env):
+    async def test_invalid_thread_id_handling(self, lightweight_services_fixture, isolated_env):
         """Test graceful handling of invalid thread IDs and malformed requests."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -134,13 +134,13 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services  
-    async def test_unauthorized_thread_access_security(self, real_services_fixture, isolated_env):
+    async def test_unauthorized_thread_access_security(self, lightweight_services_fixture, isolated_env):
         """Test security validation - users should not access other users' threads."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -253,13 +253,13 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_database_connection_failure_recovery(self, real_services_fixture, isolated_env):
+    async def test_database_connection_failure_recovery(self, lightweight_services_fixture, isolated_env):
         """Test graceful handling of database connection failures and recovery."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        original_db_session = real_services_fixture["db"]
+        original_db_session = lightweight_services_fixture["db"]
         if not original_db_session:
             pytest.skip("Database session not available")
         
@@ -331,10 +331,10 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
         # Scenario 3: Test recovery with new session
         try:
             # Get new session for recovery testing
-            recovery_session = real_services_fixture.get("db_recovery")
+            recovery_session = lightweight_services_fixture.get("db_recovery")
             if not recovery_session:
                 # Create new session if recovery session not available
-                recovery_session = real_services_fixture["db"]
+                recovery_session = lightweight_services_fixture["db"]
             
             # Test that recovery works
             if recovery_session and recovery_session != original_db_session:
@@ -379,13 +379,13 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_disconnection_during_routing(self, real_services_fixture, isolated_env):
+    async def test_websocket_disconnection_during_routing(self, lightweight_services_fixture, isolated_env):
         """Test handling of WebSocket disconnections during thread routing operations."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -516,13 +516,13 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_resource_exhaustion_and_cleanup(self, real_services_fixture, isolated_env):
+    async def test_resource_exhaustion_and_cleanup(self, lightweight_services_fixture, isolated_env):
         """Test system behavior under resource exhaustion and proper cleanup."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -710,13 +710,13 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_error_message_quality_and_user_feedback(self, real_services_fixture, isolated_env):
+    async def test_error_message_quality_and_user_feedback(self, lightweight_services_fixture, isolated_env):
         """Test that error messages are helpful and provide proper user feedback."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         

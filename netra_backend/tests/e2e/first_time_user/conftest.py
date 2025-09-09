@@ -52,15 +52,6 @@ async def conversion_environment():
     # Mock: OAuth external provider isolation for network-independent testing
     auth_client.initiate_oauth = AsyncMock(return_value = {"oauth_url": "https://auth.example.com", "state": "test_state"})
     
-    # Create demo service mock
-    # Mock: Generic component isolation for controlled unit testing
-    demo_service = AsyncMock()
-    # Mock: Async component isolation for testing without real async operations
-    demo_service.calculate_roi = AsyncMock(return_value = {"roi_percentage": 300, "monthly_savings": 2400})
-    # Mock: Async component isolation for testing without real async operations
-    demo_service.get_optimization_preview = AsyncMock(return_value = {"preview_data": "sample"})
-    # Mock: Async component isolation for testing without real async operations
-    demo_service.run_scenario = AsyncMock(return_value = {"scenario_result": "success", "savings": 1200})
     
     yield {
         "user_id": "test_user_123",
@@ -75,7 +66,6 @@ async def conversion_environment():
         "metrics_tracker": metrics_tracker,
         "websocket_manager": websocket_manager,
         "auth_client": auth_client,
-        "demo_service": demo_service,
 }
 
 

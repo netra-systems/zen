@@ -888,7 +888,9 @@ class MessageRouter:
     """Routes messages to appropriate handlers."""
     
     def __init__(self):
-        self.handlers: List[MessageHandler] = [
+        # Separate lists: custom handlers get precedence over built-in handlers
+        self.custom_handlers: List[MessageHandler] = []
+        self.builtin_handlers: List[MessageHandler] = [
             ConnectionHandler(),
             TypingHandler(),
             HeartbeatHandler(),
@@ -914,18 +916,58 @@ class MessageRouter:
         self.startup_grace_period_seconds = 10.0  # 10 second grace period
         
         # Log initialization for debugging
-        logger.info(f"MessageRouter initialized with {len(self.handlers)} base handlers")
-        for handler in self.handlers:
+        logger.info(f"MessageRouter initialized with {len(self.builtin_handlers)} base handlers")
+        for handler in self.builtin_handlers:
             logger.debug(f"  - {handler.__class__.__name__}: {getattr(handler, 'supported_types', [])}")
     
+    @property
+    def handlers(self) -> List[MessageHandler]:
+        """Get all handlers in priority order: custom handlers first, then built-in handlers."""
+        return self.custom_handlers + self.builtin_handlers
+    
     def add_handler(self, handler: MessageHandler) -> None:
-        """Add a message handler to the router."""
-        self.handlers.append(handler)
+        """Add a custom message handler to the router.
+        
+        Custom handlers are added to the custom_handlers list and take precedence 
+        over built-in handlers. Among custom handlers, first registered wins.
+        
+        Args:
+            handler: The message handler to add
+        """
+        # Append to custom handlers list (first registered wins among custom handlers)
+        self.custom_handlers.append(handler)
+        position = len(self.custom_handlers) - 1
+        logger.info(f"Added custom handler {handler.__class__.__name__} at custom position {position}")
     
     def remove_handler(self, handler: MessageHandler) -> None:
         """Remove a message handler from the router."""
-        if handler in self.handlers:
-            self.handlers.remove(handler)
+        # Try to remove from custom handlers first
+        if handler in self.custom_handlers:
+            self.custom_handlers.remove(handler)
+            logger.info(f"Removed custom handler {handler.__class__.__name__}")
+        elif handler in self.builtin_handlers:
+            self.builtin_handlers.remove(handler)
+            logger.info(f"Removed built-in handler {handler.__class__.__name__}")
+        else:
+            logger.warning(f"Handler {handler.__class__.__name__} not found for removal")
+    
+    def insert_handler(self, handler: MessageHandler, index: int = 0) -> None:
+        """Insert handler at specific position in the custom handlers list.
+        
+        Args:
+            handler: The message handler to insert
+            index: Position to insert at in custom handlers (0 = highest precedence, default)
+        """
+        try:
+            self.custom_handlers.insert(index, handler)
+            logger.info(f"Inserted custom handler {handler.__class__.__name__} at position {index}")
+        except IndexError:
+            self.custom_handlers.append(handler)
+            logger.warning(f"Invalid index {index}, appended {handler.__class__.__name__} to end of custom handlers")
+
+    def get_handler_order(self) -> List[str]:
+        """Get ordered list of handler class names for debugging."""
+        return [h.__class__.__name__ for h in self.handlers]
     
     async def route_message(self, user_id: str, websocket: WebSocket,
                           raw_message: Dict[str, Any]) -> bool:
@@ -994,9 +1036,18 @@ class MessageRouter:
     
     def _find_handler(self, message_type: MessageType) -> Optional[MessageHandler]:
         """Find handler that can process the message type."""
-        for handler in self.handlers:
-            if handler.can_handle(message_type):
+        logger.debug(f"Finding handler for {message_type}, checking {len(self.handlers)} handlers")
+        
+        for i, handler in enumerate(self.handlers):
+            handler_name = handler.__class__.__name__
+            can_handle = handler.can_handle(message_type)
+            logger.debug(f"  [{i}] {handler_name}.can_handle({message_type}) = {can_handle}")
+            
+            if can_handle:
+                logger.info(f"Selected handler [{i}] {handler_name} for {message_type}")
                 return handler
+        
+        logger.warning(f"No handler found for message type {message_type}")
         return None
     
     def _is_unknown_message_type(self, message_type: str) -> bool:
@@ -1101,14 +1152,20 @@ class MessageRouter:
         
         # Add handler-specific stats
         handler_stats = {}
-        for handler in self.handlers:
+        handler_order = []
+        
+        for i, handler in enumerate(self.handlers):
             handler_name = handler.__class__.__name__
+            handler_order.append(f"[{i}] {handler_name}")
+            
             if hasattr(handler, 'get_stats'):
                 handler_stats[handler_name] = handler.get_stats()
             else:
                 handler_stats[handler_name] = {"status": "active"}
         
         stats["handler_stats"] = handler_stats
+        stats["handler_order"] = handler_order  # Track handler precedence
+        stats["handler_count"] = len(self.handlers)
         
         # CRITICAL FIX: Add startup grace period status
         stats["handler_status"] = self.check_handler_status_with_grace_period()

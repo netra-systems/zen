@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-08 18:35:00
+**Generated:** 2025-09-08 18:56:04
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
-- **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Total Tests:** 2
+- **Passed:** 1 (50.0%)
+- **Failed:** 1 (50.0%)
 - **Skipped:** 0
-- **Duration:** 5.23 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 8.41 seconds
+- **Pass Rate:** 50.0%
 
 ## Test Results by Priority
 
@@ -19,13 +19,14 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_websocket_connection | FAIL failed | 0.615s | test_1_websocket_events_staging.py |
+| test_health_check | PASS passed | 0.807s | test_1_websocket_events_staging.py |
+| test_websocket_connection | FAIL failed | 0.889s | test_1_websocket_events_staging.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_websocket_connection
 - **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 0.615s
+- **Duration:** 0.889s
 - **Error:** tests\e2e\staging_test_base.py:308: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -40,10 +41,11 @@ tests\e2e\staging\test_1_websocket_events_staging.py:92: in test_websocket_conne
 ## Pytest Output Format
 
 ```
+test_1_websocket_events_staging.py::test_health_check PASSED
 test_1_websocket_events_staging.py::test_websocket_connection FAILED
 
 ==================================================
-0 passed, 1 failed in 5.23s
+1 passed, 1 failed in 8.41s
 ```
 
 ## Test Coverage Matrix
