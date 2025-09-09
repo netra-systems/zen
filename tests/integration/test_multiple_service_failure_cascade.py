@@ -45,7 +45,7 @@ from shared.isolated_environment import get_env
 # Import system components for service failure simulation
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.startup_manager import StartupManager
+from netra_backend.app.smd import StartupOrchestrator
 
 # Import BusinessValueValidator
 from tests.mission_critical.test_fallback_handler_degradation_prevention import (
@@ -89,8 +89,8 @@ class MultipleServiceFailureSimulator:
         """Simulate startup completion failure."""
         with self._lock:
             if 'startup' not in self.failed_services:
-                self.original_services['startup'] = getattr(StartupManager, '_startup_complete', True)
-                StartupManager._startup_complete = False
+                self.original_services['startup'] = getattr(StartupOrchestrator, '_startup_complete', True)
+                StartupOrchestrator._startup_complete = False
                 self.failed_services.add('startup')
                 logger.error("🚨 SERVICE FAILURE: Startup incomplete")
     
@@ -111,7 +111,7 @@ class MultipleServiceFailureSimulator:
                 elif service_name == 'thread_service':
                     ThreadService._instance = self.original_services.get('thread_service')
                 elif service_name == 'startup':
-                    StartupManager._startup_complete = self.original_services.get('startup', True)
+                    StartupOrchestrator._startup_complete = self.original_services.get('startup', True)
                 
                 self.failed_services.discard(service_name)
                 logger.info(f"✅ SERVICE RESTORED: {service_name}")

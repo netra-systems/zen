@@ -37,9 +37,10 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         
         # Service endpoints for testing (using test ports)
         # CRITICAL FIX: Only test services that actually have JWT validation endpoints
+        # Test environment uses different ports: auth on 8083, backend on 8002
         self.service_endpoints = {
-            "auth_service": "http://localhost:8081",
-            "backend_service": "http://localhost:8000"
+            "auth_service": "http://localhost:8083",  # Alpine test auth service port
+            "backend_service": "http://localhost:8002"  # Alpine test backend service port
             # Note: backend_service has no direct JWT validation endpoint - uses auth service via proxy
         }
         
@@ -72,6 +73,9 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         Business Value: Ensures tokens issued by auth service work across all services.
         Security Impact: Validates JWT secret synchronization prevents auth bypass.
         """
+        # Skip if auth service is not available
+        if not self.services_available.get("auth_service", False):
+            pytest.skip("Auth service not available - cannot test JWT cross-service validation")
         user = self.test_users[0]
         
         # Create JWT token from auth service
@@ -87,7 +91,7 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         async with httpx.AsyncClient() as client:
             for service_name, service_url in self.service_endpoints.items():
                 try:
-                    # CRITICAL FIX: Use correct endpoint and request format for each service
+                    # CRITICAL FIX: Only test services that actually have JWT validation endpoints
                     if service_name == "auth_service":
                         # Auth service uses POST /auth/validate with token in body
                         response = await client.post(
@@ -97,13 +101,16 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
                             timeout=10.0
                         )
                     else:
-                        # For other services, use their specific validation endpoints
-                        # (Currently only auth service has direct validation)
-                        response = await client.get(
-                            f"{service_url}/auth/validate-token",
-                            headers={"Authorization": f"Bearer {auth_token}"},
-                            timeout=10.0
-                        )
+                        # CRITICAL FIX: Skip services that don't have direct JWT validation
+                        # Backend service uses auth service via proxy/middleware, not direct validation
+                        self.logger.info(f"Skipping {service_name} - no direct JWT validation endpoint")
+                        service_validation_results[service_name] = {
+                            "valid": False,
+                            "error": "Service doesn't have direct JWT validation endpoint",
+                            "service_response": "skipped",
+                            "skipped": True
+                        }
+                        continue
                     
                     if response.status_code == 200:
                         validation_data = response.json()
@@ -132,8 +139,19 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
             if result["valid"]
         ]
         
-        # At least auth service should validate successfully
-        assert len(successful_validations) > 0, "At least one service should validate the token"
+        # Count services that were actually tested (not skipped)
+        tested_services = [
+            result for result in service_validation_results.values()
+            if not result.get("skipped", False)
+        ]
+        
+        # CRITICAL FIX: Auth service should validate successfully if it's available
+        auth_service_result = service_validation_results.get("auth_service")
+        if auth_service_result and not auth_service_result.get("skipped", False):
+            assert auth_service_result["valid"], f"Auth service should validate successfully: {auth_service_result.get('error', 'Unknown error')}"
+        
+        # If we have successful validations, they should be consistent
+        assert len(successful_validations) > 0, f"At least auth service should validate the token. Tested {len(tested_services)} services, got {len(successful_validations)} successful validations"
         
         # All successful validations should have consistent user data
         if len(successful_validations) > 1:
@@ -154,6 +172,9 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         Business Value: Enables secure inter-service communication for complex workflows.
         Strategic Impact: Core infrastructure for microservice orchestration.
         """
+        # Check database services availability for core functionality
+        if not all(status is True for status in self.service_status.values()):
+            pytest.skip(f"Required database services not available: {self.service_status}")
         # Test service-to-service token creation
         service_token_data = {
             "service_name": "backend_service",
@@ -243,6 +264,9 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         Business Value: Ensures consistent user experience across all services.
         Security Impact: Validates user context isolation maintained across services.
         """
+        # Skip if no services available for context propagation testing
+        if not any(self.services_available.values()):
+            pytest.skip("No HTTP services available - cannot test user context propagation")
         user = self.test_users[1]  # Enterprise user
         
         # Create user token
@@ -361,6 +385,9 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         Business Value: Ensures service resilience when auth service is unavailable.
         Strategic Impact: Maintains system availability during auth service outages.
         """
+        # This test specifically tests circuit breaker behavior, so it can run even with unavailable services
+        # It's designed to test what happens when auth service is unavailable
+        pass  # No skip condition - this test is meant to handle service unavailability
         # Test auth service unavailability scenarios
         circuit_breaker_tests = [
             {
@@ -437,6 +464,9 @@ class TestCrossServiceAuthIntegration(BaseIntegrationTest):
         Business Value: Ensures revenue protection across all service boundaries.
         Strategic Impact: Technical enforcement of business model across architecture.
         """
+        # Skip if no services available for tier enforcement testing
+        if not any(self.services_available.values()):
+            pytest.skip("No HTTP services available - cannot test subscription tier enforcement")
         # Test tier enforcement across services
         tier_enforcement_tests = [
             {

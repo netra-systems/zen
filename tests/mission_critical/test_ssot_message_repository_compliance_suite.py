@@ -418,7 +418,7 @@ class TestSSotMessageRepositoryIntegration:
         This test ensures both creation methods handle transactions properly
         and expose any transaction handling differences.
         """
-        db_helper = SSotDatabaseHelper()
+        db_helper = DatabaseTestUtility(service="netra_backend")
         message_repository = MessageRepository()
         test_thread_id = f"thread_{uuid.uuid4().hex[:8]}"
         

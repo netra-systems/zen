@@ -47,7 +47,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.routes.websocket import WebSocketMessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 
 # Business workflow imports

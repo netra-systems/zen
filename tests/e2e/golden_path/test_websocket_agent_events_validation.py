@@ -35,7 +35,7 @@ from test_framework.ssot.real_services_test_fixtures import real_services_fixtur
 from test_framework.websocket_helpers import WebSocketTestHelpers, assert_websocket_events
 
 # System imports
-from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator, generate_uuid_replacement
 
 
 class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
@@ -53,7 +53,6 @@ class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
         self.record_metric("target_event_types", 5)
         self.record_metric("event_system", "websocket_agent_notifications")
         
-        self._id_generator = UnifiedIdGenerator()
         self._websocket_connection = None
         
     async def async_setup_method(self, method=None):
@@ -92,7 +91,7 @@ class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
         5. agent_completed - User knows when response ready
         """
         # === AUTHENTICATION & CONNECTION ===
-        user_id = f"event_test_{self._id_generator.generate_uuid_replacement()}"
+        user_id = f"event_test_{generate_uuid_replacement()}"
         jwt_token = self._auth_helper.create_test_jwt_token(user_id=user_id)
         
         ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
@@ -208,7 +207,7 @@ class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
         Events must be delivered promptly to maintain good user experience.
         """
         # === SETUP AND CONNECTION ===
-        user_id = f"timing_test_{self._id_generator.generate_uuid_replacement()}"
+        user_id = f"timing_test_{generate_uuid_replacement()}"
         jwt_token = self._auth_helper.create_test_jwt_token(user_id=user_id)
         ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         websocket_url = self.get_env_var("WEBSOCKET_URL", "ws://localhost:8000/ws")
@@ -295,7 +294,7 @@ class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
         Even when agents encounter errors, users should receive appropriate event notifications.
         """
         # === SETUP CONNECTION ===
-        user_id = f"error_test_{self._id_generator.generate_uuid_replacement()}"
+        user_id = f"error_test_{generate_uuid_replacement()}"
         jwt_token = self._auth_helper.create_test_jwt_token(user_id=user_id)
         ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         websocket_url = self.get_env_var("WEBSOCKET_URL", "ws://localhost:8000/ws")
