@@ -26,13 +26,13 @@ from netra_backend.app.routes.utils.thread_creators import ThreadCreator
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 
-from test_framework.ssot.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.factories import create_defensive_user_execution_context
-from test_framework.ssot.test_base import AsyncTestBase
+from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
+from test_framework.ssot import AsyncBaseTestCase
 from shared.types import UserID, ThreadID, RunID, RequestID
 
 
-class TestConcurrentExecutionComprehensive(AsyncTestBase):
+class TestConcurrentExecutionComprehensive(AsyncBaseTestCase):
     """
     Comprehensive Integration Tests for Concurrent Execution Scenarios.
     

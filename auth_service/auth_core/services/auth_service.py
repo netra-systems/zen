@@ -385,24 +385,9 @@ class AuthService:
         """Register a test user in memory"""
         import uuid
         
-        # Check if user already exists - for testing purposes, update the existing user
+        # Check if user already exists - follow business rules and raise error for duplicates
         if email in self._test_users:
-            existing_user = self._test_users[email]
-            # Hash the new password using existing password_hasher for consistency
-            password_hash = self.password_hasher.hash(password)
-            
-            # Update the existing user with new password
-            self._test_users[email].update({
-                "password_hash": password_hash,
-                "name": "Test User",
-                "created_at": datetime.now(UTC).isoformat()
-            })
-            
-            return {
-                "user_id": existing_user["id"],
-                "email": email,
-                "message": "Test user updated successfully"
-            }
+            raise ValueError("User with this email already registered")
         
         user_id = str(uuid.uuid4())
         
