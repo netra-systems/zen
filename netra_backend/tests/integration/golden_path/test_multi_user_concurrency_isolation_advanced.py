@@ -44,7 +44,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.execution_engine import ExecutionEngine
 from netra_backend.app.websocket.websocket_manager import WebSocketManager
 from netra_backend.app.database.models.agent_execution import AgentExecution, AgentExecutionStatus
