@@ -331,10 +331,17 @@ class IsolatedEnvironment:
         # During initialization, _isolation_enabled might be True but _isolated_vars is empty
         # We must use direct os.environ access here, not isolated vars or self.get()
         for indicator in test_indicators:
-            value = os.environ.get(indicator, '').lower()
-            # Only consider it a test context if the value is explicitly true
-            if value in ['true', '1', 'yes', 'on']:
-                return True
+            value = os.environ.get(indicator, '')
+            
+            # PYTEST_CURRENT_TEST contains test identifier, not boolean value
+            if indicator == 'PYTEST_CURRENT_TEST':
+                # If PYTEST_CURRENT_TEST exists and is not empty, we're in a test
+                if value:
+                    return True
+            else:
+                # For other indicators, check for boolean values
+                if value.lower() in ['true', '1', 'yes', 'on']:
+                    return True
         
         # Check if ENVIRONMENT is set to testing (direct access, not via self.get())
         env_value = os.environ.get('ENVIRONMENT', '').lower()
@@ -384,6 +391,7 @@ class IsolatedEnvironment:
             'POSTGRES_USER': 'netra_test',
             'POSTGRES_PASSWORD': 'netra_test_password',
             'POSTGRES_DB': 'netra_test',
+            'DATABASE_URL': 'postgresql://netra_test:netra_test_password@localhost:5434/netra_test',
             
             # Redis defaults for testing
             'REDIS_HOST': 'localhost',
@@ -1366,20 +1374,19 @@ class SecretLoader:
 
 # Legacy compatibility function  
 def get_environment_manager(isolation_mode: Optional[bool] = None):
-    """Legacy compatibility function for get_environment_manager."""
-    # Import here to avoid circular dependency
-    try:
-        from dev_launcher.environment_manager import get_environment_manager as get_manager
-        return get_manager(isolation_mode)
-    except ImportError:
-        logger.warning("dev_launcher.environment_manager not available, returning unified IsolatedEnvironment")
-        env = get_env()
-        if isolation_mode is not None:
-            if isolation_mode:
-                env.enable_isolation()
-            else:
-                env.disable_isolation()
-        return env
+    """Legacy compatibility function for get_environment_manager.
+    
+    IMPORTANT: This function returns the unified IsolatedEnvironment as the single source of truth.
+    The dev_launcher.environment_manager module has been consolidated into shared.isolated_environment.
+    """
+    # Always use the unified IsolatedEnvironment as single source of truth
+    env = get_env()
+    if isolation_mode is not None:
+        if isolation_mode:
+            env.enable_isolation()
+        else:
+            env.disable_isolation()
+    return env
 
 
 # Backwards Compatibility: EnvironmentValidator class
