@@ -114,7 +114,7 @@ async def user_execution_context(authenticated_user, real_services_fixture):
 
 
 @pytest.fixture
-async def data_helper_agent(real_services_fixture, mock_websocket_manager):
+async def data_helper_agent(real_services_fixture, mock_websocket_manager, user_execution_context):
     """Create DataHelperAgent with real LLM and tool dispatcher."""
     env = get_env()
     
@@ -132,8 +132,8 @@ async def data_helper_agent(real_services_fixture, mock_websocket_manager):
     else:
         llm_manager = await _create_mock_llm_manager()
     
-    # Create real tool dispatcher
-    tool_dispatcher = UnifiedToolDispatcher()
+    # Create tool dispatcher using factory pattern for proper user isolation
+    tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
     
     # Create agent with WebSocket integration
     agent = DataHelperAgent(llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)
@@ -1198,7 +1198,8 @@ Please provide your monthly AI usage reports and performance metrics.""",
 Please gather this information for comprehensive analysis."""
         ]
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         
         # Test each response format
         for i, response_text in enumerate(varied_responses):
@@ -1311,7 +1312,8 @@ Please gather this information for comprehensive analysis."""
 Please provide your recommendation system metrics including cost reports, 
 performance data, and usage analytics for comprehensive optimization."""
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         
         # Run multiple executions to test consistency
         num_executions = 3
@@ -1513,7 +1515,8 @@ compliance and performance requirements."""
         
         mock_llm_manager.agenerate.side_effect = verify_token_limits
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         agent = DataHelperAgent(llm_manager=mock_llm_manager, tool_dispatcher=tool_dispatcher)
         
         async def mock_notify_event(event_type: str, data: Dict[str, Any]):
@@ -1607,7 +1610,8 @@ Please provide system monitoring data to validate resilience improvements."""
         
         mock_llm_manager.agenerate.side_effect = mock_generate_with_retry
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         agent = DataHelperAgent(llm_manager=mock_llm_manager, tool_dispatcher=tool_dispatcher)
         
         async def mock_notify_event(event_type: str, data: Dict[str, Any]):
@@ -1919,7 +1923,8 @@ class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
         failing_llm_manager = AsyncMock(spec=LLMManager)
         failing_llm_manager.agenerate.side_effect = Exception("Simulated LLM service failure")
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         failing_agent = DataHelperAgent(llm_manager=failing_llm_manager, tool_dispatcher=tool_dispatcher)
         
         async def mock_notify_event(event_type: str, data: Dict[str, Any]):

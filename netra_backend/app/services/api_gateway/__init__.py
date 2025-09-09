@@ -10,6 +10,11 @@ from netra_backend.app.services.api_gateway.cache_strategies import CacheStrateg
 from netra_backend.app.services.api_gateway.transformation_engine import (
     TransformationEngine,
 )
+from netra_backend.app.services.api_gateway.rate_limiter import (
+    ApiGatewayRateLimiter,
+    RateLimitConfig,
+    RateLimitResult,
+)
 
 # Stubs for deleted modules
 class ApiCacheManager:
@@ -22,10 +27,7 @@ class ApiCircuitBreaker:
     def __init__(self):
         pass
 
-class ApiGatewayRateLimiter:
-    """Stub for deleted ApiGatewayRateLimiter"""
-    def __init__(self):
-        pass
+# ApiGatewayRateLimiter is now imported from rate_limiter module above
 
 class ApiGatewayRouter:
     """Stub for deleted ApiGatewayRouter"""
@@ -34,7 +36,9 @@ class ApiGatewayRouter:
 
 __all__ = [
     'ApiGatewayRouter',
-    'ApiGatewayRateLimiter', 
+    'ApiGatewayRateLimiter',
+    'RateLimitConfig',
+    'RateLimitResult',
     'ApiCacheManager',
     'ApiCircuitBreaker',
     'CacheStrategy',

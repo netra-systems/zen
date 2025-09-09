@@ -36,10 +36,9 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 
 # SSOT imports following absolute import rules
-from test_framework.base_e2e_test import BaseE2ETest
-from test_framework.ssot.e2e_auth_helper import (
-    E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user_context
-)
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from test_framework.websocket_helpers import WebSocketTestClient, assert_websocket_events_sent
 
 # Strongly typed context imports
@@ -52,8 +51,10 @@ import httpx
 
 
 @pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.real_services
-class TestCompleteGoldenPathUserJourneyE2E(BaseE2ETest):
+@pytest.mark.asyncio
+class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
     """
     CRITICAL: Primary Golden Path validation test.
     

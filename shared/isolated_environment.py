@@ -984,7 +984,13 @@ class IsolatedEnvironment:
                     # OS environment variables (current, not just original) always have priority 
                     # over file-based configs regardless of override_existing setting
                     # But only skip if the variable was set externally (not by a previous load_from_file)
-                    if not self._isolation_enabled and key in os.environ:
+                    if self._isolation_enabled and key in self._isolated_vars:
+                        # In isolation mode, check if this was set by us vs externally
+                        var_source = self._variable_sources.get(key, "")
+                        if not var_source.startswith("file:"):
+                            # This was set externally (via set() method, not from a file), skip it
+                            continue
+                    elif not self._isolation_enabled and key in os.environ:
                         # Check if this was set by us (via load_from_file) or externally
                         var_source = self._variable_sources.get(key, "")
                         if not var_source.startswith("file:"):

@@ -60,7 +60,7 @@ class ResilienceTestResult:
     system_recovered_fully: bool
 
 
-class TestErrorRecoveryResilience(BaseIntegrationTest, ServiceOrchestrationIntegrationTest):
+class TestErrorRecoveryResilience(ServiceOrchestrationIntegrationTest):
     """Test error recovery and system resilience with real service integration."""
     
     def setup_method(self):

@@ -10,6 +10,7 @@ resolution with existing infrastructure.
 import asyncio
 import logging
 from typing import Any, Dict, List, Optional
+from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
 from .models import (
@@ -143,7 +144,7 @@ class IntegrationManager:
             try:
                 # Check for basic database connectivity through existing session factory
                 async with app.state.db_session_factory() as session:
-                    await session.execute("SELECT 1")
+                    await session.execute(text("SELECT 1"))
                 
                 return {
                     "success": True,
@@ -168,7 +169,7 @@ class IntegrationManager:
                 # Validate Redis connection through existing manager
                 redis_manager = app.state.redis_manager
                 test_key = "integration_test"
-                await redis_manager.set(test_key, "test_value", expire_seconds=60)
+                await redis_manager.set(test_key, "test_value", ex=60)
                 await redis_manager.delete(test_key)
                 
                 return {

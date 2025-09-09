@@ -30,14 +30,19 @@ from unittest.mock import AsyncMock
 
 # SSOT IMPORTS
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from test_framework.websocket_helpers import WebSocketTestHelpers, assert_websocket_events
 
 # System imports
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator, generate_uuid_replacement
+from shared.types.core_types import UserID, ThreadID, RunID
 
 
+@pytest.mark.integration
+@pytest.mark.real_services
+@pytest.mark.asyncio
 class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
     """
     Validates the 5 critical WebSocket agent events that enable golden path user experience.

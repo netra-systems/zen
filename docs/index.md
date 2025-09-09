@@ -4,6 +4,7 @@
 
 ### 🏗️ Core Architecture (Start Here)
 
+- **[🎯 Golden Path Documentation Index](./GOLDEN_PATH_DOCUMENTATION_INDEX.md)** 🚀 - **MASTER HUB**: Complete index and cross-reference for all Golden Path documentation, implementation reports, and validation evidence ($120K+ MRR protection)
 - **[🚀 Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** 🎯 - **MISSION CRITICAL**: Complete user journey analysis from connection to response delivery, identifies critical race conditions and WebSocket event requirements ($500K+ ARR dependency)
 - **[SSOT Index](../reports/ssot-compliance/SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
 - **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams including child context hierarchies
@@ -146,14 +147,15 @@ The system uses factory patterns extensively:
 
 ## 📖 Essential Reading Order
 
-1. **[🚀 Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **START HERE**: Complete user journey with critical issues and business impact
-2. **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory-based system overview including child context patterns
-3. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
-4. **[Golden Agent Index](./GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
-5. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
-6. [Tool Dispatcher Migration Guide](../reports/archived/TOOL_DISPATCHER_DEDUPLICATION_REPORT.md) - Learn isolation patterns
-7. [WebSocket Modernization Report](../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
-8. [Learnings Index](../SPEC/learnings/index.xml) - Critical patterns and known issues
+1. **[🎯 Golden Path Documentation Index](./GOLDEN_PATH_DOCUMENTATION_INDEX.md)** - **START HERE**: Master hub with complete navigation to all Golden Path documentation
+2. **[🚀 Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - Complete user journey with critical issues and business impact
+3. **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory-based system overview including child context patterns
+4. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
+5. **[Golden Agent Index](./GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
+6. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
+7. [Tool Dispatcher Migration Guide](../reports/archived/TOOL_DISPATCHER_DEDUPLICATION_REPORT.md) - Learn isolation patterns
+8. [WebSocket Modernization Report](../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
+9. [Learnings Index](../SPEC/learnings/index.xml) - Critical patterns and known issues
 
 ## 📚 Documentation Archive
 

@@ -32,14 +32,16 @@ from unittest.mock import patch
 # SSOT imports following CLAUDE.md absolute import rules
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
-from test_framework.ssot.e2e_auth_helper import (
-    E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user_context
-)
+from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from test_framework.websocket_helpers import WebSocketTestHelpers, WebSocketTestClient
-from shared.types.core_types import UserID, WebSocketID
+from shared.types.core_types import UserID, ThreadID, RunID, WebSocketID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
+@pytest.mark.integration
+@pytest.mark.real_services
+@pytest.mark.asyncio
 class TestRaceConditionScenarios(SSotAsyncTestCase):
     """Test race condition scenarios in Golden Path with real services."""
     

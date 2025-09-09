@@ -1329,10 +1329,14 @@ async def create_isolated_execution_context(
     return context
 
 
+# Alias for compatibility with integration tests
+UserExecutionContextFactory = UserContextFactory
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
     'UserContextFactory',
+    'UserExecutionContextFactory',  # Alias for compatibility
     'InvalidContextError', 
     'ContextIsolationError',
     'validate_user_context',

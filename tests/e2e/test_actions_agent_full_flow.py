@@ -33,7 +33,7 @@
     # REMOVED_SYNTAX_ERROR: import aiohttp
     # REMOVED_SYNTAX_ERROR: import psutil
     # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
     # CRITICAL: Add project root to Python path for imports
     # REMOVED_SYNTAX_ERROR: project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

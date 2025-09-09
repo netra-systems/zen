@@ -51,6 +51,7 @@ from test_framework.fixtures.real_services import (
 )
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 # Core type safety imports
 from shared.types.core_types import UserID, ThreadID, RunID, MessageID, WebSocketID
@@ -79,6 +80,9 @@ except ImportError:
     WEBSOCKET_AVAILABLE = False
 
 
+@pytest.mark.integration
+@pytest.mark.real_services
+@pytest.mark.asyncio
 class TestDataPersistenceComprehensive(
     DatabaseIntegrationTest, 
     CacheIntegrationTest, 

@@ -36,7 +36,7 @@ class WebSocketTestConnection:
                 """
                 import pytest
                 import asyncio
-                from netra_backend.app.core.agent_registry import AgentRegistry
+                from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
                 from shared.isolated_environment import IsolatedEnvironment
 
                 from netra_backend.app.websocket_core import get_websocket_manager

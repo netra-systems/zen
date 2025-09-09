@@ -36,7 +36,7 @@ from netra_backend.app.auth_dependencies import get_request_scoped_db_session_fo
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import test framework
-from test_framework.docker_manager import UnifiedDockerManager
+from test_framework.docker_test_manager import UnifiedDockerManager
 from test_framework.async_test_helpers import AsyncTestDatabase
 
 # Use isolated environment for all env access

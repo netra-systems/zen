@@ -51,7 +51,7 @@ from netra_backend.app.websocket_core.types import (
 )
 # Optional imports - may not exist in all environments
 try:
-    from netra_backend.app.core.agent_registry import AgentRegistry
+    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 except ImportError:
     AgentRegistry = None
 

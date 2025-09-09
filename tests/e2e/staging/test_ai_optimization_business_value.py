@@ -69,32 +69,31 @@ class TestAIOptimizationBusinessValue:
         await self.ws_utility.cleanup()
 
     async def _get_auth_token(self, user_id: str) -> str:
-        """Get authentication token for staging environment."""
-        # Use proper staging authentication with multiple fallback strategies
-        from tests.e2e.jwt_token_helpers import JWTTestHelper
+        """Get authentication token for staging environment using SSOT authentication helper."""
+        # SSOT COMPLIANCE: Use test_framework.ssot.e2e_auth_helper for all E2E authentication
+        from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
+        
+        # Create SSOT auth helper with staging configuration
+        auth_config = E2EAuthConfig.for_staging()
+        auth_helper = E2EAuthHelper(auth_config)
         
         # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-        # Primary approach: Use JWTTestHelper for staging authentication
-        jwt_helper = JWTTestHelper(environment="staging")
-        token = await jwt_helper.get_staging_jwt_token(
-            user_id=user_id, 
-            email=f"{user_id}@test.netrasystems.ai"
+        # Use SSOT authentication pattern
+        authenticated_user = await auth_helper.create_authenticated_user(
+            user_id=user_id,
+            email=f"{user_id}@test.netrasystems.ai",
+            full_name=f"Test User {user_id}",
+            permissions=["chat", "optimization", "data_analysis"]
         )
-        if token:
-            logger.info(f"✓ Generated staging JWT token for user {user_id}")
-            return token
         
-        # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-        # Fallback: Try staging config token generation
-        test_token = self.config.create_test_jwt_token()
-        if test_token:
-            logger.info(f"✓ Generated staging config token for user {user_id}")
-            return test_token
+        if authenticated_user and authenticated_user.jwt_token:
+            logger.info(f"✓ Generated SSOT staging JWT token for user {user_id}")
+            return authenticated_user.jwt_token
         
-        # Final fallback with clear error message
+        # If SSOT authentication fails, raise clear error
         error_msg = (
-            f"Unable to create valid staging authentication token for user {user_id}. "
-            f"Please set one of: E2E_BYPASS_KEY, STAGING_TEST_API_KEY, or STAGING_JWT_SECRET"
+            f"SSOT authentication failed for user {user_id} in staging environment. "
+            f"Check staging authentication configuration and credentials."
         )
         logger.error(error_msg)
         raise RuntimeError(error_msg)

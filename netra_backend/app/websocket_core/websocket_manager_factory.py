@@ -51,6 +51,9 @@ from typing import Union
 # Import UnifiedIDManager for SSOT ID generation
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
+# Import SSOT safe WebSocket state logging function
+from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
+
 logger = central_logger.get_logger(__name__)
 
 
@@ -1226,7 +1229,7 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
                         if connection.websocket.client_state == WebSocketState.CONNECTED:
                             healthy_connections += 1
                         else:
-                            logger.debug(f"Connection {conn_id} not in CONNECTED state: {connection.websocket.client_state}")
+                            logger.debug(f"Connection {conn_id} not in CONNECTED state: {_safe_websocket_state_for_logging(connection.websocket.client_state)}")
                     else:
                         # If no state info available, assume healthy if websocket exists
                         healthy_connections += 1

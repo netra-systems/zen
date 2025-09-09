@@ -11,6 +11,7 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, Optional
+from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.shared_health_types import HealthStatus
@@ -122,8 +123,8 @@ class HealthCheckValidator:
             # Test database connection and basic query
             async with asyncio.timeout(config.timeout_seconds):
                 async with app.state.db_session_factory() as session:
-                    # Basic connectivity test
-                    result = await session.execute("SELECT 1 as test_value")
+                    # Basic connectivity test  
+                    result = await session.execute(text("SELECT 1 as test_value"))
                     test_value = result.scalar()
                     
                     if test_value != 1:
@@ -133,11 +134,11 @@ class HealthCheckValidator:
                         )
                     
                     # Schema readiness check - count tables
-                    table_result = await session.execute("""
+                    table_result = await session.execute(text("""
                         SELECT COUNT(*) as table_count 
                         FROM information_schema.tables 
                         WHERE table_schema = 'public'
-                    """)
+                    """))
                     table_count = table_result.scalar()
                     
                     details = {
@@ -197,7 +198,7 @@ class HealthCheckValidator:
                 test_value = "health_check_value"
                 
                 # Test SET operation
-                await redis_manager.set(test_key, test_value, expire_seconds=60)
+                await redis_manager.set(test_key, test_value, ex=60)
                 
                 # Test GET operation
                 retrieved_value = await redis_manager.get(test_key)

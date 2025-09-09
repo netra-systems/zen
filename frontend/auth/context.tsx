@@ -9,7 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
-import { monitorAuthState } from '@/lib/auth-validation';
+import { monitorAuthState, createAtomicAuthUpdate, applyAtomicAuthUpdate, attemptEnhancedAuthRecovery } from '@/lib/auth-validation';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 export interface AuthContextType {
   user: User | null;
@@ -43,6 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false); // Track initialization completion
+  
+  // Initialization state machine - prevents race conditions during startup
+  const initStateRef = useRef<'idle' | 'starting' | 'processing_token' | 'dev_login' | 'completed' | 'failed'>('idle');
+  const initAttemptsRef = useRef(0);
+  const MAX_INIT_ATTEMPTS = 3;
   const [authConfig, setAuthConfig] = useState<AuthConfigResponse | null>(null);
   const [token, setToken] = useState<string | null>(() => {
     // Check for token in localStorage during initial state creation
@@ -78,6 +83,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authStore.logout();
     }
   }, [authStore]);
+
+  /**
+   * State machine helper for robust initialization
+   */
+  const transitionInitState = useCallback((
+    newState: typeof initStateRef.current, 
+    context?: string
+  ) => {
+    const oldState = initStateRef.current;
+    initStateRef.current = newState;
+    
+    logger.debug('[INIT STATE] Transition', {
+      component: 'AuthContext',
+      action: 'init_state_transition',
+      from: oldState,
+      to: newState,
+      context,
+      attempt: initAttemptsRef.current + 1
+    });
+  }, []);
+
+  /**
+   * Check if we can proceed with initialization step
+   */
+  const canProceedWithInit = useCallback(() => {
+    if (initAttemptsRef.current >= MAX_INIT_ATTEMPTS) {
+      logger.error('[INIT STATE] Max initialization attempts reached', {
+        attempts: initAttemptsRef.current,
+        state: initStateRef.current
+      });
+      return false;
+    }
+    return initStateRef.current !== 'completed';
+  }, []);
 
   /**
    * Automatically refresh token if needed with loop prevention
@@ -148,11 +187,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           const decodedUser = jwtDecode(newToken) as User;
           
-          // Update all auth state atomically
-          setToken(newToken);
-          setUser(decodedUser);
-          // Use the actual values we're setting, not stale state
-          syncAuthStore(decodedUser, newToken);
+          // Update all auth state atomically using atomic helper
+          const atomicUpdate = createAtomicAuthUpdate(newToken, decodedUser);
+          const updateSuccess = applyAtomicAuthUpdate(
+            atomicUpdate, 
+            setToken, 
+            setUser, 
+            syncAuthStore
+          );
+          
+          if (!updateSuccess) {
+            logger.error('Failed to apply atomic auth update during refresh');
+            refreshFailureCountRef.current++;
+            return;
+          }
           
           logger.info('Automatic token refresh successful', {
             component: 'AuthContext',
@@ -222,6 +270,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [handleTokenRefresh]);
 
   const fetchAuthConfig = useCallback(async () => {
+    // Check if we can proceed with initialization
+    if (!canProceedWithInit()) {
+      return;
+    }
+
+    // Start initialization
+    transitionInitState('starting', 'fetchAuthConfig_begin');
+    initAttemptsRef.current += 1;
+
     // Track the actual user that will be set for monitoring
     let actualUser: User | null = null;
     let actualToken: string | null = token;
@@ -238,6 +295,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (storedToken) {
         // Process the token if we have one
+        transitionInitState('processing_token', 'stored_token_found');
+        
         // Update token if different from state
         if (storedToken !== currentToken) {
           setToken(storedToken);
@@ -301,6 +360,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (!hasLoggedOut) {
           // Only auto-login if user hasn't explicitly logged out AND OAuth is not available
+          transitionInitState('dev_login', 'auto_dev_login_attempt');
+          
           logger.info('Attempting auto dev login (OAuth not available)', {
             component: 'AuthContext',
             action: 'auto_dev_login_attempt'
@@ -346,6 +407,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         component: 'AuthContext',
         action: 'fetch_auth_config_failed'
       });
+      transitionInitState('failed', 'auth_config_fetch_error');
       
       // Graceful degradation - create offline auth config
       const offlineConfig: AuthConfigResponse = {
@@ -373,8 +435,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
     } finally {
-      setLoading(false);
-      setInitialized(true); // Mark initialization as complete
+      // Mark as completed regardless of success/failure
+      if (initStateRef.current !== 'failed' || initAttemptsRef.current >= MAX_INIT_ATTEMPTS) {
+        transitionInitState('completed', 'auth_init_finally');
+        setLoading(false);
+        setInitialized(true); // Mark initialization as complete
+      }
       
       logger.info('[AUTH INIT] Auth context initialization finished', {
         component: 'AuthContext',
@@ -382,13 +448,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         hasUser: !!actualUser,
         hasToken: !!actualToken,
         initialized: true,
+        initState: initStateRef.current,
+        attempt: initAttemptsRef.current,
         timestamp: new Date().toISOString()
       });
       
       // Monitor auth state for consistency - use actual values that were set
       monitorAuthState(actualToken, actualUser, true, 'auth_init_complete');
     }
-  }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh, token]);
+  }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh, token, canProceedWithInit, transitionInitState]);
 
   const hasMountedRef = useRef(false);
 
@@ -413,12 +481,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Update token immediately when detected via storage event
         try {
           const decodedUser = jwtDecode(e.newValue) as User;
-          // Update state atomically
-          setToken(e.newValue);
-          setUser(decodedUser);
-          // Use actual values being set
-          syncAuthStore(decodedUser, e.newValue);
-          scheduleTokenRefreshCheck(e.newValue);
+          
+          // Update state atomically using atomic helper
+          const atomicUpdate = createAtomicAuthUpdate(e.newValue, decodedUser);
+          const updateSuccess = applyAtomicAuthUpdate(
+            atomicUpdate, 
+            setToken, 
+            setUser, 
+            syncAuthStore
+          );
+          
+          if (updateSuccess) {
+            scheduleTokenRefreshCheck(e.newValue);
+          } else {
+            logger.error('Failed to apply atomic auth update from storage event');
+          }
         } catch (error) {
           logger.error('Failed to decode token from storage event', error as Error);
         }

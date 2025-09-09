@@ -18,6 +18,21 @@ from datetime import datetime, timezone
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
+# Import core agent exceptions from canonical SSOT location
+from netra_backend.app.core.exceptions_agent import (
+    AgentExecutionError,
+    AgentTimeoutError,
+    AgentError,
+    LLMError
+)
+
+# Import service exceptions for cross-service error handling
+from netra_backend.app.core.exceptions_service import (
+    ServiceUnavailableError,
+    ServiceError,
+    ServiceTimeoutError
+)
+
 
 class AgentLifecycleError(NetraException):
     """

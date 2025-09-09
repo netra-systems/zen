@@ -33,6 +33,12 @@ export interface TokenValidation {
   errors: string[];
 }
 
+export interface AtomicAuthUpdate {
+  token: string | null;
+  user: User | null;
+  timestamp: number;
+}
+
 /**
  * Validates the consistency of auth state
  * This is CRITICAL for preventing chat initialization failures
@@ -236,21 +242,22 @@ export function monitorAuthState(
  */
 export async function attemptAuthRecovery(
   token: string | null,
+  user: User | null,
   setUser: (user: User | null) => void,
   setToken: (token: string | null) => void
 ): Promise<boolean> {
   logger.info('[AUTH RECOVERY] Attempting auth state recovery', {
     component: 'auth-validation',
     action: 'recovery_start',
-    hasToken: !!token
+    hasToken: !!token,
+    hasUser: !!user
   });
 
   // If we have a token but no user, try to decode it
   if (token && !user) {
     try {
-      const decoded = jwtDecode(token) as User;
-      
-      // Validate the decoded token
+      // Validate the token and get user from validation
+      // Note: We don't need to decode here as validateToken does it
       const validation = validateToken(token);
       if (validation.isValid && validation.decodedUser) {
         setUser(validation.decodedUser);
@@ -282,6 +289,139 @@ export async function attemptAuthRecovery(
     }
   }
 
+  return false;
+}
+
+/**
+ * Atomic auth state update helper - prevents race conditions
+ * CRITICAL: Always use this for simultaneous token+user updates
+ */
+export function createAtomicAuthUpdate(
+  token: string | null, 
+  user: User | null
+): AtomicAuthUpdate {
+  return {
+    token,
+    user,
+    timestamp: Date.now()
+  };
+}
+
+/**
+ * Apply atomic auth update with validation
+ * Returns true if update was applied successfully
+ */
+export function applyAtomicAuthUpdate(
+  update: AtomicAuthUpdate,
+  setToken: (token: string | null) => void,
+  setUser: (user: User | null) => void,
+  syncAuthStore?: (user: User | null, token: string | null) => void
+): boolean {
+  try {
+    // Validate the atomic update before applying
+    const validation = validateAuthState(update.token, update.user, true);
+    
+    if (!validation.isValid && validation.errors.length > 0) {
+      logger.error('[ATOMIC UPDATE] Invalid auth state in atomic update', {
+        component: 'auth-validation',
+        action: 'atomic_update_invalid',
+        errors: validation.errors,
+        update
+      });
+      return false;
+    }
+
+    // Apply updates atomically
+    setToken(update.token);
+    setUser(update.user);
+    
+    // Sync with external store if provided
+    if (syncAuthStore) {
+      syncAuthStore(update.user, update.token);
+    }
+
+    logger.info('[ATOMIC UPDATE] Auth state updated atomically', {
+      component: 'auth-validation',
+      action: 'atomic_update_success',
+      hasToken: !!update.token,
+      hasUser: !!update.user,
+      timestamp: update.timestamp
+    });
+    
+    return true;
+  } catch (error) {
+    logger.error('[ATOMIC UPDATE] Failed to apply atomic auth update', error as Error);
+    return false;
+  }
+}
+
+/**
+ * Enhanced recovery with atomic updates and proper error handling
+ */
+export async function attemptEnhancedAuthRecovery(
+  token: string | null,
+  user: User | null,
+  setUser: (user: User | null) => void,
+  setToken: (token: string | null) => void,
+  syncAuthStore?: (user: User | null, token: string | null) => void
+): Promise<boolean> {
+  logger.info('[ENHANCED RECOVERY] Starting enhanced auth recovery', {
+    component: 'auth-validation',
+    action: 'enhanced_recovery_start',
+    hasToken: !!token,
+    hasUser: !!user
+  });
+
+  // First try basic recovery
+  const basicRecoverySuccess = await attemptAuthRecovery(token, user, setUser, setToken);
+  if (basicRecoverySuccess) {
+    logger.info('[ENHANCED RECOVERY] Basic recovery succeeded');
+    return true;
+  }
+
+  // If basic recovery failed, try enhanced patterns
+  
+  // Pattern 1: Token exists but might be invalid - validate and recover
+  if (token) {
+    const tokenValidation = validateToken(token);
+    
+    if (tokenValidation.isValid && tokenValidation.decodedUser && !user) {
+      // We have a valid token with user data but no user set
+      const atomicUpdate = createAtomicAuthUpdate(token, tokenValidation.decodedUser);
+      const success = applyAtomicAuthUpdate(atomicUpdate, setToken, setUser, syncAuthStore);
+      
+      if (success) {
+        logger.info('[ENHANCED RECOVERY] Recovered user from valid token');
+        return true;
+      }
+    } else if (!tokenValidation.isValid) {
+      // Token is invalid - clear both token and user atomically
+      const atomicUpdate = createAtomicAuthUpdate(null, null);
+      const success = applyAtomicAuthUpdate(atomicUpdate, setToken, setUser, syncAuthStore);
+      
+      if (success) {
+        logger.info('[ENHANCED RECOVERY] Cleared invalid token and user');
+        // Also clear from localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('jwt_token');
+        }
+        return true;
+      }
+    }
+  }
+
+  // Pattern 2: User exists but no token - invalid state, clear both
+  if (user && !token) {
+    const atomicUpdate = createAtomicAuthUpdate(null, null);
+    const success = applyAtomicAuthUpdate(atomicUpdate, setToken, setUser, syncAuthStore);
+    
+    if (success) {
+      logger.info('[ENHANCED RECOVERY] Cleared user without token');
+      return true;
+    }
+  }
+
+  logger.warn('[ENHANCED RECOVERY] All recovery patterns failed');
   return false;
 }
 
@@ -332,5 +472,8 @@ export const AuthValidation = {
   validateToken,
   monitorAuthState,
   attemptAuthRecovery,
+  attemptEnhancedAuthRecovery,
+  createAtomicAuthUpdate,
+  applyAtomicAuthUpdate,
   debugAuthState
 };

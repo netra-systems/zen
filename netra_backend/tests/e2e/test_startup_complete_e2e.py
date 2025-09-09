@@ -46,7 +46,7 @@ from fastapi import FastAPI
 # SSOT imports following CLAUDE.md absolute import requirements
 from test_framework.ssot.base import BaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
-from test_framework.ssot.test_fixtures import E2ETestFixture
+from test_framework.ssot.real_services_test_fixtures import E2ETestFixture
 from shared.isolated_environment import get_env
 
 # Import modules under test

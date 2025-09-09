@@ -59,7 +59,6 @@ from netra_backend.app.core.managers.unified_state_manager import (
 
 # Supporting Infrastructure Imports
 from netra_backend.app.db.database_manager import DatabaseManager
-from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge

@@ -2,7 +2,6 @@ from shared.isolated_environment import get_env
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 from unittest.mock import Mock, patch, MagicMock

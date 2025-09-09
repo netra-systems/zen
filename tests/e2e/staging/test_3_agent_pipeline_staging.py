@@ -28,14 +28,61 @@ class TestAgentPipelineStaging(StagingTestBase):
         self.ensure_auth_setup()
     
     def ensure_auth_setup(self):
-        """Ensure authentication is set up regardless of execution method"""
+        """Ensure authentication is set up using SSOT patterns regardless of execution method"""
         if not hasattr(self, 'auth_helper'):
-            self.auth_helper = TestAuthHelper(environment="staging")
+            # SSOT COMPLIANCE: Use test_framework.ssot.e2e_auth_helper for all E2E authentication
+            from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
+            auth_config = E2EAuthConfig.for_staging()
+            self.auth_helper = E2EAuthHelper(auth_config)
         if not hasattr(self, 'test_token'):
-            self.test_token = self.auth_helper.create_test_token(
-                f"staging_pipeline_test_user_{int(time.time())}", 
-                "staging_pipeline@test.netrasystems.ai"
-            )
+            # REGRESSION FIX: Use proper async context instead of asyncio.run() in running loop
+            # Use SSOT authentication pattern with proper async handling
+            user_id = f"staging_pipeline_test_user_{int(time.time())}"
+            
+            # Check if we're already in an async context
+            try:
+                import asyncio
+                # Try to get the current event loop
+                loop = asyncio.get_running_loop()
+                # We're in an async context - create a task instead of asyncio.run()
+                import concurrent.futures
+                import threading
+                
+                # Run authentication in a separate thread to avoid event loop conflict
+                def create_user_sync():
+                    # Create new event loop for authentication
+                    new_loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(new_loop)
+                    try:
+                        return new_loop.run_until_complete(
+                            self.auth_helper.create_authenticated_user(
+                                user_id=user_id,
+                                email="staging_pipeline@test.netrasystems.ai",
+                                full_name=f"Pipeline Test User {user_id}",
+                                permissions=["agent_execution", "pipeline_test"]
+                            )
+                        )
+                    finally:
+                        new_loop.close()
+                
+                # Run in thread pool to avoid blocking
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(create_user_sync)
+                    authenticated_user = future.result(timeout=10)
+                    
+            except RuntimeError:
+                # Not in an async context - use asyncio.run() normally
+                authenticated_user = asyncio.run(self.auth_helper.create_authenticated_user(
+                    user_id=user_id,
+                    email="staging_pipeline@test.netrasystems.ai",
+                    full_name=f"Pipeline Test User {user_id}",
+                    permissions=["agent_execution", "pipeline_test"]
+                ))
+            
+            if authenticated_user and authenticated_user.jwt_token:
+                self.test_token = authenticated_user.jwt_token
+            else:
+                raise RuntimeError("Failed to create SSOT authenticated user for staging pipeline test")
     
     @staging_test
     async def test_real_agent_discovery(self):

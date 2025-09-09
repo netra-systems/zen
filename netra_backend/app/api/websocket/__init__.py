@@ -1,0 +1,1 @@
+"""WebSocket API module - bridge to SSOT types."""
