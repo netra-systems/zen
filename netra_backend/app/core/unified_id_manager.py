@@ -726,7 +726,21 @@ def is_valid_id_format(id_value: str) -> bool:
     except ValueError:
         pass
     
-    # Check for common test patterns first (backward compatibility)
+    # CRITICAL: Check for WebSocket temporary authentication IDs FIRST
+    # These are special temporary IDs used during WebSocket authentication flow
+    # SECURITY: These should ONLY be used during connection setup and replaced with real user IDs
+    websocket_temp_auth_patterns = [
+        r'^pending_auth$',               # Temporary user ID during WebSocket auth flow
+        r'^temp_auth_\w+$',             # Generic temporary auth patterns (future use)
+        r'^awaiting_auth(_\w+)?$',      # Alternative temporary auth patterns (with optional suffix)
+    ]
+    
+    import re
+    for pattern in websocket_temp_auth_patterns:
+        if re.match(pattern, id_value):
+            return True
+    
+    # Check for common test patterns (backward compatibility)
     test_patterns = [
         r'^test-user-\d+$',              # test-user-123
         r'^test-connection-\d+$',        # test-connection-456 
@@ -754,7 +768,6 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^\d{18,21}$',                  # Google OAuth numeric user IDs (18-21 digits)
     ]
     
-    import re
     for pattern in test_patterns:
         if re.match(pattern, id_value):
             return True

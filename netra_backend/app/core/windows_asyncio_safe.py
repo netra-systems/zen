@@ -31,6 +31,12 @@ logger = central_logger.get_logger(__name__)
 
 T = TypeVar('T')
 
+# CRITICAL FIX: Store original asyncio functions to prevent infinite recursion
+# These references are preserved before any monkey patching occurs
+_ORIGINAL_ASYNCIO_SLEEP = asyncio.sleep
+_ORIGINAL_ASYNCIO_WAIT_FOR = asyncio.wait_for  
+_ORIGINAL_ASYNCIO_GATHER = asyncio.gather
+
 class WindowsAsyncioSafePatterns:
     """Windows-safe asyncio patterns to prevent deadlocks."""
     
@@ -61,18 +67,21 @@ class WindowsAsyncioSafePatterns:
         Args:
             delay: Sleep duration in seconds
         """
+        # CRITICAL FIX: Always use the stored original asyncio.sleep to prevent recursion
+        # This method should NEVER be subject to monkey-patching
         if self.is_windows and delay > 0.1:
             # Break long sleeps into smaller chunks on Windows to prevent deadlocks
             remaining = delay
             chunk_size = 0.05  # 50ms chunks
             while remaining > 0:
                 sleep_time = min(chunk_size, remaining)
-                await asyncio.sleep(sleep_time)
+                await _ORIGINAL_ASYNCIO_SLEEP(sleep_time)
                 remaining -= sleep_time
-                # Allow other tasks to run
-                await asyncio.sleep(0)
+                # Allow other tasks to run between chunks
+                await _ORIGINAL_ASYNCIO_SLEEP(0)
         else:
-            await asyncio.sleep(delay)
+            # For short delays or non-Windows, use original sleep directly
+            await _ORIGINAL_ASYNCIO_SLEEP(delay)
     
     async def safe_wait_for(
         self, 
@@ -114,13 +123,13 @@ class WindowsAsyncioSafePatterns:
                     raise asyncio.TimeoutError(f"Operation timed out after {timeout}s")
                 
                 # Non-blocking sleep to allow other tasks
-                await asyncio.sleep(min(check_interval, timeout - elapsed))
+                await _ORIGINAL_ASYNCIO_SLEEP(min(check_interval, timeout - elapsed))
             
             return await task
         else:
             # Non-Windows platforms can use standard wait_for
             try:
-                return await asyncio.wait_for(awaitable, timeout=timeout)
+                return await _ORIGINAL_ASYNCIO_WAIT_FOR(awaitable, timeout=timeout)
             except asyncio.TimeoutError:
                 if default is not None:
                     return default
@@ -144,11 +153,11 @@ class WindowsAsyncioSafePatterns:
             for i in range(0, len(awaitables), max_concurrent):
                 chunk = awaitables[i:i + max_concurrent]
                 try:
-                    chunk_results = await asyncio.gather(*chunk, return_exceptions=return_exceptions)
+                    chunk_results = await _ORIGINAL_ASYNCIO_GATHER(*chunk, return_exceptions=return_exceptions)
                     results.extend(chunk_results)
                     # Small delay between chunks to prevent event loop saturation
                     if i + max_concurrent < len(awaitables):
-                        await asyncio.sleep(0.01)
+                        await _ORIGINAL_ASYNCIO_SLEEP(0.01)
                 except Exception as e:
                     if return_exceptions:
                         results.extend([e] * len(chunk))
@@ -158,7 +167,7 @@ class WindowsAsyncioSafePatterns:
             return results
         else:
             # Non-Windows or single awaitable
-            return await asyncio.gather(*awaitables, return_exceptions=return_exceptions)
+            return await _ORIGINAL_ASYNCIO_GATHER(*awaitables, return_exceptions=return_exceptions)
     
     async def safe_progressive_delay(
         self, 
