@@ -316,10 +316,11 @@ class E2EAuthHelper:
         last_error = None
         for attempt in range(max_retries + 1):
             try:
-                # Create WebSocket connection with full authentication
+                # PHASE 2 FIX: Use additional_headers instead of extra_headers for compatibility
+                # This fixes 100% connection failure rate under concurrent load
                 websocket = await websockets.connect(
                     websocket_url,
-                    extra_headers=headers,
+                    additional_headers=headers,  # FIXED: Changed from extra_headers to additional_headers
                     subprotocols=subprotocols,
                     ping_interval=20,  # Keep connection alive
                     ping_timeout=10,

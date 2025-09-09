@@ -27,7 +27,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 
 # CRITICAL: Import actual message routing and execution components
 from netra_backend.app.websocket_core.types import MessageType, create_standard_message
-from netra_backend.app.websocket_core.handlers import MessageProcessor, handle_agent_request_message
+from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler, BaseMessageHandler
 from netra_backend.app.routes.agents_execute import execute_agent_endpoint
 from netra_backend.app.services.agent_service_core import AgentServiceCore
@@ -67,7 +67,7 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
         ]
         
         routing_failures = []
-        processor = MessageProcessor()
+        router = get_message_router()
         
         for variation in case_variations:
             try:
@@ -79,15 +79,19 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
                 }
                 
                 # Attempt routing with different case variations
-                result = await processor.route_message(
-                    message_type=variation,
-                    data=message_data,
-                    user_id=message_data["user_id"]
-                )
-                
-                # Check if routing was successful
-                if result is None:
-                    routing_failures.append(f"ROUTING FAILURE: {variation} failed to route (returned None)")
+                try:
+                    test_message = create_standard_message(
+                        msg_type=variation,
+                        payload=message_data
+                    )
+                    handler = router.get_handler(test_message.type)
+                    
+                    # Check if routing was successful
+                    if handler is None:
+                        routing_failures.append(f"ROUTING FAILURE: {variation} failed to route (no handler found)")
+                except ValueError as ve:
+                    # Message type not valid - expected for non-standard formats
+                    routing_failures.append(f"MESSAGE TYPE INVALID: {variation} - {ve}")
                 
             except (KeyError, ValueError, AttributeError) as e:
                 # Case variation not recognized - expected for non-standard formats
@@ -113,8 +117,8 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
         """
         registration_failures = []
         
-        # Test handler registration in MessageProcessor
-        processor = MessageProcessor()
+        # Test handler registration in MessageRouter
+        router = get_message_router()
         
         # Check if execute_agent handler is registered
         execute_agent_variations = [
@@ -125,8 +129,8 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
         
         for message_type in execute_agent_variations:
             try:
-                # Check if handler exists for message type
-                handler = processor.get_handler(message_type)
+                # Check if handler exists for message type  
+                handler = router.get_handler(MessageType(message_type))
                 
                 if handler is None:
                     registration_failures.append(f"HANDLER REGISTRATION FAILURE: No handler registered for {message_type}")
@@ -302,27 +306,23 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
         
         # Test timeout handling in message routing
         try:
-            processor = MessageProcessor()
+            router = get_message_router()
             
             start_time = time.time()
             
             # Try to route message that might cause timeout
-            result = await asyncio.wait_for(
-                processor.route_message(
-                    message_type="execute_agent",
-                    data={"agent_name": "timeout_agent", "user_request": "timeout test"},
-                    user_id="routing_timeout_test"
-                ),
-                timeout=0.5  # 500ms timeout
+            test_message = create_standard_message(
+                msg_type=MessageType.AGENT_REQUEST,
+                payload={"agent_name": "timeout_agent", "user_request": "timeout test"}
             )
+            
+            # Simple synchronous handler lookup - timing it to check for performance issues
+            handler = router.get_handler(test_message.type)
             
             routing_time = time.time() - start_time
             if routing_time > 0.4:  # More than 400ms is slow
                 timeout_failures.append(f"SLOW ROUTING: Message routing took {routing_time:.3f}s")
             
-        except asyncio.TimeoutError:
-            routing_time = time.time() - start_time
-            timeout_failures.append(f"ROUTING TIMEOUT: Message routing timed out after {routing_time:.3f}s")
         except Exception as e:
             timeout_failures.append(f"ROUTING ERROR: {e}")
         

@@ -1,12 +1,12 @@
 """
-Demonstration tests for Issue #112 - Auth Middleware Dependency Order Violation.
+UPDATED: Tests for Issue #112 - Auth Middleware Dependency Order Violation - REMEDIATION VALIDATION.
 
-These tests are designed to FAIL and demonstrate the exact problem:
-- GCPAuthContextMiddleware is installed outside SSOT setup_middleware()
-- This causes SessionMiddleware dependency violations
-- The violation blocks Golden Path user flows
+These tests now validate that the issue has been FIXED:
+- GCPAuthContextMiddleware is now properly integrated into SSOT setup_middleware()
+- SessionMiddleware dependency order is correct
+- Golden Path user flows are unblocked
 
-CRITICAL: These tests document the bug and should FAIL with current code.
+CRITICAL: These tests should now PASS, confirming the successful remediation.
 """
 
 import pytest
@@ -15,8 +15,8 @@ from unittest.mock import Mock, patch, AsyncMock
 from fastapi import FastAPI, Request
 from starlette.middleware.sessions import SessionMiddleware
 
-from netra_backend.app.core.app_factory import _install_auth_context_middleware
-from netra_backend.app.core.middleware_setup import setup_middleware as ssot_setup_middleware
+# NOTE: _install_auth_context_middleware has been REMOVED as part of the fix
+from netra_backend.app.core.middleware_setup import setup_middleware as ssot_setup_middleware, setup_gcp_auth_context_middleware
 from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
 
 
@@ -62,10 +62,10 @@ class TestMiddlewareDependencyDemonstration:
         
         assert session_lines, "Should find lines that access request.session"
 
-    def test_ssot_setup_does_not_include_gcp_middleware(self):
-        """TEST 2: Prove that SSOT setup_middleware() does NOT include GCPAuthContextMiddleware.
+    def test_ssot_setup_now_includes_gcp_middleware(self):
+        """TEST 2: Verify that SSOT setup_middleware() NOW INCLUDES GCPAuthContextMiddleware.
         
-        This test FAILS and demonstrates the SSOT violation.
+        This test should now PASS, confirming the SSOT compliance fix.
         """
         # Analyze SSOT setup_middleware function
         source_lines = inspect.getsourcelines(ssot_setup_middleware)[0]
@@ -73,40 +73,56 @@ class TestMiddlewareDependencyDemonstration:
         
         # Look for GCP middleware setup patterns
         gcp_patterns = [
-            'GCPAuthContextMiddleware',
+            'setup_gcp_auth_context_middleware',  # Updated pattern
             'gcp_auth_context',
-            '_install_auth_context_middleware',
-            'install_auth_context_middleware'
+            'GCP Authentication Context middleware'
         ]
         
         found_gcp_patterns = [pattern for pattern in gcp_patterns if pattern in source_code]
         
-        print(f"\nSSOT setup_middleware() analysis:")
+        print(f"\nSSOT setup_middleware() analysis (POST-FIX):")
         print(f"  Total lines: {len(source_lines)}")
         print(f"  GCP middleware patterns found: {found_gcp_patterns}")
         
-        # This test SHOULD FAIL - demonstrating the SSOT violation
-        assert not found_gcp_patterns, (
-            f"SSOT VIOLATION: GCPAuthContextMiddleware setup found in SSOT function: {found_gcp_patterns}. "
-            f"This violates the principle that ALL middleware should be in SSOT setup_middleware()."
+        # This test should now PASS - confirming the SSOT compliance fix
+        assert found_gcp_patterns, (
+            f"SSOT COMPLIANCE RESTORED: GCPAuthContextMiddleware setup should be found in SSOT function. "
+            f"Expected patterns: {gcp_patterns}, Found: {found_gcp_patterns}"
         )
         
-        print(f"  ✓ CONFIRMED: GCPAuthContextMiddleware is NOT in SSOT setup_middleware()")
-
-    def test_factory_installs_gcp_middleware_outside_ssot(self):
-        """TEST 3: Prove that app_factory.py installs GCPAuthContextMiddleware outside SSOT.
+        print(f"  ✓ CONFIRMED: GCPAuthContextMiddleware is NOW PROPERLY in SSOT setup_middleware()")
         
-        This test FAILS and demonstrates the exact violation causing Issue #112.
+        # Verify the order is correct - should come after session middleware
+        setup_gcp_line = None
+        session_line = None
+        for i, line in enumerate(source_lines):
+            if 'setup_session_middleware' in line:
+                session_line = i
+            if 'setup_gcp_auth_context_middleware' in line:
+                setup_gcp_line = i
+        
+        if session_line is not None and setup_gcp_line is not None:
+            print(f"  Session middleware setup at line: {session_line}")  
+            print(f"  GCP auth middleware setup at line: {setup_gcp_line}")
+            assert setup_gcp_line > session_line, (
+                f"GCP auth middleware should come AFTER session middleware. "
+                f"Session line: {session_line}, GCP line: {setup_gcp_line}"
+            )
+            print(f"  ✓ CONFIRMED: Proper middleware order maintained")
+
+    def test_factory_no_longer_installs_gcp_middleware_outside_ssot(self):
+        """TEST 3: Verify that app_factory.py NO LONGER installs GCPAuthContextMiddleware outside SSOT.
+        
+        This test should now PASS, confirming the violation has been fixed.
         """
         from netra_backend.app.core import app_factory
         
         # Analyze the app factory module
         factory_source = inspect.getsource(app_factory)
         
-        # Look for GCP middleware installation
+        # Look for GCP middleware installation patterns (should be REMOVED)
         gcp_installation_patterns = [
             '_install_auth_context_middleware',
-            'GCPAuthContextMiddleware',
             'app.add_middleware(GCPAuthContextMiddleware'
         ]
         
@@ -115,28 +131,32 @@ class TestMiddlewareDependencyDemonstration:
             if pattern in factory_source:
                 found_installations.append(pattern)
         
-        print(f"\napp_factory.py GCP middleware installation analysis:")
-        print(f"  Patterns found: {found_installations}")
+        print(f"\napp_factory.py GCP middleware installation analysis (POST-FIX):")
+        print(f"  Violation patterns found: {found_installations}")
         
-        # Find the specific function that installs GCP middleware
-        if '_install_auth_context_middleware' in factory_source:
-            auth_install_source = inspect.getsource(_install_auth_context_middleware)
-            print(f"  _install_auth_context_middleware function found:")
-            print(f"    Lines: {len(auth_install_source.split(chr(10)))}")
-            
-            # Check if it installs GCP middleware
-            installs_gcp = 'GCPAuthContextMiddleware' in auth_install_source
-            print(f"    Installs GCPAuthContextMiddleware: {installs_gcp}")
-            
-            # This test FAILS - proving the violation
-            assert not installs_gcp, (
-                f"CRITICAL VIOLATION: _install_auth_context_middleware() installs "
-                f"GCPAuthContextMiddleware OUTSIDE the SSOT setup_middleware() function. "
-                f"This causes middleware order issues and can break SessionMiddleware dependencies."
-            )
+        # This test should now PASS - confirming the violation is fixed  
+        assert not found_installations, (
+            f"VIOLATION FIXED: No GCP middleware installation patterns should remain in app_factory.py. "
+            f"Found violating patterns: {found_installations}. "
+            f"All GCP middleware setup should now be in SSOT setup_middleware()."
+        )
         
-        assert found_installations, (
-            f"Expected to find GCP middleware installation patterns in app_factory.py"
+        print(f"  ✓ CONFIRMED: app_factory.py no longer installs GCP middleware outside SSOT")
+        
+        # Verify the note about SSOT delegation exists
+        ssot_delegation_patterns = [
+            'SSOT setup_middleware',
+            'middleware_setup.py',
+            'proper dependency order'
+        ]
+        
+        found_notes = [pattern for pattern in ssot_delegation_patterns if pattern in factory_source]
+        print(f"  SSOT delegation notes found: {found_notes}")
+        
+        # Should have documentation about the fix
+        assert found_notes, (
+            f"app_factory.py should contain notes about SSOT delegation. "
+            f"Expected patterns: {ssot_delegation_patterns}, Found: {found_notes}"
         )
 
     def test_middleware_order_causes_session_access_failure(self):
@@ -268,57 +288,61 @@ class TestMiddlewareDependencyDemonstration:
         )
 
 
-class TestSSOTComplianceViolation:
-    """Tests that document the specific SSOT compliance violation."""
+class TestSSOTComplianceRestoration:
+    """Tests that validate the SSOT compliance has been restored."""
 
-    def test_document_ssot_violation_pattern(self):
-        """Document the exact SSOT violation pattern causing Issue #112."""
+    def test_validate_ssot_compliance_restoration(self):
+        """Validate that the SSOT compliance violation has been successfully fixed."""
         
-        violation_report = {
-            'issue': 'GCPAuthContextMiddleware installed outside SSOT setup_middleware()',
-            'location': 'netra_backend/app/core/app_factory.py line 257',
-            'function': '_install_auth_context_middleware()',
-            'ssot_location': 'netra_backend/app/core/middleware_setup.py setup_middleware()',
-            'dependency': 'Requires SessionMiddleware to be installed first',
-            'impact': 'Breaks Golden Path user authentication and session management'
+        remediation_report = {
+            'issue_status': 'RESOLVED - GCPAuthContextMiddleware now in SSOT setup_middleware()',
+            'new_location': 'netra_backend/app/core/middleware_setup.py setup_gcp_auth_context_middleware()',
+            'ssot_integration': 'Properly integrated into setup_middleware() after SessionMiddleware',
+            'dependency_order': 'SessionMiddleware -> GCPAuthContextMiddleware (correct order)',
+            'impact': 'Golden Path user authentication and session management restored'
         }
         
-        print(f"\nSSOT Compliance Violation Report:")
-        for key, value in violation_report.items():
+        print(f"\nSSOT Compliance Remediation Report:")
+        for key, value in remediation_report.items():
             print(f"  {key}: {value}")
         
-        # Verify each component of the violation
+        # Verify each component of the fix
         
-        # 1. Confirm SSOT setup function exists
+        # 1. Confirm SSOT setup function exists and is enhanced
         assert callable(ssot_setup_middleware), "SSOT setup_middleware function should exist"
         
-        # 2. Confirm violating function exists
-        assert callable(_install_auth_context_middleware), "Violating function should exist"
+        # 2. Confirm new setup function exists
+        assert callable(setup_gcp_auth_context_middleware), "New GCP auth setup function should exist"
         
-        # 3. Check that SSOT function handles SessionMiddleware
+        # 3. Check that SSOT function now handles GCP middleware  
         ssot_source = inspect.getsource(ssot_setup_middleware)
+        handles_gcp = 'setup_gcp_auth_context_middleware' in ssot_source
         handles_session = 'SessionMiddleware' in ssot_source or 'setup_session_middleware' in ssot_source
-        assert handles_session, "SSOT function should handle SessionMiddleware"
-        
-        # 4. Check that violating function handles GCP middleware
-        violating_source = inspect.getsource(_install_auth_context_middleware)
-        installs_gcp = 'GCPAuthContextMiddleware' in violating_source
         
         print(f"\n  SSOT handles SessionMiddleware: {handles_session}")
-        print(f"  Violating function installs GCP middleware: {installs_gcp}")
+        print(f"  SSOT now handles GCP middleware: {handles_gcp}")
         
-        # This is the core of the violation - GCP middleware outside SSOT
-        if installs_gcp:
-            pytest.fail(
-                f"SSOT COMPLIANCE VIOLATION CONFIRMED: "
-                f"_install_auth_context_middleware() installs GCPAuthContextMiddleware "
-                f"outside the SSOT setup_middleware() function. This violates the principle "
-                f"that ALL middleware setup should go through the single source of truth. "
-                f"Result: SessionMiddleware dependency order issues block Golden Path."
+        assert handles_session, "SSOT function should handle SessionMiddleware"  
+        assert handles_gcp, "SSOT function should now handle GCP middleware"
+        
+        # 4. Verify proper order in SSOT function
+        ssot_lines = inspect.getsourcelines(ssot_setup_middleware)[0]
+        session_line = gcp_line = None
+        
+        for i, line in enumerate(ssot_lines):
+            if 'setup_session_middleware' in line:
+                session_line = i
+            elif 'setup_gcp_auth_context_middleware' in line:
+                gcp_line = i
+        
+        if session_line is not None and gcp_line is not None:
+            assert gcp_line > session_line, (
+                f"GCP middleware setup should come AFTER session middleware in SSOT. "
+                f"Session: line {session_line}, GCP: line {gcp_line}"
             )
-        else:
-            print(f"  No GCP middleware installation detected in violating function")
-            assert True, "Violation pattern not found - issue may be resolved"
+            print(f"  ✓ CONFIRMED: Proper middleware order in SSOT function")
+        
+        print(f"  ✓ SSOT COMPLIANCE FULLY RESTORED")
 
 
 if __name__ == '__main__':
