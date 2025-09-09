@@ -136,9 +136,9 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['redis'] = ServiceReadinessCheck(
             name='redis',
             validator=self._validate_redis_readiness,
-            timeout_seconds=60.0 if self.is_gcp_environment else 10.0,  # BUGFIX: Increased from 30.0 to 60.0 for staging race condition fix
-            retry_count=5,
-            retry_delay=1.5 if self.is_gcp_environment else 1.0,
+            timeout_seconds=15.0 if self.is_gcp_environment else 10.0,  # READINESS TIMEOUT FIX: Reduced from 60.0s to 15.0s to prevent health check timeouts
+            retry_count=3,  # Reduced retries to speed up validation
+            retry_delay=1.0,  # Consistent 1s delay for faster feedback
             is_critical=True,
             description="Redis connection and caching system"
         )
@@ -386,27 +386,48 @@ class GCPWebSocketInitializationValidator:
                 return False
     
     def _validate_websocket_integration_readiness(self) -> bool:
-        """Validate complete WebSocket integration readiness."""
+        """
+        Validate complete WebSocket integration readiness.
+        
+        CRITICAL FIX: This validation runs DURING Phase 6 (WEBSOCKET) in the deterministic
+        startup sequence. It should return True when websocket phase is reached or completed,
+        not just when finalize/complete phases are reached.
+        
+        Returns:
+            True if startup has reached websocket phase or beyond
+            False if startup is still in phases before websocket
+        """
         try:
             if not self.app_state:
                 return False
             
             # Check startup completion flag from deterministic startup
+            # CRITICAL FIX: Don't require startup_complete=True during websocket phase validation
+            # This validation runs DURING websocket phase, before startup is marked complete
             if hasattr(self.app_state, 'startup_complete'):
                 startup_complete = bool(self.app_state.startup_complete)
+                # Only require startup_complete=True if we're past the websocket phase
                 if not startup_complete:
-                    return False
+                    # Check if we've at least reached the websocket phase
+                    if hasattr(self.app_state, 'startup_phase'):
+                        current_phase = str(self.app_state.startup_phase)
+                        # Allow validation to pass if we're in websocket phase or beyond
+                        if current_phase not in ['websocket', 'finalize', 'complete']:
+                            return False
+                    else:
+                        return False
             
             # Check that we're not in a failed startup state
             if hasattr(self.app_state, 'startup_failed'):
                 if bool(self.app_state.startup_failed):
                     return False
             
-            # Verify Phase 6 (WEBSOCKET) completion
+            # Verify Phase 6 (WEBSOCKET) completion or in progress
             if hasattr(self.app_state, 'startup_phase'):
                 current_phase = str(self.app_state.startup_phase)
-                # Phase should be "complete" or "finalize"
-                if current_phase in ['init', 'dependencies', 'database', 'cache', 'services', 'websocket']:
+                # Phase should be "websocket", "finalize", or "complete"
+                # Return False only if we're in phases BEFORE websocket
+                if current_phase in ['init', 'dependencies', 'database', 'cache', 'services']:
                     return False
             
             return True
@@ -417,7 +438,7 @@ class GCPWebSocketInitializationValidator:
     
     async def validate_gcp_readiness_for_websocket(
         self, 
-        timeout_seconds: float = 120.0
+        timeout_seconds: float = 30.0
     ) -> GCPReadinessResult:
         """
         Validate GCP readiness for WebSocket connections.
@@ -457,7 +478,7 @@ class GCPWebSocketInitializationValidator:
             self.logger.info("📋 Phase 1: Validating dependencies (Database, Redis, Auth)...")
             dependencies_ready = await self._validate_service_group([
                 'database', 'redis', 'auth_validation'
-            ], timeout_seconds=60.0)
+            ], timeout_seconds=20.0)
             
             if not dependencies_ready['success']:
                 failed_services.extend(dependencies_ready['failed'])
@@ -489,7 +510,7 @@ class GCPWebSocketInitializationValidator:
                 self.logger.info("📋 Phase 2: Validating services (Agent Supervisor, WebSocket Bridge)...")
                 services_ready = await self._validate_service_group([
                     'agent_supervisor', 'websocket_bridge'
-                ], timeout_seconds=60.0)
+                ], timeout_seconds=10.0)
                 
                 if not services_ready['success']:
                     failed_services.extend(services_ready['failed'])
@@ -503,7 +524,7 @@ class GCPWebSocketInitializationValidator:
                 self.logger.info("📋 Phase 3: Validating WebSocket integration...")
                 integration_ready = await self._validate_service_group([
                     'websocket_integration'
-                ], timeout_seconds=30.0)
+                ], timeout_seconds=5.0)
                 
                 if not integration_ready['success']:
                     failed_services.extend(integration_ready['failed'])
@@ -697,7 +718,7 @@ async def gcp_websocket_readiness_check(app_state: Any) -> Tuple[bool, Dict[str,
         Tuple of (ready: bool, details: dict)
     """
     validator = create_gcp_websocket_validator(app_state)
-    result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=30.0)
+    result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=15.0)
     
     return result.ready, {
         "websocket_ready": result.ready,

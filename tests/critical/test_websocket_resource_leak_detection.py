@@ -734,9 +734,10 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
     @pytest.mark.asyncio  
     async def test_emergency_cleanup_threshold_trigger(self):
         """
-        CRITICAL TEST: Verify emergency cleanup triggers at 80% capacity (16 managers).
+        CRITICAL TEST: Verify proactive cleanup triggers at 60% capacity (12 managers).
         
-        This tests the emergency cleanup mechanism that should prevent hitting the hard limit.
+        This tests the proactive cleanup mechanism that prevents hitting emergency thresholds.
+        Updated to reflect improved 60% threshold instead of 80% emergency threshold.
         """
         logger.info("🔥 CRITICAL TEST: Emergency Cleanup Threshold Trigger")
         
@@ -745,9 +746,9 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         user_id = "test-user-1002"
         created_managers = []
         
-        # Phase 1: Create managers approaching 80% threshold (16 managers)
-        logger.info("Phase 1: Creating managers to approach 80% threshold")
-        for i in range(16):
+        # Phase 1: Create managers approaching 60% threshold (12 managers)  
+        logger.info("Phase 1: Creating managers to approach 60% threshold")
+        for i in range(12):
             context = self.create_test_user_context(
                 user_id,
                 websocket_client_id=f"ws-emergency-{i}-{uuid.uuid4().hex[:8]}"
@@ -760,8 +761,8 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
             connection = self.create_test_websocket_connection(user_id, f"conn-emergency-{i}")
             await manager.add_connection(connection)
             
-            # Make first 8 managers "old" by setting their activity time
-            if i < 8:
+            # Make first 6 managers "old" by setting their activity time  
+            if i < 6:
                 old_time = datetime.utcnow() - timedelta(minutes=10)
                 manager._metrics.last_activity = old_time
                 # Also update creation time in factory
@@ -771,18 +772,18 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
                         break
         
         threshold_snapshot = self.resource_tracker.take_snapshot("threshold_reached", self.factory)
-        assert threshold_snapshot["active_managers"] == 16
+        assert threshold_snapshot["active_managers"] == 12
         
-        # Phase 2: Test emergency cleanup trigger
-        logger.info("Phase 2: Testing emergency cleanup mechanism")
+        # Phase 2: Test proactive cleanup trigger  
+        logger.info("Phase 2: Testing proactive cleanup mechanism (60% threshold)")
         
-        # This should trigger emergency cleanup before hitting the limit
+        # This should trigger proactive cleanup before hitting emergency limits
         emergency_context = self.create_test_user_context(
             user_id,
-            websocket_client_id=f"ws-trigger-emergency-{uuid.uuid4().hex[:8]}"
+            websocket_client_id=f"ws-trigger-proactive-cleanup-{uuid.uuid4().hex[:8]}"
         )
         
-        # The factory should perform emergency cleanup internally before creating new manager
+        # The factory should perform proactive cleanup internally before creating new manager
         emergency_start_time = time.time()
         
         try:
@@ -796,22 +797,23 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
                 new_manager_created=True
             )
             
-            # Emergency cleanup should have been triggered
-            post_emergency_snapshot = self.resource_tracker.take_snapshot("post_emergency", self.factory)
+            # Proactive cleanup should have been triggered
+            post_proactive_snapshot = self.resource_tracker.take_snapshot("post_proactive", self.factory)
             
-            # Should have fewer than 20 managers due to emergency cleanup
-            assert post_emergency_snapshot["active_managers"] < 20
+            # Should have fewer managers due to proactive cleanup (removed old managers)
+            # Expected: 12 original - 6 old + 1 new = 7 managers
+            assert post_proactive_snapshot["active_managers"] <= 7  
             assert new_manager._is_active
             
-            logger.info(f"📊 EMERGENCY CLEANUP TRIGGERED:")
+            logger.info(f"📊 PROACTIVE CLEANUP TRIGGERED:")
             logger.info(f"  Before: {threshold_snapshot['active_managers']} managers")
-            logger.info(f"  After: {post_emergency_snapshot['active_managers']} managers")
+            logger.info(f"  After: {post_proactive_snapshot['active_managers']} managers")
             logger.info(f"  Cleanup duration: {emergency_duration_ms:.1f}ms")
             
         except RuntimeError as e:
-            # If emergency cleanup failed, we should still test the manual cleanup
+            # If proactive cleanup failed, we should still test the manual cleanup
             if "maximum number" in str(e):
-                logger.warning("Emergency cleanup mechanism may need tuning - testing manual cleanup")
+                logger.warning("Proactive cleanup mechanism may need tuning - testing manual cleanup")
                 
                 # Test manual emergency cleanup
                 manual_cleanup_start = time.time()
@@ -840,34 +842,34 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
             else:
                 raise
         
-        # Phase 3: Validate emergency cleanup effectiveness
-        final_snapshot = self.resource_tracker.take_snapshot("emergency_test_complete", self.factory)
+        # Phase 3: Validate proactive cleanup effectiveness
+        final_snapshot = self.resource_tracker.take_snapshot("proactive_test_complete", self.factory)
         
         # Should not have hit the hard limit
         assert final_snapshot["active_managers"] <= 20
         assert final_snapshot["resource_limit_hits"] <= initial_snapshot["resource_limit_hits"] + 1
         
-        # Emergency cleanup should be reasonably fast (using configuration)
-        emergency_timings = [t for t in self.resource_tracker.timing_measurements 
+        # Proactive cleanup should be reasonably fast (using configuration)
+        proactive_timings = [t for t in self.resource_tracker.timing_measurements 
                            if t["operation"] in ["emergency_cleanup_trigger", "manual_emergency_cleanup"]]
         
-        if emergency_timings:
-            max_emergency_time = max(t["duration_ms"] for t in emergency_timings)
-            emergency_threshold = self.test_config.emergency_cleanup_timeout_ms
+        if proactive_timings:
+            max_proactive_time = max(t["duration_ms"] for t in proactive_timings)
+            proactive_threshold = self.test_config.emergency_cleanup_timeout_ms
             
-            if max_emergency_time > emergency_threshold:
+            if max_proactive_time > proactive_threshold:
                 self.resource_tracker.record_violation(
-                    "slow_emergency_cleanup",
+                    "slow_proactive_cleanup",
                     "HIGH",
-                    duration_ms=max_emergency_time,
-                    threshold_ms=emergency_threshold
+                    duration_ms=max_proactive_time,
+                    threshold_ms=proactive_threshold
                 )
             
             # Allow 2x the configured threshold as absolute maximum
-            max_acceptable = emergency_threshold * 2
-            assert max_emergency_time < max_acceptable, f"Emergency cleanup too slow: {max_emergency_time}ms (max allowed: {max_acceptable}ms)"
+            max_acceptable = proactive_threshold * 2
+            assert max_proactive_time < max_acceptable, f"Proactive cleanup too slow: {max_proactive_time}ms (max allowed: {max_acceptable}ms)"
         
-        logger.info("✅ EMERGENCY CLEANUP THRESHOLD TEST PASSED")
+        logger.info("✅ PROACTIVE CLEANUP THRESHOLD TEST PASSED")
 
     @pytest.mark.asyncio
     async def test_rapid_websocket_connection_cycles_stress(self):

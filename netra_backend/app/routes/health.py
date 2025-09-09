@@ -537,15 +537,16 @@ async def ready(request: Request) -> Dict[str, Any]:
             
             async with get_db() as db:
                 try:
-                    # CRITICAL FIX: Reduce timeout to align with faster database check (6.0s total allows for retries)
-                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=6.0)
+                    # CRITICAL FIX: Increase timeout to accommodate GCP validator's actual validation times
+                    # GCP WebSocket validator needs up to 30s, so allow 45s total for safety margin
+                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=45.0)
                     return result
                 except asyncio.TimeoutError:
-                    logger.error("Readiness check exceeded 6 second timeout")
+                    logger.error("Readiness check exceeded 45 second timeout")
                     return _create_error_response(503, {
                         "status": "unhealthy",
-                        "message": "Readiness check timeout",
-                        "timeout_seconds": 6
+                        "message": "Readiness check timeout - services taking longer than expected to initialize",
+                        "timeout_seconds": 45
                     })
                 except Exception as check_error:
                     logger.error(f"Readiness check failed: {check_error}")

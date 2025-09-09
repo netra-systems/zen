@@ -369,6 +369,90 @@ class UserExecutionContext:
             audit_metadata=audit_metadata or {}
         )
     
+    @classmethod
+    def from_websocket_request(
+        cls,
+        user_id: str,
+        websocket_client_id: Optional[str] = None,
+        operation: str = "websocket_session"
+    ) -> 'UserExecutionContext':
+        """
+        SSOT factory method for WebSocket context creation with consistent ID generation.
+        
+        This is the Single Source of Truth for WebSocket-related UserExecutionContext creation.
+        It ensures consistent thread_id generation patterns across all WebSocket components,
+        preventing the isolation key mismatches that cause resource leak issues.
+        
+        Business Value Justification (BVJ):
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Eliminate WebSocket resource leaks causing user connection failures
+        - Value Impact: Ensures reliable chat connections and prevents service degradation
+        - Strategic Impact: CRITICAL - Prevents cascade failures in real-time user interactions
+        
+        Args:
+            user_id: User identifier from authentication
+            websocket_client_id: Optional WebSocket connection ID (auto-generated if None)
+            operation: Operation type for ID generation consistency (default: "websocket_session")
+            
+        Returns:
+            New UserExecutionContext with consistent SSOT ID generation
+            
+        Raises:
+            InvalidContextError: If user_id is invalid or ID generation fails
+        """
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
+            raise InvalidContextError(
+                f"user_id must be a non-empty string for WebSocket context, got: {user_id!r}"
+            )
+        
+        # Use SSOT ID generation for consistent patterns
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        
+        try:
+            # Generate consistent IDs using SSOT pattern
+            thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+                user_id=user_id,
+                operation=operation
+            )
+            
+            # Generate websocket_client_id if not provided
+            if websocket_client_id is None:
+                websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id)
+                
+            logger.info(
+                f"SSOT WebSocket Context: Created for user {user_id[:8]}... with "
+                f"thread_id={thread_id}, websocket_client_id={websocket_client_id}"
+            )
+            
+            return cls(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                request_id=request_id,
+                websocket_client_id=websocket_client_id,
+                agent_context={
+                    'source': 'websocket_ssot',
+                    'operation': operation,
+                    'created_via': 'from_websocket_request'
+                },
+                audit_metadata={
+                    'context_source': 'websocket_ssot',
+                    'id_generation_method': 'UnifiedIdGenerator',
+                    'operation_type': operation,
+                    'isolation_key_compatible': True
+                }
+            )
+            
+        except Exception as id_error:
+            logger.error(
+                f"SSOT ID generation failed for WebSocket context creation "
+                f"(user_id={user_id[:8]}..., operation={operation}): {id_error}"
+            )
+            raise InvalidContextError(
+                f"WebSocket context creation failed due to ID generation error: {id_error}. "
+                f"This indicates a system configuration issue with SSOT ID generation."
+            ) from id_error
+    
     @classmethod 
     def from_fastapi_request(
         cls,

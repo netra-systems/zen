@@ -519,8 +519,8 @@ class UserMessageHandler(BaseMessageHandler):
     
     def __init__(self):
         super().__init__([
-            MessageType.USER_MESSAGE,
-            MessageType.CHAT,
+            # USER_MESSAGE and CHAT are handled by AgentMessageHandler for agent execution
+            # This handler only handles system and thread-related messages
             MessageType.SYSTEM_MESSAGE,
             MessageType.AGENT_RESPONSE,
             MessageType.AGENT_PROGRESS,
@@ -544,9 +544,7 @@ class UserMessageHandler(BaseMessageHandler):
             logger.info(f"Processing {message.type} from {user_id}: {message.payload.get('content', '')[:100]}")
             
             # Handle different message subtypes
-            if message.type in [MessageType.USER_MESSAGE, MessageType.CHAT]:
-                return await self._handle_user_message(user_id, websocket, message)
-            elif message.type == MessageType.AGENT_RESPONSE:
+            if message.type == MessageType.AGENT_RESPONSE:
                 return await self._handle_agent_response(user_id, websocket, message)
             else:
                 # Generic handling
