@@ -25,7 +25,7 @@ import {
 export const createWebSocketState = (status: WebSocketStatus): WebSocketConnectionState => {
   const isConnected = status === 'OPEN';
   const isConnecting = status === 'CONNECTING';
-  const isFailed = status === 'CLOSED';
+  const isFailed = status === 'CLOSED' || status === 'CLOSING';
   return { isConnected, isConnecting, isFailed, status };
 };
 
