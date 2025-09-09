@@ -948,7 +948,8 @@ class UnifiedToolDispatcherFactory:
     def create_for_request(
         user_context: 'UserExecutionContext',
         websocket_manager: Optional['WebSocketManager'] = None,
-        tools: Optional[List['BaseTool']] = None
+        tools: Optional[List['BaseTool']] = None,
+        registry: Optional['ToolRegistry'] = None
     ) -> UnifiedToolDispatcher:
         """Create a request-scoped tool dispatcher.
         
@@ -956,6 +957,7 @@ class UnifiedToolDispatcherFactory:
             user_context: User execution context for isolation
             websocket_manager: WebSocket manager for event emission
             tools: Initial tools to register
+            registry: Optional pre-created registry to prevent proliferation
             
         Returns:
             Request-scoped UnifiedToolDispatcher instance
@@ -967,7 +969,8 @@ class UnifiedToolDispatcherFactory:
             user_context=user_context,
             websocket_manager=websocket_manager,
             strategy=DispatchStrategy.DEFAULT,
-            tools=tools
+            tools=tools,
+            registry=registry
         )
     
     @staticmethod
