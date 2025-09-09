@@ -90,15 +90,8 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         google_project = env.get("GOOGLE_CLOUD_PROJECT", "")
         k_service = env.get("K_SERVICE", "")  # GCP Cloud Run service name
         
-        # Auto-detect staging environments that should enable E2E bypass
-        is_staging_environment = (
-            current_env == "staging" or
-            "staging" in google_project.lower() or
-            k_service.endswith("-staging") or  # Cloud Run staging service detection
-            "staging" in k_service.lower()
-        )
-        
-        # Standard E2E environment variable detection
+        # SECURITY FIX: E2E environment variable detection only
+        # Removed automatic staging environment detection to prevent auth bypass
         is_e2e_via_env_vars = (
             env.get("E2E_TESTING", "0") == "1" or 
             env.get("PYTEST_RUNNING", "0") == "1" or
@@ -107,12 +100,13 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
             env.get("E2E_TEST_ENV") == "staging"
         )
         
-        # ENHANCED FIX: Combine environment variable detection with staging auto-detection
-        is_e2e_via_env = is_e2e_via_env_vars or is_staging_environment
+        # CRITICAL SECURITY FIX: Only use explicit environment variables for E2E bypass
+        # Do NOT automatically bypass auth for staging deployments
+        is_e2e_via_env = is_e2e_via_env_vars
         
-        # Log enhanced detection for debugging
-        if is_staging_environment and not is_e2e_via_env_vars:
-            logger.info(f"ENHANCED E2E DETECTION: Auto-enabled for staging environment "
+        # Log E2E detection for debugging
+        if is_e2e_via_env_vars:
+            logger.info(f"E2E DETECTION: Enabled via environment variables "
                        f"(env={current_env}, project={google_project[:20]}..., service={k_service})")
         
         # Create E2E context if detected
@@ -122,8 +116,7 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
                 "detection_method": {
                     "via_headers": is_e2e_via_headers,
                     "via_environment": is_e2e_via_env,
-                    "via_env_vars": is_e2e_via_env_vars,
-                    "via_staging_auto_detection": is_staging_environment
+                    "via_env_vars": is_e2e_via_env_vars
                 },
                 "e2e_headers": e2e_headers,
                 "environment": current_env,
