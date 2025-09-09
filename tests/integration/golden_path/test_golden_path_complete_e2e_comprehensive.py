@@ -346,19 +346,57 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     
     async def establish_authenticated_websocket_connection(
         self, 
-        context: GoldenPathTestContext
-    ) -> websockets.WebSocketServerProtocol:
+        context: GoldenPathTestContext,
+        services: Optional[Dict[str, Any]] = None
+    ):
         """
         Establish authenticated WebSocket connection with comprehensive error handling.
         
         Args:
             context: Golden Path test context
+            services: Optional mock services (for no-Docker mode)
             
         Returns:
-            Authenticated WebSocket connection
+            Authenticated WebSocket connection or mock WebSocket
         """
         connection_start = time.time()
         
+        # Check if we should use mock services
+        if services and services.get("service_type") == "mock":
+            logger.info(f"🔧 Using mock WebSocket connection for {context.test_id}")
+            self.using_mock_services = True
+            
+            # Create mock WebSocket connection
+            mock_websocket = services["websocket_manager"]
+            
+            # Simulate connection process
+            await asyncio.sleep(0.1)  # Simulate connection delay
+            
+            # Connect to mock WebSocket
+            user_context = {
+                "user_id": context.authenticated_user.user_id,
+                "email": context.authenticated_user.email
+            }
+            
+            success = await mock_websocket.connect(
+                context.authenticated_user.user_id, 
+                user_context
+            )
+            
+            if not success:
+                raise ConnectionError("Failed to connect to mock WebSocket")
+            
+            # Track connection timing
+            connection_time = time.time() - connection_start
+            self.golden_path_metrics.websocket_connection_time = connection_time
+            
+            # Mark connection established in context
+            context.mark_connection_established()
+            
+            logger.success(f"✅ Mock WebSocket connection established in {connection_time:.2f}s")
+            return mock_websocket
+        
+        # Try real WebSocket connection first
         try:
             # Get WebSocket authentication headers using SSOT helper
             headers = self.websocket_auth_helper.get_websocket_headers(

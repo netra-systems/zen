@@ -31,6 +31,5 @@ __all__ = [
 'TestClickHouseConnectionPool',
 'TestMigrationRunnerSafety',
 'TestDatabaseHealthChecks',
-,
 'TestOptimizationRepositoryStorage',
 ]

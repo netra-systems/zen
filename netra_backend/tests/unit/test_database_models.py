@@ -16,6 +16,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 
+from netra_backend.app.auth.models import (
     Base,
     AuthUser,
     AuthSession,

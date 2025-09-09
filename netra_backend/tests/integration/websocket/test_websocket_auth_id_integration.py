@@ -93,6 +93,7 @@ except ImportError:
 from tests.clients.auth_client import AuthTestClient as AuthServiceClient
 # AuthSession model - create mock if not available
 try:
+    from netra_backend.app.auth.models import AuthSession
 except ImportError:
     # Mock AuthSession for integration testing
     class AuthSession:
