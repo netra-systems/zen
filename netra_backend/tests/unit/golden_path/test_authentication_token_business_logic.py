@@ -244,6 +244,12 @@ class AuthenticationTokenManager:
                         validation_result["security_warnings"].append(
                             f"Potential tier escalation detected: {user_tier.value} tier token missing expected permissions: {sorted(missing_permissions)}"
                         )
+                        
+                        # Also specifically flag the suspicious escalated permissions
+                        escalated_high_value_perms = set(token_permissions) & high_value_permissions
+                        if escalated_high_value_perms:
+                            for perm in escalated_high_value_perms:
+                                validation_result["security_warnings"].append(f"Suspicious {perm} permission in incomplete {user_tier.value} token")
             
             # Business Rule 5: Validate business context integrity
             business_context = decoded_payload["business_context"]
