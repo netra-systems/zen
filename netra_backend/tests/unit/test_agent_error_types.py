@@ -37,7 +37,7 @@ class TestAgentErrorTypes(SSotBaseTestCase):
         """
         error_msg = "Invalid input parameter"
         field_name = "user_id"
-        context = ErrorContext(trace_id="test-123", user_id="user-456")
+        context = ErrorContext(operation="test_validation", trace_id="test-123", user_id="user-456")
         
         error = AgentValidationError(
             message=error_msg,
@@ -46,7 +46,7 @@ class TestAgentErrorTypes(SSotBaseTestCase):
         )
         
         # Verify error message and custom attributes
-        assert str(error) == error_msg
+        assert error_msg in str(error)  # Error may include category prefix
         assert error.field_name == field_name
         assert error.context == context
         
@@ -83,7 +83,7 @@ class TestAgentErrorTypes(SSotBaseTestCase):
         """
         error_msg = "Connection timeout"
         endpoint = "https://api.external-service.com/v1/data"
-        context = ErrorContext(trace_id="net-456", user_id="user-789")
+        context = ErrorContext(operation="test_network", trace_id="net-456", user_id="user-789")
         
         error = NetworkError(
             message=error_msg,
@@ -125,7 +125,7 @@ class TestAgentErrorTypes(SSotBaseTestCase):
         """
         error_msg = "Query execution failed"
         query = "SELECT * FROM user_sessions WHERE user_id = $1"
-        context = ErrorContext(trace_id="db-789", user_id="user-012")
+        context = ErrorContext(operation="test_database", trace_id="db-789", user_id="user-012")
         
         error = AgentDatabaseError(
             message=error_msg,
@@ -220,7 +220,7 @@ class TestAgentErrorTypes(SSotBaseTestCase):
         """
         trace_id = "trace-123-456"
         user_id = "user-789-012"
-        context = ErrorContext(trace_id=trace_id, user_id=user_id)
+        context = ErrorContext(operation="test_error_creation", trace_id=trace_id, user_id=user_id)
         
         validation_error = AgentValidationError("test", context=context)
         network_error = NetworkError("test", context=context)

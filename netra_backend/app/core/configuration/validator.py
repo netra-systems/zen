@@ -276,6 +276,43 @@ class ConfigurationValidator:
             # External services often have reasonable defaults or are optional
             return []
     
+    def validate_environment_variables(self, env_dict: Dict[str, str]) -> ValidationResult:
+        """Validate environment variables without creating config objects.
+        
+        This method is used for testing configuration validation without
+        instantiating full configuration objects.
+        
+        Args:
+            env_dict: Dictionary of environment variables to validate
+            
+        Returns:
+            ValidationResult with errors and warnings
+        """
+        errors = []
+        warnings = []
+        
+        # Basic required variables validation
+        required_vars = ["ENVIRONMENT"]
+        for var in required_vars:
+            if not env_dict.get(var):
+                errors.append(f"Missing required environment variable: {var}")
+        
+        # Environment-specific validation
+        environment = env_dict.get("ENVIRONMENT", "").lower()
+        if environment == "production":
+            # Production requires strict validation
+            prod_required = ["JWT_SECRET_KEY", "SERVICE_SECRET", "POSTGRES_PASSWORD"]
+            for var in prod_required:
+                if not env_dict.get(var):
+                    errors.append(f"Missing required production variable: {var}")
+        
+        return ValidationResult(
+            is_valid=len(errors) == 0,
+            errors=errors,
+            warnings=warnings,
+            score=90 if len(errors) == 0 else 50
+        )
+
     def _collect_config_dependency_errors(self, config: AppConfig) -> List[str]:
         """Collect configuration dependency errors using ConfigDependencyMap.
         

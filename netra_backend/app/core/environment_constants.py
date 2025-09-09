@@ -122,8 +122,8 @@ class EnvironmentDetector:
         """Get the current environment using standardized detection logic.
         
         Priority order:
-        1. Testing environment detection (TESTING variable takes highest priority)
-        2. Explicit ENVIRONMENT variable
+        1. Explicit ENVIRONMENT variable (highest priority)
+        2. Testing environment detection (TESTING variable or pytest context)
         3. Cloud platform detection
         4. Default to development
         
@@ -135,14 +135,14 @@ class EnvironmentDetector:
         should use the unified configuration system.
         """
         # BOOTSTRAP ONLY: Direct env access required for initial config loading
-        # Check for testing environment first (highest priority)
-        if bool(get_env().get(EnvironmentVariables.TESTING)) or bool(get_env().get(EnvironmentVariables.PYTEST_CURRENT_TEST)):
-            return Environment.TESTING.value
-        
-        # Check explicit environment variable second
+        # Check explicit environment variable first (highest priority)
         env_var = get_env().get(EnvironmentVariables.ENVIRONMENT, "").strip().lower()
         if Environment.is_valid(env_var):
             return env_var
+        
+        # Check for testing environment second (only if ENVIRONMENT not explicitly set)
+        if bool(get_env().get(EnvironmentVariables.TESTING)) or bool(get_env().get(EnvironmentVariables.PYTEST_CURRENT_TEST)):
+            return Environment.TESTING.value
             
         # Check for cloud environments
         cloud_env = EnvironmentDetector.detect_cloud_environment()
