@@ -456,6 +456,12 @@ async def websocket_endpoint(websocket: WebSocket):
         from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
         from netra_backend.app.services.message_handlers import MessageHandlerService
         
+        # STAGE 1 ENHANCEMENT: Import Service Readiness Validator for adaptive service checking
+        from netra_backend.app.websocket_core.service_readiness_validator import (
+            create_service_readiness_validator,
+            websocket_readiness_guard
+        )
+        
         # Get dependencies from app state (check if they exist first)
         supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
         thread_service = getattr(websocket.app.state, 'thread_service', None)
@@ -524,20 +530,88 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 logger.info(f"WebSocket proceeding after {total_waited}s wait (startup_complete={startup_complete})")
         
-        # CRITICAL FIX: After waiting for startup, services should be initialized
-        # If they're still missing, use graceful degradation instead of 1011 failure
+        # STAGE 1 ENHANCEMENT: Use adaptive service validation with graceful degradation
+        # This replaces hard-coded service checks with intelligent timeout logic
+        logger.info("🔍 Stage 1: Performing adaptive service readiness validation...")
+        
+        service_validation_results = None
+        validation_start_time = time.time()
+        
+        try:
+            # Create service readiness validator for current environment
+            service_validator = create_service_readiness_validator(websocket.app.state, environment)
+            
+            # Validate critical WebSocket services with adaptive timeouts
+            critical_services = ["database", "redis", "auth_system", "agent_supervisor", "thread_service"]
+            
+            # Use shorter timeout for WebSocket connections to prevent blocking
+            validation_timeout = 10.0 if environment in ["test", "development"] else 20.0
+            
+            service_group_result = await service_validator.validate_service_group(
+                critical_services,
+                group_name="websocket_connection_critical",
+                fail_fast_on_critical=False  # Don't fail fast - collect all validation results
+            )
+            
+            validation_elapsed = time.time() - validation_start_time
+            service_validation_results = service_group_result
+            
+            logger.info(
+                f"✅ Service validation complete ({validation_elapsed:.2f}s): "
+                f"{service_group_result.ready_services}/{service_group_result.total_services} ready, "
+                f"{len(service_group_result.critical_failures)} critical failures, "
+                f"{len(service_group_result.degraded_services)} degraded"
+            )
+            
+            # Log detailed service status
+            for service_name, result in service_group_result.service_results.items():
+                status_icon = "✅" if result.ready else ("⚠️" if result.degradation_applied else "❌")
+                logger.info(
+                    f"  {status_icon} {service_name}: {result.level.value} "
+                    f"({result.elapsed_time:.3f}s, {result.attempts} attempts)"
+                )
+                if result.error_message:
+                    logger.debug(f"    Error: {result.error_message}")
+            
+            # Extract service references from validation results or app state
+            # This maintains backward compatibility with existing code
+            supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+            thread_service = getattr(websocket.app.state, 'thread_service', None)
+            
+        except Exception as validation_error:
+            validation_elapsed = time.time() - validation_start_time
+            logger.error(f"🔴 Service validation error ({validation_elapsed:.2f}s): {validation_error}")
+            logger.info("🔄 Falling back to legacy service checking for reliability")
+            
+            # Fallback to original service checking logic
+            supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+            thread_service = getattr(websocket.app.state, 'thread_service', None)
+        
+        # ENHANCED LEGACY COMPATIBILITY: Maintain original service checking with improvements
+        # This code maintains all existing functionality while adding adaptive logic
         if supervisor is None:
             logger.warning(f"agent_supervisor is None in {environment} - using graceful degradation")
             
             # CRITICAL FIX: Don't fail immediately - use fallback pattern for staging
             if environment in ["staging", "production"]:
-                # CRITICAL FIX: Reduced wait time to prevent WebSocket blocking
-                supervisor_wait_attempts = 2  # Reduced from 3 to 2 attempts
+                # STAGE 1 ENHANCEMENT: Use adaptive timeout based on service validation results
+                if service_validation_results and 'agent_supervisor' in service_validation_results.service_results:
+                    supervisor_result = service_validation_results.service_results['agent_supervisor']
+                    # Use adaptive retry count based on validation results
+                    supervisor_wait_attempts = max(2, min(supervisor_result.attempts, 5))
+                    retry_delay = 0.1 if supervisor_result.elapsed_time < 1.0 else 0.2
+                else:
+                    # Fallback to reduced wait time to prevent WebSocket blocking
+                    supervisor_wait_attempts = 2
+                    retry_delay = 0.1
+                
+                logger.info(f"🔄 Attempting {supervisor_wait_attempts} supervisor recovery attempts with {retry_delay}s intervals")
+                
                 for attempt in range(supervisor_wait_attempts):
-                    await asyncio.sleep(0.1)  # CRITICAL: Reduced from 500ms to 100ms per attempt
+                    await asyncio.sleep(retry_delay)
                     supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
                     if supervisor is not None:
-                        logger.info(f"supervisor initialized after {(attempt + 1) * 0.1}s wait")
+                        logger.info(f"✅ supervisor initialized after {(attempt + 1) * retry_delay}s wait")
                         break
                 
                 # If supervisor still None, use fallback but don't fail connection
@@ -551,18 +625,34 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # CRITICAL FIX: Use same graceful approach for thread_service
             if environment in ["staging", "production"]:
-                # CRITICAL FIX: Reduced wait time to prevent WebSocket blocking
-                thread_wait_attempts = 2  # Reduced from 3 to 2 attempts
+                # STAGE 1 ENHANCEMENT: Use adaptive timeout based on service validation results
+                if service_validation_results and 'thread_service' in service_validation_results.service_results:
+                    thread_result = service_validation_results.service_results['thread_service']
+                    # Use adaptive retry count based on validation results
+                    thread_wait_attempts = max(2, min(thread_result.attempts, 5))
+                    retry_delay = 0.1 if thread_result.elapsed_time < 1.0 else 0.2
+                else:
+                    # Fallback to reduced wait time to prevent WebSocket blocking
+                    thread_wait_attempts = 2
+                    retry_delay = 0.1
+                
+                logger.info(f"🔄 Attempting {thread_wait_attempts} thread_service recovery attempts with {retry_delay}s intervals")
+                
                 for attempt in range(thread_wait_attempts):
-                    await asyncio.sleep(0.1)  # CRITICAL: Reduced from 500ms to 100ms per attempt
+                    await asyncio.sleep(retry_delay)
                     thread_service = getattr(websocket.app.state, 'thread_service', None)
                     if thread_service is not None:
-                        logger.info(f"thread_service initialized after {(attempt + 1) * 0.1}s wait")
+                        logger.info(f"✅ thread_service initialized after {(attempt + 1) * retry_delay}s wait")
                         break
                 
                 # If thread_service still None, use fallback but don't fail connection
                 if thread_service is None:
-                    logger.info(f"ThreadService still None after {thread_wait_attempts * 0.1}s - using fallback (prevents WebSocket delay)")
+                    fallback_reason = "service_unavailable_after_retries"
+                    if service_validation_results and 'thread_service' in service_validation_results.service_results:
+                        thread_result = service_validation_results.service_results['thread_service']
+                        fallback_reason = f"validation_failed_{thread_result.level.value}"
+                    
+                    logger.info(f"⚠️ ThreadService still None after {thread_wait_attempts * retry_delay}s - using fallback (reason: {fallback_reason})")
             
             # No 1011 error - proceed with graceful degradation
         
@@ -635,17 +725,29 @@ async def websocket_endpoint(websocket: WebSocket):
                     handler_types = getattr(handler, 'supported_types', [])
                     logger.info(f"  Handler {idx}: {handler.__class__.__name__} - supports {handler_types}")
                     
-                # Send informational message about reduced functionality (non-blocking)
+                # STAGE 1 ENHANCEMENT: Send enhanced service status with validation details
                 try:
+                    service_info = {
+                        "event": "service_status",
+                        "message": "WebSocket connected with fallback functionality",
+                        "environment": environment,
+                        "missing_dependencies": missing_deps,
+                        "fallback_active": True
+                    }
+                    
+                    # Add service validation details if available
+                    if service_validation_results:
+                        service_info.update({
+                            "services_ready": f"{service_validation_results.ready_services}/{service_validation_results.total_services}",
+                            "validation_time": f"{service_validation_results.total_elapsed_time:.2f}s",
+                            "degraded_services": service_validation_results.degraded_services,
+                            "critical_failures": service_validation_results.critical_failures,
+                            "graceful_degradation": service_validation_results.graceful_degradation_active
+                        })
+                    
                     info_response = create_server_message(
                         MessageType.SYSTEM_MESSAGE,
-                        {
-                            "event": "service_info",
-                            "message": "WebSocket connected with basic functionality. Some advanced features may be limited.",
-                            "environment": environment,
-                            "missing_dependencies": missing_deps,
-                            "fallback_active": True
-                        }
+                        service_info
                     )
                     await safe_websocket_send(websocket, info_response.model_dump())
                 except Exception as info_error:
