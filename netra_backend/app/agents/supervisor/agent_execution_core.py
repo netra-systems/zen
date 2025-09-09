@@ -166,17 +166,46 @@ class AgentExecutionCore:
                         )
                     return agent
                 
-                # Execute without heartbeat monitoring (heartbeat disabled - was hiding errors)
-                # See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
-                if heartbeat:  # This will be False since heartbeat is disabled
-                    async with heartbeat:
-                        result = await self._execute_with_protection(
-                            agent, context, state, exec_id, heartbeat, timeout, trace_context
-                        )
-                else:
-                    # Direct execution without heartbeat wrapper
-                    result = await self._execute_with_protection(
-                        agent, context, state, exec_id, None, timeout, trace_context
+                # CRITICAL REMEDIATION: Execute with comprehensive timeout management
+                # This prevents agent execution from hanging indefinitely and blocking user responses
+                try:
+                    async def agent_execution_wrapper():
+                        # Execute without heartbeat monitoring (heartbeat disabled - was hiding errors)
+                        # See AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
+                        if heartbeat:  # This will be False since heartbeat is disabled
+                            async with heartbeat:
+                                return await self._execute_with_protection(
+                                    agent, context, state, exec_id, heartbeat, timeout, trace_context
+                                )
+                        else:
+                            # Direct execution without heartbeat wrapper
+                            return await self._execute_with_protection(
+                                agent, context, state, exec_id, None, timeout, trace_context
+                            )
+                    
+                    # CRITICAL: Execute agent with timeout manager to prevent blocking
+                    result = await self.timeout_manager.execute_agent_with_timeout(
+                        agent_execution_wrapper,
+                        context.agent_name,
+                        str(context.run_id),
+                        self.websocket_bridge
+                    )
+                    
+                except CircuitBreakerOpenError as e:
+                    # Circuit breaker is open - create fallback response
+                    logger.error(f"🚫 Circuit breaker open for {context.agent_name}: {e}")
+                    fallback_response = await self.timeout_manager.create_fallback_response(
+                        context.agent_name,
+                        e,
+                        str(context.run_id),
+                        self.websocket_bridge
+                    )
+                    result = AgentExecutionResult(
+                        success=False,
+                        agent_name=context.agent_name,
+                        error=str(e),
+                        duration=0.0,
+                        data=fallback_response
                     )
             
                 # Collect and persist metrics
