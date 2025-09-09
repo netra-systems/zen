@@ -16,7 +16,6 @@ Issues replicated:
 import pytest
 import os
 from secrets import token_urlsafe
-from auth_service.core.auth_manager import AuthManager
 
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.config import get_config

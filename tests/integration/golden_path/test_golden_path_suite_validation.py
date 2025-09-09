@@ -41,6 +41,14 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 
+# No-Docker fixtures for service-independent testing
+from test_framework.fixtures.no_docker_golden_path_fixtures import (
+    no_docker_golden_path_services, 
+    golden_path_services,
+    mock_authenticated_user,
+    skip_if_docker_required
+)
+
 # Core system imports
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID
@@ -150,10 +158,9 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         ]
         
     @pytest.mark.integration
-    @pytest.mark.real_services
     @pytest.mark.validation
     @pytest.mark.asyncio
-    async def test_golden_path_test_suite_completeness_validation(self):
+    async def test_golden_path_test_suite_completeness_validation(self, golden_path_services):
         """
         Validate golden path test suite completeness.
         
@@ -223,10 +230,9 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         self.logger.info(f"   Coverage: {test_coverage_rate:.1%} ({found_test_count}/{expected_test_count})")
     
     @pytest.mark.integration
-    @pytest.mark.real_services
     @pytest.mark.validation
     @pytest.mark.asyncio
-    async def test_ssot_compliance_validation(self):
+    async def test_ssot_compliance_validation(self, golden_path_services):
         """
         Validate SSOT (Single Source of Truth) compliance across golden path tests.
         
@@ -292,10 +298,9 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         self.logger.info(f"   Compliance rate: {ssot_compliance_rate:.1%} ({compliant_files}/{total_files_analyzed})")
     
     @pytest.mark.integration
-    @pytest.mark.real_services
     @pytest.mark.validation
     @pytest.mark.asyncio
-    async def test_real_services_integration_validation(self):
+    async def test_real_services_integration_validation(self, golden_path_services):
         """
         Validate real services integration patterns across golden path tests.
         
@@ -391,10 +396,9 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         self.logger.info(f"   Real services rate: {real_services_rate:.1%} ({real_services_tests}/{total_analyzed})")
     
     @pytest.mark.integration
-    @pytest.mark.real_services
     @pytest.mark.validation
     @pytest.mark.asyncio
-    async def test_websocket_event_validation_coverage(self):
+    async def test_websocket_event_validation_coverage(self, golden_path_services):
         """
         Validate WebSocket event validation coverage across golden path tests.
         
@@ -486,10 +490,9 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         self.logger.info(f"   WebSocket coverage: {websocket_coverage_rate:.1%} ({websocket_event_tests}/{total_analyzed})")
     
     @pytest.mark.integration
-    @pytest.mark.real_services  
     @pytest.mark.validation
     @pytest.mark.asyncio
-    async def test_comprehensive_golden_path_suite_validation_summary(self):
+    async def test_comprehensive_golden_path_suite_validation_summary(self, golden_path_services):
         """
         Comprehensive golden path suite validation summary and business impact analysis.
         

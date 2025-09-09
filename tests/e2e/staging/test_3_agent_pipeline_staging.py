@@ -28,14 +28,25 @@ class TestAgentPipelineStaging(StagingTestBase):
         self.ensure_auth_setup()
     
     def ensure_auth_setup(self):
-        """Ensure authentication is set up regardless of execution method"""
+        """Ensure authentication is set up using SSOT patterns regardless of execution method"""
         if not hasattr(self, 'auth_helper'):
-            self.auth_helper = TestAuthHelper(environment="staging")
+            # SSOT COMPLIANCE: Use test_framework.ssot.e2e_auth_helper for all E2E authentication
+            from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
+            auth_config = E2EAuthConfig.for_staging()
+            self.auth_helper = E2EAuthHelper(auth_config)
         if not hasattr(self, 'test_token'):
-            self.test_token = self.auth_helper.create_test_token(
-                f"staging_pipeline_test_user_{int(time.time())}", 
-                "staging_pipeline@test.netrasystems.ai"
-            )
+            # Use SSOT authentication pattern
+            user_id = f"staging_pipeline_test_user_{int(time.time())}"
+            authenticated_user = asyncio.run(self.auth_helper.create_authenticated_user(
+                user_id=user_id,
+                email="staging_pipeline@test.netrasystems.ai",
+                full_name=f"Pipeline Test User {user_id}",
+                permissions=["agent_execution", "pipeline_test"]
+            ))
+            if authenticated_user and authenticated_user.jwt_token:
+                self.test_token = authenticated_user.jwt_token
+            else:
+                raise RuntimeError("Failed to create SSOT authenticated user for staging pipeline test")
     
     @staging_test
     async def test_real_agent_discovery(self):

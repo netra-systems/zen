@@ -43,10 +43,12 @@ from test_framework.base_integration_test import (
     BaseIntegrationTest, DatabaseIntegrationTest, CacheIntegrationTest,
     WebSocketIntegrationTest, ServiceOrchestrationIntegrationTest
 )
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.real_services_test_fixtures import real_services_fixture
+from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, E2EWebSocketAuthHelper, AuthenticatedUser,
-    create_authenticated_user_context, create_test_user_with_auth
+    create_test_user_with_auth
 )
 from shared.types.core_types import UserID, ThreadID, RunID, WebSocketID, ensure_user_id
 from shared.types.execution_types import StronglyTypedUserExecutionContext

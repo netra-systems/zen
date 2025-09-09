@@ -13,6 +13,7 @@ Prevents breaking changes for existing imports while system transitions to new s
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as CoreManager
 from netra_backend.app.websocket_core.connection_info import ConnectionInfo as CoreConnectionInfo
 from netra_backend.app.websocket_core.types import WebSocketConnectionState, WebSocketMessage
+from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
 
 
 class ConnectionManager(CoreManager):
@@ -97,6 +98,7 @@ __all__ = [
     'ConnectionInfo', 
     'WebSocketConnectionState',
     'WebSocketMessage',
+    'WebSocketConnectionManager',
     'get_connection_manager',
     'get_connection_monitor'
 ]

@@ -20,9 +20,7 @@ TestMigrationRunnerSafety,
 )
 from netra_backend.tests.database.test_message_repository import TestMessageRepositoryQueries
 from netra_backend.tests.database.test_repository_auth import (
-TestMetricRepositoryAggregation,
 TestOptimizationRepositoryStorage,
-TestUserRepositoryAuth,
 )
 from netra_backend.tests.database.test_thread_repository import TestThreadRepositoryOperations
 
@@ -33,7 +31,5 @@ __all__ = [
 'TestClickHouseConnectionPool',
 'TestMigrationRunnerSafety',
 'TestDatabaseHealthChecks',
-'TestUserRepositoryAuth',
 'TestOptimizationRepositoryStorage',
-'TestMetricRepositoryAggregation'
 ]

@@ -9,7 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
 import { logger } from '@/lib/logger';
 import { useGTMEvent } from '@/hooks/useGTMEvent';
-import { monitorAuthState } from '@/lib/auth-validation';
+import { monitorAuthState, createAtomicAuthUpdate, applyAtomicAuthUpdate, attemptEnhancedAuthRecovery } from '@/lib/auth-validation';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 export interface AuthContextType {
   user: User | null;
@@ -43,6 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false); // Track initialization completion
+  
+  // Initialization state machine - prevents race conditions during startup
+  const initStateRef = useRef<'idle' | 'starting' | 'processing_token' | 'dev_login' | 'completed' | 'failed'>('idle');
+  const initAttemptsRef = useRef(0);
+  const MAX_INIT_ATTEMPTS = 3;
   const [authConfig, setAuthConfig] = useState<AuthConfigResponse | null>(null);
   const [token, setToken] = useState<string | null>(() => {
     // Check for token in localStorage during initial state creation
@@ -148,11 +153,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           
           const decodedUser = jwtDecode(newToken) as User;
           
-          // Update all auth state atomically
-          setToken(newToken);
-          setUser(decodedUser);
-          // Use the actual values we're setting, not stale state
-          syncAuthStore(decodedUser, newToken);
+          // Update all auth state atomically using atomic helper
+          const atomicUpdate = createAtomicAuthUpdate(newToken, decodedUser);
+          const updateSuccess = applyAtomicAuthUpdate(
+            atomicUpdate, 
+            setToken, 
+            setUser, 
+            syncAuthStore
+          );
+          
+          if (!updateSuccess) {
+            logger.error('Failed to apply atomic auth update during refresh');
+            refreshFailureCountRef.current++;
+            return;
+          }
           
           logger.info('Automatic token refresh successful', {
             component: 'AuthContext',
@@ -413,12 +427,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Update token immediately when detected via storage event
         try {
           const decodedUser = jwtDecode(e.newValue) as User;
-          // Update state atomically
-          setToken(e.newValue);
-          setUser(decodedUser);
-          // Use actual values being set
-          syncAuthStore(decodedUser, e.newValue);
-          scheduleTokenRefreshCheck(e.newValue);
+          
+          // Update state atomically using atomic helper
+          const atomicUpdate = createAtomicAuthUpdate(e.newValue, decodedUser);
+          const updateSuccess = applyAtomicAuthUpdate(
+            atomicUpdate, 
+            setToken, 
+            setUser, 
+            syncAuthStore
+          );
+          
+          if (updateSuccess) {
+            scheduleTokenRefreshCheck(e.newValue);
+          } else {
+            logger.error('Failed to apply atomic auth update from storage event');
+          }
         } catch (error) {
           logger.error('Failed to decode token from storage event', error as Error);
         }

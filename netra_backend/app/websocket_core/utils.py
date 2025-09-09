@@ -234,10 +234,13 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
     Enhanced connection validation with application state integration and race condition detection.
     CRITICAL: Combines WebSocket transport state with application-level readiness and race condition prevention.
     
+    RACE CONDITION FIX: This function now properly separates transport readiness from application readiness.
+    WebSocket.accept() completion (transport ready) != ready to process messages (application ready).
+    
     This function ensures that:
     1. WebSocket is in CONNECTED state (transport level)
     2. Handshake is complete and validated
-    3. Application-level connection state is ready (if available)
+    3. Application-level connection state is ready (REQUIRED for message processing)
     4. Bidirectional communication is ready
     5. Race condition patterns are detected and logged
     
@@ -267,8 +270,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             logger.debug("WebSocket missing receive/send methods - handshake not complete")
             return False
         
-        # PHASE 2: Application State Validation (NEW)
-        # Check connection state machine if available
+        # PHASE 2: Application State Validation (CRITICAL FIX)
+        # RACE CONDITION FIX: Always check connection state machine when connection_id is provided
         if connection_id:
             try:
                 # Import here to avoid circular imports
@@ -276,24 +279,58 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
                 state_machine = get_connection_state_machine(connection_id)
                 
                 if state_machine:
-                    # Use application-level readiness check
+                    # Use application-level readiness check - THIS IS THE KEY FIX
                     app_ready = state_machine.can_process_messages()
-                    logger.debug(f"Connection {connection_id} application state ready: {app_ready} (state: {state_machine.current_state})")
+                    current_state = state_machine.current_state
+                    logger.debug(f"Connection {connection_id} application state: {current_state}, ready: {app_ready}")
                     
+                    # CRITICAL FIX: Application must be ready for message processing
                     if not app_ready:
-                        # Application not ready - return False regardless of transport state
+                        logger.debug(f"Application not ready for {connection_id} (state: {current_state}) - transport may be ready but application setup incomplete")
                         return False
                     
-                    # Application is ready - proceed with transport validation
+                    # Application is ready - connection is fully operational
+                    logger.debug(f"Connection {connection_id} fully operational - transport and application ready")
                 else:
-                    # No state machine - fall back to transport-only validation
-                    logger.debug(f"No state machine found for connection {connection_id}, using transport-only validation")
+                    # CRITICAL FIX: No state machine = connection not properly initialized
+                    logger.warning(f"No state machine found for connection {connection_id} - application setup incomplete")
+                    # In production environments, this should be considered not ready
+                    from shared.isolated_environment import get_env
+                    env = get_env()
+                    environment = env.get("ENVIRONMENT", "development").lower()
+                    
+                    if environment in ["staging", "production"]:
+                        logger.debug(f"Cloud environment {environment}: missing state machine indicates incomplete setup")
+                        return False
+                    else:
+                        # Development - be more permissive but log the issue
+                        logger.debug(f"Development environment: proceeding despite missing state machine for {connection_id}")
+                        
             except ImportError:
                 # State machine not available - fall back to transport-only validation
                 logger.debug("ConnectionStateMachine not available, using transport-only validation")
             except Exception as e:
-                # Error accessing state machine - log but continue with transport validation
-                logger.debug(f"Error accessing state machine for {connection_id}: {e}")
+                # Error accessing state machine - this indicates a problem
+                logger.warning(f"Error accessing state machine for {connection_id}: {e}")
+                # In production, treat state machine errors as not ready
+                from shared.isolated_environment import get_env
+                env = get_env()
+                environment = env.get("ENVIRONMENT", "development").lower()
+                
+                if environment in ["staging", "production"]:
+                    logger.debug(f"Cloud environment {environment}: state machine error indicates not ready")
+                    return False
+        else:
+            # CRITICAL FIX: No connection_id means we can't validate application state
+            logger.debug("No connection_id provided - cannot validate application readiness")
+            # In production environments, require connection_id for proper state validation
+            from shared.isolated_environment import get_env
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            if environment in ["staging", "production"]:
+                logger.debug(f"Cloud environment {environment}: connection_id required for application state validation")
+                return False
         
         # PHASE 3: WebSocket Transport Readiness Validation
         # Additional validation: Check if websocket is in a state ready for messaging
@@ -303,11 +340,11 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             if hasattr(websocket, '_send_queue') or hasattr(websocket, '_receive_queue'):
                 # These attributes indicate the websocket internal queues are initialized
                 logger.debug("WebSocket internal queues confirmed - handshake complete")
-                return True
             elif hasattr(websocket, 'send_json'):
                 # send_json is available - indicates websocket is properly initialized
                 logger.debug("WebSocket send_json available - handshake complete")
-                return True
+            else:
+                logger.debug("WebSocket attributes suggest handshake may not be complete")
         except Exception as e:
             logger.debug(f"WebSocket state introspection failed: {e}")
             # Fall through to environment-specific logic
@@ -326,26 +363,26 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             race_detector = None
         
         if environment in ["staging", "production"]:
-            # In cloud environments, be very conservative
-            # Only return True if we can definitively confirm readiness
-            logger.debug(f"Cloud environment {environment}: requiring definitive handshake confirmation")
+            # CRITICAL FIX: In cloud environments, be very conservative about readiness
+            # We've already validated application state above, so if we get here, we're ready
+            logger.debug(f"Cloud environment {environment}: transport and application validation passed")
             
-            # Log potential race condition pattern
+            # Log successful validation pattern
             if race_detector:
                 race_detector.add_detected_pattern(
-                    "cloud_environment_conservative_validation",
-                    "warning",
+                    "cloud_environment_successful_validation",
+                    "info",
                     details={
                         "environment": environment,
                         "connection_id": connection_id,
-                        "reason": "cloud_environment_requires_definitive_confirmation"
+                        "reason": "transport_and_application_state_validated"
                     }
                 )
             
-            return False  # Conservative approach - only return True if we can confirm readiness above
+            return True  # Both transport and application validated successfully
         else:
-            # Development environment - if basic connection check passed, assume ready
-            logger.debug("Development environment: assuming ready after basic connection check")
+            # Development environment - if all checks passed, assume ready
+            logger.debug("Development environment: transport and application validation passed")
             return True
         
     except Exception as e:

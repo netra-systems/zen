@@ -14,5 +14,8 @@ Business Value Justification (BVJ):
 # Import the actual BaseIntegrationTest from the correct location
 from test_framework.base_integration_test import BaseIntegrationTest
 
+# Alias for compatibility with existing imports
+IntegrationTestBase = BaseIntegrationTest
+
 # Re-export for SSOT compliance
-__all__ = ["BaseIntegrationTest"]
+__all__ = ["BaseIntegrationTest", "IntegrationTestBase"]

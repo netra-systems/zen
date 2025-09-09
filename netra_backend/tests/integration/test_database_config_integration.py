@@ -27,7 +27,6 @@ from pathlib import Path
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from shared.database_url_builder import DatabaseURLBuilder
-from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 
