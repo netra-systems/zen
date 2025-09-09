@@ -314,23 +314,23 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         redis = real_services_fixture["redis"]
         
         # Create user and thread
-        user_id = UserID.generate()
-        thread_id = ThreadID.generate()
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
         
-        user = User(id=str(user_id), email="enterprise@example.com", name="Enterprise User")
+        user = User(id=user_id, email="enterprise@example.com", name="Enterprise User")
         db.add(user)
         
-        thread = Thread(id=str(thread_id), user_id=str(user_id), title="Security Analysis")
+        thread = Thread(id=thread_id, user_id=user_id, title="Security Analysis")
         db.add(thread)
         await db.commit()
         
         # Generate comprehensive report
         security_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
             "agent_type": "security_analyzer",
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            "user_id": str(user_id),
-            "thread_id": str(thread_id),
+            "user_id": user_id,
+            "thread_id": thread_id,
             "executive_summary": "Critical security vulnerabilities identified requiring immediate attention",
             "key_findings": [
                 "3 critical vulnerabilities in production systems",
@@ -363,9 +363,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Store report with proper database structure
         message = Message(
             id=security_report["report_id"],
-            thread_id=str(thread_id),
-            user_id=str(user_id),
-            run_id=str(RunID.generate()),
+            thread_id=thread_id,
+            user_id=user_id,
+            run_id=UnifiedIdGenerator.generate_base_id("run_test"),
             message_type=MessageType.AGENT_RESPONSE,
             content=str(security_report),
             metadata=security_report["metadata"]
@@ -380,8 +380,8 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # CRITICAL ASSERTIONS: Report must be persistently accessible
         stored_message = await db.get(Message, message.id)
         assert stored_message is not None, "Report must persist in database"
-        assert stored_message.user_id == str(user_id), "Report must be linked to correct user"
-        assert stored_message.thread_id == str(thread_id), "Report must be linked to correct thread"
+        assert stored_message.user_id == user_id, "Report must be linked to correct user"
+        assert stored_message.thread_id == thread_id, "Report must be linked to correct thread"
         assert stored_message.message_type == MessageType.AGENT_RESPONSE, "Must be identified as agent response"
         
         # Verify cache accessibility  
@@ -411,12 +411,12 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         redis = real_services_fixture["redis"]
         
         # Create user with multiple reports
-        user_id = UserID.generate()
-        user = User(id=str(user_id), email="user@example.com", name="Business User")
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
+        user = User(id=user_id, email="user@example.com", name="Business User")
         db.add(user)
         
-        thread_id = ThreadID.generate()
-        thread = Thread(id=str(thread_id), user_id=str(user_id), title="Performance Analysis")
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
+        thread = Thread(id=thread_id, user_id=user_id, title="Performance Analysis")
         db.add(thread)
         await db.commit()
         
@@ -424,7 +424,7 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         reports = []
         for i in range(3):
             report = {
-                "report_id": str(MessageID.generate()),
+                "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
                 "agent_type": "performance_analyzer", 
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 "sequence": i + 1,
@@ -448,9 +448,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
             
             message = Message(
                 id=report["report_id"],
-                thread_id=str(thread_id),
-                user_id=str(user_id),
-                run_id=str(RunID.generate()),
+                thread_id=thread_id,
+                user_id=user_id,
+                run_id=UnifiedIdGenerator.generate_base_id("run_test"),
                 message_type=MessageType.AGENT_RESPONSE,
                 content=str(report),
                 metadata={"sequence": i + 1, "report_type": "performance"}
@@ -461,8 +461,8 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # Test report retrieval by user
         user_messages = db.query(Message).filter(
-            Message.user_id == str(user_id),
-            Message.thread_id == str(thread_id),
+            Message.user_id == user_id,
+            Message.thread_id == thread_id,
             Message.message_type == MessageType.AGENT_RESPONSE
         ).all()
         
@@ -471,8 +471,8 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # Verify reports are in correct order and accessible
         for i, message in enumerate(user_messages):
-            assert message.user_id == str(user_id), f"Message {i} must belong to correct user"
-            assert message.thread_id == str(thread_id), f"Message {i} must belong to correct thread"
+            assert message.user_id == user_id, f"Message {i} must belong to correct user"
+            assert message.thread_id == thread_id, f"Message {i} must belong to correct thread"
             assert message.message_type == MessageType.AGENT_RESPONSE, f"Message {i} must be agent response"
             
             # Verify report content is accessible and valid
@@ -481,8 +481,8 @@ class TestAgentReportGeneration(BaseIntegrationTest):
             
         # Test latest report retrieval (common user pattern)
         latest_message = db.query(Message).filter(
-            Message.user_id == str(user_id),
-            Message.thread_id == str(thread_id),
+            Message.user_id == user_id,
+            Message.thread_id == thread_id,
             Message.message_type == MessageType.AGENT_RESPONSE
         ).order_by(Message.created_at.desc()).first()
         
@@ -505,21 +505,21 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         db = real_services_fixture["db"]
         
         # Create two separate enterprise users
-        user1_id = UserID.generate()
-        user2_id = UserID.generate()
+        user1_id = UnifiedIdGenerator.generate_base_id("user_test")
+        user2_id = UnifiedIdGenerator.generate_base_id("user_test")
         
-        user1 = User(id=str(user1_id), email="enterprise1@company.com", name="Enterprise User 1")
-        user2 = User(id=str(user2_id), email="enterprise2@company.com", name="Enterprise User 2")
+        user1 = User(id=user1_id, email="enterprise1@company.com", name="Enterprise User 1")
+        user2 = User(id=user2_id, email="enterprise2@company.com", name="Enterprise User 2")
         
         db.add(user1)
         db.add(user2)
         
         # Create separate threads
-        thread1_id = ThreadID.generate()
-        thread2_id = ThreadID.generate()
+        thread1_id = UnifiedIdGenerator.generate_base_id("thread_test")
+        thread2_id = UnifiedIdGenerator.generate_base_id("thread_test")
         
-        thread1 = Thread(id=str(thread1_id), user_id=str(user1_id), title="User 1 Analysis")
-        thread2 = Thread(id=str(thread2_id), user_id=str(user2_id), title="User 2 Analysis")
+        thread1 = Thread(id=thread1_id, user_id=user1_id, title="User 1 Analysis")
+        thread2 = Thread(id=thread2_id, user_id=user2_id, title="User 2 Analysis")
         
         db.add(thread1)
         db.add(thread2)
@@ -527,9 +527,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # Generate confidential reports for each user
         user1_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user1_id),
             "agent_type": "confidential_analyzer",
-            "user_id": str(user1_id),
+            "user_id": user1_id,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "executive_summary": "CONFIDENTIAL: User 1 sensitive business data analysis",
             "key_findings": [
@@ -555,9 +555,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         }
         
         user2_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user2_id),
             "agent_type": "confidential_analyzer", 
-            "user_id": str(user2_id),
+            "user_id": user2_id,
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "executive_summary": "CONFIDENTIAL: User 2 different sensitive business data",
             "key_findings": [
@@ -585,22 +585,22 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Store reports with proper user isolation
         message1 = Message(
             id=user1_report["report_id"],
-            thread_id=str(thread1_id),
-            user_id=str(user1_id),
-            run_id=str(RunID.generate()),
+            thread_id=thread1_id,
+            user_id=user1_id,
+            run_id=UnifiedIdGenerator.generate_base_id("run_test"),
             message_type=MessageType.AGENT_RESPONSE,
             content=str(user1_report),
-            metadata={"classification": "confidential", "owner": str(user1_id)}
+            metadata={"classification": "confidential", "owner": user1_id}
         )
         
         message2 = Message(
             id=user2_report["report_id"],
-            thread_id=str(thread2_id),
-            user_id=str(user2_id), 
-            run_id=str(RunID.generate()),
+            thread_id=thread2_id,
+            user_id=user2_id, 
+            run_id=UnifiedIdGenerator.generate_base_id("run_test"),
             message_type=MessageType.AGENT_RESPONSE,
             content=str(user2_report),
-            metadata={"classification": "confidential", "owner": str(user2_id)}
+            metadata={"classification": "confidential", "owner": user2_id}
         )
         
         db.add(message1)
@@ -611,31 +611,31 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # User 1 can only access their own reports
         user1_messages = db.query(Message).filter(
-            Message.user_id == str(user1_id)
+            Message.user_id == user1_id
         ).all()
         assert len(user1_messages) == 1, "User 1 must only see their own reports"
         assert user1_messages[0].id == user1_report["report_id"], "User 1 must get correct report"
-        assert str(user1_id) in user1_messages[0].content, "Report must contain User 1's data"
-        assert str(user2_id) not in user1_messages[0].content, "Report must NOT contain User 2's data"
+        assert user1_id in user1_messages[0].content, "Report must contain User 1's data"
+        assert user2_id not in user1_messages[0].content, "Report must NOT contain User 2's data"
         
         # User 2 can only access their own reports
         user2_messages = db.query(Message).filter(
-            Message.user_id == str(user2_id)
+            Message.user_id == user2_id
         ).all()
         assert len(user2_messages) == 1, "User 2 must only see their own reports"
         assert user2_messages[0].id == user2_report["report_id"], "User 2 must get correct report"
-        assert str(user2_id) in user2_messages[0].content, "Report must contain User 2's data"
-        assert str(user1_id) not in user2_messages[0].content, "Report must NOT contain User 1's data"
+        assert user2_id in user2_messages[0].content, "Report must contain User 2's data"
+        assert user1_id not in user2_messages[0].content, "Report must NOT contain User 1's data"
         
         # Cross-user access must be completely blocked
         user1_cannot_access_user2 = db.query(Message).filter(
-            Message.user_id == str(user2_id),
+            Message.user_id == user2_id,
             Message.id == user1_report["report_id"]
         ).first()
         assert user1_cannot_access_user2 is None, "User 1 must not access User 2's reports"
         
         user2_cannot_access_user1 = db.query(Message).filter(
-            Message.user_id == str(user1_id),
+            Message.user_id == user1_id,
             Message.id == user2_report["report_id"]
         ).first()
         assert user2_cannot_access_user1 is None, "User 2 must not access User 1's reports"
@@ -655,18 +655,18 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         db = real_services_fixture["db"]
         
         # Create test user
-        user_id = UserID.generate()
-        user = User(id=str(user_id), email="test@example.com", name="Test User")
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
+        user = User(id=user_id, email="test@example.com", name="Test User")
         db.add(user)
         
-        thread_id = ThreadID.generate()
-        thread = Thread(id=str(thread_id), user_id=str(user_id), title="Error Handling Test")
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
+        thread = Thread(id=thread_id, user_id=user_id, title="Error Handling Test")
         db.add(thread)
         await db.commit()
         
         # Test Case 1: Missing data but still provide value
         incomplete_data_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
             "agent_type": "resilient_analyzer",
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "status": "partial_data",
@@ -714,7 +714,7 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # Test Case 2: API errors but still provide guidance
         api_error_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
             "agent_type": "error_resilient_analyzer",
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "status": "api_errors_encountered",
@@ -764,9 +764,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         for report in error_reports:
             message = Message(
                 id=report["report_id"],
-                thread_id=str(thread_id),
-                user_id=str(user_id),
-                run_id=str(RunID.generate()),
+                thread_id=thread_id,
+                user_id=user_id,
+                run_id=UnifiedIdGenerator.generate_base_id("run_test"),
                 message_type=MessageType.AGENT_RESPONSE,
                 content=str(report),
                 metadata={"error_handling": True, "status": report["status"]}
@@ -777,8 +777,8 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # CRITICAL ASSERTIONS: Even error cases must provide business value
         error_messages = db.query(Message).filter(
-            Message.user_id == str(user_id),
-            Message.thread_id == str(thread_id)
+            Message.user_id == user_id,
+            Message.thread_id == thread_id
         ).all()
         
         assert len(error_messages) == 2, "Both error case reports must be stored"
