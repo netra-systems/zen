@@ -701,6 +701,12 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_golden_path_timing_requirements_under_race_conditions(self, real_services_fixture):
         """Test Golden Path timing requirements are met even with race conditions."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="golden_path_timing_test@example.com",
@@ -709,10 +715,10 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Test complete Golden Path flow under race condition scenarios
         golden_path_scenarios = [
