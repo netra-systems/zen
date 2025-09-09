@@ -260,28 +260,63 @@ class MockWebSocketManager:
             # Execute the agent pipeline
             result = await self.agent_engine.execute_agent_pipeline(user_context, message)
             
-            # Queue the final assistant message
-            assistant_message = {
+            # Queue multiple assistant messages to simulate separate insights
+            main_response = result.get("result", "Based on AI infrastructure analysis, here are my recommendations:")
+            
+            # First insight: Model optimization 
+            insight1_message = {
                 "type": "assistant_message",
-                "content": result.get("result", "Summary: I recommend you implement cost optimization strategies to reduce expenses by $15,000/month. You should consider switching models, apply caching solutions, and optimize your infrastructure. These actionable suggestions will help achieve your optimization goals."),
+                "content": "**Insight 1 - Model Selection Strategy**: I recommend you switch from GPT-4 to GPT-3.5-turbo for 70% of routine tasks. This optimization strategy can reduce costs by $15,000/month while maintaining quality.",
                 "thread_id": user_context.get("thread_id"),
                 "run_id": user_context.get("run_id"),
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            self.message_queue.append(json.dumps(assistant_message))
-            
-            # Also save assistant message to mock database
-            assistant_message_record = {
-                "id": str(uuid.uuid4()),
+            # Second insight: Caching optimization
+            insight2_message = {
+                "type": "assistant_message", 
+                "content": "**Insight 2 - Caching Analysis**: I suggest you implement Redis caching for repeated queries. This strategy will reduce API calls by 40% and optimize performance significantly.",
                 "thread_id": user_context.get("thread_id"),
-                "type": "assistant",
-                "content": assistant_message["content"],
+                "run_id": user_context.get("run_id"),
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
-            if "messages" not in self.mock_state.database_records:
-                self.mock_state.database_records["messages"] = []
-            self.mock_state.database_records["messages"].append(assistant_message_record)
+            
+            # Third insight: Infrastructure efficiency
+            insight3_message = {
+                "type": "assistant_message",
+                "content": "**Insight 3 - Infrastructure Strategy**: You should apply batch processing techniques and consider enabling request optimization. These recommendations will reduce operational costs by 25%.",
+                "thread_id": user_context.get("thread_id"),
+                "run_id": user_context.get("run_id"),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Final summary
+            summary_message = {
+                "type": "assistant_message",
+                "content": "**Summary**: These actionable insights provide immediate cost optimization opportunities. I recommend implementing these strategies in phases to achieve $18,000/month in total savings.",
+                "thread_id": user_context.get("thread_id"),
+                "run_id": user_context.get("run_id"),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Queue all messages
+            self.message_queue.append(json.dumps(insight1_message))
+            self.message_queue.append(json.dumps(insight2_message))
+            self.message_queue.append(json.dumps(insight3_message))
+            self.message_queue.append(json.dumps(summary_message))
+            
+            # Also save all assistant messages to mock database
+            for message in [insight1_message, insight2_message, insight3_message, summary_message]:
+                assistant_message_record = {
+                    "id": str(uuid.uuid4()),
+                    "thread_id": user_context.get("thread_id"),
+                    "type": "assistant",
+                    "content": message["content"],
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                if "messages" not in self.mock_state.database_records:
+                    self.mock_state.database_records["messages"] = []
+                self.mock_state.database_records["messages"].append(assistant_message_record)
             
             logger.info(f"[MOCK WebSocket] Agent execution completed, events queued")
             
