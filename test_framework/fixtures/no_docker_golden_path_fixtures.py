@@ -128,6 +128,48 @@ class MockWebSocketManager:
         critical_events = ["agent_started", "agent_thinking", "tool_executing", 
                           "tool_completed", "agent_completed"]
         return len([e for e in self.events_sent if e["event_type"] in critical_events])
+    
+    async def recv(self, timeout: Optional[float] = None) -> str:
+        """
+        Mock recv method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Returns a JSON-serialized mock message for testing purposes.
+        """
+        # Simulate typical WebSocket message
+        mock_message = {
+            "type": "connection_ready",
+            "data": "Mock WebSocket message",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "connection_count": len(self.mock_state.websocket_connections)
+        }
+        return json.dumps(mock_message)
+    
+    async def send(self, message: str) -> None:
+        """
+        Mock send method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Parses the message and stores it in the events_sent list.
+        """
+        try:
+            parsed_message = json.loads(message)
+        except json.JSONDecodeError:
+            # If not JSON, treat as plain text
+            parsed_message = {"type": "text", "data": message}
+        
+        # Store as sent event
+        event = {
+            "event_type": parsed_message.get("type", "message"),
+            "data": parsed_message,
+            "client_id": self.client_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "mock_source": "MockWebSocketManager.send()"
+        }
+        
+        self.mock_state.websocket_events_sent.append(event)
+        self.events_sent.append(event)
+        logger.debug(f"[MOCK WebSocket] Manager sent: {parsed_message.get('type', 'unknown')}")
 
 
 class MockDatabaseManager:
