@@ -24,8 +24,8 @@ from typing import Dict, Any, List
 from uuid import uuid4
 
 # SSOT Imports - Absolute imports as per CLAUDE.md requirement
-from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
-from shared.types.websocket_types import StronglyTypedWebSocketEvent, WebSocketEventType
+from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id, WebSocketEventType
+from shared.types.execution_types import StronglyTypedWebSocketEvent
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.real_services_test_fixtures import real_services_fixture
