@@ -63,7 +63,7 @@ TIER_CONFIGURATIONS = {
         memory_limit_mb=512,
         timeout_seconds=60,
         priority_level=3,
-        allowed_agents=["basic_analysis", "advanced_analysis", "data_optimization"],
+        allowed_agents=["basic_analysis", "advanced_analysis", "data_optimization", "database_optimization"],
         premium_features=["advanced_optimization", "multi_table_analysis"]
     ),
     "enterprise": TierConfiguration(
@@ -275,15 +275,16 @@ class AgentExecutionValidator:
             
             sanitized = user_input
             
-            # HTML escape for XSS prevention
-            sanitized = html.escape(sanitized)
-            
-            # Remove dangerous patterns while preserving legitimate SQL in appropriate contexts
+            # Remove dangerous patterns first, before HTML escaping
             for pattern in self.dangerous_patterns:
                 if context_type == "database_optimization" and "select" in pattern.pattern.lower():
                     # Allow legitimate SELECT queries in database context
                     continue
                 sanitized = pattern.sub("[FILTERED]", sanitized)
+            
+            # Only apply HTML escaping if we're not in a technical context where it's needed
+            if context_type not in ["database_optimization", "technical_query"]:
+                sanitized = html.escape(sanitized)
             
             # Log sanitization if changes were made
             if sanitized != user_input:

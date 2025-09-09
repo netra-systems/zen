@@ -366,9 +366,8 @@ class AgentBusinessRuleValidator:
         if "read" not in user_permissions:
             return False
         
-        # Premium agents require premium permissions
-        if ("premium" in agent_type.lower() or 
-            "advanced" in agent_type.lower()) and "premium" not in user_permissions:
+        # Only premium agents require premium permissions (not advanced agents)
+        if "premium" in agent_type.lower() and "premium" not in user_permissions:
             return False
         
         return True
