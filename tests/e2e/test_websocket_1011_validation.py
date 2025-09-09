@@ -423,7 +423,7 @@ class TestWebSocket1011BusinessValueValidation:
         
         registry = get_connection_state_registry()
         chat_connection = f"chat_test_{int(time.time())}"
-        chat_user = f"user_{int(time.time())}_chat"
+        chat_user = generate_test_user_id("chat")
         
         try:
             # Chat requires: Connection -> Authentication -> Processing Ready
@@ -465,7 +465,7 @@ class TestWebSocket1011BusinessValueValidation:
         
         registry = get_connection_state_registry()
         events_connection = f"events_test_{int(time.time())}"
-        events_user = f"user_{int(time.time())}_events"
+        events_user = generate_test_user_id("events")
         
         try:
             # Real-time events require operational connection management
@@ -514,7 +514,7 @@ class TestWebSocket1011BusinessValueValidation:
             # Check 2: State machine operation
             registry = get_connection_state_registry()
             staging_connection = f"staging_test_{int(time.time())}"
-            staging_user = f"user_{int(time.time())}_staging"
+            staging_user = generate_test_user_id("staging")
             
             state_machine = registry.register_connection(staging_connection, staging_user)
             success = state_machine.transition_to(
