@@ -1,0 +1,127 @@
+[
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\scripts\\test\\test_staging_quick.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\scripts\\test\\test_staging_quick.py",
+    "timestamp": "2025-09-09T10:43:10.643155"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\e2e\\integration\\test_staging_health_validation.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\e2e\\integration\\test_staging_health_validation.py",
+    "timestamp": "2025-09-09T10:43:10.653959"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\e2e\\test_auth_flow_comprehensive.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\e2e\\test_auth_flow_comprehensive.py",
+    "timestamp": "2025-09-09T10:43:10.659967"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\manual\\staging_e2e_manual_tests.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\tests\\manual\\staging_e2e_manual_tests.py",
+    "timestamp": "2025-09-09T10:43:10.664183"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\e2e\\staging\\run_100_iterations_real.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\e2e\\staging\\run_100_iterations_real.py",
+    "timestamp": "2025-09-09T10:43:10.665193"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\mission_critical\\test_staging_endpoints_direct.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\mission_critical\\test_staging_endpoints_direct.py",
+    "timestamp": "2025-09-09T10:43:10.665193"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\test_backend_auth_staging.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\test_backend_auth_staging.py",
+    "timestamp": "2025-09-09T10:43:10.676381"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\e2e\\test_auth_service_staging.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\e2e\\test_auth_service_staging.py",
+    "timestamp": "2025-09-09T10:43:10.680431"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\staging_auth_e2e_tests.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\staging_auth_e2e_tests.py",
+    "timestamp": "2025-09-09T10:43:10.684647"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\e2e\\integration\\test_staging_oauth_authentication.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\e2e\\integration\\test_staging_oauth_authentication.py",
+    "timestamp": "2025-09-09T10:43:10.684647"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\verify_original_tests.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\verify_original_tests.py",
+    "timestamp": "2025-09-09T10:43:10.695022"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\simple_staging_auth_tests.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\simple_staging_auth_tests.py",
+    "timestamp": "2025-09-09T10:43:10.699172"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\staging\\real_staging_test_framework.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\tests\\staging\\real_staging_test_framework.py",
+    "timestamp": "2025-09-09T10:43:10.705778"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\scripts\\verify_oauth_redirect_uris.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\scripts\\verify_oauth_redirect_uris.py",
+    "timestamp": "2025-09-09T10:43:10.712976"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\mission_critical\\test_staging_websocket_agent_events_enhanced.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\mission_critical\\test_staging_websocket_agent_events_enhanced.py",
+    "timestamp": "2025-09-09T10:43:10.715780"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\test_staging_e2e.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\test_staging_e2e.py",
+    "timestamp": "2025-09-09T10:43:10.719868"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\final_staging_auth_tests.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\final_staging_auth_tests.py",
+    "timestamp": "2025-09-09T10:43:10.725061"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\e2e\\staging\\run_100_tests_safe.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\e2e\\staging\\run_100_tests_safe.py",
+    "timestamp": "2025-09-09T10:43:10.731958"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\scripts\\staging_comprehensive_test.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\scripts\\staging_comprehensive_test.py",
+    "timestamp": "2025-09-09T10:43:10.736643"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\mission_critical\\test_staging_auth_cross_service_validation.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\mission_critical\\test_staging_auth_cross_service_validation.py",
+    "timestamp": "2025-09-09T10:43:10.742051"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\staging_endpoint_investigation.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\staging_endpoint_investigation.py",
+    "timestamp": "2025-09-09T10:43:10.747297"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\mission_critical\\test_first_message_experience.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\mission_critical\\test_first_message_experience.py",
+    "timestamp": "2025-09-09T10:43:10.751500"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\tests\\unit\\test_deploy_to_gcp_comprehensive.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\tests\\unit\\test_deploy_to_gcp_comprehensive.py",
+    "timestamp": "2025-09-09T10:43:10.756975"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\tests\\e2e\\staging\\run_100_tests.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\backup\\url_migration\\tests\\e2e\\staging\\run_100_tests.py",
+    "timestamp": "2025-09-09T10:43:10.762218"
+  },
+  {
+    "file": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\test_scripts\\run_staging_tests.py",
+    "backup": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\backup\\url_migration\\20250909_104154\\test_scripts\\run_staging_tests.py",
+    "timestamp": "2025-09-09T10:43:10.766413"
+  }
+]
