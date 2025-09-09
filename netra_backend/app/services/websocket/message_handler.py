@@ -181,22 +181,47 @@ class StartAgentHandler(BaseMessageHandler):
         """Execute agent workflow without holding database session"""
         self._configure_supervisor(thread_id, user_id)
         
-        # CRITICAL FIX: Ensure supervisor has WebSocket bridge for event emission
+        # PHASE 4 FIX: Enhanced WebSocket bridge creation with retry logic for connection storms
         if not hasattr(self.supervisor, 'websocket_bridge') or not self.supervisor.websocket_bridge:
-            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-            from netra_backend.app.dependencies import get_user_execution_context
-            
-            context = get_user_execution_context(
-                user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id
-            )
-            
-            websocket_bridge = create_agent_websocket_bridge(context)
-            self.supervisor.websocket_bridge = websocket_bridge
-            logger.info(f"✅ Added WebSocket bridge to supervisor for user {user_id}")
+            await self._create_websocket_bridge_with_retry(user_id, thread_id, run_id)
         
         return await self.supervisor.run(user_request, thread_id, user_id, run_id)
+    
+    async def _create_websocket_bridge_with_retry(self, user_id: str, thread_id: str, run_id: str) -> None:
+        """
+        PHASE 4 FIX: Create WebSocket bridge with retry logic for connection storms.
+        
+        This method handles bridge creation failures that can occur during
+        concurrent connection establishment, ensuring robust chat functionality.
+        """
+        max_retries = 3
+        retry_delay = 0.1  # 100ms
+        
+        for attempt in range(max_retries + 1):
+            try:
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                from netra_backend.app.dependencies import get_user_execution_context
+                
+                context = get_user_execution_context(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id
+                )
+                
+                websocket_bridge = create_agent_websocket_bridge(context)
+                self.supervisor.websocket_bridge = websocket_bridge
+                logger.info(f"✅ PHASE 4: Added WebSocket bridge to supervisor for user {user_id} (attempt {attempt + 1})")
+                return
+                
+            except Exception as e:
+                logger.warning(f"PHASE 4: WebSocket bridge creation attempt {attempt + 1} failed for user {user_id}: {e}")
+                
+                if attempt < max_retries:
+                    await asyncio.sleep(retry_delay * (2 ** attempt))  # Exponential backoff
+                else:
+                    logger.error(f"PHASE 4: Failed to create WebSocket bridge after {max_retries + 1} attempts for user {user_id}")
+                    # Continue without bridge - supervisor will work but without real-time events
+                    self.supervisor.websocket_bridge = None
     
     def _configure_supervisor(self, thread_id: str, user_id: str) -> None:
         """Configure supervisor properties"""

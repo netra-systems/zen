@@ -30,7 +30,8 @@ from netra_backend.app.websocket_core.types import MessageType, create_standard_
 from netra_backend.app.websocket_core.handlers import MessageRouter, get_message_router
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler, BaseMessageHandler
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-from netra_backend.app.services.user_execution_context import UserExecutionContext, get_user_execution_context
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.dependencies import get_user_execution_context
 from shared.isolated_environment import get_env
 
 
@@ -254,8 +255,8 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
         
         # Create handler with real supervisor that might timeout
         try:
-            # Try to create a real SupervisorSSO instance
-            supervisor = SupervisorSSO()
+            # Try to create a real SupervisorAgent instance
+            supervisor = SupervisorAgent()
             
             handler = StartAgentHandler(
                 supervisor=supervisor,
