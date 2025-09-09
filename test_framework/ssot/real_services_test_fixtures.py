@@ -19,7 +19,8 @@ from test_framework.fixtures.real_services import (
     real_postgres_connection,
     with_test_database,
     real_redis_fixture,
-    real_services_fixture
+    real_services_fixture,
+    integration_services_fixture
 )
 
 # Re-export for SSOT compliance
@@ -27,5 +28,6 @@ __all__ = [
     "real_postgres_connection",
     "with_test_database",
     "real_redis_fixture", 
-    "real_services_fixture"
+    "real_services_fixture",
+    "integration_services_fixture"
 ]
