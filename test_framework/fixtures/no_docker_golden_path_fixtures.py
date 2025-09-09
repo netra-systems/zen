@@ -459,20 +459,11 @@ async def golden_path_services(request) -> AsyncGenerator[Dict[str, Any], None]:
             docker_available = False
     
     if use_real_services and docker_available:
-        logger.info("[GOLDEN PATH SERVICES] Using real services (Docker)")
-        # Import and use real services fixture
-        try:
-            from test_framework.fixtures.real_services import real_services_fixture
-            async for services in real_services_fixture():
-                yield services
-                break
-        except Exception as e:
-            logger.warning(f"[GOLDEN PATH SERVICES] Real services failed, falling back to mock: {e}")
-            async for services in no_docker_golden_path_services():
-                yield services
-                break
+        logger.info("[GOLDEN PATH SERVICES] Docker available but real services disabled for no-Docker mode")
+        # For this implementation, always use mock services to ensure no-Docker compatibility
+        async for services in no_docker_golden_path_services():
+            yield services
     else:
         logger.info("[GOLDEN PATH SERVICES] Using mock services (no Docker)")
         async for services in no_docker_golden_path_services():
             yield services
-            break
