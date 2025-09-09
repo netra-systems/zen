@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="3.183" timestamp="2025-09-09T11:18:40.153537-07:00" hostname="Shivanginis-MacBook-Pro.local"><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_service_startup_sequence_validation" time="0.168" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_configuration_validation_comprehensive" time="0.011" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_environment_specific_configuration" time="0.003" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_dependency_health_checks" time="0.004" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_startup_performance_optimization" time="0.003" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_health_check_endpoints" time="0.001" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthTestStartupConfiguration" name="test_graceful_shutdown_sequence" time="0.003" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_configuration_hot_reload" time="0.007" /><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_startup_failure_recovery" time="0.002"><failure message="Exception: DB connection failed">auth_service/tests/unit/test_auth_startup_configuration_comprehensive.py:716: in test_startup_failure_recovery
-    startup_result = service_initializer.initialize_service()
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-auth_service/tests/unit/test_auth_startup_configuration_comprehensive.py:60: in initialize_service
-    self._check_database_connection()
-/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py:1134: in __call__
-    return self._mock_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py:1138: in _mock_call
-    return self._execute_mock_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/lib/python3.12/unittest/mock.py:1193: in _execute_mock_call
-    raise effect
-E   Exception: DB connection failed</failure></testcase><testcase classname="tests.unit.test_auth_startup_configuration_comprehensive.TestAuthStartupConfiguration" name="test_startup_monitoring_and_metrics" time="0.007" /></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="1" tests="2" time="2.051" timestamp="2025-09-09T12:32:12.780007-07:00" hostname="Anthony"><testcase classname="" name="tests.test_auth_real_services_comprehensive" time="0.000"><skipped message="collection skipped">('C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\auth_service\\tests\\test_auth_real_services_comprehensive.py', 51, 'Skipped: Test framework functions have been removed')</skipped></testcase><testcase classname="" name="tests.unit.golden_path.test_auth_service_business_logic" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\tests\unit\golden_path\test_auth_service_business_logic.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+auth_service\tests\unit\golden_path\test_auth_service_business_logic.py:26: in &lt;module&gt;
+    from auth_service.auth_core.database.repository import UserRepository
+E   ImportError: cannot import name 'UserRepository' from 'auth_service.auth_core.database.repository' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\auth_service\auth_core\database\repository.py)</error></testcase></testsuite></testsuites>
