@@ -37,7 +37,8 @@ from netra_backend.app.services.agent_websocket_bridge import (
 )
 from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.services.user_execution_context import UserExecutionContext, get_user_execution_context
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import get_env
 

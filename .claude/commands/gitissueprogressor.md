@@ -40,7 +40,7 @@ ONLY RUN tests that don't require docker, such as unit, integration (no docker),
 
 Decision (one of): Fix the TEST if fixable OR
 if very bad mark and report as such and go back to 3) with the new added info.
-4.1) UPDATE a comment on the ISSUE with the test results and decision.
+4.1) UPDATE a comment on the ISSUE with the test results and decision following @GITHUB_STYLE_GUIDE.md  .
 
 5) PLAN REMEDIATION ITEM SPECIFIC PLAN : SNST : 
 PLAN ONLY THE REMEDIATION TO THE SYSTEM UNDER TEST.
