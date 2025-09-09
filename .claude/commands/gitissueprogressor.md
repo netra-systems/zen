@@ -57,7 +57,8 @@ do not introduce new problems.
 7.1) UPDATE a comment on the ISSUE with PROOF  following @GITHUB_STYLE_GUIDE.md  .
 
 8) Staging Deploy SNST :  Spawn a sub agent PROVE THAT THE CHANGES WORK OR FAIL IN STAGING.
-8.1) Deploy the backend service if it hasn't been deployed last 3 minutes. 
+8.1) Deploy the service (only deploy the service(s) with the files edited/updated)
+if it hasn't been deployed last 3 minutes.
 8.2) WAIT for service revision success or failure.
 8.3) Read service logs to audit no net new breaking changes
 8.4) Run relevant tests on staging gcp (either newly created tests and relevant existing e2e tests related to this)
