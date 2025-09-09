@@ -224,10 +224,26 @@ class AuthenticationTokenManager:
             expected_permissions = self.business_permission_rules[user_tier]["permissions"]
             token_permissions = decoded_payload["permissions"]
             
-            # Check for permission escalation
+            # Check for permission escalation - unexpected permissions
             for permission in token_permissions:
                 if permission not in expected_permissions:
                     validation_result["security_warnings"].append(f"Unexpected permission: {permission}")
+            
+            # Business Security Rule: Detect potential tier escalation attempts
+            # A legitimate token for a tier should have ALL expected permissions for that tier
+            # Tokens with only some permissions suggest possible escalation from a lower tier
+            if user_tier in [UserTier.ENTERPRISE, UserTier.MID]:
+                missing_permissions = set(expected_permissions) - set(token_permissions)
+                if missing_permissions:
+                    # If high-value permissions are missing, this suggests tier escalation
+                    high_value_permissions = {"admin_panel", "user_management", "advanced_analytics", "api_access", "custom_integrations"}
+                    has_high_value_perms = any(perm in token_permissions for perm in high_value_permissions)
+                    missing_high_value_perms = missing_permissions & high_value_permissions
+                    
+                    if has_high_value_perms and missing_high_value_perms:
+                        validation_result["security_warnings"].append(
+                            f"Potential tier escalation detected: {user_tier.value} tier token missing expected permissions: {sorted(missing_permissions)}"
+                        )
             
             # Business Rule 5: Validate business context integrity
             business_context = decoded_payload["business_context"]
