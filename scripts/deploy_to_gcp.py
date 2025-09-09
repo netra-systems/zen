@@ -83,7 +83,7 @@ class GCPDeployer:
         self.use_shell = sys.platform == "win32"
         
         # Service configurations (Alpine-optimized if flag is set)
-        backend_dockerfile = "docker/backend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/backend.gcp.Dockerfile"
+        backend_dockerfile = "dockerfiles/backend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/backend.gcp.Dockerfile"
         backend_memory = "2Gi" if self.use_alpine else "4Gi"
         backend_cpu = "2" if self.use_alpine else "2"
         
@@ -126,7 +126,7 @@ class GCPDeployer:
                 name="auth",
                 directory="auth_service",
                 port=8080,
-                dockerfile="docker/auth.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/auth.gcp.Dockerfile",
+                dockerfile="dockerfiles/auth.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/auth.gcp.Dockerfile",
                 cloud_run_name="netra-auth-service",
                 memory="512Mi",  # Gen2 requires minimum 512Mi with CPU always allocated
                 cpu="1",  # Cloud Run requires minimum 1 CPU with concurrency
@@ -156,7 +156,7 @@ class GCPDeployer:
                 name="frontend",
                 directory="frontend",
                 port=3000,
-                dockerfile="docker/frontend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/frontend.gcp.Dockerfile",
+                dockerfile="dockerfiles/frontend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/frontend.gcp.Dockerfile",
                 cloud_run_name="netra-frontend-staging",
                 memory="512Mi" if self.use_alpine else "2Gi",
                 cpu="1" if self.use_alpine else "1",
