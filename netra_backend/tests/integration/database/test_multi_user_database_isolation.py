@@ -38,7 +38,6 @@ try:
     from sqlalchemy import text, select, and_, func, distinct
     from sqlalchemy.pool import NullPool
     from netra_backend.app.db.models_postgres import User, Thread, Message
-    from auth_service.auth_core.database.models import AuthUser
     SQLALCHEMY_AVAILABLE = True
 except ImportError:
     SQLALCHEMY_AVAILABLE = False

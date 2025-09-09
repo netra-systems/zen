@@ -19,8 +19,6 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch, MagicMock
 
 # Absolute imports per CLAUDE.md requirements
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
 
 

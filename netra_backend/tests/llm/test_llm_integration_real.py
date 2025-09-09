@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
-from auth_service.core.auth_manager import AuthManager
 from shared.isolated_environment import IsolatedEnvironment
 
 

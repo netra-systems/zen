@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 from test_framework.database.test_database_manager import DatabaseTestManager
 from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
-from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment

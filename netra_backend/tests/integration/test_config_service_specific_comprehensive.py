@@ -45,8 +45,6 @@ from shared.database_url_builder import DatabaseURLBuilder
 from shared.port_discovery import PortDiscovery
 
 # Auth service real configuration - SSOT
-from auth_service.auth_core.config import AuthConfig, get_config as get_auth_config
-from auth_service.auth_core.auth_environment import get_auth_env, AuthEnvironment
 
 # Backend configuration - UnifiedConfigManager
 from netra_backend.app.core.configuration.base import (

@@ -16,7 +16,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
 
-from auth_service.auth_core.database.models import (
     Base,
     AuthUser,
     AuthSession,
