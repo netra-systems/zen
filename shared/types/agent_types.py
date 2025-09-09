@@ -18,7 +18,7 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, field_validator
 
-from shared.types.core_types import UserID, ThreadID, ensure_user_id
+from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
 
 # =============================================================================
@@ -82,12 +82,69 @@ class AgentExecutionRequest(BaseModel):
 # Agent Execution Result Types  
 # =============================================================================
 
-# Import existing AgentExecutionResult from schemas for backward compatibility
-# This maintains SSOT while providing shared access
-from netra_backend.app.schemas.agent_result_types import (
-    AgentExecutionResult, 
-    TypedAgentResult
-)
+class AgentExecutionResult(BaseModel):
+    """SSOT Agent execution result with complete execution information.
+    
+    This class provides comprehensive result tracking for agent executions
+    including user context, execution metadata, and business value indicators.
+    """
+    
+    user_id: UserID = Field(description="User who initiated the execution")
+    thread_id: ThreadID = Field(description="Thread/conversation identifier")
+    run_id: RunID = Field(description="Execution run identifier")
+    success: bool = Field(description="Whether execution completed successfully")
+    result_data: Dict[str, Any] = Field(description="Structured result data from agent")
+    execution_metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Metadata about the execution process"
+    )
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Result creation timestamp"
+    )
+    error_message: Optional[str] = Field(None, description="Error message if execution failed")
+    
+    @field_validator('user_id', mode='before')
+    @classmethod
+    def validate_user_id(cls, v):
+        """Ensure user_id is properly typed."""
+        if isinstance(v, str):
+            return ensure_user_id(v)
+        return v
+    
+    @field_validator('thread_id', mode='before')
+    @classmethod
+    def validate_thread_id(cls, v):
+        """Ensure thread_id is properly typed."""
+        if isinstance(v, str):
+            return ThreadID(v)
+        return v
+    
+    @field_validator('run_id', mode='before')
+    @classmethod
+    def validate_run_id(cls, v):
+        """Ensure run_id is properly typed."""
+        if isinstance(v, str):
+            return RunID(v)
+        return v
+    
+    @field_validator('result_data')
+    @classmethod
+    def validate_result_data(cls, v):
+        """Ensure result_data is a dictionary."""
+        if not isinstance(v, dict):
+            raise ValueError("result_data must be a dictionary")
+        return v
+    
+    class Config:
+        """Pydantic configuration."""
+        json_encoders = {
+            datetime: lambda dt: dt.isoformat(),
+        }
+
+
+# Import TypedAgentResult from schemas for additional compatibility  
+from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 
 
 # =============================================================================
