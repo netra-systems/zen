@@ -28,7 +28,7 @@ import threading
 import pytest
 from loguru import logger
 from shared.isolated_environment import get_env
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to Python path

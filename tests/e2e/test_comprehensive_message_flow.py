@@ -34,7 +34,7 @@
         # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass, field
         # REMOVED_SYNTAX_ERROR: from enum import Enum
         # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # Add project root to path
