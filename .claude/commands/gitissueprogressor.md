@@ -33,33 +33,34 @@ PLAN ONLY the update, align, or creation of: the required unit, integration (non
 on reproducing the item in question (failing tests). following reports\testing\TEST_CREATION_GUIDE.md
 and all of the latest testing best practices as per claude.md
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
-3.1) UPDATE a comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
+3.1) UPDATE the comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
 
 4) EXECUTE THE TEST PLAN : SNST : with new spawned sub agent. audit and review the test. And run the fake test checks. 
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
 
 Decision (one of): Fix the TEST if fixable OR
 if very bad mark and report as such and go back to 3) with the new added info.
-4.1) UPDATE a comment on the ISSUE with the test results and decision following @GITHUB_STYLE_GUIDE.md  .
+4.1) UPDATE the comment on the ISSUE with the test results and decision following @GITHUB_STYLE_GUIDE.md  .
 
 5) PLAN REMEDIATION ITEM SPECIFIC PLAN : SNST : 
 PLAN ONLY THE REMEDIATION TO THE SYSTEM UNDER TEST.
 to fix the original issue and pass the test too.
-5.1) Make or UPDATE a comment on the ISSUE with the results.
+5.1) UPDATE the comment on the ISSUE with the results following @GITHUB_STYLE_GUIDE.md  .
 
 6) EXECUTE THE REMEDIATION ITEM SPECIFIC PLAN: SNST :
-6.1) Make or UPDATE a comment on the ISSUE with the results.
+6.1) UPDATE the comment on the ISSUE with the results following @GITHUB_STYLE_GUIDE.md  .
 6.2) Git commit work in conceptual batches. 
 
 7) PROOF: SNST : Spawn a sub agent PROVE THAT THE CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
 otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
 do not introduce new problems.
-7.1) Make or UPDATE a comment on the ISSUE with PROOF.
+7.1) UPDATE a comment on the ISSUE with PROOF  following @GITHUB_STYLE_GUIDE.md  .
 
 8) PR AND CLOSURE: SNST:
 8.1) Git commit remaining related work in conceptual batches. 
 8.2) Make a NEW PR (Pull Request).
 8.3) Cross link the prior generated issue so it will close on PR merge.
+8.4) Do a final update for this loop  following @GITHUB_STYLE_GUIDE.md  .
 
 END PROCESS INSTRUCTIONS
 
