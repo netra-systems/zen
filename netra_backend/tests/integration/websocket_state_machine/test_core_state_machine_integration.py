@@ -999,3 +999,656 @@ class TestCoreStateMachineIntegration(BaseIntegrationTest):
             'state_consistency': True,
             'failure_recovery': True
         }, 'reliability')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_011_terminal_state_handling_closed_failed(self, real_services_fixture):
+        """
+        Test proper handling of terminal states (CLOSED, FAILED).
+        
+        Business Value: Ensures connections are properly finalized and resources
+        are cleaned up when connections end, preventing resource leaks.
+        """
+        user_data = await self.create_test_user_context(real_services_fixture, {
+            'email': 'terminal_states_test@netra.ai',
+            'name': 'Terminal States Test User',
+            'is_active': True
+        })
+        user_id = ensure_user_id(user_data['id'])
+        
+        # Test CLOSED terminal state
+        connection_id_1 = f"test_conn_closed_{int(time.time())}"
+        state_machine_1 = ConnectionStateMachine(connection_id_1, user_id)
+        
+        # Transition to operational state
+        state_machine_1.transition_to(ApplicationConnectionState.ACCEPTED, "setup")
+        state_machine_1.transition_to(ApplicationConnectionState.AUTHENTICATED, "setup")
+        state_machine_1.transition_to(ApplicationConnectionState.PROCESSING_READY, "setup")
+        
+        # Transition to CLOSING then CLOSED
+        success = state_machine_1.transition_to(ApplicationConnectionState.CLOSING, "client_disconnect")
+        assert success, "Should transition to CLOSING"
+        
+        success = state_machine_1.transition_to(ApplicationConnectionState.CLOSED, "connection_closed")
+        assert success, "Should transition to CLOSED"
+        
+        # Verify terminal state properties
+        assert ApplicationConnectionState.is_terminal(state_machine_1.current_state)
+        assert not state_machine_1.is_operational
+        assert not state_machine_1.is_ready_for_messages
+        assert not state_machine_1.can_process_messages()
+        
+        # Test that transitions from CLOSED are blocked (except to CONNECTING for retry)
+        blocked_transitions = [
+            ApplicationConnectionState.ACCEPTED,
+            ApplicationConnectionState.AUTHENTICATED,
+            ApplicationConnectionState.PROCESSING_READY,
+            ApplicationConnectionState.PROCESSING,
+            ApplicationConnectionState.IDLE,
+            ApplicationConnectionState.DEGRADED,
+            ApplicationConnectionState.CLOSING
+        ]
+        
+        for blocked_state in blocked_transitions:
+            success = state_machine_1.transition_to(blocked_state, "should_be_blocked")
+            assert not success, f"Should not transition from CLOSED to {blocked_state.value}"
+        
+        # Test allowed transition from CLOSED to CONNECTING (reconnection)
+        success = state_machine_1.transition_to(ApplicationConnectionState.CONNECTING, "reconnection_attempt")
+        assert success, "Should allow transition from CLOSED to CONNECTING"
+        
+        # Test FAILED terminal state
+        connection_id_2 = f"test_conn_failed_{int(time.time())}"
+        state_machine_2 = ConnectionStateMachine(connection_id_2, user_id)
+        
+        # Force to FAILED state
+        state_machine_2.force_failed_state("test_failure_simulation")
+        
+        assert state_machine_2.current_state == ApplicationConnectionState.FAILED
+        assert ApplicationConnectionState.is_terminal(state_machine_2.current_state)
+        assert not state_machine_2.is_operational
+        assert not state_machine_2.can_process_messages()
+        
+        # Test that FAILED allows transition to CONNECTING
+        success = state_machine_2.transition_to(ApplicationConnectionState.CONNECTING, "recovery_attempt")
+        assert success, "Should allow transition from FAILED to CONNECTING"
+        
+        # Test maximum failure handling
+        connection_id_3 = f"test_conn_max_failures_{int(time.time())}"
+        state_machine_3 = ConnectionStateMachine(connection_id_3, user_id)
+        
+        # Trigger multiple failures to exceed maximum
+        for i in range(6):  # Exceed max_transition_failures (5)
+            state_machine_3.transition_to(ApplicationConnectionState.PROCESSING_READY, "invalid")  # Invalid from CONNECTING
+        
+        # Should be forced to FAILED state
+        assert state_machine_3.current_state == ApplicationConnectionState.FAILED
+        
+        self.assert_business_value_delivered({
+            'terminal_state_handling': True,
+            'resource_cleanup': True,
+            'reconnection_capability': True
+        }, 'stability')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_012_state_machine_integration_with_websocket_utilities(self, real_services_fixture):
+        """
+        Test state machine integration with WebSocket utility functions.
+        
+        Business Value: Ensures state machine provides accurate connection
+        readiness information to the broader WebSocket infrastructure.
+        """
+        user_data = await self.create_test_user_context(real_services_fixture, {
+            'email': 'utilities_integration_test@netra.ai',
+            'name': 'Utilities Integration Test User',
+            'is_active': True
+        })
+        user_id = ensure_user_id(user_data['id'])
+        connection_id = f"test_conn_utilities_{int(time.time())}"
+        
+        # Test integration with global registry
+        registry = get_connection_state_registry()
+        state_machine = registry.register_connection(connection_id, user_id)
+        
+        # Test is_connection_ready_for_messages function
+        assert not is_connection_ready_for_messages(connection_id), "Should not be ready initially"
+        
+        # Progress through states and test readiness at each step
+        state_readiness_tests = [
+            (ApplicationConnectionState.CONNECTING, False),
+            (ApplicationConnectionState.ACCEPTED, False),
+            (ApplicationConnectionState.AUTHENTICATED, False),
+            (ApplicationConnectionState.SERVICES_READY, False),
+            (ApplicationConnectionState.PROCESSING_READY, True),
+            (ApplicationConnectionState.PROCESSING, True),
+            (ApplicationConnectionState.IDLE, True),
+            (ApplicationConnectionState.DEGRADED, True)  # Can still process in degraded mode
+        ]
+        
+        for target_state, expected_ready in state_readiness_tests:
+            if target_state != ApplicationConnectionState.CONNECTING:  # Already in CONNECTING
+                state_machine.transition_to(target_state, f"test_{target_state.value}")
+            
+            actual_ready = is_connection_ready_for_messages(connection_id)
+            assert actual_ready == expected_ready, f"Readiness mismatch at state {target_state.value}"
+            
+            # Also test the state machine's own methods
+            assert state_machine.is_ready_for_messages == expected_ready
+            assert state_machine.can_process_messages() == expected_ready
+        
+        # Test with non-existent connection
+        non_existent_ready = is_connection_ready_for_messages("non_existent_connection")
+        assert non_existent_ready, "Non-existent connections should default to ready (backward compatibility)"
+        
+        # Test state machine removal from registry
+        registry.unregister_connection(connection_id)
+        removed_ready = is_connection_ready_for_messages(connection_id)
+        assert removed_ready, "Removed connections should default to ready"
+        
+        # Test degraded mode readiness requirements
+        connection_id_2 = f"test_conn_degraded_{int(time.time())}"
+        state_machine_2 = registry.register_connection(connection_id_2, user_id)
+        
+        # Go directly to degraded without proper setup
+        state_machine_2.transition_to(ApplicationConnectionState.ACCEPTED, "minimal_setup")
+        state_machine_2.transition_to(ApplicationConnectionState.DEGRADED, "forced_degradation")
+        
+        # Should not be ready due to insufficient setup
+        assert not state_machine_2.can_process_messages(), "Degraded mode should require minimum setup"
+        
+        # Complete proper setup then degrade
+        state_machine_2.transition_to(ApplicationConnectionState.AUTHENTICATED, "proper_setup")
+        state_machine_2.transition_to(ApplicationConnectionState.SERVICES_READY, "proper_setup")
+        state_machine_2.transition_to(ApplicationConnectionState.PROCESSING_READY, "proper_setup")
+        state_machine_2.transition_to(ApplicationConnectionState.DEGRADED, "network_degradation")
+        
+        # Should now be ready even in degraded mode
+        assert state_machine_2.can_process_messages(), "Properly setup degraded connections should be ready"
+        
+        # Test failure threshold integration
+        connection_id_3 = f"test_conn_failures_{int(time.time())}"
+        state_machine_3 = registry.register_connection(connection_id_3, user_id)
+        
+        # Setup to ready state
+        state_machine_3.transition_to(ApplicationConnectionState.ACCEPTED, "setup")
+        state_machine_3.transition_to(ApplicationConnectionState.AUTHENTICATED, "setup") 
+        state_machine_3.transition_to(ApplicationConnectionState.SERVICES_READY, "setup")
+        state_machine_3.transition_to(ApplicationConnectionState.PROCESSING_READY, "setup")
+        
+        # Should be ready
+        assert state_machine_3.can_process_messages()
+        
+        # Generate failures near threshold
+        for i in range(4):  # Just below max_transition_failures - 1
+            state_machine_3.transition_to(ApplicationConnectionState.CONNECTING, "invalid")  # Invalid transition
+        
+        # Should still be ready
+        assert state_machine_3.can_process_messages()
+        
+        # One more failure should make it not ready
+        state_machine_3.transition_to(ApplicationConnectionState.CONNECTING, "invalid")  # Invalid transition
+        assert not state_machine_3.can_process_messages(), "Should not be ready after excessive failures"
+        
+        registry.unregister_connection(connection_id_2)
+        registry.unregister_connection(connection_id_3)
+        
+        self.assert_business_value_delivered({
+            'websocket_utility_integration': True,
+            'readiness_validation': True,
+            'backward_compatibility': True
+        }, 'integration')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_013_connection_readiness_validation_comprehensive(self, real_services_fixture):
+        """
+        Test comprehensive connection readiness validation scenarios.
+        
+        Business Value: Ensures accurate connection readiness detection prevents
+        premature message processing and maintains reliable chat functionality.
+        """
+        user_data = await self.create_test_user_context(real_services_fixture, {
+            'email': 'readiness_test@netra.ai',
+            'name': 'Readiness Test User',
+            'is_active': True
+        })
+        user_id = ensure_user_id(user_data['id'])
+        connection_id = f"test_conn_readiness_{int(time.time())}"
+        
+        state_machine = ConnectionStateMachine(connection_id, user_id)
+        
+        # Test readiness at each state in the progression
+        readiness_progression = [
+            # (state, is_operational, is_ready_for_messages, can_process_messages)
+            (ApplicationConnectionState.CONNECTING, False, False, False),
+            (ApplicationConnectionState.ACCEPTED, False, False, False),
+            (ApplicationConnectionState.AUTHENTICATED, False, False, False),
+            (ApplicationConnectionState.SERVICES_READY, False, False, False),
+            (ApplicationConnectionState.PROCESSING_READY, True, True, True),
+            (ApplicationConnectionState.PROCESSING, True, True, True),
+            (ApplicationConnectionState.IDLE, True, True, True),
+            (ApplicationConnectionState.DEGRADED, True, True, True),  # Degraded but functional
+            (ApplicationConnectionState.RECONNECTING, False, False, False),
+            (ApplicationConnectionState.CLOSING, False, False, False),
+            (ApplicationConnectionState.CLOSED, False, False, False),
+            (ApplicationConnectionState.FAILED, False, False, False)
+        ]
+        
+        for target_state, expected_operational, expected_ready, expected_can_process in readiness_progression:
+            # Transition to target state (with proper sequence)
+            if target_state == ApplicationConnectionState.CONNECTING:
+                pass  # Already in CONNECTING
+            elif target_state == ApplicationConnectionState.ACCEPTED:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.AUTHENTICATED:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.SERVICES_READY:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.PROCESSING_READY:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.PROCESSING:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.IDLE:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.DEGRADED:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.RECONNECTING:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.CLOSING:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.CLOSED:
+                state_machine.transition_to(target_state, "test")
+            elif target_state == ApplicationConnectionState.FAILED:
+                state_machine.force_failed_state("test_failure")
+            
+            # Verify readiness properties
+            assert state_machine.is_operational == expected_operational, \
+                f"is_operational mismatch at {target_state.value}: expected {expected_operational}, got {state_machine.is_operational}"
+            
+            assert state_machine.is_ready_for_messages == expected_ready, \
+                f"is_ready_for_messages mismatch at {target_state.value}: expected {expected_ready}, got {state_machine.is_ready_for_messages}"
+            
+            assert state_machine.can_process_messages() == expected_can_process, \
+                f"can_process_messages mismatch at {target_state.value}: expected {expected_can_process}, got {state_machine.can_process_messages()}"
+            
+            # Break after FAILED state as no more transitions are possible
+            if target_state == ApplicationConnectionState.FAILED:
+                break
+        
+        # Test edge cases for degraded mode readiness
+        connection_id_2 = f"test_conn_degraded_edge_{int(time.time())}"
+        state_machine_2 = ConnectionStateMachine(connection_id_2, user_id)
+        
+        # Test degraded mode with insufficient setup
+        state_machine_2.transition_to(ApplicationConnectionState.ACCEPTED, "minimal")
+        state_machine_2.transition_to(ApplicationConnectionState.DEGRADED, "premature_degradation")
+        
+        # Should not be ready for processing due to insufficient setup
+        assert not state_machine_2.can_process_messages(), "Degraded mode should require minimum setup phases"
+        
+        # Add authentication and test again
+        state_machine_2.transition_to(ApplicationConnectionState.AUTHENTICATED, "add_auth")
+        state_machine_2.transition_to(ApplicationConnectionState.DEGRADED, "degraded_with_auth")
+        
+        # Should now be ready (has ACCEPTED + AUTHENTICATED)
+        assert state_machine_2.can_process_messages(), "Degraded mode should work with sufficient setup"
+        
+        # Test failure threshold edge cases
+        connection_id_3 = f"test_conn_failure_edge_{int(time.time())}"
+        state_machine_3 = ConnectionStateMachine(connection_id_3, user_id)
+        
+        # Setup to ready state
+        state_machine_3.transition_to(ApplicationConnectionState.ACCEPTED, "setup")
+        state_machine_3.transition_to(ApplicationConnectionState.AUTHENTICATED, "setup")
+        state_machine_3.transition_to(ApplicationConnectionState.SERVICES_READY, "setup")
+        state_machine_3.transition_to(ApplicationConnectionState.PROCESSING_READY, "setup")
+        
+        # Generate failures up to threshold - 1
+        initial_failures = state_machine_3._transition_failures
+        max_failures = state_machine_3._max_transition_failures
+        
+        for i in range(max_failures - 1):
+            state_machine_3.transition_to(ApplicationConnectionState.CONNECTING, "invalid")  # Invalid transition
+        
+        # Should still be able to process (one failure away from threshold)
+        assert state_machine_3.can_process_messages(), "Should be ready just below failure threshold"
+        
+        # One more failure should push over threshold
+        state_machine_3.transition_to(ApplicationConnectionState.CONNECTING, "invalid")
+        assert not state_machine_3.can_process_messages(), "Should not be ready at failure threshold"
+        
+        # Test readiness recovery after successful transition
+        success = state_machine_3.transition_to(ApplicationConnectionState.PROCESSING, "recovery")
+        assert success, "Should be able to transition normally"
+        assert state_machine_3.can_process_messages(), "Should be ready after successful transition"
+        
+        self.assert_business_value_delivered({
+            'comprehensive_readiness_validation': True,
+            'edge_case_handling': True,
+            'failure_threshold_management': True
+        }, 'reliability')
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_014_operational_state_verification_comprehensive(self, real_services_fixture):
+        """
+        Test comprehensive operational state verification logic.
+        
+        Business Value: Ensures accurate operational status detection enables
+        proper load balancing and health monitoring across connections.
+        """
+        user_data = await self.create_test_user_context(real_services_fixture, {
+            'email': 'operational_test@netra.ai',
+            'name': 'Operational Test User',
+            'is_active': True
+        })
+        user_id = ensure_user_id(user_data['id'])
+        connection_id = f"test_conn_operational_{int(time.time())}"
+        
+        state_machine = ConnectionStateMachine(connection_id, user_id)
+        
+        # Test operational status for all states
+        operational_status_map = {
+            ApplicationConnectionState.CONNECTING: False,
+            ApplicationConnectionState.ACCEPTED: False,
+            ApplicationConnectionState.AUTHENTICATED: False,
+            ApplicationConnectionState.SERVICES_READY: False,
+            ApplicationConnectionState.PROCESSING_READY: True,
+            ApplicationConnectionState.PROCESSING: True,
+            ApplicationConnectionState.IDLE: True,
+            ApplicationConnectionState.DEGRADED: True,
+            ApplicationConnectionState.RECONNECTING: False,
+            ApplicationConnectionState.CLOSING: False,
+            ApplicationConnectionState.CLOSED: False,
+            ApplicationConnectionState.FAILED: False
+        }
+        
+        # Test static method for operational state detection
+        for state, expected_operational in operational_status_map.items():
+            is_operational = ApplicationConnectionState.is_operational(state)
+            assert is_operational == expected_operational, \
+                f"Static is_operational check failed for {state.value}: expected {expected_operational}, got {is_operational}"
+        
+        # Test instance property through state transitions
+        current_state = ApplicationConnectionState.CONNECTING
+        for target_state, expected_operational in operational_status_map.items():
+            # Transition to target state
+            if target_state != current_state:
+                if target_state == ApplicationConnectionState.FAILED:
+                    state_machine.force_failed_state("test_failure")
+                else:
+                    # For valid transitions, follow proper sequence
+                    if self._can_transition_directly(current_state, target_state):
+                        state_machine.transition_to(target_state, "test_operational")
+                        current_state = target_state
+                    else:
+                        # Skip states that require complex transition sequences
+                        continue
+            
+            # Verify operational status
+            assert state_machine.is_operational == expected_operational, \
+                f"Instance is_operational check failed for {target_state.value}: expected {expected_operational}, got {state_machine.is_operational}"
+            
+            if target_state == ApplicationConnectionState.FAILED:
+                break  # Can't transition further from FAILED
+        
+        # Test operational state transitions with registry integration
+        registry = ConnectionStateMachineRegistry()
+        
+        # Create multiple connections in different operational states
+        operational_connections = []
+        non_operational_connections = []
+        
+        for i, (state, is_op) in enumerate(operational_status_map.items()):
+            conn_id = f"test_op_conn_{i}_{int(time.time())}"
+            machine = registry.register_connection(conn_id, user_id)
+            
+            # Transition to target state through proper sequence
+            if state != ApplicationConnectionState.CONNECTING:
+                if state == ApplicationConnectionState.ACCEPTED:
+                    machine.transition_to(state, "test")
+                elif state == ApplicationConnectionState.AUTHENTICATED:
+                    machine.transition_to(ApplicationConnectionState.ACCEPTED, "test")
+                    machine.transition_to(state, "test")
+                elif state == ApplicationConnectionState.SERVICES_READY:
+                    machine.transition_to(ApplicationConnectionState.ACCEPTED, "test")
+                    machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "test")
+                    machine.transition_to(state, "test")
+                elif state in [ApplicationConnectionState.PROCESSING_READY, 
+                              ApplicationConnectionState.PROCESSING, 
+                              ApplicationConnectionState.IDLE,
+                              ApplicationConnectionState.DEGRADED]:
+                    # Full setup sequence
+                    machine.transition_to(ApplicationConnectionState.ACCEPTED, "test")
+                    machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "test")
+                    machine.transition_to(ApplicationConnectionState.SERVICES_READY, "test")
+                    machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "test")
+                    if state != ApplicationConnectionState.PROCESSING_READY:
+                        machine.transition_to(state, "test")
+                elif state == ApplicationConnectionState.FAILED:
+                    machine.force_failed_state("test_failure")
+                elif state in [ApplicationConnectionState.CLOSING, ApplicationConnectionState.CLOSED]:
+                    # Setup first then close
+                    machine.transition_to(ApplicationConnectionState.ACCEPTED, "test")
+                    machine.transition_to(ApplicationConnectionState.AUTHENTICATED, "test")
+                    machine.transition_to(ApplicationConnectionState.SERVICES_READY, "test")
+                    machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "test")
+                    machine.transition_to(ApplicationConnectionState.CLOSING, "test")
+                    if state == ApplicationConnectionState.CLOSED:
+                        machine.transition_to(state, "test")
+            
+            if is_op:
+                operational_connections.append(conn_id)
+            else:
+                non_operational_connections.append(conn_id)
+        
+        # Test registry operational connection filtering
+        all_operational = registry.get_all_operational_connections()
+        
+        # Verify all expected operational connections are found
+        for conn_id in operational_connections:
+            assert conn_id in all_operational, f"Operational connection {conn_id} not found in registry"
+        
+        # Verify non-operational connections are not included
+        for conn_id in non_operational_connections:
+            assert conn_id not in all_operational, f"Non-operational connection {conn_id} found in operational list"
+        
+        # Test registry statistics
+        stats = registry.get_registry_stats()
+        assert stats['operational_connections'] == len(operational_connections)
+        assert stats['total_connections'] == len(operational_status_map)
+        
+        self.assert_business_value_delivered({
+            'operational_state_verification': True,
+            'registry_operational_filtering': True,
+            'health_monitoring_support': True
+        }, 'monitoring')
+
+    def _can_transition_directly(self, from_state, to_state):
+        """Helper method to check if direct transition is possible."""
+        if from_state == to_state:
+            return True
+        
+        # Define simple direct transitions for testing
+        direct_transitions = {
+            ApplicationConnectionState.CONNECTING: [ApplicationConnectionState.ACCEPTED],
+            ApplicationConnectionState.ACCEPTED: [ApplicationConnectionState.AUTHENTICATED],
+            ApplicationConnectionState.AUTHENTICATED: [ApplicationConnectionState.SERVICES_READY],
+            ApplicationConnectionState.SERVICES_READY: [ApplicationConnectionState.PROCESSING_READY],
+            ApplicationConnectionState.PROCESSING_READY: [ApplicationConnectionState.PROCESSING, ApplicationConnectionState.IDLE, ApplicationConnectionState.DEGRADED],
+            ApplicationConnectionState.PROCESSING: [ApplicationConnectionState.IDLE, ApplicationConnectionState.DEGRADED],
+            ApplicationConnectionState.IDLE: [ApplicationConnectionState.PROCESSING, ApplicationConnectionState.DEGRADED],
+            ApplicationConnectionState.DEGRADED: [ApplicationConnectionState.PROCESSING_READY]
+        }
+        
+        return to_state in direct_transitions.get(from_state, [])
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_015_state_machine_cleanup_and_resource_management(self, real_services_fixture):
+        """
+        Test proper cleanup and resource management for state machines.
+        
+        Business Value: Prevents memory leaks and ensures efficient resource
+        utilization in high-throughput connection scenarios.
+        """
+        # Create multiple users for cleanup testing
+        users = []
+        for i in range(5):
+            user_data = await self.create_test_user_context(real_services_fixture, {
+                'email': f'cleanup_test_{i}@netra.ai',
+                'name': f'Cleanup Test User {i}',
+                'is_active': True
+            })
+            users.append(user_data)
+        
+        registry = ConnectionStateMachineRegistry()
+        created_connections = []
+        
+        # Create connections and track resources
+        for i, user_data in enumerate(users):
+            user_id = ensure_user_id(user_data['id'])
+            connection_id = f"test_cleanup_conn_{i}_{int(time.time())}"
+            
+            # Register connection
+            state_machine = registry.register_connection(connection_id, user_id)
+            created_connections.append((connection_id, state_machine, user_id))
+            
+            # Add callbacks to track resource usage
+            callback_counter = {'calls': 0}
+            
+            def resource_tracking_callback(transition_info):
+                callback_counter['calls'] += 1
+            
+            state_machine.add_state_change_callback(resource_tracking_callback)
+            
+            # Perform some transitions to generate history and metrics
+            state_machine.transition_to(ApplicationConnectionState.ACCEPTED, f"setup_{i}")
+            state_machine.transition_to(ApplicationConnectionState.AUTHENTICATED, f"setup_{i}")
+            
+            # Verify callback was called
+            assert callback_counter['calls'] == 2, "Callbacks should be working"
+        
+        # Verify all connections are registered
+        initial_stats = registry.get_registry_stats()
+        assert initial_stats['total_connections'] == len(users)
+        
+        # Test individual connection cleanup
+        connection_id_0, state_machine_0, user_id_0 = created_connections[0]
+        
+        # Generate some history and metrics
+        state_machine_0.transition_to(ApplicationConnectionState.SERVICES_READY, "test")
+        state_machine_0.transition_to(ApplicationConnectionState.PROCESSING_READY, "test")
+        
+        history_before = state_machine_0.get_state_history()
+        metrics_before = state_machine_0.get_metrics()
+        
+        assert len(history_before) > 0, "Should have transition history"
+        assert metrics_before['total_transitions'] > 0, "Should have transition metrics"
+        
+        # Close the connection
+        state_machine_0.transition_to(ApplicationConnectionState.CLOSING, "cleanup_test")
+        state_machine_0.transition_to(ApplicationConnectionState.CLOSED, "cleanup_test")
+        
+        # Verify state is terminal
+        assert ApplicationConnectionState.is_terminal(state_machine_0.current_state)
+        
+        # Test automatic cleanup of closed connections
+        cleaned_count = registry.cleanup_closed_connections()
+        assert cleaned_count == 1, "Should clean up one closed connection"
+        
+        # Verify connection was removed from registry
+        retrieved = registry.get_connection_state_machine(connection_id_0)
+        assert retrieved is None, "Cleaned up connection should not be retrievable"
+        
+        # Test cleanup of failed connections
+        connection_id_1, state_machine_1, user_id_1 = created_connections[1]
+        
+        # Force to failed state
+        state_machine_1.force_failed_state("cleanup_test_failure")
+        assert state_machine_1.current_state == ApplicationConnectionState.FAILED
+        
+        # Cleanup failed connections
+        failed_cleaned = registry.cleanup_closed_connections()
+        assert failed_cleaned == 1, "Should clean up one failed connection"
+        
+        # Test bulk cleanup of multiple terminal connections
+        remaining_connections = created_connections[2:]
+        
+        for connection_id, state_machine, user_id in remaining_connections:
+            # Close all remaining connections
+            state_machine.transition_to(ApplicationConnectionState.PROCESSING_READY, "bulk_test")
+            state_machine.transition_to(ApplicationConnectionState.CLOSING, "bulk_cleanup")
+            state_machine.transition_to(ApplicationConnectionState.CLOSED, "bulk_cleanup")
+        
+        # Cleanup all closed connections
+        bulk_cleaned = registry.cleanup_closed_connections()
+        assert bulk_cleaned == len(remaining_connections), f"Should clean up {len(remaining_connections)} connections"
+        
+        # Verify registry is empty
+        final_stats = registry.get_registry_stats()
+        assert final_stats['total_connections'] == 0, "Registry should be empty after cleanup"
+        assert final_stats['operational_connections'] == 0, "No operational connections should remain"
+        
+        # Test memory and resource tracking
+        # Create and destroy many connections to test resource management
+        stress_connections = []
+        for i in range(50):  # Moderate stress test
+            user_id = ensure_user_id(users[i % len(users)]['id'])
+            connection_id = f"stress_conn_{i}_{int(time.time())}"
+            
+            machine = registry.register_connection(connection_id, user_id)
+            
+            # Rapid state transitions
+            machine.transition_to(ApplicationConnectionState.ACCEPTED, f"stress_{i}")
+            machine.transition_to(ApplicationConnectionState.AUTHENTICATED, f"stress_{i}")
+            machine.transition_to(ApplicationConnectionState.PROCESSING_READY, f"stress_{i}")
+            machine.transition_to(ApplicationConnectionState.CLOSING, f"stress_{i}")
+            machine.transition_to(ApplicationConnectionState.CLOSED, f"stress_{i}")
+            
+            stress_connections.append(connection_id)
+        
+        # Verify all connections were created
+        stress_stats = registry.get_registry_stats()
+        assert stress_stats['total_connections'] == 50
+        
+        # Cleanup all stress test connections
+        stress_cleaned = registry.cleanup_closed_connections()
+        assert stress_cleaned == 50, "Should clean up all stress test connections"
+        
+        # Verify complete cleanup
+        final_stress_stats = registry.get_registry_stats()
+        assert final_stress_stats['total_connections'] == 0
+        
+        # Test callback cleanup (callbacks should not prevent cleanup)
+        test_connection_id = f"callback_cleanup_test_{int(time.time())}"
+        callback_machine = registry.register_connection(test_connection_id, users[0]['id'])
+        
+        # Add multiple callbacks
+        callback_calls = []
+        for i in range(5):
+            def make_callback(index):
+                def callback(transition_info):
+                    callback_calls.append(f"callback_{index}")
+                return callback
+            
+            callback_machine.add_state_change_callback(make_callback(i))
+        
+        # Close connection
+        callback_machine.transition_to(ApplicationConnectionState.ACCEPTED, "callback_test")
+        callback_machine.transition_to(ApplicationConnectionState.CLOSING, "callback_test")
+        callback_machine.transition_to(ApplicationConnectionState.CLOSED, "callback_test")
+        
+        # Verify callbacks were called
+        assert len(callback_calls) == 15, "All callbacks should be called (5 callbacks * 3 transitions)"
+        
+        # Cleanup should still work despite callbacks
+        callback_cleaned = registry.cleanup_closed_connections()
+        assert callback_cleaned == 1, "Should clean up connection with callbacks"
+        
+        self.assert_business_value_delivered({
+            'resource_cleanup': True,
+            'memory_management': True,
+            'bulk_cleanup_efficiency': True
+        }, 'performance')
