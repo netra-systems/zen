@@ -735,7 +735,7 @@ class TestAgentLifecycleManager(SSotBaseTestCase):
     """Test AgentLifecycleManager memory leak prevention."""
     
     @pytest.mark.asyncio
-    async def test_lifecycle_manager_cleanup_agent_resources(self, mock_llm_manager, mock_agent):
+    async def test_lifecycle_manager_cleanup_agent_resources(self, mock_llm_manager):
         """Test lifecycle manager cleans up specific agent resources."""
         registry = AgentRegistry(mock_llm_manager)
         lifecycle_manager = registry._lifecycle_manager
@@ -743,17 +743,23 @@ class TestAgentLifecycleManager(SSotBaseTestCase):
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
         agent_id = "test_agent"
         
+        # Create mock agent with proper cleanup method
+        mock_agent = Mock(spec=BaseAgent)
+        mock_agent.cleanup = AsyncMock()
+        
         # Create session and register agent
         session = await registry.get_user_session(user_id)
         await session.register_agent(agent_id, mock_agent)
         
         assert await session.get_agent(agent_id) == mock_agent
+        assert agent_id in session._agents
         
         # Cleanup specific agent
         await lifecycle_manager.cleanup_agent_resources(user_id, agent_id)
         
         # Verify agent removed and cleaned up
-        assert await session.get_agent(agent_id) is None
+        # The lifecycle manager directly removes from session._agents
+        assert agent_id not in session._agents, f"Agent {agent_id} should be removed but still in {session._agents}"
         mock_agent.cleanup.assert_called_once()
         
         self.record_metric("lifecycle_manager_cleanup_success", True)
@@ -784,12 +790,16 @@ class TestAgentLifecycleManager(SSotBaseTestCase):
         self.record_metric("memory_monitoring_success", True)
     
     @pytest.mark.asyncio
-    async def test_lifecycle_manager_trigger_cleanup(self, mock_llm_manager, mock_agent):
+    async def test_lifecycle_manager_trigger_cleanup(self, mock_llm_manager):
         """Test lifecycle manager triggers emergency cleanup."""
         registry = AgentRegistry(mock_llm_manager)
         lifecycle_manager = registry._lifecycle_manager
         
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+        
+        # Create mock agent with proper cleanup method
+        mock_agent = Mock(spec=BaseAgent)
+        mock_agent.cleanup = AsyncMock()
         
         # Create session with agents
         session = await registry.get_user_session(user_id)
@@ -801,7 +811,7 @@ class TestAgentLifecycleManager(SSotBaseTestCase):
         # Trigger emergency cleanup
         await lifecycle_manager.trigger_cleanup(user_id)
         
-        # Verify session removed from registry
+        # Verify session removed from registry (this is what the lifecycle manager does)
         assert user_id not in registry._user_sessions
         
         # Verify agent cleanup was called

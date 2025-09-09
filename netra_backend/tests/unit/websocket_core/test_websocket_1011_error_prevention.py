@@ -159,7 +159,7 @@ class TestWebSocket1011ErrorPrevention:
         
         # Test connection registration (basic functionality test)
         test_connection_id = "test_connection_123"
-        test_user_id = "test_user_456"
+        test_user_id = generate_test_user_id("test_user_456")
         
         # This should not raise errors related to undefined functions
         try:
@@ -220,7 +220,7 @@ class TestWebSocket1011ErrorPrevention:
         # Test 3: Verify state machine functionality
         registry = get_connection_state_registry()
         test_connection = "integration_test_connection"
-        test_user = "integration_test_user"
+        test_user = generate_test_user_id("integration_test_user")
         
         state_machine = registry.register_connection(test_connection, test_user)
         assert state_machine is not None
@@ -351,7 +351,12 @@ class TestWebSocket1011BusinessImpactPrevention:
         
         # Verify can transition to processing ready (required for event delivery)
         processing_state = context['connection_states'].PROCESSING_READY
-        can_reach_processing = state_machine.can_transition_to(processing_state)
+        # Test direct transition as can_transition_to is not implemented
+        try:
+            success = state_machine.transition_to(processing_state, reason="Test processing ready state")
+            can_reach_processing = success
+        except Exception:
+            can_reach_processing = False
         
         # Cleanup
         registry.unregister_connection(connection_id)

@@ -369,7 +369,13 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         print(f"   Connection errors: {stress_metrics['connection_errors']}")
         print(f"   Timeout errors: {stress_metrics['timeout_errors']}")
         print(f"   Recovery time: {recovery_time:.2f}s")
-        print(f"   Recovery success rate: {recovery_success_rate:.3f}")\n    \n    @pytest.mark.integration\n    @pytest.mark.performance\n    @pytest.mark.real_services\n    async def test_connection_pool_efficiency_patterns(self, real_services_fixture):\n        """
+        print(f"   Recovery success rate: {recovery_success_rate:.3f}")
+    
+    @pytest.mark.integration
+    @pytest.mark.performance
+    @pytest.mark.real_services
+    async def test_connection_pool_efficiency_patterns(self, real_services_fixture):
+        """
         Test database connection pool efficiency with various usage patterns.
         
         Performance SLA:

@@ -106,12 +106,12 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
         - Success rate: >95% under 20 concurrent executions
         - Memory usage: <50MB per concurrent agent
         - No resource contention blocking
-        \"\"\"
+        """
         concurrent_agents = 20
         executions_per_agent = 5
         
-        db = real_services_fixture[\"db\"]
-        redis = real_services_fixture[\"redis\"]
+        db = real_services_fixture["db"]
+        redis = real_services_fixture["redis"]
         
         agent_performance_results = []
         
