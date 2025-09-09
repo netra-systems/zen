@@ -66,7 +66,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 
 # State and Schema Models
 from netra_backend.app.agents.state import OptimizationsResult, ActionPlanResult
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, ErrorContext
+from netra_backend.app.schemas.shared_types import DataAnalysisResponse, ErrorContext, PerformanceMetrics
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 
 
@@ -154,20 +154,24 @@ class TestActionsToMeetGoalsSubAgent(SSotBaseTestCase):
         optimization_data = {
             "user_request": "Help me reduce cloud costs by 30%",
             "optimizations_result": OptimizationsResult(
-                optimization_strategies=[
-                    {
-                        "category": "cost_optimization", 
-                        "strategy": "right-size instances",
-                        "potential_savings": 2400
-                    }
+                optimization_type="cost_optimization",
+                recommendations=[
+                    "Right-size instances to match actual usage patterns",
+                    "Implement automated scaling policies"
                 ],
-                estimated_total_savings=2400,
+                cost_savings=2400.0,
                 confidence_score=0.85
             ),
             "data_result": DataAnalysisResponse(
-                insights=["High compute utilization during off-peak hours"],
-                recommendations=["Implement auto-scaling policies"],
-                confidence_score=0.90
+                analysis_id="test-analysis-123",
+                status="completed",
+                results={
+                    "insights": ["High compute utilization during off-peak hours"],
+                    "recommendations": ["Implement auto-scaling policies"],
+                    "confidence_score": 0.90
+                },
+                metrics=PerformanceMetrics(duration_ms=2500.0, memory_usage_mb=128.5),
+                created_at=time.time()
             )
         }
         optimization_data.update(authenticated_user_context.agent_context)
