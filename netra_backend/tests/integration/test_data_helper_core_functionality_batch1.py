@@ -114,7 +114,7 @@ async def user_execution_context(authenticated_user, real_services_fixture):
 
 
 @pytest.fixture
-async def data_helper_agent(real_services_fixture, mock_websocket_manager):
+async def data_helper_agent(real_services_fixture, mock_websocket_manager, user_execution_context):
     """Create DataHelperAgent with real LLM and tool dispatcher."""
     env = get_env()
     

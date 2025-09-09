@@ -117,12 +117,16 @@ class WebSocketEventsValidator:
             thread_id=thread_id,
             run_id=run_id,
             request_id=request_id,
-            websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(user_id),
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id),
             db_session=None,  # Mock for this test
-            metadata={
+            agent_context={
                 'user_request': 'Analyze my AI costs and suggest optimizations',
                 'request_type': 'cost_optimization',
                 'test_mode': True
+            },
+            audit_metadata={
+                'test_source': 'websocket_events_validation',
+                'created_at': datetime.utcnow().isoformat()
             }
         )
         
