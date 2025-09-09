@@ -98,11 +98,12 @@ class TestAuthServiceBusinessLogic:
         from datetime import datetime, UTC
         
         # Create a mock database user that matches what the repository would return
+        # Use real argon2 hash for password "correct_password"
         mock_db_user = AuthUser(
             id="login-business-user",
             email="login@company.com", 
             full_name="Login User",
-            hashed_password="$argon2id$v=19$m=65536,t=3,p=4$test$hash",  # Proper argon2 hash format
+            hashed_password="$argon2id$v=19$m=65536,t=3,p=4$uiiWemmn4i18TRXKlUvnjA$GViBYfYvATO6iqQ5sSZf0uyBA/m+8+dBKqXPBTq5NxA",  # Real hash for "correct_password"
             auth_provider="local",
             is_active=True,
             is_verified=True,
@@ -120,14 +121,10 @@ class TestAuthServiceBusinessLogic:
         # This ensures that _validate_local_auth uses the repository instead of test users
         auth_service.db_session = "mock_session"  # Non-None value to trigger database path
         
-        # Mock password verification to succeed - patch the instance's password_hasher
-        with patch.object(auth_service.password_hasher, 'verify') as mock_verify:
-            mock_verify.return_value = None  # argon2 verify doesn't return anything on success
-            
-            login_request = UserLogin(
-                email="login@company.com",
-                password="correct_password"
-            )
+        login_request = UserLogin(
+            email="login@company.com",
+            password="correct_password"
+        )
             
             # Business Rule: Test actual login business logic by calling the real method
             # This ensures we test the actual authentication flow
