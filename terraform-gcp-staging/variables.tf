@@ -28,13 +28,13 @@ variable "environment" {
 variable "postgres_version" {
   description = "PostgreSQL version for Cloud SQL"
   type        = string
-  default     = "POSTGRES_17"  # Latest PostgreSQL 17
+  default     = "POSTGRES_17" # Latest PostgreSQL 17
 }
 
 variable "database_tier" {
   description = "Cloud SQL instance tier"
   type        = string
-  default     = "db-g1-small"  # Matching current staging tier
+  default     = "db-g1-small" # Matching current staging tier
 }
 
 variable "database_name" {
@@ -65,7 +65,7 @@ variable "enable_private_ip" {
 variable "enable_public_ip" {
   description = "Enable public IP for Cloud SQL"
   type        = bool
-  default     = true  # Needed for external connectivity
+  default     = true # Needed for external connectivity
 }
 
 variable "authorized_networks" {
@@ -76,7 +76,7 @@ variable "authorized_networks" {
   }))
   default = [
     {
-      name  = "allow-all"  # For staging only; restrict in production
+      name  = "allow-all" # For staging only; restrict in production
       value = "0.0.0.0/0"
     }
   ]
@@ -142,14 +142,14 @@ variable "disk_autoresize_limit" {
 variable "availability_type" {
   description = "Availability type (ZONAL or REGIONAL)"
   type        = string
-  default     = "ZONAL"  # Use REGIONAL for production
+  default     = "ZONAL" # Use REGIONAL for production
 }
 
 # Maintenance Configuration
 variable "maintenance_window_day" {
   description = "Day of week for maintenance window (1-7, 1 = Monday)"
   type        = number
-  default     = 7  # Sunday
+  default     = 7 # Sunday
 }
 
 variable "maintenance_window_hour" {
@@ -178,27 +178,27 @@ variable "database_flags" {
     },
     {
       name  = "shared_buffers"
-      value = "256000"  # in 8KB units, ~2GB
+      value = "256000" # in 8KB units, ~2GB
     },
     {
       name  = "work_mem"
-      value = "4096"  # in KB, 4MB
+      value = "4096" # in KB, 4MB
     },
     {
       name  = "maintenance_work_mem"
-      value = "65536"  # in KB, 64MB
+      value = "65536" # in KB, 64MB
     },
     {
       name  = "effective_cache_size"
-      value = "1048576"  # in 8KB units, ~8GB
+      value = "1048576" # in 8KB units, ~8GB
     },
     {
       name  = "random_page_cost"
-      value = "1.1"  # SSD optimization
+      value = "1.1" # SSD optimization
     },
     {
       name  = "log_statement"
-      value = "all"  # For staging debugging
+      value = "all" # For staging debugging
     },
     {
       name  = "log_duration"
@@ -238,26 +238,39 @@ variable "redis_version" {
 variable "backend_timeout_sec" {
   description = "Backend service timeout in seconds for WebSocket support"
   type        = number
-  default     = 86400  # CRITICAL FIX: Increase to 24 hours for WebSocket connections
+  default     = 86400 # CRITICAL FIX: Increase to 24 hours for WebSocket connections
 }
 
 variable "session_affinity_ttl_sec" {
   description = "Session affinity cookie TTL in seconds"
   type        = number
-  default     = 86400  # CRITICAL FIX: Increase to 24 hours
+  default     = 86400 # CRITICAL FIX: Increase to 24 hours
 }
 
 # WebSocket Configuration
 variable "websocket_timeout_sec" {
   description = "WebSocket connection timeout in seconds for long-lived connections"
   type        = number
-  default     = 86400  # 24 hours for WebSocket connections
+  default     = 86400 # 24 hours for WebSocket connections
 }
 
 variable "force_https_enabled" {
   description = "Force HTTPS for all services"
   type        = bool
   default     = true
+}
+
+# Authentication Header Configuration
+variable "authentication_header_preservation_enabled" {
+  description = "Enable authentication header preservation for WebSocket connections"
+  type        = bool
+  default     = true
+}
+
+variable "preserved_auth_headers" {
+  description = "List of authentication headers to preserve through the load balancer"
+  type        = list(string)
+  default     = ["Authorization", "X-E2E-Bypass"]
 }
 
 # Labels for resource organization
@@ -276,5 +289,5 @@ variable "labels" {
 variable "notification_channels" {
   description = "List of notification channel IDs for alerts"
   type        = list(string)
-  default     = []  # Add notification channel IDs once created in GCP
+  default     = [] # Add notification channel IDs once created in GCP
 }

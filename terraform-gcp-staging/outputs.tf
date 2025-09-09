@@ -106,11 +106,11 @@ output "region" {
 output "deployment_summary" {
   description = "Summary of deployed infrastructure"
   value = {
-    environment     = var.environment
-    postgres_version = var.postgres_version
-    database_tier   = var.database_tier
-    redis_tier      = var.redis_tier
-    backup_enabled  = var.backup_enabled
+    environment        = var.environment
+    postgres_version   = var.postgres_version
+    database_tier      = var.database_tier
+    redis_tier         = var.redis_tier
+    backup_enabled     = var.backup_enabled
     private_ip_enabled = var.enable_private_ip
     public_ip_enabled  = var.enable_public_ip
   }
