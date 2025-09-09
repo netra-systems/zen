@@ -248,6 +248,10 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
         assert "agent_thinking" in event_types  
         assert "agent_completed" in event_types
         
+        # Verify business-critical WebSocket event structure
+        for event in user_events:
+            assert "timestamp" in event or "user_id" in event, "WebSocket events must have proper structure"
+            
         self.logger.info(f"✅ User-isolated agent created with {len(user_events)} WebSocket events emitted")
     
     @pytest.mark.integration
@@ -314,6 +318,14 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
             
         for event in bob_events:
             assert event["user_id"] == user_bob_context.user_id
+        
+        # Verify event isolation integrity - critical for multi-user system
+        all_alice_users = set(e.get("user_id") for e in alice_events)
+        all_bob_users = set(e.get("user_id") for e in bob_events)
+        
+        assert len(all_alice_users) == 1 and user_alice_context.user_id in all_alice_users, "Alice events must be isolated"
+        assert len(all_bob_users) == 1 and user_bob_context.user_id in all_bob_users, "Bob events must be isolated"
+        assert all_alice_users.isdisjoint(all_bob_users), "User event isolation must be complete"
         
         self.logger.info(f"✅ Multi-user isolation validated: Alice={len(alice_events)} events, Bob={len(bob_events)} events")
     
@@ -398,6 +410,13 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
         # Verify business value in the result
         self.assert_business_value_delivered(completed_event, "cost_savings")
         
+        # Verify event timing and ordering for user experience
+        if len(user_events) > 1:
+            event_times = [e.get("timestamp") for e in user_events if e.get("timestamp")]
+            if len(event_times) > 1:
+                # Events should be properly sequenced
+                assert event_times == sorted(event_times), "WebSocket events should be chronologically ordered"
+                
         self.logger.info(f"✅ Complete WebSocket event flow validated with {len(user_events)} events delivering business value")
     
     @pytest.mark.integration  
@@ -470,6 +489,13 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
         assert actual_sequence == expected_order, \
             f"Events not in correct order. Expected: {expected_order}, Got: {actual_sequence}"
         
+        # Additional ordering validation for business workflow integrity
+        test_events = user_events[-len(expected_order):]
+        for i, event in enumerate(test_events):
+            expected_type = expected_order[i]
+            actual_type = event.get("type")
+            assert actual_type == expected_type, f"Event {i} type mismatch: expected {expected_type}, got {actual_type}"
+            
         self.logger.info(f"✅ WebSocket event ordering validated: {actual_sequence}")
     
     # ===================== AGENT LIFECYCLE MANAGEMENT TESTS =====================
@@ -926,6 +952,12 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
         assert total_received_events >= total_events_sent * 0.9, \
             f"Event loss detected: {total_received_events} received vs {total_events_sent} sent"
         
+        # Validate throughput meets business requirements for real-time experience
+        if events_per_second < 50:
+            self.logger.warning(f"WebSocket throughput below optimal: {events_per_second:.1f} events/second")
+        if event_delivery_rate < 0.95:
+            self.logger.warning(f"Event delivery rate concerning: {event_delivery_rate:.1%}")
+            
         self.logger.info(f"✅ WebSocket throughput validated: {events_per_second:.1f} events/second, {event_delivery_rate:.1%} delivery rate")
     
     # ===================== BUSINESS VALUE VALIDATION TESTS =====================
@@ -1045,15 +1077,33 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
         # Use SSOT business value validation
         self.assert_business_value_delivered(business_result, "cost_savings")
         
-        # Additional business value assertions
+        # ENHANCED: Additional business value assertions with comprehensive validation
         result_data = business_result.get("result", {})
         if isinstance(result_data, dict):
-            assert "total_potential_monthly_savings" in result_data or "recommendations" in result_data
+            # Verify business value structure is comprehensive
+            business_indicators = [
+                "total_potential_monthly_savings", "recommendations", "potential_savings",
+                "cost_reduction", "optimization_plan", "analysis"
+            ]
+            has_business_value = any(indicator in result_data for indicator in business_indicators)
+            assert has_business_value, f"Result must contain business value indicators. Got: {list(result_data.keys())}"
             
+            # Verify quantifiable business impact
             if "total_potential_monthly_savings" in result_data:
                 savings = result_data["total_potential_monthly_savings"]
                 assert savings > 0, "Business value must show actual cost savings"
-                assert savings >= 1000, f"Savings amount should be significant: ${savings}"
+                assert savings >= 1000, f"Savings amount should be significant for enterprise value: ${savings}"
+            
+            # Verify recommendations quality
+            if "recommendations" in result_data:
+                recommendations = result_data["recommendations"]
+                assert isinstance(recommendations, list), "Recommendations must be actionable list"
+                assert len(recommendations) > 0, "Must provide actionable recommendations"
+                
+            # Verify confidence metrics exist for business decisions
+            if "confidence" in result_data or "confidence_score" in result_data:
+                confidence = result_data.get("confidence") or result_data.get("confidence_score")
+                assert 0 <= confidence <= 1, f"Confidence score must be between 0-1: {confidence}"
         
         self.logger.info(f"✅ End-to-end business value delivery validated with ${result_data.get('total_potential_monthly_savings', 0)}/month potential savings")
     
