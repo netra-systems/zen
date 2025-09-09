@@ -128,3 +128,5 @@ psutil>=7.0.0
 pytest>=8.4.1
 # Pytest plugin for testing asyncio code.
 pytest-asyncio>=1.1.0
+# Coverage plugin for pytest to measure code coverage.
+pytest-cov>=6.0.0
