@@ -574,7 +574,7 @@ class ServiceReadinessValidator:
             self.logger.debug(f"Database validation error: {e}")
             return False
     
-    def _validate_redis_service(self) -> bool:
+    async def _validate_redis_service(self) -> bool:
         """Validate Redis service readiness with enhanced diagnostics."""
         try:
             if not self.app_state:
@@ -606,9 +606,10 @@ class ServiceReadinessValidator:
                 # Check if Redis is actually reachable with ping test
                 if hasattr(redis_manager, '_client') and redis_manager._client:
                     try:
-                        # Attempt a quick ping to validate actual connectivity
+                        # CRITICAL FIX: Use await instead of asyncio.run() in running event loop
+                        # This fixes "asyncio.run() cannot be called from a running event loop" error
                         import asyncio
-                        ping_result = asyncio.run(asyncio.wait_for(redis_manager._client.ping(), timeout=2.0))
+                        ping_result = await asyncio.wait_for(redis_manager._client.ping(), timeout=2.0)
                         self.logger.info(f"Redis ping test result: {ping_result}")
                     except Exception as ping_error:
                         self.logger.warning(f"Redis ping test failed: {ping_error}")

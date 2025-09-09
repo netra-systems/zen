@@ -744,6 +744,7 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^sample_\w+$',                 # sample_user, sample_connection
         r'^ssot-[a-zA-Z]+-\w+$',         # ssot-test-user, ssot-mock-session
         r'^e2e-[a-zA-Z0-9_-]+$',         # e2e-staging_pipeline, e2e-deployment-test
+        r'^\d{18,21}$',                  # Google OAuth numeric user IDs (18-21 digits)
     ]
     
     import re
