@@ -1682,5 +1682,5 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
 pytestmark = [
     pytest.mark.asyncio,
     pytest.mark.integration,
-    pytest.mark.agent_routing
+    pytest.mark.agents
 ]

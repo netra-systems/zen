@@ -54,8 +54,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core import create_websocket_manager
 from shared.types.execution_types import StronglyTypedUserExecutionContext
-from shared.types.core_types import UserID, ThreadID, WebSocketID, ConnectionID
-from shared.types.websocket_types import StronglyTypedWebSocketEvent, WebSocketEventType
+from shared.types.core_types import UserID, ThreadID, WebSocketID, ConnectionID, RequestID
+from shared.types import StronglyTypedWebSocketEvent, WebSocketEventType
 
 
 class UserIsolationTestHarness:
@@ -428,17 +428,19 @@ class TestMultiUserIsolationRouting(BaseIntegrationTest):
         
         # Create strongly typed WebSocket events for each user
         user1_event = StronglyTypedWebSocketEvent(
-            event_type=WebSocketEventType.USER_MESSAGE,
+            event_type=WebSocketEventType.STATUS_UPDATE.value,
             user_id=UserID(user1["user_id"]),
-            payload={"message": "Private message for user1"},
-            message_id=str(uuid.uuid4())
+            thread_id=ThreadID(f"thread_{user1['user_id']}"),
+            request_id=RequestID(f"req_{user1['user_id']}"),
+            data={"message": "Private message for user1"},
         )
         
         user2_event = StronglyTypedWebSocketEvent(
-            event_type=WebSocketEventType.USER_MESSAGE,
+            event_type=WebSocketEventType.STATUS_UPDATE.value,
             user_id=UserID(user2["user_id"]),
-            payload={"message": "Private message for user2"},
-            message_id=str(uuid.uuid4())
+            thread_id=ThreadID(f"thread_{user2['user_id']}"),
+            request_id=RequestID(f"req_{user2['user_id']}"),
+            data={"message": "Private message for user2"},
         )
         
         # Simulate message routing through managers
