@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 
 # SSOT imports following CLAUDE.md absolute import rules
-from test_framework.ssot.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user_context
@@ -40,7 +40,7 @@ from shared.types.core_types import UserID, WebSocketID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestRaceConditionScenarios(BaseE2ETest):
+class TestRaceConditionScenarios(SSotAsyncTestCase):
     """Test race condition scenarios in Golden Path with real services."""
     
     async def async_setup_method(self, method=None):

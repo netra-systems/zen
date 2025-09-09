@@ -19,17 +19,15 @@ from datetime import datetime, timedelta
 
 # These imports will FAIL initially - that's expected and drives implementation
 try:
-    from netra_backend.core.service_dependencies.service_dependency_checker import ServiceDependencyChecker
-    from netra_backend.core.service_dependencies.health_check_validator import HealthCheckValidator
-    from netra_backend.core.service_dependencies.retry_mechanism import RetryMechanism
-    from netra_backend.core.service_dependencies.startup_orchestrator import StartupOrchestrator
-    from netra_backend.core.service_dependencies.dependency_graph_resolver import DependencyGraphResolver
-    from netra_backend.core.service_dependencies.models import (
+    from netra_backend.app.core.service_dependencies.service_dependency_checker import ServiceDependencyChecker
+    from netra_backend.app.core.service_dependencies.health_check_validator import HealthCheckValidator
+    from netra_backend.app.core.service_dependencies.retry_mechanism import RetryMechanism
+    from netra_backend.app.core.service_dependencies.startup_orchestrator import StartupOrchestrator
+    from netra_backend.app.core.service_dependencies.dependency_graph_resolver import DependencyGraphResolver
+    from netra_backend.app.core.service_dependencies.models import (
         ServiceDependency,
-        DependencyStatus,
         HealthCheckResult,
-        ServiceStartupResult,
-        DependencyGraph
+        ServiceConfiguration
     )
 except ImportError as e:
     pytest.skip(f"Service dependency components not implemented yet: {e}", allow_module_level=True)

@@ -30,15 +30,15 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone, timedelta
 
 # SSOT imports following CLAUDE.md absolute import rules
-from test_framework.ssot.base_integration_test import BaseIntegrationTest
-from test_framework.ssot.real_services_test_fixtures import real_services_fixture, real_redis_fixture
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 from shared.types.core_types import UserID, ThreadID, RunID, WebSocketID
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestRedisCacheIntegration(BaseIntegrationTest):
+class TestRedisCacheIntegration(SSotAsyncTestCase):
     """Test Redis cache integration with real Redis instance."""
     
     async def async_setup_method(self, method=None):

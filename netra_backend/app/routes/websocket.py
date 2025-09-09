@@ -807,7 +807,11 @@ async def websocket_endpoint(websocket: WebSocket):
             except Exception as initialization_error:
                 logger.error(f"🚨 CRITICAL: SSOT service initialization failed: {initialization_error}")
                 
-                # Send error to user and fail the connection
+                # CRITICAL BUSINESS CONTINUITY FIX: Use graceful degradation instead of hard failure
+                # This ensures users ALWAYS get some level of functionality to protect $500K+ ARR
+                logger.warning(f"🔄 SSOT service initialization failed: {initialization_error}")
+                logger.info("🛡️ GRACEFUL DEGRADATION: Activating fallback handlers to maintain business continuity")
+                
                 try:
                     await progress_communicator.send_initialization_failed(
                         error_message=str(initialization_error),
@@ -817,9 +821,56 @@ async def websocket_endpoint(websocket: WebSocket):
                 except Exception:
                     pass  # Best effort notification
                 
-                # CRITICAL: Raise the error to fail the connection
-                # This eliminates fallback handler creation completely
-                raise Exception(f"WebSocket connection failed: Unable to initialize required services. {initialization_error}")
+                # CRITICAL BUSINESS PROTECTION: Instead of hard failure, activate graceful degradation
+                from netra_backend.app.websocket_core.graceful_degradation_manager import create_graceful_degradation_manager
+                
+                logger.info("🚀 ACTIVATING GRACEFUL DEGRADATION: Ensuring users get basic chat functionality")
+                
+                try:
+                    # Create graceful degradation manager
+                    degradation_manager = await create_graceful_degradation_manager(websocket, websocket.app.state)
+                    
+                    # Notify user about degraded mode  
+                    await degradation_manager.notify_user_of_degradation()
+                    
+                    # Create fallback handler for basic chat
+                    fallback_handler = await degradation_manager.create_fallback_handler()
+                    
+                    # Register fallback handler with message router for basic responses
+                    message_router.add_handler(fallback_handler)
+                    
+                    # Start recovery monitoring
+                    await degradation_manager.start_recovery_monitoring()
+                    
+                    logger.info("✅ GRACEFUL DEGRADATION ACTIVE: Users will receive basic chat functionality with recovery monitoring")
+                    logger.info("💡 Business continuity maintained - connection will not be terminated")
+                    
+                    # Store degradation manager for cleanup later
+                    setattr(websocket, '_degradation_manager', degradation_manager)
+                    
+                except Exception as degradation_error:
+                    logger.error(f"🚨 CRITICAL: Graceful degradation setup failed: {degradation_error}")
+                    # Last resort: Provide emergency stub functionality to prevent complete failure
+                    logger.warning("⚡ EMERGENCY FALLBACK: Creating minimal emergency response system")
+                    
+                    # Create minimal emergency handler inline
+                    class EmergencyHandler:
+                        async def handle_message(self, message):
+                            emergency_response = create_server_message(
+                                MessageType.SYSTEM_MESSAGE,
+                                {
+                                    "content": "System is experiencing technical difficulties. Please try again in a few minutes.",
+                                    "type": "emergency_maintenance",
+                                    "timestamp": datetime.now(timezone.utc).isoformat()
+                                }
+                            )
+                            await safe_websocket_send(websocket, emergency_response.model_dump())
+                            return True
+                    
+                    emergency_handler = EmergencyHandler()
+                    message_router.add_handler(emergency_handler)
+                    
+                    logger.info("⚡ EMERGENCY FALLBACK ACTIVE: Minimal functionality to prevent complete service failure")
         
         # CRITICAL SECURITY FIX: Enhanced authentication with isolated manager
         # User context extraction was done above, now establish secure connection

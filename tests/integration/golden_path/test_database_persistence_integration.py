@@ -29,8 +29,9 @@ from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime, timezone
 
 # SSOT imports following CLAUDE.md absolute import rules
-from test_framework.ssot.base_integration_test import BaseIntegrationTest
-from test_framework.ssot.real_services_test_fixtures import real_services_fixture, real_db_fixture
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.real_services_test_fixtures import real_services_fixture
+from test_framework.fixtures.database_fixtures import test_db_session
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 from shared.types.core_types import UserID, ThreadID, RunID, MessageID
 from shared.types.execution_types import StronglyTypedUserExecutionContext
@@ -43,7 +44,7 @@ from netra_backend.app.database.session_manager import get_db_session
 from netra_backend.app.services.persistence_service import PersistenceService
 
 
-class TestDatabasePersistenceIntegration(BaseIntegrationTest):
+class TestDatabasePersistenceIntegration(SSotAsyncTestCase):
     """Test database persistence integration with real PostgreSQL."""
     
     async def async_setup_method(self, method=None):

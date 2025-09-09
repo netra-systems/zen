@@ -29,12 +29,12 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # SSOT imports following CLAUDE.md absolute import rules
-from test_framework.ssot.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
 from shared.types.core_types import UserID, ThreadID, RunID
-from shared.types.execution_types import StronglyTypedUserExecutionContext, AgentExecutionResult
+from shared.types.execution_types import StronglyTypedUserExecutionContext, AgentCreationResult, ToolExecutionResult
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 # Agent system imports
@@ -118,7 +118,7 @@ class MockWebSocketNotifier:
         return [event for event in self.sent_events if event["type"] == event_type]
 
 
-class TestAgentPipelineIntegration(BaseIntegrationTest):
+class TestAgentPipelineIntegration(SSotAsyncTestCase):
     """Test agent pipeline integration with real components."""
     
     async def async_setup_method(self, method=None):

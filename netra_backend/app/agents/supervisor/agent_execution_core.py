@@ -121,6 +121,15 @@ class AgentExecutionCore:
                         agent_name=context.agent_name,
                         trace_context=trace_context.to_websocket_context()
                     )
+                    
+                    # CRITICAL: Send agent thinking event for real-time user feedback
+                    # Business Value: Users see AI is working on their problem (Trust Building)
+                    await self.websocket_bridge.notify_agent_thinking(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        reasoning=f"Analyzing your request and determining the best approach...",
+                        step_number=1
+                    )
                 
                 # Get agent from registry
                 agent = self._get_agent_or_error(context.agent_name)
@@ -304,8 +313,26 @@ class AgentExecutionCore:
             
             # Execute the agent
             try:
+                # CRITICAL: Send thinking event before execution for user visibility
+                if self.websocket_bridge:
+                    await self.websocket_bridge.notify_agent_thinking(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        reasoning=f"Executing {context.agent_name} with your specific requirements...",
+                        step_number=2
+                    )
+                
                 # CRITICAL: This is where agent.execute() is called
                 result = await agent.execute(state, context.run_id, True)
+                
+                # CRITICAL: Send thinking event after successful execution
+                if self.websocket_bridge and result is not None:
+                    await self.websocket_bridge.notify_agent_thinking(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        reasoning=f"Completed analysis and preparing response...",
+                        step_number=3
+                    )
                 
                 # Send final heartbeat if heartbeat is enabled
                 if heartbeat:
@@ -376,6 +403,19 @@ class AgentExecutionCore:
                 agent._run_id = context.run_id
                 websocket_set = True
                 logger.info(f"✅ WebSocket bridge set via direct assignment on {agent.__class__.__name__}")
+                
+                # CRITICAL: Also provide a helper method for thinking events
+                async def emit_thinking(reasoning: str, step_number: int = None):
+                    """Helper method for agents to emit thinking events easily."""
+                    await self.websocket_bridge.notify_agent_thinking(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        reasoning=reasoning,
+                        step_number=step_number
+                    )
+                
+                # Add the helper method to the agent
+                agent.emit_thinking = emit_thinking
             
             # Method 3: Set on execution engine if agent has one
             if hasattr(agent, 'execution_engine') and agent.execution_engine:

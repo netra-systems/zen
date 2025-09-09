@@ -9,11 +9,13 @@ from netra_backend.app.models.user import User, UserSession
 # Create aliases for backward compatibility
 ConversationThread = Thread
 ConversationMessage = Message
+Conversation = Thread  # Conversation is essentially a Thread in our system
 
 # Re-export existing models
 __all__ = [
     'ConversationThread',
     'ConversationMessage', 
+    'Conversation',
     'User',
     'UserSession'
 ]

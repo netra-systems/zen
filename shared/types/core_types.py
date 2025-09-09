@@ -65,6 +65,9 @@ ExecutionID = NewType('ExecutionID', str)
 ContextID = NewType('ContextID', str)
 """Strongly typed context identifier."""
 
+MessageID = NewType('MessageID', str)
+"""Strongly typed message identifier."""
+
 # Database and external service identifiers
 DatabaseSessionID = NewType('DatabaseSessionID', str)
 """Strongly typed database session identifier."""

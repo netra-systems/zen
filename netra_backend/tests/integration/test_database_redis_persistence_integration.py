@@ -63,8 +63,8 @@ from netra_backend.app.cache.result_cache import ResultCache
 
 # Agent execution components
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor_agent import SupervisorAgent
-from netra_backend.app.execution.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
 
 
 @pytest.mark.integration
