@@ -52,7 +52,7 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         result = is_valid_id_format(valid_uuid)
         
-        self.assertTrue(result, "Valid UUID should be accepted as valid thread ID format")
+        assert result, "Valid UUID should be accepted as valid thread ID format"
     
     def test_valid_structured_format_accepted(self):
         """Test that structured ID format is accepted."""
@@ -61,28 +61,28 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         result = is_valid_id_format(structured_id)
         
-        self.assertTrue(result, "Structured thread ID format should be accepted")
+        assert result, "Structured thread ID format should be accepted"
     
     def test_empty_string_rejected(self):
         """Test that empty string is rejected."""
         # BUSINESS VALUE: Prevents routing failures from empty thread IDs
         result = is_valid_id_format("")
         
-        self.assertFalse(result, "Empty string should be rejected as thread ID")
+        assert not result, "Empty string should be rejected as thread ID"
     
     def test_none_value_rejected(self):
         """Test that None value is rejected."""
         # BUSINESS VALUE: Prevents routing failures from null thread IDs
         result = is_valid_id_format(None)
         
-        self.assertFalse(result, "None should be rejected as thread ID")
+        assert not result, "None should be rejected as thread ID"
     
     def test_whitespace_only_rejected(self):
         """Test that whitespace-only string is rejected."""
         # BUSINESS VALUE: Prevents routing failures from whitespace thread IDs
         result = is_valid_id_format("   ")
         
-        self.assertFalse(result, "Whitespace-only string should be rejected")
+        assert not result, "Whitespace-only string should be rejected"
     
     def test_malformed_structured_id_rejected(self):
         """Test that malformed structured ID is rejected."""
@@ -91,7 +91,7 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         result = is_valid_id_format(malformed_id)
         
-        self.assertFalse(result, "Malformed structured ID should be rejected")
+        assert not result, "Malformed structured ID should be rejected"
     
     # UUID Compliance Tests
     
@@ -142,13 +142,12 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         # Verify the generated ID passes format validation
         is_valid = is_valid_id_format(generated_id)
-        self.assertTrue(is_valid, "Generated thread ID should pass format validation")
+        assert is_valid, "Generated thread ID should pass format validation"
         
         # Verify it can be registered and retrieved
         metadata = self.id_manager.get_id_metadata(generated_id)
-        self.assertIsNotNone(metadata, "Generated thread ID should have metadata")
-        self.assertEqual(metadata.id_type, IDType.THREAD, 
-            "Generated ID should have correct type")
+        assert metadata is not None, "Generated thread ID should have metadata"
+        assert metadata.id_type == IDType.THREAD, "Generated ID should have correct type"
     
     def test_generate_multiple_unique_thread_ids(self):
         """Test that multiple generated thread IDs are unique."""
@@ -157,8 +156,7 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         for _ in range(100):  # Generate 100 IDs to test uniqueness
             thread_id = self.id_manager.generate_id(IDType.THREAD)
-            self.assertNotIn(thread_id, generated_ids, 
-                "Generated thread IDs must be unique")
+            assert thread_id not in generated_ids, "Generated thread IDs must be unique"
             generated_ids.add(thread_id)
     
     # Thread ID Type Conversion Tests
@@ -170,9 +168,8 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         result = ensure_thread_id_type(test_thread_id)
         
-        self.assertIsInstance(result, ThreadID, "Result should be ThreadID type")
-        self.assertEqual(str(result), test_thread_id, 
-            "Converted ThreadID should preserve original value")
+        assert isinstance(result, ThreadID), "Result should be ThreadID type"
+        assert str(result) == test_thread_id, "Converted ThreadID should preserve original value"
     
     def test_ensure_thread_id_type_already_typed(self):
         """Test that already typed ThreadID is returned unchanged."""
@@ -181,8 +178,7 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         result = ensure_thread_id_type(original_thread_id)
         
-        self.assertIs(result, original_thread_id, 
-            "Already typed ThreadID should be returned unchanged")
+        assert result is original_thread_id, "Already typed ThreadID should be returned unchanged"
     
     # User Ownership Validation Tests
     
@@ -196,16 +192,13 @@ class TestThreadIDValidation(SSotBaseTestCase):
         )
         
         # Verify context is properly formed
-        self.assertEqual(str(user_context.user_id), self.test_user_id,
-            "User context should preserve user ID")
-        self.assertEqual(str(user_context.thread_id), self.test_thread_id,
-            "User context should preserve thread ID")
+        assert str(user_context.user_id) == self.test_user_id, "User context should preserve user ID"
+        assert str(user_context.thread_id) == self.test_thread_id, "User context should preserve thread ID"
     
     def test_invalid_thread_id_in_context_raises_error(self):
         """Test that invalid thread ID in context raises appropriate error."""
         # BUSINESS VALUE: Prevents system corruption from invalid contexts
-        with self.assertRaises((ValueError, TypeError), 
-                             msg="Invalid thread ID should raise validation error"):
+        with pytest.raises(ValueError, match=TypeError):
             UserExecutionContext(
                 user_id=UserID(self.test_user_id),
                 thread_id=None,  # Invalid thread ID
@@ -237,7 +230,7 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         result = is_valid_id_format(long_id)
         
-        self.assertFalse(result, "Extremely long thread ID should be rejected")
+        assert not result, "Extremely long thread ID should be rejected"
     
     def test_special_characters_handling(self):
         """Test handling of special characters in thread IDs."""
@@ -278,8 +271,7 @@ class TestThreadIDValidation(SSotBaseTestCase):
         validation_time = end_time - start_time
         
         # Should validate 2000 IDs in less than 1 second
-        self.assertLess(validation_time, 1.0, 
-            "Thread ID validation should complete within performance limits")
+        assert validation_time < 1.0, "Thread ID validation should complete within performance limits"
     
     # Integration with System Components
     
@@ -291,8 +283,7 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         extracted_thread_id = UnifiedIDManager.extract_thread_id(run_id)
         
-        self.assertEqual(extracted_thread_id, test_thread_id,
-            "Extracted thread ID should match original")
+        assert extracted_thread_id == test_thread_id, "Extracted thread ID should match original"
     
     def test_run_id_validation(self):
         """Test run ID format validation."""
@@ -300,10 +291,8 @@ class TestThreadIDValidation(SSotBaseTestCase):
         valid_run_id = "run_thread_test_12345_67890_abcd1234"
         invalid_run_id = "invalid_run_format"
         
-        self.assertTrue(UnifiedIDManager.validate_run_id(valid_run_id),
-            "Valid run ID should pass validation")
-        self.assertFalse(UnifiedIDManager.validate_run_id(invalid_run_id),
-            "Invalid run ID should fail validation")
+        assert UnifiedIDManager.validate_run_id(valid_run_id), "Valid run ID should pass validation"
+        assert not UnifiedIDManager.validate_run_id(invalid_run_id), "Invalid run ID should fail validation"
     
     def test_run_id_parsing(self):
         """Test run ID parsing into components."""
@@ -313,13 +302,10 @@ class TestThreadIDValidation(SSotBaseTestCase):
         
         parsed = UnifiedIDManager.parse_run_id(run_id)
         
-        self.assertTrue(parsed['valid'], "Parsed run ID should be marked as valid")
-        self.assertEqual(parsed['thread_id'], test_thread_id,
-            "Parsed thread ID should match original")
-        self.assertTrue(parsed['timestamp'].isdigit(),
-            "Parsed timestamp should be numeric")
-        self.assertEqual(len(parsed['uuid_part']), 8,
-            "Parsed UUID part should be 8 characters")
+        assert parsed['valid'], "Parsed run ID should be marked as valid"
+        assert parsed['thread_id'] == test_thread_id, "Parsed thread ID should match original"
+        assert parsed['timestamp'].isdigit(), "Parsed timestamp should be numeric"
+        assert len(parsed['uuid_part']) == 8, "Parsed UUID part should be 8 characters"
 
 
 if __name__ == '__main__':

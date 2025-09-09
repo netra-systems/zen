@@ -43,7 +43,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 # SSOT Types for strong type safety
 from shared.types.core_types import (
     UserID, ThreadID, RunID, RequestID, ConnectionID, WebSocketID,
-    ensure_user_id, ensure_thread_id, ensure_connection_id, ensure_websocket_id
+    ensure_user_id, ensure_thread_id, ensure_websocket_id
 )
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env

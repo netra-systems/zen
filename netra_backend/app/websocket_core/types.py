@@ -349,6 +349,7 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "user": MessageType.USER_MESSAGE,  # Map 'user' to USER_MESSAGE
     "user_input": MessageType.USER_MESSAGE,
     "user_message": MessageType.USER_MESSAGE,
+    "chat_message": MessageType.USER_MESSAGE,  # Fix for MessageRouter 'chat_message' issue
     "chat": MessageType.CHAT,
     "message": MessageType.USER_MESSAGE,
     

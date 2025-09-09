@@ -62,8 +62,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         
         handler = self.message_service.handlers.get(message_type)
         
-        self.assertIsInstance(handler, StartAgentHandler,
-            "start_agent messages should route to StartAgentHandler")
+        assert isinstance(handler, StartAgentHandler), "start_agent messages should route to StartAgentHandler"
     
     def test_user_message_routes_to_correct_handler(self):
         """Test that user_message messages route to UserMessageHandler."""
@@ -72,8 +71,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         
         handler = self.message_service.handlers.get(message_type)
         
-        self.assertIsInstance(handler, UserMessageHandler,
-            "user_message messages should route to UserMessageHandler")
+        assert isinstance(handler, UserMessageHandler), "user_message messages should route to UserMessageHandler"
     
     def test_thread_history_routes_to_correct_handler(self):
         """Test that get_thread_history messages route to ThreadHistoryHandler."""
@@ -82,8 +80,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         
         handler = self.message_service.handlers.get(message_type)
         
-        self.assertIsInstance(handler, ThreadHistoryHandler,
-            "get_thread_history messages should route to ThreadHistoryHandler")
+        assert isinstance(handler, ThreadHistoryHandler), "get_thread_history messages should route to ThreadHistoryHandler"
     
     def test_stop_agent_routes_to_correct_handler(self):
         """Test that stop_agent messages route to StopAgentHandler."""
@@ -92,8 +89,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         
         handler = self.message_service.handlers.get(message_type)
         
-        self.assertIsInstance(handler, StopAgentHandler,
-            "stop_agent messages should route to StopAgentHandler")
+        assert isinstance(handler, StopAgentHandler), "stop_agent messages should route to StopAgentHandler"
     
     def test_unknown_message_type_handling(self):
         """Test handling of unknown message types."""
@@ -102,7 +98,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         
         handler = self.message_service.handlers.get(unknown_type)
         
-        self.assertIsNone(handler, "Unknown message types should not have handlers")
+        assert handler is None, "Unknown message types should not have handlers"
     
     # Message Priority Assignment Tests
     
@@ -111,40 +107,35 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         # BUSINESS VALUE: Ensures urgent operations are processed first
         priority = self.message_service._determine_priority("stop_agent")
         
-        self.assertEqual(priority, MessagePriority.CRITICAL,
-            "stop_agent should get CRITICAL priority")
+        assert priority == MessagePriority.CRITICAL, "stop_agent should get CRITICAL priority"
     
     def test_high_priority_assignment(self):
         """Test that high priority messages get HIGH priority."""
         # BUSINESS VALUE: Ensures important operations are prioritized
         priority = self.message_service._determine_priority("start_agent")
         
-        self.assertEqual(priority, MessagePriority.HIGH,
-            "start_agent should get HIGH priority")
+        assert priority == MessagePriority.HIGH, "start_agent should get HIGH priority"
     
     def test_normal_priority_assignment(self):
         """Test that normal messages get NORMAL priority."""
         # BUSINESS VALUE: Ensures regular user messages are processed normally
         priority = self.message_service._determine_priority("user_message")
         
-        self.assertEqual(priority, MessagePriority.NORMAL,
-            "user_message should get NORMAL priority")
+        assert priority == MessagePriority.NORMAL, "user_message should get NORMAL priority"
     
     def test_low_priority_assignment(self):
         """Test that low priority messages get LOW priority."""
         # BUSINESS VALUE: Ensures background operations don't block important tasks
         priority = self.message_service._determine_priority("get_thread_history")
         
-        self.assertEqual(priority, MessagePriority.LOW,
-            "get_thread_history should get LOW priority")
+        assert priority == MessagePriority.LOW, "get_thread_history should get LOW priority"
     
     def test_unknown_message_priority_fallback(self):
         """Test that unknown message types get NORMAL priority."""
         # BUSINESS VALUE: Provides sensible fallback for unknown message types
         priority = self.message_service._determine_priority("unknown_type")
         
-        self.assertEqual(priority, MessagePriority.NORMAL,
-            "Unknown message types should default to NORMAL priority")
+        assert priority == MessagePriority.NORMAL, "Unknown message types should default to NORMAL priority"
     
     # Payload Validation Tests
     
@@ -158,22 +149,19 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
             "request": {"query": "Optimize my AWS costs"}
         }
         result = handler._extract_user_request(payload_with_query)
-        self.assertEqual(result, "Optimize my AWS costs",
-            "Should extract query from request payload")
+        assert result == "Optimize my AWS costs", "Should extract query from request payload"
         
         # Test with 'user_request' field  
         payload_with_user_request = {
             "request": {"user_request": "Analyze my spending"}
         }
         result = handler._extract_user_request(payload_with_user_request)
-        self.assertEqual(result, "Analyze my spending",
-            "Should extract user_request from request payload")
+        assert result == "Analyze my spending", "Should extract user_request from request payload"
         
         # Test with empty payload
         empty_payload = {"request": {}}
         result = handler._extract_user_request(empty_payload)
-        self.assertEqual(result, "",
-            "Should return empty string for empty payload")
+        assert result == "", "Should return empty string for empty payload"
     
     def test_user_message_payload_extraction(self):
         """Test user_message payload extraction logic."""
@@ -201,12 +189,12 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         payload_with_limit = {"limit": 25}
         # We need to simulate the extraction logic since it's in a private method
         limit = payload_with_limit.get("limit", 50)
-        self.assertEqual(limit, 25, "Should extract custom limit")
+        assert limit == 25, "Should extract custom limit"
         
         # Test with default limit
         payload_without_limit = {}
         limit = payload_without_limit.get("limit", 50)
-        self.assertEqual(limit, 50, "Should use default limit when not specified")
+        assert limit == 50, "Should use default limit when not specified"
     
     # Routing Rule Evaluation Tests
     
@@ -227,7 +215,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
             self.test_user_id, invalid_message
         )
         
-        self.assertFalse(result, "Invalid message should fail validation")
+        assert not result, "Invalid message should fail validation"
         mock_manager.send_error.assert_called_once()
     
     @patch('netra_backend.app.services.websocket.message_handler.get_user_execution_context')
@@ -244,21 +232,21 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         result = await self.message_service._extract_message_type(
             self.test_user_id, message_without_type
         )
-        self.assertIsNone(result, "Message without type should return None")
+        assert result is None, "Message without type should return None"
         
         # Test unknown message type
         message_unknown_type = {"type": "unknown_type"}
         result = await self.message_service._extract_message_type(
             self.test_user_id, message_unknown_type
         )
-        self.assertIsNone(result, "Unknown message type should return None")
+        assert result is None, "Unknown message type should return None"
         
         # Test valid message type
         message_valid_type = {"type": "user_message"}
         result = await self.message_service._extract_message_type(
             self.test_user_id, message_valid_type
         )
-        self.assertEqual(result, "user_message", "Valid message type should be returned")
+        assert result == "user_message", "Valid message type should be returned"
     
     def test_queued_message_creation(self):
         """Test QueuedMessage creation with correct routing parameters."""
@@ -270,16 +258,11 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
             self.test_user_id, message, "user_message", priority
         )
         
-        self.assertIsInstance(queued_message, QueuedMessage,
-            "Should create QueuedMessage instance")
-        self.assertEqual(queued_message.user_id, self.test_user_id,
-            "Should set correct user_id")
-        self.assertEqual(queued_message.type, "user_message",
-            "Should set correct message type")
-        self.assertEqual(queued_message.priority, priority,
-            "Should set correct priority")
-        self.assertEqual(queued_message.payload, {"text": "test"},
-            "Should set correct payload")
+        assert isinstance(queued_message, QueuedMessage), "Should create QueuedMessage instance"
+        assert queued_message.user_id == self.test_user_id, "Should set correct user_id"
+        assert queued_message.type == "user_message", "Should set correct message type"
+        assert queued_message.priority == priority, "Should set correct priority"
+        assert queued_message.payload == {"text": "test"}, "Should set correct payload"
     
     # Thread Association Logic Tests
     
@@ -293,8 +276,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         
         # Verify thread ID is preserved in payload
         thread_id = message_with_thread["payload"].get("thread_id")
-        self.assertEqual(thread_id, self.test_thread_id,
-            "Thread ID should be preserved in message payload")
+        assert thread_id == self.test_thread_id, "Thread ID should be preserved in message payload"
     
     def test_user_context_creation_for_routing(self):
         """Test user context creation for message routing."""
@@ -305,8 +287,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
             # Simulate context creation
             context = mock_context(user_id=self.test_user_id)
             
-            self.assertEqual(context.user_id, self.test_user_id,
-                "User context should have correct user_id")
+            assert context.user_id == self.test_user_id, "User context should have correct user_id"
     
     # Error Handling in Routing Tests
     
@@ -317,7 +298,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         invalid_handler.handle = Mock(side_effect=Exception("Routing error"))
         
         # Simulate handler error
-        with self.assertRaises(Exception):
+        with pytest.raises(Exception):
             invalid_handler.handle()
         
         # Verify error was raised
@@ -383,8 +364,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         processing_time = end_time - start_time
         
         # Should process 4000 priority assignments in less than 0.1 seconds
-        self.assertLess(processing_time, 0.1,
-            "Priority mapping should complete within performance limits")
+        assert processing_time < 0.1, "Priority mapping should complete within performance limits"
     
     def test_handler_registration_completeness(self):
         """Test that all expected handlers are registered."""
@@ -414,8 +394,7 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         # Since BaseMessageHandler is abstract, we need to test with concrete handler
         test_handler = StartAgentHandler(self.mock_supervisor, self.mock_db_session_factory)
         
-        self.assertEqual(test_handler.get_message_type(), "start_agent",
-            "Handler should return correct message type")
+        assert test_handler.get_message_type() == "start_agent", "Handler should return correct message type"
     
     def test_message_routing_statistics(self):
         """Test message routing statistics collection."""
@@ -432,10 +411,8 @@ class TestMessageRoutingLogic(SSotBaseTestCase):
         stats["total_messages_routed"] += 1
         stats["messages_by_type"]["user_message"] = stats["messages_by_type"].get("user_message", 0) + 1
         
-        self.assertEqual(stats["total_messages_routed"], 1,
-            "Should track total routed messages")
-        self.assertEqual(stats["messages_by_type"]["user_message"], 1,
-            "Should track messages by type")
+        assert stats["total_messages_routed"] == 1, "Should track total routed messages"
+        assert stats["messages_by_type"]["user_message"] == 1, "Should track messages by type"
 
 
 if __name__ == '__main__':

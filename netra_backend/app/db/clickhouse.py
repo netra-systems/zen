@@ -20,7 +20,6 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCir
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.logging_config import central_logger as logger
-from test_framework.ssot.test_context_decorator import test_decorator
 
 
 class ClickHouseCache:
@@ -164,7 +163,6 @@ _clickhouse_cache = ClickHouseCache()
 # Real services only per CLAUDE.md section 2.4
 
 
-@test_decorator(allow_production=True, message="Context detection function - being migrated to test-only")
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
     from shared.isolated_environment import get_env
@@ -176,7 +174,6 @@ def _is_testing_environment() -> bool:
     config = get_configuration()
     return config.environment == "testing"
 
-@test_decorator()
 def _is_real_database_test() -> bool:
     """Check if this is a test that explicitly requires real database connections."""
     import sys
@@ -198,7 +195,6 @@ def _is_real_database_test() -> bool:
     
     return False
 
-@test_decorator(allow_production=True, message="Test context detection - called from production code paths")
 def _should_disable_clickhouse_for_tests() -> bool:
     """Check if ClickHouse should be disabled for the current test context."""
     from shared.isolated_environment import get_env
@@ -234,7 +230,6 @@ def _should_disable_clickhouse_for_tests() -> bool:
     # For all other tests, default to enabled (will use NoOp client in testing environment)
     return False
 
-@test_decorator(allow_production=True, message="Mock decision function - called from production connection logic")
 def use_mock_clickhouse() -> bool:
     """Determine if mock ClickHouse should be used.
     
@@ -449,7 +444,6 @@ class NoOpClickHouseClient:
     CRITICAL FIX: Simulates realistic error conditions that tests expect.
     """
     
-    @test_decorator()
     def __init__(self):
         """Initialize NoOp client with connection tracking."""
         self._connected = True

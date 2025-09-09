@@ -33,10 +33,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestThreadRunRegistryCore(SSotAsyncTestCase):
     """Test thread run registry core functionality with SSOT patterns."""
     
-    def setup_method(self, method=None) -> None:
+    @pytest.fixture(autouse=True)
+    async def setup_registry(self):
         """Set up test fixtures following SSOT patterns."""
-        super().setup_method(method)
-        
         # Create test configuration for faster testing
         self.test_config = RegistryConfig(
             mapping_ttl_hours=1,  # 1 hour for testing
@@ -57,12 +56,12 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
             "user_id": self.test_user_id,
             "created_by": "test_suite"
         }
-    
-    def teardown_method(self, method=None) -> None:
-        """Clean up test resources."""
+        
+        yield
+        
         # Clean shutdown of registry
-        asyncio.run(self.registry.shutdown())
-        super().teardown_method(method)
+        if hasattr(self, 'registry') and self.registry:
+            await self.registry.shutdown()
     
     # CRUD Operations Tests
     
@@ -75,12 +74,11 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
             self.test_metadata
         )
         
-        self.assertTrue(success, "Run mapping registration should succeed")
+        assert success, "Run mapping registration should succeed"
         
         # Verify mapping is stored correctly
         retrieved_thread_id = await self.registry.get_thread(self.test_run_id)
-        self.assertEqual(retrieved_thread_id, self.test_thread_id,
-            "Retrieved thread ID should match registered value")
+        assert retrieved_thread_id == self.test_thread_id, "Retrieved thread ID should match registered value"
     
     async def test_register_duplicate_run_mapping(self):
         """Test registration of duplicate run mapping."""
@@ -97,12 +95,11 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         )
         
         # Should still succeed (overwrites existing)
-        self.assertTrue(success, "Duplicate registration should succeed (overwrite)")
+        assert success, "Duplicate registration should succeed (overwrite)"
         
         # Verify latest mapping is stored
         retrieved_thread_id = await self.registry.get_thread(self.test_run_id)
-        self.assertEqual(retrieved_thread_id, different_thread_id,
-            "Latest registration should overwrite previous mapping")
+        assert retrieved_thread_id == different_thread_id, "Latest registration should overwrite previous mapping"
     
     async def test_register_with_invalid_parameters(self):
         """Test registration with invalid parameters."""
@@ -126,8 +123,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         retrieved_thread_id = await self.registry.get_thread(self.test_run_id)
         
-        self.assertEqual(retrieved_thread_id, self.test_thread_id,
-            "Should retrieve correct thread ID for registered run ID")
+        assert retrieved_thread_id == self.test_thread_id, "Should retrieve correct thread ID for registered run ID"
     
     async def test_get_thread_mapping_not_found(self):
         """Test retrieval of non-existent mapping."""
@@ -136,8 +132,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         retrieved_thread_id = await self.registry.get_thread(non_existent_run_id)
         
-        self.assertIsNone(retrieved_thread_id,
-            "Should return None for non-existent run ID")
+        assert retrieved_thread_id is None, "Should return None for non-existent run ID"
     
     async def test_get_runs_for_thread(self):
         """Test retrieval of all run IDs for a thread."""
@@ -154,8 +149,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         retrieved_runs = await self.registry.get_runs(self.test_thread_id)
         
-        self.assertEqual(len(retrieved_runs), 3,
-            "Should retrieve all runs for thread")
+        assert len(retrieved_runs) == 3, "Should retrieve all runs for thread"
         for run_id in run_ids:
             self.assertIn(run_id, retrieved_runs,
                 f"Should include {run_id} in thread runs")
@@ -167,15 +161,15 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         # Verify mapping exists
         thread_id = await self.registry.get_thread(self.test_run_id)
-        self.assertIsNotNone(thread_id, "Mapping should exist before unregistration")
+        assert thread_id is not None, "Mapping should exist before unregistration"
         
         # Unregister mapping
         success = await self.registry.unregister_run(self.test_run_id)
-        self.assertTrue(success, "Unregistration should succeed")
+        assert success, "Unregistration should succeed"
         
         # Verify mapping is removed
         thread_id = await self.registry.get_thread(self.test_run_id)
-        self.assertIsNone(thread_id, "Mapping should not exist after unregistration")
+        assert thread_id is None, "Mapping should not exist after unregistration"
     
     async def test_unregister_nonexistent_run(self):
         """Test unregistration of non-existent run mapping."""
@@ -184,7 +178,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         success = await self.registry.unregister_run(non_existent_run_id)
         
-        self.assertFalse(success, "Unregistration of non-existent run should return False")
+        assert not success, "Unregistration of non-existent run should return False"
     
     # TTL Expiration Tests
     
@@ -206,18 +200,18 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
             
             # Verify mapping exists immediately
             thread_id = await short_registry.get_thread(self.test_run_id)
-            self.assertIsNotNone(thread_id, "Mapping should exist immediately after registration")
+            assert thread_id is not None, "Mapping should exist immediately after registration"
             
             # Wait for TTL expiration
             await asyncio.sleep(4.0)  # Wait longer than TTL
             
             # Manually trigger cleanup
             cleanup_count = await short_registry.cleanup_old_mappings()
-            self.assertGreater(cleanup_count, 0, "Should clean up expired mappings")
+            assert cleanup_count > 0, "Should clean up expired mappings"
             
             # Verify mapping is expired (not accessible)
             thread_id = await short_registry.get_thread(self.test_run_id)
-            self.assertIsNone(thread_id, "Mapping should be None after TTL expiration")
+            assert thread_id is None, "Mapping should be None after TTL expiration"
             
         finally:
             await short_registry.shutdown()
@@ -241,8 +235,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         updated_mapping = self.registry._run_to_thread.get(self.test_run_id)
         updated_access_time = updated_mapping.last_accessed
         
-        self.assertGreater(updated_access_time, initial_access_time,
-            "Accessing mapping should update last_accessed timestamp")
+        assert updated_access_time > initial_access_time, "Accessing mapping should update last_accessed timestamp"
     
     async def test_cleanup_old_mappings_manual(self):
         """Test manual cleanup of old mappings."""
@@ -270,11 +263,11 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
             cleanup_count = await cleanup_registry.cleanup_old_mappings()
             
             # Should clean up expired mappings but leave fresh ones
-            self.assertGreaterEqual(cleanup_count, 2, "Should clean up at least 2 expired mappings")
+            assert cleanup_count >= 2, "Should clean up at least 2 expired mappings"
             
             # Verify fresh mapping still exists
             fresh_thread = await cleanup_registry.get_thread("run_fresh_1")
-            self.assertIsNotNone(fresh_thread, "Fresh mapping should survive cleanup")
+            assert fresh_thread is not None, "Fresh mapping should survive cleanup"
             
         finally:
             await cleanup_registry.shutdown()
@@ -296,7 +289,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         # Test reverse mapping
         thread_runs = await self.registry.get_runs(self.test_thread_id)
         
-        self.assertEqual(len(thread_runs), 2, "Should return all runs for thread")
+        assert len(thread_runs) == 2, "Should return all runs for thread"
         for run_id in run_ids:
             self.assertIn(run_id, thread_runs, f"Should include {run_id}")
     
@@ -312,16 +305,16 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         # Verify both are in reverse mapping
         thread_runs = await self.registry.get_runs(self.test_thread_id)
-        self.assertEqual(len(thread_runs), 2, "Should have 2 runs initially")
+        assert len(thread_runs) == 2, "Should have 2 runs initially"
         
         # Unregister one run
         await self.registry.unregister_run(run_id_1)
         
         # Verify reverse mapping is updated
         thread_runs = await self.registry.get_runs(self.test_thread_id)
-        self.assertEqual(len(thread_runs), 1, "Should have 1 run after unregistration")
-        self.assertIn(run_id_2, thread_runs, "Remaining run should still be present")
-        self.assertNotIn(run_id_1, thread_runs, "Unregistered run should be removed")
+        assert len(thread_runs) == 1, "Should have 1 run after unregistration"
+        assert run_id_2 in thread_runs, "Remaining run should still be present"
+        assert run_id_1 not in thread_runs, "Unregistered run should be removed"
     
     async def test_empty_thread_cleanup(self):
         """Test that empty thread entries are cleaned up."""
@@ -333,8 +326,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         await self.registry.unregister_run(run_id)
         
         # Verify thread entry is removed when empty
-        self.assertNotIn(self.test_thread_id, self.registry._thread_to_runs,
-            "Empty thread entry should be cleaned up")
+        assert self.test_thread_id not in self.registry._thread_to_runs, "Empty thread entry should be cleaned up"
     
     # Performance and Concurrency Tests
     
@@ -353,8 +345,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         # All registrations should succeed
         successful_registrations = sum(1 for result in results if result)
-        self.assertEqual(successful_registrations, 50,
-            "All concurrent registrations should succeed")
+        assert successful_registrations == 50, "All concurrent registrations should succeed"
     
     async def test_concurrent_lookups(self):
         """Test concurrent lookup operations."""
@@ -378,8 +369,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         # All lookups should return correct results
         successful_lookups = sum(1 for result in results if result)
-        self.assertEqual(successful_lookups, 10,
-            "All concurrent lookups should return correct results")
+        assert successful_lookups == 10, "All concurrent lookups should return correct results"
     
     async def test_registry_max_mappings_limit(self):
         """Test registry respects maximum mappings limit."""
@@ -399,8 +389,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
             
             # Verify we're at limit
             metrics = await limited_registry.get_metrics()
-            self.assertEqual(metrics['active_mappings'], 5,
-                "Should have exactly 5 active mappings")
+            assert metrics['active_mappings'] == 5, "Should have exactly 5 active mappings"
             
             # Registry should continue to work even at capacity
             # (Implementation may vary - could reject or use LRU eviction)
@@ -433,14 +422,10 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
             self.assertIn(key, metrics, f"Metrics should include {key}")
         
         # Verify specific values
-        self.assertEqual(metrics['total_registrations'], 1,
-            "Should track total registrations")
-        self.assertEqual(metrics['successful_lookups'], 1,
-            "Should track successful lookups")
-        self.assertEqual(metrics['failed_lookups'], 1,
-            "Should track failed lookups")
-        self.assertEqual(metrics['lookup_success_rate'], 0.5,
-            "Should calculate correct success rate (1 success, 1 failure)")
+        assert metrics['total_registrations'] == 1, "Should track total registrations"
+        assert metrics['successful_lookups'] == 1, "Should track successful lookups"
+        assert metrics['failed_lookups'] == 1, "Should track failed lookups"
+        assert metrics['lookup_success_rate'] == 0.5, "Should calculate correct success rate (1 success, 1 failure)"
     
     async def test_registry_status_information(self):
         """Test registry status information."""
@@ -459,11 +444,10 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
             self.assertIn(key, status, f"Status should include {key}")
         
         # Verify status values
-        self.assertTrue(status['registry_healthy'], "Registry should be healthy")
+        assert status['registry_healthy'], "Registry should be healthy"
         self.assertIsInstance(status['uptime_seconds'], (int, float),
             "Uptime should be numeric")
-        self.assertIn('mapping_ttl_hours', status['config'],
-            "Status should include configuration")
+        assert 'mapping_ttl_hours' in status['config'], "Status should include configuration"
     
     # Error Handling Tests
     
@@ -475,11 +459,11 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         with patch.object(self.registry, '_registry_lock', side_effect=Exception("Lock error")):
             # Operations should handle errors gracefully
             success = await self.registry.register("test_run", "test_thread")
-            self.assertFalse(success, "Should handle lock errors gracefully")
+            assert not success, "Should handle lock errors gracefully"
         
         # Registry should still work after error
         success = await self.registry.register(self.test_run_id, self.test_thread_id)
-        self.assertTrue(success, "Registry should recover from errors")
+        assert success, "Registry should recover from errors"
     
     async def test_cleanup_error_handling(self):
         """Test cleanup error handling."""
@@ -488,8 +472,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         # Mock cleanup to raise error
         with patch.object(self.registry, '_cleanup_lock', side_effect=Exception("Cleanup error")):
             cleanup_count = await self.registry.cleanup_old_mappings()
-            self.assertEqual(cleanup_count, 0,
-                "Should return 0 when cleanup encounters errors")
+            assert cleanup_count == 0, "Should return 0 when cleanup encounters errors"
     
     # Integration Tests
     
@@ -502,8 +485,7 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         registry2 = await get_thread_run_registry()
         
         # Should be same instance
-        self.assertIs(registry1, registry2,
-            "Factory should return same singleton instance")
+        assert registry1 is registry2, "Factory should return same singleton instance"
     
     async def test_initialize_thread_run_registry(self):
         """Test registry initialization function."""
@@ -517,10 +499,8 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         
         registry = await initialize_thread_run_registry(init_config)
         
-        self.assertIsInstance(registry, ThreadRunRegistry,
-            "Should return ThreadRunRegistry instance")
-        self.assertEqual(registry.config.mapping_ttl_hours, 2,
-            "Should use provided configuration")
+        assert isinstance(registry, ThreadRunRegistry), "Should return ThreadRunRegistry instance"
+        assert registry.config.mapping_ttl_hours == 2, "Should use provided configuration"
     
     async def test_debug_listing_functionality(self):
         """Test debug listing of all mappings."""
@@ -539,12 +519,9 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         debug_info = await self.registry.debug_list_all_mappings()
         
         # Verify debug information
-        self.assertIn('total_mappings', debug_info,
-            "Debug info should include total mappings count")
-        self.assertIn('mappings', debug_info,
-            "Debug info should include mappings details")
-        self.assertEqual(debug_info['total_mappings'], 2,
-            "Should report correct total mappings count")
+        assert 'total_mappings' in debug_info, "Debug info should include total mappings count"
+        assert 'mappings' in debug_info, "Debug info should include mappings details"
+        assert debug_info['total_mappings'] == 2, "Should report correct total mappings count"
         
         # Verify individual mapping details
         mappings = debug_info['mappings']
@@ -564,32 +541,28 @@ class TestThreadRunRegistryCore(SSotAsyncTestCase):
         await self.registry.register(self.test_run_id, self.test_thread_id)
         
         # Verify registry is operational
-        self.assertFalse(self.registry._shutdown, "Registry should not be shutdown initially")
+        assert not self.registry._shutdown, "Registry should not be shutdown initially"
         
         # Shutdown registry
         await self.registry.shutdown()
         
         # Verify shutdown state
-        self.assertTrue(self.registry._shutdown, "Registry should be shutdown after shutdown()")
-        self.assertEqual(len(self.registry._run_to_thread), 0,
-            "All mappings should be cleared after shutdown")
+        assert self.registry._shutdown, "Registry should be shutdown after shutdown()"
+        assert len(self.registry._run_to_thread) == 0, "All mappings should be cleared after shutdown"
     
     async def test_shutdown_cancels_background_tasks(self):
         """Test that shutdown cancels background cleanup task."""
         # BUSINESS VALUE: Prevents resource leaks from orphaned background tasks
         
         # Verify cleanup task is running initially
-        self.assertIsNotNone(self.registry._cleanup_task,
-            "Cleanup task should be created on initialization")
-        self.assertFalse(self.registry._cleanup_task.done(),
-            "Cleanup task should be running initially")
+        assert self.registry._cleanup_task is not None, "Cleanup task should be created on initialization"
+        assert not self.registry._cleanup_task.done(), "Cleanup task should be running initially"
         
         # Shutdown registry
         await self.registry.shutdown()
         
         # Verify cleanup task is cancelled
-        self.assertTrue(self.registry._cleanup_task.done(),
-            "Cleanup task should be done after shutdown")
+        assert self.registry._cleanup_task.done(), "Cleanup task should be done after shutdown"
 
 
 if __name__ == '__main__':
