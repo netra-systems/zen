@@ -125,39 +125,39 @@ class TestAuthServiceBusinessLogic:
             email="login@company.com",
             password="correct_password"
         )
+        
+        # Business Rule: Test actual login business logic by calling the real method
+        # This ensures we test the actual authentication flow
+        import asyncio
+        
+        async def test_login_flow():
+            # Call the actual login method which should trigger repository calls
+            result = await auth_service.login(
+                email=login_request.email,
+                password=login_request.password
+            )
+            return result
+        
+        # Execute the async login test
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            login_result = loop.run_until_complete(test_login_flow())
             
-            # Business Rule: Test actual login business logic by calling the real method
-            # This ensures we test the actual authentication flow
-            import asyncio
+            # Business Rule: Valid login should return a result
+            assert login_result is not None, "Valid login should return login response"
+            assert hasattr(login_result, 'access_token'), "Login result should contain access token"
+            assert hasattr(login_result, 'user_id'), "Login result should contain user ID"
             
-            async def test_login_flow():
-                # Call the actual login method which should trigger repository calls
-                result = await auth_service.login(
-                    email=login_request.email,
-                    password=login_request.password
-                )
-                return result
+            # Validate that repository was called as part of business logic
+            mock_repo_instance.get_by_email.assert_called_with("login@company.com")
             
-            # Execute the async login test
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                login_result = loop.run_until_complete(test_login_flow())
-                
-                # Business Rule: Valid login should return a result
-                assert login_result is not None, "Valid login should return login response"
-                assert hasattr(login_result, 'access_token'), "Login result should contain access token"
-                assert hasattr(login_result, 'user_id'), "Login result should contain user ID"
-                
-                # Validate that repository was called as part of business logic
-                mock_repo_instance.get_by_email.assert_called_with("login@company.com")
-                
-                # Validate login request structure (business validation)
-                assert login_request.email == "login@company.com", "Login must specify email"
-                assert login_request.password == "correct_password", "Login must specify password"
-                
-            finally:
-                loop.close()
+            # Validate login request structure (business validation)
+            assert login_request.email == "login@company.com", "Login must specify email"
+            assert login_request.password == "correct_password", "Login must specify password"
+            
+        finally:
+            loop.close()
 
     def test_token_validation_business_security(self):
         """Test token validation enforces business security requirements."""

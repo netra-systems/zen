@@ -440,6 +440,7 @@ LEGACY_MESSAGE_TYPE_MAP = {
     
     # CRITICAL FIX: Add missing execute_agent mapping (causes Tests 23 & 25 failures)
     "execute_agent": MessageType.START_AGENT,
+    "EXECUTE_AGENT": MessageType.START_AGENT,  # Phase 2 Fix 2a: Handle uppercase case
     
     # Typing indicators
     "typing": MessageType.USER_TYPING,
@@ -483,6 +484,10 @@ def normalize_message_type(message_type: Union[str, MessageType]) -> MessageType
     if isinstance(message_type, MessageType):
         return message_type
     
+    # Phase 2 Fix 2a: Validate input type
+    if not isinstance(message_type, str):
+        raise ValueError(f"Message type must be string or MessageType enum, got {type(message_type)}")
+    
     # Check legacy mappings first
     if message_type in LEGACY_MESSAGE_TYPE_MAP:
         return LEGACY_MESSAGE_TYPE_MAP[message_type]
@@ -491,8 +496,8 @@ def normalize_message_type(message_type: Union[str, MessageType]) -> MessageType
     try:
         return MessageType(message_type)
     except ValueError:
-        # Default to user message for unknown types
-        return MessageType.USER_MESSAGE
+        # Phase 2 Fix 2a: Be more strict - raise error for unknown types instead of defaulting
+        raise ValueError(f"Unknown message type: '{message_type}'. Valid types: {list(MessageType.__members__.keys())} or legacy types: {list(LEGACY_MESSAGE_TYPE_MAP.keys())}")
 
 
 def get_frontend_message_type(message_type: Union[str, MessageType]) -> str:
