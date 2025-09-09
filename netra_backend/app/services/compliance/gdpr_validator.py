@@ -14,6 +14,7 @@ Full implementation should follow CLAUDE.md SSOT patterns.
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
+from datetime import datetime
 
 from shared.isolated_environment import get_env
 
@@ -167,10 +168,150 @@ def create_gdpr_validator() -> GDPRValidator:
     return GDPRValidator()
 
 
+@dataclass
+class DataProcessingAudit:
+    """
+    SSOT Data Processing Audit record for GDPR compliance.
+    
+    Tracks data processing activities for audit purposes.
+    """
+    audit_id: str
+    user_id: str
+    data_type: str
+    processing_purpose: str
+    legal_basis: str
+    consent_obtained: bool
+    consent_timestamp: Optional[datetime]
+    processing_timestamp: datetime
+    retention_period_days: int
+    third_party_sharing: bool
+    cross_border_transfer: bool
+    audit_metadata: Dict[str, Any]
+
+
+@dataclass 
+class ConsentValidation:
+    """
+    SSOT Consent Validation record for GDPR compliance.
+    
+    Validates and tracks user consent for data processing.
+    """
+    consent_id: str
+    user_id: str
+    data_types: List[str]
+    processing_purposes: List[str]
+    consent_given: bool
+    consent_timestamp: Optional[datetime]
+    withdrawal_timestamp: Optional[datetime]
+    consent_method: str  # explicit, implicit, legitimate_interest
+    consent_evidence: Dict[str, Any]
+    is_valid: bool
+    
+    def is_consent_valid_for_purpose(self, purpose: str) -> bool:
+        """Check if consent is valid for specific purpose."""
+        return (
+            self.is_valid and 
+            self.consent_given and 
+            purpose in self.processing_purposes and
+            self.withdrawal_timestamp is None
+        )
+
+
+@dataclass
+class DataRetentionPolicy:
+    """
+    SSOT Data Retention Policy for GDPR compliance.
+    
+    Defines data retention rules and enforcement.
+    """
+    policy_id: str
+    data_type: str
+    retention_period_days: int
+    legal_basis: str
+    deletion_method: str
+    archival_required: bool
+    exceptions: List[str]
+    policy_metadata: Dict[str, Any]
+    
+    def is_data_expired(self, data_age_days: int) -> bool:
+        """Check if data has exceeded retention period."""
+        return data_age_days > self.retention_period_days
+
+
+# SSOT Factory Functions
+def create_data_processing_audit(
+    user_id: str,
+    data_type: str, 
+    processing_purpose: str,
+    legal_basis: str = "consent",
+    consent_obtained: bool = False
+) -> DataProcessingAudit:
+    """Create a new data processing audit record."""
+    return DataProcessingAudit(
+        audit_id=f"audit_{user_id}_{int(datetime.now().timestamp())}",
+        user_id=user_id,
+        data_type=data_type,
+        processing_purpose=processing_purpose,
+        legal_basis=legal_basis,
+        consent_obtained=consent_obtained,
+        consent_timestamp=datetime.now() if consent_obtained else None,
+        processing_timestamp=datetime.now(),
+        retention_period_days=730,  # Default 2 years
+        third_party_sharing=False,
+        cross_border_transfer=False,
+        audit_metadata={}
+    )
+
+
+def create_consent_validation(
+    user_id: str,
+    data_types: List[str],
+    processing_purposes: List[str],
+    consent_given: bool = True
+) -> ConsentValidation:
+    """Create a new consent validation record."""
+    return ConsentValidation(
+        consent_id=f"consent_{user_id}_{int(datetime.now().timestamp())}",
+        user_id=user_id,
+        data_types=data_types,
+        processing_purposes=processing_purposes,
+        consent_given=consent_given,
+        consent_timestamp=datetime.now() if consent_given else None,
+        withdrawal_timestamp=None,
+        consent_method="explicit" if consent_given else "none",
+        consent_evidence={},
+        is_valid=consent_given
+    )
+
+
+def create_data_retention_policy(
+    data_type: str,
+    retention_period_days: int = 730,
+    legal_basis: str = "consent"
+) -> DataRetentionPolicy:
+    """Create a new data retention policy."""
+    return DataRetentionPolicy(
+        policy_id=f"policy_{data_type}_{int(datetime.now().timestamp())}",
+        data_type=data_type,
+        retention_period_days=retention_period_days,
+        legal_basis=legal_basis,
+        deletion_method="secure_deletion",
+        archival_required=False,
+        exceptions=[],
+        policy_metadata={}
+    )
+
+
 # Export SSOT interface
 __all__ = [
     "GDPRValidator",
     "GDPRValidationResult", 
     "GDPRViolationType",
-    "create_gdpr_validator"
+    "DataProcessingAudit",
+    "ConsentValidation", 
+    "DataRetentionPolicy",
+    "create_gdpr_validator",
+    "create_data_processing_audit",
+    "create_consent_validation",
+    "create_data_retention_policy"
 ]
