@@ -46,7 +46,7 @@ from netra_backend.app.models.websocket_connection import WebSocketConnection
 
 # Import SSOT UnifiedIdGenerator for proper database integration
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-from shared.types.core_types import UserID, ConnectionID, ThreadID, MessageID
+from shared.types import UserID, ConnectionID, ThreadID, MessageID
 
 
 @pytest.mark.integration

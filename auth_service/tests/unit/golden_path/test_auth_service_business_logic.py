@@ -20,10 +20,10 @@ from typing import Dict, List, Optional
 from unittest.mock import Mock, MagicMock, patch
 
 # Import auth service business logic components
-from auth_service.app.services.auth_service import AuthService
-from auth_service.app.models.user import User
-from auth_service.app.schemas.auth import UserCreate, UserLogin, TokenResponse
-from auth_service.database.repository import UserRepository
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.models import User
+from auth_service.auth_core.models.auth_models import UserCreate, UserLogin, TokenResponse
+from auth_service.auth_core.database.repository import AuthUserRepository
 
 
 @pytest.mark.unit
