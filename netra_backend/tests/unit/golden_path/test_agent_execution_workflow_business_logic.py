@@ -25,10 +25,10 @@ from decimal import Decimal
 from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
-from netra_backend.app.agents.optimization_agents.optimization_helper_agent import OptimizationHelperAgent
-from netra_backend.app.agents.reporting_agents.uvs_reporting_agent import UVSReportingAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
@@ -196,10 +196,10 @@ class TestAgentWorkflowBusinessLogic:
         }
         
         # Test optimization agent execution (mocked)
-        with patch('netra_backend.app.agents.optimization_agents.optimization_helper_agent.OptimizationHelperAgent.run') as mock_run:
+        with patch('netra_backend.app.agents.optimizations_core_sub_agent.OptimizationsCoreSubAgent.run') as mock_run:
             # Mock optimization result
             mock_result = AgentExecutionResult(
-                agent_name="OptimizationHelperAgent",
+                agent_name="OptimizationsCoreSubAgent",
                 success=True,
                 result_data={
                     "optimization": {
@@ -218,7 +218,7 @@ class TestAgentWorkflowBusinessLogic:
             mock_run.return_value = mock_result
             
             # Execute optimization agent
-            opt_agent = OptimizationHelperAgent(user_context=context)
+            opt_agent = OptimizationsCoreSubAgent(user_context=context)
             result = await opt_agent.run(
                 f"Optimize costs based on: {json.dumps(cost_data)}", 
                 thread_id="thread-456",
@@ -278,10 +278,10 @@ class TestAgentWorkflowBusinessLogic:
         }
         
         # Test reporting agent execution (mocked)
-        with patch('netra_backend.app.agents.reporting_agents.uvs_reporting_agent.UVSReportingAgent.run') as mock_run:
+        with patch('netra_backend.app.agents.reporting_sub_agent.ReportingSubAgent.run') as mock_run:
             # Mock comprehensive report result
             mock_result = AgentExecutionResult(
-                agent_name="UVSReportingAgent",
+                agent_name="ReportingSubAgent",
                 success=True,
                 result_data={
                     "final_report": {
@@ -300,7 +300,7 @@ class TestAgentWorkflowBusinessLogic:
             mock_run.return_value = mock_result
             
             # Execute reporting agent
-            report_agent = UVSReportingAgent(user_context=context)
+            report_agent = ReportingSubAgent(user_context=context)
             result = await report_agent.run(
                 f"Generate comprehensive report from: {json.dumps(combined_data)}",
                 thread_id="thread-789",
@@ -327,8 +327,8 @@ class TestAgentWorkflowBusinessLogic:
         # Business Rule: Workflow should follow the golden path sequence
         expected_sequence = [
             "DataHelperAgent",      # Step 1: Analyze current costs
-            "OptimizationHelperAgent", # Step 2: Find optimization opportunities  
-            "UVSReportingAgent"     # Step 3: Generate comprehensive report
+            "OptimizationsCoreSubAgent", # Step 2: Find optimization opportunities  
+            "ReportingSubAgent"     # Step 3: Generate comprehensive report
         ]
         
         # Mock execution context
@@ -368,7 +368,7 @@ class TestAgentWorkflowBusinessLogic:
         )
         
         optimization_result = AgentExecutionResult(
-            agent_name="OptimizationHelperAgent", 
+            agent_name="OptimizationsCoreSubAgent", 
             success=True,
             result_data={"optimization": {"savings": 70.25, "recommendations": [{"action": "switch_models"}]}},
             execution_time=3.2,
@@ -376,7 +376,7 @@ class TestAgentWorkflowBusinessLogic:
         )
         
         reporting_result = AgentExecutionResult(
-            agent_name="UVSReportingAgent",
+            agent_name="ReportingSubAgent",
             success=True,
             result_data={"final_report": {"executive_summary": "Cost analysis complete", "roi_impact": "15.6%"}},
             execution_time=4.1, 
@@ -440,8 +440,8 @@ class TestAgentWorkflowBusinessLogic:
         # Define business performance requirements
         max_execution_times = {
             "DataHelperAgent": 10.0,        # Data analysis should complete in 10s
-            "OptimizationHelperAgent": 15.0, # Optimization should complete in 15s  
-            "UVSReportingAgent": 20.0       # Report generation should complete in 20s
+            "OptimizationsCoreSubAgent": 15.0, # Optimization should complete in 15s  
+            "ReportingSubAgent": 20.0       # Report generation should complete in 20s
         }
         
         # Mock agent results with performance tracking
@@ -478,8 +478,8 @@ class TestAgentWorkflowBusinessLogic:
         # Mock token usage for different agent types
         token_usage_data = [
             {"agent": "DataHelperAgent", "tokens": 150, "cost_per_1k": 0.002},
-            {"agent": "OptimizationHelperAgent", "tokens": 200, "cost_per_1k": 0.002},
-            {"agent": "UVSReportingAgent", "tokens": 300, "cost_per_1k": 0.002}
+            {"agent": "OptimizationsCoreSubAgent", "tokens": 200, "cost_per_1k": 0.002},
+            {"agent": "ReportingSubAgent", "tokens": 300, "cost_per_1k": 0.002}
         ]
         
         total_tokens = sum(data["tokens"] for data in token_usage_data)
