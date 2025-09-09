@@ -552,9 +552,10 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     
     async def monitor_golden_path_execution(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket,  # Can be real WebSocket or mock WebSocket
         context: GoldenPathTestContext,
-        timeout: float = 120.0
+        timeout: float = 120.0,
+        services: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Monitor complete Golden Path execution with comprehensive event tracking.
