@@ -19,6 +19,9 @@ from datetime import datetime, timezone
 from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 from contextlib import asynccontextmanager
 
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState, WebSocketDisconnect
 
@@ -89,16 +92,25 @@ def generate_connection_id(user_id: Union[str, UserID], prefix: str = "conn") ->
     # Ensure user_id is validated
     validated_user_id = ensure_user_id(user_id)
     
-    timestamp = int(time.time() * 1000)
-    random_suffix = uuid.uuid4().hex[:8]
-    connection_id = f"{prefix}_{validated_user_id}_{timestamp}_{random_suffix}"
+    # Use UnifiedIDManager for consistent ID generation with audit trail
+    id_manager = UnifiedIDManager()
+    connection_id = id_manager.generate_id(
+        IDType.WEBSOCKET,
+        prefix=prefix,
+        context={"user_id": str(validated_user_id), "component": "websocket_connection"}
+    )
     
     return ConnectionID(connection_id)
 
 
 def generate_message_id() -> str:
-    """Generate unique message ID."""
-    return str(uuid.uuid4())
+    """Generate unique message ID using UnifiedIDManager."""
+    id_manager = UnifiedIDManager()
+    return id_manager.generate_id(
+        IDType.WEBSOCKET,
+        prefix="msg",
+        context={"component": "websocket_message"}
+    )
 
 
 def get_current_timestamp() -> float:

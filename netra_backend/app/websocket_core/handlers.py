@@ -40,6 +40,8 @@ from netra_backend.app.websocket_core.types import (
     convert_jsonrpc_to_websocket_message,
     normalize_message_type
 )
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.websocket_core.utils import is_websocket_connected
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core import create_websocket_manager
@@ -842,12 +844,17 @@ class BatchMessageHandler(BaseMessageHandler):
                 del self.batch_timers[user_id]
             
             # Create batch
-            import uuid
+            # Use UnifiedIDManager for batch ID generation with audit trail
+            id_manager = UnifiedIDManager()
             batch = MessageBatch(
                 messages=messages,
                 connection_id=f"ws_{user_id}",
                 user_id=user_id,
-                batch_id=str(uuid.uuid4()),
+                batch_id=id_manager.generate_id(
+                    IDType.WEBSOCKET,
+                    prefix="batch",
+                    context={"user_id": user_id, "message_count": len(messages)}
+                ),
                 total_size_bytes=sum(len(json.dumps(msg.content)) for msg in messages)
             )
             
