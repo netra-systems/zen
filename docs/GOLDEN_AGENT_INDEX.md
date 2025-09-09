@@ -14,6 +14,7 @@ This index serves as the **Single Source of Truth (SSOT)** for all agent-related
 
 | Document | Purpose | Status |
 |----------|---------|--------|
+| **[Golden Path Documentation Index](GOLDEN_PATH_DOCUMENTATION_INDEX.md)** | 🆕 **Master hub for all Golden Path docs and cross-references** | 🆕 Active |
 | **[UVS Triage Architecture](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** | NEW: 2-agent model with data sufficiency validation | 🆕 Active |
 | [Agent Golden Pattern Guide](agent_golden_pattern_guide.md) | Complete implementation patterns and examples | ✅ Active |
 | [Agent Migration Checklist](agent_migration_checklist.md) | Step-by-step migration to BaseAgent infrastructure | ✅ Active |
@@ -257,6 +258,11 @@ All agents have been successfully migrated to the golden pattern with comprehens
 
 ## 📖 Related Documentation
 
+### Golden Path Integration
+- **[Golden Path Documentation Index](GOLDEN_PATH_DOCUMENTATION_INDEX.md)** - **Master hub for all Golden Path implementations**
+- **[Golden Path User Flow Complete](GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - Complete user journey with technical flows
+- **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory-based isolation patterns
+
 ### Core System Specs
 - [`SPEC/core.xml`](../SPEC/core.xml) - Core architecture
 - [`SPEC/type_safety.xml`](../SPEC/type_safety.xml) - Type safety rules
@@ -266,6 +272,7 @@ All agents have been successfully migrated to the golden pattern with comprehens
 - [`SPEC/learnings/ssot_consolidation_20250825.xml`](../SPEC/learnings/ssot_consolidation_20250825.xml)
 - [`SPEC/learnings/unified_agent_testing_implementation.xml`](../SPEC/learnings/unified_agent_testing_implementation.xml)
 - [`SPEC/learnings/websocket_agent_integration_critical.xml`](../SPEC/learnings/websocket_agent_integration_critical.xml)
+- [`SPEC/learnings/golden_path_user_flow_analysis_20250109.xml`](../SPEC/learnings/golden_path_user_flow_analysis_20250109.xml)
 
 ### System Documentation
 - [`CLAUDE.md`](../CLAUDE.md) - System directives
