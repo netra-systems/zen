@@ -19,6 +19,9 @@ htmlcov/
 .ruff_cache/
 .coverage*
 
+# Test output files
+junit.xml
+
 # Dev launcher cache
 .dev_cache/
 .dev_launcher_cache/
