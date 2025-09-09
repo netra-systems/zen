@@ -171,15 +171,20 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         return False
 
 
-def is_websocket_connected_and_ready(websocket: WebSocket) -> bool:
+def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Optional[str] = None) -> bool:
     """
-    Enhanced connection validation with handshake completion check.
-    CRITICAL: Replaces basic client_state check to prevent race conditions.
+    Enhanced connection validation with application state integration.
+    CRITICAL: Combines WebSocket transport state with application-level readiness.
     
     This function ensures that:
-    1. WebSocket is in CONNECTED state
+    1. WebSocket is in CONNECTED state (transport level)
     2. Handshake is complete and validated
-    3. Bidirectional communication is ready
+    3. Application-level connection state is ready (if available)
+    4. Bidirectional communication is ready
+    
+    Args:
+        websocket: WebSocket connection to check
+        connection_id: Optional connection ID for state machine lookup
     
     Returns:
         True only when WebSocket is fully operational for message handling
@@ -190,6 +195,7 @@ def is_websocket_connected_and_ready(websocket: WebSocket) -> bool:
             logger.debug("WebSocket not connected - basic state check failed")
             return False
         
+        # PHASE 1: WebSocket Transport Validation
         # Check if websocket has been accepted
         if hasattr(websocket, 'client_state'):
             client_state = websocket.client_state
@@ -202,6 +208,35 @@ def is_websocket_connected_and_ready(websocket: WebSocket) -> bool:
             logger.debug("WebSocket missing receive/send methods - handshake not complete")
             return False
         
+        # PHASE 2: Application State Validation (NEW)
+        # Check connection state machine if available
+        if connection_id:
+            try:
+                # Import here to avoid circular imports
+                from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine
+                state_machine = get_connection_state_machine(connection_id)
+                
+                if state_machine:
+                    # Use application-level readiness check
+                    app_ready = state_machine.can_process_messages()
+                    logger.debug(f"Connection {connection_id} application state ready: {app_ready} (state: {state_machine.current_state})")
+                    
+                    if not app_ready:
+                        # Application not ready - return False regardless of transport state
+                        return False
+                    
+                    # Application is ready - proceed with transport validation
+                else:
+                    # No state machine - fall back to transport-only validation
+                    logger.debug(f"No state machine found for connection {connection_id}, using transport-only validation")
+            except ImportError:
+                # State machine not available - fall back to transport-only validation
+                logger.debug("ConnectionStateMachine not available, using transport-only validation")
+            except Exception as e:
+                # Error accessing state machine - log but continue with transport validation
+                logger.debug(f"Error accessing state machine for {connection_id}: {e}")
+        
+        # PHASE 3: WebSocket Transport Readiness Validation
         # Additional validation: Check if websocket is in a state ready for messaging
         # This prevents "Need to call accept first" errors by ensuring accept() was called
         try:
@@ -218,6 +253,7 @@ def is_websocket_connected_and_ready(websocket: WebSocket) -> bool:
             logger.debug(f"WebSocket state introspection failed: {e}")
             # Fall through to environment-specific logic
         
+        # PHASE 4: Environment-Specific Validation
         # Environment-specific validation
         from shared.isolated_environment import get_env
         env = get_env()

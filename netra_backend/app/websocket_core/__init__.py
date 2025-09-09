@@ -249,6 +249,25 @@ __all__ = [
     "safe_websocket_send",
     "safe_websocket_close",
     "is_websocket_connected",
+    "is_websocket_connected_and_ready",
+    
+    # Connection state machine components
+    "ApplicationConnectionState",
+    "ConnectionStateMachine", 
+    "ConnectionStateMachineRegistry",
+    "StateTransitionInfo",
+    "get_connection_state_registry",
+    "get_connection_state_machine",
+    "is_connection_ready_for_messages",
+    
+    # Message queue components
+    "MessageQueue",
+    "MessageQueueRegistry",
+    "MessagePriority",
+    "MessageQueueState",
+    "QueuedMessage",
+    "get_message_queue_registry",
+    "get_message_queue_for_connection",
     
     # Types and message creation
     "MessageType",
