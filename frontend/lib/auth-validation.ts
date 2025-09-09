@@ -256,9 +256,8 @@ export async function attemptAuthRecovery(
   // If we have a token but no user, try to decode it
   if (token && !user) {
     try {
-      const decoded = jwtDecode(token) as User;
-      
-      // Validate the decoded token
+      // Validate the token and get user from validation
+      // Note: We don't need to decode here as validateToken does it
       const validation = validateToken(token);
       if (validation.isValid && validation.decodedUser) {
         setUser(validation.decodedUser);

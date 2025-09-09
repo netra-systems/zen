@@ -18,6 +18,9 @@ import {
   validateToken,
   monitorAuthState,
   attemptAuthRecovery,
+  attemptEnhancedAuthRecovery,
+  createAtomicAuthUpdate,
+  applyAtomicAuthUpdate,
   debugAuthState,
   AuthValidation
 } from '@/lib/auth-validation';
@@ -113,37 +116,44 @@ describe('Auth Validation Helpers - CRITICAL BUG REPRODUCTION', () => {
       );
     });
 
-    test('SHOULD FAIL: attemptAuthRecovery has bug in function signature', async () => {
+    test('SHOULD PASS: attemptAuthRecovery correctly recovers user from valid token', async () => {
       const mockSetUser = jest.fn();
       const mockSetToken = jest.fn();
 
-      // Test will fail because attemptAuthRecovery references undefined 'user' variable
-      // This is part of the auth validation bug we're exposing
-      try {
-        const recovered = await attemptAuthRecovery(
-          validToken, // token exists
-          mockSetUser, 
-          mockSetToken
-        );
-        
-        // Should not reach this point due to undefined 'user' reference
-        expect(recovered).toBe(true);
-        expect(mockSetUser).toHaveBeenCalled();
-      } catch (error) {
-        // This catch block exposes the bug in attemptAuthRecovery function
-        expect(error).toBeInstanceOf(ReferenceError);
-        expect((error as Error).message).toContain('user is not defined');
-        
-        console.error('🐛 EXPOSED BUG: attemptAuthRecovery function has undefined user reference');
-      }
+      // Now with the fix, attemptAuthRecovery should work correctly with proper user parameter
+      const recovered = await attemptAuthRecovery(
+        validToken, // token exists
+        null,       // user is initially null (the bug state)
+        mockSetUser, 
+        mockSetToken
+      );
       
-      // Verify recovery logging still works
+      // Should successfully recover user from token
+      expect(recovered).toBe(true);
+      expect(mockSetUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-user-123',
+          email: 'test@example.com'
+        })
+      );
+      
+      // Verify recovery logging includes both token and user info
       expect(logger.info).toHaveBeenCalledWith(
         '[AUTH RECOVERY] Attempting auth state recovery',
         expect.objectContaining({
           component: 'auth-validation',
           action: 'recovery_start',
-          hasToken: true
+          hasToken: true,
+          hasUser: false
+        })
+      );
+      
+      expect(logger.info).toHaveBeenCalledWith(
+        '[AUTH RECOVERY] Successfully recovered user from token',
+        expect.objectContaining({
+          component: 'auth-validation',
+          action: 'recovery_success',
+          userId: 'test-user-123'
         })
       );
     });
@@ -168,6 +178,92 @@ describe('Auth Validation Helpers - CRITICAL BUG REPRODUCTION', () => {
       expect(validation.isValid).toBe(false);
       expect(validation.isExpired).toBe(true);
       expect(validation.errors.some(error => error.includes('Token expired at'))).toBe(true);
+    });
+  });
+
+  describe('Atomic Auth Updates - Race Condition Prevention', () => {
+    test('SHOULD PASS: createAtomicAuthUpdate creates proper update object', () => {
+      const atomicUpdate = createAtomicAuthUpdate(validToken, mockUser);
+      
+      expect(atomicUpdate.token).toBe(validToken);
+      expect(atomicUpdate.user).toBe(mockUser);
+      expect(atomicUpdate.timestamp).toBeGreaterThan(Date.now() - 1000);
+      expect(typeof atomicUpdate.timestamp).toBe('number');
+    });
+
+    test('SHOULD PASS: applyAtomicAuthUpdate applies valid updates atomically', () => {
+      const mockSetToken = jest.fn();
+      const mockSetUser = jest.fn();
+      const mockSyncStore = jest.fn();
+      
+      const atomicUpdate = createAtomicAuthUpdate(validToken, mockUser);
+      const success = applyAtomicAuthUpdate(
+        atomicUpdate, 
+        mockSetToken, 
+        mockSetUser, 
+        mockSyncStore
+      );
+      
+      expect(success).toBe(true);
+      expect(mockSetToken).toHaveBeenCalledWith(validToken);
+      expect(mockSetUser).toHaveBeenCalledWith(mockUser);
+      expect(mockSyncStore).toHaveBeenCalledWith(mockUser, validToken);
+      
+      expect(logger.info).toHaveBeenCalledWith(
+        '[ATOMIC UPDATE] Auth state updated atomically',
+        expect.objectContaining({
+          component: 'auth-validation',
+          action: 'atomic_update_success',
+          hasToken: true,
+          hasUser: true
+        })
+      );
+    });
+
+    test('SHOULD PASS: applyAtomicAuthUpdate handles logout state atomically', () => {
+      const mockSetToken = jest.fn();
+      const mockSetUser = jest.fn();
+      const mockSyncStore = jest.fn();
+      
+      const atomicUpdate = createAtomicAuthUpdate(null, null);
+      const success = applyAtomicAuthUpdate(
+        atomicUpdate, 
+        mockSetToken, 
+        mockSetUser, 
+        mockSyncStore
+      );
+      
+      expect(success).toBe(true);
+      expect(mockSetToken).toHaveBeenCalledWith(null);
+      expect(mockSetUser).toHaveBeenCalledWith(null);
+      expect(mockSyncStore).toHaveBeenCalledWith(null, null);
+    });
+
+    test('SHOULD PASS: attemptEnhancedAuthRecovery uses atomic updates', async () => {
+      const mockSetUser = jest.fn();
+      const mockSetToken = jest.fn();
+      const mockSyncStore = jest.fn();
+
+      const recovered = await attemptEnhancedAuthRecovery(
+        validToken, // token exists
+        null,       // user is null
+        mockSetUser,
+        mockSetToken,
+        mockSyncStore
+      );
+
+      expect(recovered).toBe(true);
+      expect(mockSetUser).toHaveBeenCalled();
+      
+      expect(logger.info).toHaveBeenCalledWith(
+        '[ENHANCED RECOVERY] Starting enhanced auth recovery',
+        expect.objectContaining({
+          component: 'auth-validation',
+          action: 'enhanced_recovery_start',
+          hasToken: true,
+          hasUser: false
+        })
+      );
     });
   });
 
