@@ -65,11 +65,11 @@ if it hasn't been deployed last 3 minutes.
 8.5) UPDATE a comment with Staging deploy information  following @GITHUB_STYLE_GUIDE.md  .
 8.6) IF new directly related and significant issues introduced log them and exit process, restart process from 1) (exit this agent and go back to main loop so it can spawn new agents)
 
-8) PR AND CLOSURE: SNST:
-8.1) Git commit remaining related work in conceptual batches. 
-8.2) Make a NEW PR (Pull Request).
-8.3) Cross link the prior generated issue so it will close on PR merge.
-8.4) Do a final update for this loop  following @GITHUB_STYLE_GUIDE.md  .
+9) PR AND CLOSURE: SNST:
+9.1) Git commit remaining related work in conceptual batches. 
+9.2) Make a NEW PR (Pull Request).
+9.3) Cross link the prior generated issue so it will close on PR merge.
+9.4) Do a final update for this loop  following @GITHUB_STYLE_GUIDE.md  .
 
 END PROCESS INSTRUCTIONS
 
