@@ -49,7 +49,11 @@ class ConnectionPoolMetrics:
 
 @dataclass
 class DatabaseLoadTestResult:
+<<<<<<< HEAD
+    """Results from database load testing."""
+=======
     \"\"\"Results from database load testing.\"\"\"
+>>>>>>> a2eccc9923a36b1445ee11732d4a1fb88b08f53d
     test_name: str
     duration: float
     operations_per_second: float
@@ -59,7 +63,11 @@ class DatabaseLoadTestResult:
 
 
 class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
+<<<<<<< HEAD
+    """Test database connection pooling performance under load."""
+=======
     \"\"\"Test database connection pooling performance under load.\"\"\"
+>>>>>>> a2eccc9923a36b1445ee11732d4a1fb88b08f53d
     
     @pytest.mark.integration
     @pytest.mark.performance
@@ -97,7 +105,11 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         operation_times = []
         
         async def database_operation_cycle(operation_id: int) -> Dict[str, Any]:
+<<<<<<< HEAD
+            """Perform a cycle of database operations."""
+=======
             \"\"\"Perform a cycle of database operations.\"\"\"
+>>>>>>> a2eccc9923a36b1445ee11732d4a1fb88b08f53d
             cycle_result = {
                 \"operation_id\": operation_id,
                 \"operations_completed\": 0,
