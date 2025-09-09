@@ -138,17 +138,6 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         """Setup golden path test suite validation."""
         super().setup_method()
         
-        self.validation_results = {
-            'test_suite_completeness': {},
-            'ssot_compliance': {},
-            'real_services_integration': {},
-            'websocket_event_coverage': {},
-            'authentication_coverage': {},
-            'platform_compatibility': {},
-            'regression_detection_capability': {},
-            'business_value_validation': {}
-        }
-        
         self.validation_metrics = {
             'total_tests_found': 0,
             'expected_tests_found': 0,
