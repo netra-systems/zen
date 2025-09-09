@@ -165,8 +165,6 @@ services:
     ports:
       - "${ALPINE_TEST_BACKEND_PORT:-8002}:8000"
     depends_on:
-      alpine-test-migration:
-        condition: service_completed_successfully
       alpine-test-postgres:
         condition: service_healthy
         restart: true
