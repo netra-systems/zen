@@ -4,6 +4,7 @@ Extends base execution engine with MCP tool routing and execution capabilities.
 Follows strict 25-line function design and 450-line limit.
 """
 
+import asyncio
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
@@ -24,6 +25,9 @@ from netra_backend.app.agents.supervisor.execution_context import (
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
+# Import ExecutionEngine dependencies for _init_from_factory
+from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
+from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -163,13 +167,157 @@ class MCPExecutionPlanner:
         return []
 
 
+def create_mcp_enhanced_engine(user_context: 'UserExecutionContext',
+                             registry: 'AgentRegistry',
+                             websocket_bridge: 'WebSocketManager') -> 'MCPEnhancedExecutionEngine':
+    """Factory method to create MCPEnhancedExecutionEngine for safe concurrent usage.
+    
+    This factory method ensures proper user isolation and follows the SSOT pattern
+    for execution engine creation.
+    
+    Args:
+        user_context: User execution context for complete isolation
+        registry: Agent registry for agent lookup
+        websocket_bridge: WebSocket bridge for event emission
+        
+    Returns:
+        MCPEnhancedExecutionEngine: Isolated MCP execution engine for this request
+    """
+    return MCPEnhancedExecutionEngine._init_from_factory(
+        registry=registry,
+        websocket_manager=websocket_bridge,
+        user_context=user_context
+    )
+
+
 class MCPEnhancedExecutionEngine(ExecutionEngine):
     """Execution engine enhanced with MCP capabilities."""
     
-    def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager'):
-        super().__init__(registry, websocket_manager)
-        self._init_mcp_components()
+    MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
+    AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
     
+    def __init__(self, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager', 
+                 user_context: Optional['UserExecutionContext'] = None):
+        """Private initializer - use factory methods instead.
+        
+        This raises RuntimeError to enforce factory pattern usage for user isolation.
+        Use create_mcp_enhanced_engine() for proper instantiation.
+        """
+        raise RuntimeError(
+            "Direct MCPEnhancedExecutionEngine instantiation is no longer supported. "
+            "Use create_mcp_enhanced_engine(user_context, registry, websocket_bridge) "
+            "for proper user isolation and concurrent execution safety."
+        )
+    
+    @classmethod
+    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_manager: 'WebSocketManager',
+                          user_context: Optional['UserExecutionContext'] = None):
+        """Internal factory initializer for creating request-scoped MCP engines.
+        
+        This method bypasses the __init__ RuntimeError and is only called
+        by factory methods to create properly isolated instances.
+        """
+        # Create instance without calling __init__
+        instance = cls.__new__(cls)
+        
+        # Initialize parent ExecutionEngine attributes directly
+        instance.registry = registry
+        instance.websocket_bridge = websocket_manager
+        instance.user_context = user_context
+        
+        # SECURITY FIX: Enforce mandatory AgentWebSocketBridge usage - no fallbacks allowed
+        if not websocket_manager:
+            raise RuntimeError(
+                "AgentWebSocketBridge is mandatory for WebSocket security and user isolation. "
+                "No fallback paths allowed."
+            )
+        
+        # Validate that websocket_manager is an AgentWebSocketBridge (not a deprecated notifier)
+        if not hasattr(websocket_manager, 'notify_agent_started'):
+            raise RuntimeError(
+                f"websocket_bridge must be AgentWebSocketBridge instance with proper notification methods. "
+                f"Got: {type(websocket_manager)}. Deprecated WebSocketNotifier fallbacks are eliminated for security."
+            )
+        
+        # Initialize ExecutionEngine state management attributes
+        instance.active_runs = {}
+        instance.run_history = []
+        
+        # Import execution tracker
+        from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
+        instance.execution_tracker = get_execution_tracker()
+        
+        # NEW: Per-user state isolation to prevent race conditions
+        instance._user_execution_states = {}
+        instance._user_state_locks = {}
+        
+        import asyncio
+        instance._state_lock_creation_lock = asyncio.Lock()
+        
+        # Initialize parent components (ExecutionEngine methods)
+        instance._init_execution_engine_components()
+        instance._init_execution_engine_death_monitoring()
+        
+        # Initialize MCP-specific components
+        instance._init_mcp_components()
+        
+        if instance.user_context:
+            logger.info(f"MCPEnhancedExecutionEngine initialized with UserExecutionContext for user {instance.user_context.user_id}")
+        
+        return instance
+    
+    def _init_execution_engine_components(self) -> None:
+        """Initialize execution engine components (copied from parent class)."""
+        # Use AgentWebSocketBridge instead of creating WebSocketNotifier
+        # periodic_update_manager removed - no longer needed
+        self.periodic_update_manager = None
+        self.agent_core = AgentExecutionCore(self.registry, self.websocket_bridge)
+        # fallback_manager removed - no longer needed
+        self.fallback_manager = None
+        self.flow_logger = get_supervisor_flow_logger()
+        
+        # CONCURRENCY OPTIMIZATION: Semaphore for agent execution control
+        self.execution_semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_AGENTS)
+        self.execution_stats = {
+            'total_executions': 0,
+            'concurrent_executions': 0,
+            'queue_wait_times': [],
+            'execution_times': [],
+            'failed_executions': 0,
+            'dead_executions': 0,
+            'timeout_executions': 0
+        }
+    
+    def _init_execution_engine_death_monitoring(self) -> None:
+        """Initialize agent death monitoring callbacks (copied from parent class)."""
+        # Register callbacks for death detection
+        self.execution_tracker.register_death_callback(self._handle_agent_death)
+        self.execution_tracker.register_timeout_callback(self._handle_agent_timeout)
+    
+    async def _handle_agent_death(self, execution_record) -> None:
+        """Handle agent death detection (copied from parent class)."""
+        logger.critical(f"💀 AGENT DEATH DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
+        
+        # Send death notification via WebSocket
+        if hasattr(self.websocket_bridge, 'notify_agent_error'):
+            await self.websocket_bridge.notify_agent_error(
+                agent_name=execution_record.agent_name,
+                error_message="Agent execution died unexpectedly",
+                execution_id=execution_record.execution_id
+            )
+    
+    async def _handle_agent_timeout(self, execution_record) -> None:
+        """Handle agent timeout detection (copied from parent class)."""
+        logger.warning(f"⏱️ AGENT TIMEOUT DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
+        
+        # Send timeout notification via WebSocket  
+        if hasattr(self.websocket_bridge, 'notify_agent_error'):
+            await self.websocket_bridge.notify_agent_error(
+                agent_name=execution_record.agent_name,
+                error_message="Agent execution timed out",
+                execution_id=execution_record.execution_id
+            )
+
     def _init_mcp_components(self) -> None:
         """Initialize MCP-specific components."""
         self.mcp_context_manager = MCPContextManager()
