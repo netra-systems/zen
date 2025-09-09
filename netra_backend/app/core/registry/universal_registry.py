@@ -817,6 +817,14 @@ class ToolRegistry(UniversalRegistry['Tool']):
         """
         return self.get(key, context)
     
+    @property
+    def _registry(self) -> Dict[str, Any]:
+        """Backward compatibility property for tests that access registry._registry.
+        
+        Returns a dict-like view of registered items for test inspection.
+        """
+        return {key: item.value for key, item in self._items.items()}
+    
     def register_tool(self, key: str, tool: 'Tool', **metadata) -> None:
         """Register tool - compatibility method for tests."""
         return self.register(key, tool, **metadata)
