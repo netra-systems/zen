@@ -299,6 +299,20 @@ class ConfigurationValidator:
         changed_keys = list(config_changes.keys())
         is_critical = any(key in critical_keys for key in changed_keys)
         
+        # Apply configuration changes if not critical
+        if not is_critical:
+            for key, value in config_changes.items():
+                # Apply the configuration to the auth_config via property setters
+                property_name = key.lower()
+                if hasattr(self.config, property_name):
+                    # Convert value to appropriate type based on property
+                    if property_name in ['jwt_token_expiry', 'rate_limit_per_minute', 'session_timeout']:
+                        # These should be integers
+                        setattr(self.config, property_name, int(value))
+                    else:
+                        # String properties
+                        setattr(self.config, property_name, str(value))
+        
         return ReloadResult(
             success=not is_critical,
             reloaded_configs=changed_keys if not is_critical else [],
@@ -456,6 +470,12 @@ class TestAuthStartupConfiguration:
         for env_name in environments:
             # Create environment-specific configuration
             auth_env.set("ENVIRONMENT", env_name, source="test")
+            
+            # CRITICAL FIX: Production requires explicit JWT_ALGORITHM configuration
+            # This follows the SSOT pattern in AuthEnvironment.get_jwt_algorithm()
+            if env_name == "production":
+                auth_env.set("JWT_ALGORITHM", "HS256", source="test")
+            
             env_config = AuthConfig(auth_env)
             
             # Test environment-specific security settings
@@ -660,7 +680,7 @@ class TestAuthStartupConfiguration:
             })
             
             assert reload_result.success
-            assert config_key.lower() in reload_result.reloaded_configs
+            assert config_key.lower() in [key.lower() for key in reload_result.reloaded_configs]
             
             # Verify new value applied
             updated_value = getattr(auth_config, config_key.lower())
