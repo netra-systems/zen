@@ -171,10 +171,10 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # Store report in database (this is what the real system should do)
         message = Message(
-            id=str(MessageID.generate()),
-            thread_id=str(thread_id),
-            user_id=str(user_id),
-            run_id=str(run_id),
+            id=UnifiedIdGenerator.generate_message_id("agent", user_id, thread_id),
+            thread_id=thread_id,
+            user_id=user_id,
+            run_id=run_id,
             message_type=MessageType.AGENT_RESPONSE,
             content=str(agent_result),
             metadata={"report_type": "cost_optimization"}
@@ -192,7 +192,7 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Verify report persistence for user access
         stored_message = await db.get(Message, message.id)
         assert stored_message is not None, "Report must be persisted for user access"
-        assert stored_message.thread_id == str(thread_id), "Report must be linked to user thread"
+        assert stored_message.thread_id == thread_id, "Report must be linked to user thread"
 
     @pytest.mark.integration
     @pytest.mark.real_services
