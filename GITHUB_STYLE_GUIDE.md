@@ -15,6 +15,7 @@
 - Limit the overall volume of information
 - Limit the complexity and take time to "make it simple smartie"
 - Make it readable in a few moments, in a conversational and accurate way
+- Seperate required "bulk dump" information from conversational information
 
 ### 3. Actionable Communication
 - Every piece of communication should have a clear next step
