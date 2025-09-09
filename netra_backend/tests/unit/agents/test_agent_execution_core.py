@@ -152,7 +152,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         
         # Mock agent that hangs (never returns)
         async def hanging_agent(*args, **kwargs):
-            await asyncio.sleep(10)  # Simulate hanging
+            await asyncio.sleep(2)  # Simulate hanging
             return {"success": True}
         
         self.mock_agent.execute = hanging_agent

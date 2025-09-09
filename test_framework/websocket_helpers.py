@@ -182,17 +182,10 @@ class MockWebSocketConnection:
     
     async def _add_mock_responses(self):
         """Add mock responses to simulate WebSocket events."""
-        mock_events = [
-            {"type": "connection_ack", "timestamp": time.time()},
-            {"type": "agent_started", "agent_name": "test_agent", "timestamp": time.time()},
-            {"type": "agent_thinking", "reasoning": "Mock reasoning", "timestamp": time.time()},
-            {"type": "tool_executing", "tool_name": "mock_tool", "timestamp": time.time()},
-            {"type": "tool_completed", "tool_name": "mock_tool", "results": {}, "timestamp": time.time()},
-            {"type": "agent_completed", "response": "Mock response", "timestamp": time.time()}
-        ]
-        
-        for event in mock_events:
-            await self._receive_queue.put(json.dumps(event))
+        # UPDATED: No longer pre-populate responses
+        # All responses now come dynamically from send() method based on actual messages
+        # This enables proper error scenario testing
+        pass
     
     async def send(self, message: str):
         """Mock send method - validates message and handles malformed events."""
@@ -203,7 +196,7 @@ class MockWebSocketConnection:
             # Try to parse the message as JSON
             parsed_message = json.loads(message)
             
-            # Check for various malformed scenarios
+            # Check for various malformed scenarios and specific error test patterns
             error_response = None
             
             # Check for missing required fields
@@ -221,18 +214,46 @@ class MockWebSocketConnection:
                     "message": "Message type is required",
                     "timestamp": time.time()
                 }
-            elif parsed_message.get("type") == "invalid_type":
+            
+            # CRITICAL: Handle specific error scenarios from create_error_scenario_message()
+            elif parsed_message.get("type") == "connection_test" and parsed_message.get("action") == "force_disconnect":
+                # connection_error scenario
                 error_response = {
                     "type": "error",
-                    "error": "unknown_message_type", 
-                    "message": f"Unknown message type: {parsed_message.get('type')}",
+                    "error": "connection_error",
+                    "message": "WebSocket connection forced disconnect",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "invalid_type":
+                # message_processing_error scenario
+                error_response = {
+                    "type": "error",
+                    "error": "message_processing_error", 
+                    "message": "Unable to process message with invalid type",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_started" and parsed_message.get("agent_name") == "non_existent_agent":
+                # agent_execution_error scenario
+                error_response = {
+                    "type": "error",
+                    "error": "agent_execution_error",
+                    "message": "Agent 'non_existent_agent' does not exist or cannot be started",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "tool_executing" and parsed_message.get("tool_name") == "invalid_tool":
+                # tool_execution_error scenario
+                error_response = {
+                    "type": "error",
+                    "error": "tool_execution_error",
+                    "message": "Tool 'invalid_tool' is not available or failed to execute",
                     "timestamp": time.time()
                 }
             elif parsed_message.get("type") == "agent_started" and not parsed_message.get("user_id"):
+                # authentication_error scenario (missing user_id)
                 error_response = {
                     "type": "error",
-                    "error": "missing_user_id",
-                    "message": "user_id is required for agent_started events",
+                    "error": "authentication_error",
+                    "message": "user_id is required for agent_started events - authentication failed",
                     "timestamp": time.time()
                 }
             elif parsed_message.get("type") == "agent_thinking" and parsed_message.get("reasoning") is None:

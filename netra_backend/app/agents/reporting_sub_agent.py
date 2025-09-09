@@ -195,18 +195,7 @@ class ReportingSubAgent(BaseAgent):
         """Execute using modern UVS pattern."""
         # UVS: Handle invalid context gracefully
         from netra_backend.app.services.user_execution_context import UserExecutionContext as UEC
-        import uuid
-        
-        if not context or not isinstance(context, UEC):
-            self.logger.warning(f"Invalid context provided: {type(context)}")
-            # Create minimal context to proceed - with required IDs
-            if not context:
-                context = UEC(
-                    user_id="fallback_user",
-                    thread_id="fallback_thread",
-                    run_id=str(uuid.uuid4())
-                )
-        
+       
         # REQUIRED: Emit agent started - with error handling
         if stream_updates:
             try:

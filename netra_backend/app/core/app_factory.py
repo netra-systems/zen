@@ -52,6 +52,7 @@ def setup_security_middleware(app: FastAPI) -> None:
     """Setup security middleware components."""
     _add_path_traversal_middleware(app)
     _add_security_headers_middleware(app)
+    _add_gcp_websocket_readiness_middleware(app)
 
 
 def _add_path_traversal_middleware(app: FastAPI) -> None:
@@ -82,6 +83,12 @@ def _add_security_headers_middleware(app: FastAPI) -> None:
     from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
     settings = get_config()
     app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
+
+
+def _add_gcp_websocket_readiness_middleware(app: FastAPI) -> None:
+    """Add GCP WebSocket readiness middleware to prevent 1011 errors."""
+    from netra_backend.app.core.middleware_setup import setup_gcp_websocket_readiness_middleware
+    setup_gcp_websocket_readiness_middleware(app)
 
 
 def setup_request_middleware(app: FastAPI) -> None:

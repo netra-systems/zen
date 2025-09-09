@@ -290,6 +290,67 @@ async def _handle_clickhouse_error(error: Exception) -> None:
     logger.error(f"ClickHouse check failed: {error}")
     raise
 
+
+async def _check_gcp_websocket_readiness() -> Dict[str, Any]:
+    """
+    Check GCP WebSocket readiness to prevent 1011 errors.
+    
+    CRITICAL: This check validates that all required services are ready
+    before GCP Cloud Run routes WebSocket connections.
+    """
+    try:
+        from netra_backend.app.middleware.gcp_websocket_readiness_middleware import websocket_readiness_health_check
+        from fastapi import Request
+        
+        # Get app state from request context (if available)
+        # For health checks, we'll use a mock request
+        class MockRequest:
+            def __init__(self):
+                self.app = type('MockApp', (), {'state': None})()
+        
+        # Try to get actual app state if available in global context
+        try:
+            import inspect
+            frame = inspect.currentframe()
+            while frame:
+                if 'request' in frame.f_locals and hasattr(frame.f_locals['request'], 'app'):
+                    mock_request = frame.f_locals['request']
+                    break
+                frame = frame.f_back
+            else:
+                mock_request = MockRequest()
+        except:
+            mock_request = MockRequest()
+        
+        # Get app state - will be None if not available
+        app_state = getattr(mock_request.app, 'state', None)
+        
+        # Run WebSocket readiness check
+        health_result = await websocket_readiness_health_check(app_state)
+        
+        return {
+            "status": health_result.get("status", "unknown"),
+            "websocket_ready": health_result.get("websocket_ready", False),
+            "details": health_result.get("details", {})
+        }
+        
+    except ImportError:
+        # GCP WebSocket validator not available - assume ready for non-GCP environments
+        return {
+            "status": "healthy",
+            "websocket_ready": True,
+            "details": {"validator_available": False}
+        }
+        
+    except Exception as e:
+        # WebSocket readiness check failed
+        logger.warning(f"GCP WebSocket readiness check failed: {e}")
+        return {
+            "status": "degraded",
+            "websocket_ready": False,
+            "details": {"error": str(e)}
+        }
+
 async def _check_redis_connection() -> None:
     """Check Redis connection for staging environment."""
     config = unified_config_manager.get_config()
@@ -342,6 +403,9 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         # Initialize status for external services
         clickhouse_status = "unavailable"
         redis_status = "unavailable"
+        
+        # GCP WebSocket readiness check - CRITICAL for preventing 1011 errors
+        websocket_readiness_status = await _check_gcp_websocket_readiness()
         
         # CRITICAL FIX: Handle ClickHouse and Redis checks with proper environment-specific logic
         # This prevents race conditions between different environment configurations
@@ -409,6 +473,7 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
             "core_db": postgres_status,
             "clickhouse_db": clickhouse_status,
             "redis_db": redis_status,
+            "websocket_readiness": websocket_readiness_status,
             "details": health_status
         }
         

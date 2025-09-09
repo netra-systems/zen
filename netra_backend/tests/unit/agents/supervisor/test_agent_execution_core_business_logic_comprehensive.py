@@ -245,7 +245,7 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         
         # Configure the mock to actually hang for a long time
         async def slow_execute(*args, **kwargs):
-            await asyncio.sleep(10)  # This should be interrupted by timeout
+            await asyncio.sleep(2)  # This should be interrupted by timeout
             return {"success": True, "result": "should not complete"}
         
         slow_agent.execute.side_effect = slow_execute

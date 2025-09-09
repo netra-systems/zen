@@ -2160,7 +2160,7 @@ class TestLifecycleManagerFactory(AsyncBaseTestCase):
         slow_component.initialize = AsyncMock()
         
         async def slow_initialize():
-            await asyncio.sleep(15)  # Longer than default startup timeout
+            await asyncio.sleep(3)  # Longer than default startup timeout for testing
             
         slow_component.initialize.side_effect = slow_initialize
         slow_component.name = "slow_component"
@@ -2201,7 +2201,7 @@ class TestLifecycleManagerFactory(AsyncBaseTestCase):
         hanging_component.shutdown = AsyncMock()
         
         async def hanging_shutdown():
-            await asyncio.sleep(60)  # Hang for a long time
+            await asyncio.sleep(5)  # Longer than test timeout to trigger timeout behavior
             
         hanging_component.shutdown.side_effect = hanging_shutdown
         hanging_component.name = "hanging_component"
