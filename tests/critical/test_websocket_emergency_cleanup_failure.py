@@ -24,7 +24,7 @@ from typing import Dict, Any, List, Optional
 # Core imports  
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory, FactoryInitializationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.unified_manager import IsolatedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
 from shared.types.core_types import UserID
 
 
@@ -234,17 +234,17 @@ class TestWebSocketEmergencyCleanupFailure:
             # Test current emergency cleanup
             cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
             
-            # PROBLEM: Current cleanup removes very few managers because they "appear" active
-            assert cleaned_count < 3, f"Conservative cleanup should remove very few managers, cleaned: {cleaned_count}"
+            # With enhanced cleanup, we should now clean more managers (including zombies)
+            assert cleaned_count >= 6, f"Enhanced cleanup should remove zombie managers, cleaned: {cleaned_count}"
             
-            # The zombie managers should still be there, causing the problem
+            # With enhanced cleanup, most zombie managers should be removed
             remaining_managers = [
                 m for m in mock_factory._active_managers.values() 
                 if m.user_context.user_id == google_oauth_user_id
             ]
             
             zombie_count = sum(1 for m in remaining_managers if hasattr(m, 'is_zombie') and m.is_zombie)
-            assert zombie_count >= 4, f"Most zombie managers should remain after conservative cleanup, zombie count: {zombie_count}"
+            assert zombie_count <= 2, f"Enhanced cleanup should remove most zombie managers, zombie count: {zombie_count}"
     
     @pytest.mark.asyncio 
     async def test_enhanced_emergency_cleanup_solution(self, mock_factory, google_oauth_user_id, create_test_context):
@@ -281,52 +281,8 @@ class TestWebSocketEmergencyCleanupFailure:
                 mock_factory._user_manager_count[google_oauth_user_id] = len(managers)
                 mock_factory._manager_creation_time[key] = datetime.utcnow() - timedelta(seconds=60)
             
-            # Implement enhanced emergency cleanup (the solution!)
-            async def enhanced_emergency_cleanup(user_id: str) -> int:
-                """Enhanced cleanup with aggressive mode and health validation"""
-                cleaned = 0
-                cutoff_time = datetime.utcnow() - timedelta(seconds=30)
-                
-                user_managers = [
-                    (key, manager) for key, manager in mock_factory._active_managers.items()
-                    if manager.user_context.user_id == user_id
-                ]
-                
-                # Phase 1: Standard cleanup (inactive managers)
-                for key, manager in user_managers[:]:
-                    if not manager._is_active or len(manager._connections) == 0:
-                        del mock_factory._active_managers[key]
-                        cleaned += 1
-                
-                # Phase 2: AGGRESSIVE MODE - Health validation for remaining managers
-                remaining_managers = [
-                    (key, manager) for key, manager in mock_factory._active_managers.items()
-                    if manager.user_context.user_id == user_id
-                ]
-                
-                if len(remaining_managers) > 10:  # Still too many managers
-                    for key, manager in remaining_managers:
-                        try:
-                            # Health check to identify zombie managers
-                            if hasattr(manager, 'health_check'):
-                                is_healthy = await asyncio.wait_for(manager.health_check(), timeout=2.0)
-                                if not is_healthy:
-                                    # Remove zombie managers that fail health check
-                                    del mock_factory._active_managers[key]
-                                    cleaned += 1
-                        except Exception:
-                            # Managers that can't be health checked are suspicious
-                            del mock_factory._active_managers[key]
-                            cleaned += 1
-                
-                # Update count
-                remaining = sum(1 for m in mock_factory._active_managers.values() 
-                              if m.user_context.user_id == user_id)
-                mock_factory._user_manager_count[user_id] = remaining
-                return cleaned
-            
-            # Apply enhanced cleanup
-            cleaned_count = await enhanced_emergency_cleanup(google_oauth_user_id)
+            # Apply the real enhanced emergency cleanup implementation
+            cleaned_count = await mock_factory._emergency_cleanup_user_managers(google_oauth_user_id)
             
             # Enhanced cleanup should remove many more managers
             assert cleaned_count >= 10, f"Enhanced cleanup should remove most problematic managers, cleaned: {cleaned_count}"
