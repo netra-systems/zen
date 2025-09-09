@@ -67,6 +67,14 @@ from test_framework.ssot.e2e_auth_helper import (
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
+# No-Docker fixtures for service-independent testing
+from test_framework.fixtures.no_docker_golden_path_fixtures import (
+    no_docker_golden_path_services, 
+    golden_path_services,
+    mock_authenticated_user,
+    skip_if_docker_required
+)
+
 # Production System Imports for Real Service Testing
 from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id, UnifiedIDManager
 
@@ -779,7 +787,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.golden_path
     @pytest.mark.e2e
     @pytest.mark.priority_p0
-    async def test_complete_golden_path_success_flow(self):
+    async def test_complete_golden_path_success_flow(self, golden_path_services, mock_authenticated_user):
         """
         Test 1: Complete Golden Path Success Flow - Full Happy Path with Real Business Scenario
         
@@ -873,7 +881,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.concurrent
     @pytest.mark.priority_p0
-    async def test_multiple_user_concurrent_golden_path(self):
+    async def test_multiple_user_concurrent_golden_path(self, golden_path_services, mock_authenticated_user):
         """
         Test 2: Multiple User Concurrent Golden Path - 5+ Users Simultaneously Completing Full Journey
         
@@ -1043,7 +1051,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.resilience
     @pytest.mark.priority_p1
-    async def test_golden_path_with_service_interruptions(self):
+    async def test_golden_path_with_service_interruptions(self, golden_path_services, mock_authenticated_user):
         """
         Test 3: Golden Path with Service Interruptions - Full Flow with Service Failures and Recovery
         
@@ -1197,7 +1205,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.performance
     @pytest.mark.priority_p1
-    async def test_golden_path_performance_validation(self):
+    async def test_golden_path_performance_validation(self, golden_path_services, mock_authenticated_user):
         """
         Test 4: Golden Path Performance Validation - End-to-End Timing Requirements Met
         
@@ -1365,7 +1373,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.business_value
     @pytest.mark.priority_p0
-    async def test_golden_path_business_value_validation(self):
+    async def test_golden_path_business_value_validation(self, golden_path_services, mock_authenticated_user):
         """
         Test 5: Golden Path Business Value Validation - Real Cost Optimization Scenario with Measurable ROI
         
@@ -1693,7 +1701,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.cross_platform
     @pytest.mark.priority_p1
-    async def test_golden_path_cross_platform_validation(self):
+    async def test_golden_path_cross_platform_validation(self, golden_path_services, mock_authenticated_user):
         """
         Test 6: Golden Path Cross-Platform Validation - Windows/Linux Compatibility for Full Flow
         
@@ -1911,7 +1919,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.load_test
     @pytest.mark.priority_p1
-    async def test_golden_path_load_test_simulation(self):
+    async def test_golden_path_load_test_simulation(self, golden_path_services, mock_authenticated_user):
         """
         Test 7: Golden Path Load Test Simulation - Enterprise-Scale Concurrent Usage
         
@@ -2143,7 +2151,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.audit_trail
     @pytest.mark.priority_p1
-    async def test_golden_path_data_audit_trail(self):
+    async def test_golden_path_data_audit_trail(self, golden_path_services, mock_authenticated_user):
         """
         Test 8: Golden Path Data Audit Trail - Complete Audit Logging and Compliance Validation
         
