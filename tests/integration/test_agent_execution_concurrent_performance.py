@@ -84,14 +84,14 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
             result_data.append(data_item)
         
         # Simulate processing time
-        time.sleep(config[\"processing_time\"])
+        time.sleep(config["processing_time"])
         
         return {
-            \"complexity\": complexity_level,
-            \"iterations\": config[\"iterations\"],
-            \"data_items\": len(result_data),
-            \"processing_time\": config[\"processing_time\"],
-            \"result_summary\": f\"Processed {len(result_data)} items at {complexity_level} complexity\"
+            "complexity": complexity_level,
+            "iterations": config["iterations"],
+            "data_items": len(result_data),
+            "processing_time": config["processing_time"],
+            "result_summary": f"Processed {len(result_data)} items at {complexity_level} complexity"
         }
     
     @pytest.mark.integration
