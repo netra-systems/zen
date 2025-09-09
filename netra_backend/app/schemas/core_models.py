@@ -69,6 +69,36 @@ class MessageMetadata(BaseModel):
     custom_fields: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
 
 
+class MessageCreate(BaseModel):
+    """Message creation model for unified message storage."""
+    content: str
+    role: str = Field(default="user", description="Message role: user, assistant, system, tool")
+    thread_id: str
+    assistant_id: Optional[str] = None
+    run_id: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    
+    model_config = ConfigDict(
+        extra="forbid"
+    )
+
+
+class MessageResponse(BaseModel):
+    """Message response model for unified message storage."""
+    id: str
+    content: str
+    role: str
+    thread_id: str
+    created_at: datetime
+    assistant_id: Optional[str] = None
+    run_id: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
 class Message(BaseModel):
     """Unified Message model - single source of truth."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

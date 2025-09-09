@@ -15,6 +15,17 @@ Endpoints provided:
 
 CRITICAL: This replaces ALL previous WebSocket endpoints.
 All clients should migrate to /ws with proper JWT authentication.
+
+🚀 GOLDEN PATH REFERENCE:
+See docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md for complete user journey analysis
+including critical race condition fixes and WebSocket event requirements.
+This file addresses the $500K+ ARR dependency on reliable chat functionality.
+
+CRITICAL ISSUES ADDRESSED:
+- WebSocket race conditions in Cloud Run environments
+- Missing business-critical WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)  
+- Service dependency graceful degradation
+- Factory initialization SSOT validation failures
 """
 
 import asyncio
