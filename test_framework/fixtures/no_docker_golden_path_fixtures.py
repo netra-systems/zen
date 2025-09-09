@@ -240,6 +240,20 @@ class MockWebSocketManager:
             # Execute agent pipeline asynchronously and queue the events
             asyncio.create_task(self._execute_and_queue_events(user_context, parsed_message["content"]))
     
+    async def close(self, code: int = 1000, reason: str = "") -> None:
+        """
+        Mock close method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Simulates closing the WebSocket connection.
+        """
+        self.connected = False
+        logger.info(f"[MOCK WebSocket] Connection closed (code: {code}, reason: {reason})")
+        
+        # Mark all connections as disconnected
+        for client_id in list(self.mock_state.websocket_connections.keys()):
+            await self.disconnect(client_id)
+    
     async def _execute_and_queue_events(self, user_context: Dict[str, Any], message: str):
         """Execute agent pipeline and queue the resulting events for recv()."""
         try:
@@ -249,7 +263,7 @@ class MockWebSocketManager:
             # Queue the final assistant message
             assistant_message = {
                 "type": "assistant_message",
-                "content": result.get("result", "Summary: Based on your AI infrastructure analysis, I recommend cost optimization strategies saving $15,000/month through model selection optimization and caching improvements."),
+                "content": result.get("result", "Summary: I recommend you implement cost optimization strategies to reduce expenses by $15,000/month. You should consider switching models, apply caching solutions, and optimize your infrastructure. These actionable suggestions will help achieve your optimization goals."),
                 "thread_id": user_context.get("thread_id"),
                 "run_id": user_context.get("run_id"),
                 "timestamp": datetime.now(timezone.utc).isoformat()
@@ -453,12 +467,17 @@ class MockAgentExecutionEngine:
             # Generate realistic business value response with optimization recommendations
             mock_business_response = (
                 "Based on your AI infrastructure analysis, I recommend the following cost optimization strategies:\n\n"
-                "1. **Model Selection Optimization**: Switch from GPT-4 to GPT-3.5-turbo for 70% of tasks, saving $15,000/month\n"
-                "2. **Usage Pattern Analysis**: Implement caching for repeated queries, reducing API calls by 40%\n"
-                "3. **Cost Forecasting**: Your current $50K/month spend can be reduced to $32K/month\n"
-                "4. **Infrastructure Efficiency**: Batch processing can reduce costs by 25%\n\n"
-                "**Summary**: These recommendations provide actionable insights for immediate cost reduction while maintaining performance quality. "
-                "The total projected savings are $18,000/month, achieving your cost optimization goals."
+                "1. **Model Selection Optimization**: You should switch from GPT-4 to GPT-3.5-turbo for 70% of tasks, which will reduce costs by $15,000/month. "
+                "Consider implementing this change gradually to maintain quality.\n\n"
+                "2. **Usage Pattern Analysis**: I suggest you implement caching for repeated queries to reduce API calls by 40%. "
+                "You could use Redis or similar caching solutions to optimize performance.\n\n"
+                "3. **Cost Forecasting**: You should apply batch processing techniques to reduce your current $50K/month spend to $32K/month. "
+                "I recommend monitoring usage patterns to optimize further.\n\n"
+                "4. **Infrastructure Efficiency**: Consider enabling request batching and implement query optimization. "
+                "You could also try using smaller models for simple tasks and apply rate limiting.\n\n"
+                "**Summary**: These actionable recommendations provide immediate cost reduction opportunities while maintaining performance quality. "
+                "I suggest you implement these changes in phases, starting with caching optimization. "
+                "The total projected savings are $18,000/month, achieving your optimization goals."
             )
             
             result = {
