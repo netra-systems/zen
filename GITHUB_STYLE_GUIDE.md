@@ -17,6 +17,8 @@
 - Limit the complexity and take time to "make it simple smartie"
 - Make it readable in a few moments, in a conversational and accurate way
 - Seperate required "bulk dump" information from conversational information
+- Prefer to edit update and extend existing comments rather then create new comments, especially 
+for work occuring within a similar amount of time.
 
 ### 3. Actionable Communication
 - Every piece of communication should have a clear next step
