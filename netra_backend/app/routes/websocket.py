@@ -873,30 +873,66 @@ async def websocket_endpoint(websocket: WebSocket):
                 connection_id = await ws_manager.connect_user(user_id, websocket)
                 logger.info(f"Registered connection with legacy manager: {connection_id}")
                 
-            # CRITICAL FIX: Enhanced delay and handshake validation for Cloud Run environments
+            # CRITICAL FIX: Enhanced handshake coordination for race condition prevention
             # This addresses the race condition where message handling starts before complete handshake
-            if environment in ["staging", "production"]:
-                # Step 1: Progressive delay for network propagation
-                await asyncio.sleep(0.1)  # Initial 100ms delay for Cloud Run stability
+            from netra_backend.app.websocket_core.race_condition_prevention import (
+                HandshakeCoordinator,
+                RaceConditionDetector
+            )
+            
+            # Initialize race condition prevention components
+            handshake_coordinator = HandshakeCoordinator(environment=environment)
+            race_detector = RaceConditionDetector(environment=environment)
+            
+            logger.info(f"🛡️ RACE CONDITION PREVENTION: Starting handshake coordination for {environment}")
+            
+            # Coordinate handshake completion with environment-specific timing
+            handshake_success = await handshake_coordinator.coordinate_handshake()
+            
+            if not handshake_success:
+                logger.error("HandshakeCoordinator failed - potential race condition detected")
+                race_detector.add_detected_pattern(
+                    "handshake_coordination_failure",
+                    "critical",
+                    details={
+                        "environment": environment,
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "connection_id": connection_id
+                    }
+                )
+                # Continue but log the issue for monitoring
+            else:
+                logger.info(f"✅ Handshake coordination successful in {handshake_coordinator.get_handshake_duration()*1000:.1f}ms")
+            
+            # Validate connection readiness using race condition detector
+            if not race_detector.validate_connection_readiness(handshake_coordinator.get_current_state()):
+                logger.warning(f"Connection not ready for messages: {handshake_coordinator.get_current_state().value}")
                 
-                # Step 2: Validate handshake completion before proceeding
+                # Try to recover by waiting for ready state
+                max_recovery_attempts = 3
+                for recovery_attempt in range(max_recovery_attempts):
+                    recovery_delay = race_detector.calculate_progressive_delay(recovery_attempt)
+                    await asyncio.sleep(recovery_delay)
+                    
+                    if race_detector.validate_connection_readiness(handshake_coordinator.get_current_state()):
+                        logger.info(f"Connection recovered after {recovery_attempt + 1} attempts")
+                        break
+                else:
+                    logger.error("Connection recovery failed - proceeding with caution")
+            
+            # Legacy handshake validation for backward compatibility
+            if environment in ["staging", "production"]:
+                # Additional validation using existing utils for double-check
                 from netra_backend.app.websocket_core.utils import validate_websocket_handshake_completion
                 
                 handshake_valid = await validate_websocket_handshake_completion(websocket, timeout_seconds=2.0)
                 if not handshake_valid:
-                    logger.warning("WebSocket handshake validation failed - implementing progressive retry")
-                    
-                    # Progressive retry with increasing delays for Cloud Run
-                    for retry_attempt in range(3):
-                        await asyncio.sleep(0.05 * (retry_attempt + 1))  # 50ms, 100ms, 150ms
-                        handshake_valid = await validate_websocket_handshake_completion(websocket, timeout_seconds=1.0)
-                        if handshake_valid:
-                            logger.info(f"WebSocket handshake validated on retry attempt {retry_attempt + 1}")
-                            break
-                    
-                    if not handshake_valid:
-                        logger.error("WebSocket handshake validation failed after all retries - potential race condition")
-                        # Continue but log the issue for monitoring
+                    logger.warning("Legacy handshake validation failed - race condition detected")
+                    race_detector.add_detected_pattern(
+                        "legacy_handshake_validation_failure", 
+                        "warning",
+                        details={"environment": environment}
+                    )
                 
                 # Step 3: Additional connection state validation
                 if websocket.client_state != WebSocketState.CONNECTED:
@@ -946,33 +982,78 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, welcome_msg.model_dump())
             
-            # CRITICAL FIX: Final handshake confirmation delay for Cloud Run
+            # CRITICAL FIX: Final race condition validation before message processing
             # This ensures the client has time to process the connection_established message
-            # and the WebSocket is fully ready for bidirectional communication
+            # and validates using race condition prevention components
             if environment in ["staging", "production"]:
                 await asyncio.sleep(0.05)  # 50ms after welcome message
                 
-                # Final verification that handshake is still valid before starting message loop
+                # Final validation using HandshakeCoordinator and RaceConditionDetector
+                if not handshake_coordinator.is_ready_for_messages():
+                    logger.warning("HandshakeCoordinator indicates not ready for messages - potential race condition")
+                    race_detector.add_detected_pattern(
+                        "final_readiness_check_failed",
+                        "warning", 
+                        details={"current_state": handshake_coordinator.get_current_state().value}
+                    )
+                
+                # Double-check with legacy validation
                 from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
                 if not is_websocket_connected_and_ready(websocket):
                     logger.warning("WebSocket not ready after final confirmation - potential race condition detected")
+                    race_detector.add_detected_pattern(
+                        "legacy_final_readiness_failed",
+                        "warning",
+                        details={"environment": environment}
+                    )
+                    
                     # Add one more small delay and check
                     await asyncio.sleep(0.1)
                     if not is_websocket_connected_and_ready(websocket):
                         logger.error("WebSocket still not ready - proceeding with caution")
+                        race_detector.add_detected_pattern(
+                            "persistent_readiness_failure",
+                            "critical",
+                            details={"recovery_attempts": 1}
+                        )
             
             # CRITICAL FIX: Log successful connection establishment for debugging
             security_pattern = "FACTORY_PATTERN" if 'user_context' in locals() else "LEGACY_SINGLETON"
             logger.info(f"WebSocket connection fully established for user {user_id} in {environment} using {security_pattern}")
             
-            # CRITICAL FIX: Verify WebSocket is ready for message handling after complete setup
-            from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
+            # CRITICAL FIX: Final race condition prevention validation before message loop
+            if not handshake_coordinator.is_ready_for_messages():
+                logger.error(f"HandshakeCoordinator not ready for messages - race condition detected")
+                race_detector.add_detected_pattern(
+                    "message_loop_readiness_failure",
+                    "critical",
+                    details={
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "current_state": handshake_coordinator.get_current_state().value,
+                        "handshake_duration_ms": handshake_coordinator.get_handshake_duration() * 1000 if handshake_coordinator.get_handshake_duration() else None
+                    }
+                )
+                raise WebSocketDisconnect(code=1006, reason="Race condition prevented message handling")
+            
+            # Legacy validation as backup
+            from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready, validate_websocket_handshake_completion
             if not is_websocket_connected_and_ready(websocket):
                 logger.error(f"WebSocket connection not ready for message handling for user {user_id}")
+                race_detector.add_detected_pattern(
+                    "legacy_message_loop_readiness_failure",
+                    "critical",
+                    details={"user_id": user_id[:8] + "..." if user_id else "unknown"}
+                )
+                
                 # Try one final validation before giving up
                 final_validation = await validate_websocket_handshake_completion(websocket, timeout_seconds=1.0)
                 if not final_validation:
                     logger.error(f"WebSocket handshake final validation failed - race condition detected")
+                    race_detector.add_detected_pattern(
+                        "final_handshake_validation_failure",
+                        "critical",
+                        details={"validation_timeout_seconds": 1.0}
+                    )
                     raise WebSocketDisconnect(code=1006, reason="Handshake validation failed - race condition")
             
             logger.debug(f"WebSocket ready: {connection_id} - Processing any queued messages...")
