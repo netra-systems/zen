@@ -184,25 +184,25 @@ async def handle_send_message_request(db: AsyncSession, thread_id: str, request,
     logger = central_logger.get_logger(__name__)
     logger.info(f"Sending message to thread {thread_id} for user {user_id}")
     
-    # Validate thread exists and user has access
-    thread = await get_thread_with_validation(db, thread_id, user_id)
-    logger.debug(f"Thread validation passed for {thread_id}")
-    
-    # Create message record
-    message_id = str(uuid4())
-    created_at = int(time.time())
-    
-    # Prepare message data
-    message_data = {
-        'id': message_id,
-        'thread_id': thread_id,
-        'role': 'user',  # Messages sent via this endpoint are user messages
-        'content': request.message,
-        'created_at': created_at,
-        'metadata_': request.metadata or {}
-    }
-    
     try:
+        # Validate thread exists and user has access
+        thread = await get_thread_with_validation(db, thread_id, user_id)
+        logger.debug(f"Thread validation passed for {thread_id}")
+        
+        # Create message record
+        message_id = str(uuid4())
+        created_at = int(time.time())
+        
+        # Prepare message data
+        message_data = {
+            'id': message_id,
+            'thread_id': thread_id,
+            'role': 'user',  # Messages sent via this endpoint are user messages
+            'content': request.message,
+            'created_at': created_at,
+            'metadata_': request.metadata or {}
+        }
+        
         # Save message to database
         message_repo = MessageRepository()
         await message_repo.create(db, **message_data)
