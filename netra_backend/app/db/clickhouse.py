@@ -20,6 +20,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCir
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.logging_config import central_logger as logger
+from test_framework.ssot.test_context_decorator import test_decorator
 
 
 class ClickHouseCache:
@@ -448,6 +449,7 @@ class NoOpClickHouseClient:
         """Initialize NoOp client with connection tracking."""
         self._connected = True
     
+    @test_decorator()
     async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Execute no-op query - simulates realistic query behaviors."""
         logger.debug(f"[ClickHouse NoOp] Simulated query execution: {query[:50]}...")
@@ -484,14 +486,17 @@ class NoOpClickHouseClient:
         # Default: return empty result for other queries
         return []
     
+    @test_decorator()
     async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Execute no-op query (alias for execute)."""
         return await self.execute(query, params)
     
+    @test_decorator()
     async def test_connection(self) -> bool:
         """Simulate connection test based on connection state."""
         return self._connected
     
+    @test_decorator()
     async def disconnect(self) -> None:
         """No-op disconnect - updates connection state."""
         logger.debug("[ClickHouse NoOp] Simulated disconnect")
