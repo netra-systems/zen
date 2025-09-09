@@ -21,6 +21,20 @@ from datetime import datetime, timezone
 import uuid
 from dataclasses import dataclass
 
+# Simple validation result class for result structure validation
+@dataclass
+class ValidationResult:
+    """Simple validation result with is_valid attribute."""
+    is_valid: bool
+    errors: List[str] = None
+    warnings: List[str] = None
+    
+    def __post_init__(self):
+        if self.errors is None:
+            self.errors = []
+        if self.warnings is None:
+            self.warnings = []
+
 # SSOT Imports - Absolute imports as per CLAUDE.md
 from shared.types.core_types import UserID, ensure_user_id
 from shared.types.agent_types import AgentExecutionRequest, AgentExecutionResult, AgentValidationResult
@@ -394,7 +408,7 @@ class AgentExecutionValidator:
             error_responses = {
                 "insufficient_permissions": {
                     "free": {
-                        "user_message": "This feature requires a premium subscription. Upgrade to Early tier to unlock advanced AI analysis and optimization tools.",
+                        "user_message": "This feature requires a premium subscription. Upgrade to Early tier to unlock advanced AI analysis and optimization tools, or contact our team for assistance.",
                         "recovery_action": "upgrade_to_early_tier"
                     },
                     "early": {
@@ -459,28 +473,24 @@ class AgentExecutionValidator:
     # Result Validation
     # =========================================================================
     
-    def validate_result_structure(self, execution_result: AgentExecutionResult) -> Dict[str, Any]:
+    def validate_result_structure(self, execution_result: AgentExecutionResult) -> ValidationResult:
         """Validate agent execution result structure for business requirements.
         
         Args:
             execution_result: Agent execution result to validate
             
         Returns:
-            Dict: Validation result with is_valid flag and details
+            ValidationResult: Validation result with is_valid flag and details
         """
         try:
-            validation = {
-                "is_valid": True,
-                "errors": [],
-                "warnings": []
-            }
+            errors = []
+            warnings = []
             
             # Check required fields
             required_fields = ["user_id", "success", "result_data"]
             for field in required_fields:
                 if not hasattr(execution_result, field) or getattr(execution_result, field) is None:
-                    validation["errors"].append(f"Missing required field: {field}")
-                    validation["is_valid"] = False
+                    errors.append(f"Missing required field: {field}")
             
             # Validate result data structure
             if hasattr(execution_result, 'result_data') and execution_result.result_data:
@@ -489,17 +499,21 @@ class AgentExecutionValidator:
                 # Check for business value fields
                 if isinstance(result_data, dict):
                     if not any(key in result_data for key in ["recommendations", "analysis", "insights", "optimization"]):
-                        validation["warnings"].append("Result may lack business value indicators")
+                        warnings.append("Result may lack business value indicators")
                 
-            return validation
+            return ValidationResult(
+                is_valid=len(errors) == 0,
+                errors=errors,
+                warnings=warnings
+            )
             
         except Exception as e:
             logger.error(f"Result structure validation error: {e}")
-            return {
-                "is_valid": False,
-                "errors": [f"Validation error: {str(e)}"],
-                "warnings": []
-            }
+            return ValidationResult(
+                is_valid=False,
+                errors=[f"Validation error: {str(e)}"],
+                warnings=[]
+            )
     
     # =========================================================================
     # Audit and Compliance
