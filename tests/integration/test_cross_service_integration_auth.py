@@ -67,29 +67,32 @@ class TestSyntaxFix:
     def test_cross_service_auth_token_setup(self, launcher_config):
         """Test cross-service auth token is set up during launcher initialization."""
         
+        # Use SSOT environment access per CLAUDE.md
+        env = get_env()
+        
         # Clear existing token to test generation
-        original_token = os.environ.get('CROSS_SERVICE_AUTH_TOKEN')
-        if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
-            del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+        original_token = env.get('CROSS_SERVICE_AUTH_TOKEN')
+        if original_token:
+            env.remove('CROSS_SERVICE_AUTH_TOKEN')
         
         try:
             launcher = DevLauncher(launcher_config)
             
             # Force cache miss to trigger environment setup
-            launcher.cache_manager.invalidate_environment_cache()
+            launcher.cache_manager.clear()
             
             # Trigger environment check which sets up tokens
             launcher.check_environment()
             
-            # Check that cross-service auth token is generated
-            token = os.environ.get('CROSS_SERVICE_AUTH_TOKEN')
-            assert token is not None
-            assert len(token) > 10  # Should be a meaningful token
+            # Check that cross-service auth token is generated via SSOT environment
+            token = env.get('CROSS_SERVICE_AUTH_TOKEN')
+            assert token is not None, "Cross-service auth token should be generated during environment check"
+            assert len(token) > 10, f"Token should be meaningful (got length {len(token) if token else 0})"
             
             # Verify it's stored in service discovery too
             stored_token = launcher.service_discovery.get_cross_service_auth_token()
-            assert stored_token == token
+            assert stored_token == token, f"Service discovery token ({stored_token}) should match environment token ({token})"
         finally:
-            # Restore original value
+            # Restore original value using SSOT environment
             if original_token is not None:
-                os.environ['CROSS_SERVICE_AUTH_TOKEN'] = original_token
+                env.set('CROSS_SERVICE_AUTH_TOKEN', original_token, source="test_restore")

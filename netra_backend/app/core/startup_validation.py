@@ -13,6 +13,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.service_dependencies import (
+    ServiceDependencyChecker,
+    EnvironmentType,
+    ServiceType
+)
 
 
 class ComponentStatus(Enum):
@@ -43,11 +48,15 @@ class StartupValidator:
     Ensures deterministic startup with proper initialization.
     """
     
-    def __init__(self):
+    def __init__(self, environment: EnvironmentType = EnvironmentType.DEVELOPMENT):
         self.logger = central_logger.get_logger(__name__)
         self.validations: List[ComponentValidation] = []
         self.start_time = None
         self.end_time = None
+        
+        # Initialize service dependency checker
+        self.service_dependency_checker = ServiceDependencyChecker(environment=environment)
+        self.environment = environment
         
     async def validate_startup(self, app) -> Tuple[bool, Dict[str, Any]]:
         """
@@ -73,6 +82,9 @@ class StartupValidator:
         
         # CRITICAL: Validate communication paths for chat functionality
         await self._validate_critical_paths(app)
+        
+        # CRITICAL: Validate service dependencies for systematic service resolution
+        await self._validate_service_dependencies(app)
         
         self.end_time = time.time()
         
@@ -681,6 +693,111 @@ class StartupValidator:
         except Exception as e:
             self._add_failed_validation("Critical Path Validation", "Critical Paths", str(e))
     
+    async def _validate_service_dependencies(self, app) -> None:
+        """Validate service dependencies for systematic service resolution."""
+        try:
+            self.logger.info("Validating service dependencies for systematic resolution...")
+            
+            # Determine which services to validate based on what's available
+            services_to_check = []
+            
+            # Check which service types are available in the application
+            if hasattr(app.state, 'db_session_factory') and app.state.db_session_factory:
+                services_to_check.append(ServiceType.DATABASE_POSTGRES)
+            
+            if hasattr(app.state, 'redis_manager') and app.state.redis_manager:
+                services_to_check.append(ServiceType.DATABASE_REDIS)
+            
+            if ((hasattr(app.state, 'key_manager') and app.state.key_manager) or
+                (hasattr(app.state, 'security_service') and app.state.security_service)):
+                services_to_check.append(ServiceType.AUTH_SERVICE)
+            
+            if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
+                services_to_check.append(ServiceType.BACKEND_SERVICE)
+            
+            if ((hasattr(app.state, 'websocket_manager') and app.state.websocket_manager) or
+                (hasattr(app.state, 'agent_websocket_bridge') and app.state.agent_websocket_bridge)):
+                services_to_check.append(ServiceType.WEBSOCKET_SERVICE)
+            
+            if hasattr(app.state, 'llm_manager') and app.state.llm_manager:
+                services_to_check.append(ServiceType.LLM_SERVICE)
+            
+            if not services_to_check:
+                validation = ComponentValidation(
+                    name="Service Dependencies",
+                    category="Service Dependencies",
+                    expected_min=1,
+                    actual_count=0,
+                    status=ComponentStatus.WARNING,
+                    message="No services found for dependency validation",
+                    is_critical=False
+                )
+                self.validations.append(validation)
+                self.logger.warning("⚠️ No services found for dependency validation")
+                return
+            
+            # Run service dependency validation
+            dependency_result = await self.service_dependency_checker.validate_service_dependencies(
+                app=app,
+                services_to_check=services_to_check,
+                include_golden_path=True
+            )
+            
+            # Convert dependency validation result to component validation
+            if dependency_result.overall_success:
+                validation = ComponentValidation(
+                    name="Service Dependencies",
+                    category="Service Dependencies", 
+                    expected_min=len(services_to_check),
+                    actual_count=dependency_result.services_healthy,
+                    status=ComponentStatus.HEALTHY,
+                    message=f"Service dependency validation passed - {dependency_result.services_healthy}/{len(services_to_check)} services healthy",
+                    is_critical=True,
+                    metadata={
+                        "services_checked": len(services_to_check),
+                        "services_healthy": dependency_result.services_healthy,
+                        "services_failed": dependency_result.services_failed,
+                        "execution_time_ms": dependency_result.execution_duration_ms,
+                        "phases_completed": len(dependency_result.phase_results),
+                        "golden_path_validated": True
+                    }
+                )
+                self.logger.info(f"✓ Service dependencies validated - {dependency_result.services_healthy}/{len(services_to_check)} services healthy")
+            else:
+                # Critical failure - service dependencies not satisfied
+                failed_count = dependency_result.services_failed
+                critical_failures = dependency_result.critical_failures
+                
+                validation = ComponentValidation(
+                    name="Service Dependencies",
+                    category="Service Dependencies",
+                    expected_min=len(services_to_check),
+                    actual_count=dependency_result.services_healthy,
+                    status=ComponentStatus.CRITICAL,
+                    message=f"Service dependency validation FAILED - {failed_count} services failed, critical business functionality at risk",
+                    is_critical=True,
+                    metadata={
+                        "services_checked": len(services_to_check),
+                        "services_healthy": dependency_result.services_healthy,
+                        "services_failed": failed_count,
+                        "critical_failures": critical_failures,
+                        "execution_time_ms": dependency_result.execution_duration_ms,
+                        "business_impact": "Chat functionality may be broken"
+                    }
+                )
+                
+                self.logger.error(f"❌ CRITICAL: Service dependency validation FAILED")
+                self.logger.error(f"   - {failed_count} services failed validation")
+                self.logger.error(f"   - Critical failures: {len(critical_failures)}")
+                for failure in critical_failures:
+                    self.logger.error(f"   - {failure}")
+            
+            self.validations.append(validation)
+            
+        except Exception as e:
+            self._add_failed_validation("Service Dependencies", "Service Dependencies", str(e))
+            self.logger.error(f"Service dependency validation failed with exception: {e}")
+    
     async def _count_database_tables(self, db_session_factory) -> int:
         """Count database tables if possible."""
         try:
@@ -803,12 +920,20 @@ class StartupValidator:
 
 
 # Global validator instance
-startup_validator = StartupValidator()
+startup_validator = StartupValidator(environment=EnvironmentType.DEVELOPMENT)
 
 
-async def validate_startup(app) -> Tuple[bool, Dict[str, Any]]:
+async def validate_startup(
+    app, 
+    environment: EnvironmentType = EnvironmentType.DEVELOPMENT
+) -> Tuple[bool, Dict[str, Any]]:
     """
-    Convenience function to validate startup.
+    Convenience function to validate startup with service dependencies.
     Returns (success, report) tuple.
     """
-    return await startup_validator.validate_startup(app)
+    # Use environment-specific validator if different from global default
+    if environment != EnvironmentType.DEVELOPMENT:
+        validator = StartupValidator(environment=environment)
+        return await validator.validate_startup(app)
+    else:
+        return await startup_validator.validate_startup(app)

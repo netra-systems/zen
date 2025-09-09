@@ -65,6 +65,9 @@ ExecutionID = NewType('ExecutionID', str)
 ContextID = NewType('ContextID', str)
 """Strongly typed context identifier."""
 
+MessageID = NewType('MessageID', str)
+"""Strongly typed message identifier."""
+
 # Database and external service identifiers
 DatabaseSessionID = NewType('DatabaseSessionID', str)
 """Strongly typed database session identifier."""
@@ -413,6 +416,41 @@ def ensure_websocket_id(value: Any) -> Optional[WebSocketID]:
         return WebSocketID(cleaned_value)
     
     raise ValueError(f"Invalid websocket_id format: {value}")
+
+
+def ensure_session_id(value: Any) -> SessionID:
+    """Convert string to SessionID with validation using enhanced dual format support."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Invalid session_id: {value}")
+    
+    cleaned_value = value.strip()
+    
+    # Session IDs are typically UUIDs - validate UUID format
+    try:
+        import uuid
+        # This will raise ValueError if not a valid UUID
+        uuid.UUID(cleaned_value)
+        return SessionID(cleaned_value)
+    except ValueError:
+        raise ValueError(f"Invalid session_id format (must be UUID): {value}")
+
+
+def ensure_connection_id(value: Any) -> ConnectionID:
+    """Convert string to ConnectionID with validation using enhanced dual format support."""
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Invalid connection_id: {value}")
+    
+    # Import here to avoid circular imports
+    from netra_backend.app.core.unified_id_manager import is_valid_id_format_compatible, IDType
+    
+    cleaned_value = value.strip()
+    
+    # Use enhanced validation that supports both UUID and structured formats
+    # ConnectionID uses WEBSOCKET validation since they're closely related
+    if is_valid_id_format_compatible(cleaned_value, IDType.WEBSOCKET):
+        return ConnectionID(cleaned_value)
+    
+    raise ValueError(f"Invalid connection_id format: {value}")
 
 
 # =============================================================================

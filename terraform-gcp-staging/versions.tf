@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.5.0"
-  
+
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -15,7 +15,7 @@ terraform {
       version = "~> 3.6"
     }
   }
-  
+
   # Backend configuration for storing state in GCS
   # Temporarily commented out for initial testing
   # Uncomment after confirming the infrastructure works

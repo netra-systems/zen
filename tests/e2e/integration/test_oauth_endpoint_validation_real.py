@@ -49,7 +49,7 @@ from test_framework.http_client import (
     create_backend_config,
 )
 from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
-from tests.e2e.service_manager import RealServicesManager
+from tests.e2e.real_services_manager import RealServicesManager
 
 logger = central_logger.get_logger(__name__)
 

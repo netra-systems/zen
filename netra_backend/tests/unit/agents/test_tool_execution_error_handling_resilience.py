@@ -43,8 +43,8 @@ from langchain_core.tools import BaseTool
 class FailingTool(BaseTool):
     """Tool that simulates various failure scenarios."""
     
-    name = "failing_tool"
-    description = "Tool that fails in configurable ways"
+    name: str = "failing_tool"
+    description: str = "Tool that fails in configurable ways"
     
     def __init__(
         self, 
@@ -101,8 +101,8 @@ class FailingTool(BaseTool):
 class SlowTool(BaseTool):
     """Tool that simulates slow execution."""
     
-    name = "slow_tool"
-    description = "Tool that takes a long time to execute"
+    name: str = "slow_tool"
+    description: str = "Tool that takes a long time to execute"
     
     def __init__(self, execution_time_ms: int = 1000):
         super().__init__()
@@ -129,8 +129,8 @@ class SlowTool(BaseTool):
 class ResourceExhaustionTool(BaseTool):
     """Tool that simulates resource exhaustion scenarios."""
     
-    name = "resource_tool"
-    description = "Tool that consumes system resources"
+    name: str = "resource_tool"
+    description: str = "Tool that consumes system resources"
     
     def __init__(self, resource_type: str = "memory"):
         super().__init__()

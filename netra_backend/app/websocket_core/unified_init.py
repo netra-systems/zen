@@ -174,6 +174,36 @@ def get_emitter_pool():
         "\n\nSee User Context Architecture documentation for secure multi-user patterns."
     )
 
+# Unified manager creation function for integration tests
+async def get_unified_websocket_manager(env=None, user_id: str = None):
+    """
+    Get unified WebSocket manager for integration testing.
+    
+    Args:
+        env: Environment manager (for compatibility)
+        user_id: Optional user ID for user-specific manager
+    
+    Returns:
+        UnifiedWebSocketManager instance
+    """
+    if user_id:
+        # Create user-specific context for testing
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        user_context = UserExecutionContext(
+            user_id=user_id,
+            thread_id=f"test_thread_{user_id}",
+            run_id=f"test_run_{user_id}",
+            request_id=f"test_request_{user_id}"
+        )
+        return await create_websocket_manager(user_context)
+    else:
+        # Create default manager for integration testing
+        factory = get_websocket_manager_factory()
+        return await factory.get_or_create_manager(
+            user_id="integration_test_user",
+            context=None
+        )
+
 # Critical events that MUST be preserved
 CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
 
@@ -205,6 +235,7 @@ __all__ = [
     
     # Functions - SECURITY FIX: Removed unsafe get_websocket_manager
     "get_manager",  # Now raises security error
+    "get_unified_websocket_manager",  # For integration testing
     "create_websocket_emitter",  # Now uses secure factory pattern
     "create_isolated_emitter",  # Now uses secure factory pattern  
     "get_emitter_pool",  # Now raises security error

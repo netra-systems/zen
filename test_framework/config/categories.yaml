@@ -221,3 +221,119 @@ categories:
     - security
     - auth
     - validation
+  golden_path:
+    description: Critical golden path user flow validation tests (DOCKER SERVICES ONLY)
+    priority: CRITICAL
+    category_type: quality
+    timeout_seconds: 900
+    estimated_duration_minutes: 12.0
+    dependencies:
+    - unit
+    - database
+    - api
+    requires_real_services: true
+    requires_real_llm: true
+    parallel_safe: false
+    max_parallel_instances: 1
+    network_intensive: true
+    memory_intensive: true
+    environment_scope: docker_local
+    tags:
+    - golden_path
+    - critical
+    - business_value
+    - end_to_end
+    - user_flow
+    - docker_only
+  golden_path_unit:
+    description: Golden path unit-level validation tests
+    priority: CRITICAL
+    category_type: functional
+    timeout_seconds: 300
+    estimated_duration_minutes: 4.0
+    dependencies:
+    - unit
+    requires_real_services: false
+    requires_real_llm: false
+    parallel_safe: true
+    max_parallel_instances: 4
+    tags:
+    - golden_path
+    - unit
+    - critical
+    - business_logic
+  golden_path_integration:
+    description: Golden path integration-level validation tests
+    priority: CRITICAL
+    category_type: integration
+    timeout_seconds: 600
+    estimated_duration_minutes: 8.0
+    dependencies:
+    - unit
+    - database
+    - api
+    requires_real_services: true
+    requires_real_llm: false
+    parallel_safe: true
+    max_parallel_instances: 2
+    network_intensive: true
+    tags:
+    - golden_path
+    - integration
+    - critical
+    - service_validation
+  golden_path_e2e:
+    description: Golden path end-to-end user flow tests (DOCKER SERVICES ONLY)
+    priority: CRITICAL
+    category_type: e2e
+    timeout_seconds: 1200
+    estimated_duration_minutes: 15.0
+    dependencies:
+    - unit
+    - database
+    - api
+    - websocket
+    requires_real_services: true
+    requires_real_llm: true
+    parallel_safe: false
+    max_parallel_instances: 1
+    network_intensive: true
+    memory_intensive: true
+    environment_scope: docker_local
+    conflicts:
+    - performance
+    tags:
+    - golden_path
+    - e2e
+    - critical
+    - user_flow
+    - business_value
+    - docker_only
+  golden_path_staging:
+    description: Golden path validation against REAL GCP STAGING environment
+    priority: CRITICAL
+    category_type: e2e
+    timeout_seconds: 1800
+    estimated_duration_minutes: 20.0
+    dependencies:
+    - unit
+    - database
+    requires_real_services: false
+    requires_real_llm: true
+    requires_staging_environment: true
+    parallel_safe: false
+    max_parallel_instances: 1
+    network_intensive: true
+    memory_intensive: true
+    environment_scope: gcp_staging_only
+    conflicts:
+    - performance
+    - golden_path
+    - golden_path_e2e
+    tags:
+    - golden_path
+    - staging
+    - gcp_cloud_run
+    - real_environment
+    - business_value
+    - production_like

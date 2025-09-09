@@ -181,7 +181,7 @@ class StagingTestBase:
             )
         return self.client
     
-    async def get_websocket_connection(self) -> websockets.WebSocketClientProtocol:
+    async def get_websocket_connection(self) -> websockets.ClientConnection:
         """Get WebSocket connection"""
         if not self.websocket:
             headers = self.config.get_websocket_headers()

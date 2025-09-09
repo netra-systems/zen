@@ -12,16 +12,20 @@ WAIT for service revision success
 
 1) Choose e2e tests with a focus on {$1 : all} on staging GCP (remote) as per tests\e2e\STAGING_E2E_TEST_INDEX.md
 Read recent logs in e2e/test_results/ for tests with ongoing issues or recently passed tests to do last.
-
 Save the choice of tests a fresh LOG = e2e testing log. in e2e/test_results/ folder (or create it)
 Literally output the named of the LOG.
+
+1.1) GITHUB ISSUE INTEGRATION
+Update existing issue or create new GITHUB ISSUE 
+using tools shown in GITHUB_INTEGRATION_IMPLEMENTATION_REPORT.md or if missing tool local `gh` command.
+Tag issue with label: "claude-code-generated-issue"
+Output to console the issue path
 
 2) Spawn a new sub agent to run real e2e staging tests with fail fast.
 Validate the test actually ran and is real e.g. real time running, real output that makes sense. If needed fix the test itself.
 Update the LOG with literal test output.
 This is aving the ACTUAL TEST OUTPUT prove it passes or fails in reports at each step. 
 Report failures back up to you
-
 
 3) For each failure, spawn a multi-agent team to do a five whys bug fix per claude.md (Read the GCP staging logs for errors too). MUST BE SSOT. MUST solve the REAL ROOT ROOT ROOT ISSUE.
 Update LOG with status.
@@ -37,7 +41,10 @@ do not introduce new problems.
 Update LOG with status.
 IF the change is false go back to step 3
 
-6) Git commit
+6)  GITHUB PR INTEGRATION
+Use github python tools or local (gh) commands.
+Git commit in conceptual batches. Then make a NEW PR (Pull Request).
+Cross link the prior generated issue.
 
 END PROCESS INSTRUCTIONS
 

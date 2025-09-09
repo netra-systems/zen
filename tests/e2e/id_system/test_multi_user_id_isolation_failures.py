@@ -36,9 +36,9 @@ from shared.types.core_types import (
     ensure_thread_id
 )
 from test_framework.ssot.e2e_auth_helper import (
-    create_test_user,
-    authenticate_test_user,
-    get_authenticated_session
+    E2EAuthHelper,
+    create_test_user_with_auth,
+    create_authenticated_user_context
 )
 
 

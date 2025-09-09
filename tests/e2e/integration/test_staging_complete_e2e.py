@@ -24,7 +24,7 @@ import pytest
 
 from test_framework.environment_markers import env, env_requires, staging_only
 from tests.e2e.integration.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.e2e.service_manager import RealServicesManager
+from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.staging_test_helpers import StagingTestResult
 from tests.e2e.test_environment_config import TestEnvironmentType
 

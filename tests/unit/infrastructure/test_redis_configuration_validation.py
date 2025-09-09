@@ -29,8 +29,8 @@ from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any, Optional
 
 from shared.isolated_environment import get_env, IsolatedEnvironment
-from netra_backend.app.redis_manager import RedisManager, RedisConnectionConfig
-from netra_backend.environments.backend_environment import BackendEnvironment
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.core.backend_environment import BackendEnvironment
 
 
 class TestRedisConfigurationValidation:

@@ -145,7 +145,10 @@ class CrossServiceConfigValidator:
         # Also check with central validator
         try:
             from shared.configuration.central_config_validator import check_config_before_deletion
-            can_delete, reason, affected = check_config_before_deletion(config_key)
+            result = check_config_before_deletion(config_key)
+            can_delete = result["safe_to_delete"]
+            reason = result["reason"]
+            affected = result["affected_services"]
             
             results.append(ServiceConfigCheck(
                 service_name="central_validator",
@@ -381,10 +384,66 @@ class CrossServiceConfigValidator:
             report_lines.append(f"  - {config}")
         
         return "\n".join(report_lines)
+    
+    @staticmethod
+    def validate_oauth_configs(environment: str) -> Dict[str, Any]:
+        """
+        Validate OAuth configuration for a specific environment.
+        
+        This method is required by unit tests for config regression prevention.
+        It validates that OAuth credentials are properly configured for the given environment.
+        
+        Args:
+            environment: The environment to validate (development, test, staging, production)
+            
+        Returns:
+            Dict with 'valid' (bool) and 'errors' (list) keys
+        """
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        errors = []
+        
+        try:
+            # Check for environment-specific OAuth credentials
+            client_id_key = f"GOOGLE_OAUTH_CLIENT_ID_{environment.upper()}"
+            client_secret_key = f"GOOGLE_OAUTH_CLIENT_SECRET_{environment.upper()}"
+            
+            client_id = env.get(client_id_key)
+            client_secret = env.get(client_secret_key)
+            
+            # Validate client ID
+            if not client_id:
+                errors.append(f"Missing {client_id_key} for {environment} environment")
+            elif client_id in ["", "your-client-id", "REPLACE_WITH"]:
+                errors.append(f"Invalid {client_id_key} - contains placeholder value")
+            
+            # Validate client secret
+            if not client_secret:
+                errors.append(f"Missing {client_secret_key} for {environment} environment")
+            elif client_secret in ["", "your-client-secret", "REPLACE_WITH"]:
+                errors.append(f"Invalid {client_secret_key} - contains placeholder value")
+            elif len(client_secret) < 10:
+                errors.append(f"Invalid {client_secret_key} - too short (minimum 10 characters)")
+            
+            # Additional validation for production/staging
+            if environment.lower() in ['staging', 'production']:
+                # Check that we're not using development credentials in production
+                dev_client_id = env.get("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
+                if client_id == dev_client_id and dev_client_id:
+                    errors.append(f"Security issue: {environment} environment is using development OAuth credentials")
+            
+        except Exception as e:
+            errors.append(f"OAuth validation error for {environment}: {str(e)}")
+        
+        return {
+            "valid": len(errors) == 0,
+            "errors": errors
+        }
 
 
 # Convenience functions for direct usage
-def validate_config_deletion_cross_service(config_key: str) -> Tuple[bool, str]:
+def validate_config_deletion_cross_service(config_key: str) -> Dict[str, Any]:
     """
     Check if a configuration can be deleted across all services.
     
@@ -392,15 +451,22 @@ def validate_config_deletion_cross_service(config_key: str) -> Tuple[bool, str]:
         config_key: Configuration key to check
         
     Returns:
-        (can_delete, impact_report)
+        Dict with 'safe' (bool) and 'affected_services' (list) keys
     """
     validator = CrossServiceConfigValidator()
     checks = validator.validate_config_deletion(config_key)
     
     can_delete = all(c.can_delete for c in checks)
-    report = validator.get_cross_service_impact_report(config_key)
+    affected_services = []
+    for check in checks:
+        affected_services.extend(check.affected_components)
+        if check.service_name not in affected_services:
+            affected_services.append(check.service_name)
     
-    return can_delete, report
+    return {
+        "safe": can_delete,
+        "affected_services": list(set(affected_services))  # Remove duplicates
+    }
 
 
 def get_cross_service_config_report() -> str:

@@ -77,7 +77,7 @@ from test_framework.ssot import (
 )
 
 # Import the actual UnifiedDockerManager for integration testing
-from test_framework.unified_docker_manager import UnifiedDockerManager, ServiceType, DockerEnvironment
+from test_framework.unified_docker_manager import UnifiedDockerManager, ServiceType, EnvironmentType
 from test_framework.environment_isolation import get_test_env_manager
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

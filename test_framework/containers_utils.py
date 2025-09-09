@@ -3,15 +3,26 @@ Testcontainers utility module for L3 integration tests.
 
 This module provides shared container management utilities for L3 tests
 that require real containerized services according to the testing specification.
+
+CRITICAL: Supports both Docker and no-Docker scenarios for --no-docker integration tests.
 """
 
 import logging
 import time
+import os
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional, Tuple
 
-from testcontainers.postgres import PostgresContainer
-from testcontainers.redis import RedisContainer
+# Conditional Docker imports for --no-docker compatibility
+try:
+    from testcontainers.postgres import PostgresContainer
+    from testcontainers.redis import RedisContainer
+    DOCKER_AVAILABLE = True
+except ImportError:
+    # Fallback for no-Docker scenarios
+    PostgresContainer = None
+    RedisContainer = None
+    DOCKER_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +42,21 @@ class ContainerHelper:
         database: str = "test_db",
         username: str = "test_user",
         password: str = "test_password"
-    ) -> Tuple[PostgresContainer, str]:
+    ) -> Tuple[Any, str]:
         """
         Start a PostgreSQL container for testing.
         
         Returns:
             Tuple of (container instance, connection URL)
         """
+        if not DOCKER_AVAILABLE:
+            # Fallback for no-Docker scenarios - return default test connection
+            logger.info("Docker not available - using default PostgreSQL connection")
+            mock_container = type('MockContainer', (), {})()
+            default_url = "postgresql+asyncpg://test_user:test_password@localhost:5434/netra_test"
+            self.container_urls["postgres"] = default_url
+            return mock_container, default_url
+        
         try:
             container = PostgresContainer(
                 image=image,
@@ -64,13 +83,21 @@ class ContainerHelper:
     def start_redis_container(
         self,
         image: str = "redis:7-alpine"
-    ) -> Tuple[RedisContainer, str]:
+    ) -> Tuple[Any, str]:
         """
         Start a Redis container for testing.
         
         Returns:
             Tuple of (container instance, connection URL)
         """
+        if not DOCKER_AVAILABLE:
+            # Fallback for no-Docker scenarios - return default test connection
+            logger.info("Docker not available - using default Redis connection")
+            mock_container = type('MockContainer', (), {})()
+            default_url = "redis://localhost:6381"  # Test Redis port
+            self.container_urls["redis"] = default_url
+            return mock_container, default_url
+        
         try:
             container = RedisContainer(image=image)
             container.start()
@@ -103,6 +130,16 @@ class ContainerHelper:
         Returns:
             Tuple of (container instance, connection URL)
         """
+        if not DOCKER_AVAILABLE:
+            # Fallback for no-Docker scenarios - return default test connection
+            logger.info("Docker not available - using default ClickHouse connection")
+            mock_container = type('MockContainer', (), {})()
+            http_url = "http://localhost:8123"
+            native_url = "clickhouse://localhost:9000/test_db"
+            self.container_urls["clickhouse_http"] = http_url
+            self.container_urls["clickhouse_native"] = native_url
+            return mock_container, native_url
+        
         try:
             from testcontainers.generic import GenericContainer
             
@@ -262,3 +299,51 @@ def get_test_redis_url() -> str:
     helper = ContainerHelper()
     _, url = helper.start_redis_container()
     return url
+
+
+def ensure_redis_container() -> None:
+    """
+    Ensure Redis container is available for testing.
+    
+    CRITICAL: For --no-docker integration tests, this is a no-op function
+    that assumes Redis is already running via Docker Compose on port 6381.
+    
+    For Docker-based tests, this would start a testcontainer if needed.
+    """
+    if not DOCKER_AVAILABLE:
+        # No-op for --no-docker scenarios - assume Redis is already running
+        logger.info("Docker not available - assuming Redis is running on localhost:6381")
+        return
+    
+    # Check if we're in a no-Docker environment by checking environment variable
+    if os.getenv("NO_DOCKER", "false").lower() == "true":
+        logger.info("NO_DOCKER flag set - skipping container startup")
+        return
+    
+    # For Docker-based tests, this could start a container if needed
+    # Currently no-op since tests use existing Docker Compose services
+    logger.info("Redis container management - using Docker Compose services")
+
+
+def ensure_backend_container() -> None:
+    """
+    Ensure backend container is available for testing.
+    
+    CRITICAL: For --no-docker integration tests, this is a no-op function
+    that assumes backend is already running via Docker Compose on port 8000.
+    
+    For Docker-based tests, this would start a testcontainer if needed.
+    """
+    if not DOCKER_AVAILABLE:
+        # No-op for --no-docker scenarios - assume backend is already running
+        logger.info("Docker not available - assuming backend is running on localhost:8000")
+        return
+    
+    # Check if we're in a no-Docker environment by checking environment variable
+    if os.getenv("NO_DOCKER", "false").lower() == "true":
+        logger.info("NO_DOCKER flag set - skipping container startup")
+        return
+    
+    # For Docker-based tests, this could start a container if needed  
+    # Currently no-op since tests use existing Docker Compose services
+    logger.info("Backend container management - using Docker Compose services")

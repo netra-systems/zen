@@ -49,7 +49,7 @@ from test_framework.http_client import (
     create_backend_config,
 )
 from test_framework.http_client import UnifiedHTTPClient as RealHTTPClient
-from tests.e2e.service_manager import (
+from tests.e2e.real_services_manager import (
     RealServicesManager as create_real_services_manager,
 )
 

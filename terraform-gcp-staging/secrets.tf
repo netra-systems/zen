@@ -4,13 +4,13 @@
 resource "google_secret_manager_secret" "database_url" {
   secret_id = "${var.environment}-database-url"
   project   = var.project_id
-  
+
   replication {
     auto {}
   }
-  
+
   labels = var.labels
-  
+
   depends_on = [google_project_service.required_apis]
 }
 
@@ -23,13 +23,13 @@ resource "google_secret_manager_secret_version" "database_url" {
 resource "google_secret_manager_secret" "database_url_direct" {
   secret_id = "${var.environment}-database-url-direct"
   project   = var.project_id
-  
+
   replication {
     auto {}
   }
-  
+
   labels = var.labels
-  
+
   depends_on = [google_project_service.required_apis]
 }
 
@@ -42,13 +42,13 @@ resource "google_secret_manager_secret_version" "database_url_direct" {
 resource "google_secret_manager_secret" "redis_url" {
   secret_id = "${var.environment}-redis-url"
   project   = var.project_id
-  
+
   replication {
     auto {}
   }
-  
+
   labels = var.labels
-  
+
   depends_on = [google_project_service.required_apis]
 }
 
@@ -66,13 +66,13 @@ resource "random_password" "jwt_secret" {
 resource "google_secret_manager_secret" "jwt_secret" {
   secret_id = "${var.environment}-jwt-secret"
   project   = var.project_id
-  
+
   replication {
     auto {}
   }
-  
+
   labels = var.labels
-  
+
   depends_on = [google_project_service.required_apis]
 }
 
@@ -86,7 +86,7 @@ resource "google_secret_manager_secret_iam_member" "database_url_access" {
   secret_id = google_secret_manager_secret.database_url.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-  
+
   depends_on = [google_secret_manager_secret.database_url]
 }
 
@@ -94,7 +94,7 @@ resource "google_secret_manager_secret_iam_member" "redis_url_access" {
   secret_id = google_secret_manager_secret.redis_url.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-  
+
   depends_on = [google_secret_manager_secret.redis_url]
 }
 
@@ -102,6 +102,6 @@ resource "google_secret_manager_secret_iam_member" "jwt_secret_access" {
   secret_id = google_secret_manager_secret.jwt_secret.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
-  
+
   depends_on = [google_secret_manager_secret.jwt_secret]
 }

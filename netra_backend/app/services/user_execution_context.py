@@ -223,14 +223,63 @@ class UserExecutionContext:
                 )
         
         # Validate thread_id consistency with run_id if extractable
+        # FIVE WHYS FIX: Updated validation logic to handle UnifiedIdGenerator patterns
         if hasattr(UnifiedIDManager, 'extract_thread_id'):
             extracted_thread_id = UnifiedIDManager.extract_thread_id(self.run_id)
-            if extracted_thread_id and extracted_thread_id != self.thread_id:
-                logger.warning(
-                    f"Thread ID mismatch: run_id contains '{extracted_thread_id}' "
-                    f"but thread_id is '{self.thread_id}'. This may indicate "
-                    "inconsistent ID generation."
-                )
+            if extracted_thread_id:
+                # Check for consistency based on ID generation pattern
+                is_consistent = self._validate_thread_run_id_consistency(extracted_thread_id, self.thread_id, self.run_id)
+                if not is_consistent:
+                    logger.warning(
+                        f"Thread ID mismatch: run_id '{self.run_id}' extracted to '{extracted_thread_id}' "
+                        f"but thread_id is '{self.thread_id}'. This may indicate "
+                        "inconsistent ID generation."
+                    )
+    
+    def _validate_thread_run_id_consistency(self, extracted_thread_id: str, actual_thread_id: str, run_id: str) -> bool:
+        """
+        Validate thread_id and run_id consistency with SSOT pattern support.
+        
+        FIVE WHYS FIX: Handles both UnifiedIdGenerator and UnifiedIDManager patterns
+        to prevent false positive thread ID mismatch warnings.
+        
+        Args:
+            extracted_thread_id: Thread ID extracted from run_id
+            actual_thread_id: Actual thread_id field value
+            run_id: Original run_id for pattern detection
+            
+        Returns:
+            True if IDs are consistent according to their generation pattern
+        """
+        # Pattern 1: UnifiedIdGenerator pattern
+        # run_id="websocket_factory_1757372478799", thread_id="thread_websocket_factory_1757372478799_528_584ef8a5"
+        # In this case, thread_id should contain the run_id as a substring
+        if run_id.startswith(('websocket_factory_', 'context_', 'agent_')):
+            # For UnifiedIdGenerator: thread_id should contain run_id as substring
+            is_consistent = run_id in actual_thread_id and actual_thread_id.startswith('thread_')
+            if is_consistent:
+                logger.debug(f"UnifiedIdGenerator pattern validated: run_id '{run_id}' found in thread_id '{actual_thread_id}'")
+            return is_consistent
+        
+        # Pattern 2: UnifiedIDManager pattern  
+        # run_id="run_thread123_456_abcd", extracted="thread123", thread_id="thread123"
+        # In this case, extracted_thread_id should exactly match actual_thread_id
+        if extracted_thread_id == actual_thread_id:
+            logger.debug(f"UnifiedIDManager pattern validated: exact match '{extracted_thread_id}'")
+            return True
+        
+        # Pattern 3: Legacy/fallback patterns - be more lenient
+        # Check if there's any reasonable relationship between the IDs
+        if extracted_thread_id in actual_thread_id or actual_thread_id in extracted_thread_id:
+            logger.debug(f"Legacy pattern validated: relationship found between '{extracted_thread_id}' and '{actual_thread_id}'")
+            return True
+        
+        # If no pattern matches, log the specific mismatch for debugging
+        logger.debug(
+            f"ID consistency check failed: extracted='{extracted_thread_id}', "
+            f"actual='{actual_thread_id}', run_id='{run_id}'"
+        )
+        return False
     
     def _validate_metadata_isolation(self) -> None:
         """Ensure metadata dictionaries are properly isolated."""
@@ -323,6 +372,90 @@ class UserExecutionContext:
             agent_context=agent_context or {},
             audit_metadata=audit_metadata or {}
         )
+    
+    @classmethod
+    def from_websocket_request(
+        cls,
+        user_id: str,
+        websocket_client_id: Optional[str] = None,
+        operation: str = "websocket_session"
+    ) -> 'UserExecutionContext':
+        """
+        SSOT factory method for WebSocket context creation with consistent ID generation.
+        
+        This is the Single Source of Truth for WebSocket-related UserExecutionContext creation.
+        It ensures consistent thread_id generation patterns across all WebSocket components,
+        preventing the isolation key mismatches that cause resource leak issues.
+        
+        Business Value Justification (BVJ):
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Eliminate WebSocket resource leaks causing user connection failures
+        - Value Impact: Ensures reliable chat connections and prevents service degradation
+        - Strategic Impact: CRITICAL - Prevents cascade failures in real-time user interactions
+        
+        Args:
+            user_id: User identifier from authentication
+            websocket_client_id: Optional WebSocket connection ID (auto-generated if None)
+            operation: Operation type for ID generation consistency (default: "websocket_session")
+            
+        Returns:
+            New UserExecutionContext with consistent SSOT ID generation
+            
+        Raises:
+            InvalidContextError: If user_id is invalid or ID generation fails
+        """
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
+            raise InvalidContextError(
+                f"user_id must be a non-empty string for WebSocket context, got: {user_id!r}"
+            )
+        
+        # Use SSOT ID generation for consistent patterns
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        
+        try:
+            # Generate consistent IDs using SSOT pattern
+            thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+                user_id=user_id,
+                operation=operation
+            )
+            
+            # Generate websocket_client_id if not provided
+            if websocket_client_id is None:
+                websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id)
+                
+            logger.info(
+                f"SSOT WebSocket Context: Created for user {user_id[:8]}... with "
+                f"thread_id={thread_id}, websocket_client_id={websocket_client_id}"
+            )
+            
+            return cls(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                request_id=request_id,
+                websocket_client_id=websocket_client_id,
+                agent_context={
+                    'source': 'websocket_ssot',
+                    'operation': operation,
+                    'created_via': 'from_websocket_request'
+                },
+                audit_metadata={
+                    'context_source': 'websocket_ssot',
+                    'id_generation_method': 'UnifiedIdGenerator',
+                    'operation_type': operation,
+                    'isolation_key_compatible': True
+                }
+            )
+            
+        except Exception as id_error:
+            logger.error(
+                f"SSOT ID generation failed for WebSocket context creation "
+                f"(user_id={user_id[:8]}..., operation={operation}): {id_error}"
+            )
+            raise InvalidContextError(
+                f"WebSocket context creation failed due to ID generation error: {id_error}. "
+                f"This indicates a system configuration issue with SSOT ID generation."
+            ) from id_error
     
     @classmethod 
     def from_fastapi_request(
@@ -940,10 +1073,29 @@ def validate_user_context(context: Any) -> UserExecutionContext:
         TypeError: If context is not a UserExecutionContext
         InvalidContextError: If context validation fails
     """
+    # Accept both UserExecutionContext and StronglyTypedUserExecutionContext for SSOT compatibility
     if not isinstance(context, UserExecutionContext):
-        raise TypeError(
-            f"Expected UserExecutionContext, got: {type(context)}"
-        )
+        # Check if it's a StronglyTypedUserExecutionContext from the SSOT auth helper
+        try:
+            from shared.types.execution_types import StronglyTypedUserExecutionContext
+            if isinstance(context, StronglyTypedUserExecutionContext):
+                # Convert to UserExecutionContext for compatibility
+                converted_context = UserExecutionContext(
+                    user_id=context.user_id,
+                    thread_id=context.thread_id,
+                    run_id=context.run_id,
+                    request_id=context.request_id
+                )
+                logger.debug(f"Converted StronglyTypedUserExecutionContext to UserExecutionContext for user {context.user_id}")
+                context = converted_context
+            else:
+                raise TypeError(
+                    f"Expected UserExecutionContext or StronglyTypedUserExecutionContext, got: {type(context)}"
+                )
+        except ImportError:
+            raise TypeError(
+                f"Expected UserExecutionContext, got: {type(context)}"
+            )
     
     # Verify isolation on each validation
     context.verify_isolation()

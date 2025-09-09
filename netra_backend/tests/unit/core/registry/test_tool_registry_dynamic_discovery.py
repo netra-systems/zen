@@ -39,8 +39,8 @@ ToolRegistry = UniversalRegistry[BaseTool]
 class MockAnalyticsTool(BaseTool):
     """Mock analytics tool for registry testing."""
     
-    name = "analytics_tool"
-    description = "Analyzes data and generates reports"
+    name: str = "analytics_tool"
+    description: str = "Analyzes data and generates reports"
     
     def __init__(self, tool_id: str = None, config: Dict[str, Any] = None):
         super().__init__()
@@ -63,8 +63,8 @@ class MockAnalyticsTool(BaseTool):
 class MockDataTool(BaseTool):
     """Mock data processing tool for registry testing."""
     
-    name = "data_tool" 
-    description = "Processes and transforms data"
+    name: str = "data_tool" 
+    description: str = "Processes and transforms data"
     
     def __init__(self, processing_type: str = "standard"):
         super().__init__()
@@ -84,8 +84,8 @@ class MockDataTool(BaseTool):
 class MockUserSpecificTool(BaseTool):
     """Mock tool that requires user context for creation."""
     
-    name = "user_specific_tool"
-    description = "Tool that operates on user-specific data"
+    name: str = "user_specific_tool"
+    description: str = "Tool that operates on user-specific data"
     
     def __init__(self, user_context: UserExecutionContext):
         super().__init__()

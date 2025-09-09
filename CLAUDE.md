@@ -20,6 +20,9 @@ CREATION OF "SIMPLE" OR "STANDALONE" ETC. TYPE FILES IS STRICTLY FORBIDDEN.
 CLAUDE.MD (THIS FILE) KNOWS BEST! NEVER ATTEMPT TO "OVERRIDE". NO EXCEPTIONS.
 ** ULTRA ULTRA CRITICAL **
 
+CONTEXT COMPACT
+WHEN YOU GET TO 50% OF YOUR CONTEXT WINDOW USAGE YOU MUST RUN /COMPACT
+
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
@@ -484,7 +487,7 @@ The following events MUST be sent during agent execution to enable meaningful AI
 
 **Key Integration Points:**
 - `AgentRegistry.set_websocket_manager()` MUST enhance tool dispatcher
-- `ExecutionEngine` MUST have WebSocketNotifier initialized
+- `ExecutionEngine` MUST have AgentWebSocketBridge initialized
 - `EnhancedToolExecutionEngine` MUST wrap tool execution
 - See [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
 

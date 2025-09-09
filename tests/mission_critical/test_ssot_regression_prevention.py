@@ -27,7 +27,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Type, Union
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 # NO MOCKS - Real services only for mission critical isolation testing
 
 import pytest

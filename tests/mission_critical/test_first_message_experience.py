@@ -297,8 +297,8 @@ class TestFirstMessageExperience:
         
         if self.is_staging:
             # Use staging URLs
-            self.backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-            self.ws_url = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
+            self.backend_url = "https://api.staging.netrasystems.ai"
+            self.ws_url = "wss://api.staging.netrasystems.ai/ws"
             # Initialize JWT helper for staging authentication
             self.jwt_helper = JWTTestHelper()
         else:
@@ -1041,8 +1041,8 @@ class TestFirstMessagePerformance:
         env_name = os.environ.get("TEST_ENV", "development")
         if env_name == "staging":
             # Use staging URLs
-            self.backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-            self.ws_url = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
+            self.backend_url = "https://api.staging.netrasystems.ai"
+            self.ws_url = "wss://api.staging.netrasystems.ai/ws"
         else:
             # Use local/development URLs
             self.backend_url = self.env.get("BACKEND_URL", "http://localhost:8000")

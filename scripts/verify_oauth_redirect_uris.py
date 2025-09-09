@@ -53,8 +53,8 @@ def main():
                 "https://app.staging.netrasystems.ai/auth/callback",
                 # Legacy Cloud Run URLs (can be removed after migration)
                 "https://netra-auth-service-cpbplcdz7q-uc.a.run.app/auth/google/callback",
-                "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app/auth/google/callback",
-                "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app/auth/callback",
+                "https://api.staging.netrasystems.ai/auth/google/callback",
+                "https://app.staging.netrasystems.ai/auth/callback",
             ]
         },
         "Production (Future)": {
@@ -122,8 +122,8 @@ Configure your OAuth 2.0 Client ID with the redirect URIs above
     service_table.add_column("URL", style="green")
     
     service_table.add_row("Auth Service", "https://netra-auth-service-cpbplcdz7q-uc.a.run.app")
-    service_table.add_row("Backend API", "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app")
-    service_table.add_row("Frontend", "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app")
+    service_table.add_row("Backend API", "https://api.staging.netrasystems.ai")
+    service_table.add_row("Frontend", "https://app.staging.netrasystems.ai")
     
     console.print(service_table)
     
@@ -133,8 +133,8 @@ Configure your OAuth 2.0 Client ID with the redirect URIs above
         "environments": environments,
         "staging_urls": {
             "auth_service": "https://netra-auth-service-cpbplcdz7q-uc.a.run.app",
-            "backend": "https://netra-backend-staging-cpbplcdz7q-uc.a.run.app",
-            "frontend": "https://netra-frontend-staging-cpbplcdz7q-uc.a.run.app"
+            "backend": "https://api.staging.netrasystems.ai",
+            "frontend": "https://app.staging.netrasystems.ai"
         }
     }
     

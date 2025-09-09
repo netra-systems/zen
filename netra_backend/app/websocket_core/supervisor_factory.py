@@ -15,9 +15,16 @@ Key Features:
 - Delegates to core supervisor creation logic for consistency
 - Provides WebSocket-specific validation and error handling
 - Maintains proper connection lifecycle management
+- Registry cleanup on WebSocket disconnect to prevent resource leaks
+
+CRITICAL FIX: This module now includes proper registry cleanup to prevent
+the "modelmetaclass already registered" error by cleaning up tool registries
+when WebSocket connections are closed.
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Dict, Set
+import weakref
+import threading
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
@@ -30,6 +37,12 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 logger = central_logger.get_logger(__name__)
+
+# CRITICAL FIX: Global registry tracking for cleanup
+# This prevents the "modelmetaclass already registered" error by tracking
+# and cleaning up tool registries when WebSocket connections close
+_connection_registries: Dict[str, Set[weakref.ref]] = {}
+_connection_lock = threading.Lock()
 
 
 async def get_websocket_scoped_supervisor(
@@ -117,6 +130,10 @@ async def get_websocket_scoped_supervisor(
             tool_dispatcher=tool_dispatcher,  # Now properly created or legacy
             tool_classes=components.get("tool_classes")  # Pass for UserContext pattern
         )
+        
+        # CRITICAL FIX: Track registries for cleanup on disconnect
+        if tool_dispatcher and hasattr(tool_dispatcher, 'registry'):
+            _track_registry_for_cleanup(context.connection_id, tool_dispatcher.registry)
         
         logger.info(
             f"✅ Created WebSocket-scoped SupervisorAgent: "
@@ -395,4 +412,110 @@ def get_websocket_supervisor_health() -> dict:
                 "status": "unhealthy",
                 "error": str(e)
             }
+        }
+
+
+def _track_registry_for_cleanup(connection_id: str, registry) -> None:
+    """Track registry for cleanup when WebSocket connection closes.
+    
+    CRITICAL FIX: This prevents the "modelmetaclass already registered" error
+    by tracking tool registries associated with WebSocket connections and
+    cleaning them up when connections close.
+    
+    Args:
+        connection_id: WebSocket connection ID
+        registry: Registry instance to track
+    """
+    global _connection_registries, _connection_lock
+    
+    try:
+        with _connection_lock:
+            if connection_id not in _connection_registries:
+                _connection_registries[connection_id] = set()
+            
+            # Use weak reference to avoid memory leaks
+            registry_ref = weakref.ref(registry)
+            _connection_registries[connection_id].add(registry_ref)
+            
+            logger.debug(f"🔍 Tracking registry for connection {connection_id}")
+            
+    except Exception as e:
+        logger.error(f"Failed to track registry for cleanup: {e}")
+
+
+def cleanup_websocket_registries(connection_id: str) -> None:
+    """Clean up tool registries for a WebSocket connection.
+    
+    CRITICAL FIX: Call this function when a WebSocket connection closes
+    to prevent the "modelmetaclass already registered" error on reconnection.
+    
+    Args:
+        connection_id: WebSocket connection ID to clean up
+    """
+    global _connection_registries, _connection_lock
+    
+    try:
+        with _connection_lock:
+            if connection_id not in _connection_registries:
+                logger.debug(f"No registries to clean up for connection {connection_id}")
+                return
+            
+            registries_to_clean = _connection_registries[connection_id]
+            cleaned_count = 0
+            
+            for registry_ref in registries_to_clean.copy():
+                registry = registry_ref()  # Get the actual registry from weak reference
+                if registry is not None:
+                    try:
+                        # Clear the registry
+                        registry.clear()
+                        cleaned_count += 1
+                        logger.debug(f"🧹 Cleaned registry {registry.name}")
+                    except Exception as e:
+                        logger.warning(f"Failed to clean registry {getattr(registry, 'name', 'unknown')}: {e}")
+                else:
+                    # Registry was already garbage collected
+                    registries_to_clean.discard(registry_ref)
+            
+            # Remove the connection from tracking
+            del _connection_registries[connection_id]
+            
+            logger.info(f"✅ Cleaned up {cleaned_count} registries for WebSocket connection {connection_id}")
+            
+    except Exception as e:
+        logger.error(f"Failed to cleanup registries for connection {connection_id}: {e}")
+
+
+def get_registry_cleanup_status() -> dict:
+    """Get status of registry cleanup system.
+    
+    Returns:
+        dict: Status information for diagnostics
+    """
+    global _connection_registries, _connection_lock
+    
+    try:
+        with _connection_lock:
+            active_connections = len(_connection_registries)
+            total_tracked_registries = sum(len(registries) for registries in _connection_registries.values())
+            
+            # Check for dead references
+            dead_refs = 0
+            for connection_id, registries in _connection_registries.items():
+                for registry_ref in registries.copy():
+                    if registry_ref() is None:
+                        dead_refs += 1
+                        registries.discard(registry_ref)
+            
+            return {
+                "active_connections": active_connections,
+                "total_tracked_registries": total_tracked_registries,
+                "dead_references_cleaned": dead_refs,
+                "status": "healthy" if active_connections < 1000 else "warning"  # Warn if too many connections
+            }
+            
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e)
         }

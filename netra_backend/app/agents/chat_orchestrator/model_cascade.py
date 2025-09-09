@@ -218,16 +218,32 @@ class ModelCascade:
             
         except Exception as e:
             logger.error(f"Cascade execution failed: {e}")
-            # Return fallback response
-            return {
-                "response": "I apologize, but I encountered an error processing your request.",
-                "model_selected": "fallback",
-                "quality_score": 0.3,
-                "total_cost": 0.001,
-                "latency_ms": (time.time() - start_time) * 1000,
-                "cache_hit": False,
-                "selection_reasoning": f"Fallback due to error: {str(e)}"
-            }
+            # Use UnifiedServiceInitializer for transparent error handling
+            from netra_backend.app.services.service_initialization.unified_service_initializer import (
+                UnifiedServiceInitializer, UnifiedServiceException
+            )
+            from netra_backend.app.schemas.shared_types import ErrorContext
+            
+            # Create transparent error context instead of mock response
+            error_context = ErrorContext(
+                user_id=metadata.get("user_id", "unknown"),
+                request_id=metadata.get("request_id", "unknown"), 
+                service_name="model_cascade",
+                error_type="llm_generation_failure"
+            )
+            
+            # Raise transparent exception instead of returning mock response
+            raise UnifiedServiceException(
+                message=f"Model cascade service temporarily unavailable: {str(e)}",
+                error_context=error_context,
+                should_retry=True,
+                estimated_recovery_time_seconds=120,
+                alternative_suggestions=[
+                    "Try a simpler query",
+                    "Check back in a few minutes", 
+                    "Contact support if this persists"
+                ]
+            )
     
     async def execute_with_escalation_tracking(
         self,
@@ -307,14 +323,30 @@ class ModelCascade:
                 "cumulative_cost": sum(h["cost"] for h in escalation_history)
             }
         
-        # Fallback
-        return {
-            "final_response": "I apologize, but I couldn't generate a satisfactory response.",
-            "escalation_history": [],
-            "total_attempts": attempts,
-            "final_quality_score": 0.2,
-            "cumulative_cost": 0.001
-        }
+        # Transparent failure instead of mock response
+        from netra_backend.app.services.service_initialization.unified_service_initializer import (
+            UnifiedServiceException
+        )
+        from netra_backend.app.schemas.shared_types import ErrorContext
+        
+        error_context = ErrorContext(
+            user_id="unknown",  # TODO: pass user_id through parameters
+            request_id="unknown",
+            service_name="model_cascade_escalation",
+            error_type="quality_escalation_failure"
+        )
+        
+        raise UnifiedServiceException(
+            message=f"Unable to generate satisfactory response after {attempts} escalation attempts",
+            error_context=error_context,
+            should_retry=True,
+            estimated_recovery_time_seconds=300,
+            alternative_suggestions=[
+                "Try rephrasing your query",
+                "Break complex requests into simpler parts",
+                "Contact support for complex analysis needs"
+            ]
+        )
     
     def enable_semantic_cache(self, similarity_threshold: float = 0.95, ttl_seconds: int = 300) -> None:
         """Enable semantic caching with specified parameters."""
@@ -461,14 +493,30 @@ class ModelCascade:
             
         except Exception as e:
             logger.error(f"Adaptive execution failed: {e}")
-            return {
-                "response": "Error in adaptive execution",
-                "model_selected": model_name,
-                "routing_reason": "error_fallback",
-                "exploration": is_exploration,
-                "performance_prediction": predicted_performance,
-                "actual_performance": {"quality": 0.1, "latency_ms": 0, "cost": 0}
-            }
+            # Transparent failure instead of mock response
+            from netra_backend.app.services.service_initialization.unified_service_initializer import (
+                UnifiedServiceException
+            )
+            from netra_backend.app.schemas.shared_types import ErrorContext
+            
+            error_context = ErrorContext(
+                user_id="unknown",  # TODO: pass user_id through parameters
+                request_id="unknown",
+                service_name="model_cascade_adaptive",
+                error_type="adaptive_routing_failure"
+            )
+            
+            raise UnifiedServiceException(
+                message=f"Adaptive model routing failed: {str(e)}",
+                error_context=error_context,
+                should_retry=True,
+                estimated_recovery_time_seconds=60,
+                alternative_suggestions=[
+                    "Try with manual model selection",
+                    "Use standard execution instead of adaptive",
+                    "Retry in a few moments"
+                ]
+            )
     
     async def update_routing_performance(
         self,

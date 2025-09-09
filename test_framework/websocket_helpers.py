@@ -633,9 +633,41 @@ class MockWebSocket:
         text = await self.receive_text()
         return json.loads(text)
         
-    async def close(self, code: int = 1000):
-        """Mock close method"""
+    async def accept(self):
+        """Mock accept method for WebSocket connection.
+        
+        This method is required for proper WebSocket handshake simulation.
+        Sets the connection state to CONNECTED and initializes connection info.
+        """
+        if self.should_disconnect:
+            raise WebSocketDisconnect(code=1000, reason="Connection rejected")
+        
+        self.state = WebSocketState.CONNECTED
+        
+        # Initialize connection metadata
+        if not hasattr(self, 'connection_time'):
+            import time
+            self.connection_time = time.time()
+        
+        # Log connection acceptance for debugging
+        try:
+            from netra_backend.app.logging_config import central_logger
+            logger = central_logger.get_logger("mock_websocket")
+            logger.debug(f"MockWebSocket accepted connection for user {self.user_id}")
+        except ImportError:
+            pass  # Silently continue if logging not available
+
+    async def close(self, code: int = 1000, reason: str = ""):
+        """Mock close method with optional reason parameter"""
         self.state = WebSocketState.DISCONNECTED
+        
+        # Log disconnection for debugging
+        try:
+            from netra_backend.app.logging_config import central_logger
+            logger = central_logger.get_logger("mock_websocket")
+            logger.debug(f"MockWebSocket closed connection for user {self.user_id} (code: {code}, reason: {reason})")
+        except ImportError:
+            pass  # Silently continue if logging not available
         
     def simulate_disconnect(self):
         """Simulate connection disconnect"""

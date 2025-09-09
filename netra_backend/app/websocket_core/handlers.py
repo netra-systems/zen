@@ -111,12 +111,68 @@ class ConnectionHandler(BaseMessageHandler):
                 logger.warning(f"Unexpected connection message type: {message.type}")
                 return False
             
+            # CRITICAL FIX: Fail-fast response validation to prevent silent failures
+            # Root cause: Handler returns True even when send fails, masking connection issues
             if is_websocket_connected(websocket):
-                await websocket.send_json(response.model_dump(mode='json'))
-            return True
+                try:
+                    # Use safe WebSocket send with retry logic for better reliability
+                    from netra_backend.app.websocket_core.utils import safe_websocket_send
+                    send_success = await safe_websocket_send(websocket, response.model_dump(mode='json'))
+                    if not send_success:
+                        logger.warning(f"Failed to send connection response to user {user_id} - WebSocket send failed")
+                        return False
+                    
+                    logger.debug(f"Connection response sent successfully to user {user_id}")
+                    return True
+                except Exception as send_error:
+                    logger.error(f"Exception during WebSocket send to user {user_id}: {send_error}")
+                    return False
+            else:
+                logger.warning(f"Cannot send connection response to user {user_id} - WebSocket not connected")
+                return False
             
         except Exception as e:
-            logger.error(f"Error in ConnectionHandler for user {user_id}: {e}")
+            # CRITICAL FIX: Enhanced error logging with full exception context and traceback
+            # Root cause: Line 119 truncated exception details masking real issues
+            import traceback
+            from shared.isolated_environment import get_env
+            
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            # Enhanced error context for GCP Cloud Run debugging
+            error_context = {
+                "user_id": user_id,
+                "message_type": str(message.type),
+                "websocket_state": "unknown",
+                "environment": environment,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "full_traceback": traceback.format_exc()
+            }
+            
+            # Try to get WebSocket state for debugging
+            try:
+                if hasattr(websocket, 'client_state'):
+                    error_context["websocket_state"] = websocket.client_state.name if hasattr(websocket.client_state, 'name') else str(websocket.client_state)
+                elif hasattr(websocket, 'application_state'):
+                    error_context["websocket_state"] = websocket.application_state.name if hasattr(websocket.application_state, 'name') else str(websocket.application_state)
+            except Exception:
+                error_context["websocket_state"] = "state_check_failed"
+            
+            # Environment-specific logging
+            if environment in ["staging", "production"]:
+                logger.error(f"🚨 CRITICAL ConnectionHandler failure in {environment} for user {user_id}")
+                logger.error(f"Error type: {error_context['error_type']}")
+                logger.error(f"WebSocket state: {error_context['websocket_state']}")
+                logger.error(f"Message type: {error_context['message_type']}")
+                logger.error(f"Full error: {error_context['error_message']}")
+                logger.error(f"Stack trace: {error_context['full_traceback']}")
+            else:
+                logger.error(f"ConnectionHandler error for user {user_id}: {error_context}")
+            
+            # CRITICAL FIX: Return False to indicate failure (fail-fast pattern)
+            # Root cause: Silent failures where handler returns True even when failing
             return False
 
 
@@ -519,8 +575,8 @@ class UserMessageHandler(BaseMessageHandler):
     
     def __init__(self):
         super().__init__([
-            MessageType.USER_MESSAGE,
-            MessageType.CHAT,
+            # USER_MESSAGE and CHAT are handled by AgentMessageHandler for agent execution
+            # This handler only handles system and thread-related messages
             MessageType.SYSTEM_MESSAGE,
             MessageType.AGENT_RESPONSE,
             MessageType.AGENT_PROGRESS,
@@ -544,9 +600,7 @@ class UserMessageHandler(BaseMessageHandler):
             logger.info(f"Processing {message.type} from {user_id}: {message.payload.get('content', '')[:100]}")
             
             # Handle different message subtypes
-            if message.type in [MessageType.USER_MESSAGE, MessageType.CHAT]:
-                return await self._handle_user_message(user_id, websocket, message)
-            elif message.type == MessageType.AGENT_RESPONSE:
+            if message.type == MessageType.AGENT_RESPONSE:
                 return await self._handle_agent_response(user_id, websocket, message)
             else:
                 # Generic handling

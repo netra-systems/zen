@@ -133,7 +133,7 @@ class EnhancedStagingWebSocketEventValidator:
     def __init__(self):
         self.staging_websocket_url = "wss://api.staging.netrasystems.ai/ws"
         self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-        self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+        self.staging_backend_url = "https://api.staging.netrasystems.ai"
         
         self.authentication_metrics = {
             "successful_signups": 0,

@@ -30,7 +30,7 @@ import pytest
 # Import websockets with fallback handling
 try:
     import websockets
-    from websockets.legacy.client import WebSocketClientProtocol
+    WebSocketClientProtocol = websockets.ClientConnection
 except ImportError:
     websockets = None
     WebSocketClientProtocol = None

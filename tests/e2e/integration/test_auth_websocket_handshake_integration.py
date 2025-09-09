@@ -22,7 +22,8 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-from tests.e2e.token_lifecycle_helpers import TokenLifecycleManager
+# DISABLED: TokenLifecycleManager - module not found, needs implementation  
+# from tests.e2e.token_lifecycle_helpers import TokenLifecycleManager
 from tests.e2e.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
 from test_framework.http_client import ClientConfig, ConnectionState
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient

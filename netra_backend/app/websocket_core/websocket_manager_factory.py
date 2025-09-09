@@ -56,7 +56,12 @@ logger = central_logger.get_logger(__name__)
 
 class FactoryInitializationError(Exception):
     """Raised when WebSocket manager factory initialization fails due to SSOT violations or other configuration issues."""
-    pass
+    
+    def __init__(self, message: str, user_id: Optional[str] = None, error_code: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
+        super().__init__(message)
+        self.user_id = user_id
+        self.error_code = error_code
+        self.details = details or {}
 
 
 def create_defensive_user_execution_context(
@@ -65,26 +70,23 @@ def create_defensive_user_execution_context(
     fallback_context: Optional[Dict[str, Any]] = None
 ) -> UserExecutionContext:
     """
-    CRITICAL FIX: Create defensive UserExecutionContext with validation and fallback.
+    CRITICAL FIX: Create defensive UserExecutionContext using SSOT factory method.
     
-    This function creates a properly formatted UserExecutionContext with defensive
-    measures to prevent validation failures that cause 1011 WebSocket errors.
+    This function creates a properly formatted UserExecutionContext using the new
+    SSOT from_websocket_request() method to ensure consistent ID generation patterns
+    and prevent WebSocket resource leaks.
     
     Args:
         user_id: User ID (required, validated)
         websocket_client_id: WebSocket client ID (optional)
-        fallback_context: Fallback context data if available
+        fallback_context: Fallback context data if available (deprecated - for compatibility)
         
     Returns:
-        Validated UserExecutionContext instance
+        Validated UserExecutionContext instance with SSOT ID patterns
         
     Raises:
         ValueError: If user_id is invalid or context creation fails
     """
-    import uuid
-    from datetime import datetime, timezone
-    from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-    
     try:
         # CRITICAL FIX: Validate user_id defensively
         if not user_id or not isinstance(user_id, str) or not user_id.strip():
@@ -93,46 +95,27 @@ def create_defensive_user_execution_context(
         
         user_id = user_id.strip()
         
-        # Generate unique identifiers using SSOT ID generator
+        # SSOT FIX: Use the new SSOT factory method for consistent ID generation
         try:
-            thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+            user_context = UserExecutionContext.from_websocket_request(
                 user_id=user_id,
+                websocket_client_id=websocket_client_id,
                 operation="websocket_factory"
             )
-        except Exception as id_gen_error:
-            logger.warning(f"UnifiedIdGenerator failed, using UnifiedIDManager fallback: {id_gen_error}")
-            # Fallback to UnifiedIDManager instead of raw UUID
-            id_manager = UnifiedIDManager()
-            thread_id = id_manager.generate_id(IDType.THREAD, prefix="ws_thread", context={"user_id": user_id})
-            run_id = id_manager.generate_id(IDType.EXECUTION, prefix="ws_run", context={"user_id": user_id})
-            request_id = id_manager.generate_id(IDType.REQUEST, prefix="ws_req", context={"user_id": user_id})
-        
-        # Handle websocket_client_id defensively
-        if websocket_client_id is None:
-            # Generate client ID using UnifiedIDManager
-            id_manager = UnifiedIDManager()
-            websocket_client_id = id_manager.generate_id(
-                IDType.WEBSOCKET,
-                prefix="ws_client",
-                context={"user_id": user_id, "component": "client_connection"}
+            
+            logger.debug(
+                f"[SSOT OK] Created SSOT UserExecutionContext for user {user_id[:8]}... "
+                f"using from_websocket_request() factory method"
             )
-            logger.debug(f"Generated websocket_client_id: {websocket_client_id}")
-        
-        # Create UserExecutionContext with validated inputs
-        user_context = UserExecutionContext(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            request_id=request_id,
-            websocket_client_id=websocket_client_id
-        )
-        
-        # CRITICAL FIX: Validate the created context to ensure it meets SSOT requirements
-        # CYCLE 4 FIX: Use staging-safe validation for environment accommodation
-        _validate_ssot_user_context_staging_safe(user_context)
-        
-        logger.debug(f"[OK] Created defensive UserExecutionContext for user {user_id[:8]}... (client_id: {websocket_client_id})")
-        return user_context
+            return user_context
+            
+        except Exception as ssot_error:
+            logger.error(f"SSOT factory method failed: {ssot_error}")
+            # Don't fallback to old methods - SSOT failure should be addressed
+            raise ValueError(
+                f"SSOT UserExecutionContext creation failed: {ssot_error}. "
+                f"This indicates an issue with the SSOT ID generation system."
+            ) from ssot_error
         
     except Exception as context_error:
         logger.error(f"Failed to create defensive UserExecutionContext for user_id {repr(user_id)}: {context_error}")
@@ -281,18 +264,30 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
         env = get_env()
         current_env = env.get("ENVIRONMENT", "unknown").lower()
         
-        # SIMPLE FIX: Basic GCP staging environment detection 
-        # Focus on the minimal fix needed for Factory SSOT validation
+        # ENHANCED FIX: Match the WebSocket auth E2E detection logic
+        # This ensures consistent E2E detection between auth and factory validation
         is_cloud_run = bool(env.get("K_SERVICE"))  # GCP Cloud Run indicator
-        is_staging = current_env == "staging" or bool(env.get("GOOGLE_CLOUD_PROJECT") and "staging" in env.get("GOOGLE_CLOUD_PROJECT", "").lower())
+        google_project = env.get("GOOGLE_CLOUD_PROJECT", "")
+        k_service = env.get("K_SERVICE", "")
         
-        # Simple E2E testing detection
-        is_e2e_testing = (
+        # Enhanced staging environment detection (matches WebSocket auth logic)
+        is_staging = (
+            current_env == "staging" or
+            "staging" in google_project.lower() or
+            k_service.endswith("-staging") or
+            "staging" in k_service.lower()
+        )
+        
+        # Standard E2E environment variable detection
+        is_e2e_via_env_vars = (
             env.get("E2E_TESTING", "0") == "1" or 
             env.get("PYTEST_RUNNING", "0") == "1" or
             env.get("STAGING_E2E_TEST", "0") == "1" or
             env.get("E2E_TEST_ENV") == "staging"
         )
+        
+        # CRITICAL FIX: Combine standard detection with staging auto-detection
+        is_e2e_testing = is_e2e_via_env_vars or is_staging
         
     except Exception as env_error:
         logger.error(f"Environment detection failed: {env_error}")
@@ -303,7 +298,12 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
     
     # Use staging-safe validation for staging or cloud run environments  
     if is_staging or is_cloud_run or is_e2e_testing:
-        logger.info(f"ENHANCED STAGING: Using staging-safe validation (env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing})")
+        # Enhanced logging for debugging
+        if is_staging and not is_e2e_via_env_vars:
+            logger.info(f"FACTORY ENHANCED E2E DETECTION: Auto-enabled for staging environment "
+                       f"(env={current_env}, project={google_project[:20]}..., service={k_service})")
+        
+        logger.info(f"ENHANCED STAGING: Using staging-safe validation (env={current_env}, cloud_run={is_cloud_run}, e2e={is_e2e_testing}, staging={is_staging})")
         
         try:
             # ENHANCED DEBUG LOGGING: Log UserExecutionContext details for debugging
@@ -1170,6 +1170,94 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
             logger.warning(f"Connection {connection_id} not found for thread update")
             return False
     
+    async def health_check(self) -> bool:
+        """
+        Enhanced health check to detect zombie managers that appear active but are stuck.
+        
+        This method performs deep health validation to identify managers that pass
+        basic state checks but are actually unresponsive (zombie managers).
+        
+        Health criteria:
+        1. Manager is marked as active
+        2. Manager has responsive connections  
+        3. WebSocket connections can handle ping/pong
+        4. No excessive error accumulation
+        5. Recent activity within reasonable timeframe
+        
+        Returns:
+            True if manager is healthy and responsive, False if zombie/stuck
+        """
+        try:
+            # Basic state validation
+            if not self._is_active:
+                logger.debug(f"Health check failed: manager inactive for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check if we have connections
+            if not self._connections:
+                logger.debug(f"Health check failed: no connections for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check error accumulation (zombie indicators)
+            if self._connection_error_count > 10:  # High error count indicates problems
+                logger.debug(f"Health check failed: high error count ({self._connection_error_count}) for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check for recent errors within last minute (zombie indicator)
+            if self._last_error_time:
+                error_age = (datetime.utcnow() - self._last_error_time).total_seconds()
+                if error_age < 60 and self._connection_error_count > 3:  # Recent errors with accumulation
+                    logger.debug(f"Health check failed: recent errors ({error_age}s ago) for user {self.user_context.user_id[:8]}...")
+                    return False
+            
+            # Enhanced connection health validation
+            healthy_connections = 0
+            total_connections = len(self._connections)
+            
+            for conn_id, connection in list(self._connections.items()):
+                try:
+                    # Check if connection object is valid
+                    if not connection or not connection.websocket:
+                        continue
+                    
+                    # Check WebSocket state if available
+                    from fastapi.websockets import WebSocketState
+                    if hasattr(connection.websocket, 'client_state'):
+                        if connection.websocket.client_state == WebSocketState.CONNECTED:
+                            healthy_connections += 1
+                        else:
+                            logger.debug(f"Connection {conn_id} not in CONNECTED state: {connection.websocket.client_state}")
+                    else:
+                        # If no state info available, assume healthy if websocket exists
+                        healthy_connections += 1
+                
+                except Exception as conn_error:
+                    logger.debug(f"Connection health check error for {conn_id}: {conn_error}")
+                    continue
+            
+            # Require at least 50% of connections to be healthy
+            health_ratio = healthy_connections / total_connections if total_connections > 0 else 0
+            if health_ratio < 0.5:
+                logger.debug(f"Health check failed: low healthy connection ratio ({health_ratio:.2f}) for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check activity recency (zombie managers may have stale activity)
+            if self._metrics.last_activity:
+                activity_age = (datetime.utcnow() - self._metrics.last_activity).total_seconds()
+                # Allow up to 2 minutes of inactivity for healthy managers
+                if activity_age > 120:  
+                    logger.debug(f"Health check failed: stale activity ({activity_age}s ago) for user {self.user_context.user_id[:8]}...")
+                    return False
+            
+            # All health checks passed
+            logger.debug(f"Health check passed: manager healthy for user {self.user_context.user_id[:8]}... ({healthy_connections}/{total_connections} connections healthy)")
+            return True
+            
+        except Exception as health_error:
+            logger.error(f"Health check error for user {self.user_context.user_id[:8]}...: {health_error}")
+            # If health check itself fails, consider the manager unhealthy
+            return False
+    
     def get_connection_health(self, user_id: str) -> Dict[str, Any]:
         """
         Get detailed connection health information for a user.
@@ -1326,25 +1414,29 @@ class WebSocketManagerFactory:
     
     def _generate_isolation_key(self, user_context: UserExecutionContext) -> str:
         """
-        Generate a unique isolation key for a user context.
+        Generate a unique isolation key for a user context using SSOT patterns.
         
-        The isolation key ensures that each connection gets its own manager instance,
-        providing the strongest possible isolation.
+        CRITICAL FIX: Uses thread_id as the primary isolation key to ensure consistency
+        between manager creation and cleanup operations. This addresses the root cause
+        of WebSocket resource leaks where different ID generation patterns caused
+        cleanup failures.
         
         Args:
             user_context: User execution context
             
         Returns:
-            Unique isolation key
+            Consistent isolation key based on user_id and thread_id
         """
-        # Use connection-specific isolation (stronger than per-user)
-        # Handle both websocket_connection_id (agents context) and websocket_client_id (services context)
-        connection_id = getattr(user_context, 'websocket_connection_id', None) or getattr(user_context, 'websocket_client_id', None)
-        if connection_id:
-            return f"{user_context.user_id}:{connection_id}"
-        else:
-            # Fallback to request-based isolation
-            return f"{user_context.user_id}:{user_context.request_id}"
+        # SSOT FIX: Use thread_id as primary isolation component for consistency
+        # This ensures manager creation and cleanup use the same key pattern
+        isolation_key = f"{user_context.user_id}:{user_context.thread_id}"
+        
+        logger.debug(
+            f"SSOT Isolation Key: Generated {isolation_key} for user {user_context.user_id[:8]}... "
+            f"(thread_id={user_context.thread_id})"
+        )
+        
+        return isolation_key
     
     async def create_manager(self, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
         """
@@ -1390,8 +1482,21 @@ class WebSocketManagerFactory:
                     # Clean up inactive manager
                     self._cleanup_manager_internal(isolation_key)
             
-            # Check resource limits with immediate cleanup attempt
+            # CRITICAL FIX: Proactive resource management - cleanup BEFORE hitting limits
             current_count = self._user_manager_count.get(user_id, 0)
+            
+            # Proactive cleanup when reaching 60% of limit (12 out of 20 managers)
+            proactive_threshold = int(self.max_managers_per_user * 0.6)
+            if current_count >= proactive_threshold:
+                logger.info(f"🔄 PROACTIVE CLEANUP: User {user_id[:8]}... at 60% capacity ({current_count}/{self.max_managers_per_user}) - cleaning expired managers")
+                try:
+                    cleaned_count = await self._emergency_cleanup_user_managers(user_id)
+                    current_count = self._user_manager_count.get(user_id, 0)  # Refresh count
+                    logger.info(f"✅ PROACTIVE CLEANUP: Removed {cleaned_count} managers, new count: {current_count}")
+                except Exception as proactive_error:
+                    logger.error(f"Proactive cleanup failed for user {user_id[:8]}...: {proactive_error}")
+            
+            # Hard limit enforcement - only after proactive cleanup failed
             if current_count >= self.max_managers_per_user:
                 self._factory_metrics.resource_limit_hits += 1
                 logger.warning(
@@ -1437,8 +1542,9 @@ class WebSocketManagerFactory:
             )
             
             logger.info(
-                f"Created isolated WebSocket manager for user {user_id[:8]}... "
-                f"(isolation_key: {isolation_key}, manager_id: {id(manager)})"
+                f"✅ SSOT MANAGER CREATED: user={user_id[:8]}... "
+                f"thread_id={user_context.thread_id} isolation_key={isolation_key} "
+                f"manager_id={id(manager)} total_active={len(self._active_managers)}"
             )
             
             return manager
@@ -1484,9 +1590,15 @@ class WebSocketManagerFactory:
                 logger.error(f"Error during manager cleanup: {e}")
             
             # Remove from tracking
+            user_id = manager.user_context.user_id
+            thread_id = manager.user_context.thread_id
             self._cleanup_manager_internal(isolation_key)
             
-            logger.info(f"Cleaned up manager with isolation key: {isolation_key}")
+            logger.info(
+                f"🗑️ SSOT MANAGER CLEANUP: user={user_id[:8]}... "
+                f"thread_id={thread_id} isolation_key={isolation_key} "
+                f"remaining_active={len(self._active_managers)}"
+            )
             return True
     
     def _cleanup_manager_internal(self, isolation_key: str) -> None:
@@ -1622,11 +1734,13 @@ class WebSocketManagerFactory:
             cleanup_interval = 30  # 30 seconds for test environments
             logger.info("🧪 TEST ENVIRONMENT: Using 30-second background cleanup interval")
         elif environment == "development":
-            cleanup_interval = 120  # 2 minutes for development
-            logger.info("🔧 DEV ENVIRONMENT: Using 2-minute background cleanup interval")
+            # FIVE WHYS FIX: Reduced from 2 minutes to 60 seconds for faster resource cleanup
+            cleanup_interval = 60  # 1 minute for development (was 2 minutes)
+            logger.info("🔧 DEV ENVIRONMENT: Using 1-minute background cleanup interval")
         else:
-            cleanup_interval = 300  # 5 minutes for staging/production
-            logger.info("🏭 PRODUCTION ENVIRONMENT: Using 5-minute background cleanup interval")
+            # FIVE WHYS FIX: Reduced from 5 minutes to 2 minutes for faster production cleanup
+            cleanup_interval = 120  # 2 minutes for staging/production (was 5 minutes)
+            logger.info("🏭 PRODUCTION ENVIRONMENT: Using 2-minute background cleanup interval")
         
         while True:
             try:
@@ -1664,10 +1778,14 @@ class WebSocketManagerFactory:
     
     async def _emergency_cleanup_user_managers(self, user_id: str) -> int:
         """
-        Perform immediate cleanup of expired managers for a specific user.
+        Enhanced two-phase emergency cleanup with health validation for zombie detection.
         
-        FIVE WHYS FIX: Provides synchronous cleanup option to address timing mismatch
-        between resource limit enforcement and background cleanup.
+        This method implements the systematic fix for the critical issue where emergency 
+        cleanup only removes 5 managers instead of 10+ because it can't detect zombie 
+        managers that appear active but are actually stuck/unresponsive.
+        
+        PHASE 1: Standard cleanup (inactive/expired managers)
+        PHASE 2: Aggressive health validation cleanup (zombie managers)
         
         Args:
             user_id: User ID to cleanup managers for
@@ -1675,7 +1793,7 @@ class WebSocketManagerFactory:
         Returns:
             Number of managers cleaned up
         """
-        logger.info(f"🚨 EMERGENCY CLEANUP: Starting immediate cleanup for user {user_id[:8]}...")
+        logger.info(f"🚨 ENHANCED EMERGENCY CLEANUP: Starting two-phase cleanup for user {user_id[:8]}...")
         
         # Find all managers for this user
         user_isolation_keys = []
@@ -1688,36 +1806,116 @@ class WebSocketManagerFactory:
             logger.info(f"No managers found for user {user_id[:8]}... during emergency cleanup")
             return 0
         
-        # Check which ones are inactive or expired (more aggressive than background cleanup)
-        cutoff_time = datetime.utcnow() - timedelta(minutes=5)  # 5-minute cutoff for emergency
-        cleanup_keys = []
+        logger.info(f"Found {len(user_isolation_keys)} managers for user {user_id[:8]}... - starting two-phase cleanup")
+        
+        # PHASE 1: Standard cleanup - remove clearly inactive/expired managers
+        logger.info(f"PHASE 1: Standard cleanup for user {user_id[:8]}...")
+        cutoff_time = datetime.utcnow() - timedelta(seconds=10)  # 10-second cutoff for emergency cleanup
+        phase1_cleanup_keys = []
         
         for key in user_isolation_keys:
             manager = self._active_managers.get(key)
             created_time = self._manager_creation_time.get(key)
             
             if not manager or not manager._is_active:
-                cleanup_keys.append(key)
-                logger.debug(f"Emergency cleanup: Manager {key} is inactive")
+                phase1_cleanup_keys.append(key)
+                logger.debug(f"Phase 1: Manager {key} is inactive")
             elif manager._metrics.last_activity and manager._metrics.last_activity < cutoff_time:
-                cleanup_keys.append(key) 
-                logger.debug(f"Emergency cleanup: Manager {key} expired (last activity: {manager._metrics.last_activity})")
+                phase1_cleanup_keys.append(key) 
+                logger.debug(f"Phase 1: Manager {key} expired (last activity: {manager._metrics.last_activity})")
             elif created_time and created_time < cutoff_time and len(manager._connections) == 0:
-                cleanup_keys.append(key)
-                logger.debug(f"Emergency cleanup: Manager {key} is old with no connections")
+                phase1_cleanup_keys.append(key)
+                logger.debug(f"Phase 1: Manager {key} is old with no connections")
         
-        # Clean up the identified managers
-        cleaned_count = 0
-        for key in cleanup_keys:
+        # Execute Phase 1 cleanup
+        phase1_cleaned = 0
+        for key in phase1_cleanup_keys:
             try:
                 await self.cleanup_manager(key)
-                cleaned_count += 1
-                logger.info(f"Emergency cleanup: Removed manager {key}")
+                phase1_cleaned += 1
+                logger.debug(f"Phase 1: Removed manager {key}")
             except Exception as e:
-                logger.error(f"Failed to emergency cleanup manager {key}: {e}")
+                logger.error(f"Phase 1: Failed to cleanup manager {key}: {e}")
         
-        logger.info(f"🔥 EMERGENCY CLEANUP COMPLETE: Cleaned {cleaned_count} managers for user {user_id[:8]}...")
-        return cleaned_count
+        logger.info(f"PHASE 1 COMPLETE: Removed {phase1_cleaned} inactive/expired managers")
+        
+        # PHASE 2: Aggressive health validation cleanup - detect zombie managers
+        logger.info(f"PHASE 2: Health validation cleanup for user {user_id[:8]}...")
+        
+        # Get remaining managers after Phase 1
+        remaining_user_keys = []
+        with self._factory_lock:
+            for key, manager in self._active_managers.items():
+                if manager.user_context.user_id == user_id:
+                    remaining_user_keys.append(key)
+        
+        logger.info(f"After Phase 1: {len(remaining_user_keys)} managers remain - checking for zombies")
+        
+        # Apply aggressive health validation if still too many managers
+        phase2_cleaned = 0
+        if len(remaining_user_keys) > 5:  # Still too many managers - apply health validation
+            logger.info(f"AGGRESSIVE MODE: {len(remaining_user_keys)} managers still active - applying health validation")
+            
+            phase2_cleanup_keys = []
+            health_check_timeout = 2.0  # 2-second timeout for health checks
+            
+            for key in remaining_user_keys:
+                manager = self._active_managers.get(key)
+                if not manager:
+                    continue
+                
+                try:
+                    # Perform health check with timeout to detect zombie managers
+                    is_healthy = await asyncio.wait_for(
+                        manager.health_check(), 
+                        timeout=health_check_timeout
+                    )
+                    
+                    if not is_healthy:
+                        phase2_cleanup_keys.append(key)
+                        logger.debug(f"Phase 2: Manager {key} failed health check - zombie detected")
+                    else:
+                        logger.debug(f"Phase 2: Manager {key} passed health check - keeping")
+                        
+                except asyncio.TimeoutError:
+                    # Health check timeout indicates unresponsive manager (zombie)
+                    phase2_cleanup_keys.append(key)
+                    logger.debug(f"Phase 2: Manager {key} health check timeout - zombie detected")
+                    
+                except Exception as health_error:
+                    # Health check errors indicate problematic manager
+                    phase2_cleanup_keys.append(key)
+                    logger.debug(f"Phase 2: Manager {key} health check error: {health_error} - removing")
+            
+            # Execute Phase 2 cleanup
+            for key in phase2_cleanup_keys:
+                try:
+                    await self.cleanup_manager(key)
+                    phase2_cleaned += 1
+                    logger.info(f"Phase 2: Removed zombie manager {key}")
+                except Exception as e:
+                    logger.error(f"Phase 2: Failed to cleanup zombie manager {key}: {e}")
+            
+            logger.info(f"PHASE 2 COMPLETE: Removed {phase2_cleaned} zombie managers")
+        else:
+            logger.info("Phase 2 skipped - manager count acceptable after Phase 1")
+        
+        total_cleaned = phase1_cleaned + phase2_cleaned
+        
+        # Final count verification
+        final_user_keys = []
+        with self._factory_lock:
+            for key, manager in self._active_managers.items():
+                if manager.user_context.user_id == user_id:
+                    final_user_keys.append(key)
+        
+        logger.info(
+            f"🔥 ENHANCED EMERGENCY CLEANUP COMPLETE: user={user_id[:8]}... "
+            f"phase1_cleaned={phase1_cleaned} phase2_cleaned={phase2_cleaned} "
+            f"total_cleaned={total_cleaned} final_count={len(final_user_keys)}"
+        )
+        
+        return total_cleaned
     
     def _start_background_cleanup(self) -> None:
         """
@@ -1837,6 +2035,64 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
         ) from unexpected_error
 
 
+def create_websocket_manager_sync(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+    """
+    Synchronous wrapper for create_websocket_manager for testing purposes.
+    
+    CRITICAL: This function is ONLY for testing and should NOT be used in production code.
+    Production code should use the async create_websocket_manager() function.
+    
+    TEST COMPATIBILITY: This function provides synchronous access for test environments
+    that cannot easily handle async factory functions.
+    
+    Args:
+        user_context: User execution context for the manager
+        
+    Returns:
+        Isolated WebSocket manager instance
+        
+    Raises:
+        RuntimeError: If called in production environment
+        ValueError: If user_context is invalid
+        FactoryInitializationError: If SSOT factory validation fails
+    """
+    import asyncio
+    import os
+    from shared.isolated_environment import get_env
+    
+    # Restrict to test environments only
+    env = get_env()
+    environment = env.get('ENVIRONMENT', 'development').lower()
+    
+    # Allow in test, development, and CI environments
+    if environment not in ['test', 'development', 'ci', 'testing']:
+        raise RuntimeError(
+            f"create_websocket_manager_sync() is restricted to test environments. "
+            f"Current environment: {environment}. Use async create_websocket_manager() in production."
+        )
+    
+    try:
+        # Run the async function synchronously in test environment
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If event loop is already running, we need to use a different approach
+            # This commonly happens in pytest-asyncio environments
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, create_websocket_manager(user_context))
+                return future.result(timeout=10.0)  # 10 second timeout for tests
+        else:
+            return loop.run_until_complete(create_websocket_manager(user_context))
+    except Exception as e:
+        logger.error(f"Failed to create WebSocket manager synchronously for user {user_context.user_id}: {e}")
+        raise FactoryInitializationError(
+            f"Synchronous WebSocket manager creation failed: {e}",
+            user_id=user_context.user_id,
+            error_code="SYNC_MANAGER_CREATION_FAILED",
+            details={"original_error": str(e)}
+        )
+
+
 __all__ = [
     "WebSocketManagerFactory",
     "IsolatedWebSocketManager", 
@@ -1846,6 +2102,7 @@ __all__ = [
     "FactoryInitializationError",
     "get_websocket_manager_factory",
     "create_websocket_manager",
+    "create_websocket_manager_sync",
     "create_defensive_user_execution_context",
     # Five Whys Root Cause Prevention
     "WebSocketManagerProtocol"  # Re-exported from protocols module

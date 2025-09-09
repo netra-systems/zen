@@ -129,6 +129,11 @@ class StronglyTypedUserExecutionContext:
         """Backward compatibility alias."""
         return self.websocket_client_id
     
+    @property
+    def websocket_id(self) -> Optional[WebSocketID]:
+        """Backward compatibility alias for websocket_id."""
+        return self.websocket_client_id
+    
     def create_child_context(self, new_request_id: Optional[RequestID] = None) -> 'StronglyTypedUserExecutionContext':
         """Create child context for sub-operations."""
         import uuid

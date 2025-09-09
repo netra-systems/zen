@@ -196,6 +196,8 @@ class TestEnvironmentIsolationBoundaries:
         CASCADE FAILURE: Staging credentials in production, localhost URLs in staging
         """
         env = get_env()
+        # CRITICAL: Reset singleton state to ensure clean test isolation
+        env.complete_reset_for_testing()
         env.enable_isolation()
         
         # Test environment configuration
@@ -254,6 +256,8 @@ class TestEnvironmentIsolationBoundaries:
         CASCADE FAILURE: Unable to trace configuration problems to source
         """
         env = get_env()
+        # CRITICAL: Reset singleton state to ensure clean test isolation
+        env.complete_reset_for_testing()
         env.enable_isolation()
         
         # Set variables from different sources

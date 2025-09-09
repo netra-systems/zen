@@ -17,16 +17,16 @@ resource "google_vpc_access_connector" "staging_connector" {
   name          = "staging-connector"
   project       = var.project_id
   region        = var.region
-  network       = "staging-vpc"  # Must match the VPC network name
-  ip_cidr_range = "10.1.0.0/28"  # Reserved range for connector
-  
+  network       = "staging-vpc" # Must match the VPC network name
+  ip_cidr_range = "10.1.0.0/28" # Reserved range for connector
+
   # Scaling configuration
   min_instances = 2
   max_instances = 10
-  
+
   # Machine type for connector instances
   machine_type = "e2-micro"
-  
+
   lifecycle {
     create_before_destroy = true
   }

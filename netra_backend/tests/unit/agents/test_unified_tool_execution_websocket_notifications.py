@@ -110,8 +110,8 @@ class MockAgentWebSocketBridge:
 class MockDataProcessingTool(BaseTool):
     """Mock tool that simulates data processing with delays."""
     
-    name = "data_processor"
-    description = "Processes datasets and generates insights"
+    name: str = "data_processor"
+    description: str = "Processes datasets and generates insights"
     
     def __init__(self, processing_delay: float = 0.001, should_fail: bool = False):
         super().__init__()
@@ -145,8 +145,8 @@ class MockDataProcessingTool(BaseTool):
 class MockLongRunningTool(BaseTool):
     """Mock tool that simulates long-running operations."""
     
-    name = "long_runner"
-    description = "Simulates long-running operations with progress updates"
+    name: str = "long_runner"
+    description: str = "Simulates long-running operations with progress updates"
     
     def __init__(self, total_steps: int = 5, step_delay: float = 0.001):
         super().__init__()

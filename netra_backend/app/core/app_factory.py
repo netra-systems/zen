@@ -109,15 +109,19 @@ def setup_request_middleware(app: FastAPI) -> None:
 
 
 def setup_middleware(app: FastAPI) -> None:
-    """Setup all middleware for the application."""
-    # CORS middleware must be added AFTER security middleware
-    # so it runs BEFORE security middleware in the request flow
-    setup_request_middleware(app)  # This includes CORS
-    setup_security_middleware(app)
-    # Add security response middleware LAST so it runs FIRST (LIFO order)
-    _add_security_response_middleware_final(app)
-    # Add CORS fix middleware to handle missing Access-Control-Allow-Origin header
-    _add_cors_fix_middleware(app)
+    """Setup all middleware for the application - DELEGATES TO SSOT.
+    
+    CRITICAL FIX: This function now delegates to the SSOT middleware setup
+    in middleware_setup.py to prevent SessionMiddleware order issues that
+    cause WebSocket 1011 internal errors.
+    """
+    # CRITICAL: Use the SSOT middleware setup function instead of duplicated logic
+    # This ensures SessionMiddleware is installed FIRST as required
+    from netra_backend.app.core.middleware_setup import setup_middleware as ssot_setup_middleware
+    ssot_setup_middleware(app)
+    
+    # Legacy setup removed - using SSOT setup_middleware from middleware_setup.py
+    # The SSOT version ensures proper middleware order: Session -> CORS -> Auth -> GCP
 
 
 def initialize_oauth(app: FastAPI) -> None:

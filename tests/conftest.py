@@ -46,6 +46,7 @@ try:
     from test_framework.fixtures.real_services import (
         real_postgres_connection,
         with_test_database,
+        real_redis_fixture,
         real_services_fixture
     )
 except ImportError:
@@ -220,6 +221,71 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
         elif "unit" in str(item.fspath):
             item.add_marker(pytest.mark.unit)
+
+# =============================================================================
+# MISSING FIXTURE IMPLEMENTATIONS
+# =============================================================================
+
+@pytest.fixture
+@memory_profile("Service discovery fixture for cross-service integration tests", "MEDIUM")
+def service_discovery():
+    """Create test service discovery fixture.
+    
+    Provides a ServiceDiscovery instance configured for testing cross-service
+    integration scenarios. Creates a temporary directory for service discovery
+    files and cleans up after test completion.
+    
+    Memory Impact: MEDIUM - Creates temporary files and ServiceDiscovery instance
+    """
+    import tempfile
+    from pathlib import Path
+    from dev_launcher.service_discovery import ServiceDiscovery
+    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        discovery = ServiceDiscovery(Path(temp_dir))
+        # Register test services with standard development ports
+        discovery.write_backend_info(8000)
+        discovery.write_frontend_info(3000)
+        discovery.write_auth_info({
+            'port': 8081,
+            'url': 'http://localhost:8081',
+            'api_url': 'http://localhost:8081/api'
+        })
+        yield discovery
+        # Cleanup happens automatically with tempfile context manager
+
+@pytest.fixture
+@memory_profile("Launcher configuration fixture for dev environment tests", "LOW")
+def launcher_config():
+    """Create test launcher configuration fixture.
+    
+    Provides a LauncherConfig instance configured for testing with minimal
+    resource usage and test-appropriate settings.
+    
+    Memory Impact: LOW - Simple configuration object creation
+    """
+    from dev_launcher.config import LauncherConfig
+    from pathlib import Path
+    
+    # Create minimal config for testing
+    config = LauncherConfig(
+        backend_port=8000,
+        frontend_port=3000,
+        dynamic_ports=False,  # Use fixed ports for testing consistency
+        backend_reload=False,  # Disable reload for test performance
+        frontend_reload=False,
+        auth_reload=False,
+        load_secrets=False,  # Local-only secrets for testing
+        no_browser=True,  # Never open browser in tests
+        verbose=False,  # Quiet mode for tests
+        non_interactive=True,  # Non-interactive for automated testing
+        parallel_startup=False,  # Sequential startup for test predictability
+        startup_mode="minimal",  # Minimal startup for tests
+        silent_mode=True,  # Silent logging for tests
+        project_root=Path.cwd(),  # Use current working directory
+    )
+    
+    yield config
 
 # Hook to provide memory usage report at end of session  
 def pytest_sessionfinish(session, exitstatus):

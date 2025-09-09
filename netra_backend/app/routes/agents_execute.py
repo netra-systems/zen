@@ -656,11 +656,18 @@ async def stream_agent_execution(
                 yield f"data: {json.dumps(data)}\n\n"
                 
             else:
-                # Use actual agent service with streaming - method doesn't exist, fallback to mock
+                # Use actual agent service with streaming
                 try:
-                    # AgentService doesn't have stream_agent_execution method
-                    # Fall through to mock streaming response
-                    raise AttributeError("stream_agent_execution method not implemented")
+                    # Use the existing generate_stream method from AgentService
+                    async for chunk in agent_service.generate_stream(request.message, request.thread_id):
+                        # Format the chunk as SSE data
+                        data = {
+                            'event': chunk.get('event', 'agent_progress'),
+                            'agent_id': agent_id,
+                            'timestamp': datetime.now(timezone.utc).isoformat(),
+                            **chunk  # Include all chunk data
+                        }
+                        yield f"data: {json.dumps(data)}\n\n"
                         
                 except Exception as e:
                     # Fallback to mock streaming on service error

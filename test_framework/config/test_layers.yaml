@@ -57,6 +57,22 @@ layers:
           include_patterns: ["unit", "component"]
           exclude_patterns: ["integration", "e2e"]
           
+      - name: "golden_path_unit"
+        timeout_seconds: 300
+        max_parallel_instances: 4
+        priority_order: 3
+        resource_requirements:
+          requires_postgresql: false
+          requires_redis: false
+          requires_backend_service: false
+          requires_real_llm: false
+          requires_real_services: false
+          min_memory_mb: 128
+          dedicated_resources: false
+        filters:
+          include_patterns: ["golden_path", "unit", "business_logic"]
+          exclude_patterns: ["integration", "e2e", "mock"]
+          
     dependencies: []
     conflicts: []
     required_services: []
@@ -162,6 +178,22 @@ layers:
           include_patterns: ["integration", "service"]
           exclude_patterns: ["unit", "e2e"]
           
+      - name: "golden_path_integration"
+        timeout_seconds: 600
+        max_parallel_instances: 2
+        priority_order: 5
+        resource_requirements:
+          requires_postgresql: true
+          requires_redis: true
+          requires_backend_service: true
+          requires_real_llm: false
+          requires_real_services: true
+          min_memory_mb: 384
+          dedicated_resources: false
+        filters:
+          include_patterns: ["golden_path", "integration", "service_validation"]
+          exclude_patterns: ["unit", "e2e", "mock"]
+          
     dependencies: ["fast_feedback"]
     conflicts: []
     required_services: ["postgresql", "redis", "backend_service"]
@@ -238,6 +270,24 @@ layers:
         filters:
           include_patterns: ["e2e", "critical", "essential"]
           exclude_patterns: ["performance", "load"]
+          
+      - name: "golden_path_e2e"
+        timeout_seconds: 1200
+        max_parallel_instances: 1
+        priority_order: 1
+        resource_requirements:
+          requires_postgresql: true
+          requires_redis: true
+          requires_backend_service: true
+          requires_auth_service: true
+          requires_websocket_server: true
+          requires_real_llm: true
+          requires_real_services: true
+          min_memory_mb: 512
+          dedicated_resources: true
+        filters:
+          include_patterns: ["golden_path", "e2e", "user_flow", "business_value"]
+          exclude_patterns: ["performance", "load", "mock"]
           
       - name: "frontend"
         timeout_seconds: 300

@@ -93,6 +93,12 @@ class ServiceInitializer:
             success: bool
             shutdown_time: float
         
+        # Call cleanup methods that the test expects
+        self._close_database_connections()
+        self._close_redis_connections() 
+        self._cleanup_oauth_sessions()
+        self._flush_security_logs()
+        
         self.is_initialized = False
         return ShutdownResult(success=True, shutdown_time=0.05)
     
@@ -134,16 +140,48 @@ class DependencyChecker:
             response_time: float = 0.0
             error: str = ""
         
+        # Actually call the health check methods that can be mocked
+        db_health = self._check_database_health()
+        redis_health = self._check_redis_health() 
+        oauth_health = self._check_external_oauth_apis()
+        
+        # Create component health objects from health check results
+        database = ComponentHealth(
+            healthy=db_health.get("healthy", True),
+            response_time=db_health.get("response_time", 0.05),
+            error=db_health.get("error", "")
+        )
+        
+        redis = ComponentHealth(
+            healthy=redis_health.get("healthy", True),
+            response_time=redis_health.get("response_time", 0.02),
+            error=redis_health.get("error", "")
+        )
+        
+        oauth_providers = ComponentHealth(
+            healthy=oauth_health.get("healthy", True),
+            response_time=oauth_health.get("response_time", 0.0),
+            error=oauth_health.get("error", "")
+        )
+        
+        # Overall health is true only if ALL components are healthy
+        all_healthy = database.healthy and redis.healthy and oauth_providers.healthy
+        
+        # Calculate overall response time
+        overall_response_time = max(database.response_time, redis.response_time, oauth_providers.response_time)
+        
         return HealthResult(
-            all_healthy=True,
-            overall_response_time=0.1,
-            database=ComponentHealth(healthy=True, response_time=0.05),
-            redis=ComponentHealth(healthy=True, response_time=0.02),
-            oauth_providers=ComponentHealth(healthy=True)
+            all_healthy=all_healthy,
+            overall_response_time=overall_response_time,
+            database=database,
+            redis=redis,
+            oauth_providers=oauth_providers
         )
     
-    def can_start_service(self): 
-        return True
+    def can_start_service(self):
+        # Service can only start if all dependencies are healthy
+        health_result = self.check_all_dependencies()
+        return health_result.all_healthy
     
     # Mock health check methods
     def _check_database_health(self): return {"healthy": True, "response_time": 0.05}
@@ -155,8 +193,16 @@ class HealthManager:
     """Mock health manager for testing purposes."""
     def __init__(self, config):
         self.config = config
+        self._service_initializer = None
+    
+    def set_service_initializer(self, service_initializer):
+        """Set service initializer reference for state checking."""
+        self._service_initializer = service_initializer
     
     def get_basic_health(self):
+        # Check if service is initialized to determine health status
+        if self._service_initializer and not self._service_initializer.is_initialized:
+            return {"status": "shutdown", "timestamp": "2024-01-01T00:00:00Z"}
         return {"status": "healthy", "timestamp": "2024-01-01T00:00:00Z"}
     
     def get_detailed_health(self):
@@ -551,6 +597,9 @@ class TestAuthStartupConfiguration:
         
         CRITICAL: Shutdown must not leave resources hanging or corrupt data.
         """
+        # Connect health manager to service initializer for state checking
+        health_manager.set_service_initializer(service_initializer)
+        
         # Initialize service first
         with patch.object(service_initializer, '_check_database_connection', return_value=True), \
              patch.object(service_initializer, '_check_redis_connection', return_value=True), \

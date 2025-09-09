@@ -68,6 +68,14 @@ class LegacyConfigMarker:
     """Mark and track legacy configuration variables to prevent regression."""
     
     LEGACY_VARIABLES: Dict[str, Dict[str, Any]] = {
+        "DATABASE_URL": {
+            "replacement": ["POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD"],
+            "deprecation_date": "2025-11-01",
+            "migration_guide": "Use component-based database configuration instead of single DATABASE_URL for better flexibility.",
+            "still_supported": True,
+            "removal_version": "2.0.0",
+            "environments_affected": ["development", "test"]
+        },
         "JWT_SECRET": {
             "replacement": "JWT_SECRET_KEY",
             "deprecation_date": "2025-10-01",
@@ -1196,7 +1204,7 @@ def get_oauth_client_secret() -> str:
     return validator.get_oauth_client_secret()
 
 
-def check_config_before_deletion(config_key: str, service_name: Optional[str] = None) -> Tuple[bool, str, List[str]]:
+def check_config_before_deletion(config_key: str, service_name: Optional[str] = None) -> Dict[str, Any]:
     """
     Check if a configuration can be safely deleted.
     
@@ -1211,19 +1219,21 @@ def check_config_before_deletion(config_key: str, service_name: Optional[str] = 
     if LegacyConfigMarker.is_legacy_variable(config_key):
         legacy_info = LegacyConfigMarker.get_legacy_info(config_key)
         if legacy_info and legacy_info["still_supported"]:
-            return (
-                False,
-                f"Legacy variable '{config_key}' is still supported until {legacy_info['deprecation_date']}. "
-                f"Migration required: {legacy_info['migration_guide']}",
-                legacy_info.get("environments_affected", [])
-            )
+            return {
+                "safe_to_delete": False,
+                "reason": f"Legacy variable '{config_key}' is still supported until {legacy_info['deprecation_date']}. "
+                         f"Migration required: {legacy_info['migration_guide']}",
+                "warnings": [f"Legacy variable {config_key} is still in use"],
+                "affected_services": legacy_info.get("environments_affected", [])
+            }
         elif legacy_info and not legacy_info["still_supported"]:
-            return (
-                True,
-                f"Legacy variable '{config_key}' is deprecated and can be removed. "
-                f"Ensure replacements are in place: {', '.join(LegacyConfigMarker.get_replacement_variables(config_key))}",
-                legacy_info.get("environments_affected", [])
-            )
+            return {
+                "safe_to_delete": True,
+                "reason": f"Legacy variable '{config_key}' is deprecated and can be removed. "
+                         f"Ensure replacements are in place: {', '.join(LegacyConfigMarker.get_replacement_variables(config_key))}",
+                "warnings": [],
+                "affected_services": legacy_info.get("environments_affected", [])
+            }
     
     # Check against configuration rules
     validator = get_central_validator()
@@ -1231,31 +1241,39 @@ def check_config_before_deletion(config_key: str, service_name: Optional[str] = 
         if rule.env_var == config_key:
             if rule.requirement in [ConfigRequirement.REQUIRED, ConfigRequirement.REQUIRED_SECURE]:
                 affected_envs = [env.value for env in rule.environments]
-                return (
-                    False,
-                    f"Configuration '{config_key}' is required in environments: {', '.join(affected_envs)}. "
-                    f"Cannot be deleted without migration plan.",
-                    affected_envs
-                )
+                return {
+                    "safe_to_delete": False,
+                    "reason": f"Configuration '{config_key}' is required in environments: {', '.join(affected_envs)}. "
+                             f"Cannot be deleted without migration plan.",
+                    "warnings": [f"Configuration {config_key} is required in {', '.join(affected_envs)}"],
+                    "affected_services": affected_envs
+                }
             elif rule.requirement == ConfigRequirement.OPTIONAL:
-                return (
-                    True,
-                    f"Configuration '{config_key}' is optional and can be safely deleted.",
-                    []
-                )
+                return {
+                    "safe_to_delete": True,
+                    "reason": f"Configuration '{config_key}' is optional and can be safely deleted.",
+                    "warnings": [],
+                    "affected_services": []
+                }
     
     # Not in our configuration rules - check with backend-specific dependencies if available
     try:
         from netra_backend.app.core.config_dependencies import ConfigDependencyMap
         can_delete, reason = ConfigDependencyMap.can_delete_config(config_key)
-        return (can_delete, reason, [])
+        return {
+            "safe_to_delete": can_delete,
+            "reason": reason,
+            "warnings": [] if can_delete else [reason],
+            "affected_services": []
+        }
     except ImportError:
         # Backend not available, assume it's safe to delete unknown configs
-        return (
-            True,
-            f"Configuration '{config_key}' is not tracked in central validator. Verify with service-specific checks.",
-            []
-        )
+        return {
+            "safe_to_delete": True,
+            "reason": f"Configuration '{config_key}' is not tracked in central validator. Verify with service-specific checks.",
+            "warnings": [],
+            "affected_services": []
+        }
     
     def is_ready(self) -> bool:
         """Check if the validator is ready to perform validations."""
@@ -1275,45 +1293,56 @@ def check_config_before_deletion(config_key: str, service_name: Optional[str] = 
             return self._wait_for_environment_readiness(timeout_seconds=5.0)
 
 
-def get_legacy_migration_report() -> str:
+def get_legacy_migration_report() -> Dict[str, Any]:
     """
     Generate a report of all legacy configurations and their migration status.
     
     Returns:
-        Formatted migration report string
+        Dictionary with legacy_vars list and migration_status
     """
-    report_lines = [
-        "=" * 80,
-        "LEGACY CONFIGURATION MIGRATION REPORT",
-        "=" * 80,
-        ""
-    ]
-    
+    legacy_vars = []
     current_date = datetime.now()
     
     for var_name, info in LegacyConfigMarker.LEGACY_VARIABLES.items():
-        deprecation_date = datetime.fromisoformat(info["deprecation_date"])
-        days_until_removal = (deprecation_date - current_date).days
+        try:
+            deprecation_date = datetime.fromisoformat(info["deprecation_date"])
+            days_until_removal = (deprecation_date - current_date).days
+        except (ValueError, KeyError):
+            days_until_removal = 0
         
-        status = "✅ REMOVED" if not info["still_supported"] else (
-            "⚠️  DEPRECATED" if days_until_removal > 0 else "🚨 OVERDUE FOR REMOVAL"
+        status = "removed" if not info["still_supported"] else (
+            "deprecated" if days_until_removal > 0 else "overdue_for_removal"
         )
         
-        report_lines.extend([
-            f"Variable: {var_name}",
-            f"Status: {status}",
-            f"Deprecation Date: {info['deprecation_date']}",
-            f"Removal Version: {info.get('removal_version', 'TBD')}",
-            f"Replacement: {info['replacement'] if isinstance(info['replacement'], str) else ', '.join(info['replacement'])}",
-            f"Migration Guide: {info['migration_guide']}",
-        ])
-        
-        if info.get("critical_security"):
-            report_lines.append("⚠️  SECURITY CRITICAL: This variable poses a security risk!")
-        
-        if info.get("auto_construct"):
-            report_lines.append("✅ Auto-Construction: System can build this from components")
-        
-        report_lines.extend(["", "-" * 40, ""])
+        legacy_vars.append({
+            "name": var_name,
+            "status": status,
+            "deprecation_date": info.get("deprecation_date"),
+            "removal_version": info.get("removal_version", "TBD"),
+            "replacement": info.get("replacement"),
+            "migration_guide": info.get("migration_guide"),
+            "critical_security": info.get("critical_security", False),
+            "auto_construct": info.get("auto_construct", False),
+            "still_supported": info.get("still_supported", True),
+            "environments_affected": info.get("environments_affected", [])
+        })
     
-    return "\n".join(report_lines)
+    # Determine overall migration status
+    total_vars = len(legacy_vars)
+    removed_vars = sum(1 for var in legacy_vars if var["status"] == "removed")
+    
+    if removed_vars == total_vars:
+        migration_status = "complete"
+    elif removed_vars > total_vars / 2:
+        migration_status = "mostly_complete"
+    else:
+        migration_status = "in_progress"
+    
+    return {
+        "legacy_vars": legacy_vars,
+        "migration_status": migration_status,
+        "total_legacy_vars": total_vars,
+        "removed_vars": removed_vars,
+        "deprecated_vars": sum(1 for var in legacy_vars if var["status"] == "deprecated"),
+        "overdue_vars": sum(1 for var in legacy_vars if var["status"] == "overdue_for_removal")
+    }
