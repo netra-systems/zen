@@ -31,10 +31,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
 from tests.e2e.staging_config import StagingTestConfig
 
 # GitHub-specific pytest configuration
-pytest_plugins = [
-    "test_framework.fixtures.github_integration_fixtures",
-    "test_framework.ssot.e2e_auth_helper"
-]
+# NOTE: pytest_plugins moved to root conftest.py per pytest requirement
 
 @pytest.fixture(scope="session")
 def e2e_auth_config():
