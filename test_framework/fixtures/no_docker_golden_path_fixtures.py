@@ -95,6 +95,15 @@ class MockWebSocketManager:
         self.mock_state.websocket_events_sent.append(event)
         self.events_sent.append(event)
         
+        # Queue the event as a WebSocket message for recv()
+        websocket_message = {
+            "type": event_type,
+            "data": data,
+            "timestamp": event["timestamp"],
+            "client_id": client_id or self.client_id
+        }
+        self.message_queue.append(json.dumps(websocket_message))
+        
         # Validate critical WebSocket events for business value
         critical_events = ["agent_started", "agent_thinking", "tool_executing", 
                           "tool_completed", "agent_completed"]
@@ -144,17 +153,14 @@ class MockWebSocketManager:
             logger.debug(f"[MOCK WebSocket] Returning queued message: {json.loads(message).get('type', 'unknown')}")
             return message
         
-        # Check if we have any events from agent execution
-        if self.events_sent:
-            # Convert the most recent event to a WebSocket message format
-            latest_event = self.events_sent[-1]
-            event_message = {
-                "type": latest_event["event_type"],
-                "data": latest_event.get("data", {}),
-                "timestamp": latest_event["timestamp"],
-                "client_id": latest_event["client_id"]
-            }
-            return json.dumps(event_message)
+        # Wait a bit for agent execution to generate events
+        await asyncio.sleep(0.1)
+        
+        # Check again after waiting
+        if self.message_queue:
+            message = self.message_queue.pop(0)
+            logger.debug(f"[MOCK WebSocket] Returning queued message: {json.loads(message).get('type', 'unknown')}")
+            return message
         
         # Simulate typical WebSocket message as fallback
         mock_message = {
@@ -493,6 +499,9 @@ async def _create_no_docker_golden_path_services() -> Dict[str, Any]:
     database_manager = MockDatabaseManager(mock_state)
     redis_manager = MockRedisManager(mock_state)
     agent_engine = MockAgentExecutionEngine(mock_state, websocket_manager)
+    
+    # Wire up the agent engine to the websocket manager
+    websocket_manager.agent_engine = agent_engine
     
     # Create service context
     services = {
