@@ -294,36 +294,36 @@ class RequestScopedSessionFactory:
                     except Exception as e:
                         # Record error and rollback if needed
                         session_metrics.record_error(str(e))
-                    
-                    # ENHANCED ERROR CONTEXT in session execution
-                    execution_error_context = {
-                        "session_id": session_id,
-                        "user_id": user_id,
-                        "request_id": request_id,
-                        "thread_id": thread_id,
-                        "error_type": type(e).__name__,
-                        "error_message": str(e),
-                        "session_state_before_error": session_metrics.state.value if session_metrics else "unknown",
-                        "session_operations_count": session_metrics.operations_count if session_metrics else 0,
-                        "authentication_hints": {
-                            "is_auth_error": "403" in str(e) or "401" in str(e) or "Not authenticated" in str(e),
-                            "user_type": "system_user" if user_id == "system" or (user_id and user_id.startswith("system")) else "regular_user"
+                        
+                        # ENHANCED ERROR CONTEXT in session execution
+                        execution_error_context = {
+                            "session_id": session_id,
+                            "user_id": user_id,
+                            "request_id": request_id,
+                            "thread_id": thread_id,
+                            "error_type": type(e).__name__,
+                            "error_message": str(e),
+                            "session_state_before_error": session_metrics.state.value if session_metrics else "unknown",
+                            "session_operations_count": session_metrics.operations_count if session_metrics else 0,
+                            "authentication_hints": {
+                                "is_auth_error": "403" in str(e) or "401" in str(e) or "Not authenticated" in str(e),
+                                "user_type": "system_user" if user_id == "system" or (user_id and user_id.startswith("system")) else "regular_user"
+                            }
                         }
-                    }
-                    
-                    logger.error(
-                        f"❌ ERROR: Request-scoped session {session_id} execution failed. "
-                        f"User: {user_id}, Error: {e}. Full context: {execution_error_context}"
-                    )
-                    
-                    try:
-                        if session.in_transaction():
-                            await session.rollback()
-                            session_metrics.state = SessionState.ROLLED_BACK
-                    except Exception as rollback_error:
-                        logger.error(f"Failed to rollback session {session_id}: {rollback_error}")
-                    
-                    raise
+                        
+                        logger.error(
+                            f"❌ ERROR: Request-scoped session {session_id} execution failed. "
+                            f"User: {user_id}, Error: {e}. Full context: {execution_error_context}"
+                        )
+                        
+                        try:
+                            if session.in_transaction():
+                                await session.rollback()
+                                session_metrics.state = SessionState.ROLLED_BACK
+                        except Exception as rollback_error:
+                            logger.error(f"Failed to rollback session {session_id}: {rollback_error}")
+                        
+                        raise
         
         except Exception as e:
             session_metrics.record_error(str(e))
