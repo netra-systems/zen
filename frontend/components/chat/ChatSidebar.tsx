@@ -48,7 +48,7 @@ export const ChatSidebar: React.FC = () => {
   // Use the proper thread switching hook
   const { switchToThread, state: threadSwitchState } = useThreadSwitching();
 
-  // Create thread click handler using the hook
+  // Create thread click handler using the hook with improved race condition handling
   const handleThreadClick = useCallback(async (threadId: string) => {
     // Prevent switching if already on the same thread
     if (threadId === activeThreadId) {
@@ -61,58 +61,50 @@ export const ChatSidebar: React.FC = () => {
       return;
     }
 
-    // Prevent switching if already loading another thread
-    if (threadSwitchState.isLoading) {
-      console.warn('Thread switching already in progress');
+    // Check if an operation is already in progress for this thread
+    if (ThreadOperationManager.isOperationInProgress('switch', threadId)) {
+      console.warn(`Thread switch to ${threadId} already in progress`);
+      return;
+    }
+
+    // Check if we're already loading this specific thread
+    if (threadSwitchState.isLoading && threadSwitchState.loadingThreadId === threadId) {
+      console.warn(`Already loading thread ${threadId}`);
       return;
     }
     
-    // Use ThreadOperationManager to ensure atomic operation
-    const result = await ThreadOperationManager.startOperation(
-      'switch',
-      threadId,
-      async (signal) => {
-        // Check if another operation is blocking
-        if (ThreadOperationManager.isOperationInProgress('create')) {
-          return { success: false, error: new Error('New chat creation in progress') };
-        }
-        
-        // Check for abort
-        if (signal.aborted) {
-          return { success: false, error: new Error('Operation aborted') };
-        }
-        
-        // Send WebSocket message for thread switch notification
+    try {
+      // If another thread is loading, use force flag to cancel it and switch immediately
+      const shouldForce = threadSwitchState.isLoading && threadSwitchState.loadingThreadId !== threadId;
+      
+      // Use the switchToThread hook directly with force option if needed
+      const success = await switchToThread(threadId, {
+        clearMessages: true,
+        showLoadingIndicator: true,
+        updateUrl: true,
+        force: shouldForce // This will cancel any pending operation and switch immediately
+      });
+      
+      if (success) {
+        // Send WebSocket notification after successful switch
         sendMessage({
           type: 'switch_thread',
           payload: { thread_id: threadId }
         });
-        
-        // Use the hook to perform the actual thread switch
-        // The hook handles all state management, loading, and cleanup
-        const success = await switchToThread(threadId, {
-          clearMessages: true,
-          showLoadingIndicator: true,
-          updateUrl: true
-        });
-        
-        // Return the expected structure for ThreadOperationManager
-        if (success) {
-          return { success: true, threadId };
-        } else {
-          return { success: false, error: new Error(`Failed to switch to thread ${threadId}`) };
+      } else {
+        // Log error but don't show to user if it's just a mutex block
+        const error = threadSwitchState.error;
+        if (error && !error.message?.includes('Operation already in progress')) {
+          console.error('Failed to switch thread:', error);
         }
-      },
-      {
-        timeoutMs: 5000,
-        retryAttempts: 2
       }
-    );
-    
-    if (!result.success) {
-      console.error('Failed to switch thread:', result.error);
+    } catch (error) {
+      // Silently ignore "Operation already in progress" errors
+      if (error instanceof Error && !error.message.includes('Operation already in progress')) {
+        console.error('Error switching thread:', error);
+      }
     }
-  }, [activeThreadId, sendMessage, switchToThread]);
+  }, [activeThreadId, isProcessing, threadSwitchState, sendMessage, switchToThread]);
   
   const { threads, isLoadingThreads, loadError, loadThreads } = useThreadLoader(
     showAllThreads,
