@@ -899,6 +899,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "websocket_manager_available": self._websocket_manager is not None,
                 # REMOVED: Orchestrator availability - using per-request factory patterns  
                 # "orchestrator_available": self._orchestrator is not None,
+                "orchestrator_factory_available": hasattr(self, 'create_execution_orchestrator'),
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None
             }
@@ -1028,6 +1029,56 @@ class AgentWebSocketBridge(MonitorableComponent):
         except Exception as e:
             logger.error(f"🚨 Error getting thread registry status: {e}")
             return None
+    
+    # ===================== PER-REQUEST ORCHESTRATOR FACTORY =====================
+    # BUSINESS CRITICAL: Enables agent execution pipeline with WebSocket integration
+    
+    async def create_execution_orchestrator(self, user_id: str, agent_type: str) -> 'RequestScopedOrchestrator':
+        """
+        Create per-request orchestrator for agent execution with WebSocket integration.
+        
+        This method replaces the singleton orchestrator pattern with per-request
+        instances to ensure complete user isolation and proper WebSocket event emission.
+        
+        Args:
+            user_id: User identifier for execution context
+            agent_type: Type of agent being executed
+            
+        Returns:
+            RequestScopedOrchestrator: Per-request orchestrator with WebSocket integration
+            
+        Raises:
+            RuntimeError: If WebSocket manager not available for event emission
+            
+        Business Value:
+        - Restores agent execution pipeline functionality  
+        - Enables WebSocket event emission (agent_thinking, tool_executing, etc.)
+        - Maintains proper multi-user isolation patterns
+        - Supports complete agent-to-user response delivery
+        """
+        if not self._websocket_manager:
+            raise RuntimeError(f"WebSocket manager not available for user {user_id}")
+        
+        logger.info(f"Creating per-request orchestrator for user {user_id}, agent {agent_type}")
+        
+        # Import here to avoid circular imports
+        from netra_backend.app.services.user_execution_context import get_user_execution_context
+        
+        # Create user execution context for this request
+        user_context = await get_user_execution_context(
+            user_id=user_id,
+            metadata={"agent_type": agent_type, "orchestrator_created": True}
+        )
+        
+        # Create user-scoped emitter for WebSocket events
+        emitter = await self.create_user_emitter(user_context)
+        
+        # Return per-request orchestrator with WebSocket integration
+        return RequestScopedOrchestrator(
+            user_context=user_context,
+            emitter=emitter,
+            websocket_bridge=self
+        )
     
     # ===================== UTILITY METHODS =====================
     # Support methods for run ID processing (required by startup validator)
@@ -2541,6 +2592,121 @@ class AgentWebSocketBridge(MonitorableComponent):
         finally:
             # Clean up if needed
             pass
+
+
+class RequestScopedOrchestrator:
+    """
+    Per-request orchestrator for agent execution with WebSocket integration.
+    
+    This class provides the interface required by AgentService for creating
+    execution contexts and completing executions, with WebSocket event emission.
+    
+    Replaces the singleton orchestrator pattern with per-request instances.
+    """
+    
+    def __init__(self, user_context: 'UserExecutionContext', emitter, websocket_bridge: AgentWebSocketBridge):
+        self.user_context = user_context
+        self.emitter = emitter
+        self.websocket_bridge = websocket_bridge
+        self._active_contexts = {}
+        
+    async def create_execution_context(
+        self, 
+        agent_type: str, 
+        user_id: str, 
+        message: str, 
+        context: Optional[str] = None
+    ) -> tuple:
+        """
+        Create execution context and notifier for agent execution.
+        
+        Args:
+            agent_type: Type of agent being executed
+            user_id: User identifier
+            message: User message/request
+            context: Optional context string
+            
+        Returns:
+            Tuple[ExecutionContext, WebSocketNotifier]: Context and notifier for WebSocket events
+        """
+        # Import here to avoid circular imports  
+        from netra_backend.app.agents.base.execution_context import AgentExecutionContext
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        
+        # Create unique execution context
+        thread_id, run_id = UnifiedIDManager.create_coupled_ids()
+        
+        exec_context = AgentExecutionContext(
+            context_id=run_id,
+            agent_id=agent_type,
+            operation=f"process_{agent_type.lower()}",
+            user_id=user_id,
+            session_id=self.user_context.session_id,
+            run_id=run_id,
+            thread_id=thread_id,
+            agent_name=agent_type,
+            metadata={
+                "message": message,
+                "context": context,
+                "user_id": user_id,
+                "orchestrator_type": "RequestScopedOrchestrator"
+            }
+        )
+        
+        # Create WebSocket notifier that delegates to emitter
+        notifier = WebSocketNotifier(self.emitter, exec_context)
+        
+        # Store for cleanup
+        self._active_contexts[run_id] = (exec_context, notifier)
+        
+        logger.info(f"Created execution context for {agent_type} (run_id={run_id})")
+        return exec_context, notifier
+    
+    async def complete_execution(self, exec_context, result):
+        """
+        Complete agent execution and cleanup resources.
+        
+        Args:
+            exec_context: Execution context from create_execution_context
+            result: Agent execution result
+        """
+        run_id = exec_context.run_id
+        
+        # Send completion notification
+        if hasattr(self.emitter, 'notify_agent_completed'):
+            await self.emitter.notify_agent_completed(
+                exec_context.agent_name,
+                {
+                    "status": "completed",
+                    "result": str(result),
+                    "run_id": run_id
+                }
+            )
+        
+        # Cleanup
+        if run_id in self._active_contexts:
+            del self._active_contexts[run_id]
+        
+        logger.info(f"Completed execution for agent {exec_context.agent_name} (run_id={run_id})")
+
+
+class WebSocketNotifier:
+    """Notifier that delegates WebSocket events to emitter."""
+    
+    def __init__(self, emitter, exec_context):
+        self.emitter = emitter
+        self.exec_context = exec_context
+        
+    async def send_agent_thinking(self, exec_context, message: str):
+        """Send agent thinking event via WebSocket emitter."""
+        if hasattr(self.emitter, 'notify_agent_thinking'):
+            await self.emitter.notify_agent_thinking(
+                exec_context.agent_name,
+                message,
+                step_number=1  # Default step number
+            )
+        else:
+            logger.warning(f"Emitter does not support notify_agent_thinking: {type(self.emitter)}")
 
 
 # SECURITY FIX: Replace singleton with factory pattern

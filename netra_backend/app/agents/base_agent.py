@@ -535,14 +535,14 @@ class BaseAgent(ABC):
         Raises:
             SessionManagerError: If context is invalid or lacks session
         """
-        # Import dynamically to avoid circular dependency
-        from netra_backend.app.database.session_manager import DatabaseSessionManager
+        # SSOT: Use SessionManager instead of deprecated DatabaseSessionManager
+        from netra_backend.app.database.session_manager import SessionManager
         
         # Validate context type with comprehensive validation
         context = validate_user_context(context)
         
-        # DatabaseSessionManager is now a stub that doesn't take context parameter
-        return DatabaseSessionManager()
+        # SSOT: Use SessionManager (which is the proper SSOT implementation)
+        return SessionManager()
     
     # === Abstract Methods ===
     

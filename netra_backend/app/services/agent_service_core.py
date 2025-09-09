@@ -536,12 +536,12 @@ class AgentService(IAgentService):
             
             # Get orchestrator through bridge
             status = await self._bridge.get_status()
-            if not status["dependencies"]["orchestrator_available"]:
-                logger.warning("Orchestrator not available, using fallback execution")
+            if not status["dependencies"]["orchestrator_factory_available"]:
+                logger.warning("Orchestrator factory not available, using fallback execution")
                 return await self._execute_agent_fallback(agent_type, message, context, user_id)
             
-            # Get orchestrator from bridge's internal state (cleaner access)
-            orchestrator = self._bridge._orchestrator
+            # Create per-request orchestrator from bridge factory (replaces singleton access)
+            orchestrator = await self._bridge.create_execution_orchestrator(user_id, agent_type)
             
             # Create execution context with deduplication
             exec_context, notifier = await orchestrator.create_execution_context(
