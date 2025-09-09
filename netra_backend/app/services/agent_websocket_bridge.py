@@ -1072,8 +1072,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            session_id=f"orchestrator_session_{user_id}_{agent_type}",
-            metadata={"agent_type": agent_type, "orchestrator_created": True}
+            agent_context={"agent_type": agent_type, "orchestrator_created": True}
         )
         
         # Create user-scoped emitter for WebSocket events
