@@ -27,7 +27,7 @@ from typing import Dict, Any, Optional
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, RequestScopedOrchestrator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types import UserID, ThreadID, RunID
-from test_framework.ssot.websocket_test_helper import MockWebSocketManager
+from test_framework.fixtures.websocket_manager_mock import MockWebSocketManager
 
 
 class TestOrchestratorFactoryPatternIssue118:
