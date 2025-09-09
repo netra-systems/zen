@@ -239,11 +239,19 @@ except ImportError:
 
 # Pytest-cov availability detection for coverage support
 try:
+    # Try importing the main pytest-cov plugin
     import pytest_cov
     PYTEST_COV_AVAILABLE = True
 except ImportError:
-    PYTEST_COV_AVAILABLE = False
-    pytest_cov = None
+    try:
+        # Fallback: check if pytest can load the cov plugin
+        import subprocess
+        import sys
+        result = subprocess.run([sys.executable, "-m", "pytest", "--help"], 
+                              capture_output=True, text=True, timeout=10)
+        PYTEST_COV_AVAILABLE = "--cov" in result.stdout
+    except Exception:
+        PYTEST_COV_AVAILABLE = False
 
 
 class UnifiedTestRunner:
