@@ -262,28 +262,46 @@ async def windows_safe_progressive_delay(
 def windows_asyncio_safe(func: Callable) -> Callable:
     """Decorator to make async functions Windows-safe by replacing asyncio calls.
     
-    This decorator automatically replaces asyncio.sleep, asyncio.wait_for, and asyncio.gather
-    calls with Windows-safe equivalents within the decorated function.
+    CRITICAL FIX: This decorator creates isolated monkey-patching that doesn't interfere
+    with the internal safe_sleep implementations that rely on _ORIGINAL_ASYNCIO_SLEEP.
     """
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        # Monkey patch asyncio functions for this function call
-        original_sleep = asyncio.sleep
-        original_wait_for = asyncio.wait_for
-        original_gather = asyncio.gather
+        # Store the current asyncio functions (might already be monkey-patched)
+        current_sleep = asyncio.sleep
+        current_wait_for = asyncio.wait_for
+        current_gather = asyncio.gather
+        
+        # Create isolated Windows-safe functions for this decorator context
+        # These functions use the ORIGINAL asyncio functions directly to avoid recursion
+        async def isolated_windows_safe_sleep(delay: float) -> None:
+            """Isolated Windows-safe sleep that bypasses any monkey-patching."""
+            await _windows_asyncio_safe.safe_sleep(delay)
+        
+        async def isolated_windows_safe_wait_for(
+            awaitable: Awaitable[T], 
+            timeout: float, 
+            default: Optional[T] = None
+        ) -> T:
+            """Isolated Windows-safe wait_for that bypasses any monkey-patching."""
+            return await _windows_asyncio_safe.safe_wait_for(awaitable, timeout, default)
+        
+        async def isolated_windows_safe_gather(*awaitables, return_exceptions: bool = False) -> list:
+            """Isolated Windows-safe gather that bypasses any monkey-patching."""
+            return await _windows_asyncio_safe.safe_gather(*awaitables, return_exceptions=return_exceptions)
         
         try:
-            # Replace with Windows-safe versions
-            asyncio.sleep = windows_safe_sleep
-            asyncio.wait_for = windows_safe_wait_for
-            asyncio.gather = windows_safe_gather
+            # Replace with isolated Windows-safe versions (no circular references)
+            asyncio.sleep = isolated_windows_safe_sleep
+            asyncio.wait_for = isolated_windows_safe_wait_for
+            asyncio.gather = isolated_windows_safe_gather
             
             return await func(*args, **kwargs)
         finally:
-            # Restore original functions
-            asyncio.sleep = original_sleep
-            asyncio.wait_for = original_wait_for
-            asyncio.gather = original_gather
+            # Restore the functions that were active before this decorator
+            asyncio.sleep = current_sleep
+            asyncio.wait_for = current_wait_for
+            asyncio.gather = current_gather
     
     return wrapper
 
