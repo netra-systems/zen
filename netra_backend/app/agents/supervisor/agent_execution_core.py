@@ -226,6 +226,15 @@ class AgentExecutionCore:
                 except CircuitBreakerOpenError as e:
                     # Circuit breaker is open - create fallback response
                     logger.error(f"🚫 Circuit breaker open for {context.agent_name}: {e}")
+                    
+                    # Transition to circuit breaker open phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.CIRCUIT_BREAKER_OPEN,
+                        metadata={'error': str(e), 'error_type': 'circuit_breaker'},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    
                     fallback_response = await self.timeout_manager.create_fallback_response(
                         context.agent_name,
                         e,
@@ -238,6 +247,25 @@ class AgentExecutionCore:
                         error=str(e),
                         duration=0.0,
                         data=fallback_response
+                    )
+                    
+                except TimeoutError as e:
+                    # Agent execution timed out
+                    logger.error(f"⏰ Agent {context.agent_name} timed out: {e}")
+                    
+                    # Transition to timeout phase
+                    await self.state_tracker.transition_phase(
+                        state_exec_id, 
+                        AgentExecutionPhase.TIMEOUT,
+                        metadata={'error': str(e), 'error_type': 'timeout'},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    
+                    result = AgentExecutionResult(
+                        success=False,
+                        agent_name=context.agent_name,
+                        error=str(e),
+                        duration=0.0
                     )
             
                 # Collect and persist metrics
@@ -274,7 +302,7 @@ class AgentExecutionCore:
                     await self.state_tracker.transition_phase(
                         state_exec_id, 
                         AgentExecutionPhase.FAILED,
-                        metadata={"error": result.error or "Unknown error"},
+                        metadata={'error': result.error or 'Unknown error'},
                         websocket_manager=self.websocket_bridge
                     )
                     self.state_tracker.complete_execution(state_exec_id, success=False)
