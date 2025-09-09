@@ -134,16 +134,48 @@ class DependencyChecker:
             response_time: float = 0.0
             error: str = ""
         
+        # Actually call the health check methods that can be mocked
+        db_health = self._check_database_health()
+        redis_health = self._check_redis_health() 
+        oauth_health = self._check_external_oauth_apis()
+        
+        # Create component health objects from health check results
+        database = ComponentHealth(
+            healthy=db_health.get("healthy", True),
+            response_time=db_health.get("response_time", 0.05),
+            error=db_health.get("error", "")
+        )
+        
+        redis = ComponentHealth(
+            healthy=redis_health.get("healthy", True),
+            response_time=redis_health.get("response_time", 0.02),
+            error=redis_health.get("error", "")
+        )
+        
+        oauth_providers = ComponentHealth(
+            healthy=oauth_health.get("healthy", True),
+            response_time=oauth_health.get("response_time", 0.0),
+            error=oauth_health.get("error", "")
+        )
+        
+        # Overall health is true only if ALL components are healthy
+        all_healthy = database.healthy and redis.healthy and oauth_providers.healthy
+        
+        # Calculate overall response time
+        overall_response_time = max(database.response_time, redis.response_time, oauth_providers.response_time)
+        
         return HealthResult(
-            all_healthy=True,
-            overall_response_time=0.1,
-            database=ComponentHealth(healthy=True, response_time=0.05),
-            redis=ComponentHealth(healthy=True, response_time=0.02),
-            oauth_providers=ComponentHealth(healthy=True)
+            all_healthy=all_healthy,
+            overall_response_time=overall_response_time,
+            database=database,
+            redis=redis,
+            oauth_providers=oauth_providers
         )
     
-    def can_start_service(self): 
-        return True
+    def can_start_service(self):
+        # Service can only start if all dependencies are healthy
+        health_result = self.check_all_dependencies()
+        return health_result.all_healthy
     
     # Mock health check methods
     def _check_database_health(self): return {"healthy": True, "response_time": 0.05}

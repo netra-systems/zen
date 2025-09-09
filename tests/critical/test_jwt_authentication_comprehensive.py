@@ -58,7 +58,7 @@ from loguru import logger
 from netra_backend.app.websocket_core.auth import WebSocketAuthenticator, AuthInfo, get_websocket_authenticator
 from netra_backend.app.clients.auth_client_core import AuthServiceClient, auth_client, AuthOperationType
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 # Test framework imports for real Docker services

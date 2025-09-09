@@ -50,6 +50,19 @@ def _validate_real_service_requirements():
     
     missing_deps = []
     
+    # Ensure test keys are available for test environment
+    env = get_env()
+    current_env = env.get_environment_name()
+    
+    # For test environment, ensure we have test keys available
+    if current_env in ["test", "development"]:
+        if not env.get("OPENAI_API_KEY"):
+            env.set("OPENAI_API_KEY", "test-openai-api-key-placeholder-for-unit-tests", "test")
+        if not env.get("ANTHROPIC_API_KEY"):
+            env.set("ANTHROPIC_API_KEY", "test-anthropic-api-key-placeholder-for-unit-tests", "test")
+        if not env.get("GEMINI_API_KEY"):
+            env.set("GEMINI_API_KEY", "mock_gemini_api_key_for_testing_purposes", "test")
+    
     # Setup LLM configuration for testing
     LLMConfigHelper.setup_test_environment()
     

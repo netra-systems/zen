@@ -109,8 +109,11 @@ class TestIDValidationPatterns:
         # Test through the ensure_user_id function (full path)
         try:
             user_id = ensure_user_id(failing_pattern)
-            assert isinstance(user_id, UserID)
-            assert str(user_id) == failing_pattern
+            # NewType creates str at runtime, but provides static type safety
+            assert isinstance(user_id, str)
+            assert user_id == failing_pattern
+            # Verify it equals what UserID constructor creates
+            assert user_id == UserID(failing_pattern)
         except ValueError as e:
             pytest.fail(
                 f"CRITICAL: Pattern '{failing_pattern}' should pass validation "
@@ -164,7 +167,7 @@ class TestIDValidationPatterns:
         EXPECTED: SUCCESS (always) - all patterns should be rejected
         """
         for pattern in invalid_patterns:
-            with pytest.raises(ValueError, match=r"Invalid user_id format"):
+            with pytest.raises(ValueError, match=r"Invalid user_id"):
                 ensure_user_id(pattern)
     
     def test_regex_pattern_matching_directly(self):

@@ -146,7 +146,7 @@ async def validate_local_websocket_auth():
                     f"Successfully connected and received response: {response_data.get('type', 'unknown')}"
                 )
                 
-        except websockets.exceptions.ConnectionError as e:
+        except websockets.exceptions.ConnectionClosedError as e:
             results.add_test_result(
                 "Local WebSocket Authentication",
                 False,
@@ -266,7 +266,7 @@ async def validate_staging_websocket_auth():
                     f"Agent event processed successfully: {ack_data.get('type', 'unknown')}"
                 )
                 
-        except websockets.exceptions.ConnectionError as e:
+        except websockets.exceptions.ConnectionClosedError as e:
             error_msg = str(e)
             if "NO_TOKEN" in error_msg.upper():
                 results.add_test_result(

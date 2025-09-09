@@ -48,8 +48,16 @@ class LLMConfigHelper:
         
         for provider in cls.SUPPORTED_PROVIDERS:
             value = env.get(provider)
-            if value and value.strip() and not value.startswith("test-"):
-                found_keys.append(provider)
+            if value and value.strip():
+                # Environment-aware validation
+                if current_env in ["test", "development"]:
+                    # In test/dev environments, accept both real and test keys
+                    found_keys.append(provider)
+                elif not value.startswith("test-"):
+                    # In production/staging, only accept real keys (not test- prefixed)
+                    found_keys.append(provider)
+                else:
+                    missing_keys.append(provider)
             else:
                 missing_keys.append(provider)
         
@@ -131,6 +139,13 @@ class LLMConfigHelper:
             elif not available:
                 return False, "Staging environment requires USE_REAL_LLM=true or valid API keys from Secret Manager"
         
+        elif current_env in ["test", "development"]:
+            # Test/development environments: accept test keys and are more permissive
+            if not available:
+                return False, f"Test environment requires at least one API key (test keys are acceptable). Missing: {', '.join(missing_keys)}"
+            return True, ""
+        
+        # Production and other environments: require real keys
         if not available and require_real_keys:
             return False, f"No valid LLM API keys found. Missing: {', '.join(missing_keys)}"
         

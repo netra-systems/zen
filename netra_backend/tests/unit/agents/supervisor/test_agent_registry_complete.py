@@ -650,7 +650,7 @@ class TestAgentRegistryComplete(SSotBaseTestCase):
         assert isinstance(registry._lifecycle_manager, AgentLifecycleManager)
         assert registry._created_at is not None
         assert isinstance(registry._session_lock, asyncio.Lock)
-        assert registry._legacy_dispatcher is None
+        # FIXED: _legacy_dispatcher removed in SSOT migration - using factory pattern
         
         # Test with default factory
         registry_default = AgentRegistry(mock_llm_manager)
@@ -1022,9 +1022,8 @@ class TestToolDispatcherIntegration(SSotBaseTestCase):
         registry = AgentRegistry(mock_llm_manager)
         mock_dispatcher = Mock()
         
-        # Should store the value but still return None from property
+        # FIXED: Setter is deprecated and ignored - no storage
         registry.tool_dispatcher = mock_dispatcher
-        assert registry._legacy_dispatcher == mock_dispatcher
         assert registry.tool_dispatcher is None
 
 
@@ -1272,7 +1271,7 @@ class TestAgentFactoryRegistration(SSotBaseTestCase):
     
     @pytest.mark.asyncio
     async def test_register_agent_safely_success_scenario(self, mock_llm_manager):
-        """Test successful agent registration via register_agent_safely."""
+        """Test successful agent registration via register_agent_safely using SSOT factory pattern."""
         registry = AgentRegistry(mock_llm_manager)
         
         # Create mock agent class and instance
@@ -1280,24 +1279,29 @@ class TestAgentFactoryRegistration(SSotBaseTestCase):
         mock_agent_instance = Mock()
         mock_agent_class.return_value = mock_agent_instance
         
-        # Mock legacy dispatcher to avoid None error
-        registry._legacy_dispatcher = Mock()
-        
-        result = await registry.register_agent_safely(
-            name="test_agent",
-            agent_class=mock_agent_class,
-            test_param="test_value"
-        )
-        
-        assert result is True
-        assert "test_agent" not in registry.registration_errors
-        
-        # Verify agent was constructed with correct parameters
-        mock_agent_class.assert_called_once_with(
-            registry.llm_manager,
-            registry._legacy_dispatcher,
-            test_param="test_value"
-        )
+        # FIXED: Mock the tool dispatcher factory to return a mock dispatcher
+        with patch.object(registry, 'create_tool_dispatcher_for_user') as mock_create_dispatcher:
+            mock_dispatcher = Mock()
+            mock_create_dispatcher.return_value = mock_dispatcher
+            
+            result = await registry.register_agent_safely(
+                name="test_agent",
+                agent_class=mock_agent_class,
+                test_param="test_value"
+            )
+            
+            assert result is True
+            assert "test_agent" not in registry.registration_errors
+            
+            # Verify tool dispatcher was created using factory
+            mock_create_dispatcher.assert_called_once()
+            
+            # Verify agent was constructed with correct parameters (SSOT pattern)
+            mock_agent_class.assert_called_once_with(
+                registry.llm_manager,
+                mock_dispatcher,  # Uses factory-created dispatcher
+                test_param="test_value"
+            )
     
     @pytest.mark.asyncio
     async def test_register_agent_safely_failure_scenario(self, mock_llm_manager):
@@ -2010,17 +2014,18 @@ class TestErrorHandlingAndEdgeCases(SSotBaseTestCase):
         assert len(context.user_id) == 1000
     
     @pytest.mark.asyncio
-    async def test_tool_dispatcher_factory_exception_handling(self, mock_llm_manager, test_user_context):
-        """Test tool dispatcher factory exception handling."""
-        # Create factory that raises exception
-        async def failing_factory(user_context, websocket_bridge=None):
-            raise RuntimeError("Factory creation failed")
+    async def test_tool_dispatcher_creation_exception_handling(self, mock_llm_manager, test_user_context):
+        """Test tool dispatcher creation exception handling."""
+        registry = AgentRegistry(mock_llm_manager)
         
-        registry = AgentRegistry(mock_llm_manager, failing_factory)
-        
-        # Should raise the factory exception
-        with pytest.raises(RuntimeError, match="Factory creation failed"):
-            await registry.create_tool_dispatcher_for_user(test_user_context)
+        # FIXED: Test exception handling when UnifiedToolDispatcher.create_for_user fails
+        # The tool_dispatcher_factory is not actually used in the current implementation
+        with patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher.create_for_user') as mock_create:
+            mock_create.side_effect = RuntimeError("Dispatcher creation failed")
+            
+            # Should raise the dispatcher creation exception
+            with pytest.raises(RuntimeError, match="Dispatcher creation failed"):
+                await registry.create_tool_dispatcher_for_user(test_user_context)
     
     @pytest.mark.asyncio
     async def test_registry_with_extremely_high_user_load(self, mock_llm_manager):

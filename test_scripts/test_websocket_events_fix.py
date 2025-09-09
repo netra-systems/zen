@@ -15,13 +15,12 @@ import sys
 import time
 from typing import Dict, List, Set, Optional, Any
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root to path
 sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
 
-from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier

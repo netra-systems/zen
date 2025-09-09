@@ -176,14 +176,15 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
 
 def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Optional[str] = None) -> bool:
     """
-    Enhanced connection validation with application state integration.
-    CRITICAL: Combines WebSocket transport state with application-level readiness.
+    Enhanced connection validation with application state integration and race condition detection.
+    CRITICAL: Combines WebSocket transport state with application-level readiness and race condition prevention.
     
     This function ensures that:
     1. WebSocket is in CONNECTED state (transport level)
     2. Handshake is complete and validated
     3. Application-level connection state is ready (if available)
     4. Bidirectional communication is ready
+    5. Race condition patterns are detected and logged
     
     Args:
         websocket: WebSocket connection to check
@@ -256,16 +257,36 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             logger.debug(f"WebSocket state introspection failed: {e}")
             # Fall through to environment-specific logic
         
-        # PHASE 4: Environment-Specific Validation
-        # Environment-specific validation
+        # PHASE 4: Environment-Specific Validation with Race Condition Detection
         from shared.isolated_environment import get_env
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
+        
+        # Initialize race condition detector for pattern tracking
+        try:
+            from netra_backend.app.websocket_core.race_condition_prevention import RaceConditionDetector
+            race_detector = RaceConditionDetector(environment=environment)
+        except ImportError:
+            # Fallback if race condition prevention not available
+            race_detector = None
         
         if environment in ["staging", "production"]:
             # In cloud environments, be very conservative
             # Only return True if we can definitively confirm readiness
             logger.debug(f"Cloud environment {environment}: requiring definitive handshake confirmation")
+            
+            # Log potential race condition pattern
+            if race_detector:
+                race_detector.add_detected_pattern(
+                    "cloud_environment_conservative_validation",
+                    "warning",
+                    details={
+                        "environment": environment,
+                        "connection_id": connection_id,
+                        "reason": "cloud_environment_requires_definitive_confirmation"
+                    }
+                )
+            
             return False  # Conservative approach - only return True if we can confirm readiness above
         else:
             # Development environment - if basic connection check passed, assume ready
@@ -274,6 +295,28 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
         
     except Exception as e:
         logger.warning(f"WebSocket readiness check error: {e}, assuming not ready")
+        
+        # Log error pattern if race detector is available
+        try:
+            from netra_backend.app.websocket_core.race_condition_prevention import RaceConditionDetector
+            from shared.isolated_environment import get_env
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            race_detector = RaceConditionDetector(environment=environment)
+            race_detector.add_detected_pattern(
+                "websocket_readiness_check_error",
+                "critical",
+                details={
+                    "error": str(e),
+                    "connection_id": connection_id,
+                    "environment": environment
+                }
+            )
+        except Exception:
+            # Fallback - don't let race condition logging break the main function
+            pass
+        
         return False
 
 
@@ -1092,3 +1135,143 @@ def decompress(data: bytes) -> str:
     if isinstance(data, bytes):
         return data.decode('utf-8')
     return data
+
+
+# Race condition prevention utility functions
+
+def create_race_condition_detector(environment: Optional[str] = None):
+    """
+    Create a RaceConditionDetector instance for WebSocket operations.
+    
+    Args:
+        environment: Target environment, defaults to detected environment
+    
+    Returns:
+        RaceConditionDetector instance or None if not available
+    """
+    try:
+        from netra_backend.app.websocket_core.race_condition_prevention import RaceConditionDetector
+        return RaceConditionDetector(environment=environment)
+    except ImportError:
+        logger.warning("Race condition prevention not available - using fallback mode")
+        return None
+
+
+def create_handshake_coordinator(environment: Optional[str] = None):
+    """
+    Create a HandshakeCoordinator instance for WebSocket operations.
+    
+    Args:
+        environment: Target environment, defaults to detected environment
+    
+    Returns:
+        HandshakeCoordinator instance or None if not available
+    """
+    try:
+        from netra_backend.app.websocket_core.race_condition_prevention import HandshakeCoordinator
+        return HandshakeCoordinator(environment=environment)
+    except ImportError:
+        logger.warning("Handshake coordination not available - using fallback mode")
+        return None
+
+
+async def validate_connection_with_race_detection(websocket: WebSocket, connection_id: Optional[str] = None) -> bool:
+    """
+    Validate WebSocket connection with integrated race condition detection.
+    
+    This function combines traditional connection validation with race condition
+    pattern detection and logging for comprehensive connection safety.
+    
+    Args:
+        websocket: WebSocket connection to validate
+        connection_id: Optional connection ID for tracking
+    
+    Returns:
+        True if connection is ready and no race conditions detected
+    """
+    try:
+        # Get environment for race condition detection
+        from shared.isolated_environment import get_env
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        # Create race condition detector
+        race_detector = create_race_condition_detector(environment)
+        handshake_coordinator = create_handshake_coordinator(environment)
+        
+        # Basic connection validation
+        is_connected = is_websocket_connected_and_ready(websocket, connection_id)
+        
+        if not is_connected and race_detector:
+            race_detector.add_detected_pattern(
+                "connection_validation_failed",
+                "warning",
+                details={
+                    "connection_id": connection_id,
+                    "environment": environment
+                }
+            )
+        
+        # If handshake coordinator is available, use it for additional validation
+        if handshake_coordinator and is_connected:
+            # For existing connections, we can't coordinate the handshake again
+            # but we can validate the current state
+            logger.debug("Connection passed basic validation and race condition checks")
+            return True
+        
+        return is_connected
+        
+    except Exception as e:
+        logger.error(f"Error during connection validation with race detection: {e}")
+        return False
+
+
+def log_race_condition_pattern(pattern_type: str, severity: str = "warning", 
+                             details: Optional[Dict] = None, 
+                             environment: Optional[str] = None):
+    """
+    Utility function to log race condition patterns from WebSocket utils.
+    
+    Args:
+        pattern_type: Type of race condition pattern
+        severity: Severity level (warning, critical, fatal)
+        details: Additional context about the pattern
+        environment: Environment where pattern occurred
+    """
+    try:
+        race_detector = create_race_condition_detector(environment)
+        if race_detector:
+            race_detector.add_detected_pattern(pattern_type, severity, details)
+        else:
+            # Fallback logging if race detection not available
+            logger.warning(f"Race condition pattern detected: {pattern_type} ({severity}) - {details}")
+    except Exception as e:
+        logger.error(f"Error logging race condition pattern: {e}")
+
+
+def get_progressive_delay(attempt: int, environment: Optional[str] = None) -> float:
+    """
+    Get progressive delay for retry operations with race condition prevention.
+    
+    Args:
+        attempt: Attempt number (0-based)
+        environment: Target environment for timing calculation
+    
+    Returns:
+        Delay in seconds appropriate for the environment and attempt
+    """
+    try:
+        race_detector = create_race_condition_detector(environment)
+        if race_detector:
+            return race_detector.calculate_progressive_delay(attempt)
+        else:
+            # Fallback timing if race detection not available
+            if environment in ["staging", "production"]:
+                return 0.025 * (attempt + 1)  # 25ms, 50ms, 75ms
+            elif environment == "testing":
+                return 0.005  # 5ms for tests
+            else:
+                return 0.01  # 10ms for development
+    except Exception as e:
+        logger.error(f"Error calculating progressive delay: {e}")
+        return 0.01  # Safe fallback

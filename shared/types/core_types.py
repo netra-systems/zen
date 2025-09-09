@@ -443,7 +443,8 @@ def ensure_connection_id(value: Any) -> ConnectionID:
     cleaned_value = value.strip()
     
     # Use enhanced validation that supports both UUID and structured formats
-    if is_valid_id_format_compatible(cleaned_value, IDType.CONNECTION):
+    # ConnectionID uses WEBSOCKET validation since they're closely related
+    if is_valid_id_format_compatible(cleaned_value, IDType.WEBSOCKET):
         return ConnectionID(cleaned_value)
     
     raise ValueError(f"Invalid connection_id format: {value}")
