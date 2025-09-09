@@ -358,11 +358,11 @@ class TestAuthServiceBusinessLogic:
         def verify_password_for_business(password: str, hashed: str) -> bool:
             # Extract salt and hash from stored hash
             parts = hashed.split('$')
-            if len(parts) != 4:
+            if len(parts) != 5:  # ['', 'pbkdf2', '100000', 'salt', 'hash']
                 return False
             
-            salt = parts[2]
-            stored_hash = parts[3]
+            salt = parts[3]
+            stored_hash = parts[4]
             
             # Re-hash provided password with same salt
             test_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
