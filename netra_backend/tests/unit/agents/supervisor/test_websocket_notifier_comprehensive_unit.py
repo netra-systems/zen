@@ -61,12 +61,11 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
         """Sample agent execution context with strongly typed IDs."""
         return AgentExecutionContext(
             agent_name="test_agent",
-            run_id=RunID(str(uuid.uuid4())),
-            thread_id=ThreadID("test-thread-123"),
-            user_id=UserID("test-user-456"),
+            run_id=str(uuid.uuid4()),
+            thread_id="test-thread-123",
+            user_id="test-user-456",
             correlation_id="test-correlation-789",
-            retry_count=0,
-            total_steps=5
+            retry_count=0
         )
 
     def test_init_shows_deprecation_warning(self, mock_websocket_manager):
@@ -147,7 +146,8 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
         assert payload["progress_percentage"] == 40.0
         assert payload["estimated_remaining_ms"] == 5000
         assert payload["current_operation"] == "data_analysis"
-        assert payload["urgency"] == "medium_priority"  # >5 seconds
+        assert payload["urgency"] == "high_priority"  # 5000ms = 5 seconds, which is <= 5 seconds
+        assert payload["total_steps"] == 0  # Default value when not set
 
     @pytest.mark.asyncio
     async def test_send_tool_executing_with_context(self, websocket_notifier, sample_context, mock_websocket_manager):
@@ -314,13 +314,14 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
         assert isinstance(operation['start_time'], float)
         assert isinstance(operation['last_event_time'], float)
 
-    def test_mark_operation_complete(self, websocket_notifier, sample_context):
+    @pytest.mark.asyncio
+    async def test_mark_operation_complete(self, websocket_notifier, sample_context):
         """Test operation marking as complete."""
         # First mark as active
         websocket_notifier._mark_operation_active(sample_context)
         assert websocket_notifier.active_operations[sample_context.thread_id]['processing'] is True
         
-        # Then mark as complete
+        # Then mark as complete (need async context for asyncio.create_task)
         websocket_notifier._mark_operation_complete(sample_context)
         
         # Verify operation marked as not processing
@@ -408,7 +409,7 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_send_websocket_message_safe_handles_none_thread_id(self, websocket_notifier, mock_websocket_manager):
         """Test safe WebSocket message sending handles None thread_id."""
-        test_message = WebSocketMessage(type="test", payload={"data": "test"})
+        test_message = WebSocketMessage(type="agent_thinking", payload={"data": "test"})
         
         # Test with None thread_id
         await websocket_notifier._send_websocket_message_safe(None, test_message)
