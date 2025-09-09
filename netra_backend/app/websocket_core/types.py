@@ -552,11 +552,16 @@ def create_standard_message(msg_type: Union[str, MessageType],
     
     # Phase 2 Fix 2b: Validate field types for specific message types
     if normalized_type in [MessageType.AGENT_REQUEST, MessageType.START_AGENT]:
-        # Agent messages require specific structure
-        if payload and "request" in payload:
+        # Agent messages require specific structure - payload cannot be empty
+        if not payload:
+            raise ValueError(f"Agent message type '{normalized_type}' requires non-empty payload")
+        
+        # If payload has request field, validate its type
+        if "request" in payload:
             request = payload.get("request")
             if not isinstance(request, (dict, str)):
                 raise TypeError(f"Agent message 'request' field must be dict or string, got {type(request)}")
+        # If no request field but has other structure, that's acceptable (different message patterns)
     
     # Phase 2 Fix 2b: Validate non-serializable data doesn't get through
     try:
