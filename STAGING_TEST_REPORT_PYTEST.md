@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-09 15:40:21
+**Generated:** 2025-09-09 15:48:04
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 30.17 seconds
+- **Duration:** 35.18 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,13 +19,13 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_023_streaming_partial_results_real | FAIL failed | 29.983s | test_priority1_critical.py |
+| test_023_streaming_partial_results_real | FAIL failed | 34.979s | test_priority1_critical.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_023_streaming_partial_results_real
 - **File:** /Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_priority1_critical.py
-- **Duration:** 29.983s
+- **Duration:** 34.979s
 - **Error:** /opt/homebrew/lib/python3.13/site-packages/pytest_asyncio/plugin.py:426: in runtest
     super().runtest()
 /opt/homebrew/lib/python3.13/site-packages/pytest_asyncio/plugin.py:642: in inner
@@ -40,7 +40,7 @@
 test_priority1_critical.py::test_023_streaming_partial_results_real FAILED
 
 ==================================================
-0 passed, 1 failed in 30.17s
+0 passed, 1 failed in 35.18s
 ```
 
 ## Test Coverage Matrix
