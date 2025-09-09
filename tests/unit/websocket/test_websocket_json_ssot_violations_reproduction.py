@@ -43,6 +43,7 @@ from netra_backend.app.websocket_core.handlers import (
 )
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.dependencies import get_user_execution_context
 from shared.isolated_environment import get_env
 
 

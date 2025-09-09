@@ -12,13 +12,14 @@ ALWAYS think about overall repo safety and STOP if anything might damage overall
 Focus areas (output this to console) is ISSUE: ${1 : latest}
  
 SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
+ALL Github output MUST follow @GITHUB_STYLE_GUIDE.md
 
 PROCESS INSTRUCTIONS START:
 
 0) READ ISSUE : SNST: Use gh to read the ISSUE ${1 : latest open issue} in question.
 
 1) STATUS UPDATE : SNST : AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
-1.1) Make or UPDATE a comment on the ISSUE with your learnings.
+1.1) Make or UPDATE a comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md .
 
 2) STATUS DECISION : SNST : (Pass context from 1): 
 IF the issue appears to already be resolved close the issue and repeat PROCESS loop, otherwise continue to the next step.
