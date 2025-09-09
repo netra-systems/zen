@@ -453,9 +453,18 @@ class UnifiedToolDispatcher:
     def register_tool(self, tool: 'BaseTool') -> None:
         """Register a tool with the dispatcher."""
         self._ensure_active()
+        
+        # CRITICAL FIX: Check if tool has name attribute before accessing it
+        if hasattr(tool, 'name') and tool.name:
+            tool_name = tool.name
+        else:
+            # Fallback to class name if no name attribute
+            tool_name = getattr(tool, '__class__', type(tool)).__name__.lower()
+            logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using fallback: {tool_name}")
+        
         # Use the UniversalRegistry's register method
-        self.registry.register(tool.name, tool)
-        logger.debug(f"Registered tool {tool.name} in dispatcher {self.dispatcher_id}")
+        self.registry.register(tool_name, tool)
+        logger.debug(f"Registered tool {tool_name} in dispatcher {self.dispatcher_id}")
     
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""

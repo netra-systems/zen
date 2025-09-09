@@ -74,10 +74,16 @@ class UserContextToolFactory:
         for tool_class in tool_classes:
             try:
                 tool_instance = tool_class()
+                
+                # Validate tool has required attributes
+                if not hasattr(tool_instance, 'name'):
+                    logger.warning(f"⚠️ Tool {tool_class.__name__} missing 'name' attribute - will use fallback naming")
+                
                 user_tools.append(tool_instance)
                 logger.debug(f"✅ Created tool {tool_class.__name__} for {correlation_id}")
             except Exception as e:
                 logger.error(f"❌ Failed to create tool {tool_class.__name__} for {correlation_id}: {e}")
+                logger.error(f"   Tool class: {tool_class}, Error type: {type(e).__name__}")
                 # Continue with other tools - partial tool availability is better than total failure
                 
         logger.info(f"🔧 Created {len(user_tools)} isolated tools for {correlation_id}")
@@ -103,7 +109,15 @@ class UserContextToolFactory:
         
         # Register tools in the isolated registry
         for tool in user_tools:
-            registry.register(tool.name, tool)
+            # CRITICAL FIX: Check if tool has name attribute before accessing it
+            if hasattr(tool, 'name') and tool.name:
+                registry.register(tool.name, tool)
+                logger.debug(f"✅ Registered tool {tool.name} in isolated registry for {correlation_id}")
+            else:
+                # Fallback to class name if no name attribute
+                tool_name = getattr(tool, '__class__', type(tool)).__name__.lower()
+                logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using fallback: {tool_name}")
+                registry.register(tool_name, tool)
         
         logger.info(f"🚀 Completed isolated tool system for {correlation_id}")
         logger.info(f"   - Registry: {registry_id} ({len(user_tools)} tools)")  
