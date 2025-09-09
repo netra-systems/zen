@@ -158,7 +158,8 @@ class ConfigurationValidator:
             errors.append("REMEDY: Ensure test environment setup calls ensure_test_isolation()")
         
         # Validate environment value
-        env_value = self.env.get("ENVIRONMENT", "").lower()
+        env_value = self.env.get("ENVIRONMENT", "") or ""
+        env_value = env_value.lower()
         if env_value not in self.VALID_ENVIRONMENTS:
             errors.append(f"Invalid ENVIRONMENT value: '{env_value}'. Valid values: {self.VALID_ENVIRONMENTS}")
             errors.append("REMEDY: Set ENVIRONMENT to 'testing' for test execution")
