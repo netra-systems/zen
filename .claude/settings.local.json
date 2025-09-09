@@ -9,7 +9,12 @@
       "Bash(gcloud run services logs read:*)",
       "Bash(gcloud logging read:*)",
       "Bash(gcloud run services describe:*)",
-      "Bash(gcloud run services list:*)"
+      "Bash(gcloud run services list:*)",
+      "Bash(gcloud auth list:*)",
+      "Bash(gcloud config set:*)",
+      "Bash(docker:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh repo view:*)"
     ],
     "deny": [],
     "ask": []

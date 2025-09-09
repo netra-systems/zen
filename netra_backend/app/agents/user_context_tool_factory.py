@@ -65,8 +65,8 @@ class UserContextToolFactory:
         # Create user-specific registry ID
         registry_id = f"user_{context.user_id}_{context.run_id}_{int(time.time()*1000)}"
         
-        # Create isolated tool registry for this user
-        registry = ToolRegistry()
+        # CRITICAL FIX: Create isolated tool registry with proper scoping
+        registry = ToolRegistry(scope_id=registry_id)
         logger.info(f"🗃️ Created isolated registry {registry_id} for {correlation_id}")
         
         # Create isolated tool instances for this user
@@ -109,15 +109,29 @@ class UserContextToolFactory:
         
         # Register tools in the isolated registry
         for tool in user_tools:
-            # CRITICAL FIX: Check if tool has name attribute before accessing it
-            if hasattr(tool, 'name') and tool.name:
-                registry.register(tool.name, tool)
-                logger.debug(f"✅ Registered tool {tool.name} in isolated registry for {correlation_id}")
-            else:
-                # Fallback to class name if no name attribute
-                tool_name = getattr(tool, '__class__', type(tool)).__name__.lower()
-                logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using fallback: {tool_name}")
-                registry.register(tool_name, tool)
+            try:
+                # CRITICAL FIX: Check if tool has name attribute before accessing it
+                if hasattr(tool, 'name') and tool.name:
+                    registry.register(tool.name, tool)
+                    logger.debug(f"✅ Registered tool {tool.name} in isolated registry for {correlation_id}")
+                else:
+                    # Use the registry's safe tool name generation instead of dangerous fallback
+                    tool_name = registry._generate_safe_tool_name(tool)
+                    logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using safe fallback: {tool_name}")
+                    registry.register(tool_name, tool)
+            except ValueError as e:
+                # CRITICAL FIX: Handle duplicate registration and validation failures gracefully
+                if "already registered" in str(e):
+                    logger.warning(f"⚠️ Tool {tool.__class__.__name__} already registered in registry for {correlation_id} - skipping duplicate")
+                elif "BaseModel" in str(e) or "validation failed" in str(e).lower():
+                    logger.error(f"❌ Tool {tool.__class__.__name__} failed validation for {correlation_id}: {e}")
+                    logger.error(f"   This tool appears to be a BaseModel data schema, not an executable tool")
+                else:
+                    logger.error(f"❌ Failed to register tool {tool.__class__.__name__} for {correlation_id}: {e}")
+                # Continue with other tools - partial functionality is better than complete failure
+            except Exception as e:
+                logger.error(f"❌ Unexpected error registering tool {tool.__class__.__name__} for {correlation_id}: {e}")
+                # Continue with other tools
         
         logger.info(f"🚀 Completed isolated tool system for {correlation_id}")
         logger.info(f"   - Registry: {registry_id} ({len(user_tools)} tools)")  
