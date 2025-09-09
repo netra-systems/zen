@@ -143,6 +143,7 @@ try:
         safe_websocket_send,
         safe_websocket_close,
         is_websocket_connected,
+        is_websocket_connected_and_ready,
     )
 except ImportError:
     # Fallback implementations
@@ -151,6 +152,48 @@ except ImportError:
     safe_websocket_send = None
     safe_websocket_close = None
     is_websocket_connected = None
+    is_websocket_connected_and_ready = None
+
+# Import new connection state machine and message queue components
+try:
+    from netra_backend.app.websocket_core.connection_state_machine import (
+        ApplicationConnectionState,
+        ConnectionStateMachine,
+        ConnectionStateMachineRegistry,
+        StateTransitionInfo,
+        get_connection_state_registry,
+        get_connection_state_machine,
+        is_connection_ready_for_messages,
+    )
+except ImportError:
+    # Fallback implementations for backward compatibility
+    ApplicationConnectionState = None
+    ConnectionStateMachine = None
+    ConnectionStateMachineRegistry = None
+    StateTransitionInfo = None
+    get_connection_state_registry = None
+    get_connection_state_machine = None
+    is_connection_ready_for_messages = None
+
+try:
+    from netra_backend.app.websocket_core.message_queue import (
+        MessageQueue,
+        MessageQueueRegistry, 
+        MessagePriority,
+        MessageQueueState,
+        QueuedMessage,
+        get_message_queue_registry,
+        get_message_queue_for_connection,
+    )
+except ImportError:
+    # Fallback implementations for backward compatibility
+    MessageQueue = None
+    MessageQueueRegistry = None
+    MessagePriority = None
+    MessageQueueState = None
+    QueuedMessage = None
+    get_message_queue_registry = None
+    get_message_queue_for_connection = None
 
 # Critical events that MUST be preserved
 CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
@@ -206,6 +249,25 @@ __all__ = [
     "safe_websocket_send",
     "safe_websocket_close",
     "is_websocket_connected",
+    "is_websocket_connected_and_ready",
+    
+    # Connection state machine components
+    "ApplicationConnectionState",
+    "ConnectionStateMachine", 
+    "ConnectionStateMachineRegistry",
+    "StateTransitionInfo",
+    "get_connection_state_registry",
+    "get_connection_state_machine",
+    "is_connection_ready_for_messages",
+    
+    # Message queue components
+    "MessageQueue",
+    "MessageQueueRegistry",
+    "MessagePriority",
+    "MessageQueueState",
+    "QueuedMessage",
+    "get_message_queue_registry",
+    "get_message_queue_for_connection",
     
     # Types and message creation
     "MessageType",

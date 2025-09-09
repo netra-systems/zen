@@ -687,6 +687,83 @@ async def create_authenticated_user(
     return token, user_data
 
 
+async def create_authenticated_user_context(
+    user_email: Optional[str] = None,
+    user_id: Optional[str] = None,
+    environment: str = "test",
+    permissions: Optional[List[str]] = None,
+    websocket_enabled: bool = True
+) -> 'StronglyTypedUserExecutionContext':
+    """
+    Create an authenticated user execution context for E2E testing.
+    This function creates a complete user context with JWT token and all required IDs.
+    
+    Args:
+        user_email: Optional user email (auto-generated if not provided)
+        user_id: Optional user ID (auto-generated if not provided)
+        environment: Test environment ('test', 'staging', etc.)
+        permissions: Optional permissions list
+        websocket_enabled: Whether to enable WebSocket support
+        
+    Returns:
+        StronglyTypedUserExecutionContext with authentication and IDs
+    """
+    from shared.types.execution_types import StronglyTypedUserExecutionContext
+    from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
+    from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+    
+    # Generate user email if not provided
+    if user_email is None:
+        user_email = f"e2e_test_{uuid.uuid4().hex[:8]}@example.com"
+    
+    # Generate user ID if not provided
+    if user_id is None:
+        user_id = f"e2e-user-{uuid.uuid4().hex[:8]}"
+    
+    # Create auth helper and get JWT token
+    auth_helper = E2EAuthHelper(environment=environment)
+    jwt_token = auth_helper.create_test_jwt_token(
+        user_id=user_id,
+        email=user_email,
+        permissions=permissions or ["read", "write"]
+    )
+    
+    # Generate unified IDs using SSOT ID generator
+    id_generator = UnifiedIdGenerator()
+    thread_id, run_id, request_id = id_generator.generate_user_context_ids(user_id=user_id, operation="e2e_auth")
+    
+    # Generate WebSocket ID if enabled
+    websocket_client_id = None
+    if websocket_enabled:
+        websocket_client_id = id_generator.generate_websocket_client_id(user_id=user_id)
+    
+    # Create strongly typed context
+    context = StronglyTypedUserExecutionContext(
+        user_id=UserID(user_id),
+        thread_id=ThreadID(thread_id),
+        run_id=RunID(run_id),
+        request_id=RequestID(request_id),
+        websocket_client_id=WebSocketID(websocket_client_id) if websocket_client_id else None,
+        db_session=None,  # E2E tests manage their own DB sessions
+        agent_context={
+            'jwt_token': jwt_token,
+            'user_email': user_email,
+            'environment': environment,
+            'permissions': permissions or ["read", "write"],
+            'test_mode': True,
+            'e2e_test': True
+        },
+        audit_metadata={
+            'created_by': 'e2e_auth_helper',
+            'creation_method': 'create_authenticated_user_context',
+            'test_environment': environment,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+    )
+    
+    return context
+
+
 def get_test_jwt_token(
     user_id: str = "test-user-123",
     email: Optional[str] = None,
@@ -723,5 +800,6 @@ __all__ = [
     "E2EAuthHelper", 
     "E2EWebSocketAuthHelper",
     "create_authenticated_user",
+    "create_authenticated_user_context",
     "get_test_jwt_token"
 ]

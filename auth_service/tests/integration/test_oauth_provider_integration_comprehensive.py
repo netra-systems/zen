@@ -33,6 +33,7 @@ from auth_service.auth_core.oauth.oauth_state_manager import OAuthStateManager
 from auth_service.auth_core.database.oauth_repository import OAuthRepository
 from auth_service.auth_core.models.oauth_user import OAuthUser
 from auth_service.auth_core.models.oauth_token import OAuthToken
+from auth_service.auth_core.auth_environment import AuthEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.database import DatabaseTestHelper
 from shared.isolated_environment import get_env
@@ -49,18 +50,17 @@ class TestOAuthProviderIntegration(SSotBaseTestCase):
     @pytest.fixture
     def auth_env(self):
         """Get isolated auth environment with OAuth configuration."""
-        env = get_env()
-        auth_env = AuthEnvironment(env)
+        # Follow SSOT pattern: AuthEnvironment() handles env internally
+        auth_env = AuthEnvironment()
         
-        # Set OAuth provider configuration
-        auth_env.set("GOOGLE_CLIENT_ID", "test-google-client-id-1234567890", source="test")
-        auth_env.set("GOOGLE_CLIENT_SECRET", "test-google-client-secret-abcdef", source="test")
-        auth_env.set("GITHUB_CLIENT_ID", "test-github-client-id-9876543210", source="test")
-        auth_env.set("GITHUB_CLIENT_SECRET", "test-github-client-secret-fedcba", source="test")
-        auth_env.set("OAUTH_REDIRECT_BASE_URL", "https://test.netra.com", source="test")
-        auth_env.set("OAUTH_STATE_SECRET", "test-oauth-state-secret-32-characters", source="test")
+        # Set OAuth provider configuration using AuthEnvironment's set method
+        auth_env.set("GOOGLE_OAUTH_CLIENT_ID", "test-google-client-id-1234567890.apps.googleusercontent.com", source="test")
+        auth_env.set("GOOGLE_OAUTH_CLIENT_SECRET", "test-google-client-secret-abcdef-1234567890", source="test")
+        auth_env.set("GITHUB_OAUTH_CLIENT_ID", "test-github-client-id-9876543210", source="test")
+        auth_env.set("GITHUB_OAUTH_CLIENT_SECRET", "test-github-client-secret-fedcba-1234567890", source="test")
+        auth_env.set("AUTH_SERVICE_URL", "https://test.netra.com", source="test")
+        auth_env.set("JWT_SECRET_KEY", "test-jwt-secret-32-characters-long-key", source="test")
         
-        auth_env.load_environment()
         return auth_env
 
     @pytest.fixture
@@ -71,11 +71,8 @@ class TestOAuthProviderIntegration(SSotBaseTestCase):
     @pytest.fixture
     def oauth_manager(self, oauth_config):
         """Create OAuth manager with providers."""
-        manager = OAuthManager(oauth_config)
-        
-        # Register providers
-        google_provider = GoogleOAuthProvider(oauth_config)
-        manager.register_provider("google", google_provider)
+        # Follow SSOT pattern: OAuthManager() initializes providers internally
+        manager = OAuthManager()
         
         return manager
 

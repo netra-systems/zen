@@ -10,8 +10,8 @@ IMPORTANT: You MUST repeat ALL STEPS 100 times. WAIT AS LONG AS IT TAKES KEEP GO
 Audit Google Cloud Platform logs for staging/production services with automatic error debugging.
 
 ## Configuration
-- **Service:** ${1:-all}
-- **Time Range:** ${2:-15} minutes
+- **Service:** ${1:-backend}
+- **Time Range:** ${2:-30} minutes
 - **Project:** netra-staging
 - **Region:** us-central1
 - **Auto-Debug:** Enabled with Five Whys

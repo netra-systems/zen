@@ -24,6 +24,8 @@ F = TypeVar('F', bound=Callable[..., Any])
 
 class TestModeViolation(Exception):
     """Exception raised when test-only function is called outside test mode."""
+    
+    __test__ = False  # Tell pytest this is not a test class
     def __init__(self, function_name: str, reason: str, suggestion: str = "Ensure TESTING=true or use unified_test_runner.py"):
         self.function_name = function_name
         self.reason = reason

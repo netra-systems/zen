@@ -154,9 +154,12 @@ class StagingConnectivityValidator:
             # Send agent request (should either succeed or get auth error)
             agent_request = {
                 "id": f"test_{uuid.uuid4().hex[:8]}",
-                "type": "agent_execute",
-                "agent_type": "connectivity_test_agent",
-                "data": {"test": "staging_connectivity"}
+                "type": "start_agent",
+                "payload": {
+                    "user_request": "Test staging connectivity",
+                    "agent_type": "connectivity_test_agent",
+                    "test": "staging_connectivity"
+                }
             }
             
             await websocket.send(json.dumps(agent_request))

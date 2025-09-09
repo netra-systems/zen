@@ -30,8 +30,8 @@ import threading
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user
 
-# Import problematic modules to test
-from netra_backend.app.data_contexts.user_data_context import UserDataContext
+# Import correct SSOT modules to test
+from netra_backend.app.data_contexts.user_data_context import UserClickHouseContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Import CORRECT types that should be used
@@ -69,9 +69,9 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
     BUSINESS IMPACT: Prevents cross-user data exposure through agents
     """
     
-    async def async_setup_method(self, method):
-        """Enhanced async setup for agent execution testing."""
-        await super().async_setup_method(method)
+    def setup_method(self, method):
+        """Enhanced setup for agent execution testing."""
+        super().setup_method(method)
         
         # Enable strict agent isolation detection
         self.set_env_var("STRICT_AGENT_ISOLATION", "true") 
@@ -81,9 +81,9 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         # Initialize test data
         self.corruption_incidents: List[str] = []
         self.agent_executions: Dict[str, MockAgentExecution] = {}
-        self.user_contexts: Dict[str, UserDataContext] = {}
+        self.user_contexts: Dict[str, UserClickHouseContext] = {}
         
-        # Setup mock agent execution tracking
+        # Setup agent execution and WebSocket event tracking per SSOT patterns
         self.agent_execution_calls = []
         self.websocket_event_calls = []
         
@@ -96,29 +96,46 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         This test simulates 2+ users running agents concurrently and verifies
         that their execution contexts remain isolated.
+        
+        CRITICAL: E2E AUTH ENFORCEMENT per CLAUDE.md - All tests must use authentication
         """
         print("🚨 TESTING: Concurrent agent execution context mixing detection")
         
-        # Create multiple user contexts that might mix due to string ID weaknesses  
+        # MANDATORY: E2E Authentication per CLAUDE.md
+        auth_helper = E2EAuthHelper(environment="test")
+        
+        # Create multiple authenticated user contexts that might mix due to string ID weaknesses  
         users_data = []
         for i in range(3):
+            user_id = f"concurrent_user_{i}"
+            
+            # CRITICAL: Generate proper JWT token for each user
+            token = auth_helper.create_test_jwt_token(user_id=user_id)
+            auth_headers = auth_helper.get_websocket_headers(token)
+            
             user_data = {
-                "user_id": f"concurrent_user_{i}",  # VIOLATION: str instead of UserID
+                "user_id": user_id,  # VIOLATION: str instead of UserID
                 "request_id": f"concurrent_req_{i}",  # VIOLATION: str instead of RequestID
                 "thread_id": f"concurrent_thread_{i}",  # VIOLATION: str instead of ThreadID
                 "agent_type": f"optimization_agent_{i % 2}",  # Mix of agent types
+                "auth_token": token,  # E2E AUTH: Include authentication token
+                "auth_headers": auth_headers,  # E2E AUTH: Include WebSocket headers
             }
             users_data.append(user_data)
             
-        # Create contexts for each user
+        # Create contexts for each user using concrete implementation
         contexts_created = []
         for user_data in users_data:
             try:
-                context = UserDataContext(
+                # Use concrete UserClickHouseContext instead of abstract UserDataContext
+                context = UserClickHouseContext(
                     user_id=user_data["user_id"],
                     request_id=user_data["request_id"],
                     thread_id=user_data["thread_id"]
                 )
+                # CRITICAL: Initialize the context (required for concrete implementations)
+                await context.initialize()
+                
                 self.user_contexts[user_data["user_id"]] = context
                 contexts_created.append(user_data["user_id"])
                 print(f"✓ Created context for user: {user_data['user_id']}")
@@ -285,39 +302,59 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         EXPECTED RESULT: FAIL - Agent results contaminated between users
         BUSINESS RISK: Enterprise user sees free user's data and vice versa
+        
+        CRITICAL: E2E AUTH ENFORCEMENT per CLAUDE.md - All tests must use authentication
         """
         print("🚨 TESTING: Agent result routing cross-user contamination")
         
+        # MANDATORY: E2E Authentication per CLAUDE.md
+        auth_helper = E2EAuthHelper(environment="test")
+        
         contamination_incidents = []
         
-        # Create two distinct users with different data profiles
+        # Create two distinct authenticated users with different data profiles
+        enterprise_user_id = "enterprise_user_001"
+        enterprise_token = auth_helper.create_test_jwt_token(user_id=enterprise_user_id)
+        enterprise_headers = auth_helper.get_websocket_headers(enterprise_token)
+        
         enterprise_user = {
-            "user_id": "enterprise_user_001",  # VIOLATION: str instead of UserID
+            "user_id": enterprise_user_id,  # VIOLATION: str instead of UserID
             "request_id": "enterprise_req_001",
             "thread_id": "enterprise_thread_001", 
             "tier": "enterprise",
-            "sensitive_data": "CONFIDENTIAL_ENTERPRISE_OPTIMIZATION_DATA"
+            "sensitive_data": "CONFIDENTIAL_ENTERPRISE_OPTIMIZATION_DATA",
+            "auth_token": enterprise_token,  # E2E AUTH: Include authentication
+            "auth_headers": enterprise_headers,
         }
         
+        free_user_id = "free_user_002"
+        free_token = auth_helper.create_test_jwt_token(user_id=free_user_id)
+        free_headers = auth_helper.get_websocket_headers(free_token)
+        
         free_user = {
-            "user_id": "free_user_002",  # VIOLATION: str instead of UserID
+            "user_id": free_user_id,  # VIOLATION: str instead of UserID
             "request_id": "free_req_002",
             "thread_id": "free_thread_002",
             "tier": "free", 
-            "sensitive_data": "FREE_TIER_BASIC_DATA"
+            "sensitive_data": "FREE_TIER_BASIC_DATA",
+            "auth_token": free_token,  # E2E AUTH: Include authentication
+            "auth_headers": free_headers,
         }
         
         users = [enterprise_user, free_user]
         
-        # Create contexts for both users
+        # Create contexts for both users using concrete implementation
         user_results = {}
         for user in users:
             try:
-                context = UserDataContext(
+                context = UserClickHouseContext(
                     user_id=user["user_id"],
                     request_id=user["request_id"],
                     thread_id=user["thread_id"]
                 )
+                # CRITICAL: Initialize the context
+                await context.initialize()
+                
                 self.user_contexts[user["user_id"]] = context
                 user_results[user["user_id"]] = {"context_created": True}
             except Exception as e:
@@ -461,20 +498,33 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         EXPECTED RESULT: FAIL - WebSocket events delivered to wrong users
         BUSINESS RISK: User A sees User B's agent progress and results
+        
+        CRITICAL: E2E AUTH ENFORCEMENT per CLAUDE.md - All tests must use authentication
         """
         print("🚨 TESTING: WebSocket event delivery user isolation")
         
+        # MANDATORY: E2E Authentication per CLAUDE.md
+        auth_helper = E2EAuthHelper(environment="test")
+        
         isolation_violations = []
         
-        # Create multiple users with WebSocket connections
+        # Create multiple authenticated users with WebSocket connections
         websocket_users = []
         for i in range(3):
+            user_id = f"ws_user_{i}"
+            
+            # CRITICAL: Generate proper JWT token and WebSocket headers
+            token = auth_helper.create_test_jwt_token(user_id=user_id)
+            auth_headers = auth_helper.get_websocket_headers(token)
+            
             user_data = {
-                "user_id": f"ws_user_{i}",
+                "user_id": user_id,
                 "request_id": f"ws_req_{i}",
                 "thread_id": f"ws_thread_{i}",
                 "websocket_id": f"ws_conn_{i}",  # VIOLATION: str instead of WebSocketID
-                "connection_state": "connected"
+                "connection_state": "connected",
+                "auth_token": token,  # E2E AUTH: Include authentication
+                "auth_headers": auth_headers,  # E2E AUTH: WebSocket headers
             }
             websocket_users.append(user_data)
         
@@ -482,11 +532,14 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         mock_websocket_connections = {}
         for user in websocket_users:
             try:
-                context = UserDataContext(
+                context = UserClickHouseContext(
                     user_id=user["user_id"],
                     request_id=user["request_id"],
                     thread_id=user["thread_id"]
                 )
+                # CRITICAL: Initialize the context
+                await context.initialize()
+                
                 self.user_contexts[user["user_id"]] = context
                 
                 # Mock WebSocket connection
@@ -620,9 +673,30 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         print("✅ WebSocket event isolation appears intact")
     
-    async def async_teardown_method(self, method):
-        """Enhanced async teardown with corruption incident reporting."""
-        await super().async_teardown_method(method)
+    def teardown_method(self, method):
+        """Enhanced teardown with corruption incident reporting."""
+        # CRITICAL: Clean up all user contexts to prevent resource leaks
+        if hasattr(self, 'user_contexts'):
+            import asyncio
+            async def cleanup_contexts():
+                for context in self.user_contexts.values():
+                    try:
+                        await context.cleanup()
+                    except Exception as e:
+                        print(f"Warning: Error cleaning up user context: {e}")
+            # Run cleanup in event loop if available
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # Schedule cleanup task
+                    loop.create_task(cleanup_contexts())
+                else:
+                    loop.run_until_complete(cleanup_contexts())
+            except RuntimeError:
+                # No event loop available, skip cleanup
+                pass
+        
+        super().teardown_method(method)
         
         # Report all corruption incidents found during test
         if self.corruption_incidents:
@@ -655,6 +729,6 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
 
 
 # Mark these as critical integration tests
-pytest.mark.critical_agent_corruption = pytest.mark.mark
-pytest.mark.agent_execution_violations = pytest.mark.mark
-pytest.mark.integration_corruption = pytest.mark.mark
+pytest.mark.critical_agent_corruption = pytest.mark.critical
+pytest.mark.agent_execution_violations = pytest.mark.integration
+pytest.mark.integration_corruption = pytest.mark.mission_critical

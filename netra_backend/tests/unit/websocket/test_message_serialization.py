@@ -48,7 +48,7 @@ from netra_backend.app.websocket_core.unified_manager import _serialize_message_
 
 
 # Test enums for comprehensive enum testing
-class TestWebSocketState(Enum):
+class WebSocketStateForTesting(Enum):
     """Test enum mimicking WebSocketState for comprehensive testing."""
     CONNECTING = 0
     OPEN = 1
@@ -56,14 +56,14 @@ class TestWebSocketState(Enum):
     CLOSED = 3
 
 
-class TestGenericEnum(Enum):
+class GenericTestEnum(Enum):
     """Test generic enum without special handling."""
     OPTION_A = "option_a"
     OPTION_B = "option_b"
     OPTION_C = 42
 
 
-class TestIntEnum(Enum):
+class IntegerTestEnum(Enum):
     """Test integer-based enum."""
     FIRST = 1
     SECOND = 2
@@ -114,7 +114,7 @@ class MockToDictObject:
 
 
 @dataclass
-class TestDataclass:
+class SerializationSerializationTestDataclass:
     """Test dataclass for serialization testing."""
     name: str
     value: int
@@ -239,7 +239,7 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     
     def test_serialize_test_websocket_state_enum(self):
         """Test serialization of test WebSocketState enum."""
-        result = _serialize_message_safely(TestWebSocketState.OPEN)
+        result = _serialize_message_safely(WebSocketStateForTesting.OPEN)
         
         # Should return the enum value for generic enums
         self.assertEqual(result, 1)
@@ -247,12 +247,12 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     def test_serialize_generic_enum_types(self):
         """Test serialization of various generic enum types."""
         test_cases = [
-            (TestGenericEnum.OPTION_A, "option_a"),
-            (TestGenericEnum.OPTION_B, "option_b"), 
-            (TestGenericEnum.OPTION_C, 42),
-            (TestIntEnum.FIRST, 1),
-            (TestIntEnum.SECOND, 2),
-            (TestIntEnum.THIRD, 3)
+            (GenericTestEnum.OPTION_A, "option_a"),
+            (GenericTestEnum.OPTION_B, "option_b"), 
+            (GenericTestEnum.OPTION_C, 42),
+            (IntegerTestEnum.FIRST, 1),
+            (IntegerTestEnum.SECOND, 2),
+            (IntegerTestEnum.THIRD, 3)
         ]
         
         for enum_val, expected in test_cases:
@@ -310,7 +310,7 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     def test_serialize_simple_dataclass(self):
         """Test serialization of simple dataclass."""
         timestamp = datetime.now()
-        dc = TestDataclass(
+        dc = SerializationTestDataclass(
             name="test_dataclass",
             value=42,
             timestamp=timestamp
@@ -328,10 +328,10 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
         nested_data = {
             "config": {"debug": True},
             "stats": [1, 2, 3],
-            "enum_val": TestGenericEnum.OPTION_A
+            "enum_val": GenericTestEnum.OPTION_A
         }
         
-        dc = TestDataclass(
+        dc = SerializationTestDataclass(
             name="nested_test",
             value=99,
             timestamp=timestamp,
@@ -381,7 +381,7 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
             42,
             3.14,
             True,
-            TestGenericEnum.OPTION_A,
+            GenericTestEnum.OPTION_A,
             datetime.now(),
             {"nested": "dict"},
             [1, 2, 3]
@@ -402,7 +402,7 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
             "item1",
             "item2", 
             "item3",
-            TestGenericEnum.OPTION_B
+            GenericTestEnum.OPTION_B
         }
         
         result = _serialize_message_safely(data)
@@ -417,7 +417,7 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     
     def test_serialize_tuples_to_lists(self):
         """Test serialization of tuples (converted to lists)."""
-        data = ("first", 42, TestGenericEnum.OPTION_C, datetime.now())
+        data = ("first", 42, GenericTestEnum.OPTION_C, datetime.now())
         
         result = _serialize_message_safely(data)
         
@@ -435,9 +435,9 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     def test_serialize_dict_with_enum_keys(self):
         """Test serialization of dictionaries with enum keys."""
         data = {
-            TestWebSocketState.OPEN: "connection_active",
-            TestWebSocketState.CLOSED: "connection_inactive", 
-            TestGenericEnum.OPTION_A: "selected_option",
+            WebSocketStateForTesting.OPEN: "connection_active",
+            WebSocketStateForTesting.CLOSED: "connection_inactive", 
+            GenericTestEnum.OPTION_A: "selected_option",
             "normal_key": "normal_value"
         }
         
@@ -456,15 +456,15 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     def test_serialize_complex_dict_with_mixed_enum_keys(self):
         """Test complex dictionary with mixed enum keys and values."""
         data = {
-            TestWebSocketState.CONNECTING: {
-                "status": TestGenericEnum.OPTION_A,
+            WebSocketStateForTesting.CONNECTING: {
+                "status": GenericTestEnum.OPTION_A,
                 "timestamp": datetime.now(),
                 "nested": {
-                    TestIntEnum.FIRST: [1, 2, TestGenericEnum.OPTION_B]
+                    IntegerTestEnum.FIRST: [1, 2, GenericTestEnum.OPTION_B]
                 }
             },
             "metadata": {
-                "enum_value": TestWebSocketState.OPEN,
+                "enum_value": WebSocketStateForTesting.OPEN,
                 "count": 42
             }
         }
@@ -498,15 +498,15 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
         data = {
             "user_context": {
                 "user_id": "user_123",
-                "session_state": TestWebSocketState.OPEN,
+                "session_state": WebSocketStateForTesting.OPEN,
                 "permissions": ["read", "write"],
                 "metadata": {
                     "created_at": timestamp,
                     "preferences": {
-                        "theme": TestGenericEnum.OPTION_A,
+                        "theme": GenericTestEnum.OPTION_A,
                         "notifications": True,
                         "settings": {
-                            "level": TestIntEnum.SECOND,
+                            "level": IntegerTestEnum.SECOND,
                             "tags": {"urgent", "priority", "review"}
                         }
                     }
@@ -515,13 +515,13 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
             "agent_states": [
                 {
                     "agent_id": "agent_001",
-                    "status": TestWebSocketState.CONNECTING,
+                    "status": WebSocketStateForTesting.CONNECTING,
                     "progress": 0.75,
                     "last_update": timestamp
                 },
                 {
                     "agent_id": "agent_002", 
-                    "status": TestWebSocketState.CLOSED,
+                    "status": WebSocketStateForTesting.CLOSED,
                     "error": None
                 }
             ]
@@ -586,7 +586,7 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
         
         data = {
             "normal": "value",
-            "enum": TestGenericEnum.OPTION_A,
+            "enum": GenericTestEnum.OPTION_A,
             "datetime": datetime.now(),
             "problematic": problematic_obj,
             "nested": {
@@ -630,11 +630,11 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
                 "items": [
                     {
                         "id": f"item_{i}_{j}",
-                        "status": TestGenericEnum.OPTION_A if j % 2 == 0 else TestGenericEnum.OPTION_B,
+                        "status": GenericTestEnum.OPTION_A if j % 2 == 0 else GenericTestEnum.OPTION_B,
                         "timestamp": datetime.now(),
                         "metadata": {
                             "tags": {f"tag_{k}" for k in range(3)},
-                            "priority": TestIntEnum.FIRST
+                            "priority": IntegerTestEnum.FIRST
                         }
                     }
                     for j in range(10)
@@ -690,10 +690,10 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
             "user_id": "user_12345",
             "thread_id": "thread_67890", 
             "timestamp": datetime.now(timezone.utc),
-            "connection_state": TestWebSocketState.OPEN,
+            "connection_state": WebSocketStateForTesting.OPEN,
             "payload": {
                 "agent_name": "CostOptimizer",
-                "status": TestGenericEnum.OPTION_A,
+                "status": GenericTestEnum.OPTION_A,
                 "progress": 0.65,
                 "current_step": "analyzing_patterns",
                 "metadata": {
@@ -702,8 +702,8 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
                     "estimat_remaining": 5000,
                     "tags": {"cost", "optimization", "analysis"},
                     "state_info": {
-                        TestIntEnum.FIRST: "initialized",
-                        TestIntEnum.SECOND: "processing"
+                        IntegerTestEnum.FIRST: "initialized",
+                        IntegerTestEnum.SECOND: "processing"
                     }
                 }
             },

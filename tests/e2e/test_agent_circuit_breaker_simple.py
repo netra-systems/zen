@@ -585,22 +585,28 @@ async def test_real_websocket_agent_execution_during_circuit_breaker_recovery(is
             # Phase 1: Test agent execution during potential circuit breaker issues
             test_requests = [
                 {
-                    "type": "agent_execute",
-                    "agent": "triage", 
-                    "message": "Circuit breaker recovery test - phase 1",
-                    "request_id": "ws_cb_recovery_test_001"
+                    "type": "start_agent",
+                    "payload": {
+                        "user_request": "Circuit breaker recovery test - phase 1",
+                        "agent": "triage",
+                        "request_id": "ws_cb_recovery_test_001"
+                    }
                 },
                 {
-                    "type": "agent_execute",
-                    "agent": "triage",
-                    "message": "Recovery monitoring during failures", 
-                    "request_id": "ws_cb_recovery_test_002"
+                    "type": "start_agent",
+                    "payload": {
+                        "user_request": "Recovery monitoring during failures",
+                        "agent": "triage",
+                        "request_id": "ws_cb_recovery_test_002"
+                    }
                 },
                 {
-                    "type": "agent_execute",
-                    "agent": "triage",
-                    "message": "Final recovery validation test",
-                    "request_id": "ws_cb_recovery_test_003"
+                    "type": "start_agent",
+                    "payload": {
+                        "user_request": "Final recovery validation test",
+                        "agent": "triage",
+                        "request_id": "ws_cb_recovery_test_003"
+                    }
                 }
             ]
             

@@ -258,10 +258,13 @@ class RealAgentExecutionValidator:
         
         message = {
             "id": request_id,
-            "type": "agent_execute",
-            "agent_type": agent_type,
-            "session_id": self.test_session_id,
-            "data": request_data,
+            "type": "start_agent",
+            "payload": {
+                "user_request": f"Execute {agent_type} with data: {request_data}",
+                "agent_type": agent_type,
+                "session_id": self.test_session_id,
+                **request_data
+            },
             "timestamp": datetime.now().isoformat()
         }
         

@@ -29,8 +29,10 @@ from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
-class TestConfigurationValidator:
+class ConfigurationValidator:
     """Validates test configuration consistency across services."""
+    
+    __test__ = False  # Tell pytest this is not a test class
     
     # SSOT: Required test environment variables
     REQUIRED_TEST_VARS = [
@@ -473,13 +475,13 @@ class TestConfigurationValidator:
 # GLOBAL VALIDATOR INSTANCE AND HELPER FUNCTIONS
 # =============================================================================
 
-_validator_instance: Optional[TestConfigurationValidator] = None
+_validator_instance: Optional[ConfigurationValidator] = None
 
-def get_config_validator() -> TestConfigurationValidator:
+def get_config_validator() -> ConfigurationValidator:
     """Get SSOT configuration validator singleton instance."""
     global _validator_instance
     if _validator_instance is None:
-        _validator_instance = TestConfigurationValidator()
+        _validator_instance = ConfigurationValidator()
     return _validator_instance
 
 def validate_test_config(service_name: str = None, skip_on_failure: bool = True) -> None:
@@ -558,12 +560,12 @@ def get_service_port(service_name: str, port_type: str = "postgres") -> Optional
     return validator.get_service_port(service_name, port_type)
 
 # Legacy alias for backward compatibility
-ConfigurationValidator = TestConfigurationValidator
+TestConfigurationValidator = ConfigurationValidator
 
 # Export key classes and functions
 __all__ = [
-    "TestConfigurationValidator",
-    "ConfigurationValidator",  # Legacy alias
+    "ConfigurationValidator",
+    "TestConfigurationValidator",  # Legacy alias
     "get_config_validator", 
     "validate_test_config",
     "is_service_enabled",

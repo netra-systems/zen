@@ -23,6 +23,7 @@ from unittest.mock import Mock, patch
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import LoginRequest, LoginResponse
 from auth_service.auth_core.auth_environment import AuthEnvironment
+from auth_service.auth_core.business_logic import user_business_logic
 from shared.isolated_environment import get_env
 from netra_backend.app.schemas.tenant import SubscriptionTier
 
@@ -39,6 +40,16 @@ class TestAuthBusinessLogicValidation:
     @pytest.fixture 
     def auth_service(self, auth_env):
         return AuthService()
+    
+    @pytest.fixture
+    def subscription_validator(self):
+        from auth_service.auth_core.business_logic import subscription_validator
+        return subscription_validator
+    
+    @pytest.fixture
+    def user_business_logic(self):
+        from auth_service.auth_core.business_logic import user_business_logic
+        return user_business_logic
 
     @pytest.mark.unit
     def test_user_registration_business_rules(self, auth_service):

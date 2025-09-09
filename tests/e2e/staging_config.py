@@ -104,7 +104,13 @@ class StagingTestConfig:
         issues = []
         
         if not self.E2E_OAUTH_SIMULATION_KEY:
-            issues.append("E2E_OAUTH_SIMULATION_KEY not set")
+            # Try to get fallback value from environment again during validation
+            fallback_key = get_env().get("E2E_OAUTH_SIMULATION_KEY")
+            if fallback_key:
+                self.E2E_OAUTH_SIMULATION_KEY = fallback_key
+                logger.warning(f"Using fallback E2E_OAUTH_SIMULATION_KEY from environment during validation")
+            else:
+                issues.append("E2E_OAUTH_SIMULATION_KEY not set and no fallback available")
         
         if not self.urls.backend_url:
             issues.append("Backend URL not configured")

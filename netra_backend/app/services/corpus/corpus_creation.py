@@ -38,7 +38,7 @@ class CorpusCreationService(BaseCorpusService):
         """Create a new corpus with ClickHouse table"""
         self._validate_corpus_data(corpus_data)
         db_corpus, corpus_id, table_name = self._prepare_and_create_corpus_model(corpus_data, user_id, content_source)
-        self._persist_and_schedule_creation(db, db_corpus, corpus_data.name, user_id, corpus_id, table_name)
+        await self._persist_and_schedule_creation(db, db_corpus, corpus_data.name, user_id, corpus_id, table_name)
         return db_corpus
     
     def _validate_corpus_data(self, corpus_data: schemas.CorpusCreate) -> None:
@@ -80,13 +80,15 @@ class CorpusCreationService(BaseCorpusService):
             "version": 1
         }
     
-    def _persist_corpus_to_db(self, db: AsyncSession, db_corpus: models.Corpus, 
-                             corpus_name: str, user_id: str) -> None:
+    async def _persist_corpus_to_db(self, db: AsyncSession, db_corpus: models.Corpus, 
+                                   corpus_name: str, user_id: str) -> None:
         """Persist corpus to database with error handling"""
         try:
-            db.add(db_corpus), db.commit(), db.refresh(db_corpus)
+            db.add(db_corpus)
+            await db.commit()
+            await db.refresh(db_corpus)
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             raise self._create_persistence_error(corpus_name, user_id, str(e))
     
     def _create_persistence_error(self, corpus_name: str, user_id: str, 
@@ -104,9 +106,9 @@ class CorpusCreationService(BaseCorpusService):
         task = self.clickhouse_ops.create_corpus_table(corpus_id, table_name, db)
         asyncio.create_task(task)
     
-    def _persist_and_schedule_creation(self, db: AsyncSession, db_corpus: models.Corpus,
-                                     corpus_name: str, user_id: str, corpus_id: str, 
-                                     table_name: str) -> None:
+    async def _persist_and_schedule_creation(self, db: AsyncSession, db_corpus: models.Corpus,
+                                           corpus_name: str, user_id: str, corpus_id: str, 
+                                           table_name: str) -> None:
         """Persist corpus to database and schedule ClickHouse table creation"""
-        self._persist_corpus_to_db(db, db_corpus, corpus_name, user_id)
+        await self._persist_corpus_to_db(db, db_corpus, corpus_name, user_id)
         self._schedule_clickhouse_table_creation(corpus_id, table_name, db)

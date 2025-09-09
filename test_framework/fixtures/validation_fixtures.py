@@ -28,7 +28,7 @@ from typing import Dict, List, Optional, Tuple
 import pytest
 
 from test_framework.ssot.configuration_validator import (
-    TestConfigurationValidator,
+    ConfigurationValidator,
     get_config_validator,
     validate_test_config
 )
@@ -117,7 +117,7 @@ def setup_test_session_configuration():
 # =============================================================================
 
 @pytest.fixture
-def config_validator() -> TestConfigurationValidator:
+def config_validator() -> ConfigurationValidator:
     """Provide configuration validator for manual validation in tests.
     
     Usage:
@@ -126,7 +126,7 @@ def config_validator() -> TestConfigurationValidator:
             assert is_valid, f"Database config invalid: {errors}"
     
     Returns:
-        TestConfigurationValidator instance
+        ConfigurationValidator instance
     """
     return get_config_validator()
 

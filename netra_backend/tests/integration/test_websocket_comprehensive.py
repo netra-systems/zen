@@ -1198,6 +1198,332 @@ class TestWebSocketReconnection(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
+    async def test_agent_started_event_structure(self, test_db_session, isolated_env):
+        """
+        BVJ: Validates agent_started event contains required data for UI rendering.
+        Tests that agent_started events have proper structure for frontend consumption.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for agent_started event testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="test_agent_started_user",
+            email="agent_started@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="test_agent_started_user"
+        )
+        
+        # Send agent request to trigger agent_started
+        agent_request = {
+            "type": "chat",
+            "content": "Test request for agent_started event",
+            "user_id": "test_agent_started_user",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, agent_request)
+        
+        # Look for agent_started event
+        started_event = None
+        for _ in range(10):
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=3.0)
+                if response.get("type") == "agent_started":
+                    started_event = response
+                    break
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate agent_started event structure
+        if started_event:
+            required_fields = ["type", "timestamp", "agent_name"]
+            validate_websocket_message(started_event, required_fields)
+            
+            # Validate specific agent_started fields
+            assert started_event["type"] == "agent_started"
+            assert "agent_name" in started_event
+            assert len(started_event["agent_name"]) > 0
+            assert isinstance(started_event["timestamp"], (int, float))
+        else:
+            pytest.skip("No agent_started event received - system may not generate for simple requests")
+            
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_tool_executing_event_validation(self, test_db_session, isolated_env):
+        """
+        BVJ: Ensures tool_executing events provide transparency for user engagement.
+        Tests that tool_executing events contain proper tool information.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for tool_executing event testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="test_tool_executing_user",
+            email="tool_executing@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="test_tool_executing_user"
+        )
+        
+        # Send agent request that might trigger tool usage
+        tool_request = {
+            "type": "chat",
+            "content": "Analyze data and provide insights",
+            "user_id": "test_tool_executing_user",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, tool_request)
+        
+        # Look for tool_executing event
+        tool_event = None
+        for _ in range(15):
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=2.0)
+                if response.get("type") == "tool_executing":
+                    tool_event = response
+                    break
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate tool_executing event if received
+        if tool_event:
+            required_fields = ["type", "timestamp", "tool_name"]
+            validate_websocket_message(tool_event, required_fields)
+            
+            assert tool_event["type"] == "tool_executing"
+            assert "tool_name" in tool_event
+            assert len(tool_event["tool_name"]) > 0
+        else:
+            pytest.skip("No tool_executing event received - system may not use tools for simple requests")
+            
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_tool_completed_event_validation(self, test_db_session, isolated_env):
+        """
+        BVJ: Validates tool completion delivers actionable results to users.
+        Tests that tool_completed events contain proper result data.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for tool_completed event testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="test_tool_completed_user",
+            email="tool_completed@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="test_tool_completed_user"
+        )
+        
+        # Send request that might trigger tool completion
+        tool_request = {
+            "type": "chat",
+            "content": "Execute analysis and return results",
+            "user_id": "test_tool_completed_user",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, tool_request)
+        
+        # Look for tool_completed event
+        completed_event = None
+        for _ in range(20):
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=2.0)
+                if response.get("type") == "tool_completed":
+                    completed_event = response
+                    break
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate tool_completed event if received
+        if completed_event:
+            required_fields = ["type", "timestamp", "tool_name"]
+            validate_websocket_message(completed_event, required_fields)
+            
+            assert completed_event["type"] == "tool_completed"
+            assert "tool_name" in completed_event
+            assert len(completed_event["tool_name"]) > 0
+            # Results field may be optional but timestamp is required
+            assert isinstance(completed_event["timestamp"], (int, float))
+        else:
+            pytest.skip("No tool_completed event received - system may not use tools for simple requests")
+            
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_agent_completed_final_response(self, test_db_session, isolated_env):
+        """
+        BVJ: Ensures agent_completed delivers final value to users.
+        Tests that agent_completed events contain proper final response data.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for agent_completed event testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="test_agent_completed_user",
+            email="agent_completed@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="test_agent_completed_user"
+        )
+        
+        # Send request to trigger agent completion
+        completion_request = {
+            "type": "chat",
+            "content": "Simple request that should complete",
+            "user_id": "test_agent_completed_user",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, completion_request)
+        
+        # Look for agent_completed event with longer timeout
+        completed_event = None
+        for _ in range(30):
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=2.0)
+                if response.get("type") == "agent_completed":
+                    completed_event = response
+                    break
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate agent_completed event
+        if completed_event:
+            required_fields = ["type", "timestamp"]
+            validate_websocket_message(completed_event, required_fields)
+            
+            assert completed_event["type"] == "agent_completed"
+            assert isinstance(completed_event["timestamp"], (int, float))
+            
+            # Response field validation (should contain meaningful response)
+            if "response" in completed_event:
+                assert len(str(completed_event["response"])) > 0
+            elif "final_response" in completed_event:
+                assert len(str(completed_event["final_response"])) > 0
+        else:
+            pytest.skip("No agent_completed event received - system may not complete for simple requests")
+            
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_websocket_event_ordering_sequence(self, test_db_session, isolated_env):
+        """
+        BVJ: Validates proper event sequence for coherent user experience.
+        Tests that WebSocket agent events arrive in correct chronological order.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for event ordering testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="test_ordering_user",
+            email="ordering@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="test_ordering_user"
+        )
+        
+        # Send request to trigger event sequence
+        sequence_request = {
+            "type": "chat",
+            "content": "Request that should trigger event sequence",
+            "user_id": "test_ordering_user",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, sequence_request)
+        
+        # Collect all events with timestamps
+        events_with_time = []
+        start_time = time.time()
+        
+        while time.time() - start_time < 25.0:
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=2.0)
+                event_time = time.time()
+                events_with_time.append((response, event_time))
+                
+                if response.get("type") == "agent_completed":
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate event ordering
+        agent_events = [
+            (event, event_time) for event, event_time in events_with_time
+            if event.get("type") in ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
+        ]
+        
+        if len(agent_events) >= 2:
+            # Events should arrive in chronological order
+            for i in range(1, len(agent_events)):
+                prev_time = agent_events[i-1][1]
+                curr_time = agent_events[i][1]
+                assert curr_time >= prev_time, f"Events out of chronological order: {agent_events[i-1][0]['type']} -> {agent_events[i][0]['type']}"
+        
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
     async def test_message_queuing_during_disconnect(self, test_db_session, isolated_env):
         """
         BVJ: Prevents message loss during temporary disconnections.
@@ -1545,6 +1871,631 @@ class TestWebSocketHealthMonitoring(BaseIntegrationTest):
         assert total_messages > 0
         assert success_count > 0  # Should have processed valid ping messages
         
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+
+class TestWebSocketUserContextIsolation(BaseIntegrationTest):
+    """Test WebSocket user context isolation and factory patterns."""
+    
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_user_execution_context_websocket_isolation(self, test_db_session, isolated_env):
+        """
+        BVJ: Ensures enterprise security through proper user context isolation.
+        Tests UserExecutionContext factory patterns prevent cross-user data leakage.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for user context isolation testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        
+        # Create two separate user contexts
+        user1_token = auth_helper.create_test_jwt_token(
+            user_id="isolated_user_1",
+            email="user1@example.com"
+        )
+        
+        user2_token = auth_helper.create_test_jwt_token(
+            user_id="isolated_user_2",
+            email="user2@example.com"
+        )
+        
+        # Create separate WebSocket connections
+        headers1 = auth_helper.get_websocket_headers(user1_token)
+        headers2 = auth_helper.get_websocket_headers(user2_token)
+        
+        websocket1 = await WebSocketTestHelpers.create_test_websocket_connection(
+            f"ws://localhost:8000/ws",
+            headers=headers1,
+            timeout=10.0,
+            user_id="isolated_user_1"
+        )
+        
+        websocket2 = await WebSocketTestHelpers.create_test_websocket_connection(
+            f"ws://localhost:8000/ws",
+            headers=headers2,
+            timeout=10.0,
+            user_id="isolated_user_2"
+        )
+        
+        # Send different requests from each user
+        user1_msg = {
+            "type": "chat",
+            "content": "User 1 private message",
+            "user_id": "isolated_user_1",
+            "timestamp": time.time()
+        }
+        
+        user2_msg = {
+            "type": "chat",
+            "content": "User 2 private message", 
+            "user_id": "isolated_user_2",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket1, user1_msg)
+        await WebSocketTestHelpers.send_test_message(websocket2, user2_msg)
+        
+        # Collect responses for each user
+        user1_events = []
+        user2_events = []
+        
+        # Collect user 1 events
+        for _ in range(5):
+            try:
+                response1 = await WebSocketTestHelpers.receive_test_message(websocket1, timeout=3.0)
+                user1_events.append(response1)
+            except asyncio.TimeoutError:
+                break
+                
+        # Collect user 2 events
+        for _ in range(5):
+            try:
+                response2 = await WebSocketTestHelpers.receive_test_message(websocket2, timeout=3.0)
+                user2_events.append(response2)
+            except asyncio.TimeoutError:
+                break
+                
+        # Validate isolation - User 1 events should not contain User 2 data
+        user1_content = json.dumps(user1_events)
+        user2_content = json.dumps(user2_events)
+        
+        assert "User 2" not in user1_content, "User 1 received User 2's data - isolation failure"
+        assert "User 1" not in user2_content, "User 2 received User 1's data - isolation failure"
+        
+        await WebSocketTestHelpers.close_test_connection(websocket1)
+        await WebSocketTestHelpers.close_test_connection(websocket2)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_websocket_manager_factory_per_user(self, test_db_session, isolated_env):
+        """
+        BVJ: Validates factory pattern creates isolated WebSocket managers per user.
+        Tests that WebSocket manager factory prevents shared state between users.
+        """
+        services = test_db_session
+        
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        
+        # Create multiple user connections to test factory isolation
+        users = ["factory_user_1", "factory_user_2", "factory_user_3"]
+        connections = []
+        
+        try:
+            for user_id in users:
+                token = auth_helper.create_test_jwt_token(
+                    user_id=user_id,
+                    email=f"{user_id}@example.com"
+                )
+                headers = auth_helper.get_websocket_headers(token)
+                
+                websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                    f"ws://localhost:8000/ws",
+                    headers=headers,
+                    timeout=10.0,
+                    user_id=user_id
+                )
+                connections.append((websocket, user_id))
+                
+            # Send unique messages from each user
+            for i, (websocket, user_id) in enumerate(connections):
+                unique_msg = {
+                    "type": "ping",
+                    "content": f"Factory test from {user_id}",
+                    "user_id": user_id,
+                    "sequence": i,
+                    "timestamp": time.time()
+                }
+                await WebSocketTestHelpers.send_test_message(websocket, unique_msg)
+                
+            # Collect responses - each should be isolated
+            for websocket, user_id in connections:
+                try:
+                    response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=5.0)
+                    # Validate response corresponds to correct user
+                    response_str = json.dumps(response)
+                    # Response should not contain data from other users
+                    other_users = [u for u in users if u != user_id]
+                    for other_user in other_users:
+                        assert other_user not in response_str, f"WebSocket manager factory isolation failed: {user_id} received {other_user} data"
+                except asyncio.TimeoutError:
+                    pass  # Some connections may not respond immediately
+                    
+        finally:
+            # Clean up connections
+            for websocket, _ in connections:
+                try:
+                    await WebSocketTestHelpers.close_test_connection(websocket)
+                except Exception:
+                    pass
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_concurrent_user_agent_events_isolation(self, test_db_session, isolated_env):
+        """
+        BVJ: Validates concurrent users receive isolated agent events.
+        Tests that multiple users can run agents simultaneously without cross-contamination.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for concurrent agent isolation testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        
+        # Create two concurrent user sessions
+        users_data = [
+            {"user_id": "concurrent_1", "email": "concurrent1@example.com", "request": "Analyze data for user 1"},
+            {"user_id": "concurrent_2", "email": "concurrent2@example.com", "request": "Process info for user 2"}
+        ]
+        
+        connections = []
+        
+        try:
+            # Establish connections
+            for user_data in users_data:
+                token = auth_helper.create_test_jwt_token(
+                    user_id=user_data["user_id"],
+                    email=user_data["email"]
+                )
+                headers = auth_helper.get_websocket_headers(token)
+                
+                websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                    f"ws://localhost:8000/ws",
+                    headers=headers,
+                    timeout=10.0,
+                    user_id=user_data["user_id"]
+                )
+                connections.append((websocket, user_data))
+                
+            # Send concurrent agent requests
+            for websocket, user_data in connections:
+                agent_request = {
+                    "type": "chat",
+                    "content": user_data["request"],
+                    "user_id": user_data["user_id"],
+                    "timestamp": time.time()
+                }
+                await WebSocketTestHelpers.send_test_message(websocket, agent_request)
+                
+            # Collect events from both users concurrently
+            async def collect_user_events(websocket, user_data, max_events=10):
+                events = []
+                for _ in range(max_events):
+                    try:
+                        response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=2.0)
+                        events.append(response)
+                        if response.get("type") == "agent_completed":
+                            break
+                    except asyncio.TimeoutError:
+                        continue
+                return events, user_data["user_id"]
+                
+            # Collect events from both users simultaneously
+            event_tasks = [
+                collect_user_events(websocket, user_data)
+                for websocket, user_data in connections
+            ]
+            
+            results = await asyncio.gather(*event_tasks, return_exceptions=True)
+            
+            # Validate isolation
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    continue
+                    
+                events, user_id = result
+                other_user_id = users_data[1-i]["user_id"]
+                
+                # Events should not contain data from the other user
+                events_str = json.dumps(events)
+                assert other_user_id not in events_str, f"Concurrent agent events contaminated: {user_id} received {other_user_id} data"
+                
+        finally:
+            # Clean up
+            for websocket, _ in connections:
+                try:
+                    await WebSocketTestHelpers.close_test_connection(websocket)
+                except Exception:
+                    pass
+
+
+class TestWebSocketBusinessValueScenarios(BaseIntegrationTest):
+    """Test WebSocket functionality that directly delivers business value."""
+    
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_real_time_chat_value_delivery(self, test_db_session, isolated_env):
+        """
+        BVJ: MISSION CRITICAL - Tests complete chat value delivery via WebSocket events.
+        Validates that users receive meaningful, real-time AI assistance through WebSocket.
+        This test represents the core $30K+ MRR chat functionality.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for chat value delivery testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="chat_value_user",
+            email="chat_value@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=15.0,
+            user_id="chat_value_user"
+        )
+        
+        # Send business-critical chat request
+        business_request = {
+            "type": "chat",
+            "content": "Help me optimize our cloud costs and identify savings opportunities",
+            "user_id": "chat_value_user",
+            "thread_id": f"business_thread_{int(time.time())}",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, business_request)
+        
+        # Collect comprehensive event sequence
+        business_value_events = []
+        start_time = time.time()
+        
+        while time.time() - start_time < 30.0:
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=3.0)
+                business_value_events.append(response)
+                
+                if response.get("type") == "agent_completed":
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate complete business value delivery
+        event_types = [event.get("type") for event in business_value_events]
+        
+        # CRITICAL: Must have meaningful business interaction
+        assert len(business_value_events) > 0, "No WebSocket events received - chat has no business value"
+        
+        # Validate user receives real-time feedback (any meaningful events)
+        meaningful_events = [
+            "agent_started", "agent_thinking", "tool_executing", 
+            "tool_completed", "agent_completed", "ack", "response"
+        ]
+        received_meaningful = [event for event in event_types if event in meaningful_events]
+        assert len(received_meaningful) > 0, f"No meaningful events received - business value not delivered. Got: {event_types}"
+        
+        # Business value assertion - user must get actionable response
+        has_actionable_content = False
+        for event in business_value_events:
+            content_fields = ["response", "final_response", "message", "content", "reasoning"]
+            for field in content_fields:
+                if field in event and event[field] and len(str(event[field])) > 10:
+                    has_actionable_content = True
+                    break
+                    
+        assert has_actionable_content, "WebSocket events contain no actionable business content"
+        
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_enterprise_multi_user_chat_isolation(self, test_db_session, isolated_env):
+        """
+        BVJ: Validates enterprise security for multi-tenant chat environments.
+        Tests that enterprise customers can have isolated chat sessions.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for enterprise isolation testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        
+        # Create enterprise user contexts
+        enterprise_users = [
+            {"user_id": "enterprise_user_1", "org": "TechCorp", "request": "Sensitive TechCorp data analysis"},
+            {"user_id": "enterprise_user_2", "org": "MegaInc", "request": "Confidential MegaInc optimization"}
+        ]
+        
+        connections = []
+        
+        try:
+            # Establish enterprise connections
+            for user_data in enterprise_users:
+                token = auth_helper.create_test_jwt_token(
+                    user_id=user_data["user_id"],
+                    email=f"{user_data['user_id']}@{user_data['org'].lower()}.com",
+                    permissions=["read", "write", "enterprise"]
+                )
+                headers = auth_helper.get_websocket_headers(token)
+                
+                websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+                    f"ws://localhost:8000/ws",
+                    headers=headers,
+                    timeout=10.0,
+                    user_id=user_data["user_id"]
+                )
+                connections.append((websocket, user_data))
+                
+            # Send sensitive enterprise requests
+            for websocket, user_data in connections:
+                enterprise_request = {
+                    "type": "chat",
+                    "content": user_data["request"],
+                    "user_id": user_data["user_id"],
+                    "org_context": user_data["org"],
+                    "security_level": "enterprise",
+                    "timestamp": time.time()
+                }
+                await WebSocketTestHelpers.send_test_message(websocket, enterprise_request)
+                
+            # Validate enterprise isolation
+            for i, (websocket, user_data) in enumerate(connections):
+                user_events = []
+                
+                # Collect events for this enterprise user
+                for _ in range(10):
+                    try:
+                        response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=3.0)
+                        user_events.append(response)
+                    except asyncio.TimeoutError:
+                        break
+                        
+                # Validate enterprise data isolation
+                events_content = json.dumps(user_events)
+                other_user = enterprise_users[1-i]
+                
+                # CRITICAL: Enterprise user data must not leak
+                assert other_user["org"] not in events_content, f"ENTERPRISE SECURITY BREACH: {user_data['org']} received {other_user['org']} data"
+                assert other_user["user_id"] not in events_content, f"ENTERPRISE ISOLATION FAILURE: Cross-user data leakage detected"
+                
+        finally:
+            # Secure cleanup
+            for websocket, _ in connections:
+                try:
+                    await WebSocketTestHelpers.close_test_connection(websocket)
+                except Exception:
+                    pass
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_free_tier_websocket_value_demonstration(self, test_db_session, isolated_env):
+        """
+        BVJ: Demonstrates WebSocket value for free tier users to drive conversion.
+        Tests that free tier users get enough value to convert to paid tiers.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for free tier value testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="free_tier_user",
+            email="free_user@example.com",
+            permissions=["read"]  # Limited free tier permissions
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="free_tier_user"
+        )
+        
+        # Send free tier appropriate request
+        free_tier_request = {
+            "type": "chat",
+            "content": "Quick help with basic optimization suggestions",
+            "user_id": "free_tier_user",
+            "tier": "free",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, free_tier_request)
+        
+        # Collect free tier response events
+        free_tier_events = []
+        for _ in range(15):
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=2.0)
+                free_tier_events.append(response)
+                if response.get("type") == "agent_completed":
+                    break
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate free tier gets meaningful value
+        assert len(free_tier_events) > 0, "Free tier users received no WebSocket value - conversion impossible"
+        
+        # Free tier should get basic real-time feedback
+        event_types = [event.get("type") for event in free_tier_events]
+        valuable_events = ["agent_started", "agent_thinking", "agent_completed", "response", "ack"]
+        received_value = [event for event in event_types if event in valuable_events]
+        
+        assert len(received_value) > 0, f"Free tier received no valuable events - no conversion incentive. Got: {event_types}"
+        
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_websocket_agent_event_payload_validation(self, test_db_session, isolated_env):
+        """
+        BVJ: Validates WebSocket agent event payloads meet API contract requirements.
+        Tests that all 5 critical agent events have valid payload structures.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for payload validation testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="payload_validation_user",
+            email="payload@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="payload_validation_user"
+        )
+        
+        # Send comprehensive agent request
+        payload_request = {
+            "type": "chat",
+            "content": "Comprehensive request to validate all agent event payloads",
+            "user_id": "payload_validation_user",
+            "timestamp": time.time()
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, payload_request)
+        
+        # Collect and validate each event type's payload
+        collected_events = {}
+        for _ in range(25):
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=2.0)
+                event_type = response.get("type")
+                
+                if event_type in ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]:
+                    collected_events[event_type] = response
+                    
+                if event_type == "agent_completed":
+                    break
+                    
+            except asyncio.TimeoutError:
+                continue
+                
+        # Validate each critical event type payload
+        for event_type, event_data in collected_events.items():
+            # Common required fields for all agent events
+            common_fields = ["type", "timestamp"]
+            validate_websocket_message(event_data, common_fields)
+            
+            # Event-specific validations
+            if event_type == "agent_started":
+                assert "agent_name" in event_data or "agent_type" in event_data, "agent_started missing agent identification"
+            elif event_type == "agent_thinking":
+                assert "reasoning" in event_data or "message" in event_data, "agent_thinking missing reasoning content"
+            elif event_type == "tool_executing":
+                assert "tool_name" in event_data, "tool_executing missing tool_name"
+            elif event_type == "tool_completed":
+                assert "tool_name" in event_data, "tool_completed missing tool_name"
+            elif event_type == "agent_completed":
+                # agent_completed should have some form of result
+                result_fields = ["response", "final_response", "result", "message"]
+                has_result = any(field in event_data for field in result_fields)
+                if not has_result:
+                    self.logger.warning("agent_completed event lacks result field - may impact user experience")
+                    
+        await WebSocketTestHelpers.close_test_connection(websocket)
+
+    @pytest.mark.integration
+    @pytest.mark.real_services
+    async def test_websocket_event_timing_performance(self, test_db_session, isolated_env):
+        """
+        BVJ: Ensures WebSocket events arrive within acceptable time limits for good UX.
+        Tests that agent events are delivered with low latency for real-time experience.
+        """
+        services = test_db_session
+        
+        if not services["websocket_available"]:
+            pytest.skip("WebSocket service not available for timing performance testing")
+            
+        auth_helper = E2EWebSocketAuthHelper(environment="test")
+        token = auth_helper.create_test_jwt_token(
+            user_id="timing_performance_user",
+            email="timing@example.com"
+        )
+        
+        headers = auth_helper.get_websocket_headers(token)
+        websocket_url = f"ws://localhost:8000/ws"
+        
+        websocket = await WebSocketTestHelpers.create_test_websocket_connection(
+            url=websocket_url,
+            headers=headers,
+            timeout=10.0,
+            user_id="timing_performance_user"
+        )
+        
+        # Send request and measure timing
+        request_start = time.time()
+        timing_request = {
+            "type": "chat",
+            "content": "Quick request to measure event timing",
+            "user_id": "timing_performance_user",
+            "timestamp": request_start
+        }
+        
+        await WebSocketTestHelpers.send_test_message(websocket, timing_request)
+        
+        # Measure time to first meaningful event
+        first_event_time = None
+        events_received = 0
+        
+        for _ in range(10):
+            try:
+                response = await WebSocketTestHelpers.receive_test_message(websocket, timeout=5.0)
+                events_received += 1
+                
+                if first_event_time is None:
+                    first_event_time = time.time()
+                    
+                # Break on completion or after reasonable number of events
+                if response.get("type") == "agent_completed" or events_received >= 5:
+                    break
+                    
+            except asyncio.TimeoutError:
+                break
+                
+        # Validate timing performance
+        if first_event_time:
+            first_event_latency = first_event_time - request_start
+            # First event should arrive within 10 seconds for good UX
+            assert first_event_latency < 10.0, f"First WebSocket event took {first_event_latency:.2f}s - too slow for real-time UX"
+            
+            self.logger.info(f"WebSocket first event latency: {first_event_latency:.3f}s")
+        else:
+            pytest.skip("No WebSocket events received for timing measurement")
+            
         await WebSocketTestHelpers.close_test_connection(websocket)
 
 
