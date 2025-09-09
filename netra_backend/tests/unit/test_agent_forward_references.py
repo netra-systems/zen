@@ -12,12 +12,13 @@ import pytest
 
 # Import all required types
 from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
+from netra_backend.app.agents.triage.models import TriageMetadata
 from netra_backend.app.schemas.agent_models import AgentMetadata, DeepAgentState
-from netra_backend.app.schemas.unified_tools import (
-    AgentCompleted,
+from netra_backend.app.schemas.registry import (
     AgentResult,
     AgentState,
 )
+from netra_backend.app.schemas.agent import AgentCompleted
 
 # Helper functions for 25-line compliance
 def create_basic_agent_result():
@@ -46,7 +47,6 @@ def create_triage_metadata():
     """Create TriageMetadata for testing."""
     return TriageMetadata(
         triage_duration_ms=50,
-        llm_tokens_used=100,
         cache_hit=False,
         fallback_used=False,
         retry_count=0
@@ -77,7 +77,6 @@ def create_complete_test_metadata():
     """Create complete metadata for complex testing."""
     return TriageMetadata(
         triage_duration_ms=75,
-        llm_tokens_used=150,
         cache_hit=True,
         fallback_used=False,
         retry_count=1

@@ -250,6 +250,13 @@ class AgentExecutionContext(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
+    # Additional fields for supervisor compatibility
+    retry_count: int = 0
+    max_retries: int = 3
+    timeout: Optional[int] = None
+    correlation_id: Optional[str] = None
+    pipeline_step_num: Optional[int] = None
+    
     @field_validator('execution_id', mode='before')
     @classmethod
     def validate_execution_id(cls, v):
@@ -447,7 +454,12 @@ def create_strongly_typed_execution_context(
     run_id: str,
     request_id: str,
     websocket_id: Optional[str] = None,
-    normalize_ids: bool = False
+    normalize_ids: bool = False,
+    retry_count: int = 0,
+    max_retries: int = 3,
+    timeout: Optional[int] = None,
+    correlation_id: Optional[str] = None,
+    pipeline_step_num: Optional[int] = None
 ) -> 'AgentExecutionContext':
     """
     Create strongly typed execution context with dual format support.
@@ -486,7 +498,12 @@ def create_strongly_typed_execution_context(
         thread_id=thread_id,
         run_id=run_id,
         request_id=request_id,
-        websocket_id=websocket_id
+        websocket_id=websocket_id,
+        retry_count=retry_count,
+        max_retries=max_retries,
+        timeout=timeout,
+        correlation_id=correlation_id,
+        pipeline_step_num=pipeline_step_num
     )
 
 
@@ -512,3 +529,55 @@ def from_string_dict(string_data: Dict[str, str], expected_types: Dict[str, type
         else:
             result[key] = value
     return result
+
+
+# =============================================================================
+# Supervisor Compatibility Layer for Migration
+# =============================================================================
+
+def create_execution_context_from_supervisor_style(
+    run_id: str,
+    thread_id: str,
+    user_id: str,
+    agent_name: str,
+    request_id: Optional[str] = None,
+    retry_count: int = 0,
+    max_retries: int = 3,
+    timeout: Optional[int] = None,
+    correlation_id: Optional[str] = None,
+    pipeline_step_num: Optional[int] = None,
+    **metadata
+) -> 'AgentExecutionContext':
+    """
+    Create SSOT AgentExecutionContext from supervisor-style parameters.
+    
+    This function bridges the gap between the legacy supervisor dataclass format
+    and the strongly typed SSOT Pydantic model.
+    """
+    # Generate required IDs
+    import uuid
+    from netra_backend.app.core.unified_id_manager import IDType
+    
+    execution_id = str(uuid.uuid4())
+    
+    # Convert agent_name to agent_id (since SSOT uses agent_id)
+    agent_id = agent_name
+    
+    # Ensure request_id exists
+    if request_id is None:
+        request_id = str(uuid.uuid4())
+    
+    return create_strongly_typed_execution_context(
+        execution_id=execution_id,
+        agent_id=agent_id,
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        request_id=request_id,
+        retry_count=retry_count,
+        max_retries=max_retries,
+        timeout=timeout,
+        correlation_id=correlation_id,
+        pipeline_step_num=pipeline_step_num,
+        normalize_ids=True
+    )

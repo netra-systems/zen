@@ -929,7 +929,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         
         # Assert
         assert registry._legacy_dispatcher == mock_dispatcher
-        assert registry.tool_dispatcher == mock_dispatcher  # Returns the set value since it's stored
+        assert registry.tool_dispatcher is None  # Getter always returns None for deprecated property
         
         self.record_metric("legacy_dispatcher_setter_deprecated", True)
 

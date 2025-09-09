@@ -28,9 +28,9 @@ from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketFactoryConfig,
     UserWebSocketContext,
     WebSocketEvent,
-    ConnectionStatus,
-    ExecutionEngineFactoryError
+    ConnectionStatus
 )
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactoryError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 

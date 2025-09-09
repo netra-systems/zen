@@ -1191,10 +1191,12 @@ class AgentRegistry(UniversalAgentRegistry):
         try:
             logger.info(f"Attempting to register agent: {name}")
             
-            # Create agent instance
+            # Create agent instance using legacy dispatcher for backward compatibility
+            # NOTE: tool_dispatcher property returns None, so use legacy dispatcher if available
+            dispatcher = self._legacy_dispatcher if self._legacy_dispatcher is not None else self.tool_dispatcher
             agent = agent_class(
                 self.llm_manager,
-                self.tool_dispatcher,
+                dispatcher,
                 **kwargs
             )
             
