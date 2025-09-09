@@ -89,8 +89,8 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
         # Test JSON serialization SSOT violation
         try:
             websocket_message = create_standard_message(
-                message_type="EXECUTE_AGENT",  # Invalid type
-                data=malformed_message["data"]
+                msg_type="EXECUTE_AGENT",  # Invalid type
+                payload=malformed_message["data"]
             )
             # If this succeeds, we have an SSOT violation
             assert False, f"SSOT VIOLATION: Invalid message type should not create valid WebSocketMessage: {websocket_message}"
@@ -134,8 +134,8 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
             try:
                 # Try to create a WebSocket message with invalid structure
                 message = create_standard_message(
-                    message_type=invalid_structure.get("type", "unknown"),
-                    data=invalid_structure.get("data", {})
+                    msg_type=invalid_structure.get("type", "unknown"),
+                    payload=invalid_structure.get("data", {})
                 )
                 
                 # If this succeeds, we have an SSOT violation
@@ -185,8 +185,8 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
         try:
             # Try to create WebSocket message with non-serializable data
             message = create_standard_message(
-                message_type=MessageType.AGENT_REQUEST,
-                data=complex_data
+                msg_type=MessageType.AGENT_REQUEST,
+                payload=complex_data
             )
             
             # Try to serialize to JSON
@@ -210,8 +210,8 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
         for edge_case in edge_cases:
             try:
                 message = create_standard_message(
-                    message_type=MessageType.AGENT_REQUEST,
-                    data=edge_case
+                    msg_type=MessageType.AGENT_REQUEST,
+                    payload=edge_case
                 )
                 json.dumps(message.dict())
                 serialization_failures.append(f"SSOT VIOLATION: Edge case passed: {edge_case}")
