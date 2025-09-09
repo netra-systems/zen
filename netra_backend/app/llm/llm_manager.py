@@ -25,6 +25,12 @@ from netra_backend.app.schemas.llm_types import (
     TokenUsage,
 )
 
+# CRITICAL REMEDIATION: Import timeout management for LLM circuit breaker protection
+from netra_backend.app.agents.execution_timeout_manager import (
+    get_timeout_manager,
+    CircuitBreakerOpenError
+)
+
 T = TypeVar('T', bound=BaseModel)
 
 
@@ -62,9 +68,12 @@ class LLMManager:
         self._ever_initialized = False  # Track if manager has ever been successfully initialized
         self._user_context = user_context
         
+        # CRITICAL REMEDIATION: Initialize timeout manager for LLM circuit breaker protection
+        self._timeout_manager = get_timeout_manager()
+        
         # Log the initialization with security context
         if user_context:
-            self._logger.info(f"LLM Manager initialized for user {user_context.user_id[:8]}...")
+            self._logger.info(f"LLM Manager initialized for user {user_context.user_id[:8]}... with timeout protection")
         else:
             self._logger.warning(
                 "LLM Manager initialized without user context. "
