@@ -43,7 +43,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket.connection_manager import WebSocketConnectionManager
-from netra_backend.app.api.websocket.events import WebSocketEventType, WebSocketEvent
+from netra_backend.app.api.websocket.events import WebSocketEventType
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.execution_engine import ExecutionEngine
 from shared.types import UserID, ThreadID, RunID, RequestID
