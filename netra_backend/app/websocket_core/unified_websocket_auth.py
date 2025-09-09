@@ -124,15 +124,29 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
             logger.info(f"E2E DETECTION: Enabled via environment variables "
                        f"(env={current_env}, project={google_project[:20]}..., service={k_service})")
         
-        # Create E2E context if detected
-        if is_e2e_via_headers or is_e2e_via_env:
+        # CRITICAL SECURITY FIX: Prevent header-based bypass in production
+        # Headers can be spoofed by attackers, so only allow them in safe environments
+        is_production = current_env in ['production', 'prod'] or 'prod' in google_project.lower()
+        
+        # In production, ONLY environment variables can enable E2E bypass (never headers)
+        if is_production:
+            allow_e2e_bypass = is_e2e_via_env  # Only env vars in production
+            security_mode = "production_strict"
+        else:
+            # In non-production, allow both headers and env vars for E2E testing
+            allow_e2e_bypass = is_e2e_via_headers or is_e2e_via_env
+            security_mode = "development_permissive"
+        
+        # Create E2E context if bypass is allowed based on security mode
+        if allow_e2e_bypass:
             e2e_context = {
                 "is_e2e_testing": True,
                 "detection_method": {
-                    "via_headers": is_e2e_via_headers,
+                    "via_headers": is_e2e_via_headers and not is_production,  # Headers blocked in production
                     "via_environment": is_e2e_via_env,
                     "via_env_vars": is_e2e_via_env_vars
                 },
+                "security_mode": security_mode,
                 "e2e_headers": e2e_headers,
                 "environment": current_env,
                 "google_cloud_project": google_project[:30] + "..." if len(google_project) > 30 else google_project,
