@@ -114,15 +114,15 @@ class TestAuthServiceBusinessLogic:
         mock_repo_instance = mock_user_repository.return_value
         mock_repo_instance.get_by_email.return_value = mock_db_user
         
-        # Mock password verification to succeed
-        with patch.object(AuthService, 'password_hasher') as mock_hasher:
-            mock_hasher.verify.return_value = None  # argon2 verify doesn't return anything on success
-            
-            auth_service = AuthService()
-            
-            # CRITICAL: Force AuthService to use database path by setting db_session
-            # This ensures that _validate_local_auth uses the repository instead of test users
-            auth_service.db_session = "mock_session"  # Non-None value to trigger database path
+        auth_service = AuthService()
+        
+        # CRITICAL: Force AuthService to use database path by setting db_session
+        # This ensures that _validate_local_auth uses the repository instead of test users
+        auth_service.db_session = "mock_session"  # Non-None value to trigger database path
+        
+        # Mock password verification to succeed - patch the instance's password_hasher
+        with patch.object(auth_service.password_hasher, 'verify') as mock_verify:
+            mock_verify.return_value = None  # argon2 verify doesn't return anything on success
             
             login_request = UserLogin(
                 email="login@company.com",

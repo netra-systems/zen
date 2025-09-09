@@ -14,9 +14,9 @@ def test_registry_fix():
     
     # Create a user context
     context = UserExecutionContext(
-        user_id="test_user",
-        run_id="test_run",
-        thread_id="test_thread"
+        user_id="usr_123456789",
+        run_id="run_123456789",
+        thread_id="thd_123456789"
     )
     
     # Create a registry
