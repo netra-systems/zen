@@ -5,6 +5,7 @@ Provides mock WebSocket managers and related fixtures for testing.
 """
 
 import asyncio
+import json
 import logging
 from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock
@@ -119,6 +120,48 @@ class MockWebSocketManager:
         for connection_id in connection_ids:
             await self.disconnect(connection_id)
         logger.debug("Mock WebSocket manager shutdown")
+    
+    async def recv(self, timeout: Optional[float] = None) -> str:
+        """
+        Mock recv method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Returns a JSON-serialized mock message for testing purposes.
+        """
+        # Simulate typical WebSocket message
+        mock_message = {
+            "type": "connection_ready",
+            "data": "Mock WebSocket message",
+            "timestamp": "2024-01-01T00:00:00Z",
+            "connection_count": len(self.active_connections)
+        }
+        return json.dumps(mock_message)
+    
+    async def send(self, message: str) -> None:
+        """
+        Mock send method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Parses the message and stores it in the messages_sent list.
+        """
+        try:
+            parsed_message = json.loads(message)
+        except json.JSONDecodeError:
+            # If not JSON, treat as plain text
+            parsed_message = {"type": "text", "data": message}
+        
+        # Store as sent to the first available connection (or create mock connection)
+        if self.active_connections:
+            connection_id = next(iter(self.active_connections))
+        else:
+            connection_id = "mock_connection_for_manager"
+        
+        self.messages_sent.append({
+            "connection_id": connection_id,
+            "message": parsed_message,
+            "timestamp": "2024-01-01T00:00:00Z"
+        })
+        logger.debug(f"Mock WebSocket manager sent: {parsed_message.get('type', 'unknown')}")
 
 
 class MockWebSocketConnection:
@@ -131,14 +174,28 @@ class MockWebSocketConnection:
         self.messages_received: List[Dict[str, Any]] = []
         self.messages_sent: List[Dict[str, Any]] = []
     
-    async def send(self, message: Dict[str, Any]):
-        """Mock send method."""
+    async def send(self, message):
+        """
+        Mock send method that handles both string and dict messages.
+        
+        Real WebSockets expect string messages, but our existing tests might
+        send dict messages. This handles both for compatibility.
+        """
         if self.is_connected:
+            if isinstance(message, str):
+                try:
+                    parsed_message = json.loads(message)
+                except json.JSONDecodeError:
+                    parsed_message = {"type": "text", "data": message}
+            else:
+                # Assume it's already a dict
+                parsed_message = message
+            
             self.messages_sent.append({
-                "message": message,
+                "message": parsed_message,
                 "timestamp": "2024-01-01T00:00:00Z"
             })
-            logger.debug(f"Mock connection {self.connection_id} sent: {message.get('type', 'unknown')}")
+            logger.debug(f"Mock connection {self.connection_id} sent: {parsed_message.get('type', 'unknown')}")
     
     async def receive(self, timeout: Optional[float] = None) -> Dict[str, Any]:
         """Mock receive method."""
@@ -150,6 +207,24 @@ class MockWebSocketConnection:
         else:
             # Return a default message for testing
             return {"type": "ping", "data": "test message"}
+    
+    async def recv(self, timeout: Optional[float] = None) -> str:
+        """
+        Mock recv method for standard WebSocket interface compatibility.
+        
+        This is an alias to receive() but returns JSON string instead of dict,
+        matching the websockets library interface that tests expect.
+        """
+        if not self.is_connected:
+            raise ConnectionError("Connection closed")
+            
+        if self.messages_received:
+            message_dict = self.messages_received.pop(0)
+        else:
+            # Return a default message for testing
+            message_dict = {"type": "ping", "data": "test message"}
+        
+        return json.dumps(message_dict)
     
     def add_received_message(self, message: Dict[str, Any]):
         """Add a message to the received queue for testing."""
