@@ -739,7 +739,7 @@ class TestWebSocketConnectionStateMachineUnit:
         assert 'state_durations' in metrics
         assert isinstance(metrics['state_durations'], dict)
     
-    def test_concurrent_state_transition_safety(self):
+    async def test_concurrent_state_transition_safety(self):
         """Test that concurrent state transitions are handled safely."""
         state_machine = MockWebSocketStateMachine()
         
@@ -819,7 +819,7 @@ class TestWebSocketConnectionStateMachineUnit:
         # Verify all rapid transitions were recorded correctly
         assert len(state_machine.transition_log) >= len(rapid_transitions)
     
-    def test_business_value_state_requirements(self):
+    async def test_business_value_state_requirements(self):
         """Test that state machine meets business value requirements."""
         state_machine = MockWebSocketStateMachine()
         
