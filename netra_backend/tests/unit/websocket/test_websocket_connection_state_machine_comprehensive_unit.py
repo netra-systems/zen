@@ -69,6 +69,7 @@ class MockWebSocketStateMachine:
             'reconnection_attempts': 0,
             'total_uptime_seconds': 0
         }
+        self._transition_lock = asyncio.Lock()
         
         # State machine configuration
         self.state_transition_matrix = self._build_transition_matrix()
@@ -707,10 +708,11 @@ class TestWebSocketConnectionStateMachineUnit:
         # Perform a series of transitions with some invalid attempts
         transitions = [
             (WebSocketConnectionState.CONNECTING, "metrics_test", True),
-            (WebSocketConnectionState.ACTIVE, "invalid_skip", False),  # Invalid
+            (WebSocketConnectionState.ACTIVE, "invalid_skip", False),  # Invalid - can't skip CONNECTED
             (WebSocketConnectionState.CONNECTED, "metrics_test", True),
             (WebSocketConnectionState.AUTHENTICATED, "metrics_test", True),
-            (WebSocketConnectionState.IDLE, "invalid_transition", False),  # Invalid
+            (WebSocketConnectionState.DISCONNECTED, "invalid_transition", False),  # Invalid - can't go to DISCONNECTED from AUTHENTICATED
+            (WebSocketConnectionState.IDLE, "metrics_test", True),  # Valid - AUTHENTICATED → IDLE is allowed
             (WebSocketConnectionState.ACTIVE, "metrics_test", True),
             (WebSocketConnectionState.ERROR, "simulated_error", True),
             (WebSocketConnectionState.CONNECTING, "recovery", True)

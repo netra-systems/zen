@@ -134,7 +134,7 @@ class TestSupervisorAgentSSOTCore(BaseTestCase):
             run_id=f"test-run-{uuid.uuid4().hex[:8]}",
             request_id=f"test-req-{uuid.uuid4().hex[:8]}",
             websocket_client_id=f"test-ws-{uuid.uuid4().hex[:8]}",
-            metadata={"user_request": "test request for SSOT SupervisorAgent"}
+            agent_context={"user_request": "test request for SSOT SupervisorAgent"}
         )
         
         # Mock database session
@@ -463,7 +463,7 @@ class TestSupervisorAgentSSOTCore(BaseTestCase):
                 run_id=f"concurrent-run-{i}",
                 request_id=f"concurrent-req-{i}",
                 websocket_client_id=f"concurrent-ws-{i}",
-                metadata={"user_request": f"concurrent test {i}"}
+                agent_context={"user_request": f"concurrent test {i}"}
             )
             context = context.with_db_session(AsyncMock())
             contexts.append(context)
@@ -740,7 +740,7 @@ class TestSupervisorAgentSSOTPerformance(BaseTestCase):
                 run_id=f"perf-run-{i}",
                 request_id=f"perf-req-{i}",
                 websocket_client_id=f"perf-ws-{i}",
-                metadata={"test_index": i}
+                agent_context={"test_index": i}
             ).with_db_session(AsyncMock())
             contexts.append(context)
         

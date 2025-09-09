@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 
 @dataclass
 class AgentPerformanceMetrics:
-    \"\"\"Agent execution performance metrics.\"\"\"
+    """Agent execution performance metrics."""
     agent_name: str
     total_executions: int
     successful_executions: int
@@ -48,7 +48,7 @@ class AgentPerformanceMetrics:
 
 @dataclass
 class AgentConcurrencyTestResult:
-    \"\"\"Results from agent concurrency testing.\"\"\"
+    """Results from agent concurrency testing."""
     test_name: str
     concurrent_agents: int
     total_duration: float
@@ -59,27 +59,27 @@ class AgentConcurrencyTestResult:
 
 
 class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
-    \"\"\"Test agent execution performance under concurrent load.\"\"\"
+    """Test agent execution performance under concurrent load."""
     
-    def _simulate_agent_work(self, complexity_level: str = \"medium\") -> Dict[str, Any]:
-        \"\"\"Simulate agent work with different complexity levels.\"\"\"
+    def _simulate_agent_work(self, complexity_level: str = "medium") -> Dict[str, Any]:
+        """Simulate agent work with different complexity levels."""
         work_configs = {
-            \"simple\": {\"iterations\": 10, \"data_size\": 100, \"processing_time\": 0.01},
-            \"medium\": {\"iterations\": 50, \"data_size\": 500, \"processing_time\": 0.05},
-            \"complex\": {\"iterations\": 100, \"data_size\": 1000, \"processing_time\": 0.1}
+            "simple": {"iterations": 10, "data_size": 100, "processing_time": 0.01},
+            "medium": {"iterations": 50, "data_size": 500, "processing_time": 0.05},
+            "complex": {"iterations": 100, "data_size": 1000, "processing_time": 0.1}
         }
         
-        config = work_configs.get(complexity_level, work_configs[\"medium\"])
+        config = work_configs.get(complexity_level, work_configs["medium"])
         
         # Simulate computational work
         result_data = []
-        for i in range(config[\"iterations\"]):
+        for i in range(config["iterations"]):
             # Simulate data processing
             data_item = {
-                \"id\": i,
-                \"data\": \"x\" * config[\"data_size\"],
-                \"timestamp\": time.time(),
-                \"processed\": True
+                "id": i,
+                "data": "x" * config["data_size"],
+                "timestamp": time.time(),
+                "processed": True
             }
             result_data.append(data_item)
         
