@@ -1,0 +1,15 @@
+{
+  "why1_confirmed": false,
+  "test_results": [
+    {
+      "status": "security_issue",
+      "message": "No auth required"
+    },
+    {
+      "status": "security_issue",
+      "message": "Invalid token accepted"
+    }
+  ],
+  "analysis_timestamp": 450909.610783166,
+  "conclusion": "SSOT Auth failed pattern not currently active"
+}
