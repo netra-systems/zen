@@ -283,16 +283,17 @@ class RequestScopedSessionFactory:
                     # CRITICAL FIX: Ensure thread record exists before session operations
                     await self._ensure_thread_record_exists(session, thread_id, user_id)
                     
-                    # Yield the regular session
-                    yield session
-                    
-                    # Mark session as successfully used
-                    session_metrics.state = SessionState.COMMITTED
-                    session_metrics.mark_activity()
-                    
-                except Exception as e:
-                    # Record error and rollback if needed
-                    session_metrics.record_error(str(e))
+                    try:
+                        # Yield the regular session
+                        yield session
+                        
+                        # Mark session as successfully used
+                        session_metrics.state = SessionState.COMMITTED
+                        session_metrics.mark_activity()
+                        
+                    except Exception as e:
+                        # Record error and rollback if needed
+                        session_metrics.record_error(str(e))
                     
                     # ENHANCED ERROR CONTEXT in session execution
                     execution_error_context = {
