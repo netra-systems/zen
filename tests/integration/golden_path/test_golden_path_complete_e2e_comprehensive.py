@@ -58,11 +58,11 @@ from loguru import logger
 
 # SSOT Framework Imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, 
     E2EWebSocketAuthHelper,
-    AuthenticatedUser,
-    create_authenticated_user_context
+    AuthenticatedUser
 )
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
@@ -241,6 +241,9 @@ class GoldenPathTestContext:
 # GOLDEN PATH COMPREHENSIVE TEST SUITE
 # ============================================================================
 
+@pytest.mark.integration
+@pytest.mark.real_services
+@pytest.mark.asyncio
 class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     """
     Comprehensive Golden Path End-to-End Integration Test Suite.
