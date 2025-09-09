@@ -537,11 +537,26 @@ class TestAuthCacheIntegration(BaseIntegrationTest):
                 "permissions": cached_permissions["permissions"]
             }
         
-        # Would trigger permission reload in real implementation
+        # Cache miss - load from simulated database (authoritative source)
+        if user_id in self._simulated_user_database:
+            user_data = self._simulated_user_database[user_id]
+            user_permissions = user_data["permissions"]
+            
+            # Cache the permissions loaded from database
+            await self._cache_user_permissions(user_id, user_permissions)
+            
+            has_permission = permission in user_permissions
+            return {
+                "result": has_permission,
+                "cache_hit": False,
+                "permissions": user_permissions
+            }
+        
+        # User not found
         return {
             "result": False,
             "cache_hit": False,
-            "error": "Permission not cached or expired"
+            "error": "User not found in database"
         }
     
     async def _update_user_permissions(self, user_id: str, new_permissions: List[str], invalidate_cache: bool = True) -> Dict[str, Any]:
