@@ -56,7 +56,12 @@ logger = central_logger.get_logger(__name__)
 
 class FactoryInitializationError(Exception):
     """Raised when WebSocket manager factory initialization fails due to SSOT violations or other configuration issues."""
-    pass
+    
+    def __init__(self, message: str, user_id: Optional[str] = None, error_code: Optional[str] = None, details: Optional[Dict[str, Any]] = None):
+        super().__init__(message)
+        self.user_id = user_id
+        self.error_code = error_code
+        self.details = details or {}
 
 
 def create_defensive_user_execution_context(
@@ -1852,6 +1857,64 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
         ) from unexpected_error
 
 
+def create_websocket_manager_sync(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+    """
+    Synchronous wrapper for create_websocket_manager for testing purposes.
+    
+    CRITICAL: This function is ONLY for testing and should NOT be used in production code.
+    Production code should use the async create_websocket_manager() function.
+    
+    TEST COMPATIBILITY: This function provides synchronous access for test environments
+    that cannot easily handle async factory functions.
+    
+    Args:
+        user_context: User execution context for the manager
+        
+    Returns:
+        Isolated WebSocket manager instance
+        
+    Raises:
+        RuntimeError: If called in production environment
+        ValueError: If user_context is invalid
+        FactoryInitializationError: If SSOT factory validation fails
+    """
+    import asyncio
+    import os
+    from shared.isolated_environment import get_env
+    
+    # Restrict to test environments only
+    env = get_env()
+    environment = env.get('ENVIRONMENT', 'development').lower()
+    
+    # Allow in test, development, and CI environments
+    if environment not in ['test', 'development', 'ci', 'testing']:
+        raise RuntimeError(
+            f"create_websocket_manager_sync() is restricted to test environments. "
+            f"Current environment: {environment}. Use async create_websocket_manager() in production."
+        )
+    
+    try:
+        # Run the async function synchronously in test environment
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If event loop is already running, we need to use a different approach
+            # This commonly happens in pytest-asyncio environments
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, create_websocket_manager(user_context))
+                return future.result(timeout=10.0)  # 10 second timeout for tests
+        else:
+            return loop.run_until_complete(create_websocket_manager(user_context))
+    except Exception as e:
+        logger.error(f"Failed to create WebSocket manager synchronously for user {user_context.user_id}: {e}")
+        raise FactoryInitializationError(
+            f"Synchronous WebSocket manager creation failed: {e}",
+            user_id=user_context.user_id,
+            error_code="SYNC_MANAGER_CREATION_FAILED",
+            details={"original_error": str(e)}
+        )
+
+
 __all__ = [
     "WebSocketManagerFactory",
     "IsolatedWebSocketManager", 
@@ -1861,6 +1924,7 @@ __all__ = [
     "FactoryInitializationError",
     "get_websocket_manager_factory",
     "create_websocket_manager",
+    "create_websocket_manager_sync",
     "create_defensive_user_execution_context",
     # Five Whys Root Cause Prevention
     "WebSocketManagerProtocol"  # Re-exported from protocols module

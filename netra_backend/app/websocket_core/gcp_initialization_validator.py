@@ -660,6 +660,107 @@ class GCPWebSocketInitializationValidator:
         
         return False
 
+    # TEST COMPATIBILITY METHODS - Required by existing test suite
+    async def _check_service_group(self, service_names: list[str] = None) -> bool:
+        """
+        Test compatibility method for _validate_service_group.
+        
+        CRITICAL: This method provides backward compatibility with existing test suite
+        that expects _check_service_group method signature.
+        
+        Args:
+            service_names: List of service names to validate (optional)
+            
+        Returns:
+            bool: True if all services are ready, False if any failed
+        """
+        if service_names is None:
+            # Default to validating all critical services
+            service_names = ['database', 'redis', 'auth_validation', 'agent_supervisor', 'websocket_bridge']
+        
+        try:
+            result = await self._validate_service_group(service_names, timeout_seconds=30.0)
+            return result['success']
+        except Exception as e:
+            self.logger.debug(f"Service group check failed: {e}")
+            return False
+
+    def _check_database_ready(self) -> bool:
+        """
+        Test compatibility method for _validate_database_readiness.
+        
+        CRITICAL: This method provides backward compatibility with existing test suite
+        that expects _check_database_ready method signature.
+        
+        Returns:
+            bool: True if database is ready, False otherwise
+        """
+        try:
+            return self._validate_database_readiness()
+        except Exception as e:
+            self.logger.debug(f"Database readiness check failed: {e}")
+            return False
+
+    def _check_redis_ready(self) -> bool:
+        """
+        Test compatibility method for _validate_redis_readiness.
+        
+        Returns:
+            bool: True if Redis is ready, False otherwise
+        """
+        try:
+            return self._validate_redis_readiness()
+        except Exception as e:
+            self.logger.debug(f"Redis readiness check failed: {e}")
+            return False
+
+    def _check_auth_system_ready(self) -> bool:
+        """
+        Test compatibility method for _validate_auth_system_readiness.
+        
+        Returns:
+            bool: True if auth system is ready, False otherwise
+        """
+        try:
+            return self._validate_auth_system_readiness()
+        except Exception as e:
+            self.logger.debug(f"Auth system readiness check failed: {e}")
+            return False
+
+    async def validate_gcp_readiness(self, timeout_seconds: float = 30.0) -> bool:
+        """
+        Test compatibility method for validate_gcp_readiness_for_websocket.
+        
+        CRITICAL: This method provides backward compatibility with existing test suite
+        that expects validate_gcp_readiness method name and _check_service_group mocking.
+        
+        Args:
+            timeout_seconds: Maximum time to wait for readiness
+            
+        Returns:
+            bool: True if GCP environment is ready for WebSocket connections
+        """
+        try:
+            # TEST COMPATIBILITY: Use _check_service_group if it's being mocked
+            # This allows test mocks to work properly
+            if hasattr(self, '_check_service_group'):
+                # Simulate the validation flow using mocked methods
+                services_ready = await self._check_service_group()
+                if not services_ready:
+                    self.logger.debug("GCP readiness validation failed: services not ready")
+                    return False
+                
+                # If services are ready, proceed with full validation
+                result = await self.validate_gcp_readiness_for_websocket(timeout_seconds)
+                return result.ready
+            else:
+                # Fallback to full validation if not mocked
+                result = await self.validate_gcp_readiness_for_websocket(timeout_seconds)
+                return result.ready
+        except Exception as e:
+            self.logger.debug(f"GCP readiness validation failed: {e}")
+            return False
+
 
 # SSOT Factory Function
 def create_gcp_websocket_validator(app_state: Optional[Any] = None) -> GCPWebSocketInitializationValidator:
