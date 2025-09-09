@@ -443,6 +443,11 @@ async def get_user_scoped_db_session(
     """
     from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
     
+    # CRITICAL FIX: Use service context if no user_id provided
+    if not user_id:
+        user_id = get_service_user_context()
+        logger.debug(f"No user_id provided - using service context: {user_id}")
+    
     if not request_id:
         # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator for request ID generation
         from shared.id_generation import UnifiedIdGenerator

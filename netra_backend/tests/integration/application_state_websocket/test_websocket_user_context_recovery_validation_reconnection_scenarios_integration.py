@@ -1210,4 +1210,3 @@ class TestWebSocketUserContextRecoveryValidation(BaseIntegrationTest):
             
         finally:
             await validator.cleanup()
-

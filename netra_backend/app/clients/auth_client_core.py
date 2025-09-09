@@ -730,8 +730,8 @@ class AuthServiceClient:
     async def validate_system_user_context(self, user_id: str, operation: str = "database_session") -> Optional[Dict]:
         """Validate system user operations using service-to-service authentication.
         
-        This method handles system user authentication for internal operations that don't have
-        JWT tokens but need to be authenticated as legitimate service operations.
+        DEPRECATED: Use validate_service_user_context() for new code.
+        This method maintained for backward compatibility.
         
         Args:
             user_id: User ID to validate (should be "system" for system operations)
@@ -771,6 +771,62 @@ class AuthServiceClient:
             "authentication_method": "service_to_service",
             "service_id": self.service_id,
             "operation": operation
+        }
+    
+    async def validate_service_user_context(self, service_id: str, operation: str = "database_session") -> Optional[Dict]:
+        """Validate service user operations using service-to-service authentication.
+        
+        CRITICAL FIX: New method that handles service authentication properly.
+        This replaces hardcoded "system" user with proper service context.
+        
+        Args:
+            service_id: Service ID to validate (e.g., "netra-backend")
+            operation: The operation being performed for logging/audit purposes
+            
+        Returns:
+            Dict with validation result for service user
+        """
+        # Validate service ID format
+        if not service_id or not isinstance(service_id, str):
+            return {"valid": False, "error": "invalid_service_id", "details": f"Invalid service ID: {service_id}"}
+        
+        # Check if we have service credentials for service operations
+        if not self.service_secret or not self.service_id:
+            logger.error(
+                f"SERVICE USER AUTHENTICATION: Service credentials not configured. "
+                f"Service operations require SERVICE_ID and SERVICE_SECRET. "
+                f"Operation: {operation}, Service ID: {service_id}"
+            )
+            return {
+                "valid": False, 
+                "error": "missing_service_credentials",
+                "details": "SERVICE_ID and SERVICE_SECRET required for service user operations",
+                "fix": "Configure SERVICE_ID and SERVICE_SECRET environment variables"
+            }
+        
+        # Validate that the requested service ID matches our configured service ID
+        if service_id != self.service_id:
+            logger.warning(
+                f"SERVICE USER AUTHENTICATION: Service ID mismatch. "
+                f"Requested: {service_id}, Configured: {self.service_id}, Operation: {operation}"
+            )
+            # Allow the validation but log the mismatch for security auditing
+        
+        # For service users, validate using service credentials instead of JWT tokens
+        logger.info(
+            f"SERVICE USER AUTHENTICATION: Validating service user for operation '{operation}' "
+            f"using service-to-service authentication. Service ID: {service_id}"
+        )
+        
+        return {
+            "valid": True,
+            "user_id": f"service:{service_id}",
+            "email": f"service@{service_id}",
+            "permissions": ["service:*"],  # Service users have service-level permissions
+            "authentication_method": "service_to_service",
+            "service_id": service_id,
+            "operation": operation,
+            "context": "internal_service_operation"
         }
     
     async def _build_validation_request(self, token: str) -> Dict:
