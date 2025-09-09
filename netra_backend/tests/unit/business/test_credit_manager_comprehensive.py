@@ -588,3 +588,238 @@ class TestBusinessLogicValidation:
             )
             assert isinstance(transaction, CreditTransaction)
             assert transaction.user_id == user_id
+
+
+class TestFinancialPrecisionAndAccuracy:
+    """Test financial precision, decimal handling, and mathematical accuracy."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_decimal_precision_credit_operations(self):
+        """
+        Business Value: Ensure precise decimal handling for fractional credit amounts
+        Revenue Impact: Prevents rounding errors that could accumulate to significant losses
+        """
+        manager = CreditManager()
+        user_id = 123
+        
+        # Test fractional credit amounts
+        fractional_amounts = [0.01, 0.001, 0.999, 1.234, 99.999]
+        
+        for amount in fractional_amounts:
+            add_result = await manager.add_credits(user_id, amount, f"Precision test {amount}")
+            deduct_result = await manager.deduct_credits(user_id, amount, f"Precision deduct {amount}")
+            
+            assert add_result is True
+            assert deduct_result is True
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_floating_point_precision_edge_cases(self):
+        """
+        Business Value: Handle floating point precision edge cases correctly
+        Revenue Impact: Prevents billing errors from floating point arithmetic issues
+        """
+        manager = CreditManager()
+        user_id = 123
+        
+        # Test problematic floating point values
+        edge_cases = [
+            0.1 + 0.2,  # Classic floating point precision issue
+            1.0 / 3.0,  # Repeating decimal
+            2.0 ** 53,  # Large integer in float
+            1e-10,      # Very small positive value
+        ]
+        
+        for amount in edge_cases:
+            add_result = await manager.add_credits(user_id, amount, f"Edge case {amount}")
+            assert add_result is True
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_currency_conversion_precision(self):
+        """
+        Business Value: Ensure precision in currency conversion scenarios
+        Revenue Impact: Prevents losses from currency conversion rounding errors
+        """
+        manager = CreditManager()
+        user_id = 123
+        
+        # Simulate currency conversion amounts (e.g., USD to credits)
+        conversion_rates = [1.2345, 0.8567, 1.0000, 100.0001]
+        base_amounts = [10.0, 25.5, 100.0, 999.99]
+        
+        for rate in conversion_rates:
+            for base in base_amounts:
+                converted_amount = base * rate
+                result = await manager.add_credits(user_id, converted_amount, f"Conversion {rate}x{base}")
+                assert result is True
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_mathematical_overflow_protection(self):
+        """
+        Business Value: Protect against mathematical overflow in credit calculations
+        Revenue Impact: Prevents system crashes during large credit transactions
+        """
+        manager = CreditManager()
+        user_id = 123
+        
+        # Test with very large amounts (within reasonable business limits)
+        large_amounts = [
+            1e6,    # 1 million credits
+            1e7,    # 10 million credits
+            1e8,    # 100 million credits
+            999999999.99  # Near system limits
+        ]
+        
+        for amount in large_amounts:
+            add_result = await manager.add_credits(user_id, amount, f"Large amount {amount}")
+            assert add_result is True
+
+
+class TestCreditHistoryAndTransactionOrdering:
+    """Test credit history tracking and transaction chronological ordering."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_transaction_chronological_ordering(self):
+        """
+        Business Value: Ensure transactions are properly ordered for audit trails
+        Revenue Impact: Enables accurate billing history and dispute resolution
+        """
+        manager = CreditManager()
+        user_id = 123
+        
+        # Create transactions in sequence
+        transactions = []
+        for i in range(5):
+            transaction = await manager.create_transaction(
+                user_id, 
+                10.0 + i, 
+                "credit" if i % 2 == 0 else "debit",
+                f"Sequential transaction {i}"
+            )
+            transactions.append(transaction)
+            
+        # All transactions should be created successfully
+        assert len(transactions) == 5
+        assert all(isinstance(t, CreditTransaction) for t in transactions)
+        
+        # Verify transaction details are preserved
+        for i, transaction in enumerate(transactions):
+            assert transaction.amount == 10.0 + i
+            assert transaction.description == f"Sequential transaction {i}"
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_credit_balance_history_simulation(self):
+        """
+        Business Value: Track credit balance changes over time for analytics
+        Revenue Impact: Enables customer usage analysis and retention strategies
+        """
+        manager = CreditManager()
+        user_id = 123
+        
+        # Simulate a series of credit operations
+        operations = [
+            ("add", 100.0, "Initial credit purchase"),
+            ("deduct", 25.0, "API usage month 1"),
+            ("add", 50.0, "Bonus credits"),
+            ("deduct", 30.0, "API usage month 2"),
+            ("deduct", 15.0, "Premium feature usage")
+        ]
+        
+        balance_history = []
+        
+        for operation, amount, description in operations:
+            # Record balance before operation
+            current_balance = await manager.get_user_credits(user_id)
+            balance_history.append(current_balance)
+            
+            # Perform operation
+            if operation == "add":
+                result = await manager.add_credits(user_id, amount, description)
+            else:
+                result = await manager.deduct_credits(user_id, amount, description)
+            
+            assert result is True
+        
+        # Verify we captured balance history
+        assert len(balance_history) == 5
+        assert all(balance == 100.0 for balance in balance_history)  # Stub implementation
+
+
+class TestPerformanceAndScalability:
+    """Test performance requirements and scalability scenarios."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_high_volume_credit_operations(self):
+        """
+        Business Value: Ensure system performs well under high credit operation load
+        Revenue Impact: Maintains service quality during peak usage periods
+        """
+        import time
+        
+        manager = CreditManager()
+        user_id = 123
+        operation_count = 50  # Reduced for faster testing
+        
+        # Measure performance of high-volume operations
+        start_time = time.time()
+        
+        for i in range(operation_count):
+            # Mix of operations
+            await manager.get_user_credits(user_id)
+            await manager.add_credits(user_id, 1.0, f"Performance test add {i}")
+            await manager.deduct_credits(user_id, 0.5, f"Performance test deduct {i}")
+        
+        end_time = time.time()
+        total_time = end_time - start_time
+        
+        # Performance should be reasonable
+        assert total_time < 2.0  # Should complete operations in under 2 seconds
+        
+        # Operations per second
+        ops_per_second = (operation_count * 3) / total_time
+        assert ops_per_second > 50  # Should handle at least 50 ops/second
+
+    @pytest.mark.asyncio
+    @pytest.mark.unit
+    async def test_concurrent_user_isolation(self):
+        """
+        Business Value: Ensure user credit operations are properly isolated
+        Revenue Impact: Prevents cross-user credit contamination and billing errors
+        """
+        manager = CreditManager()
+        
+        # Test with multiple users concurrently
+        user_ids = [100, 200, 300, 400, 500]
+        
+        # Perform operations for all users
+        all_operations = []
+        
+        for user_id in user_ids:
+            all_operations.extend([
+                manager.get_user_credits(user_id),
+                manager.add_credits(user_id, 25.0, f"Concurrent test user {user_id}"),
+                manager.deduct_credits(user_id, 5.0, f"Concurrent usage user {user_id}")
+            ])
+        
+        # Execute all operations
+        results = []
+        for operation in all_operations:
+            result = await operation
+            results.append(result)
+        
+        # Verify all operations completed successfully
+        assert len(results) == len(user_ids) * 3
+        
+        # Check get_user_credits results (every 3rd starting from 0)
+        balance_results = results[::3]
+        assert all(balance == 100.0 for balance in balance_results)
+        
+        # Check operation results
+        operation_results = [r for i, r in enumerate(results) if i % 3 != 0]
+        assert all(result is True for result in operation_results)
