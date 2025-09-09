@@ -61,6 +61,10 @@ services:
       JWT_SECRET_KEY: staging_jwt_secret_key_secure_64_chars_minimum_for_production_2024
       FERNET_KEY: staging_fernet_key_base64_32_bytes_secure_2024_replace_this_value
       
+      # Service Configuration
+      SERVICE_ID: netra-backend
+      SERVICE_SECRET: staging_service_secret_secure_32_chars_minimum_2024
+      
       # Service URLs - Internal Container Communication
       AUTH_SERVICE_URL: http://auth:8081
       FRONTEND_URL: http://frontend:3000
@@ -143,6 +147,7 @@ services:
       JWT_REFRESH_EXPIRY_DAYS: "7"
       
       # Service Configuration
+      SERVICE_ID: netra-auth
       SERVICE_SECRET: staging_service_secret_secure_32_chars_minimum_2024
       FRONTEND_URL: http://frontend:3000
       
