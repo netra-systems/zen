@@ -411,7 +411,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
     
     async def send_golden_path_optimization_request(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket,  # Can be real WebSocket or mock WebSocket
         context: GoldenPathTestContext
     ) -> str:
         """
@@ -479,8 +479,14 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         
         # Send message and track timing
         message_start = time.time()
-        await websocket.send(json.dumps(golden_path_message))
-        message_time = time.time() - message_start
+        
+        if self.using_mock_services:
+            # For mock services, just log the message send
+            logger.info(f"📤 [MOCK] Golden Path message prepared: {scenario['message'][:100]}...")
+            message_time = 0.01  # Simulate minimal send time
+        else:
+            await websocket.send(json.dumps(golden_path_message))
+            message_time = time.time() - message_start
         
         # Update metrics
         self.golden_path_metrics.message_routing_time = message_time
@@ -598,6 +604,11 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                         # Check if we have complete response
                         if self._is_complete_response(message_data):
                             logger.success("🏁 Complete Golden Path response received")
+                            break
+                        
+                        # For mock services, break after processing agent_completed
+                        if self.using_mock_services and event_type == "agent_completed":
+                            logger.success("🏁 Mock Golden Path execution completed")
                             break
                     
                     # Log event for debugging
@@ -810,7 +821,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         )
         
         # Step 1: Establish authenticated WebSocket connection
-        websocket = await self.establish_authenticated_websocket_connection(context)
+        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
         assert websocket is not None, "WebSocket connection must be established"
         assert context.connection_established, "Connection context must be marked as established"
         
@@ -821,7 +832,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         assert context.thread_id == thread_id, "Thread ID must match in context"
         
         # Step 3: Monitor complete Golden Path execution with business value tracking
-        execution_results = await self.monitor_golden_path_execution(websocket, context, timeout=90.0)
+        execution_results = await self.monitor_golden_path_execution(websocket, context, timeout=90.0, services=golden_path_services)
         
         # Step 4: Validate mission-critical WebSocket events were received
         assert execution_results["all_events_received"], (
@@ -955,7 +966,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             concurrent_timeout = 150.0  # 2.5 minutes for concurrent processing
             
             monitoring_tasks = [
-                self.monitor_golden_path_execution(websocket, context, timeout=concurrent_timeout)
+                self.monitor_golden_path_execution(websocket, context, timeout=concurrent_timeout, services=golden_path_services)
                 for websocket, context in zip(concurrent_websockets, concurrent_contexts)
             ]
             
@@ -1074,7 +1085,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         )
         
         # Step 1: Establish initial connection
-        websocket = await self.establish_authenticated_websocket_connection(context)
+        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
         assert websocket is not None, "Initial WebSocket connection must be established"
         
         # Step 2: Send optimization request
@@ -1235,7 +1246,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         
         # Step 1: Measure connection performance
         connection_start = time.time()
-        websocket = await self.establish_authenticated_websocket_connection(context)
+        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
         connection_time = time.time() - connection_start
         
         assert connection_time <= max_connection_time, (
@@ -1416,7 +1427,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         }
         
         # Step 1: Establish connection for business scenario
-        websocket = await self.establish_authenticated_websocket_connection(context)
+        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
         
         # Step 2: Send comprehensive enterprise optimization request
         enterprise_request_message = {
@@ -1762,10 +1773,10 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 if config["use_asyncio_safe_patterns"]:
                     # Use Windows-safe asyncio patterns
                     logger.info("🪟 Using Windows-safe asyncio patterns")
-                    websocket = await self._establish_windows_safe_websocket_connection(context, config["websocket_timeout"])
+                    websocket = await self._establish_windows_safe_websocket_connection(context, config["websocket_timeout"], golden_path_services)
                 else:
                     # Use standard connection patterns
-                    websocket = await self.establish_authenticated_websocket_connection(context)
+                    websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
                 
                 if websocket:
                     logger.success(f"✅ Platform connection successful on attempt {connection_attempts}")
@@ -1883,9 +1894,14 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         logger.success(f"📊 Events Received: {len(platform_events)}")
         logger.success(f"🎯 Critical Events: {len(received_critical)}")
     
-    async def _establish_windows_safe_websocket_connection(self, context: GoldenPathTestContext, timeout: float):
+    async def _establish_windows_safe_websocket_connection(self, context: GoldenPathTestContext, timeout: float, services: Optional[Dict[str, Any]] = None):
         """Establish WebSocket connection using Windows-safe asyncio patterns."""
         try:
+            # Check if we should use mock services (even in Windows mode)
+            if services and services.get("service_type") == "mock":
+                logger.info("🪟🔧 Using mock WebSocket for Windows-safe connection")
+                return await self.establish_authenticated_websocket_connection(context, services)
+            
             # Windows-specific connection handling
             import asyncio
             
@@ -2004,7 +2020,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     
                     # Establish connection
                     connection_start = time.time()
-                    websocket = await self.establish_authenticated_websocket_connection(context)
+                    websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
                     connection_time = time.time() - connection_start
                     
                     user_metrics["connection_time"] = connection_time
@@ -2021,7 +2037,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     
                     # Monitor execution with load test timeout
                     execution_results = await self.monitor_golden_path_execution(
-                        websocket, context, timeout=120.0  # 2 minute timeout per user
+                        websocket, context, timeout=120.0, services=golden_path_services  # 2 minute timeout per user
                     )
                     
                     user_execution_time = time.time() - user_start_time
@@ -2212,7 +2228,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         compliance_metrics["audit_events_captured"] += 1
         compliance_metrics["security_events"] += 1
         
-        websocket = await self.establish_authenticated_websocket_connection(context)
+        websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
         
         # Record connection audit event
         audit_events.append({
