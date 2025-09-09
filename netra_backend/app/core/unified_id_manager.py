@@ -777,6 +777,12 @@ def is_valid_id_format(id_value: str) -> bool:
                 if has_known_prefix:
                     return True
     
+    # Check for OAuth provider numeric IDs (Google, Facebook, etc.)
+    # Google OAuth IDs are typically 15-21 digits long
+    import re
+    if re.match(r'^\d{15,21}$', id_value):
+        return True
+    
     return False
 
 
