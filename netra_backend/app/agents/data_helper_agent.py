@@ -53,13 +53,14 @@ class DataHelperAgent(BaseAgent):
         self.data_helper_tool = DataHelper(llm_manager)
     
     
-    async def _execute_core(self, context: 'UserExecutionContext') -> 'UserExecutionContext':
+    async def _execute_with_user_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> 'UserExecutionContext':
         """Execute core data request generation logic with complete user isolation.
         
-        ✅ MIGRATED: Uses UserExecutionContext for secure, isolated execution.
+        ✅ MIGRATED: Uses modern BaseAgent interface with UserExecutionContext for secure, isolated execution.
         
         Args:
             context: UserExecutionContext with complete request isolation
+            stream_updates: Whether to enable streaming updates (not used by DataHelper currently)
             
         Returns:
             Enhanced UserExecutionContext with data request results
