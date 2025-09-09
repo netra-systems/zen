@@ -382,8 +382,8 @@ class TestDomainExpertsComprehensive(SSotBaseTestCase):
         # Test with payback data
         request_with_payback = {
             "data": {
-                "payback_period": "24 months",
-                "break_even_point": "Q2 2025"
+                "payback": "24 months",
+                "break_even": "Q2 2025"
             }
         }
         
@@ -821,7 +821,7 @@ class TestDomainExpertsComprehensive(SSotBaseTestCase):
         mock_state.accumulated_data = {
             "costs": 50000, "roi": 0.25, "payback": "12 months",  # Finance data
             "latency": "50ms", "throughput": 1000, "scale": "horizontal",  # Engineering data
-            "market": "enterprise", "competitors": ["AWS", "Azure"], "revenue": 500000  # Business data
+            "market": "enterprise", "competitor": "AWS", "revenue": 500000  # Business data
         }
         
         context = ExecutionContext(request_id="concurrent_test", state=mock_state)

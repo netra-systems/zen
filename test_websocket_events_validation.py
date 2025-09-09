@@ -23,7 +23,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from shared.id_generation import UnifiedIdGenerator
+from shared.id_generation import UnifiedIdGenerator, generate_uuid_replacement
 
 
 class WebSocketEventsValidator:
@@ -109,12 +109,15 @@ class WebSocketEventsValidator:
         
     def create_test_user_context(self) -> UserExecutionContext:
         """Create test user context for agent execution."""
+        user_id = f"test-user-{generate_uuid_replacement()}"
+        thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(user_id, "validation")
+        
         return UserExecutionContext(
-            user_id=f"test-user-{UnifiedIdGenerator.generate_uuid()[:8]}",
-            thread_id=UnifiedIdGenerator.generate_thread_id(),
-            run_id=UnifiedIdGenerator.generate_run_id(),
-            request_id=UnifiedIdGenerator.generate_request_id(),
-            websocket_connection_id=f"ws-test-{UnifiedIdGenerator.generate_uuid()[:8]}",
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(user_id),
             db_session=None,  # Mock for this test
             metadata={
                 'user_request': 'Analyze my AI costs and suggest optimizations',

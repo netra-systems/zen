@@ -132,8 +132,8 @@ async def data_helper_agent(real_services_fixture, mock_websocket_manager):
     else:
         llm_manager = await _create_mock_llm_manager()
     
-    # Create real tool dispatcher
-    tool_dispatcher = UnifiedToolDispatcher()
+    # Create tool dispatcher using factory pattern for proper user isolation
+    tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
     
     # Create agent with WebSocket integration
     agent = DataHelperAgent(llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)
@@ -1923,7 +1923,8 @@ class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
         failing_llm_manager = AsyncMock(spec=LLMManager)
         failing_llm_manager.agenerate.side_effect = Exception("Simulated LLM service failure")
         
-        tool_dispatcher = UnifiedToolDispatcher()
+        # Create tool dispatcher using factory pattern for proper user isolation
+        tool_dispatcher = await UnifiedToolDispatcher.create_for_user(user_execution_context)
         failing_agent = DataHelperAgent(llm_manager=failing_llm_manager, tool_dispatcher=tool_dispatcher)
         
         async def mock_notify_event(event_type: str, data: Dict[str, Any]):
