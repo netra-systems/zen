@@ -182,6 +182,8 @@ class MockWebSocketHandshakeValidator:
         return delays[delay_index]
 
 
+@pytest.mark.unit
+@pytest.mark.golden_path
 class TestWebSocketHandshakeTimingLogic(SSotBaseTestCase):
     """Test WebSocket handshake timing business logic validation."""
     
