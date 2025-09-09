@@ -151,7 +151,7 @@ def generate_markdown_report():
     with open(report_path, "w") as f:
         f.write("# Top 100 E2E Staging Tests - Execution Report\n\n")
         f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"**Environment:** Staging - https://netra-backend-staging-pnovr5vsba-uc.a.run.app\n")
+        f.write(f"**Environment:** Staging - https://api.staging.netrasystems.ai\n")
         f.write(f"**Test Framework:** Pytest {data.get('pytest_version', 'unknown')}\n\n")
         
         # Executive Summary

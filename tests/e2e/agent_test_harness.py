@@ -21,7 +21,7 @@ import httpx
 import websockets
 from websockets import ServerConnection
 
-from tests.e2e.service_manager import HealthMonitor, ServiceManager, TestDataSeeder
+from tests.e2e.real_services_manager import HealthMonitor, ServiceManager, TestDataSeeder
 from tests.e2e.test_harness import ServiceConfig
 from tests.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 

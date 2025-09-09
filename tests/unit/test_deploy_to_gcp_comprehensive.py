@@ -770,7 +770,7 @@ class TestErrorDetectionAndValidation(SSotBaseTestCase):
         # Test URL extraction from mock gcloud output
         mock_output = """
         Deploying container to Cloud Run service [netra-backend-staging]
-        Service URL: https://netra-backend-staging-123abc-uc.a.run.app
+        Service URL: https://api.staging.netrasystems.ai
         """
         
         # Test URL extraction logic
@@ -781,7 +781,7 @@ class TestErrorDetectionAndValidation(SSotBaseTestCase):
                 break
                 
         # Should extract URL correctly
-        assert url == "https://netra-backend-staging-123abc-uc.a.run.app"
+        assert url == "https://api.staging.netrasystems.ai"
         assert url.startswith("https://")
         assert "netra-backend-staging" in url
         assert ".run.app" in url

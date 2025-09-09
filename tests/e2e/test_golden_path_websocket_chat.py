@@ -48,9 +48,9 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
     interactions that depend on WebSocket infrastructure.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up Golden Path test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.env = get_env()
         
         # Determine test environment (staging vs local)
@@ -592,9 +592,9 @@ class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
     even under various failure and edge case scenarios.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up resilience test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.env = get_env()
         test_env = self.env.get("TEST_ENV", "test")
         

@@ -43,9 +43,9 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 class TestWebSocketAuthIntegration(SSotAsyncTestCase):
     """Test WebSocket authentication integration with real services."""
     
-    async def async_setup_method(self, method=None):
-        """Async setup for integration test components."""
-        await super().async_setup_method(method)
+    def setup_method(self, method=None):
+        """Setup method for WebSocket auth integration tests."""
+        super().setup_method(method)
         
         # Initialize auth helpers
         self.environment = self.get_env_var("TEST_ENV", "test")
@@ -61,6 +61,11 @@ class TestWebSocketAuthIntegration(SSotAsyncTestCase):
         self.record_metric("test_category", "integration")
         self.record_metric("golden_path_component", "websocket_auth_integration")
         self.record_metric("real_services_required", True)
+    
+    async def async_setup_method(self, method=None):
+        """Async setup for integration test components."""
+        # The sync setup_method handles the main initialization
+        pass
         
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -302,10 +307,17 @@ class TestWebSocketAuthIntegration(SSotAsyncTestCase):
             if isinstance(result, Exception):
                 failed_connections += 1
                 print(f"❌ Concurrent auth {i} failed: {result}")
-            else:
+            elif isinstance(result, dict) and result.get("success", False):
                 successful_connections += 1
-                connection_times.append(result["connection_time"])
-                print(f"✅ Concurrent auth {i} succeeded in {result['connection_time']:.2f}s")
+                if "connection_time" in result:
+                    connection_times.append(result["connection_time"])
+                    print(f"✅ Concurrent auth {i} succeeded in {result['connection_time']:.2f}s")
+                else:
+                    print(f"✅ Concurrent auth {i} succeeded")
+            else:
+                failed_connections += 1
+                error_msg = result.get("error", str(result)) if isinstance(result, dict) else str(result)
+                print(f"❌ Concurrent auth {i} failed: {error_msg}")
         
         # Assertions
         success_rate = successful_connections / concurrent_users

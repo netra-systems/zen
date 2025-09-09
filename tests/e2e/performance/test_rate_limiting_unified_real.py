@@ -44,7 +44,7 @@ from tests.e2e.rate_limiting_core import (
     RedisManager,
     UserManager,
 )
-from tests.e2e.service_manager import ServiceManager
+from tests.e2e.real_services_manager import ServiceManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 

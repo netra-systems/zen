@@ -41,26 +41,13 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 class TestRedisCacheIntegration(SSotAsyncTestCase):
     """Test Redis cache integration with real Redis instance."""
     
-    async def async_setup_method(self, method=None):
-        """Async setup for Redis integration test components."""
-        await super().async_setup_method(method)
+    def setup_method(self, method=None):
+        """Setup for Redis integration test components.""" 
+        super().setup_method(method)
         
         # Initialize components
-        self.environment = self.get_env_var("TEST_ENV", "test")
+        self.test_environment = self.get_env_var("TEST_ENV", "test")
         self.id_generator = UnifiedIdGenerator()
-        
-        # Redis connection configuration
-        redis_host = self.get_env_var("REDIS_HOST", "localhost")
-        redis_port = int(self.get_env_var("REDIS_PORT", "6381"))  # Test Redis port
-        redis_db = int(self.get_env_var("REDIS_DB", "1"))  # Test database
-        
-        # Create Redis connection
-        self.redis_client = redis.Redis(
-            host=redis_host,
-            port=redis_port,
-            db=redis_db,
-            decode_responses=True
-        )
         
         # Test metrics
         self.record_metric("test_category", "integration")
@@ -69,21 +56,6 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Track keys for cleanup
         self.created_keys = set()
-        
-    async def async_teardown_method(self, method=None):
-        """Cleanup Redis keys and close connection."""
-        try:
-            # Clean up created keys
-            if self.created_keys:
-                await self.redis_client.delete(*self.created_keys)
-            
-            # Close Redis connection
-            await self.redis_client.aclose()
-            
-        except Exception as e:
-            print(f"Warning: Redis cleanup failed: {e}")
-        
-        await super().async_teardown_method(method)
     
     def _track_key(self, key: str):
         """Track key for cleanup."""
@@ -94,10 +66,12 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_session_state_caching_and_retrieval(self, real_redis_fixture):
         """Test session state caching with real Redis."""
+        # Use the Redis client from fixture
+        redis_client = real_redis_fixture
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="session_cache_test@example.com",
-            environment=self.environment,
+            environment=self.test_environment,
             websocket_enabled=True
         )
         
@@ -105,7 +79,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         session_state = {
             "user_id": str(user_context.user_id),
             "thread_id": str(user_context.thread_id),
-            "websocket_id": str(user_context.websocket_id),
+            "websocket_client_id": str(user_context.websocket_client_id),
             "connection_time": datetime.now(timezone.utc).isoformat(),
             "last_activity": datetime.now(timezone.utc).isoformat(),
             "status": "active",
@@ -129,7 +103,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Cache session state with performance timing
         cache_start = time.time()
-        await self.redis_client.setex(
+        await redis_client.setex(
             cache_key,
             3600,  # 1 hour TTL
             json.dumps(session_state)
@@ -138,7 +112,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Test session state retrieval
         retrieval_start = time.time()
-        cached_session = await self.redis_client.get(cache_key)
+        cached_session = await redis_client.get(cache_key)
         retrieval_time = time.time() - retrieval_start
         
         # Assertions
@@ -162,7 +136,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         parsed_session["last_activity"] = datetime.now(timezone.utc).isoformat()
         parsed_session["session_data"]["conversation_step"] = 4
         
-        await self.redis_client.setex(
+        await redis_client.setex(
             cache_key,
             3600,
             json.dumps(parsed_session)
@@ -170,7 +144,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         update_time = time.time() - update_start
         
         # Verify update
-        updated_session = json.loads(await self.redis_client.get(cache_key))
+        updated_session = json.loads(await redis_client.get(cache_key))
         assert updated_session["session_data"]["conversation_step"] == 4, \
             "Session should be updated"
         assert update_time < 0.1, f"Update should be < 100ms: {update_time*1000:.1f}ms"
@@ -185,16 +159,18 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_websocket_connection_state_in_redis(self, real_redis_fixture):
         """Test WebSocket connection state management in Redis."""
+        # Use the Redis client from fixture
+        redis_client = real_redis_fixture
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="websocket_cache_test@example.com",
-            environment=self.environment,
+            environment=self.test_environment,
             websocket_enabled=True
         )
         
         # Create WebSocket connection state
         ws_connection_state = {
-            "websocket_id": str(user_context.websocket_id),
+            "websocket_client_id": str(user_context.websocket_client_id),
             "user_id": str(user_context.user_id),
             "connection_time": time.time(),
             "last_ping": time.time(),
@@ -212,11 +188,11 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         }
         
         # Cache WebSocket state
-        ws_key = f"websocket:{user_context.websocket_id}"
+        ws_key = f"websocket:{user_context.websocket_client_id}"
         self._track_key(ws_key)
         
         ws_cache_start = time.time()
-        await self.redis_client.setex(
+        await redis_client.setex(
             ws_key,
             1800,  # 30 minutes TTL
             json.dumps(ws_connection_state)
@@ -225,7 +201,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Test WebSocket state retrieval
         ws_retrieval_start = time.time()
-        cached_ws_state = await self.redis_client.get(ws_key)
+        cached_ws_state = await redis_client.get(ws_key)
         ws_retrieval_time = time.time() - ws_retrieval_start
         
         # Assertions
@@ -235,8 +211,8 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Verify WebSocket data integrity
         parsed_ws_state = json.loads(cached_ws_state)
-        assert parsed_ws_state["websocket_id"] == str(user_context.websocket_id), \
-            "WebSocket ID should be preserved"
+        assert parsed_ws_state["websocket_client_id"] == str(user_context.websocket_client_id), \
+            "WebSocket client ID should be preserved"
         assert parsed_ws_state["user_id"] == str(user_context.user_id), \
             "User ID should be preserved"
         assert parsed_ws_state["connection_status"] == "connected", \
@@ -248,7 +224,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         heartbeat_start = time.time()
         parsed_ws_state["last_ping"] = time.time()
         
-        await self.redis_client.setex(
+        await redis_client.setex(
             ws_key,
             1800,
             json.dumps(parsed_ws_state)
@@ -264,7 +240,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         parsed_ws_state["connection_status"] = "disconnected"
         parsed_ws_state["disconnection_time"] = time.time()
         
-        await self.redis_client.setex(
+        await redis_client.setex(
             ws_key,
             300,  # Reduce TTL to 5 minutes for disconnected state
             json.dumps(parsed_ws_state)
@@ -275,7 +251,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         assert disconnect_time < 0.1, \
             f"Disconnection update should be fast: {disconnect_time*1000:.1f}ms"
         
-        disconnected_state = json.loads(await self.redis_client.get(ws_key))
+        disconnected_state = json.loads(await redis_client.get(ws_key))
         assert disconnected_state["connection_status"] == "disconnected", \
             "Disconnection should be recorded"
         
@@ -289,10 +265,12 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_agent_results_caching_for_performance(self, real_redis_fixture):
         """Test agent results caching for performance optimization."""
+        # Use the Redis client from fixture
+        redis_client = real_redis_fixture
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="agent_results_cache_test@example.com",
-            environment=self.environment,
+            environment=self.test_environment,
             websocket_enabled=True
         )
         
@@ -300,7 +278,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         agent_results = {
             "data_agent": {
                 "agent_name": "data_agent",
-                "execution_id": self.id_generator.generate_execution_id(),
+                "execution_id": self.id_generator.generate_agent_execution_id("test_agent", str(user_context.user_id)),
                 "execution_time": 8.2,
                 "status": "completed",
                 "results": {
@@ -328,7 +306,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             },
             "optimization_agent": {
                 "agent_name": "optimization_agent",
-                "execution_id": self.id_generator.generate_execution_id(),
+                "execution_id": self.id_generator.generate_agent_execution_id("test_agent", str(user_context.user_id)),
                 "execution_time": 12.5,
                 "status": "completed",
                 "results": {
@@ -378,7 +356,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             
             # Cache agent results
             cache_start = time.time()
-            await self.redis_client.setex(
+            await redis_client.setex(
                 cache_key,
                 cache_ttl,
                 json.dumps(result)
@@ -393,7 +371,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         # Test bulk retrieval performance
         bulk_retrieval_start = time.time()
         cache_keys = [result["metadata"]["cache_key"] for result in agent_results.values()]
-        cached_results = await self.redis_client.mget(cache_keys)
+        cached_results = await redis_client.mget(cache_keys)
         bulk_retrieval_time = time.time() - bulk_retrieval_start
         
         # Assertions for bulk retrieval
@@ -429,7 +407,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         # Test cache expiration and TTL
         ttl_check_start = time.time()
         for cache_key in cache_keys:
-            ttl = await self.redis_client.ttl(cache_key)
+            ttl = await redis_client.ttl(cache_key)
             assert ttl > 0, f"Cache key {cache_key} should have positive TTL: {ttl}"
             assert ttl <= 7200, f"TTL should not exceed max: {ttl}"
         ttl_check_time = time.time() - ttl_check_start
@@ -440,11 +418,11 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         # Test cache invalidation
         invalidation_start = time.time()
         data_agent_key = agent_results["data_agent"]["metadata"]["cache_key"]
-        await self.redis_client.delete(data_agent_key)
+        await redis_client.delete(data_agent_key)
         invalidation_time = time.time() - invalidation_start
         
         # Verify invalidation
-        invalidated_result = await self.redis_client.get(data_agent_key)
+        invalidated_result = await redis_client.get(data_agent_key)
         assert invalidated_result is None, "Cache should be invalidated"
         assert invalidation_time < 0.05, \
             f"Cache invalidation should be very fast: {invalidation_time*1000:.1f}ms"
@@ -463,17 +441,19 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_cache_cleanup_on_session_termination(self, real_redis_fixture):
         """Test cache cleanup when session terminates."""
+        # Use the Redis client from fixture
+        redis_client = real_redis_fixture
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="cache_cleanup_test@example.com",
-            environment=self.environment,
+            environment=self.test_environment,
             websocket_enabled=True
         )
         
         # Create multiple cache entries for user session
         session_keys = [
             f"session:{user_context.user_id}",
-            f"websocket:{user_context.websocket_id}",
+            f"websocket:{user_context.websocket_client_id}",
             f"agent_results:{user_context.user_id}:data_agent",
             f"agent_results:{user_context.user_id}:optimization_agent",
             f"user_preferences:{user_context.user_id}",
@@ -486,8 +466,8 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
                 "user_id": str(user_context.user_id),
                 "status": "active"
             },
-            f"websocket:{user_context.websocket_id}": {
-                "websocket_id": str(user_context.websocket_id),
+            f"websocket:{user_context.websocket_client_id}": {
+                "websocket_client_id": str(user_context.websocket_client_id),
                 "status": "connected"
             },
             f"agent_results:{user_context.user_id}:data_agent": {
@@ -511,13 +491,13 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         # Cache all data
         cache_setup_start = time.time()
         for key, data in cache_data.items():
-            await self.redis_client.setex(key, 3600, json.dumps(data))
+            await redis_client.setex(key, 3600, json.dumps(data))
             self._track_key(key)
         cache_setup_time = time.time() - cache_setup_start
         
         # Verify all data is cached
         verification_start = time.time()
-        cached_keys = await self.redis_client.exists(*session_keys)
+        cached_keys = await redis_client.exists(*session_keys)
         verification_time = time.time() - verification_start
         
         assert cached_keys == len(session_keys), \
@@ -542,25 +522,25 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Delete WebSocket specific keys
         ws_cleanup_start = time.time()
-        await self.redis_client.delete(f"websocket:{user_context.websocket_id}")
+        await redis_client.delete(f"websocket:{user_context.websocket_client_id}")
         ws_cleanup_time = time.time() - ws_cleanup_start
         cleanup_operations.append(("websocket", ws_cleanup_time))
         
         # Delete session key
         session_cleanup_start = time.time()
-        await self.redis_client.delete(f"session:{user_context.user_id}")
+        await redis_client.delete(f"session:{user_context.user_id}")
         session_cleanup_time = time.time() - session_cleanup_start
         cleanup_operations.append(("session", session_cleanup_time))
         
         # Delete conversation state
         conversation_cleanup_start = time.time()
-        await self.redis_client.delete(f"conversation_state:{user_context.thread_id}")
+        await redis_client.delete(f"conversation_state:{user_context.thread_id}")
         conversation_cleanup_time = time.time() - conversation_cleanup_start
         cleanup_operations.append(("conversation", conversation_cleanup_time))
         
         # Delete user preferences
         prefs_cleanup_start = time.time()
-        await self.redis_client.delete(f"user_preferences:{user_context.user_id}")
+        await redis_client.delete(f"user_preferences:{user_context.user_id}")
         prefs_cleanup_time = time.time() - prefs_cleanup_start
         cleanup_operations.append(("preferences", prefs_cleanup_time))
         
@@ -570,7 +550,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             f"agent_results:{user_context.user_id}:data_agent",
             f"agent_results:{user_context.user_id}:optimization_agent"
         ]
-        await self.redis_client.delete(*agent_keys)
+        await redis_client.delete(*agent_keys)
         agent_results_cleanup_time = time.time() - agent_results_cleanup_start
         cleanup_operations.append(("agent_results", agent_results_cleanup_time))
         
@@ -578,7 +558,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Verify cleanup completed
         post_cleanup_verification_start = time.time()
-        remaining_keys = await self.redis_client.exists(*session_keys)
+        remaining_keys = await redis_client.exists(*session_keys)
         post_cleanup_verification_time = time.time() - post_cleanup_verification_start
         
         # Assertions
@@ -596,7 +576,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
         # Test cleanup idempotence (cleanup again should not fail)
         idempotent_cleanup_start = time.time()
-        await self.redis_client.delete(*session_keys)  # Should not fail
+        await redis_client.delete(*session_keys)  # Should not fail
         idempotent_cleanup_time = time.time() - idempotent_cleanup_start
         
         assert idempotent_cleanup_time < 0.1, \
@@ -612,6 +592,8 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_multi_user_cache_isolation(self, real_redis_fixture):
         """Test cache isolation between multiple concurrent users."""
+        # Use the Redis client from fixture
+        redis_client = real_redis_fixture
         concurrent_users = 5
         user_contexts = []
         
@@ -619,7 +601,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         for i in range(concurrent_users):
             context = await create_authenticated_user_context(
                 user_email=f"cache_isolation_user_{i}@example.com",
-                environment=self.environment,
+                environment=self.test_environment,
                 websocket_enabled=True
             )
             user_contexts.append(context)
@@ -659,9 +641,9 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             self._track_key(results_key)
             
             # Cache all user data
-            await self.redis_client.setex(session_key, 3600, json.dumps(user_data["session"]))
-            await self.redis_client.setex(prefs_key, 3600, json.dumps(user_data["preferences"]))
-            await self.redis_client.setex(results_key, 3600, json.dumps(user_data["agent_results"]))
+            await redis_client.setex(session_key, 3600, json.dumps(user_data["session"]))
+            await redis_client.setex(prefs_key, 3600, json.dumps(user_data["preferences"]))
+            await redis_client.setex(results_key, 3600, json.dumps(user_data["agent_results"]))
         
         isolation_setup_time = time.time() - isolation_setup_start
         
@@ -674,9 +656,9 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             prefs_key = f"user_preferences:{context.user_id}"
             results_key = f"agent_results:{context.user_id}:cost_analysis"
             
-            cached_session = json.loads(await self.redis_client.get(session_key))
-            cached_prefs = json.loads(await self.redis_client.get(prefs_key))
-            cached_results = json.loads(await self.redis_client.get(results_key))
+            cached_session = json.loads(await redis_client.get(session_key))
+            cached_prefs = json.loads(await redis_client.get(prefs_key))
+            cached_results = json.loads(await redis_client.get(results_key))
             
             # Verify user sees their own data
             assert cached_session["user_index"] == i, \
@@ -698,7 +680,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             for j, other_context in enumerate(user_contexts):
                 if i != j:  # Different user
                     other_session_key = f"session:{other_context.user_id}"
-                    other_cached_session = json.loads(await self.redis_client.get(other_session_key))
+                    other_cached_session = json.loads(await redis_client.get(other_session_key))
                     
                     # Verify data is different (isolation test)
                     assert other_cached_session["user_index"] != i, \
@@ -714,7 +696,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         # Simulate concurrent cache access from all users
         access_tasks = []
         for context in user_contexts:
-            task = self._simulate_concurrent_user_cache_access(context)
+            task = self._simulate_concurrent_user_cache_access(context, redis_client)
             access_tasks.append(task)
         
         access_results = await asyncio.gather(*access_tasks)
@@ -748,7 +730,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             ]
             
             for key in expected_keys:
-                if await self.redis_client.exists(key):
+                if await redis_client.exists(key):
                     user_keys.append(key)
             
             assert len(user_keys) == 3, \
@@ -777,7 +759,8 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         
     async def _simulate_concurrent_user_cache_access(
         self, 
-        user_context: StronglyTypedUserExecutionContext
+        user_context: StronglyTypedUserExecutionContext,
+        redis_client
     ) -> Dict[str, Any]:
         """Simulate concurrent cache access for a single user."""
         access_start = time.time()
@@ -789,16 +772,16 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             results_key = f"agent_results:{user_context.user_id}:cost_analysis"
             
             # Read operations
-            session_data = await self.redis_client.get(session_key)
-            prefs_data = await self.redis_client.get(prefs_key)
-            results_data = await self.redis_client.get(results_key)
+            session_data = await redis_client.get(session_key)
+            prefs_data = await redis_client.get(prefs_key)
+            results_data = await redis_client.get(results_key)
             
             # Write operation (update last access)
             access_time = time.time()
             session_update = json.loads(session_data)
             session_update["last_access"] = access_time
             
-            await self.redis_client.setex(session_key, 3600, json.dumps(session_update))
+            await redis_client.setex(session_key, 3600, json.dumps(session_update))
             
             # Verify data integrity
             assert session_data is not None, "Session data should exist"
@@ -827,6 +810,8 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_cache_performance_requirements(self, real_redis_fixture):
         """Test Redis cache meets performance requirements."""
+        # Use the Redis client from fixture
+        redis_client = real_redis_fixture
         # Performance test parameters
         performance_iterations = 50
         batch_size = 10
@@ -846,14 +831,14 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             
             # Single SET performance
             set_start = time.time()
-            await self.redis_client.setex(test_key, 300, json.dumps(test_data))
+            await redis_client.setex(test_key, 300, json.dumps(test_data))
             set_time = time.time() - set_start
             performance_metrics["single_set_times"].append(set_time)
             self._track_key(test_key)
             
             # Single GET performance
             get_start = time.time()
-            retrieved_data = await self.redis_client.get(test_key)
+            retrieved_data = await redis_client.get(test_key)
             get_time = time.time() - get_start
             performance_metrics["single_get_times"].append(get_time)
             
@@ -877,7 +862,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             
             # Batch SET performance (using pipeline)
             batch_set_start = time.time()
-            pipe = self.redis_client.pipeline()
+            pipe = redis_client.pipeline()
             for key, data in batch_data.items():
                 pipe.setex(key, 300, data)
             await pipe.execute()
@@ -886,7 +871,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
             
             # Batch GET performance
             batch_get_start = time.time()
-            batch_results = await self.redis_client.mget(batch_keys)
+            batch_results = await redis_client.mget(batch_keys)
             batch_get_time = time.time() - batch_get_start
             performance_metrics["batch_get_times"].append(batch_get_time)
             
@@ -899,7 +884,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         delete_test_keys = [f"delete_test:{i}" for i in range(20)]
         
         # Create keys for deletion test
-        pipe = self.redis_client.pipeline()
+        pipe = redis_client.pipeline()
         for key in delete_test_keys:
             pipe.setex(key, 300, f"delete_test_data")
             self._track_key(key)
@@ -908,7 +893,7 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         # Test individual delete performance
         for key in delete_test_keys:
             delete_start = time.time()
-            await self.redis_client.delete(key)
+            await redis_client.delete(key)
             delete_time = time.time() - delete_start
             performance_metrics["delete_times"].append(delete_time)
         
@@ -949,9 +934,12 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         assert max_delete < 0.2, \
             f"Max DELETE should be < 200ms: {max_delete*1000:.1f}ms"
         
-        # Throughput calculations
-        single_ops_throughput = performance_iterations / sum(performance_metrics["single_set_times"] + performance_metrics["single_get_times"])
-        batch_ops_throughput = (len(performance_metrics["batch_set_times"]) * batch_size) / sum(performance_metrics["batch_set_times"] + performance_metrics["batch_get_times"])
+        # Throughput calculations with safety checks
+        single_ops_total_time = sum(performance_metrics["single_set_times"] + performance_metrics["single_get_times"])
+        single_ops_throughput = performance_iterations / single_ops_total_time if single_ops_total_time > 0 else 0
+        
+        batch_ops_total_time = sum(performance_metrics["batch_set_times"] + performance_metrics["batch_get_times"])
+        batch_ops_throughput = (len(performance_metrics["batch_set_times"]) * batch_size) / batch_ops_total_time if batch_ops_total_time > 0 else 0
         
         self.record_metric("cache_performance_test_passed", True)
         self.record_metric("avg_single_set_time", avg_single_set)

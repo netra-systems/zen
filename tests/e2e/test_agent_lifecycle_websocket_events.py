@@ -71,7 +71,7 @@
                 # REMOVED_SYNTAX_ERROR: TestDataFactory)
                 # REMOVED_SYNTAX_ERROR: from tests.e2e.agent_conversation_helpers import AgentConversationTestCore
                 # REMOVED_SYNTAX_ERROR: from tests.e2e.websocket_resilience_core import WebSocketResilienceTestCore
-                # REMOVED_SYNTAX_ERROR: from tests.e2e.service_manager import RealServicesManager
+                # REMOVED_SYNTAX_ERROR: from tests.e2e.real_services_manager import RealServicesManager
                 # REMOVED_SYNTAX_ERROR: from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
                 # REMOVED_SYNTAX_ERROR: logger = central_logger.get_logger(__name__)

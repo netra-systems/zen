@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework import setup_test_path
 setup_test_path()
 
-from tests.e2e.service_manager import ServiceManager
+from tests.e2e.real_services_manager import ServiceManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete, create_test_harness
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient

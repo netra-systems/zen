@@ -39,10 +39,12 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 # Agent system imports
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.execution_engine.user_execution_engine import UserExecutionEngine
-from netra_backend.app.agents.execution_engine.factory import ExecutionEngineFactory
-from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class MockWebSocketNotifier:
@@ -121,20 +123,41 @@ class MockWebSocketNotifier:
 class TestAgentPipelineIntegration(SSotAsyncTestCase):
     """Test agent pipeline integration with real components."""
     
-    async def async_setup_method(self, method=None):
-        """Async setup for agent pipeline integration test components."""
-        await super().async_setup_method(method)
+    def setup_method(self, method=None):
+        """Setup method run before each test method."""
+        super().setup_method(method)
         
-        # Initialize components
+        # Initialize environment attribute for test compatibility
+        # Using the SSOT pattern from base class
         self.environment = self.get_env_var("TEST_ENV", "test")
+        
+        # Initialize components that don't require async setup
         self.id_generator = UnifiedIdGenerator()
         self.mock_websocket_notifier = MockWebSocketNotifier()
         
-        # Initialize real agent registry
-        self.agent_registry = AgentRegistry()
+        # Initialize LLM manager for agent registry
+        self.llm_manager = LLMManager()
         
-        # Initialize execution engine factory
-        self.execution_engine_factory = ExecutionEngineFactory()
+        # Initialize websocket bridge for execution engine factory
+        self.websocket_bridge = AgentWebSocketBridge()
+        
+        # Initialize real agent registry with required LLM manager
+        self.agent_registry = AgentRegistry(self.llm_manager)
+        
+        # Register default agents for testing
+        self.agent_registry.register_default_agents()
+        
+        # Configure agent instance factory with the agent registry for proper integration
+        from netra_backend.app.agents.supervisor.agent_instance_factory import configure_agent_instance_factory
+        # We need to configure this asynchronously, so we'll store the configuration for later
+        self._configure_factory_task = lambda: configure_agent_instance_factory(
+            agent_registry=self.agent_registry,
+            websocket_bridge=self.websocket_bridge,
+            llm_manager=self.llm_manager
+        )
+
+        # Initialize execution engine factory with required websocket bridge
+        self.execution_engine_factory = ExecutionEngineFactory(websocket_bridge=self.websocket_bridge)
         
         # Test metrics
         self.record_metric("test_category", "integration")
@@ -146,19 +169,32 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_agent_registry_and_execution_engine_integration(self, real_services_fixture):
         """Test integration between agent registry and execution engine."""
-        # Create user context
-        user_context = await create_authenticated_user_context(
-            user_email="agent_integration_test@example.com",
-            environment=self.environment,
-            websocket_enabled=True
+        # Configure agent instance factory with the agent registry
+        await self._configure_factory_task()
+        
+        # Create user context using the expected type
+        # For testing purposes, create a simple UserExecutionContext
+        user_context = UserExecutionContext(
+            user_id=self.id_generator.generate_base_id("user"),
+            thread_id=self.id_generator.generate_base_id("thread"), 
+            run_id=self.id_generator.generate_base_id("run"),
+            request_id=self.id_generator.generate_base_id("req")
         )
         
-        # Get registered agents
-        registered_agents = self.agent_registry.get_available_agents()
-        assert len(registered_agents) > 0, "Agent registry should have registered agents"
+        # Get registered agent names (using available method from UniversalRegistry)
+        registered_agent_names = self.agent_registry.list_keys()
+        assert len(registered_agent_names) > 0, "Agent registry should have registered agents"
+        
+        # Create simple agent objects with names for compatibility with test expectations
+        class SimpleAgent:
+            def __init__(self, name):
+                self.name = name
+        
+        registered_agents = [SimpleAgent(name) for name in registered_agent_names]
         
         # Verify golden path agents are available
-        golden_path_agents = ["triage_agent", "data_agent", "optimization_agent", "report_agent"]
+        # Using actual registered agent names from the system
+        golden_path_agents = ["triage", "data", "optimization", "reporting"]
         available_agent_names = [agent.name for agent in registered_agents]
         
         for agent_name in golden_path_agents:
@@ -167,9 +203,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         
         # Create execution engine for user
         execution_engine_start = time.time()
-        execution_engine = await self.execution_engine_factory.create_user_execution_engine(
-            user_context=user_context,
-            websocket_notifier=self.mock_websocket_notifier
+        execution_engine = await self.execution_engine_factory.create_execution_engine(
+            user_context=user_context
         )
         engine_creation_time = time.time() - execution_engine_start
         
@@ -197,6 +232,9 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_tool_dispatcher_factory_integration(self, real_services_fixture):
         """Test tool dispatcher factory creation and integration."""
+        # Configure agent instance factory with the agent registry
+        await self._configure_factory_task()
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="tool_dispatcher_test@example.com",
@@ -205,9 +243,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         )
         
         # Create execution engine with tool dispatcher
-        execution_engine = await self.execution_engine_factory.create_user_execution_engine(
-            user_context=user_context,
-            websocket_notifier=self.mock_websocket_notifier
+        execution_engine = await self.execution_engine_factory.create_execution_engine(
+            user_context=user_context
         )
         
         # Verify tool dispatcher integration
@@ -258,6 +295,9 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_websocket_notifier_integration(self, real_services_fixture):
         """Test WebSocket notifier integration with agent execution."""
+        # Configure agent instance factory with the agent registry
+        await self._configure_factory_task()
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="websocket_notifier_test@example.com",
@@ -266,9 +306,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         )
         
         # Create execution engine with WebSocket notifier
-        execution_engine = await self.execution_engine_factory.create_user_execution_engine(
-            user_context=user_context,
-            websocket_notifier=self.mock_websocket_notifier
+        execution_engine = await self.execution_engine_factory.create_execution_engine(
+            user_context=user_context
         )
         
         # Test WebSocket notifications during mock agent execution
@@ -326,6 +365,9 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_agent_state_management_across_pipeline(self, real_services_fixture):
         """Test agent state management throughout execution pipeline."""
+        # Configure agent instance factory with the agent registry
+        await self._configure_factory_task()
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="agent_state_test@example.com",
@@ -334,9 +376,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         )
         
         # Create execution engine
-        execution_engine = await self.execution_engine_factory.create_user_execution_engine(
-            user_context=user_context,
-            websocket_notifier=self.mock_websocket_notifier
+        execution_engine = await self.execution_engine_factory.create_execution_engine(
+            user_context=user_context
         )
         
         # Test state management through mock agent lifecycle
@@ -394,6 +435,9 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_multi_agent_coordination_and_data_flow(self, real_services_fixture):
         """Test multi-agent coordination and data flow in pipeline."""
+        # Configure agent instance factory with the agent registry
+        await self._configure_factory_task()
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="multi_agent_test@example.com",
@@ -402,9 +446,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         )
         
         # Create execution engine
-        execution_engine = await self.execution_engine_factory.create_user_execution_engine(
-            user_context=user_context,
-            websocket_notifier=self.mock_websocket_notifier
+        execution_engine = await self.execution_engine_factory.create_execution_engine(
+            user_context=user_context
         )
         
         # Simulate Golden Path agent coordination: Data → Optimization → Report
@@ -552,6 +595,9 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_error_handling_and_recovery_in_pipeline(self, real_services_fixture):
         """Test error handling and recovery mechanisms in agent pipeline."""
+        # Configure agent instance factory with the agent registry
+        await self._configure_factory_task()
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="error_handling_test@example.com",
@@ -560,9 +606,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         )
         
         # Create execution engine
-        execution_engine = await self.execution_engine_factory.create_user_execution_engine(
-            user_context=user_context,
-            websocket_notifier=self.mock_websocket_notifier
+        execution_engine = await self.execution_engine_factory.create_execution_engine(
+            user_context=user_context
         )
         
         # Test scenario 1: Agent execution failure
@@ -593,7 +638,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         stored_error_result = execution_engine.get_agent_result("failing_agent")
         assert stored_error_result["status"] == "failed", "Should store failed status"
         assert "error" in stored_error_result, "Should store error information"
-        assert stored_error_result["error"]["retry_possible"] is True, \
+        assert stored_error_result["error"]["details"]["retry_possible"] is True, \
             "Should preserve retry possibility"
         
         # Test scenario 2: Dependency failure handling
@@ -673,6 +718,9 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_concurrent_multi_user_pipeline_isolation(self, real_services_fixture):
         """Test pipeline isolation with multiple concurrent users."""
+        # Configure agent instance factory with the agent registry
+        await self._configure_factory_task()
+        
         concurrent_users = 3
         user_contexts = []
         execution_engines = []
@@ -686,9 +734,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             )
             user_contexts.append(context)
             
-            engine = await self.execution_engine_factory.create_user_execution_engine(
-                user_context=context,
-                websocket_notifier=self.mock_websocket_notifier
+            engine = await self.execution_engine_factory.create_execution_engine(
+                user_context=context
             )
             execution_engines.append(engine)
         

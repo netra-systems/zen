@@ -60,8 +60,8 @@ TEST_CONFIG = {
     "backend_url": "http://localhost:8000",       # Main backend port (local dev)
     "frontend_url": "http://localhost:3000",      # Frontend port (local dev)
     "staging_auth_url": "https://auth.staging.netrasystems.ai",
-    "staging_backend_url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
-    "staging_frontend_url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app",
+    "staging_backend_url": "https://api.staging.netrasystems.ai",
+    "staging_frontend_url": "https://app.staging.netrasystems.ai",
     "timeout": 30.0,  # Longer timeout for GCP services
 }
 

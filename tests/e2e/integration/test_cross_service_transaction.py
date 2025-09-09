@@ -15,7 +15,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Import dependencies with fallbacks
 try:
-    from tests.e2e.service_manager import RealServicesManager
+    from tests.e2e.real_services_manager import RealServicesManager
 except ImportError:
     RealServicesManager = None
     

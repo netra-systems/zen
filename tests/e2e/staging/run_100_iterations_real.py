@@ -28,7 +28,7 @@ class StagingE2ETestRunner:
         self.results_dir = PROJECT_ROOT / "test_reports" / "staging_e2e"
         self.results_dir.mkdir(parents=True, exist_ok=True)
         self.all_results = []
-        self.staging_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+        self.staging_url = "https://api.staging.netrasystems.ai"
         
     def run_tests(self, test_pattern: Optional[str] = None) -> Tuple[int, int, List[str]]:
         """Run E2E tests and return passed, failed counts and failed test names"""

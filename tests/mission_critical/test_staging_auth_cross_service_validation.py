@@ -76,7 +76,7 @@ class StagingAuthCrossServiceValidator:
         current_env = self.env.get("ENVIRONMENT", "development")
         if current_env == "staging":
             self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-            self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+            self.staging_backend_url = "https://api.staging.netrasystems.ai"
         else:
             # Use local services for development testing
             self.staging_auth_url = "http://localhost:8081"

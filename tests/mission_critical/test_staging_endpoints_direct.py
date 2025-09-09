@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # REMOVED_SYNTAX_ERROR: def __init__(self):
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-    # REMOVED_SYNTAX_ERROR: self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+    # REMOVED_SYNTAX_ERROR: self.staging_backend_url = "https://api.staging.netrasystems.ai"
 
     # Removed problematic line: async def test_auth_service_health(self):
         # REMOVED_SYNTAX_ERROR: """Test auth service health endpoint."""

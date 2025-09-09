@@ -37,9 +37,9 @@ class StagingHealthValidator:
     """Validates staging environment health and functionality."""
     
     STAGING_SERVICES = {
-        'backend': 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
+        'backend': 'https://api.staging.netrasystems.ai',
         'auth': 'https://auth.staging.netrasystems.ai',
-        'frontend': 'https://netra-frontend-staging-pnovr5vsba-uc.a.run.app'
+        'frontend': 'https://app.staging.netrasystems.ai'
     }
     
     def __init__(self):

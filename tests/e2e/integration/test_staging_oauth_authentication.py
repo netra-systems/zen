@@ -40,8 +40,8 @@ class GCPStagingOAuthTestHelper:
         self.auth_helper = StagingAuthHelper()
         # Use GCP staging service URLs from task requirements
         self.staging_auth_url = "https://auth.staging.netrasystems.ai"
-        self.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-        self.staging_frontend_url = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
+        self.staging_backend_url = "https://api.staging.netrasystems.ai"
+        self.staging_frontend_url = "https://app.staging.netrasystems.ai"
         self.auth_helper.staging_auth_url = self.staging_auth_url
         self.test_session_id = str(uuid.uuid4())
         self.mock_oauth_state = str(uuid.uuid4())

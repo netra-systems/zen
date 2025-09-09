@@ -9,7 +9,7 @@ Business Value Justification:
 
 CRITICAL TEST PURPOSE:
 These E2E tests specifically target the GCP Load Balancer authentication header 
-stripping issue that caused complete WebSocket infrastructure failure.
+stripping issue that caused complete WebSocket infrastructure failure (GitHub issue #113).
 
 PRIMARY REGRESSION PREVENTION:
 - test_gcp_load_balancer_preserves_authorization_header()
@@ -22,18 +22,26 @@ for WebSocket upgrade requests, causing 100% authentication failures and 1011 er
 Infrastructure Fix Required:
 terraform-gcp-staging/load-balancer.tf needs WebSocket path authentication header preservation.
 
+COMPLEMENTARY TESTS:
+This file focuses on WebSocket-specific infrastructure validation. 
+See test_gcp_load_balancer_header_validation.py for comprehensive load balancer testing.
+
 CLAUDE.MD E2E AUTH COMPLIANCE:
 All tests use real authentication as required by CLAUDE.MD Section 7.3.
 """
 
 import asyncio
 import json
+import logging
 import pytest
 import time
+import unittest
 import websockets
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
 from unittest.mock import Mock, patch
+
+logger = logging.getLogger(__name__)
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, AuthenticatedUser
@@ -41,7 +49,7 @@ from tests.e2e.staging_config import StagingTestConfig, staging_urls
 from shared.isolated_environment import get_env
 
 
-class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
+class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase):
     """
     CRITICAL E2E Tests for GCP Staging WebSocket Infrastructure
     
@@ -50,9 +58,9 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
     caused complete Golden Path failure.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up staging environment test configuration."""
-        super().setUp()
+        super().setup_method(method)
         self.env = get_env()
         self.staging_config = StagingTestConfig()
         self.e2e_helper = E2EWebSocketAuthHelper(environment="staging")
@@ -99,7 +107,6 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
             async with websockets.connect(
                 self.staging_websocket_url,
                 additional_headers=websocket_headers,
-                timeout=self.gcp_timeout,
                 # GCP-specific connection parameters
                 ping_interval=None,  # Disable ping during connection for GCP
                 ping_timeout=None,   # Disable ping timeout during handshake  
@@ -205,7 +212,6 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
             async with websockets.connect(
                 self.staging_websocket_url,
                 additional_headers=websocket_headers,
-                timeout=self.gcp_timeout,
                 ping_interval=None,
                 ping_timeout=None
             ) as websocket:
@@ -274,8 +280,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
         try:
             async with websockets.connect(
                 self.staging_websocket_url,
-                additional_headers=websocket_headers,
-                timeout=self.gcp_timeout
+                additional_headers=websocket_headers
             ) as websocket:
                 golden_path_steps_completed.append("connection_established")
                 print(f"✅ Step 1: WebSocket connection established")
@@ -363,8 +368,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
                 
                 async with websockets.connect(
                     self.staging_websocket_url,
-                    additional_headers=websocket_headers,
-                    timeout=10.0
+                    additional_headers=websocket_headers
                 ) as websocket:
                     # Send reconnection test message
                     reconnect_message = {
@@ -433,8 +437,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
             try:
                 async with websockets.connect(
                     self.staging_websocket_url,
-                    additional_headers=headers,
-                    timeout=10.0
+                    additional_headers=headers
                 ) as websocket:
                     isolation_result["connection_success"] = True
                     
@@ -491,9 +494,140 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase):
                 len(user_ids),
                 f"Users should have unique isolated contexts. User IDs: {user_ids}"
             )
+    
+    async def test_websocket_header_stripping_regression_prevention(self):
+        """
+        CRITICAL: Specific regression test for GitHub issue #113 header stripping.
+        
+        This test validates that the specific header stripping issue that caused
+        WebSocket 1011 errors is completely resolved and won't regress.
+        
+        COMPLEMENTARY TO: test_gcp_load_balancer_header_validation.py
+        This focuses specifically on WebSocket upgrade header preservation.
+        """
+        logger.info("🔍 REGRESSION TEST: GitHub issue #113 header stripping prevention")
+        
+        # Arrange - Create user with comprehensive auth headers
+        regression_user = await self.e2e_helper.create_authenticated_user(
+            email="github_issue_113_regression@example.com",
+            permissions=["read", "write", "websocket", "regression_test"]
+        )
+        
+        # Build comprehensive header set that previously failed
+        problematic_headers = self.e2e_helper.get_websocket_headers(regression_user.jwt_token)
+        problematic_headers.update({
+            # These headers were specifically stripped by the load balancer
+            "Authorization": f"Bearer {regression_user.jwt_token}",  # Explicit Authorization
+            "X-E2E-Bypass": "true",  # E2E testing bypass
+            "X-E2E-Test-Environment": "staging",  # Environment context
+            "X-GitHub-Issue": "113",  # Issue tracking
+            "X-WebSocket-Protocol": "netra-websocket-v1",  # Custom protocol
+            "X-User-Agent": "E2E-Test-WebSocket-Client",  # User agent
+            "X-Forwarded-Proto": "https",  # Protocol forwarding
+            "Upgrade": "websocket",  # Critical WebSocket upgrade header
+            "Connection": "upgrade"  # Critical connection upgrade header
+        })
+        
+        print(f"🔍 Testing {len(problematic_headers)} headers that previously failed")
+        print(f"🔑 Critical headers: Authorization, X-E2E-Bypass, Upgrade, Connection")
+        
+        # Act - Test WebSocket connection with previously problematic headers
+        regression_test_result = {
+            "headers_sent": list(problematic_headers.keys()),
+            "connection_successful": False,
+            "header_stripping_detected": False,
+            "websocket_upgrade_successful": False,
+            "error_details": None,
+            "regression_prevented": False
+        }
+        
+        try:
+            async with websockets.connect(
+                self.staging_websocket_url,
+                additional_headers=problematic_headers,
+                ping_interval=None,
+                ping_timeout=None
+            ) as websocket:
+                regression_test_result["connection_successful"] = True
+                regression_test_result["websocket_upgrade_successful"] = True
+                
+                # Send specific regression test message
+                regression_message = {
+                    "type": "github_issue_113_regression_test",
+                    "purpose": "validate_header_stripping_fix",
+                    "user_id": regression_user.user_id,
+                    "headers_tested": list(problematic_headers.keys()),
+                    "issue_number": 113,
+                    "test_environment": "staging",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                
+                await websocket.send(json.dumps(regression_message))
+                
+                # Wait for confirmation that headers were processed
+                try:
+                    response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                    response_data = json.loads(response)
+                    
+                    regression_test_result["server_response"] = response_data.get("type", "unknown")
+                    regression_test_result["regression_prevented"] = True
+                    
+                except asyncio.TimeoutError:
+                    # No response but connection works = regression prevented
+                    regression_test_result["regression_prevented"] = True
+                    regression_test_result["server_response"] = "timeout_but_connected"
+                
+                print("✅ GitHub issue #113 regression test: WebSocket connection successful")
+                
+        except websockets.exceptions.InvalidHandshake as e:
+            regression_test_result["error_details"] = f"Handshake failed: {e}"
+            
+            # Check for specific patterns indicating header stripping
+            error_str = str(e).lower()
+            if any(pattern in error_str for pattern in ["401", "unauthorized", "forbidden", "authentication"]):
+                regression_test_result["header_stripping_detected"] = True
+                regression_test_result["error_details"] += " (HEADER STRIPPING DETECTED)"
+                
+        except websockets.exceptions.ConnectionClosedError as e:
+            regression_test_result["error_details"] = f"Connection closed: {e}"
+            
+            # 1011 error was the specific symptom of header stripping
+            if "1011" in str(e):
+                regression_test_result["header_stripping_detected"] = True
+                regression_test_result["error_details"] += " (1011 ERROR - HEADER STRIPPING DETECTED)"
+                
+        except Exception as e:
+            regression_test_result["error_details"] = f"Connection error: {e}"
+        
+        # CRITICAL ASSERTIONS for regression prevention
+        self.assertFalse(
+            regression_test_result["header_stripping_detected"],
+            f"CRITICAL REGRESSION: GitHub issue #113 header stripping has returned! "
+            f"Load balancer is stripping authentication headers again. "
+            f"Error details: {regression_test_result['error_details']}. "
+            f"Headers tested: {regression_test_result['headers_sent']}. "
+            f"IMMEDIATE FIX REQUIRED: Check terraform-gcp-staging/load-balancer.tf deployment"
+        )
+        
+        self.assertTrue(
+            regression_test_result["connection_successful"],
+            f"CRITICAL REGRESSION: WebSocket connection failed with auth headers. "
+            f"This is exactly the symptom of GitHub issue #113. "
+            f"Connection result: {regression_test_result}. "
+            f"IMMEDIATE ACTION: Validate load balancer header forwarding configuration"
+        )
+        
+        self.assertTrue(
+            regression_test_result["regression_prevented"],
+            f"CRITICAL REGRESSION: GitHub issue #113 symptoms detected. "
+            f"WebSocket upgrade with auth headers is not working properly. "
+            f"Full test result: {regression_test_result}"
+        )
+        
+        print("✅ REGRESSION TEST PASSED: GitHub issue #113 header stripping prevented")
 
 
-class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase):
+class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCase):
     """
     Tests for GCP WebSocket infrastructure resilience and error handling.
     
@@ -501,9 +635,9 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase):
     that can occur in GCP staging and production environments.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up resilience test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.staging_config = StagingTestConfig()
         self.e2e_helper = E2EWebSocketAuthHelper(environment="staging")
         self.staging_websocket_url = self.staging_config.urls.websocket_url
@@ -541,7 +675,6 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase):
                 async with websockets.connect(
                     self.staging_websocket_url,
                     additional_headers=headers,
-                    timeout=timeout_value,
                     ping_interval=None,  # GCP optimization
                     ping_timeout=None
                 ) as websocket:
@@ -625,8 +758,7 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase):
                 # Attempt connection with problematic configuration
                 async with websockets.connect(
                     self.staging_websocket_url,
-                    additional_headers=scenario["headers"],
-                    timeout=5.0
+                    additional_headers=scenario["headers"]
                 ) as websocket:
                     # If connection succeeds unexpectedly
                     error_handling_results.append({
