@@ -30,7 +30,7 @@ from unittest.mock import patch
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.fixtures.lightweight_services import lightweight_services_fixture
 from test_framework.fixtures.isolated_environment import isolated_env
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
@@ -65,13 +65,13 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_concurrent_thread_creation_race_conditions(self, real_services_fixture, isolated_env):
+    async def test_concurrent_thread_creation_race_conditions(self, lightweight_services_fixture, isolated_env):
         """Test race conditions in concurrent thread creation for same user."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -253,13 +253,13 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_simultaneous_message_routing_race_conditions(self, real_services_fixture, isolated_env):
+    async def test_simultaneous_message_routing_race_conditions(self, lightweight_services_fixture, isolated_env):
         """Test race conditions in simultaneous message routing to same threads."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -530,13 +530,13 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_registry_concurrent_access_patterns(self, real_services_fixture, isolated_env):
+    async def test_thread_registry_concurrent_access_patterns(self, lightweight_services_fixture, isolated_env):
         """Test thread registry race conditions under concurrent access patterns."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         
@@ -805,13 +805,13 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_database_transaction_isolation_race_conditions(self, real_services_fixture, isolated_env):
+    async def test_database_transaction_isolation_race_conditions(self, lightweight_services_fixture, isolated_env):
         """Test database transaction isolation and race conditions in concurrent scenarios."""
         
-        if not real_services_fixture["database_available"]:
+        if not lightweight_services_fixture["database_available"]:
             pytest.skip("Real database not available - run with --real-services")
         
-        db_session = real_services_fixture["db"]
+        db_session = lightweight_services_fixture["db"]
         if not db_session:
             pytest.skip("Database session not available")
         

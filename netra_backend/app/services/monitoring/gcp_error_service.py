@@ -36,7 +36,13 @@ from netra_backend.app.schemas.monitoring_schemas import (
 )
 from netra_backend.app.services.monitoring.error_formatter import ErrorFormatter
 from netra_backend.app.services.monitoring.gcp_client_manager import GCPClientManager
+from netra_backend.app.services.monitoring.gcp_error_reporter import GCPErrorReporter
 from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
+from netra_backend.app.services.monitoring.enterprise_error_context import (
+    EnterpriseErrorContextBuilder,
+    PerformanceErrorCorrelator,
+    ComplianceContextTracker,
+)
 
 
 class GCPErrorService:
@@ -48,10 +54,23 @@ class GCPErrorService:
         self.error_formatter = ErrorFormatter(config.enable_pii_redaction)
         self.rate_limiter = GCPRateLimiter(config.rate_limit_per_minute)
         self.client = None
+        # Enhanced error flow pipeline integration
+        self.gcp_reporter: Optional[GCPErrorReporter] = None
+        
+        # Enterprise context builders
+        self.enterprise_context_builder = EnterpriseErrorContextBuilder()
+        self.performance_correlator = PerformanceErrorCorrelator()
+        self.compliance_tracker = ComplianceContextTracker()
     
     async def initialize(self) -> None:
-        """Initialize GCP client and validate connection."""
+        """Initialize GCP client and error reporter integration."""
         self.client = await self.client_manager.initialize_client()
+        # Initialize GCP Error Reporter integration
+        from netra_backend.app.services.monitoring.gcp_error_reporter import get_error_reporter
+        self.gcp_reporter = get_error_reporter()
+        # Integrate client manager with error reporter
+        if self.gcp_reporter:
+            self.gcp_reporter.set_client_manager(self.client_manager)
     
     async def fetch_errors(self, query: ErrorQuery) -> ErrorResponse:
         """Fetch errors from GCP Error Reporting with rate limiting."""
@@ -189,11 +208,186 @@ class GCPErrorService:
         logger.info(f"Marking error {error_id} as resolved: {resolution.resolution_note}")
         return True
     
+    async def report_error_with_context(
+        self, 
+        error: Exception, 
+        business_context: Dict[str, Any],
+        user_context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Report error with complete enterprise-grade business and user context.
+        
+        This method implements the enhanced Service → Reporter → Client Manager → GCP pipeline
+        with full enterprise context preservation.
+        
+        Args:
+            error: Exception to report
+            business_context: Business metadata (customer tier, operation type, etc.)
+            user_context: User authentication and session context
+            
+        Returns:
+            bool: True if error reported successfully
+        """
+        if not self.gcp_reporter:
+            logger.warning("GCP Error Reporter not initialized for enhanced reporting")
+            return False
+        
+        try:
+            await self.rate_limiter.enforce_rate_limit()
+            
+            # Build enterprise context with all components
+            complete_context = await self._build_enterprise_complete_context(
+                error, business_context, user_context
+            )
+            
+            # Report through enhanced pipeline
+            success = await self.gcp_reporter.report_error(error, complete_context)
+            
+            if success:
+                logger.debug(f"Successfully reported error with enterprise context: {type(error).__name__}")
+            else:
+                logger.warning(f"Failed to report error with enterprise context: {type(error).__name__}")
+            
+            return success
+            
+        except Exception as e:
+            logger.error(f"Enterprise error reporting failed: {e}")
+            return False
+    
+    def _build_complete_context(
+        self, 
+        business_context: Dict[str, Any], 
+        user_context: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Build complete context for enhanced error reporting.
+        
+        Args:
+            business_context: Business operation context
+            user_context: User authentication context
+            
+        Returns:
+            Dict containing complete error reporting context
+        """
+        context = {
+            'service_name': 'gcp_error_service',
+            'integration_source': 'enhanced_service_pipeline',
+            'service_version': 'v2_enhanced'
+        }
+        
+        # Add business context
+        if business_context:
+            context.update({
+                'business_unit': business_context.get('business_unit', 'platform'),
+                'operation_type': business_context.get('operation_type', 'unknown'),
+                'business_impact': business_context.get('business_impact_level', 'medium'),
+                'revenue_affecting': business_context.get('revenue_affecting', False)
+            })
+        
+        # Add user context if available
+        if user_context:
+            context.update({
+                'user_id': user_context.get('user_id'),
+                'user_email': user_context.get('user_email'),
+                'customer_tier': user_context.get('customer_tier', 'free'),
+                'session_id': user_context.get('session_id'),
+                'auth_method': user_context.get('auth_method')
+            })
+        
+        return context
+    
+    async def _build_enterprise_complete_context(
+        self,
+        error: Exception,
+        business_context: Dict[str, Any],
+        user_context: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Build complete enterprise context using all context builders.
+        
+        Args:
+            error: Exception that occurred
+            business_context: Business operation context
+            user_context: User authentication context
+            
+        Returns:
+            Complete enterprise context dictionary
+        """
+        try:
+            # Convert user_context dict to StronglyTypedUserExecutionContext if available
+            from netra_backend.app.middleware.gcp_auth_context_middleware import get_current_user_context
+            typed_user_context = get_current_user_context()
+            
+            # Build base context
+            base_context = self._build_complete_context(business_context, user_context)
+            
+            # Build enterprise context
+            enterprise_context = self.enterprise_context_builder.build_enterprise_context(
+                typed_user_context, business_context
+            )
+            
+            # Build performance context
+            performance_context = self.performance_correlator.analyze_performance_impact(
+                error, business_context, enterprise_context
+            )
+            
+            # Build compliance context
+            compliance_context = self.compliance_tracker.build_compliance_context(
+                typed_user_context, business_context
+            )
+            
+            # Merge all contexts
+            complete_enterprise_context = {
+                **base_context,
+                **enterprise_context,
+                'performance_analysis': performance_context,
+                'compliance_context': compliance_context,
+                'enterprise_pipeline_version': 'v2_complete',
+                'context_completeness_score': self._calculate_context_completeness(
+                    base_context, enterprise_context, performance_context, compliance_context
+                )
+            }
+            
+            return complete_enterprise_context
+            
+        except Exception as e:
+            logger.warning(f"Failed to build complete enterprise context: {e}")
+            # Fall back to basic context
+            return self._build_complete_context(business_context, user_context)
+    
+    def _calculate_context_completeness(
+        self, 
+        base_context: Dict[str, Any],
+        enterprise_context: Dict[str, Any],
+        performance_context: Dict[str, Any],
+        compliance_context: Dict[str, Any]
+    ) -> float:
+        """Calculate completeness score for context quality tracking.
+        
+        Returns:
+            Float between 0.0 and 1.0 representing context completeness
+        """
+        total_fields = 0
+        populated_fields = 0
+        
+        contexts = [base_context, enterprise_context, performance_context, compliance_context]
+        
+        for context in contexts:
+            if isinstance(context, dict):
+                total_fields += len(context)
+                populated_fields += sum(1 for v in context.values() if v is not None and v != '' and v != [])
+        
+        return populated_fields / total_fields if total_fields > 0 else 0.0
+    
     def get_service_status(self) -> Dict[str, Any]:
         """Get current service status and metrics."""
         return {
             "initialized": self.client is not None,
             "project_id": self.config.project_id,
             "rate_limiter": self.rate_limiter.get_current_usage(),
-            "pii_redaction_enabled": self.error_formatter.enable_pii_redaction
+            "pii_redaction_enabled": self.error_formatter.enable_pii_redaction,
+            "enhanced_pipeline_enabled": self.gcp_reporter is not None,
+            "enterprise_context_enabled": True,
+            "context_builders": {
+                "enterprise": bool(self.enterprise_context_builder),
+                "performance": bool(self.performance_correlator),
+                "compliance": bool(self.compliance_tracker)
+            }
         }

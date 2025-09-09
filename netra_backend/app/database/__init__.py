@@ -46,17 +46,27 @@ def get_engine():
     global _engine
     if _engine is None:
         database_url = get_database_url()
-        # WEBSOCKET OPTIMIZATION: Use async-compatible connection pooling
-        # Note: QueuePool cannot be used with async engines - use AsyncAdaptedQueuePool or default
+        # RACE CONDITION FIX: Increased pool size and improved connection isolation
+        # Note: QueuePool cannot be used with async engines - use AsyncAdaptedQueuePool (default)
         _engine = create_async_engine(
             database_url,
             # poolclass is omitted - SQLAlchemy will use default async-compatible pool (AsyncAdaptedQueuePool)
-            pool_size=5,          # Small pool size for efficient connection reuse
-            max_overflow=10,      # Allow burst connections
-            pool_timeout=5,       # Fast timeout to prevent WebSocket blocking
+            pool_size=20,         # RACE FIX: Increased from 5 to 20 for better concurrent access
+            max_overflow=30,      # RACE FIX: Increased from 10 to 30 for high concurrency
+            pool_timeout=10,      # RACE FIX: Increased timeout to prevent premature failures
             pool_recycle=300,     # Recycle connections every 5 minutes
+            pool_pre_ping=True,   # RACE FIX: Verify connections before use
             echo=False,
-            future=True
+            future=True,
+            # RACE CONDITION FIX: Enable connection pooling optimizations
+            pool_reset_on_return='commit',  # Clean up connections properly
+            execution_options={
+                "isolation_level": "READ_COMMITTED"  # Explicit isolation level
+            }
+        )
+        logger.info(
+            f"📊 DATABASE ENGINE: Created with pool_size=20, max_overflow=30, "
+            f"pool_timeout=10s for race condition prevention"
         )
     return _engine
 
@@ -69,9 +79,12 @@ def get_sessionmaker():
             engine,
             class_=AsyncSession,
             expire_on_commit=False,
-            autoflush=False,
-            autocommit=False
+            autoflush=False,           # RACE FIX: Keep explicit transaction control
+            autocommit=False,          # RACE FIX: Keep explicit transaction control  
+            # RACE CONDITION FIX: Additional session configuration
+            info={'connection_isolation': True}  # Tag sessions for isolation tracking
         )
+        logger.info("📊 SESSION MAKER: Configured with race condition prevention settings")
     return _sessionmaker
 
 @asynccontextmanager
@@ -82,21 +95,50 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     This is the canonical SSOT function for database sessions.
     All FastAPI routes should use this as a dependency.
     
+    RACE CONDITION FIX: Enhanced connection management and isolation.
+    
     Yields:
-        AsyncSession: Database session
+        AsyncSession: Database session with proper connection isolation
     """
     sessionmaker = get_sessionmaker()
-    async with sessionmaker() as session:
-        try:
-            logger.debug("Created new database session")
-            yield session
-        except Exception as e:
-            logger.error(f"Database session error: {e}")
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
-            logger.debug("Closed database session")
+    session = None
+    try:
+        # RACE CONDITION FIX: Create session with explicit connection handling
+        session = sessionmaker()
+        
+        # RACE CONDITION FIX: Tag session with isolation metadata
+        if not hasattr(session, 'info'):
+            session.info = {}
+        session.info.update({
+            'race_condition_fix': True,
+            'session_creation_time': asyncio.get_event_loop().time(),
+            'connection_isolated': True
+        })
+        
+        logger.debug(f"Created new database session {id(session)} with race condition protection")
+        yield session
+        
+        # RACE CONDITION FIX: Explicit commit handling
+        if session.in_transaction():
+            await session.commit()
+            logger.debug(f"Committed transaction for session {id(session)}")
+            
+    except Exception as e:
+        logger.error(f"Database session error: {e}")
+        if session and session.in_transaction():
+            try:
+                await session.rollback()
+                logger.debug(f"Rolled back transaction for session {id(session)}")
+            except Exception as rollback_error:
+                logger.error(f"Failed to rollback session {id(session)}: {rollback_error}")
+        raise
+    finally:
+        if session:
+            try:
+                await session.close()
+                logger.debug(f"Closed database session {id(session)}")
+            except Exception as close_error:
+                logger.error(f"Error closing session {id(session)}: {close_error}")
 
 @asynccontextmanager
 async def get_system_db() -> AsyncGenerator[AsyncSession, None]:

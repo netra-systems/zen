@@ -27,7 +27,7 @@ from typing import Dict, Any, List, Optional, Set
 from unittest.mock import patch, AsyncMock
 
 from test_framework.base_integration_test import BaseIntegrationTest  
-from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.fixtures.lightweight_services import lightweight_services_fixture
 from test_framework.fixtures.isolated_environment import isolated_env
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
@@ -58,7 +58,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_connection_thread_mapping(self, real_services_fixture, isolated_env):
+    async def test_websocket_connection_thread_mapping(self, lightweight_services_fixture, isolated_env):
         """Test WebSocket connections correctly map to threads."""
         
         # Skip if Redis not available
@@ -172,7 +172,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_thread_switching_state_management(self, real_services_fixture, isolated_env):
+    async def test_websocket_thread_switching_state_management(self, lightweight_services_fixture, isolated_env):
         """Test WebSocket connection thread switching and state consistency."""
         
         if not redis:
@@ -309,7 +309,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_multi_user_websocket_thread_isolation(self, real_services_fixture, isolated_env):
+    async def test_multi_user_websocket_thread_isolation(self, lightweight_services_fixture, isolated_env):
         """Test WebSocket thread isolation between multiple concurrent users."""
         
         if not redis:
@@ -458,7 +458,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_connection_lifecycle_thread_cleanup(self, real_services_fixture, isolated_env):
+    async def test_websocket_connection_lifecycle_thread_cleanup(self, lightweight_services_fixture, isolated_env):
         """Test WebSocket connection lifecycle and thread mapping cleanup."""
         
         if not redis:

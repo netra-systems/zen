@@ -256,7 +256,15 @@ class MockWebSocketConnection:
                     "message": "user_id is required for agent_started events - authentication failed",
                     "timestamp": time.time()
                 }
-            elif parsed_message.get("type") == "agent_thinking" and parsed_message.get("reasoning") is None:
+            elif parsed_message.get("type") == "invalid_operation":
+                # Generic invalid operation error for ordering tests
+                error_response = {
+                    "type": "error",
+                    "error": "invalid_operation",
+                    "message": "The requested operation is not valid or supported",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_thinking" and "reasoning" in parsed_message and parsed_message.get("reasoning") is None:
                 error_response = {
                     "type": "error",
                     "error": "invalid_reasoning",

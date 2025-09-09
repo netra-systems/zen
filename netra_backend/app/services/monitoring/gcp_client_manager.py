@@ -145,6 +145,11 @@ class GCPClientManager:
         if not self._initialized:
             await self.initialize()
         return self.get_error_reporting_client()
+    
+    async def initialize_client(self):
+        """Initialize client and return error reporting client for service integration."""
+        await self.initialize()
+        return self.get_error_reporting_client()
 
 
 # Mock clients for testing/development

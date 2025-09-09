@@ -109,7 +109,9 @@ async def lightweight_test_database(lightweight_postgres_connection):
     
     # Import models to create tables
     try:
-        from netra_backend.app.models.database import Base
+        from netra_backend.app.db.base import Base
+        # Import all models to register them with the Base
+        from netra_backend.app.db import models_postgres
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         logger.info("Database tables created successfully for lightweight testing")

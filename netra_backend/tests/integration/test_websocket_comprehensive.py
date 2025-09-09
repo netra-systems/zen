@@ -126,7 +126,15 @@ class TestWebSocketConnectionEstablishment(BaseIntegrationTest):
         BVJ: Ensures security by validating auth is required.
         Tests that WebSocket connections without proper authentication are rejected.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         websocket_url = f"ws://localhost:8000/ws"
         
         # Attempt connection without auth headers
@@ -161,7 +169,15 @@ class TestWebSocketConnectionEstablishment(BaseIntegrationTest):
         BVJ: Validates JWT token security for chat authentication.
         Tests that invalid/expired JWT tokens are properly rejected.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         websocket_url = f"ws://localhost:8000/ws"
         
         # Create invalid token
@@ -203,7 +219,15 @@ class TestWebSocketAgentEvents(BaseIntegrationTest):
         
         Without these events, users get no real-time feedback and chat has no business value.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         if not services["database_available"]:
             pytest.skip("Database not available for agent event testing")
             
@@ -304,9 +328,17 @@ class TestWebSocketAgentEvents(BaseIntegrationTest):
         BVJ: Ensures event messages have proper structure for frontend consumption.
         Tests that each WebSocket event contains required fields for UI rendering.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for agent event message structure testing")
             
         # Create authenticated WebSocket connection
@@ -349,9 +381,17 @@ class TestWebSocketAgentEvents(BaseIntegrationTest):
         BVJ: Validates reasoning visibility for user engagement.
         Tests that agent_thinking events contain reasoning text for user display.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for agent thinking event testing")
             
         # Create authenticated WebSocket connection
@@ -414,7 +454,15 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         BVJ: Ensures different message types reach appropriate handlers.
         Tests routing of chat, system, and data messages to correct processors.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         # Create authenticated connection
         auth_helper = E2EWebSocketAuthHelper(environment="test") 
@@ -466,9 +514,17 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         BVJ: Ensures system handles invalid messages gracefully.
         Tests error handling for malformed or unknown message types.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for invalid message type testing")
             
         # Create authenticated WebSocket connection
@@ -510,9 +566,17 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         BVJ: Ensures system handles malformed JSON gracefully.
         Tests error recovery from invalid JSON messages.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for malformed JSON testing")
             
         # Create authenticated WebSocket connection
@@ -563,7 +627,15 @@ class TestWebSocketConcurrency(BaseIntegrationTest):
         BVJ: Validates multi-user chat capability for enterprise customers.
         Tests that multiple users can maintain WebSocket connections simultaneously.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         # Create multiple authenticated connections
         connections = []
@@ -640,9 +712,17 @@ class TestWebSocketConcurrency(BaseIntegrationTest):
         BVJ: Validates system handles high-frequency messages for active users.
         Tests rapid message sending without dropping or corrupting messages.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for rapid message testing")
             
         # Create authenticated WebSocket connection
@@ -696,9 +776,17 @@ class TestWebSocketConcurrency(BaseIntegrationTest):
         BVJ: Ensures user data privacy and isolation for enterprise security.
         Tests that messages sent by one user are not received by another user.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for connection isolation testing")
             
         # Create two separate authenticated WebSocket connections
@@ -771,9 +859,17 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
         BVJ: Ensures service reliability for consistent user experience.
         Tests that WebSocket connections can recover from temporary errors.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for connection recovery testing")
             
         # Create authenticated WebSocket connection
@@ -831,9 +927,17 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
         BVJ: Prevents system crashes from malicious or accidental large messages.
         Tests handling of messages that exceed size limits.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for oversized message testing")
             
         # Create authenticated WebSocket connection
@@ -883,9 +987,17 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
         BVJ: Ensures robust error handling for malformed client messages.
         Tests handling of messages missing required fields.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for missing fields testing")
             
         # Create authenticated WebSocket connection
@@ -935,7 +1047,15 @@ class TestWebSocketPerformance(BaseIntegrationTest):
         BVJ: Ensures fast connection times for good user experience.
         Tests that WebSocket connections establish within acceptable time limits.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         auth_helper = E2EWebSocketAuthHelper(environment="test")
         token = auth_helper.create_test_jwt_token(user_id="test_speed_user")
@@ -944,7 +1064,7 @@ class TestWebSocketPerformance(BaseIntegrationTest):
         # Measure connection time
         start_time = time.time()
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for connection speed testing")
             
         websocket = await WebSocketTestHelpers.create_test_websocket_connection(
@@ -967,9 +1087,17 @@ class TestWebSocketPerformance(BaseIntegrationTest):
         BVJ: Validates system can handle expected message volumes.
         Tests message processing speed for active chat users.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for message throughput testing")
             
         # Create authenticated WebSocket connection
@@ -1020,9 +1148,17 @@ class TestWebSocketPerformance(BaseIntegrationTest):
         BVJ: Prevents memory leaks that could cause service instability.
         Tests that WebSocket connections don't accumulate excessive memory.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for memory stability testing")
             
         # Create and close multiple real connections to test memory stability
@@ -1077,7 +1213,15 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Ensures chat reliability when connections are lost.
         Tests that users can reconnect after network interruptions.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         auth_helper = E2EWebSocketAuthHelper(environment="test")
         user_id = "test_reconnect_user"
@@ -1130,9 +1274,17 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Maintains conversation continuity for better user experience.
         Tests that session context is restored after reconnection.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for session restoration testing")
             
         # Create authenticated WebSocket connection
@@ -1203,9 +1355,17 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Validates agent_started event contains required data for UI rendering.
         Tests that agent_started events have proper structure for frontend consumption.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for agent_started event testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -1267,9 +1427,17 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Ensures tool_executing events provide transparency for user engagement.
         Tests that tool_executing events contain proper tool information.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for tool_executing event testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -1329,9 +1497,17 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Validates tool completion delivers actionable results to users.
         Tests that tool_completed events contain proper result data.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for tool_completed event testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -1393,9 +1569,17 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Ensures agent_completed delivers final value to users.
         Tests that agent_completed events contain proper final response data.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for agent_completed event testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -1460,9 +1644,17 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Validates proper event sequence for coherent user experience.
         Tests that WebSocket agent events arrive in correct chronological order.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for event ordering testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -1529,9 +1721,17 @@ class TestWebSocketReconnection(BaseIntegrationTest):
         BVJ: Prevents message loss during temporary disconnections.
         Tests that messages are queued when user is temporarily disconnected.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for message queuing testing")
             
         # Create authenticated WebSocket connection
@@ -1578,7 +1778,15 @@ class TestWebSocketSecurity(BaseIntegrationTest):
         BVJ: Ensures security by enforcing token expiration.
         Tests that expired JWT tokens are properly rejected.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         auth_helper = E2EWebSocketAuthHelper(environment="test")
         
@@ -1619,9 +1827,17 @@ class TestWebSocketSecurity(BaseIntegrationTest):
         BVJ: Prevents abuse and ensures fair resource usage.
         Tests that rate limiting is enforced for WebSocket messages.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for rate limiting testing")
             
         # Create authenticated WebSocket connection
@@ -1684,7 +1900,15 @@ class TestWebSocketSecurity(BaseIntegrationTest):
         BVJ: Ensures proper access control for different user tiers.
         Tests that user permissions are validated for WebSocket operations.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         # Create user with limited permissions
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -1693,7 +1917,7 @@ class TestWebSocketSecurity(BaseIntegrationTest):
             permissions=["read"]  # No write permission
         )
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for user permissions testing")
             
         # Create WebSocket connection with limited user
@@ -1733,7 +1957,15 @@ class TestWebSocketHealthMonitoring(BaseIntegrationTest):
         BVJ: Enables monitoring and alerts for service reliability.
         Tests WebSocket health check endpoint returns valid status.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         # Test health endpoint with HTTP client
         try:
@@ -1759,9 +1991,17 @@ class TestWebSocketHealthMonitoring(BaseIntegrationTest):
         BVJ: Provides operational insights for capacity planning.
         Tests that WebSocket connection metrics are properly tracked.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for connection metrics testing")
             
         # Create multiple real WebSocket connections to generate metrics
@@ -1814,9 +2054,17 @@ class TestWebSocketHealthMonitoring(BaseIntegrationTest):
         BVJ: Enables proactive error detection and resolution.
         Tests that WebSocket error rates are monitored and reported.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for error rate monitoring testing")
             
         # Create authenticated WebSocket connection
@@ -1884,9 +2132,17 @@ class TestWebSocketUserContextIsolation(BaseIntegrationTest):
         BVJ: Ensures enterprise security through proper user context isolation.
         Tests UserExecutionContext factory patterns prevent cross-user data leakage.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for user context isolation testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -1975,7 +2231,15 @@ class TestWebSocketUserContextIsolation(BaseIntegrationTest):
         BVJ: Validates factory pattern creates isolated WebSocket managers per user.
         Tests that WebSocket manager factory prevents shared state between users.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
         auth_helper = E2EWebSocketAuthHelper(environment="test")
         
@@ -2038,9 +2302,17 @@ class TestWebSocketUserContextIsolation(BaseIntegrationTest):
         BVJ: Validates concurrent users receive isolated agent events.
         Tests that multiple users can run agents simultaneously without cross-contamination.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for concurrent agent isolation testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -2133,10 +2405,18 @@ class TestWebSocketBusinessValueScenarios(BaseIntegrationTest):
         Validates that users receive meaningful, real-time AI assistance through WebSocket.
         This test represents the core $30K+ MRR chat functionality.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
-            pytest.skip("WebSocket service not available for chat value delivery testing")
+        if not services["services_available"]["backend"]:
+            pytest.skip("Backend service not available for chat value delivery testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
         token = auth_helper.create_test_jwt_token(
@@ -2214,9 +2494,17 @@ class TestWebSocketBusinessValueScenarios(BaseIntegrationTest):
         BVJ: Validates enterprise security for multi-tenant chat environments.
         Tests that enterprise customers can have isolated chat sessions.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for enterprise isolation testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -2294,9 +2582,17 @@ class TestWebSocketBusinessValueScenarios(BaseIntegrationTest):
         BVJ: Demonstrates WebSocket value for free tier users to drive conversion.
         Tests that free tier users get enough value to convert to paid tiers.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for free tier value testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -2357,9 +2653,17 @@ class TestWebSocketBusinessValueScenarios(BaseIntegrationTest):
         BVJ: Validates WebSocket agent event payloads meet API contract requirements.
         Tests that all 5 critical agent events have valid payload structures.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for payload validation testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -2435,9 +2739,17 @@ class TestWebSocketBusinessValueScenarios(BaseIntegrationTest):
         BVJ: Ensures WebSocket events arrive within acceptable time limits for good UX.
         Tests that agent events are delivered with low latency for real-time experience.
         """
-        services = test_db_session
+        # Create services status structure for consistency
+        services = {
+            "database_available": test_db_session is not None,
+            "services_available": {
+                "backend": True,  # Assume backend is available for WebSocket tests
+                "auth": True,     # Assume auth is available for WebSocket tests
+                "websocket": True # WebSocket endpoint availability
+            }
+        }
         
-        if not services["websocket_available"]:
+        if not services["services_available"]["backend"]:
             pytest.skip("WebSocket service not available for timing performance testing")
             
         auth_helper = E2EWebSocketAuthHelper(environment="test")

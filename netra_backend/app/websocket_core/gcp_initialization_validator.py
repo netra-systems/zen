@@ -186,7 +186,7 @@ class GCPWebSocketInitializationValidator:
             self.logger.debug(f"Database readiness check failed: {e}")
             return False
     
-    def _validate_redis_readiness(self) -> bool:
+    async def _validate_redis_readiness(self) -> bool:
         """Validate Redis readiness using SSOT patterns with race condition fix."""
         try:
             if not self.app_state:
@@ -207,8 +207,9 @@ class GCPWebSocketInitializationValidator:
                 # If connected but in GCP environment, add small delay to allow
                 # background monitoring tasks to fully stabilize (race condition fix)
                 if is_connected and self.is_gcp_environment:
-                    import time
-                    time.sleep(0.5)  # 500ms grace period for background task stability
+                    # CRITICAL FIX: Use async sleep instead of blocking sleep
+                    # This prevents blocking the event loop and interfering with health monitoring
+                    await asyncio.sleep(0.5)  # 500ms grace period for background task stability
                 
                 return is_connected
             
@@ -503,7 +504,13 @@ class GCPWebSocketInitializationValidator:
         
         for attempt in range(check.retry_count + 1):
             try:
-                if check.validator():
+                # Check if validator is async
+                if asyncio.iscoroutinefunction(check.validator):
+                    result = await check.validator()
+                else:
+                    result = check.validator()
+                
+                if result:
                     return True
                 
                 # If not ready and we have more retries, wait

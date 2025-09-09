@@ -182,19 +182,82 @@ def _configure_app_routes(app: FastAPI) -> None:
 
 
 def _install_gcp_error_handlers(app: FastAPI) -> None:
-    """Install GCP error reporting handlers if running in GCP."""
+    """Install comprehensive GCP error reporting integration.
+    
+    This now includes:
+    1. GCP Client Manager integration
+    2. Python logging handler for logger.error() calls
+    3. Exception handlers for unhandled exceptions
+    4. FastAPI middleware for request context
+    """
     try:
-        from netra_backend.app.services.monitoring.gcp_error_reporter import install_exception_handlers
+        from netra_backend.app.services.monitoring.gcp_error_reporter import (
+            install_exception_handlers, 
+            get_error_reporter
+        )
+        from netra_backend.app.services.monitoring.gcp_client_manager import create_gcp_client_manager
         from netra_backend.app.core.unified_logging import get_logger
+        from shared.isolated_environment import get_env
         
         logger = get_logger(__name__)
+        
+        # Load GCP configuration
+        env = get_env()
+        project_id = env.get('GCP_PROJECT_ID') or env.get('GOOGLE_CLOUD_PROJECT')
+        
+        if not project_id:
+            logger.info("No GCP project ID found, skipping GCP error reporting setup")
+            return
+        
+        # Create and initialize GCP Client Manager
+        client_manager = create_gcp_client_manager(project_id)
+        
+        # Get error reporter and integrate with client manager
+        error_reporter = get_error_reporter()
+        error_reporter.set_client_manager(client_manager)
+        
+        # Install all handlers (logging handler, exception handlers, middleware)
         install_exception_handlers(app)
-        logger.info("GCP error reporting handlers installed")
-    except ImportError:
+        
+        # Install authentication context middleware for enterprise error tracking
+        _install_auth_context_middleware(app)
+        
+        logger.info("Complete GCP error reporting integration installed")
+        
+    except ImportError as e:
         # GCP libraries not available, skip installation
+        from netra_backend.app.core.unified_logging import get_logger
+        logger = get_logger(__name__)
+        logger.debug(f"GCP libraries not available: {e}")
         pass
     except Exception as e:
         # Don't let error reporting setup break the app
         from netra_backend.app.core.unified_logging import get_logger
         logger = get_logger(__name__)
         logger.warning(f"Could not install GCP error handlers: {e}")
+
+
+def _install_auth_context_middleware(app: FastAPI) -> None:
+    """Install authentication context middleware for GCP error reporting.
+    
+    This middleware captures authentication context for enterprise error tracking
+    and multi-user isolation in GCP Error Reporting.
+    """
+    try:
+        from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
+        from netra_backend.app.core.unified_logging import get_logger
+        
+        logger = get_logger(__name__)
+        
+        # Install auth context middleware
+        app.add_middleware(GCPAuthContextMiddleware, enable_user_isolation=True)
+        logger.info("GCP Authentication Context Middleware installed")
+        
+    except ImportError as e:
+        from netra_backend.app.core.unified_logging import get_logger
+        logger = get_logger(__name__)
+        logger.debug(f"Authentication context middleware not available: {e}")
+    except Exception as e:
+        from netra_backend.app.core.unified_logging import get_logger
+        logger = get_logger(__name__)
+        logger.warning(f"Failed to install auth context middleware: {e}")
