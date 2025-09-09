@@ -27,7 +27,6 @@ from auth_service.auth_core.database.repository import AuthUserRepository
 
 
 @pytest.mark.unit
-@pytest.mark.golden_path
 class TestAuthServiceBusinessLogic:
     """Test auth service core business logic for golden path scenarios."""
 
@@ -299,8 +298,7 @@ class TestAuthServiceBusinessLogic:
         assert len(hashed1) > 50, "Hash should be sufficiently long for security"
 
 
-@pytest.mark.unit
-@pytest.mark.golden_path  
+@pytest.mark.unit  
 class TestAuthServiceErrorHandlingBusinessContinuity:
     """Test auth service error handling maintains business continuity."""
 

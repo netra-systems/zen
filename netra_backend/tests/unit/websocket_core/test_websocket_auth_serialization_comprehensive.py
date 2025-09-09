@@ -19,6 +19,9 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     WebSocketAuthResult,
     get_websocket_authenticator
 )
+
+# Import SSOT safe WebSocket state logging function
+from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 from netra_backend.app.services.unified_authentication_service import AuthResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -83,8 +86,8 @@ class TestWebSocketAuthSerializationFix:
         This test directly addresses the root cause:
         "Object of type WebSocketState is not JSON serializable"
         """
-        # Add WebSocketState to the auth result to simulate real-world scenario
-        auth_failure_result.error_message = f"Auth failed with connection state: {mock_websocket.client_state}"
+        # Add WebSocketState to the auth result to simulate real-world scenario using SSOT safe logging
+        auth_failure_result.error_message = f"Auth failed with connection state: {_safe_websocket_state_for_logging(mock_websocket.client_state)}"
         
         # Call the method that previously failed
         await authenticator.create_auth_error_response(mock_websocket, auth_failure_result)

@@ -750,6 +750,7 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^user_\d+$',                   # user_0, user_1
         r'^thread-\d+$',                 # thread-456, thread-123 (CRITICAL: Golden Path test format)
         r'^[a-zA-Z]+-[a-zA-Z]+-\d+$',    # test-user-123, mock-connection-456
+        r'^[a-zA-Z]+-[a-zA-Z0-9]+-[a-zA-Z0-9-]+$',  # CRITICAL FIX: staging-e2e-user-001, production-e2e-user-002
         r'^[a-zA-Z]+_\d+$',              # user_123, session_456
         r'^[a-zA-Z]+_[a-zA-Z]+_\d+$',    # test_user_123, mock_session_456
         r'^non_existent_\w+$',           # non_existent_user, non_existent_session

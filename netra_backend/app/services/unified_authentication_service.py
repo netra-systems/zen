@@ -172,6 +172,9 @@ class UnifiedAuthenticationService:
         """
         Extract user ID from E2E token patterns.
         
+        CRITICAL FIX: Enhanced extraction for staging E2E user patterns
+        to resolve user ID validation failures in staging environments.
+        
         This method attempts to extract meaningful user IDs from E2E testing
         tokens that may contain predictable patterns.
         
@@ -182,16 +185,28 @@ class UnifiedAuthenticationService:
             Extracted user ID or None if no pattern found
         """
         try:
-            # Check for staging-e2e-user patterns in token
+            # CRITICAL FIX: Enhanced staging-e2e-user pattern extraction
             if "staging-e2e-user" in token.lower():
-                # Try to extract user number from token
+                # Try to extract user number from token - support various formats
                 import re
-                match = re.search(r'staging-e2e-user-(\d+)', token.lower())
-                if match:
-                    return f"staging-e2e-user-{match.group(1).zfill(3)}"
+                patterns = [
+                    r'staging-e2e-user-(\d+)',  # staging-e2e-user-001
+                    r'staging_e2e_user_(\d+)',  # staging_e2e_user_001  
+                    r'e2e-user-(\d+)',          # e2e-user-001
+                    r'test.*staging.*(\d+)',     # test-staging-001
+                ]
+                
+                for pattern in patterns:
+                    match = re.search(pattern, token.lower())
+                    if match:
+                        user_num = match.group(1).zfill(3)
+                        user_id = f"staging-e2e-user-{user_num}"
+                        logger.info(f"E2E USER ID: Extracted '{user_id}' from token pattern '{pattern}'")
+                        return user_id
             
             # Check for test-user patterns  
             if "test-user" in token.lower():
+                import re
                 match = re.search(r'test-user-([a-f0-9-]+)', token.lower())
                 if match:
                     return f"test-user-{match.group(1)}"
@@ -201,32 +216,30 @@ class UnifiedAuthenticationService:
                 import base64
                 import json
                 
-                # Split token and get payload
-                parts = token.split('.')
-                if len(parts) >= 2:
-                    # Add padding if needed for base64 decoding
-                    payload = parts[1]
-                    padding = len(payload) % 4
+                try:
+                    # Decode JWT payload (second part)
+                    payload_b64 = token.split('.')[1]
+                    # Add padding if needed
+                    padding = len(payload_b64) % 4
                     if padding:
-                        payload += '=' * (4 - padding)
+                        payload_b64 += '=' * (4 - padding)
                     
-                    try:
-                        decoded = base64.b64decode(payload)
-                        payload_data = json.loads(decoded)
+                    payload_json = base64.urlsafe_b64decode(payload_b64).decode()
+                    payload = json.loads(payload_json)
+                    
+                    # Extract user ID from standard JWT claims
+                    user_id = payload.get('sub') or payload.get('user_id')
+                    if user_id:
+                        logger.info(f"E2E USER ID: Extracted '{user_id}' from JWT payload")
+                        return user_id
                         
-                        # Extract user ID from standard JWT claims
-                        return (
-                            payload_data.get('sub') or 
-                            payload_data.get('user_id') or 
-                            payload_data.get('username')
-                        )
-                    except (ValueError, json.JSONDecodeError):
-                        pass  # Invalid JWT format, continue to fallback
+                except Exception as e:
+                    logger.debug(f"E2E USER ID: Failed to decode JWT payload: {e}")
             
             return None
             
         except Exception as e:
-            logger.debug(f"Failed to extract user ID from E2E token: {e}")
+            logger.warning(f"E2E USER ID: Error extracting user ID from token: {e}")
             return None
     
     async def authenticate_token(

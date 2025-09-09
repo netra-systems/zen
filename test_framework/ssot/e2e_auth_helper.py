@@ -254,6 +254,108 @@ class E2EAuthHelper:
             
         return headers
     
+    def get_websocket_subprotocols(self, token: Optional[str] = None) -> list[str]:
+        """
+        Get WebSocket subprotocols for JWT authentication.
+        
+        CRITICAL FIX: Provides JWT transmission via Sec-WebSocket-Protocol header
+        as an alternative to Authorization header, addressing GCP staging issues.
+        
+        Args:
+            token: JWT token (uses cached if not provided)
+            
+        Returns:
+            List of subprotocol strings including JWT authentication
+        """
+        token = token or self._get_valid_token()
+        
+        # Encode JWT token in base64url for subprotocol transmission
+        import base64
+        token_b64 = base64.urlsafe_b64encode(token.encode()).decode().rstrip('=')
+        
+        return [
+            "jwt-auth",  # Standard JWT auth subprotocol
+            f"jwt.{token_b64}",  # Actual JWT token transmission
+            "e2e-testing"  # E2E test detection subprotocol
+        ]
+    
+    async def create_websocket_connection(
+        self,
+        websocket_url: Optional[str] = None,
+        token: Optional[str] = None,
+        timeout: float = 10.0,
+        max_retries: int = 3
+    ) -> tuple[object, str]:
+        """
+        Create authenticated WebSocket connection with E2E test support.
+        
+        CRITICAL FIX: Provides comprehensive WebSocket connection setup
+        with proper authentication, subprotocols, and retry logic.
+        
+        Args:
+            websocket_url: WebSocket URL (uses config if not provided)
+            token: JWT token (uses cached if not provided)
+            timeout: Connection timeout in seconds
+            max_retries: Number of connection retry attempts
+            
+        Returns:
+            Tuple of (websocket_connection, connection_info)
+        """
+        import websockets
+        import json
+        
+        websocket_url = websocket_url or self.config.websocket_url
+        token = token or self._get_valid_token()
+        
+        headers = self.get_websocket_headers(token)
+        subprotocols = self.get_websocket_subprotocols(token)
+        
+        logger.info(f"E2E WEBSOCKET: Connecting to {websocket_url}")
+        logger.debug(f"E2E WEBSOCKET: Headers count: {len(headers)}, Subprotocols count: {len(subprotocols)}")
+        
+        last_error = None
+        for attempt in range(max_retries + 1):
+            try:
+                # Create WebSocket connection with full authentication
+                websocket = await websockets.connect(
+                    websocket_url,
+                    extra_headers=headers,
+                    subprotocols=subprotocols,
+                    ping_interval=20,  # Keep connection alive
+                    ping_timeout=10,
+                    close_timeout=5,
+                    max_size=2**20,  # 1MB message size limit
+                    timeout=timeout
+                )
+                
+                # Verify connection is established
+                if websocket.open:
+                    connection_info = {
+                        "url": websocket_url,
+                        "user_id": self._extract_user_id(token),
+                        "authenticated": True,
+                        "attempt": attempt + 1,
+                        "headers_sent": len(headers),
+                        "subprotocols_sent": len(subprotocols)
+                    }
+                    
+                    logger.info(f"E2E WEBSOCKET: Connected successfully on attempt {attempt + 1}")
+                    return websocket, json.dumps(connection_info)
+                    
+            except Exception as e:
+                last_error = e
+                wait_time = min(2 ** attempt, 5)  # Exponential backoff, max 5s
+                logger.warning(f"E2E WEBSOCKET: Attempt {attempt + 1} failed: {e}")
+                
+                if attempt < max_retries:
+                    logger.info(f"E2E WEBSOCKET: Retrying in {wait_time}s...")
+                    await asyncio.sleep(wait_time)
+                    
+        # All attempts failed
+        error_msg = f"Failed to establish WebSocket connection after {max_retries + 1} attempts. Last error: {last_error}"
+        logger.error(f"E2E WEBSOCKET: {error_msg}")
+        raise Exception(error_msg)
+    
     async def authenticate_user(
         self,
         email: Optional[str] = None,
