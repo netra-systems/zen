@@ -169,6 +169,8 @@ except ImportError:
     validate_connection_with_race_detection = None
 
 # Import new connection state machine and message queue components
+# CRITICAL FIX: Remove fallback behavior that causes 1011 errors
+# Setting critical functions to None causes runtime failures in staging
 try:
     from netra_backend.app.websocket_core.connection_state_machine import (
         ApplicationConnectionState,
@@ -179,15 +181,14 @@ try:
         get_connection_state_machine,
         is_connection_ready_for_messages,
     )
-except ImportError:
-    # Fallback implementations for backward compatibility
-    ApplicationConnectionState = None
-    ConnectionStateMachine = None
-    ConnectionStateMachineRegistry = None
-    StateTransitionInfo = None
-    get_connection_state_registry = None
-    get_connection_state_machine = None
-    is_connection_ready_for_messages = None
+except ImportError as e:
+    # FAIL FAST: Never set critical WebSocket functions to None
+    # This was causing WebSocket 1011 internal server errors in staging
+    raise ImportError(
+        f"CRITICAL: WebSocket state machine import failed: {e}. "
+        f"This will cause 1011 WebSocket errors. Fix import dependencies immediately. "
+        f"See WEBSOCKET_1011_FIVE_WHYS_ANALYSIS_20250909_NIGHT.md for details."
+    ) from e
 
 try:
     from netra_backend.app.websocket_core.message_queue import (
@@ -199,15 +200,13 @@ try:
         get_message_queue_registry,
         get_message_queue_for_connection,
     )
-except ImportError:
-    # Fallback implementations for backward compatibility
-    MessageQueue = None
-    MessageQueueRegistry = None
-    MessagePriority = None
-    MessageQueueState = None
-    QueuedMessage = None
-    get_message_queue_registry = None
-    get_message_queue_for_connection = None
+except ImportError as e:
+    # FAIL FAST: Message queue components are critical for WebSocket reliability
+    raise ImportError(
+        f"CRITICAL: WebSocket message queue import failed: {e}. "
+        f"This may cause message delivery failures and WebSocket instability. "
+        f"Fix import dependencies immediately."
+    ) from e
 
 # Import race condition prevention components
 try:
@@ -217,12 +216,13 @@ try:
         RaceConditionDetector,
         HandshakeCoordinator,
     )
-except ImportError:
-    # Fallback implementations for backward compatibility
-    RaceConditionApplicationConnectionState = None
-    RaceConditionPattern = None
-    RaceConditionDetector = None
-    HandshakeCoordinator = None
+except ImportError as e:
+    # FAIL FAST: Race condition prevention is critical for WebSocket stability
+    raise ImportError(
+        f"CRITICAL: WebSocket race condition prevention import failed: {e}. "
+        f"This may cause WebSocket handshake failures and connection instability. "
+        f"Fix import dependencies immediately."
+    ) from e
 
 # Critical events that MUST be preserved
 CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
