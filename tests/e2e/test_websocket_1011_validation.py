@@ -26,6 +26,7 @@ Success criteria:
 import asyncio
 import pytest
 import time
+import uuid
 import websockets
 from unittest.mock import AsyncMock, Mock
 
@@ -33,6 +34,13 @@ from netra_backend.app.logging_config import central_logger
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 logger = central_logger.get_logger(__name__)
+
+def generate_test_user_id(suffix: str = "") -> str:
+    """Generate a valid user ID for testing."""
+    base_uuid = str(uuid.uuid4())
+    if suffix:
+        return f"{base_uuid}_{suffix}"
+    return base_uuid
 
 
 class TestWebSocket1011Prevention:
@@ -96,7 +104,7 @@ class TestWebSocket1011Prevention:
         
         # Test full connection lifecycle
         test_connection_id = f"e2e_test_{int(time.time())}"
-        test_user_id = f"user_{int(time.time())}"  # Use proper user ID format
+        test_user_id = generate_test_user_id("e2e_test")
         
         try:
             # Register connection
@@ -144,7 +152,7 @@ class TestWebSocket1011Prevention:
         
         registry = get_connection_state_registry()
         test_connection = f"e2e_pipeline_{int(time.time())}"
-        test_user = f"user_{int(time.time())}_pipeline"
+        test_user = generate_test_user_id("pipeline")
         
         try:
             # Simulate the complete pipeline that was failing
