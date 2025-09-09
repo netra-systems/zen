@@ -566,12 +566,30 @@ def create_standard_message(msg_type: Union[str, MessageType],
     # Phase 2 Fix 2b: Validate non-serializable data doesn't get through
     try:
         import json
-        # Quick serialization test to catch non-serializable objects
+        import math
+        
+        # Check for infinity and NaN values first (common edge cases)
+        def check_for_special_floats(obj):
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    check_for_special_floats(value)
+            elif isinstance(obj, list):
+                for item in obj:
+                    check_for_special_floats(item)
+            elif isinstance(obj, float):
+                if math.isinf(obj):
+                    raise ValueError("Payload contains infinity values that violate SSOT")
+                if math.isnan(obj):
+                    raise ValueError("Payload contains NaN values that violate SSOT")
+        
+        check_for_special_floats(payload)
+        
+        # Quick serialization test to catch other non-serializable objects
         json.dumps(payload, default=str, ensure_ascii=False)
     except (TypeError, ValueError, RecursionError) as e:
         if "circular" in str(e).lower() or "not.*serializable" in str(e).lower():
             raise ValueError(f"Payload contains non-serializable data that violates SSOT: {e}")
-        # Re-raise other JSON errors
+        # Re-raise validation errors (including our infinity/NaN checks)
         raise
     
     return WebSocketMessage(
