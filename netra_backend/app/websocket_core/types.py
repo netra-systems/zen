@@ -141,7 +141,16 @@ class ConnectionInfo(BaseModel):
 
 
 class WebSocketMessage(BaseModel):
-    """Standard WebSocket message format."""
+    """
+    Standard WebSocket message format.
+    
+    timestamp: Unix timestamp as float. Accepts various input formats:
+    - Unix timestamp (float/int): 1693567801.447585
+    - ISO datetime string: '2025-09-08T16:50:01.447585'
+    - None: Uses current time
+    
+    Use timestamp_utils.safe_convert_timestamp() for safe conversion.
+    """
     type: MessageType
     payload: Dict[str, Any] = Field(default_factory=dict)
     timestamp: Optional[float] = None

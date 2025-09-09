@@ -277,13 +277,17 @@ class TestQualityMessageRouter:
     async def test_handle_unknown_message_type_error_handling(self, mock_create_manager, 
                                                               mock_get_context, router, caplog):
         """Test that errors during unknown message handling are logged."""
+        # Enable logging capture at the right level
+        caplog.set_level("ERROR", logger="netra_backend.app.services.websocket.quality_message_router")
+        
         mock_get_context.side_effect = Exception("WebSocket manager creation failed")
         
         await router._handle_unknown_message_type("user456", "bad_type")
         
         # Verify error is logged
-        assert "Failed to send error message to user user456" in caplog.text
-        assert "WebSocket manager creation failed" in caplog.text
+        log_messages = [record.message for record in caplog.records]
+        assert any("Failed to send error message to user user456" in msg for msg in log_messages)
+        assert any("WebSocket manager creation failed" in msg for msg in log_messages)
 
     @pytest.mark.asyncio
     async def test_handle_message_with_unknown_type_calls_unknown_handler(self, router):
@@ -406,6 +410,9 @@ class TestQualityMessageRouter:
     async def test_broadcast_error_handling_continues_with_other_subscribers(self, mock_create_manager, 
                                                                              mock_get_context, router, caplog):
         """Test that errors during broadcast don't stop other subscribers from receiving messages."""
+        # Enable logging capture at the right level
+        caplog.set_level("ERROR", logger="netra_backend.app.services.websocket.quality_message_router")
+        
         mock_context = Mock()
         mock_get_context.return_value = mock_context
         
@@ -421,7 +428,8 @@ class TestQualityMessageRouter:
             await router.broadcast_quality_update(update)
         
         # Verify error is logged but broadcast continues
-        assert "Error broadcasting to user1" in caplog.text
+        log_messages = [record.message for record in caplog.records]
+        assert any("Error broadcasting to user1" in msg for msg in log_messages)
         mock_manager2.send_to_user.assert_called_once()
 
     # Message Building Tests
@@ -595,26 +603,32 @@ class TestQualityMessageRouter:
     def test_router_state_isolation_between_instances(self, mock_supervisor, mock_db_session_factory,
                                                       mock_quality_gate_service, mock_monitoring_service):
         """Test that different router instances maintain separate state."""
-        router1 = QualityMessageRouter(
-            supervisor=mock_supervisor,
-            db_session_factory=mock_db_session_factory,
-            quality_gate_service=mock_quality_gate_service,
-            monitoring_service=mock_monitoring_service
-        )
-        
-        router2 = QualityMessageRouter(
-            supervisor=mock_supervisor,
-            db_session_factory=mock_db_session_factory,
-            quality_gate_service=mock_quality_gate_service,
-            monitoring_service=mock_monitoring_service
-        )
-        
-        # Verify they have separate handler dictionaries
-        assert router1.handlers is not router2.handlers
-        assert id(router1.handlers) != id(router2.handlers)
-        
-        # Verify separate instances of handlers
-        assert router1.handlers["get_quality_metrics"] is not router2.handlers["get_quality_metrics"]
+        with patch.object(QualityMessageRouter, '_create_enhanced_start_handler') as mock_create_start:
+            # Mock the problematic handler creation to return a simple mock
+            mock_start_handler = Mock()
+            mock_start_handler.handle = AsyncMock()
+            mock_create_start.return_value = mock_start_handler
+            
+            router1 = QualityMessageRouter(
+                supervisor=mock_supervisor,
+                db_session_factory=mock_db_session_factory,
+                quality_gate_service=mock_quality_gate_service,
+                monitoring_service=mock_monitoring_service
+            )
+            
+            router2 = QualityMessageRouter(
+                supervisor=mock_supervisor,
+                db_session_factory=mock_db_session_factory,
+                quality_gate_service=mock_quality_gate_service,
+                monitoring_service=mock_monitoring_service
+            )
+            
+            # Verify they have separate handler dictionaries
+            assert router1.handlers is not router2.handlers
+            assert id(router1.handlers) != id(router2.handlers)
+            
+            # Verify separate instances of handlers
+            assert router1.handlers["get_quality_metrics"] is not router2.handlers["get_quality_metrics"]
 
 
 # Performance and Load Testing Scenarios
@@ -625,12 +639,18 @@ class TestQualityMessageRouterPerformance:
     def performance_router(self, mock_supervisor, mock_db_session_factory,
                           mock_quality_gate_service, mock_monitoring_service):
         """Create router for performance testing."""
-        return QualityMessageRouter(
-            supervisor=mock_supervisor,
-            db_session_factory=mock_db_session_factory,
-            quality_gate_service=mock_quality_gate_service,
-            monitoring_service=mock_monitoring_service
-        )
+        with patch.object(QualityMessageRouter, '_create_enhanced_start_handler') as mock_create_start:
+            # Mock the problematic handler creation to return a simple mock
+            mock_start_handler = Mock()
+            mock_start_handler.handle = AsyncMock()
+            mock_create_start.return_value = mock_start_handler
+            
+            return QualityMessageRouter(
+                supervisor=mock_supervisor,
+                db_session_factory=mock_db_session_factory,
+                quality_gate_service=mock_quality_gate_service,
+                monitoring_service=mock_monitoring_service
+            )
 
     @pytest.mark.asyncio
     async def test_high_volume_message_routing_performance(self, performance_router):

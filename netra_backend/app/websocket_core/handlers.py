@@ -43,6 +43,7 @@ from netra_backend.app.websocket_core.types import (
 from netra_backend.app.websocket_core.utils import is_websocket_connected
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.timestamp_utils import safe_convert_timestamp
 
 logger = central_logger.get_logger(__name__)
 
@@ -978,10 +979,14 @@ class MessageRouter:
         msg_type = raw_message.get("type", "user_message")
         normalized_type = normalize_message_type(msg_type)
         
+        # Convert timestamp safely to handle various formats (ISO strings, Unix floats, etc.)
+        raw_timestamp = raw_message.get("timestamp")
+        converted_timestamp = safe_convert_timestamp(raw_timestamp, fallback_to_current=True)
+        
         return WebSocketMessage(
             type=normalized_type,
             payload=raw_message.get("payload", raw_message),
-            timestamp=raw_message.get("timestamp", time.time()),
+            timestamp=converted_timestamp,
             message_id=raw_message.get("message_id"),
             user_id=raw_message.get("user_id"),
             thread_id=raw_message.get("thread_id")

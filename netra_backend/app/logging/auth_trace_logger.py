@@ -353,7 +353,7 @@ class AuthTraceLogger:
             
         # Safely build error context
         try:
-            if not hasattr(context, 'error_context'):
+            if not hasattr(context, 'error_context') or context.error_context is None:
                 context.error_context = {}
                 
             context.error_context.update({

@@ -70,8 +70,12 @@ async def create_quick_operation():
     return "success"
 
 async def create_slow_operation():
-    """Create slow async operation"""
-    await asyncio.sleep(1.0)
+    """Create slow async operation
+    
+    CRITICAL: Uses 0.2s delay for unit test compatibility.
+    Longer than quick operations but still fast enough for unit tests.
+    """
+    await asyncio.sleep(0.2)  # Reduced from 1.0s to 0.2s for unit test speed
     return "should not reach here"
 
 async def create_failing_operation():

@@ -25,12 +25,11 @@ class TestAuthTraceLoggerNoneErrorBug:
         """Set up test fixtures."""
         self.logger = AuthTraceLogger()
     
-    def test_log_failure_with_none_error_context_and_additional_context(self):
+    def test_log_failure_with_none_error_context_and_additional_context_FIXED(self):
         """
-        CRITICAL: Direct reproduction of the NoneType bug.
+        VALIDATION: Confirm the NoneType bug is now FIXED.
         
-        This test reproduces the exact error:
-        'NoneType' object has no attribute 'update'
+        This test validates that the previously failing scenario now works correctly.
         """
         # Create context with error_context explicitly set to None
         context = AuthTraceContext(
@@ -40,28 +39,59 @@ class TestAuthTraceLoggerNoneErrorBug:
             operation="test_auth"
         )
         
-        # CRITICAL: Set error_context to None after creation
-        # This simulates the exact bug condition
+        # Set error_context to None - the previously problematic condition
         context.error_context = None
         
-        # Verify the problematic state
-        assert hasattr(context, 'error_context')  # This passes - attribute exists
-        assert context.error_context is None      # But it's None - this is the bug!
+        # Verify the state that previously caused the bug
+        assert hasattr(context, 'error_context')
+        assert context.error_context is None
         
-        # Create additional context that will trigger the bug
+        # Create additional context that previously triggered the bug
         additional_context = {"debug_info": "test_debug"}
         test_error = Exception("Test authentication failure")
         
-        # Now mock the logger to bypass the try/catch and expose the bug
+        # Mock the logger to capture warnings
         import unittest.mock
         with unittest.mock.patch('netra_backend.app.logging.auth_trace_logger.logger.warning') as mock_warning:
-            self.logger.log_failure(context, test_error, additional_context)
+            # This should now work without any exceptions
+            try:
+                self.logger.log_failure(context, test_error, additional_context)
+                # If we get here, the fix worked!
+                fix_successful = True
+            except AttributeError as e:
+                if "'NoneType' object has no attribute 'update'" in str(e):
+                    fix_successful = False
+                    pytest.fail(f"Bug still exists: {e}")
+                else:
+                    raise e
+            except Exception as e:
+                # Debug any other exceptions
+                print(f"Unexpected exception: {e}")
+                raise e
             
-            # The bug should be caught and logged as a warning
-            mock_warning.assert_called()
-            warning_call = mock_warning.call_args[0][0]
-            assert "Failed to build error context:" in warning_call
-            assert "'NoneType' object has no attribute 'update'" in warning_call
+            # Check if any warnings were logged (indicating exceptions were caught)
+            if mock_warning.called:
+                for call in mock_warning.call_args_list:
+                    print(f"Warning logged: {call[0][0]}")
+        
+        assert fix_successful, "The fix should prevent the NoneType error"
+        
+        # Debug: Print the actual error_context to understand what's happening
+        print(f"Final error_context: {context.error_context}")
+        print(f"Context state: auth_state={context.auth_state}")
+        
+        # Verify the context was properly initialized after the call
+        assert context.error_context is not None
+        assert isinstance(context.error_context, dict)
+        
+        # The fix should have added both the standard error fields AND additional_context
+        expected_fields = ["error_type", "error_message", "is_auth_error", "is_permission_error"]
+        for field in expected_fields:
+            assert field in context.error_context, f"Expected field {field} missing from error_context"
+            
+        # The additional_context should also be merged in
+        assert "debug_info" in context.error_context
+        assert context.error_context["debug_info"] == "test_debug"
     
     def test_direct_none_error_reproduction_bypass_exception_handling(self):
         """
