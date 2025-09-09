@@ -65,7 +65,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
     @pytest.mark.performance
     @pytest.mark.real_services
     async def test_connection_pool_concurrent_access(self, real_services_fixture):
-        \"\"\"
+        """
         Test database connection pool performance with concurrent access.
         
         Performance SLA:
