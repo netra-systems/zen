@@ -26,8 +26,8 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.logging_config import central_logger
-# Import UnifiedIDManager for SSOT ID generation
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+# Import UnifiedIdGenerator for SSOT ID generation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 logger = central_logger.get_logger(__name__)
 
@@ -154,22 +154,12 @@ class WebSocketContext:
             WebSocketContext: Configured context for the user connection
         """
         if not run_id:
-            # Use UnifiedIDManager for consistent run ID generation
-            id_manager = UnifiedIDManager()
-            run_id = id_manager.generate_id(
-                IDType.EXECUTION,
-                prefix="run",
-                context={"user_id": user_id, "component": "websocket_context"}
-            )
+            # Use UnifiedIdGenerator for consistent run ID generation
+            run_id = UnifiedIdGenerator.generate_base_id("run_execution", include_random=True, random_length=8)
         
         if not connection_id:
-            # Use UnifiedIDManager for consistent connection ID generation
-            id_manager = UnifiedIDManager()
-            connection_id = id_manager.generate_id(
-                IDType.WEBSOCKET,
-                prefix="ws",
-                context={"user_id": user_id, "component": "websocket_context"}
-            )
+            # Use UnifiedIdGenerator for consistent connection ID generation  
+            connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
         
         context = cls(
             connection_id=connection_id,
