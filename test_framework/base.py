@@ -118,10 +118,17 @@ def create_mock(**kwargs) -> Mock:
     return mock
 
 
+# Import SSOT base test classes for cross-compatibility
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+
+# Add missing BaseUnitTest alias that tests are expecting
+BaseUnitTest = SSotBaseTestCase
+
 # Re-export common testing utilities
 __all__ = [
     "BaseTestCase",
-    "AsyncTestCase",
+    "AsyncTestCase", 
+    "BaseUnitTest",  # Added for backward compatibility
     "MockBase",
     "TestFixtures",
     "create_async_mock",

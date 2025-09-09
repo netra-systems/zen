@@ -1320,6 +1320,71 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
             'error_count': self._connection_error_count
         }
     
+    async def send_error(self, user_id: Union[str, UserID], error_message: str) -> None:
+        """
+        Send an error message to the specified user.
+        
+        CRITICAL FIX: This method was missing and causing AttributeError in message handlers.
+        Implements the standard error message sending interface expected by WebSocket handlers.
+        
+        Args:
+            user_id: Target user ID (must match this manager's user context)  
+            error_message: Error message to send
+            
+        Raises:
+            ValueError: If user_id doesn't match this manager's user context
+            RuntimeError: If manager is not active
+        """
+        self._validate_active()
+        
+        # SECURITY: Validate that the requested user_id matches this manager's user
+        manager_user_id = str(self.user_context.user_id)
+        target_user_id = str(user_id)
+        
+        if target_user_id != manager_user_id:
+            logger.critical(
+                f"SECURITY VIOLATION: Attempted to send error to user {target_user_id} "
+                f"from isolated manager for user {manager_user_id[:8]}... "
+                f"This violates user isolation requirements."
+            )
+            raise ValueError(
+                f"Cannot send error to user {target_user_id} from manager for user {manager_user_id}. "
+                f"This violates user isolation - use the correct manager instance for the target user."
+            )
+        
+        # Format error message using standard WebSocket error format
+        error_payload = {
+            "type": "error",
+            "data": {
+                "error": error_message,
+                "timestamp": datetime.utcnow().isoformat(),
+                "user_context": {
+                    "user_id": self.user_context.user_id,
+                    "request_id": getattr(self.user_context, 'request_id', None)
+                }
+            },
+            "critical": True
+        }
+        
+        try:
+            await self.send_to_user(user_id, error_payload)
+            logger.debug(
+                f"Successfully sent error message to user {self.user_context.user_id[:8]}...: {error_message[:100]}"
+            )
+        except Exception as e:
+            logger.critical(
+                f"CRITICAL ERROR: Failed to send error message to user {self.user_context.user_id[:8]}...: {e}. "
+                f"Original error: {error_message}"
+            )
+            # Store for recovery (this is critical - user needs to know about errors)
+            self._message_recovery_queue.append({
+                **error_payload,
+                'failed_at': datetime.utcnow().isoformat(),
+                'failure_reason': f'error_send_failure: {e}',
+                'original_error': error_message
+            })
+            raise
+
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
         """
         Send message to a thread (compatibility method).
