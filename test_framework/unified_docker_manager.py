@@ -3373,6 +3373,67 @@ class UnifiedDockerManager:
             
         return True
     
+    async def ensure_services_running(self, services: List[str], timeout: int = 60) -> bool:
+        """
+        Ensure specified services are running and healthy.
+        
+        This method checks if services are already running and healthy, and starts them
+        if they are not. It's the entry point for integration tests that need specific
+        services to be available.
+        
+        Args:
+            services: List of service names to ensure are running
+            timeout: Maximum time to wait for services to be healthy
+            
+        Returns:
+            True if all services are running and healthy, False otherwise
+        """
+        if not services:
+            _get_logger().warning("No services specified to ensure running")
+            return True
+            
+        _get_logger().info(f"🔍 Ensuring services are running: {', '.join(services)}")
+        
+        # Perform memory pre-flight check
+        if not self.perform_memory_pre_flight_check():
+            _get_logger().error("❌ Memory pre-flight check failed - cannot ensure services safely")
+            return False
+        
+        # Check which services are already running and healthy
+        running_services = []
+        services_to_start = []
+        
+        for service in services:
+            if service not in self.SERVICES:
+                _get_logger().error(f"❌ Unknown service: {service}")
+                return False
+                
+            if await self.check_container_reusable(service):
+                running_services.append(service)
+                _get_logger().info(f"✅ Service {service} is already running and healthy")
+            else:
+                services_to_start.append(service)
+                _get_logger().info(f"⚠️ Service {service} needs to be started")
+        
+        # Start services that are not running
+        if services_to_start:
+            _get_logger().info(f"🚀 Starting {len(services_to_start)} services: {', '.join(services_to_start)}")
+            start_success = await self.start_services_smart(services_to_start, wait_healthy=True)
+            if not start_success:
+                _get_logger().error(f"❌ Failed to start required services: {', '.join(services_to_start)}")
+                return False
+        
+        # Final health check for all requested services
+        _get_logger().info(f"🏥 Final health check for all services: {', '.join(services)}")
+        health_check_success = self.wait_for_services(services, timeout=timeout)
+        
+        if health_check_success:
+            _get_logger().info(f"✅ All services are running and healthy: {', '.join(services)}")
+        else:
+            _get_logger().error(f"❌ Health check failed for services: {', '.join(services)}")
+            
+        return health_check_success
+    
     def _check_base_images(self) -> bool:
         """
         Check if required base images are available locally.
