@@ -20,11 +20,8 @@ from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.agent_factory import AgentFactory
-from netra_backend.app.agents.agent_registry import AgentRegistry  
-from netra_backend.app.agents.agent_resource_manager import AgentResourceManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from test_framework.mock_factory import MockFactory
 
 
 class TestAgentFactoryBusinessLogic:

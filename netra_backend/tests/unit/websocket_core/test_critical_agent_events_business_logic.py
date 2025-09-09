@@ -50,7 +50,7 @@ from netra_backend.app.websocket_core.types import (
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from test_framework.base_unit_test import BaseUnitTest
+from test_framework.base import BaseUnitTest
 
 
 class TestCriticalAgentEventDelivery(BaseUnitTest):

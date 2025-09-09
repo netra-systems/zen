@@ -23,7 +23,6 @@ from datetime import datetime, timezone
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.user_context_factory import UserContextFactory
 from netra_backend.app.services.session_isolation_manager import SessionIsolationManager
-from test_framework.mock_factory import MockFactory
 
 
 class TestUserContextIsolationBusinessLogic:

@@ -20,9 +20,8 @@ from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any, List
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from netra_backend.app.config.configuration_manager import ConfigurationManager
-from netra_backend.app.config.environment_detector import EnvironmentDetector
-from test_framework.mock_factory import MockFactory
+from netra_backend.app.config import config_manager
+from netra_backend.app.core.configuration.environment_detector import EnvironmentDetector
 
 
 class TestConfigurationValidationBusinessLogic:

@@ -23,7 +23,7 @@ from typing import Optional
 
 import pytest
 
-from netra_backend.tests.routes.test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     CommonResponseValidators,
     MockServiceFactory,
     agent_test_client,

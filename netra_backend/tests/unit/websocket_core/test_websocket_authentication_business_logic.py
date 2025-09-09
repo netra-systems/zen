@@ -53,7 +53,7 @@ from netra_backend.app.services.unified_authentication_service import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from fastapi.websockets import WebSocketState
-from test_framework.base_unit_test import BaseUnitTest
+from test_framework.base import BaseUnitTest
 
 
 class TestWebSocketAuthResultBusinessLogic(BaseUnitTest):

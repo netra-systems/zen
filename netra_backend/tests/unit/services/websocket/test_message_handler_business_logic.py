@@ -52,7 +52,7 @@ from netra_backend.app.services.websocket.message_queue import (
     QueuedMessage
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from test_framework.base_unit_test import BaseUnitTest
+from test_framework.base import BaseUnitTest
 
 
 class TestBaseMessageHandlerInterface(BaseUnitTest):

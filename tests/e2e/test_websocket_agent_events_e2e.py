@@ -23,7 +23,7 @@ from test_framework.ssot.e2e_auth_helper import (
     create_authenticated_user
 )
 
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
 from test_framework.backend_client import BackendClient

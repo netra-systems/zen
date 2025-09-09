@@ -60,7 +60,7 @@ class ResponseQualityMetrics:
     overall_quality: ResponseQualityLevel
 
 
-class TestAgentResponseQualityValidation(BaseIntegrationTest, WebSocketIntegrationTest):
+class TestAgentResponseQualityValidation(WebSocketIntegrationTest):
     """Test agent response quality with real service integration."""
     
     def setup_method(self):

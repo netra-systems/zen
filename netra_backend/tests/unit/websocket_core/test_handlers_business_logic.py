@@ -68,7 +68,7 @@ from netra_backend.app.websocket_core.types import (
     create_server_message
 )
 from netra_backend.app.websocket_core.utils import is_websocket_connected
-from test_framework.base_unit_test import BaseUnitTest
+from test_framework.base import BaseUnitTest
 
 
 class TestConnectionHandlerBusinessLogic(BaseUnitTest):
