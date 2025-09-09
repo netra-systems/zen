@@ -6,7 +6,13 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, UTC
 from typing import Any, AsyncIterator, Dict, List, Optional
 
-from google.cloud import logging as gcp_logging
+# Optional GCP imports with graceful fallback
+try:
+    from google.cloud import logging as gcp_logging
+    GCP_LOGGING_AVAILABLE = True
+except ImportError:
+    gcp_logging = None
+    GCP_LOGGING_AVAILABLE = False
 
 from test_framework.unified.base_interfaces import ILogAnalyzer
 from test_framework.gcp_integration.base import GCPBaseClient, GCPConfig
