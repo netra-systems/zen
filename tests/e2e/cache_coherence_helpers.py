@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Set
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 from tests.e2e.database_sync_fixtures import DatabaseSyncValidator
-from tests.e2e.service_manager import RealServicesManager
+from test_framework.cypress.service_manager import ServiceDependencyManager as RealServicesManager
 from test_framework.http_client import UnifiedHTTPClient as RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)

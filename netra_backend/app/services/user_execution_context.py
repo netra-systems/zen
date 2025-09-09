@@ -26,9 +26,10 @@ user requests.
 
 import uuid
 import copy
+import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional, Union, TYPE_CHECKING
+from typing import Any, Dict, Optional, Union, TYPE_CHECKING, List, Callable
 import logging
 from contextlib import asynccontextmanager
 
@@ -118,6 +119,9 @@ class UserExecutionContext:
     # Hierarchical operation tracking
     operation_depth: int = field(default=0)
     parent_request_id: Optional[str] = field(default=None)
+    
+    # Resource cleanup management
+    cleanup_callbacks: List[Callable] = field(default_factory=list, repr=False, compare=False)
     
     def __post_init__(self):
         """Comprehensive validation after initialization."""
@@ -219,14 +223,63 @@ class UserExecutionContext:
                 )
         
         # Validate thread_id consistency with run_id if extractable
+        # FIVE WHYS FIX: Updated validation logic to handle UnifiedIdGenerator patterns
         if hasattr(UnifiedIDManager, 'extract_thread_id'):
             extracted_thread_id = UnifiedIDManager.extract_thread_id(self.run_id)
-            if extracted_thread_id and extracted_thread_id != self.thread_id:
-                logger.warning(
-                    f"Thread ID mismatch: run_id contains '{extracted_thread_id}' "
-                    f"but thread_id is '{self.thread_id}'. This may indicate "
-                    "inconsistent ID generation."
-                )
+            if extracted_thread_id:
+                # Check for consistency based on ID generation pattern
+                is_consistent = self._validate_thread_run_id_consistency(extracted_thread_id, self.thread_id, self.run_id)
+                if not is_consistent:
+                    logger.warning(
+                        f"Thread ID mismatch: run_id '{self.run_id}' extracted to '{extracted_thread_id}' "
+                        f"but thread_id is '{self.thread_id}'. This may indicate "
+                        "inconsistent ID generation."
+                    )
+    
+    def _validate_thread_run_id_consistency(self, extracted_thread_id: str, actual_thread_id: str, run_id: str) -> bool:
+        """
+        Validate thread_id and run_id consistency with SSOT pattern support.
+        
+        FIVE WHYS FIX: Handles both UnifiedIdGenerator and UnifiedIDManager patterns
+        to prevent false positive thread ID mismatch warnings.
+        
+        Args:
+            extracted_thread_id: Thread ID extracted from run_id
+            actual_thread_id: Actual thread_id field value
+            run_id: Original run_id for pattern detection
+            
+        Returns:
+            True if IDs are consistent according to their generation pattern
+        """
+        # Pattern 1: UnifiedIdGenerator pattern
+        # run_id="websocket_factory_1757372478799", thread_id="thread_websocket_factory_1757372478799_528_584ef8a5"
+        # In this case, thread_id should contain the run_id as a substring
+        if run_id.startswith(('websocket_factory_', 'context_', 'agent_')):
+            # For UnifiedIdGenerator: thread_id should contain run_id as substring
+            is_consistent = run_id in actual_thread_id and actual_thread_id.startswith('thread_')
+            if is_consistent:
+                logger.debug(f"UnifiedIdGenerator pattern validated: run_id '{run_id}' found in thread_id '{actual_thread_id}'")
+            return is_consistent
+        
+        # Pattern 2: UnifiedIDManager pattern  
+        # run_id="run_thread123_456_abcd", extracted="thread123", thread_id="thread123"
+        # In this case, extracted_thread_id should exactly match actual_thread_id
+        if extracted_thread_id == actual_thread_id:
+            logger.debug(f"UnifiedIDManager pattern validated: exact match '{extracted_thread_id}'")
+            return True
+        
+        # Pattern 3: Legacy/fallback patterns - be more lenient
+        # Check if there's any reasonable relationship between the IDs
+        if extracted_thread_id in actual_thread_id or actual_thread_id in extracted_thread_id:
+            logger.debug(f"Legacy pattern validated: relationship found between '{extracted_thread_id}' and '{actual_thread_id}'")
+            return True
+        
+        # If no pattern matches, log the specific mismatch for debugging
+        logger.debug(
+            f"ID consistency check failed: extracted='{extracted_thread_id}', "
+            f"actual='{actual_thread_id}', run_id='{run_id}'"
+        )
+        return False
     
     def _validate_metadata_isolation(self) -> None:
         """Ensure metadata dictionaries are properly isolated."""
@@ -319,6 +372,90 @@ class UserExecutionContext:
             agent_context=agent_context or {},
             audit_metadata=audit_metadata or {}
         )
+    
+    @classmethod
+    def from_websocket_request(
+        cls,
+        user_id: str,
+        websocket_client_id: Optional[str] = None,
+        operation: str = "websocket_session"
+    ) -> 'UserExecutionContext':
+        """
+        SSOT factory method for WebSocket context creation with consistent ID generation.
+        
+        This is the Single Source of Truth for WebSocket-related UserExecutionContext creation.
+        It ensures consistent thread_id generation patterns across all WebSocket components,
+        preventing the isolation key mismatches that cause resource leak issues.
+        
+        Business Value Justification (BVJ):
+        - Segment: ALL (Free -> Enterprise)
+        - Business Goal: Eliminate WebSocket resource leaks causing user connection failures
+        - Value Impact: Ensures reliable chat connections and prevents service degradation
+        - Strategic Impact: CRITICAL - Prevents cascade failures in real-time user interactions
+        
+        Args:
+            user_id: User identifier from authentication
+            websocket_client_id: Optional WebSocket connection ID (auto-generated if None)
+            operation: Operation type for ID generation consistency (default: "websocket_session")
+            
+        Returns:
+            New UserExecutionContext with consistent SSOT ID generation
+            
+        Raises:
+            InvalidContextError: If user_id is invalid or ID generation fails
+        """
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
+            raise InvalidContextError(
+                f"user_id must be a non-empty string for WebSocket context, got: {user_id!r}"
+            )
+        
+        # Use SSOT ID generation for consistent patterns
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        
+        try:
+            # Generate consistent IDs using SSOT pattern
+            thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+                user_id=user_id,
+                operation=operation
+            )
+            
+            # Generate websocket_client_id if not provided
+            if websocket_client_id is None:
+                websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id)
+                
+            logger.info(
+                f"SSOT WebSocket Context: Created for user {user_id[:8]}... with "
+                f"thread_id={thread_id}, websocket_client_id={websocket_client_id}"
+            )
+            
+            return cls(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                request_id=request_id,
+                websocket_client_id=websocket_client_id,
+                agent_context={
+                    'source': 'websocket_ssot',
+                    'operation': operation,
+                    'created_via': 'from_websocket_request'
+                },
+                audit_metadata={
+                    'context_source': 'websocket_ssot',
+                    'id_generation_method': 'UnifiedIdGenerator',
+                    'operation_type': operation,
+                    'isolation_key_compatible': True
+                }
+            )
+            
+        except Exception as id_error:
+            logger.error(
+                f"SSOT ID generation failed for WebSocket context creation "
+                f"(user_id={user_id[:8]}..., operation={operation}): {id_error}"
+            )
+            raise InvalidContextError(
+                f"WebSocket context creation failed due to ID generation error: {id_error}. "
+                f"This indicates a system configuration issue with SSOT ID generation."
+            ) from id_error
     
     @classmethod 
     def from_fastapi_request(
@@ -571,6 +708,43 @@ class UserExecutionContext:
         
         logger.debug(f"Context isolation verified for request_id={self.request_id}")
         return True
+    
+    async def cleanup(self) -> None:
+        """Clean up resources associated with this context.
+        
+        This method executes all registered cleanup callbacks in reverse order (LIFO)
+        to ensure proper resource cleanup and prevent memory leaks.
+        
+        **Compatibility Note**: This method provides compatibility with the execution
+        factory pattern while maintaining the managed_user_context design.
+        
+        Raises:
+            Exception: If any cleanup callback fails (logged but not re-raised)
+        """
+        if not self.cleanup_callbacks:
+            logger.debug(f"No cleanup callbacks for context {self.request_id}")
+            return
+            
+        logger.debug(f"🧹 Running {len(self.cleanup_callbacks)} cleanup callbacks for context {self.request_id}")
+        
+        # Execute cleanup callbacks in reverse order (LIFO)
+        for i, callback in enumerate(reversed(self.cleanup_callbacks)):
+            try:
+                if asyncio.iscoroutinefunction(callback):
+                    await callback()
+                else:
+                    callback()
+                logger.debug(f"✅ Cleanup callback {i+1}/{len(self.cleanup_callbacks)} executed successfully")
+            except Exception as e:
+                logger.error(
+                    f"❌ Cleanup callback {i+1}/{len(self.cleanup_callbacks)} failed: {e}",
+                    exc_info=True
+                )
+                # Continue with other callbacks even if one fails
+        
+        # Clear all callbacks after execution
+        self.cleanup_callbacks.clear()
+        logger.debug(f"🧹 Cleanup completed for context {self.request_id}")
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert context to dictionary for serialization and logging.
@@ -899,10 +1073,29 @@ def validate_user_context(context: Any) -> UserExecutionContext:
         TypeError: If context is not a UserExecutionContext
         InvalidContextError: If context validation fails
     """
+    # Accept both UserExecutionContext and StronglyTypedUserExecutionContext for SSOT compatibility
     if not isinstance(context, UserExecutionContext):
-        raise TypeError(
-            f"Expected UserExecutionContext, got: {type(context)}"
-        )
+        # Check if it's a StronglyTypedUserExecutionContext from the SSOT auth helper
+        try:
+            from shared.types.execution_types import StronglyTypedUserExecutionContext
+            if isinstance(context, StronglyTypedUserExecutionContext):
+                # Convert to UserExecutionContext for compatibility
+                converted_context = UserExecutionContext(
+                    user_id=context.user_id,
+                    thread_id=context.thread_id,
+                    run_id=context.run_id,
+                    request_id=context.request_id
+                )
+                logger.debug(f"Converted StronglyTypedUserExecutionContext to UserExecutionContext for user {context.user_id}")
+                context = converted_context
+            else:
+                raise TypeError(
+                    f"Expected UserExecutionContext or StronglyTypedUserExecutionContext, got: {type(context)}"
+                )
+        except ImportError:
+            raise TypeError(
+                f"Expected UserExecutionContext, got: {type(context)}"
+            )
     
     # Verify isolation on each validation
     context.verify_isolation()
@@ -943,6 +1136,12 @@ async def managed_user_context(
         )
         raise
     finally:
+        # Execute registered cleanup callbacks first
+        try:
+            await context.cleanup()
+        except Exception as e:
+            logger.warning(f"Error during cleanup callbacks: {e}")
+        
         # Cleanup database session if requested
         if cleanup_db_session and context.db_session:
             try:
@@ -1001,6 +1200,135 @@ class UserContextFactory:
         return context.with_db_session(db_session)
 
 
+async def create_isolated_execution_context(
+    user_id: str,
+    request_id: str,
+    database_session: Optional['AsyncSession'] = None,
+    websocket_emitter: Optional[Any] = None,
+    thread_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+    validate_user: bool = True,
+    isolation_level: str = "standard"
+) -> UserExecutionContext:
+    """
+    SSOT factory function for creating isolated execution contexts.
+    
+    This is the Single Source of Truth for creating UserExecutionContext instances
+    with comprehensive isolation guarantees and database/WebSocket integration.
+    
+    Business Value Justification (BVJ):
+    - Segment: ALL (Free → Enterprise)
+    - Business Goal: Ensure complete request isolation and proper resource management
+    - Value Impact: Guarantees user data security and prevents resource leaks
+    - Strategic Impact: Critical for multi-user agent execution and compliance
+    
+    Args:
+        user_id: User identifier from authentication
+        request_id: Request identifier for this specific operation
+        database_session: Optional database session for request-scoped operations
+        websocket_emitter: Optional WebSocket emitter for real-time updates
+        thread_id: Optional thread identifier (auto-generated if None)
+        run_id: Optional run identifier (auto-generated if None)  
+        validate_user: Whether to validate user exists in database
+        isolation_level: Isolation level ("standard" or "strict")
+        
+    Returns:
+        New UserExecutionContext with proper isolation
+        
+    Raises:
+        InvalidContextError: If parameters are invalid or user validation fails
+    """
+    if not user_id or not isinstance(user_id, str):
+        raise InvalidContextError("user_id must be a non-empty string")
+        
+    if not request_id or not isinstance(request_id, str):
+        raise InvalidContextError("request_id must be a non-empty string")
+    
+    # Generate missing IDs if not provided
+    id_manager = UnifiedIDManager()
+    
+    if not thread_id:
+        thread_id = id_manager.generate_thread_id()
+        
+    if not run_id:
+        run_id = id_manager.generate_run_id()
+    
+    # Validate user exists in database if requested and session available
+    if validate_user and database_session:
+        try:
+            # Check user exists in database
+            result = await database_session.execute("""
+                SELECT id, is_active FROM auth.users WHERE id = :user_id 
+                UNION ALL
+                SELECT id, is_active FROM users WHERE id = :user_id
+                LIMIT 1
+            """, {"user_id": user_id})
+            
+            user_row = result.fetchone()
+            if not user_row:
+                raise InvalidContextError(f"User {user_id} not found in database")
+                
+            if not user_row[1]:  # is_active check
+                raise InvalidContextError(f"User {user_id} is not active")
+                
+            logger.debug(f"User validation successful for {user_id}")
+            
+        except Exception as e:
+            if isinstance(e, InvalidContextError):
+                raise
+            logger.warning(f"User validation failed for {user_id}: {e}")
+            
+            # In strict isolation, validation failure is fatal
+            if isolation_level == "strict":
+                raise InvalidContextError(
+                    f"User validation required in strict isolation mode but failed: {e}"
+                )
+    
+    # Build agent context with isolation metadata
+    agent_context = {
+        'isolation_level': isolation_level,
+        'created_via': 'create_isolated_execution_context',
+        'validated_user': validate_user and database_session is not None,
+        'has_websocket_emitter': websocket_emitter is not None,
+        'has_database_session': database_session is not None
+    }
+    
+    # Build audit metadata
+    audit_metadata = {
+        'context_source': 'ssot_isolated_factory',
+        'isolation_level': isolation_level,
+        'validation_performed': validate_user and database_session is not None,
+        'factory_method': 'create_isolated_execution_context'
+    }
+    
+    # Convert websocket_emitter to websocket_client_id if needed
+    websocket_client_id = None
+    if websocket_emitter:
+        if hasattr(websocket_emitter, 'user_id'):
+            websocket_client_id = f"ws_{websocket_emitter.user_id}"
+        else:
+            websocket_client_id = f"ws_{user_id}"
+    
+    # Create the context
+    context = UserExecutionContext(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        request_id=request_id,
+        db_session=database_session,
+        websocket_client_id=websocket_client_id,
+        agent_context=agent_context,
+        audit_metadata=audit_metadata
+    )
+    
+    logger.info(
+        f"Created isolated execution context: user={user_id[:8]}..., "
+        f"request={request_id[:8]}..., isolation={isolation_level}"
+    )
+    
+    return context
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
@@ -1010,5 +1338,6 @@ __all__ = [
     'validate_user_context',
     'managed_user_context',
     'register_shared_object',
-    'clear_shared_object_registry'
+    'clear_shared_object_registry',
+    'create_isolated_execution_context'
 ]

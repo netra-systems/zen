@@ -17,6 +17,9 @@ import time
 import uuid
 from pydantic import BaseModel, Field
 
+# Import UnifiedIdGenerator for SSOT ID generation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+
 
 class WebSocketConnectionState(str, Enum):
     """WebSocket connection states."""
@@ -101,7 +104,7 @@ class ConnectionInfo(BaseModel):
     """WebSocket connection information."""
     model_config = {"arbitrary_types_allowed": True}
     
-    connection_id: str = Field(default_factory=lambda: f"conn_{uuid.uuid4().hex[:8]}")
+    connection_id: Optional[str] = None
     user_id: str
     websocket: Optional[Any] = None  # WebSocket instance
     thread_id: Optional[str] = None
@@ -115,6 +118,12 @@ class ConnectionInfo(BaseModel):
     client_info: Optional[Dict[str, Any]] = None
     state: WebSocketConnectionState = WebSocketConnectionState.ACTIVE
     failure_count: int = 0  # Track state transition failures
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.connection_id is None:
+            # Generate connection_id using user_id for proper pattern
+            self.connection_id = UnifiedIdGenerator.generate_websocket_connection_id(self.user_id)
     
     def transition_to_failed(self):
         """Transition connection to failed state."""
@@ -141,7 +150,16 @@ class ConnectionInfo(BaseModel):
 
 
 class WebSocketMessage(BaseModel):
-    """Standard WebSocket message format."""
+    """
+    Standard WebSocket message format.
+    
+    timestamp: Unix timestamp as float. Accepts various input formats:
+    - Unix timestamp (float/int): 1693567801.447585
+    - ISO datetime string: '2025-09-08T16:50:01.447585'
+    - None: Uses current time
+    
+    Use timestamp_utils.safe_convert_timestamp() for safe conversion.
+    """
     type: MessageType
     payload: Dict[str, Any] = Field(default_factory=dict)
     timestamp: Optional[float] = None
@@ -274,15 +292,57 @@ class TypingMessage(BaseModel):
 
 
 class WebSocketConfig(BaseModel):
-    """WebSocket configuration."""
+    """WebSocket configuration with environment-specific optimizations."""
     max_connections_per_user: int = 3
     max_message_rate_per_minute: int = 30
     max_message_size_bytes: int = 8192
     connection_timeout_seconds: int = 300
-    heartbeat_interval_seconds: int = 45
+    heartbeat_interval_seconds: int = 25  # GCP Cloud Run requires <30s for stability
     cleanup_interval_seconds: int = 60
     enable_compression: bool = False
     allowed_origins: List[str] = Field(default_factory=list)
+    
+    # PHASE 1 FIX 3: Cloud Run environment timing adjustments
+    # These settings help mitigate accept() race conditions in Cloud Run environments
+    accept_completion_timeout_seconds: float = 5.0  # Max time to wait for accept() completion
+    accept_validation_interval_ms: int = 100  # Interval for checking accept() status
+    cloud_run_accept_delay_ms: int = 50  # Additional delay after accept() in Cloud Run
+    cloud_run_stabilization_delay_ms: int = 25  # Final stabilization delay
+    cloud_run_progressive_backoff_ms: List[int] = Field(default=[25, 50, 75])  # Progressive delay attempts
+    
+    @classmethod
+    def get_cloud_run_optimized_config(cls) -> 'WebSocketConfig':
+        """Get Cloud Run optimized configuration for race condition prevention."""
+        return cls(
+            heartbeat_interval_seconds=20,  # Reduced for Cloud Run
+            accept_completion_timeout_seconds=10.0,  # Longer timeout for Cloud Run
+            accept_validation_interval_ms=50,  # More frequent validation
+            cloud_run_accept_delay_ms=75,  # Increased delay for Cloud Run
+            cloud_run_stabilization_delay_ms=50,  # Increased stabilization
+            cloud_run_progressive_backoff_ms=[50, 100, 150, 200]  # More aggressive backoff
+        )
+    
+    @classmethod
+    def detect_and_configure_for_environment(cls) -> 'WebSocketConfig':
+        """Detect environment and return optimized configuration."""
+        import os
+        
+        # Detect Cloud Run environment
+        is_cloud_run = any([
+            os.getenv('K_SERVICE'),  # Cloud Run service name
+            os.getenv('K_REVISION'),  # Cloud Run revision
+            os.getenv('GOOGLE_CLOUD_PROJECT'),  # GCP project
+            'run.app' in os.getenv('GAE_APPLICATION', ''),  # Cloud Run domain
+        ])
+        
+        environment = os.getenv('ENVIRONMENT', 'development')
+        
+        if is_cloud_run or environment in ['staging', 'production']:
+            # Use Cloud Run optimized settings for production environments
+            return cls.get_cloud_run_optimized_config()
+        else:
+            # Use default configuration for development/testing
+            return cls()
 
 
 class ReconnectionConfig(BaseModel):
@@ -349,6 +409,7 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "user": MessageType.USER_MESSAGE,  # Map 'user' to USER_MESSAGE
     "user_input": MessageType.USER_MESSAGE,
     "user_message": MessageType.USER_MESSAGE,
+    "chat_message": MessageType.USER_MESSAGE,  # Fix for MessageRouter 'chat_message' issue
     "chat": MessageType.CHAT,
     "message": MessageType.USER_MESSAGE,
     
@@ -376,6 +437,9 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "agent_fallback": MessageType.AGENT_ERROR,
     "tool_executing": MessageType.AGENT_PROGRESS,
     "tool_completed": MessageType.AGENT_PROGRESS,
+    
+    # CRITICAL FIX: Add missing execute_agent mapping (causes Tests 23 & 25 failures)
+    "execute_agent": MessageType.START_AGENT,
     
     # Typing indicators
     "typing": MessageType.USER_TYPING,
@@ -473,7 +537,11 @@ def create_standard_message(msg_type: Union[str, MessageType],
         type=normalized_type,
         payload=payload,
         timestamp=time.time(),
-        message_id=str(uuid.uuid4()),
+        message_id=UnifiedIdGenerator.generate_base_id(
+            f"msg_{str(normalized_type.value)}", 
+            include_random=True,
+            random_length=8
+        ),
         user_id=user_id,
         thread_id=thread_id
     )
@@ -533,6 +601,42 @@ def convert_jsonrpc_to_websocket_message(jsonrpc_msg: Dict[str, Any]) -> WebSock
         type=msg_type,
         payload=jsonrpc_msg,
         timestamp=time.time()
+    )
+
+
+def generate_default_message(
+    message_type: Union[str, MessageType],
+    user_id: str,
+    thread_id: str,
+    data: Optional[Dict[str, Any]] = None
+) -> WebSocketMessage:
+    """Generate a default WebSocket message with standard structure.
+    
+    This function provides compatibility for test cases that expect
+    a generate_default_message function with this signature.
+    
+    Args:
+        message_type: The type of message (string or MessageType enum)
+        user_id: User identifier
+        thread_id: Thread/conversation identifier
+        data: Optional data payload
+        
+    Returns:
+        WebSocketMessage: Standardized message with default values
+    """
+    normalized_type = normalize_message_type(message_type)
+    
+    return WebSocketMessage(
+        type=normalized_type,
+        payload=data or {},
+        timestamp=time.time(),
+        message_id=UnifiedIdGenerator.generate_base_id(
+            f"msg_{str(normalized_type.value)}", 
+            include_random=True,
+            random_length=8
+        ),
+        user_id=user_id,
+        thread_id=thread_id
     )
 
 

@@ -27,7 +27,7 @@ from unittest.mock import patch, AsyncMock
 from netra_backend.app.auth_integration.auth import auth_client
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.configuration import get_configuration
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.main import app
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from test_framework.auth_jwt_test_manager import JWTGenerationTestManager as AuthJWTTestManager

@@ -398,6 +398,16 @@ class UniversalRegistry(Generic[T]):
     
     def _validate_item(self, key: str, item: Any) -> bool:
         """Validate item before registration."""
+        # CRITICAL FIX: Prevent BaseModel classes from being registered as tools
+        if self._is_basemodel_class_or_instance(item):
+            logger.warning(f"❌ Rejected BaseModel registration attempt: {key} (type: {type(item).__name__}) - BaseModel classes are data schemas, not executable tools")
+            return False
+        
+        # CRITICAL FIX: For tool registries, validate tool interface
+        if self.name == "ToolRegistry" and not self._is_valid_tool(item):
+            logger.warning(f"❌ Rejected invalid tool registration attempt: {key} (type: {type(item).__name__}) - Missing required tool interface")
+            return False
+        
         for validator in self._validation_handlers:
             try:
                 if not validator(key, item):
@@ -407,6 +417,104 @@ class UniversalRegistry(Generic[T]):
                 logger.error(f"Validator error for {key}: {e}")
                 return False
         return True
+    
+    def _is_basemodel_class_or_instance(self, item: Any) -> bool:
+        """Check if item is a Pydantic BaseModel class or instance.
+        
+        This prevents BaseModel data schemas from being registered as executable tools,
+        which causes the "modelmetaclass" registration error.
+        
+        Args:
+            item: Item to check
+            
+        Returns:
+            bool: True if item is BaseModel-related, False otherwise
+        """
+        try:
+            from pydantic import BaseModel
+            
+            # Check if it's a BaseModel instance
+            if isinstance(item, BaseModel):
+                logger.debug(f"🔍 Detected BaseModel instance: {type(item).__name__}")
+                return True
+                
+            # Check if it's a BaseModel class
+            if isinstance(item, type) and issubclass(item, BaseModel):
+                logger.debug(f"🔍 Detected BaseModel class: {item.__name__}")
+                return True
+                
+            # Check for metaclass name that causes the "modelmetaclass" error
+            metaclass_name = type(type(item)).__name__.lower()
+            if metaclass_name == "modelmetaclass":
+                logger.debug(f"🔍 Detected modelmetaclass: {type(item).__name__}")
+                return True
+                
+        except ImportError:
+            # If Pydantic not available, skip check
+            pass
+        except Exception as e:
+            logger.debug(f"BaseModel check error for {type(item).__name__}: {e}")
+            
+        return False
+    
+    def _is_valid_tool(self, item: Any) -> bool:
+        """Check if item implements valid tool interface.
+        
+        A valid tool should have:
+        1. A 'name' attribute or property
+        2. An 'execute' method (for executable tools)
+        
+        Args:
+            item: Item to check
+            
+        Returns:
+            bool: True if valid tool, False otherwise
+        """
+        try:
+            # Check if it has a name attribute (required for tool identification)
+            has_name = hasattr(item, 'name') and getattr(item, 'name', None) is not None
+            
+            # For tool instances, check if they have execute method
+            has_execute = hasattr(item, 'execute') and callable(getattr(item, 'execute', None))
+            
+            # Tool classes might not have execute yet, so be more lenient for classes
+            if isinstance(item, type):
+                # For tool classes, just check if name is defined or can be derived
+                return has_name or hasattr(item, '__name__')
+            else:
+                # For tool instances, require either name or execute
+                # Some legacy tools might not have execute method but are still valid
+                return has_name or has_execute
+                
+        except Exception as e:
+            logger.debug(f"Tool validation error for {type(item).__name__}: {e}")
+            return True  # Be permissive on validation errors
+    
+    def _generate_safe_tool_name(self, item: Any) -> str:
+        """Generate safe tool name avoiding metaclass fallbacks.
+        
+        This replaces the dangerous fallback that creates "modelmetaclass" names.
+        
+        Args:
+            item: Tool item
+            
+        Returns:
+            str: Safe tool name
+        """
+        # First try to get name attribute
+        if hasattr(item, 'name') and getattr(item, 'name', None):
+            return str(item.name).lower()
+            
+        # Use class name but ensure it's not a metaclass
+        class_name = getattr(item, '__class__', type(item)).__name__
+        
+        # Prevent dangerous metaclass names
+        if class_name.lower() in ['modelmetaclass', 'type', 'abc', 'object']:
+            # Use a more descriptive fallback
+            module_name = getattr(type(item), '__module__', 'unknown')
+            return f"tool_{module_name.split('.')[-1]}_{id(item)}"
+            
+        return class_name.lower()
     
     # ===================== METRICS & HEALTH =====================
     
@@ -670,13 +778,36 @@ class AgentRegistry(UniversalRegistry['BaseAgent']):
 
 
 class ToolRegistry(UniversalRegistry['Tool']):
-    """Tool-specific registry."""
+    """Tool-specific registry with enhanced validation and scoping."""
     
-    def __init__(self):
-        super().__init__("ToolRegistry")
+    def __init__(self, scope_id: Optional[str] = None):
+        # CRITICAL FIX: Better registry naming with scope to prevent conflicts
+        registry_name = f"ToolRegistry_{scope_id}" if scope_id else "ToolRegistry"
+        super().__init__(registry_name, allow_override=False)
         
-        # Register default tools
-        self._register_default_tools()
+        self.scope_id = scope_id
+        
+        # Add tool-specific validation
+        self.add_validation_handler(self._validate_tool_interface)
+        
+        # Register default tools only for non-scoped registries
+        if scope_id is None:
+            self._register_default_tools()
+        else:
+            logger.info(f"Created scoped ToolRegistry with ID: {scope_id}")
+    
+    def _validate_tool_interface(self, key: str, tool: Any) -> bool:
+        """Validate tool has proper interface.
+        
+        This is in addition to the base validation in UniversalRegistry.
+        """
+        try:
+            # Additional tool-specific validation can go here
+            # The base class already handles BaseModel filtering and basic validation
+            return True
+        except Exception as e:
+            logger.error(f"Tool interface validation error for {key}: {e}")
+            return False
     
     def _register_default_tools(self) -> None:
         """Register default synthetic and corpus tools."""

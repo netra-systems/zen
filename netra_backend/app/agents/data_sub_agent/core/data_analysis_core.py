@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 import asyncio
 
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.agents.supervisor.data_access_integration import DataAccessCapabilities
 from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
 
@@ -38,7 +38,7 @@ class DataAnalysisCore:
     """
     
     def __init__(self, 
-                 session_manager: DatabaseSessionManager,
+                 session_manager: SessionManager,
                  data_access: Optional[DataAccessCapabilities] = None):
         """
         Initialize DataAnalysisCore with database session manager.
@@ -203,7 +203,7 @@ class DataAnalysisCore:
         
         return validation_result
     
-    def get_session_manager(self) -> DatabaseSessionManager:
+    def get_session_manager(self) -> SessionManager:
         """Get the database session manager."""
         return self.session_manager
     

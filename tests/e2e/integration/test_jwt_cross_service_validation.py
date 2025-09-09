@@ -41,7 +41,7 @@ from tests.e2e.jwt_token_helpers import (
     JWTSecurityTester,
     JWTTestHelper,
 )
-from tests.e2e.service_manager import RealServicesManager
+from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.test_data_factory import (
     create_test_service_credentials,
     create_test_user,

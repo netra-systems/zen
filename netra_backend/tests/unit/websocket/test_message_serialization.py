@@ -114,7 +114,7 @@ class MockToDictObject:
 
 
 @dataclass
-class SerializationSerializationTestDataclass:
+class SerializationTestDataclass:
     """Test dataclass for serialization testing."""
     name: str
     value: int
@@ -170,7 +170,7 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     def test_serialize_basic_types(self):
         """Test serialization of basic JSON-compatible types."""
         test_cases = [
-            ("string", "hello world"),
+            ("hello world", "hello world"),
             (42, 42),
             (3.14159, 3.14159),
             (True, True),
@@ -192,57 +192,61 @@ class TestMessageSerialization(SSotAsyncTestCase, unittest.TestCase):
     @patch('netra_backend.app.websocket_core.unified_manager.logger')
     def test_serialize_starlette_websocket_state(self, mock_logger):
         """Test serialization of Starlette WebSocketState enum."""
-        # Mock Starlette WebSocketState
-        mock_state = Mock()
-        mock_state.name = "CONNECTED"
+        # Create a mock enum that looks like a WebSocket state from the starlette module
+        class MockStarletteWebSocketState(Enum):
+            CONNECTED = 1
+            
+        # Override the module to look like starlette.websockets  
+        MockStarletteWebSocketState.__module__ = 'starlette.websockets'
         
-        # Patch import to simulate Starlette WebSocketState
-        with patch('netra_backend.app.websocket_core.unified_manager.StarletteWebSocketState', mock_state.__class__):
-            # Make isinstance return True for our mock
-            with patch('builtins.isinstance', side_effect=lambda obj, cls: obj is mock_state):
-                result = _serialize_message_safely(mock_state)
-                
-                # Should convert to lowercase name
-                self.assertEqual(result, "connected")
+        mock_state = MockStarletteWebSocketState.CONNECTED
+        
+        result = _serialize_message_safely(mock_state)
+        
+        # Should convert to lowercase name
+        self.assertEqual(result, "connected")
     
     @patch('netra_backend.app.websocket_core.unified_manager.logger')
     def test_serialize_fastapi_websocket_state(self, mock_logger):
         """Test serialization of FastAPI WebSocketState enum."""
-        # Mock FastAPI WebSocketState
-        mock_state = Mock()
-        mock_state.name = "OPEN"
+        # Create a mock enum that looks like a WebSocket state from the fastapi module
+        class MockFastAPIWebSocketState(Enum):
+            OPEN = 1
+            
+        # Override the module to look like fastapi.websockets  
+        MockFastAPIWebSocketState.__module__ = 'fastapi.websockets'
         
-        # Simulate FastAPI import failure and then success
-        with patch('netra_backend.app.websocket_core.unified_manager.StarletteWebSocketState', side_effect=ImportError):
-            with patch('netra_backend.app.websocket_core.unified_manager.FastAPIWebSocketState', mock_state.__class__):
-                with patch('builtins.isinstance', side_effect=lambda obj, cls: obj is mock_state):
-                    result = _serialize_message_safely(mock_state)
-                    
-                    self.assertEqual(result, "open")
+        mock_state = MockFastAPIWebSocketState.OPEN
+        
+        result = _serialize_message_safely(mock_state)
+        
+        self.assertEqual(result, "open")
     
     @patch('netra_backend.app.websocket_core.unified_manager.logger')
     def test_serialize_generic_websocket_state_fallback(self, mock_logger):
-        """Test generic WebSocketState fallback when imports fail."""
-        # Mock object with name and value attributes
-        mock_state = Mock()
-        mock_state.name = "CONNECTING"
-        mock_state.value = 0
+        """Test generic WebSocketState detection for class names with websocket pattern."""
+        # Create a mock enum that looks like a WebSocket state but isn't from a framework module
+        class MockGenericWebSocketState(Enum):
+            CONNECTING = 0
+            
+        # This will be from the test module, not a framework module
+        mock_state = MockGenericWebSocketState.CONNECTING
         
-        # Simulate both imports failing
-        with patch('netra_backend.app.websocket_core.unified_manager.StarletteWebSocketState', side_effect=ImportError):
-            with patch('netra_backend.app.websocket_core.unified_manager.FastAPIWebSocketState', side_effect=ImportError):
-                # Mock hasattr to return True for name and value
-                with patch('builtins.hasattr', return_value=True):
-                    result = _serialize_message_safely(mock_state)
-                    
-                    self.assertEqual(result, "connecting")
+        # With our updated logic, this should detect it as a WebSocket state
+        # because it has the right class name pattern AND enum name
+        MockGenericWebSocketState.__name__ = 'WebSocketState'
+        
+        result = _serialize_message_safely(mock_state)
+        
+        # Should return the lowercase name since it matches our WebSocket state detection
+        self.assertEqual(result, "connecting")
     
     def test_serialize_test_websocket_state_enum(self):
         """Test serialization of test WebSocketState enum."""
         result = _serialize_message_safely(WebSocketStateForTesting.OPEN)
         
-        # Should return the enum value for generic enums
-        self.assertEqual(result, 1)
+        # Should return the enum name for WebSocket state enums (detected by class name pattern)
+        self.assertEqual(result, "open")
     
     def test_serialize_generic_enum_types(self):
         """Test serialization of various generic enum types."""

@@ -52,7 +52,7 @@ class UserTestData:
 
 # Add parent directories to sys.path for imports
 
-from tests.e2e.service_manager import (
+from tests.e2e.real_services_manager import (
     RealServicesManager as create_real_services_manager,
 )
 

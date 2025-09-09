@@ -172,6 +172,8 @@ class IsolatedEnvironment:
             self._original_environ_backup: Dict[str, str] = {}
             self._env_cache: Dict[str, Any] = {}
             self._original_state: Optional[Dict[str, str]] = None
+            self._bypass_test_defaults: bool = False  # Flag to bypass test defaults after force reset
+            self._explicitly_cleared_keys: Set[str] = set()  # Keys that were explicitly cleared
             
             # Track initial os.environ state
             self._original_environ_backup = dict(os.environ)
@@ -331,10 +333,17 @@ class IsolatedEnvironment:
         # During initialization, _isolation_enabled might be True but _isolated_vars is empty
         # We must use direct os.environ access here, not isolated vars or self.get()
         for indicator in test_indicators:
-            value = os.environ.get(indicator, '').lower()
-            # Only consider it a test context if the value is explicitly true
-            if value in ['true', '1', 'yes', 'on']:
-                return True
+            value = os.environ.get(indicator, '')
+            
+            # PYTEST_CURRENT_TEST contains test identifier, not boolean value
+            if indicator == 'PYTEST_CURRENT_TEST':
+                # If PYTEST_CURRENT_TEST exists and is not empty, we're in a test
+                if value:
+                    return True
+            else:
+                # For other indicators, check for boolean values
+                if value.lower() in ['true', '1', 'yes', 'on']:
+                    return True
         
         # Check if ENVIRONMENT is set to testing (direct access, not via self.get())
         env_value = os.environ.get('ENVIRONMENT', '').lower()
@@ -384,6 +393,7 @@ class IsolatedEnvironment:
             'POSTGRES_USER': 'netra_test',
             'POSTGRES_PASSWORD': 'netra_test_password',
             'POSTGRES_DB': 'netra_test',
+            'DATABASE_URL': 'postgresql://netra_test:netra_test_password@localhost:5434/netra_test',
             
             # Redis defaults for testing
             'REDIS_HOST': 'localhost',
@@ -603,10 +613,14 @@ class IsolatedEnvironment:
                 
                 # CRITICAL FIX: Provide OAuth test credentials as built-in defaults during test context
                 # This ensures CentralConfigurationValidator can always find required test OAuth credentials
-                if self._is_test_context():
+                # CRITICAL: Honor bypass flag to prevent configuration pollution between test scenarios
+                # CRITICAL: Don't return defaults for keys that were explicitly cleared
+                if self._is_test_context() and not self._bypass_test_defaults:
                     test_defaults = self._get_test_environment_defaults()
                     if key in test_defaults:
-                        return test_defaults[key]
+                        # Don't return defaults for keys that were explicitly cleared
+                        if key not in self._explicitly_cleared_keys:
+                            return test_defaults[key]
                 
                 # Not found in isolated vars or os.environ
                 return default
@@ -803,15 +817,40 @@ class IsolatedEnvironment:
         
         return env
     
-    def clear(self) -> None:
-        """Clear all environment variables (only in isolation mode)."""
+    def clear(self, force_reset: bool = False) -> None:
+        """
+        Clear all environment variables (only in isolation mode).
+        
+        Args:
+            force_reset: If True, completely reset singleton state including variable sources tracking.
+                        This prevents configuration pollution between test scenarios.
+                        If False, will auto-detect environment switching and enable bypass if needed.
+        """
         if not self._isolation_enabled:
             raise RuntimeError("Cannot clear environment variables outside isolation mode")
         
         with self._lock:
+            # CRITICAL FIX: In test contexts, clearing should disable built-in defaults to prevent pollution
+            # This ensures complete isolation between different test configurations
+            should_bypass_defaults = force_reset or self._is_test_context()
+            if should_bypass_defaults and not force_reset:
+                logger.debug("Test context detected during clear() - enabling test defaults bypass to ensure clean configuration isolation")
+            
+            # CRITICAL FIX: Track keys that existed before clearing for bypass logic
+            if should_bypass_defaults:
+                # Remember which keys were explicitly set so we don't return defaults for them
+                self._explicitly_cleared_keys.update(self._isolated_vars.keys())
+                logger.debug(f"Tracked {len(self._isolated_vars)} explicitly cleared keys: {list(self._isolated_vars.keys())}")
+            
             self._isolated_vars.clear()
             self._protected_vars.clear()
             self._env_cache.clear()
+            
+            # CRITICAL FIX: Clear variable sources to prevent configuration pollution
+            if should_bypass_defaults:
+                self._variable_sources.clear()
+                self._bypass_test_defaults = True  # Bypass test defaults until next reset
+                logger.debug("Cleared all singleton state including variable sources and enabled test defaults bypass")
     
     def protect(self, key: str) -> None:
         """Mark a variable as protected (cannot be modified)."""
@@ -994,6 +1033,8 @@ class IsolatedEnvironment:
             self._protected_vars.clear()
             self._env_cache.clear()
             self._isolation_enabled = False
+            self._bypass_test_defaults = False  # Reset bypass flag
+            self._explicitly_cleared_keys.clear()  # Clear explicitly cleared keys
             logger.debug("Environment reset to initial state")
     
     def reset_to_original(self) -> None:
@@ -1027,11 +1068,67 @@ class IsolatedEnvironment:
             # Clear tracking
             self._variable_sources.clear()
             self._env_cache.clear()
+            self._bypass_test_defaults = False  # Reset bypass flag
+            self._explicitly_cleared_keys.clear()  # Clear explicitly cleared keys
     
     def clear_cache(self) -> None:
         """Clear the environment cache."""
         with self._lock:
             self._env_cache.clear()
+    
+    def enable_test_defaults_bypass(self) -> None:
+        """
+        Enable bypass of test defaults to prevent configuration pollution.
+        
+        This method allows tests to explicitly disable built-in test defaults
+        to ensure proper isolation between different test scenarios.
+        """
+        with self._lock:
+            self._bypass_test_defaults = True
+            logger.debug("Test defaults bypass enabled - built-in test defaults will not be returned")
+    
+    def disable_test_defaults_bypass(self) -> None:
+        """
+        Disable bypass of test defaults to restore normal test behavior.
+        
+        This method restores normal test context behavior where built-in
+        test defaults are returned when variables are not explicitly set.
+        """
+        with self._lock:
+            self._bypass_test_defaults = False
+            logger.debug("Test defaults bypass disabled - built-in test defaults will be returned in test context")
+    
+    def complete_reset_for_testing(self) -> None:
+        """
+        Completely reset the singleton for clean test isolation.
+        
+        This method resets ALL internal state to ensure no pollution
+        between test runs. Only use this in test contexts.
+        
+        DANGER: This will reset all configuration and should only be used
+        in test scenarios where complete clean state is needed.
+        """
+        with self._lock:
+            if not self._is_test_context():
+                logger.warning("complete_reset_for_testing called outside test context - this is dangerous!")
+            
+            # Reset ALL internal state
+            self._isolated_vars.clear()
+            self._protected_vars.clear()
+            self._env_cache.clear()
+            self._variable_sources.clear()
+            self._change_callbacks.clear()
+            self._explicitly_cleared_keys.clear()
+            
+            # Reset flags
+            self._isolation_enabled = False
+            self._bypass_test_defaults = False
+            
+            # Clear original state tracking
+            self._original_environ_backup.clear()
+            self._original_state = None
+            
+            logger.debug("Complete singleton reset performed - all state cleared")
     
     def get_all_with_prefix(self, prefix: str) -> Dict[str, str]:
         """Get all environment variables with a specific prefix."""
@@ -1366,20 +1463,19 @@ class SecretLoader:
 
 # Legacy compatibility function  
 def get_environment_manager(isolation_mode: Optional[bool] = None):
-    """Legacy compatibility function for get_environment_manager."""
-    # Import here to avoid circular dependency
-    try:
-        from dev_launcher.environment_manager import get_environment_manager as get_manager
-        return get_manager(isolation_mode)
-    except ImportError:
-        logger.warning("dev_launcher.environment_manager not available, returning unified IsolatedEnvironment")
-        env = get_env()
-        if isolation_mode is not None:
-            if isolation_mode:
-                env.enable_isolation()
-            else:
-                env.disable_isolation()
-        return env
+    """Legacy compatibility function for get_environment_manager.
+    
+    IMPORTANT: This function returns the unified IsolatedEnvironment as the single source of truth.
+    The dev_launcher.environment_manager module has been consolidated into shared.isolated_environment.
+    """
+    # Always use the unified IsolatedEnvironment as single source of truth
+    env = get_env()
+    if isolation_mode is not None:
+        if isolation_mode:
+            env.enable_isolation()
+        else:
+            env.disable_isolation()
+    return env
 
 
 # Backwards Compatibility: EnvironmentValidator class

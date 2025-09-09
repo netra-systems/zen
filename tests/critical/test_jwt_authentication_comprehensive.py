@@ -55,10 +55,10 @@ if project_root not in sys.path:
 from loguru import logger
 
 # Import real authentication components - NO MOCKS
-from netra_backend.app.websocket_core.auth import WebSocketAuthenticator, AuthInfo, get_websocket_authenticator
+from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator, WebSocketAuthResult, get_websocket_authenticator
 from netra_backend.app.clients.auth_client_core import AuthServiceClient, auth_client, AuthOperationType
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import get_env, IsolatedEnvironment
 
 # Test framework imports for real Docker services
@@ -70,9 +70,9 @@ from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 # Docker infrastructure for real services
 from tests.mission_critical.websocket_real_test_base import (
     RealWebSocketTestBase,
-    is_docker_available,
     RealWebSocketTestConfig
 )
+from test_framework.unified_docker_manager import UnifiedDockerManager
 
 
 class RealWebSocketConnection:

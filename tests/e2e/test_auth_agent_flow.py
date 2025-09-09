@@ -140,9 +140,8 @@ class TestAuthAgentFlow:
             real_jwt_token = create_real_jwt_token(
                 user_id=test_user_id,
                 permissions=["read", "write", "agent_execute"],
-                token_type="access",
                 email=test_email,
-                expires_in=900
+                expires_in_seconds=900
             )
             
             # Return login result with real JWT

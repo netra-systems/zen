@@ -17,7 +17,7 @@ from enum import Enum
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
     JSONErrorFixer,
@@ -116,7 +116,7 @@ class GoalsTriageSubAgent(BaseAgent):
             
         return True
 
-    async def execute_core_logic(self, context: UserExecutionContext, user_request: str, session_manager: DatabaseSessionManager) -> Dict[str, Any]:
+    async def execute_core_logic(self, context: UserExecutionContext, user_request: str, session_manager: SessionManager) -> Dict[str, Any]:
         """Execute core goal triage logic with WebSocket events."""
         start_time = time.time()
         
@@ -344,7 +344,7 @@ class GoalsTriageSubAgent(BaseAgent):
     async def _finalize_goal_triage_result(self, context: UserExecutionContext, 
                                          triage_results: List[GoalTriageResult],
                                          prioritized_plan: Dict[str, Any],
-                                         session_manager: DatabaseSessionManager) -> Dict[str, Any]:
+                                         session_manager: SessionManager) -> Dict[str, Any]:
         """Finalize and structure the goal triage results."""
         
         # Structure the result data
@@ -571,7 +571,7 @@ class GoalsTriageSubAgent(BaseAgent):
         self.logger.info(f"GoalsTriageSubAgent executing for user {context.user_id}, run {context.run_id}")
         
         # Create database session manager from context
-        session_manager = DatabaseSessionManager()
+        session_manager = SessionManager()
         
         try:
             # Validate preconditions
@@ -681,7 +681,7 @@ class GoalsTriageSubAgent(BaseAgent):
         
     async def _execute_fallback_logic(self, context: UserExecutionContext, 
                                     user_request: str, 
-                                    session_manager: DatabaseSessionManager) -> Dict[str, Any]:
+                                    session_manager: SessionManager) -> Dict[str, Any]:
         """Fallback execution with proper WebSocket events and user isolation.
         
         Args:

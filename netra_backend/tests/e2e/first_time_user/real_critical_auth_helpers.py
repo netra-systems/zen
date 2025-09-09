@@ -21,7 +21,6 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.cost_calculator import CostCalculatorService
-from netra_backend.app.services.demo_service import DemoService
 
 class CriticalUserJourneyHelpers:
     """Core helper methods for critical user journey validation (≤8 lines each)"""
@@ -61,7 +60,6 @@ class CriticalUserJourneyHelpers:
     async def setup_real_optimization_service():
         """Setup real optimization service for first-time analysis"""
         optimization_config = {
-            "demo_service": DemoService(),
             "cost_calculator": CostCalculatorService(),
             "analysis_timeout": 60
         }

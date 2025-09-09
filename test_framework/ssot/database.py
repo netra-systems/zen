@@ -915,6 +915,18 @@ class DatabaseTestManager:
         self.is_initialized = True
         logger.debug("DatabaseTestManager initialized (legacy compatibility)")
         
+    async def setup_test_session(self):
+        """Setup test database session (legacy interface)."""
+        if not self.is_initialized:
+            await self.initialize()
+        
+        # Initialize the database utility if needed
+        await self._utility.initialize()
+        
+        # Store reference for compatibility
+        self.engine = self._utility.async_engine
+        logger.debug("DatabaseTestManager test session setup completed (legacy compatibility)")
+        
     async def create_session(self) -> AsyncSession:
         """Create a database session (legacy interface)."""
         if not self.is_initialized:

@@ -40,7 +40,7 @@ class TestErrorHandlingResilience:
         checker = HealthChecker()
         
         async def slow_database_check():
-            await asyncio.sleep(10)  # Simulate very slow database
+            await asyncio.sleep(2)  # Simulate very slow database
             return {'healthy': True, 'latency_ms': 10000}
         
         with patch.object(checker, 'check_postgres', side_effect=slow_database_check):

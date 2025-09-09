@@ -20,19 +20,16 @@ from typing import Any, Dict
 
 import pytest
 
+from netra_backend.app.websocket_core.connection_info import ConnectionInfo
 from netra_backend.app.websocket_core.handlers import (
-ConnectionInfo, 
-WebSocketManager,
 MessageRouter,
 get_message_router,
-UserMessageHandler,
 UserMessageHandler,
 HeartbeatHandler,
 JsonRpcHandler,
 ErrorHandler
 )
-# BroadcastManager removed - use UnifiedWebSocketManager from websocket_core instead
-# from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
+from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as BroadcastManager
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
@@ -73,15 +70,18 @@ class TestWebSocketExecutionEngineInitialization:
                 """Test BroadcastManager is properly initialized."""
         # Mock WebSocketManager for BroadcastManager
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-                mock_ws_manager = Mock(spec=WebSocketManager)
+                mock_ws_manager = Mock(spec=IsolatedWebSocketManager)
                 broadcast_manager = BroadcastManager()
 
                 assert broadcast_manager is not None
                 assert hasattr(broadcast_manager, 'broadcast_message')
 
                 def test_websocket_manager_initialization(self):
-                    """Test WebSocketManager is properly initialized."""
-                    ws_manager = WebSocketManager()
+                    """Test IsolatedWebSocketManager is properly initialized."""
+                    # Create mock user context for isolated manager
+                    mock_user_context = Mock(spec=UserExecutionContext)
+                    mock_user_context.user_id = "test_user_123"
+                    ws_manager = IsolatedWebSocketManager(user_context=mock_user_context)
 
                     assert ws_manager is not None
                     assert hasattr(ws_manager, 'connect_user')
@@ -238,9 +238,7 @@ class TestWebSocketExecutionEngineInitialization:
 
         # Core WebSocket imports should work
                                                             from netra_backend.app.websocket_core.handlers import (
-                                                            WebSocketManager,
                                                             MessageRouter,
-                                                            UserMessageHandler,
                                                             UserMessageHandler,
                                                             get_message_router
                                                             )
@@ -253,7 +251,9 @@ class TestWebSocketExecutionEngineInitialization:
                                                             from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
 
         # All components should initialize successfully
-                                                            ws_manager = WebSocketManager()
+                                                            mock_user_context = Mock(spec=UserExecutionContext)
+                                                            mock_user_context.user_id = "test_user_123"
+                                                            ws_manager = IsolatedWebSocketManager(user_context=mock_user_context)
                                                             router = get_message_router()
                                                             handler = UserMessageHandler()
                                                             broadcast_manager = BroadcastManager()
@@ -272,12 +272,14 @@ class TestWebSocketExecutionEngineInitialization:
                                                                 @pytest.mark.asyncio
                                                                 async def test_websocket_manager_handles_none_connections(self):
                                                                     """Test WebSocket manager handles None connections gracefully."""
-                                                                    ws_manager = WebSocketManager()
+                                                                    mock_user_context = Mock(spec=UserExecutionContext)
+                                                                    mock_user_context.user_id = "test_user_123"
+                                                                    ws_manager = IsolatedWebSocketManager(user_context=mock_user_context)
 
-        # Test that stats can be retrieved even with no connections
+                                                                    # Test that stats can be retrieved even with no connections
                                                                     stats = ws_manager.get_stats()
 
-        # Should return valid stats structure
+                                                                    # Should return valid stats structure
                                                                     assert isinstance(stats, dict)
                                                                     assert "active_connections" in stats
                                                                     assert "total_connections" in stats

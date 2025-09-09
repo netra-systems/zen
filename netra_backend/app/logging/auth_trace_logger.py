@@ -353,7 +353,7 @@ class AuthTraceLogger:
             
         # Safely build error context
         try:
-            if not hasattr(context, 'error_context'):
+            if not hasattr(context, 'error_context') or context.error_context is None:
                 context.error_context = {}
                 
             context.error_context.update({
@@ -361,7 +361,7 @@ class AuthTraceLogger:
                 "error_message": str(error) if error else "no_error_provided",
                 "is_auth_error": self._is_authentication_error(error) if error else False,
                 "is_permission_error": self._is_permission_error(error) if error else False,
-                "stack_trace": traceback.format_exc() if logger.isEnabledFor(10) and error else None
+                "stack_trace": traceback.format_exc() if getattr(logger, 'isEnabledFor', lambda x: False)(10) and error else None
             })
             
             if additional_context:

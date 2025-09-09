@@ -75,6 +75,12 @@ from netra_backend.app.websocket_core.user_context_extractor import (
     extract_websocket_user_context
 )
 
+# CRITICAL FIX: Import WebSocket context classes for proper request handling
+from netra_backend.app.websocket_core.context import (
+    WebSocketContext,
+    WebSocketRequestContext,
+)
+
 # Backward compatibility aliases
 WebSocketManager = UnifiedWebSocketManager
 # SECURITY FIX: Removed singleton websocket_manager - use create_websocket_manager() instead
@@ -144,6 +150,10 @@ try:
         safe_websocket_close,
         is_websocket_connected,
         is_websocket_connected_and_ready,
+        validate_websocket_handshake_completion,
+        create_race_condition_detector,
+        create_handshake_coordinator,
+        validate_connection_with_race_detection,
     )
 except ImportError:
     # Fallback implementations
@@ -153,6 +163,10 @@ except ImportError:
     safe_websocket_close = None
     is_websocket_connected = None
     is_websocket_connected_and_ready = None
+    validate_websocket_handshake_completion = None
+    create_race_condition_detector = None
+    create_handshake_coordinator = None
+    validate_connection_with_race_detection = None
 
 # Import new connection state machine and message queue components
 try:
@@ -195,6 +209,21 @@ except ImportError:
     get_message_queue_registry = None
     get_message_queue_for_connection = None
 
+# Import race condition prevention components
+try:
+    from netra_backend.app.websocket_core.race_condition_prevention import (
+        ApplicationConnectionState as RaceConditionApplicationConnectionState,
+        RaceConditionPattern,
+        RaceConditionDetector,
+        HandshakeCoordinator,
+    )
+except ImportError:
+    # Fallback implementations for backward compatibility
+    RaceConditionApplicationConnectionState = None
+    RaceConditionPattern = None
+    RaceConditionDetector = None
+    HandshakeCoordinator = None
+
 # Critical events that MUST be preserved
 CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
 
@@ -224,6 +253,10 @@ __all__ = [
     "get_user_context_extractor", 
     "extract_websocket_user_context",
     
+    # CRITICAL FIX: WebSocket context classes for proper request handling
+    "WebSocketContext",
+    "WebSocketRequestContext",
+    
     # Backward compatibility
     "WebSocketManager",
     # SECURITY FIX: Removed websocket_manager singleton export
@@ -250,6 +283,10 @@ __all__ = [
     "safe_websocket_close",
     "is_websocket_connected",
     "is_websocket_connected_and_ready",
+    "validate_websocket_handshake_completion",
+    "create_race_condition_detector",
+    "create_handshake_coordinator",
+    "validate_connection_with_race_detection",
     
     # Connection state machine components
     "ApplicationConnectionState",
@@ -268,6 +305,12 @@ __all__ = [
     "QueuedMessage",
     "get_message_queue_registry",
     "get_message_queue_for_connection",
+    
+    # Race condition prevention components
+    "RaceConditionApplicationConnectionState",
+    "RaceConditionPattern",
+    "RaceConditionDetector", 
+    "HandshakeCoordinator",
     
     # Types and message creation
     "MessageType",

@@ -8,8 +8,8 @@ import sys
 from datetime import datetime
 from shared.isolated_environment import IsolatedEnvironment
 
-STAGING_BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-STAGING_AUTH_URL = "https://netra-auth-staging-pnovr5vsba-uc.a.run.app"
+STAGING_BACKEND_URL = "https://api.staging.netrasystems.ai"
+STAGING_AUTH_URL = "https://auth.staging.netrasystems.ai"
 
 def test_health_endpoints():
     """Test health endpoints are accessible"""

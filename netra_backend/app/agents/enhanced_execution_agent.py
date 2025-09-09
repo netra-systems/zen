@@ -131,8 +131,47 @@ class EnhancedExecutionAgent(BaseAgent):
             return response.get("content", "No response generated")
         except Exception as e:
             logger.error(f"LLM processing failed for user {context.user_id}: {e}")
-            user_prompt = context.metadata.get('user_request', 'request')
-            return f"Processing completed with fallback response for: {str(user_prompt)}"
+            # Use UnifiedServiceInitializer for transparent error handling
+            from netra_backend.app.services.service_initialization.unified_service_initializer import (
+                UnifiedServiceException
+            )
+            from netra_backend.app.schemas.shared_types import ErrorContext
+            
+            # Create transparent error context instead of mock response
+            error_context = ErrorContext(
+                user_id=context.user_id,
+                request_id=context.request_id,
+                service_name="enhanced_execution_agent",
+                error_type="llm_processing_failure",
+                user_tier=getattr(context, 'user_tier', 'standard')
+            )
+            
+            # Send transparent WebSocket notification about service failure
+            if hasattr(context, 'websocket_bridge'):
+                await context.websocket_bridge.emit_service_unavailable(
+                    service_name="enhanced_execution_agent",
+                    reason=f"LLM processing failed: {str(e)}",
+                    estimated_recovery_seconds=120,
+                    alternatives=[
+                        "Try a simpler query",
+                        "Check system status",
+                        "Contact support if issue persists"
+                    ]
+                )
+            
+            # Raise transparent exception instead of returning mock response
+            raise UnifiedServiceException(
+                message=f"Enhanced execution agent temporarily unavailable: {str(e)}",
+                error_context=error_context,
+                should_retry=True,
+                estimated_recovery_time_seconds=120,
+                alternative_suggestions=[
+                    "Simplify your request",
+                    "Try again in a few minutes",
+                    "Contact support for urgent requests"
+                ],
+                enterprise_escalation=(getattr(context, 'user_tier', 'standard') == 'enterprise')
+            )
     
     def _needs_tools(self, context: UserExecutionContext) -> bool:
         """Check if tools are needed using context pattern."""

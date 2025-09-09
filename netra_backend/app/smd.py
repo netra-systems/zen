@@ -322,6 +322,10 @@ class StartupOrchestrator:
         # Step 21: Verify WebSocket events can actually be sent
         await self._verify_websocket_events()
         self.logger.info("  ✓ Step 21: WebSocket event delivery verified")
+        
+        # Step 22: GCP WebSocket Readiness Validation (CRITICAL for GCP Cloud Run)
+        await self._validate_gcp_websocket_readiness()
+        self.logger.info("  ✓ Step 22: GCP WebSocket readiness validated")
     
     async def _phase7_finalize(self) -> None:
         """Phase 7: FINALIZE - Final validation and optional services."""
@@ -1199,6 +1203,84 @@ class StartupOrchestrator:
             raise
         except Exception as e:
             raise DeterministicStartupError(f"WebSocket configuration verification failed: {e}")
+    
+    async def _validate_gcp_websocket_readiness(self) -> None:
+        """
+        Validate GCP WebSocket readiness to prevent 1011 connection errors.
+        
+        CRITICAL: This method prevents GCP Cloud Run from accepting WebSocket 
+        connections before agent_supervisor services are fully ready, which
+        causes 1011 WebSocket errors.
+        
+        SSOT COMPLIANCE: Uses the unified GCP WebSocket initialization validator.
+        """
+        try:
+            from netra_backend.app.websocket_core.gcp_initialization_validator import create_gcp_websocket_validator
+            
+            self.logger.info("  Step 22: Validating GCP WebSocket readiness...")
+            
+            # Create validator with app state for service checks
+            validator = create_gcp_websocket_validator(self.app.state)
+            
+            # Run comprehensive GCP readiness validation
+            result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=90.0)
+            
+            if not result.ready:
+                # CRITICAL: GCP readiness failure should fail deterministic startup
+                failed_services_str = ', '.join(result.failed_services) if result.failed_services else 'unknown'
+                error_msg = (
+                    f"GCP WebSocket readiness validation failed. "
+                    f"Failed services: [{failed_services_str}]. "
+                    f"State: {result.state.value}. "
+                    f"Elapsed: {result.elapsed_time:.2f}s. "
+                    f"This will cause 1011 WebSocket errors in GCP Cloud Run."
+                )
+                
+                # Log detailed failure information for debugging
+                self.logger.error(f"    ❌ GCP WebSocket readiness FAILED:")
+                self.logger.error(f"       State: {result.state.value}")
+                self.logger.error(f"       Failed services: {failed_services_str}")
+                self.logger.error(f"       Warnings: {', '.join(result.warnings) if result.warnings else 'none'}")
+                self.logger.error(f"       Details: {result.details}")
+                
+                raise DeterministicStartupError(error_msg)
+            
+            # Success - log detailed readiness confirmation
+            self.logger.info(f"    ✅ GCP WebSocket readiness VALIDATED")
+            self.logger.info(f"       State: {result.state.value}")
+            self.logger.info(f"       Validation time: {result.elapsed_time:.2f}s")
+            self.logger.info(f"       Environment: {result.details.get('environment', 'unknown')}")
+            self.logger.info(f"       Cloud Run detected: {result.details.get('cloud_run', False)}")
+            
+            # Store readiness result on app state for health checks
+            self.app.state.gcp_websocket_ready = True
+            self.app.state.gcp_websocket_validation_result = result
+            
+        except ImportError as e:
+            # GCP validator not available - log warning but don't fail
+            self.logger.warning(f"    ⚠️  GCP WebSocket validator not available: {e}")
+            self.logger.warning("    ⚠️  Proceeding without GCP-specific validation")
+            self.app.state.gcp_websocket_ready = False
+            
+        except DeterministicStartupError:
+            # Re-raise deterministic startup errors
+            raise
+            
+        except Exception as e:
+            # Unexpected error in GCP validation
+            self.logger.error(f"    ❌ Unexpected error in GCP WebSocket validation: {e}")
+            
+            # Check if we're in a GCP environment
+            environment = get_env('ENVIRONMENT', '').lower()
+            is_gcp = environment in ['staging', 'production']
+            
+            if is_gcp:
+                # In GCP environments, validation failures are critical
+                raise DeterministicStartupError(f"GCP WebSocket readiness validation system error: {e}")
+            else:
+                # In non-GCP environments, log warning and continue
+                self.logger.warning(f"    ⚠️  Non-critical GCP validation error in {environment} environment")
+                self.app.state.gcp_websocket_ready = False
     
     async def _initialize_clickhouse(self) -> None:
         """Initialize ClickHouse with clear status reporting and consistent error handling.

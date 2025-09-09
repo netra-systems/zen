@@ -313,16 +313,21 @@ class UnifiedWebSocketEmitter:
     
     # Backward compatibility methods for existing code
     
-    async def notify_agent_started(self, agent_name: str, metadata: Dict[str, Any] = None):
+    async def notify_agent_started(self, agent_name: str, metadata: Dict[str, Any] = None, context: Dict[str, Any] = None):
         """
         Send agent_started event - CRITICAL for chat value delivery.
         
         Args:
             agent_name: Name of the agent starting
-            metadata: Additional event metadata
+            metadata: Additional event metadata (preferred)
+            context: Context data (legacy compatibility)
         """
         if metadata is None:
             metadata = {}
+            
+        # Merge context data into metadata for compatibility
+        if context:
+            metadata = {**metadata, **context}
         
         await self.emit_agent_started({
             'agent_name': agent_name,
@@ -331,19 +336,31 @@ class UnifiedWebSocketEmitter:
             'timestamp': time.time()
         })
     
-    async def notify_agent_thinking(self, thought: str, metadata: Dict[str, Any] = None):
+    async def notify_agent_thinking(self, agent_name: str = None, reasoning: str = None, thought: str = None, step_number: Optional[int] = None, metadata: Dict[str, Any] = None):
         """
         Send agent_thinking event - CRITICAL for chat value delivery.
         
         Args:
-            thought: The agent's current thought
+            agent_name: Name of the agent (for compatibility)
+            reasoning: The agent's reasoning (preferred)
+            thought: The agent's current thought (legacy compatibility)
+            step_number: Step number in the process
             metadata: Additional event metadata
         """
         if metadata is None:
             metadata = {}
         
+        # Use reasoning if provided, otherwise fall back to thought
+        actual_thought = reasoning or thought or "Agent is thinking..."
+        
+        # Add step number and agent name to metadata
+        if step_number is not None:
+            metadata['step_number'] = step_number
+        if agent_name:
+            metadata['agent_name'] = agent_name
+        
         await self.emit_agent_thinking({
-            'thought': thought,
+            'thought': actual_thought,
             'metadata': metadata,
             'type': 'reasoning',
             'timestamp': time.time()
@@ -385,16 +402,26 @@ class UnifiedWebSocketEmitter:
             'timestamp': time.time()
         })
     
-    async def notify_agent_completed(self, agent_name: str, metadata: Dict[str, Any] = None):
+    async def notify_agent_completed(self, agent_name: str, metadata: Dict[str, Any] = None, result: Dict[str, Any] = None, execution_time_ms: float = None):
         """
         Send agent_completed event - CRITICAL for chat value delivery.
         
         Args:
             agent_name: Name of the agent that completed
-            metadata: Additional event metadata (should include 'result')
+            metadata: Additional event metadata (preferred)
+            result: Agent result data (legacy compatibility)
+            execution_time_ms: Execution time in milliseconds
         """
         if metadata is None:
             metadata = {}
+            
+        # Merge result data into metadata for compatibility
+        if result:
+            metadata = {**metadata, **result}
+            
+        # Add execution time if provided
+        if execution_time_ms is not None:
+            metadata['execution_time_ms'] = execution_time_ms
         
         await self.emit_agent_completed({
             'agent_name': agent_name,

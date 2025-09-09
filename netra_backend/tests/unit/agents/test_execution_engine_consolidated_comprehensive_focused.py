@@ -108,7 +108,7 @@ class RealMockAgent:
         # Handle different failure modes
         if self.should_fail:
             if self.fail_mode == "timeout":
-                await asyncio.sleep(10)  # Simulate long execution
+                await asyncio.sleep(2)  # Simulate long execution
             elif self.fail_mode == "memory_error":
                 raise MemoryError(f"Agent {self.name} ran out of memory")
             elif self.fail_mode == "value_error":

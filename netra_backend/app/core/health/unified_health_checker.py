@@ -94,12 +94,43 @@ class UnifiedHealthChecker:
         self.env = IsolatedEnvironment()
         self._load_config_from_env()
     
+    def _parse_timeout_value(self, value: str) -> float:
+        """Parse timeout value that may include units like '10s', '5.0', etc.
+        
+        Args:
+            value: Timeout value string (e.g., '10s', '5.0', '30')
+            
+        Returns:
+            float: Timeout in seconds
+        """
+        if not value:
+            return self.config.timeout_seconds
+            
+        # Handle values with 's' suffix (seconds)
+        if value.endswith('s'):
+            try:
+                return float(value[:-1])
+            except ValueError:
+                logger.warning(f"Invalid timeout format '{value}', using default {self.config.timeout_seconds}s")
+                return self.config.timeout_seconds
+        
+        # Handle plain numeric values
+        try:
+            return float(value)
+        except ValueError:
+            logger.warning(f"Invalid timeout format '{value}', using default {self.config.timeout_seconds}s")
+            return self.config.timeout_seconds
+    
     def _load_config_from_env(self) -> None:
         """Load health check configuration from environment."""
         # Override config with environment variables if present
-        self.config.timeout_seconds = float(self.env.get("HEALTH_CHECK_TIMEOUT", str(self.config.timeout_seconds)))
+        timeout_value = self.env.get("HEALTH_CHECK_TIMEOUT", str(self.config.timeout_seconds))
+        self.config.timeout_seconds = self._parse_timeout_value(timeout_value)
+        
         self.config.max_retries = int(self.env.get("HEALTH_CHECK_RETRIES", str(self.config.max_retries)))
-        self.config.retry_delay_seconds = float(self.env.get("HEALTH_CHECK_RETRY_DELAY", str(self.config.retry_delay_seconds)))
+        
+        retry_delay_value = self.env.get("HEALTH_CHECK_RETRY_DELAY", str(self.config.retry_delay_seconds))
+        self.config.retry_delay_seconds = self._parse_timeout_value(retry_delay_value)
         
         # Allow custom health endpoints
         self.config.endpoint_path = self.env.get("HEALTH_ENDPOINT_PATH", self.config.endpoint_path)

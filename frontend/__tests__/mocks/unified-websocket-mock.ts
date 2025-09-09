@@ -196,6 +196,7 @@ export class UnifiedWebSocketMock {
     this.waitForHandlerSetup(() => {
       if (this.isDisposed || this.hasErrored) return;
       
+      // FIXED: Set state BEFORE triggering event for more reliable timing
       this.readyState = UnifiedWebSocketMock.OPEN;
       const openEvent = new Event('open');
       this.triggerEventHandler('onopen', openEvent);
@@ -295,6 +296,21 @@ export class UnifiedWebSocketMock {
     });
 
     this.triggerEventHandler('onmessage', messageEvent);
+  }
+
+  /**
+   * Public method to manually trigger connection success
+   * Used by tests for precise timing control
+   */
+  public simulateConnectionSuccess(): void {
+    if (this.readyState !== UnifiedWebSocketMock.CONNECTING) {
+      console.warn('UnifiedWebSocketMock: Cannot simulate connection - not in connecting state');
+      return;
+    }
+    
+    this.readyState = UnifiedWebSocketMock.OPEN;
+    const openEvent = new Event('open');
+    this.triggerEventHandler('onopen', openEvent);
   }
 
   /**

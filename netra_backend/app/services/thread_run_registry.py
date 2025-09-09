@@ -83,21 +83,11 @@ class ThreadRunRegistry:
     _instance: Optional['ThreadRunRegistry'] = None
     _lock = asyncio.Lock()
     
-    def __new__(cls, config: Optional[RegistryConfig] = None) -> 'ThreadRunRegistry':
-        """Singleton pattern implementation."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-    
     def __init__(self, config: Optional[RegistryConfig] = None):
-        """Initialize registry with thread-safe singleton pattern."""
-        if hasattr(self, '_initialized'):
-            return
-        
+        """Initialize registry instance."""
         self.config = config or RegistryConfig()
         self._initialize_state()
         self._initialize_cleanup_task()
-        self._initialized = True
         
         logger.info(f"ThreadRunRegistry initialized with TTL={self.config.mapping_ttl_hours}h, cleanup={self.config.cleanup_interval_minutes}m")
     
@@ -131,8 +121,12 @@ class ThreadRunRegistry:
     def _initialize_cleanup_task(self) -> None:
         """Initialize background cleanup task."""
         if not self._shutdown:
-            self._cleanup_task = asyncio.create_task(self._cleanup_loop())
-            logger.debug("Background cleanup task started")
+            try:
+                self._cleanup_task = asyncio.create_task(self._cleanup_loop())
+                logger.debug("Background cleanup task started")
+            except RuntimeError as e:
+                logger.warning(f"Could not create cleanup task: {e}")
+                self._cleanup_task = None
     
     async def register(
         self, 
@@ -153,6 +147,15 @@ class ThreadRunRegistry:
             
         Business Value: Enables WebSocket events to reach users reliably
         """
+        # Validate input parameters
+        if not run_id or not isinstance(run_id, str) or run_id.strip() == "":
+            logger.error(f"🚨 INVALID run_id: '{run_id}' - must be non-empty string")
+            return False
+        
+        if not thread_id or not isinstance(thread_id, str) or thread_id.strip() == "":
+            logger.error(f"🚨 INVALID thread_id: '{thread_id}' - must be non-empty string")
+            return False
+        
         try:
             async with self._registry_lock:
                 # Create mapping object
@@ -354,7 +357,7 @@ class ThreadRunRegistry:
     def _is_mapping_expired(self, mapping: RunMapping) -> bool:
         """Check if a mapping has expired based on TTL."""
         ttl_delta = timedelta(hours=self.config.mapping_ttl_hours)
-        return datetime.now(timezone.utc) - mapping.created_at > ttl_delta
+        return datetime.now(timezone.utc) - mapping.last_accessed > ttl_delta
     
     async def _cleanup_loop(self) -> None:
         """Background cleanup loop for expired mappings."""
@@ -362,8 +365,12 @@ class ThreadRunRegistry:
         
         while not self._shutdown:
             try:
-                # Sleep for cleanup interval
-                await asyncio.sleep(self.config.cleanup_interval_minutes * 60)
+                # Sleep for cleanup interval with periodic checks for shutdown
+                cleanup_seconds = self.config.cleanup_interval_minutes * 60
+                for _ in range(int(cleanup_seconds)):
+                    if self._shutdown:
+                        break
+                    await asyncio.sleep(1)  # Sleep 1 second at a time to be more responsive
                 
                 if self._shutdown:
                     break
@@ -485,18 +492,23 @@ class ThreadRunRegistry:
         logger.info("Shutting down ThreadRunRegistry")
         self._shutdown = True
         
-        # Cancel cleanup task
+        # Cancel cleanup task with better error handling
         if self._cleanup_task and not self._cleanup_task.done():
             self._cleanup_task.cancel()
             try:
-                await self._cleanup_task
-            except asyncio.CancelledError:
-                pass
+                await asyncio.wait_for(self._cleanup_task, timeout=3.0)
+            except (asyncio.CancelledError, asyncio.TimeoutError):
+                pass  # Expected for cancelled tasks
+            except Exception as e:
+                logger.warning(f"Error during cleanup task shutdown: {e}")
         
-        # Clear all mappings
-        async with self._registry_lock:
-            self._run_to_thread.clear()
-            self._thread_to_runs.clear()
+        # Clear all mappings with error handling
+        try:
+            async with self._registry_lock:
+                self._run_to_thread.clear()
+                self._thread_to_runs.clear()
+        except Exception as e:
+            logger.warning(f"Error clearing mappings during shutdown: {e}")
         
         logger.info("ThreadRunRegistry shutdown complete")
     

@@ -22,6 +22,8 @@ from pydantic import BaseModel
 
 class TestExecutionState(str, Enum):
     """Test execution state enumeration."""
+    __test__ = False  # Explicitly tell pytest not to collect this class
+    
     PENDING = "pending"
     RUNNING = "running"
     PASSED = "passed"
@@ -30,8 +32,10 @@ class TestExecutionState(str, Enum):
     ERROR = "error"
 
 
-class CategoryType(str, Enum):
-    """Test category classification."""
+class ExecutionCategory(str, Enum):
+    """Test execution category classification for pytest organization."""
+    __test__ = False  # Explicitly tell pytest not to collect this class
+    
     UNIT = "unit"
     INTEGRATION = "integration"
     E2E = "e2e"
@@ -41,12 +45,17 @@ class CategoryType(str, Enum):
     CRITICAL = "critical"
 
 
+# Backward compatibility aliases - DEPRECATED: Use ExecutionCategory instead
+TestExecutionCategory = ExecutionCategory
+CategoryType = ExecutionCategory
+
+
 @dataclass
 class TestResult:
     """Individual test execution result."""
     test_id: str
     name: str
-    category: CategoryType
+    category: ExecutionCategory
     state: TestExecutionState
     duration: float = 0.0
     error_message: Optional[str] = None
@@ -134,11 +143,11 @@ class TestDiscovery:
     
     def __init__(self, config: TestConfiguration):
         self.config = config
-        self._discovered_tests: Dict[CategoryType, List[str]] = {}
+        self._discovered_tests: Dict[ExecutionCategory, List[str]] = {}
     
-    def discover_tests(self, paths: List[str]) -> Dict[CategoryType, List[str]]:
+    def discover_tests(self, paths: List[str]) -> Dict[ExecutionCategory, List[str]]:
         """Discover and categorize tests from given paths."""
-        discovered = {category: [] for category in CategoryType}
+        discovered = {category: [] for category in ExecutionCategory}
         
         for path in paths:
             category = self._categorize_test(path)
@@ -147,26 +156,26 @@ class TestDiscovery:
         self._discovered_tests = discovered
         return discovered
     
-    def _categorize_test(self, test_path: str) -> CategoryType:
+    def _categorize_test(self, test_path: str) -> ExecutionCategory:
         """Categorize a test based on its path and content."""
         path_lower = test_path.lower()
         
         if "integration" in path_lower:
-            return CategoryType.INTEGRATION
+            return ExecutionCategory.INTEGRATION
         elif "e2e" in path_lower or "end_to_end" in path_lower:
-            return CategoryType.E2E
+            return ExecutionCategory.E2E
         elif "performance" in path_lower or "perf" in path_lower:
-            return CategoryType.PERFORMANCE
+            return ExecutionCategory.PERFORMANCE
         elif "security" in path_lower or "sec" in path_lower:
-            return CategoryType.SECURITY
+            return ExecutionCategory.SECURITY
         elif "agent" in path_lower:
-            return CategoryType.AGENTS
+            return ExecutionCategory.AGENTS
         elif "critical" in path_lower:
-            return CategoryType.CRITICAL
+            return ExecutionCategory.CRITICAL
         else:
-            return CategoryType.UNIT
+            return ExecutionCategory.UNIT
     
-    def get_tests_by_category(self, category: CategoryType) -> List[str]:
+    def get_tests_by_category(self, category: ExecutionCategory) -> List[str]:
         """Get all tests in a specific category."""
         return self._discovered_tests.get(category, [])
 
@@ -201,7 +210,7 @@ class UnifiedTestOrchestrator:
         
         return self._generate_report(all_results)
     
-    def execute_category(self, category: CategoryType, test_paths: List[str]) -> TestReport:
+    def execute_category(self, category: ExecutionCategory, test_paths: List[str]) -> TestReport:
         """Execute tests in a specific category."""
         discovered = self.discovery.discover_tests(test_paths)
         category_tests = discovered.get(category, [])
@@ -218,15 +227,15 @@ class UnifiedTestOrchestrator:
         
         return self._generate_report(all_results)
     
-    def _should_execute_category(self, category: CategoryType) -> bool:
+    def _should_execute_category(self, category: ExecutionCategory) -> bool:
         """Check if category should be executed based on config."""
-        if category == CategoryType.INTEGRATION:
+        if category == ExecutionCategory.INTEGRATION:
             return self.config.enable_integration_tests
-        elif category == CategoryType.E2E:
+        elif category == ExecutionCategory.E2E:
             return self.config.enable_e2e_tests
-        elif category == CategoryType.PERFORMANCE:
+        elif category == ExecutionCategory.PERFORMANCE:
             return self.config.enable_performance_tests
-        elif category == CategoryType.AGENTS:
+        elif category == ExecutionCategory.AGENTS:
             return self.config.enable_agent_tests
         else:
             return True  # Unit, security, critical always enabled
@@ -272,7 +281,7 @@ class BaseInterfaces:
         return TestResult(
             test_id=test_id,
             name=name,
-            category=CategoryType.UNIT,
+            category=ExecutionCategory.UNIT,
             state=state,
             duration=duration
         )
@@ -291,7 +300,9 @@ TestCategory = CategoryType  # Backward compatibility alias
 # Export all main classes
 __all__ = [
     'TestExecutionState',
-    'CategoryType',
+    'ExecutionCategory',
+    'TestExecutionCategory',  # Deprecated alias for backward compatibility
+    'CategoryType',  # Deprecated alias for backward compatibility
     'TestResult', 
     'TestReport',
     'TestExecutor',

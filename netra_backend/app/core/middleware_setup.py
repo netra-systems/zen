@@ -124,14 +124,65 @@ def setup_auth_middleware(app: FastAPI) -> None:
     logger.debug("Authentication middleware configured with WebSocket exclusions")
 
 
+def setup_gcp_websocket_readiness_middleware(app: FastAPI) -> None:
+    """
+    Setup GCP WebSocket readiness middleware to prevent 1011 errors.
+    
+    CRITICAL: This middleware prevents GCP Cloud Run from accepting WebSocket
+    connections before required services are ready, which causes 1011 errors.
+    
+    SSOT COMPLIANCE: Uses the unified GCP WebSocket initialization validator.
+    """
+    try:
+        from netra_backend.app.middleware.gcp_websocket_readiness_middleware import (
+            GCPWebSocketReadinessMiddleware
+        )
+        from shared.isolated_environment import get_env
+        
+        env_manager = get_env()
+        environment = env_manager.get('ENVIRONMENT', '').lower()
+        is_gcp = environment in ['staging', 'production']
+        
+        # Only add middleware in GCP environments
+        if is_gcp:
+            # GCP environments need longer timeout due to Cloud SQL connection delays
+            timeout_seconds = 90.0 if environment == 'staging' else 60.0
+            
+            app.add_middleware(
+                GCPWebSocketReadinessMiddleware,
+                timeout_seconds=timeout_seconds
+            )
+            logger.info(f"GCP WebSocket readiness middleware added for {environment} environment (timeout: {timeout_seconds}s)")
+        else:
+            logger.debug(f"GCP WebSocket readiness middleware skipped for {environment} environment")
+            
+    except ImportError as e:
+        logger.warning(f"GCP WebSocket readiness middleware not available: {e}")
+    except Exception as e:
+        logger.error(f"Error setting up GCP WebSocket readiness middleware: {e}")
+        # Don't fail app startup if middleware setup fails
+        pass
+
+
 def setup_session_middleware(app: FastAPI) -> None:
-    """Setup session middleware."""
-    from netra_backend.app.clients.auth_client_core import AuthServiceClient
-    auth_client = AuthServiceClient()
-    current_environment = auth_client.detect_environment()
-    session_config = _determine_session_config(current_environment)
-    _log_session_config(session_config, current_environment)
-    _add_session_middleware(app, session_config)
+    """Setup session middleware with enhanced error handling for staging deployment.
+    
+    CRITICAL FIX: Added comprehensive error handling and environment variable
+    validation to prevent 'SessionMiddleware must be installed to access request.session' errors.
+    """
+    try:
+        from netra_backend.app.clients.auth_client_core import AuthServiceClient
+        auth_client = AuthServiceClient()
+        current_environment = auth_client.detect_environment()
+        session_config = _determine_session_config(current_environment)
+        _log_session_config(session_config, current_environment)
+        _add_session_middleware_with_validation(app, session_config, current_environment)
+        logger.info(f"SessionMiddleware successfully configured for {current_environment.value}")
+    except Exception as e:
+        logger.error(f"CRITICAL: SessionMiddleware setup failed: {e}")
+        # Fallback to basic session middleware to prevent deployment failures
+        _add_fallback_session_middleware(app)
+        raise RuntimeError(f"SessionMiddleware configuration failed: {e}")
 
 def _determine_session_config(current_environment) -> dict:
     """Determine session configuration based on environment."""
@@ -168,8 +219,91 @@ def _log_session_config(session_config: dict, current_environment) -> None:
         f"https_only={session_config['https_only']}, environment={current_environment.value}"
     )
 
+def _add_session_middleware_with_validation(app: FastAPI, session_config: dict, environment) -> None:
+    """Add session middleware to app with validation.
+    
+    CRITICAL FIX: Enhanced validation prevents staging deployment failures
+    due to missing or invalid SECRET_KEY environment variables.
+    """
+    config = get_configuration()
+    
+    # CRITICAL: Validate secret_key before using it
+    secret_key = _validate_and_get_secret_key(config, environment)
+    
+    # Log session middleware configuration for debugging
+    logger.info(
+        f"Adding SessionMiddleware: same_site={session_config['same_site']}, "
+        f"https_only={session_config['https_only']}, environment={environment.value}, "
+        f"secret_key_length={len(secret_key) if secret_key else 0}"
+    )
+    
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=secret_key,
+        same_site=session_config["same_site"],
+        https_only=session_config["https_only"],
+        max_age=3600,  # 1 hour session
+    )
+
+def _validate_and_get_secret_key(config, environment) -> str:
+    """Validate and get secret_key with enhanced environment variable loading.
+    
+    CRITICAL FIX: Handles cases where config.secret_key is None or invalid
+    by directly loading from environment variables with fallback strategies.
+    """
+    from shared.isolated_environment import get_env
+    
+    # First try config.secret_key
+    secret_key = getattr(config, 'secret_key', None)
+    
+    if not secret_key or secret_key == "default_secret_key" or len(secret_key) < 32:
+        logger.warning(f"Config secret_key invalid or missing (length: {len(secret_key) if secret_key else 0})")
+        
+        # Try to load directly from environment
+        env = get_env()
+        env_secret = env.get('SECRET_KEY')
+        
+        if env_secret and len(env_secret.strip()) >= 32:
+            secret_key = env_secret.strip()
+            logger.info("Loaded SECRET_KEY from environment (config fallback)")
+        else:
+            # Generate a staging-safe secret for non-production environments
+            if environment.value in ["development", "testing"]:
+                secret_key = "dev-session-secret-key-32-chars-minimum-required-length-for-starlette"
+                logger.warning("Using development fallback SECRET_KEY")
+            else:
+                # Production/staging MUST have proper SECRET_KEY
+                raise ValueError(
+                    f"CRITICAL: SECRET_KEY environment variable is required for {environment.value} but "
+                    f"is missing or too short (minimum 32 characters). Found: {len(env_secret) if env_secret else 0} chars"
+                )
+    
+    # Final validation
+    if len(secret_key) < 32:
+        raise ValueError(f"SECRET_KEY must be at least 32 characters long, got {len(secret_key)}")
+    
+    return secret_key
+
+def _add_fallback_session_middleware(app: FastAPI) -> None:
+    """Add basic session middleware as fallback to prevent deployment failures.
+    
+    This ensures the app can start even if configuration loading fails.
+    """
+    logger.warning("Adding fallback SessionMiddleware with basic configuration")
+    
+    # Generate a basic session key (not for production use)
+    fallback_key = "fallback-session-key-32-chars-minimum-required-for-emergency-deployment"
+    
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=fallback_key,
+        same_site="lax",
+        https_only=False,
+        max_age=3600,
+    )
+
 def _add_session_middleware(app: FastAPI, session_config: dict) -> None:
-    """Add session middleware to app."""
+    """Legacy session middleware setup - kept for backward compatibility."""
     config = get_configuration()
     app.add_middleware(
         SessionMiddleware,
@@ -178,3 +312,36 @@ def _add_session_middleware(app: FastAPI, session_config: dict) -> None:
         https_only=session_config["https_only"],
         max_age=3600,  # 1 hour session
     )
+
+
+def setup_middleware(app: FastAPI) -> None:
+    """
+    Main middleware setup function - SSOT for all middleware configuration.
+    
+    CRITICAL: This function consolidates all middleware setup in proper order.
+    Order matters for middleware execution - they are applied in reverse order.
+    """
+    logger.info("Starting middleware setup...")
+    
+    try:
+        # 1. Session middleware (must be first for request.session access)
+        setup_session_middleware(app)
+        
+        # 2. CORS middleware (handles cross-origin requests)
+        setup_cors_middleware(app)
+        
+        # 3. Authentication middleware (after CORS, before application logic)
+        setup_auth_middleware(app)
+        
+        # 4. GCP WebSocket readiness middleware (environment specific)
+        setup_gcp_websocket_readiness_middleware(app)
+        
+        # 5. CORS redirect middleware (handles redirects with CORS headers)
+        cors_redirect = create_cors_redirect_middleware()
+        app.middleware("http")(cors_redirect)
+        
+        logger.info("All middleware setup completed successfully")
+        
+    except Exception as e:
+        logger.error(f"CRITICAL: Middleware setup failed: {e}")
+        raise RuntimeError(f"Failed to setup middleware: {e}")

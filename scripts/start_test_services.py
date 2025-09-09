@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python
 """
 Start test services for frontend real service testing.
@@ -15,6 +14,9 @@ import time
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from shared.isolated_environment import get_env
 
 
 def check_docker_running():

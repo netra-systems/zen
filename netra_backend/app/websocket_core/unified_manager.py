@@ -15,6 +15,8 @@ from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
     ensure_user_id, ensure_thread_id, ensure_websocket_id
 )
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # Import the protocol after it's defined to avoid circular imports
 logger = central_logger.get_logger(__name__)
@@ -24,10 +26,10 @@ def _get_enum_key_representation(enum_key: Enum) -> str:
     """
     Get string representation for enum keys in dictionaries.
     
-    For enum keys, we always want readable string representation to ensure
-    JSON serialization compatibility. Enum keys should use lowercase names
-    for better readability in JSON, regardless of whether they're WebSocketState
-    or generic enums.
+    For enum keys, we use different strategies based on enum type:
+    - WebSocketState enums: Use lowercase names for consistency ("open" vs "1")
+    - Integer enums (IntEnum): Use string value for readability ("1" vs "first")  
+    - String/text enums: Use lowercase names for readability ("option_a" vs "OPTION_A")
     
     Args:
         enum_key: Enum object to convert to string key
@@ -36,9 +38,31 @@ def _get_enum_key_representation(enum_key: Enum) -> str:
         String representation suitable for JSON dict keys
     """
     if hasattr(enum_key, 'name') and hasattr(enum_key, 'value'):
-        # For enum keys, always use lowercase names for better JSON readability
-        # This makes the JSON more human-readable: {"open": "connected"} vs {"1": "connected"}
-        return str(enum_key.name).lower()
+        # WEBSOCKET STATE HANDLING: Check if this is a WebSocket state enum
+        enum_name = str(enum_key.name).upper()
+        websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
+        
+        # Check if it's from a WebSocket framework module or has WebSocket-like class name
+        module_name = getattr(enum_key.__class__, '__module__', '')
+        framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
+        is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
+        
+        class_name = enum_key.__class__.__name__
+        is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
+        
+        # For WebSocket state enums, always use lowercase name for keys
+        if (is_framework_websocket or 
+            (is_websocket_class and enum_name in websocket_state_names)):
+            return str(enum_key.name).lower()
+        
+        # For integer-valued non-WebSocket enums, use the string representation of the value
+        # This makes {"1": "initialized"} instead of {"first": "initialized"}
+        elif isinstance(enum_key.value, int):
+            return str(enum_key.value)
+        else:
+            # For string/other enums, use lowercase names for better JSON readability
+            # This makes {"option_a": "selected"} instead of {"OPTION_A": "selected"}
+            return str(enum_key.name).lower()
     else:
         # Fallback to string representation
         return str(enum_key)
@@ -118,23 +142,30 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
     
     # Handle enum objects - CONSISTENT LOGIC: Return .value for generic enums  
     if isinstance(message, Enum):
-        # CLOUD RUN FALLBACK: Handle generic WebSocket state patterns ONLY for actual framework WebSocketState enums
-        # Only check for WebSocketState behavior if we couldn't match the specific framework imports above
-        # This avoids false positives with test enums that happen to have WebSocket-like names
+        # WEBSOCKET STATE HANDLING: Check if this enum represents WebSocket state
+        # This includes both framework enums and test enums with WebSocket-like names
         if hasattr(message, 'name') and hasattr(message, 'value'):
-            # More specific check: only treat as WebSocketState if it's actually from a WebSocket framework
+            # Check for WebSocket state behavior by enum name pattern
+            enum_name = str(message.name).upper()
+            websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
+            
+            # Also check if it's from a WebSocket framework module
             module_name = getattr(message.__class__, '__module__', '')
-            # Only match actual WebSocket framework modules, not test modules
             framework_modules = ['starlette.websockets', 'fastapi.websockets', 'websockets']
             is_framework_websocket = any(framework_mod in module_name for framework_mod in framework_modules)
             
-            if is_framework_websocket:
-                enum_name = str(message.name).upper()
-                websocket_state_names = {'CONNECTING', 'OPEN', 'CLOSING', 'CLOSED', 'CONNECTED', 'DISCONNECTED'}
-                if enum_name in websocket_state_names:
-                    return str(message.name).lower()
+            # Also check if the class name suggests it's a WebSocket state enum
+            class_name = message.__class__.__name__
+            is_websocket_class = 'websocket' in class_name.lower() and 'state' in class_name.lower()
+            
+            # Treat as WebSocket state if: 
+            # 1. From framework module, OR
+            # 2. Has WebSocket-like class name AND websocket state name
+            if (is_framework_websocket or 
+                (is_websocket_class and enum_name in websocket_state_names)):
+                return str(message.name).lower()
         
-        # For all other enums (including test enums), return the value
+        # For all other enums, return the value
         return message.value if hasattr(message, 'value') else str(message)
     
     # Handle Pydantic models with proper datetime serialization
@@ -142,8 +173,12 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
         try:
             return message.model_dump(mode='json')
         except Exception as e:
-            logger.warning(f"Pydantic model_dump failed: {e}, falling back to dict")
-            return message.model_dump()
+            logger.warning(f"Pydantic model_dump(mode='json') failed: {e}, trying without mode")
+            try:
+                return message.model_dump()
+            except Exception as e2:
+                logger.warning(f"Pydantic model_dump failed completely: {e2}, using string fallback")
+                # Fall through to the string fallback at the end of the function
     
     # Handle objects with to_dict method (DeepAgentState, etc.)
     if hasattr(message, 'to_dict'):
@@ -763,9 +798,14 @@ class UnifiedWebSocketManager:
     
     async def connect_user(self, user_id: str, websocket: Any) -> Any:
         """Legacy compatibility method for connecting a user."""
-        import uuid
         from datetime import datetime
-        connection_id = str(uuid.uuid4())
+        # Use UnifiedIDManager for consistent connection ID generation
+        id_manager = UnifiedIDManager()
+        connection_id = id_manager.generate_id(
+            IDType.WEBSOCKET,
+            prefix="conn",
+            context={"user_id": user_id, "component": "legacy_connection"}
+        )
         connection = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,

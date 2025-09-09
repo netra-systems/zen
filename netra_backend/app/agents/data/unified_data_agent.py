@@ -865,46 +865,47 @@ class UnifiedDataAgent(BaseAgent):
             result = await self.data_access.execute_query(query)
             return result if isinstance(result, list) else []
         except Exception as e:
-            self.logger.warning(f"Data fetch failed, using fallback: {e}")
-            # Return mock data for testing
-            return self._generate_fallback_data(metrics, 100)
+            self.logger.error(f"Data fetch failed: {e}")
+            # Use UnifiedServiceInitializer for transparent error handling
+            from netra_backend.app.services.service_initialization.unified_service_initializer import (
+                UnifiedServiceException
+            )
+            from netra_backend.app.schemas.shared_types import ErrorContext
+            
+            # Create transparent error context instead of generating mock data
+            error_context = ErrorContext(
+                user_id=getattr(self, 'current_user_id', 'unknown'),
+                request_id=getattr(self, 'current_request_id', 'unknown'),
+                service_name="unified_data_agent",
+                error_type="data_access_failure"
+            )
+            
+            # Send transparent WebSocket notification if available
+            if hasattr(self, 'websocket_bridge') and self.websocket_bridge:
+                await self.websocket_bridge.emit_service_unavailable(
+                    service_name="data_pipeline",
+                    reason=f"Data access failed: {str(e)}",
+                    estimated_recovery_seconds=300,
+                    alternatives=[
+                        "Try with a smaller date range",
+                        "Check data source availability", 
+                        "Contact support for data access issues"
+                    ]
+                )
+            
+            # Raise transparent exception instead of returning fabricated data
+            raise UnifiedServiceException(
+                message=f"Data pipeline temporarily unavailable: {str(e)}",
+                error_context=error_context,
+                should_retry=True,
+                estimated_recovery_time_seconds=300,
+                alternative_suggestions=[
+                    "Reduce the scope of your data request",
+                    "Try again when data sources are available",
+                    "Contact support for critical data needs"
+                ]
+            )
     
-    def _generate_fallback_data(
-        self,
-        metrics: List[str],
-        count: int
-    ) -> List[Dict[str, Any]]:
-        """Generate fallback data for testing."""
-        import random
-        
-        data = []
-        base_time = datetime.now(timezone.utc)
-        
-        for i in range(count):
-            record = {
-                "timestamp": (base_time - timedelta(hours=i)).isoformat()
-            }
-            
-            # Generate mock values for each metric
-            for metric in metrics:
-                if metric == "latency_ms":
-                    record[metric] = random.uniform(10, 500)
-                elif metric == "throughput":
-                    record[metric] = random.uniform(100, 1000)
-                elif metric == "success_rate":
-                    record[metric] = random.uniform(0.9, 1.0)
-                elif metric == "error_rate":
-                    record[metric] = random.uniform(0, 0.1)
-                elif metric == "cost_cents":
-                    record[metric] = random.uniform(1, 100)
-                elif metric == "value":
-                    record[metric] = random.uniform(0, 100)
-                else:
-                    record[metric] = random.uniform(0, 100)
-            
-            data.append(record)
-        
-        return data
     
     async def _generate_insights(
         self,
@@ -998,6 +999,54 @@ class UnifiedDataAgent(BaseAgent):
             "suggestion": f"Try using one of: {', '.join(available_types)}"
         }
     
+    def _generate_fallback_data(self, metrics: List[str], count: int) -> List[Dict[str, Any]]:
+        """Generate fallback sample data for testing.
+        
+        This method is kept for backward compatibility with existing tests.
+        In production, the agent uses transparent error handling instead of fallback data.
+        
+        Args:
+            metrics: List of metric names to include in data
+            count: Number of records to generate
+            
+        Returns:
+            List of sample data records with specified metrics
+        """
+        import random
+        from datetime import datetime, timezone, timedelta
+        
+        data = []
+        base_time = datetime.now(timezone.utc) - timedelta(hours=count)
+        
+        for i in range(count):
+            record = {
+                "timestamp": (base_time + timedelta(minutes=i * 5)).isoformat()
+            }
+            
+            # Generate realistic sample values for common metrics
+            for metric in metrics:
+                if metric == "latency_ms":
+                    record[metric] = random.randint(10, 500)
+                elif metric == "throughput":
+                    record[metric] = random.randint(100, 1000)
+                elif metric == "success_rate":
+                    record[metric] = random.uniform(0.9, 1.0)
+                elif metric == "error_rate":
+                    record[metric] = random.uniform(0.0, 0.1)
+                elif metric == "cost_cents":
+                    record[metric] = random.randint(1, 50)
+                elif metric == "tokens_input":
+                    record[metric] = random.randint(50, 200)
+                elif metric == "tokens_output":
+                    record[metric] = random.randint(20, 100)
+                else:
+                    # Generic numeric value for unknown metrics
+                    record[metric] = random.uniform(0, 100)
+            
+            data.append(record)
+        
+        return data
+
     async def cleanup(self) -> None:
         """Clean up agent resources."""
         try:

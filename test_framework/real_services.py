@@ -74,7 +74,14 @@ class ServiceEndpoints:
         based on USE_REAL_SERVICES environment flag and service availability.
         """
         if env_manager:
-            env = env_manager.env
+            # Handle IsolatedEnvironment objects which have get() method instead of env attribute
+            if hasattr(env_manager, 'get'):
+                env = env_manager
+            elif hasattr(env_manager, 'env'):
+                env = env_manager.env
+            else:
+                # Fallback - try to treat as dict-like
+                env = env_manager
         else:
             # Fallback to regular environment
             from shared.isolated_environment import get_env

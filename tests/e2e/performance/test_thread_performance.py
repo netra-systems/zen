@@ -83,7 +83,7 @@
     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
     # REMOVED_SYNTAX_ERROR: return []
 
-    # REMOVED_SYNTAX_ERROR: from tests.e2e.service_manager import ServiceManager
+    # REMOVED_SYNTAX_ERROR: from tests.e2e.real_services_manager import ServiceManager
     # REMOVED_SYNTAX_ERROR: from tests.e2e.harness_utils import UnifiedTestHarnessComplete, create_test_harness
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

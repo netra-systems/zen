@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Automated Remediation - Database connectivity issue</title>
+    <category>remediation</category>
+    <service>netra-core-generation-1-alpine-test-postgres-1</service>
+    <date>2025-09-08T19:45:21.516604</date>
+    <iteration>1</iteration>
+  </metadata>
+  
+  <issue>
+    <type>Database connectivity issue</type>
+    <severity>CRITICAL</severity>
+    <container>netra-core-generation-1-alpine-test-postgres-1</container>
+    <log_excerpt>2025-09-09 01:45:31.276 UTC [51] LOG:  database system was shut down at 2025-09-09 01:45:29 UTC</log_excerpt>
+  </issue>
+  
+  <remediation>
+    <success>True</success>
+    <strategy>Automated remediation loop</strategy>
+  </remediation>
+</learning>

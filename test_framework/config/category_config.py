@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Set, Union, Any
 import yaml
 from dotenv import load_dotenv
 
-from test_framework.category_system import TestCategory, CategoryPriority, CategoryType, CategorySystem
+from test_framework.category_system import TestCategory, CategoryPriority, TestOrganizationType, CategorySystem
 from test_framework.auto_splitter import SplittingStrategy
 from test_framework.fail_fast_strategies import FailFastMode, ThresholdConfig
 from test_framework.progress_tracker import ProgressTracker
@@ -438,7 +438,7 @@ class CategoryConfigLoader:
             
             # Validate category type
             try:
-                CategoryType(category.category_type)
+                TestOrganizationType(category.category_type)
             except ValueError:
                 errors.append(f"Invalid category_type for category {name}: {category.category_type}")
             
@@ -470,7 +470,7 @@ class CategoryConfigLoader:
                 name=name,
                 description=category_config.description,
                 priority=CategoryPriority[category_config.priority],
-                category_type=CategoryType(category_config.category_type),
+                category_type=TestOrganizationType(category_config.category_type),
                 timeout_seconds=category_config.timeout_seconds,
                 parent=category_config.parent,
                 children=set(category_config.children),

@@ -52,6 +52,28 @@ class ConfigDependencyMap:
             "migration_guide": "JWT_SECRET_KEY is the current standard. JWT_SECRET is deprecated."
         },
         
+        "JWT_SECRET": {
+            "required_by": [
+                "auth_service",
+                "backend_auth", 
+                "token_validation",
+                "session_management"
+            ],
+            "shared_across": ["netra_backend", "auth_service"],
+            "fallback_allowed": False,
+            "impact_level": ConfigImpactLevel.CRITICAL,
+            "deletion_impact": "CRITICAL - All authentication will fail",
+            "alternatives": ["JWT_SECRET_KEY"],
+            "validation": lambda x: x and len(x) >= 32,
+            # Legacy information
+            "legacy_status": "DEPRECATED_CRITICAL",
+            "deprecation_date": "2025-10-01",
+            "removal_version": "1.5.0",
+            "replacement": "JWT_SECRET_KEY",
+            "migration_guide": "JWT_SECRET is deprecated. Use JWT_SECRET_KEY for consistency across environments.",
+            "security_critical": True
+        },
+        
         "ENVIRONMENT": {
             "required_by": ["all_services"],
             "fallback_allowed": True,
@@ -251,7 +273,8 @@ class ConfigDependencyMap:
         
         "GOOGLE_OAUTH_CLIENT_ID": {
             "required_by": [
-                "auth_service.oauth",
+                "backend",
+                "auth_service",
                 "google_oauth_provider",
                 "user_authentication",
                 "oauth_authorization"
@@ -274,7 +297,8 @@ class ConfigDependencyMap:
         
         "GOOGLE_OAUTH_CLIENT_SECRET": {
             "required_by": [
-                "auth_service.oauth",
+                "backend",
+                "auth_service",
                 "google_oauth_provider",
                 "token_exchange",
                 "user_verification"
@@ -1053,6 +1077,94 @@ class ConfigDependencyMap:
                         )
         
         return warnings
+    
+    @classmethod
+    def get_dependent_services(cls, config_key: str) -> List[str]:
+        """
+        Get list of services that depend on a configuration key.
+        
+        This method is required by unit tests for config regression prevention.
+        It extracts the services from the 'required_by' field in our dependency maps.
+        
+        Args:
+            config_key: Configuration key to check
+            
+        Returns:
+            List of service names that depend on this configuration
+        """
+        all_deps = {
+            **cls.CRITICAL_DEPENDENCIES,
+            **cls.HIGH_PRIORITY_DEPENDENCIES,
+            **cls.SERVICE_SPECIFIC_DEPENDENCIES
+        }
+        
+        if config_key in all_deps:
+            deps = all_deps[config_key]
+            # Extract service names from required_by list
+            # Convert component names to service names where appropriate
+            required_by = deps.get("required_by", [])
+            services = []
+            
+            for component in required_by:
+                # Map components to services
+                if any(comp in component for comp in ["auth_service", "oauth_service", "google_oauth"]):
+                    if "auth_service" not in services:
+                        services.append("auth_service")
+                elif any(comp in component for comp in ["session_service", "backend_auth", "token_validation"]):
+                    if "backend" not in services:
+                        services.append("backend")
+                elif "all_services" in component:
+                    services = ["backend", "auth_service"]
+                    break
+                else:
+                    # For specific components, add as-is or map to known services
+                    if component not in services:
+                        services.append(component)
+            
+            # Ensure OAuth configs are always mapped to both backend and auth_service
+            # since both services need access to OAuth configuration
+            if "OAUTH" in config_key.upper():
+                if "backend" not in services:
+                    services.append("backend")
+                if "auth_service" not in services:
+                    services.append("auth_service")
+            
+            # Also check shared_across field
+            shared_across = deps.get("shared_across", [])
+            for service in shared_across:
+                if service not in services:
+                    services.append(service)
+            
+            return services
+        
+        return []
+    
+    @classmethod
+    def get_impact_level(cls, config_key: str) -> ConfigImpactLevel:
+        """
+        Get the impact level for a configuration key.
+        
+        This method is required by unit tests for config regression prevention.
+        It returns the impact level from our dependency maps.
+        
+        Args:
+            config_key: Configuration key to check
+            
+        Returns:
+            ConfigImpactLevel enum value
+        """
+        all_deps = {
+            **cls.CRITICAL_DEPENDENCIES,
+            **cls.HIGH_PRIORITY_DEPENDENCIES,
+            **cls.SERVICE_SPECIFIC_DEPENDENCIES
+        }
+        
+        if config_key in all_deps:
+            deps = all_deps[config_key]
+            return deps.get("impact_level", ConfigImpactLevel.LOW)
+        
+        # If not found in our maps, assume low impact
+        return ConfigImpactLevel.LOW
     
     @classmethod
     def get_legacy_migration_plan(cls, config_key: str) -> Optional[Dict[str, Any]]:

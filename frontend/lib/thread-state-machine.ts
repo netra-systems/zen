@@ -158,7 +158,15 @@ export class ThreadStateMachine {
    * Resets state machine
    */
   public reset(): void {
-    this.transition('RESET');
+    const previousState = this.currentState;
+    this.currentState = this.config.initialState;
+    this.stateData = this.createInitialStateData();
+    
+    // Notify listeners of reset
+    this.config.onStateChange?.(previousState, this.currentState, this.stateData);
+    this.notifyListeners();
+    
+    logger.debug(`State machine reset: ${previousState} -> ${this.currentState}`);
   }
 
   /**

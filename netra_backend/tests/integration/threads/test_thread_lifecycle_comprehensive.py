@@ -25,12 +25,15 @@ Each test validates complete business workflows with real services and WebSocket
 
 import asyncio
 import json
+import logging
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from unittest.mock import patch
+
+logger = logging.getLogger(__name__)
 
 import pytest
 from sqlalchemy import text, select, delete
@@ -52,6 +55,7 @@ from netra_backend.app.db.models_postgres import Thread, Message, User
 from netra_backend.app.schemas.core_models import Thread as ThreadModel, ThreadMetadata
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.core.exceptions_database import DatabaseError, RecordNotFoundError
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.schemas.websocket_server_messages import (
     ThreadCreatedMessage, ThreadUpdatedMessage, ThreadDeletedMessage,
     ThreadLoadedMessage, ThreadRenamedMessage, ThreadSwitchedMessage
@@ -62,46 +66,51 @@ from shared.types.core_types import UserID, ThreadID, ensure_user_id, ensure_thr
 
 
 @pytest.fixture(scope="function")
-def real_services_manager():
-    """Provide a real services manager for integration tests."""
+async def database_manager():
+    """Provide a real database manager for integration tests."""
     env = get_env()
     env.set('USE_REAL_SERVICES', 'true', source='integration_test')
     env.set('SKIP_MOCKS', 'true', source='integration_test')
     
-    manager = get_real_services()
-    return manager
+    try:
+        db_manager = DatabaseManager()
+        await db_manager.initialize()
+        return db_manager
+    except Exception as e:
+        pytest.skip(f"Real database not available for integration testing: {e}")
 
 
 @pytest.fixture
-async def thread_repository(real_services_manager):
+async def thread_repository(database_manager):
     """Provide a real thread repository with database connection."""
     repo = ThreadRepository()
     return repo
 
 
 @pytest.fixture
-async def websocket_test_client(real_services_manager):
+async def websocket_test_client():
     """Provide a WebSocket test client for event validation."""
-    client = WebSocketTestClient(real_services_manager)
+    real_services = get_real_services()
+    client = WebSocketTestClient(real_services)
     await client.setup()
     yield client
     await client.cleanup()
 
 
 @pytest.fixture
-async def clean_test_data(real_services_manager):
+async def clean_test_data(database_manager):
     """Clean up test data before and after tests."""
-    services = real_services_manager
-    
     # Clean up before test
-    await services.postgres.execute("DELETE FROM threads WHERE id LIKE 'test_%'")
-    await services.postgres.execute("DELETE FROM messages WHERE thread_id LIKE 'test_%'")
+    async with database_manager.get_session() as session:
+        await session.execute(text("DELETE FROM threads WHERE id LIKE 'test_%'"))
+        await session.execute(text("DELETE FROM messages WHERE thread_id LIKE 'test_%'"))
     
     yield
     
     # Clean up after test
-    await services.postgres.execute("DELETE FROM threads WHERE id LIKE 'test_%'")
-    await services.postgres.execute("DELETE FROM messages WHERE thread_id LIKE 'test_%'")
+    async with database_manager.get_session() as session:
+        await session.execute(text("DELETE FROM threads WHERE id LIKE 'test_%'"))
+        await session.execute(text("DELETE FROM messages WHERE thread_id LIKE 'test_%'"))
 
 
 class TestThreadLifecycleComprehensive(BaseIntegrationTest):
@@ -113,16 +122,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_basic_thread_creation_with_title_generation(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_basic_thread_creation_with_title_generation(self, database_manager, thread_repository, clean_test_data):
         """Test 1: Basic thread creation with automatic title generation.
         
         Business Value: Users can create new conversations instantly.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread using repository
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -130,7 +138,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 created_at=int(time.time()),
                 metadata_={"user_id": user_id, "title": "AI Assistant Chat"}
             )
-            await db_session.commit()
         
         # Verify thread creation
         assert thread is not None
@@ -143,12 +150,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_creation_with_custom_metadata(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_creation_with_custom_metadata(self, database_manager, thread_repository, clean_test_data):
         """Test 2: Thread creation with rich custom metadata.
         
         Business Value: Enterprise users can tag and organize conversations.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         custom_metadata = {
@@ -160,7 +166,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             "project_id": "proj_12345"
         }
         
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -168,7 +174,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 created_at=int(time.time()),
                 metadata_=custom_metadata
             )
-            await db_session.commit()
         
         # Verify metadata preservation
         assert thread.metadata_["tags"] == ["optimization", "aws", "cost-analysis"]
@@ -180,7 +185,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_creation_triggers_websocket_events(self, real_services_manager, websocket_test_client, clean_test_data):
+    async def test_thread_creation_triggers_websocket_events(self, database_manager, websocket_test_client, clean_test_data):
         """Test 3: Thread creation sends proper WebSocket notifications.
         
         Business Value: Real-time UI updates for immediate user feedback.
@@ -200,7 +205,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             thread_id = f"test_thread_{uuid.uuid4()}"
             
             # Create thread
-            async with real_services_manager.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread = await thread_service.create_thread(
                     db_session=db_session,
                     user_id=user_id,
@@ -223,18 +228,16 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_multiple_user_thread_creation_isolation(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_multiple_user_thread_creation_isolation(self, database_manager, thread_repository, clean_test_data):
         """Test 4: Multiple users can create threads simultaneously with proper isolation.
         
         Business Value: Multi-tenant system supports concurrent users.
         """
-        services = real_services_manager
-        
         users = [f"test_user_{uuid.uuid4()}" for _ in range(5)]
         created_threads = []
         
         async def create_user_thread(user_id: str):
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread = await thread_repository.create(
                     db=db_session,
                     id=f"test_thread_{user_id}_{uuid.uuid4()}",
@@ -242,7 +245,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     created_at=int(time.time()),
                     metadata_={"user_id": user_id, "title": f"Thread for {user_id}"}
                 )
-                await db_session.commit()
                 return thread
         
         # Create threads concurrently
@@ -261,15 +263,14 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_creation_with_invalid_data_validation(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_creation_with_invalid_data_validation(self, database_manager, thread_repository, clean_test_data):
         """Test 5: Thread creation properly validates invalid data.
         
         Business Value: System stability through data integrity enforcement.
         """
-        services = real_services_manager
         
         # Test 1: Missing user_id in metadata should fail
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             with pytest.raises((ValueError, DatabaseError)):
                 await thread_repository.create(
                     db=db_session,
@@ -281,7 +282,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         
         # Test 2: Invalid thread ID format should be handled gracefully
         try:
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread = await thread_repository.create(
                     db=db_session,
                     id="invalid-thread-format",  # Non-standard format
@@ -299,16 +300,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_creation_database_transaction_consistency(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_creation_database_transaction_consistency(self, database_manager, thread_repository, clean_test_data):
         """Test 6: Thread creation maintains database transaction consistency.
         
         Business Value: Data integrity ensures reliable conversation history.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Test transaction rollback on error
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             try:
                 # Create valid thread
                 thread1 = await thread_repository.create(
@@ -328,12 +328,13 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                         created_at=int(time.time()),
                         metadata_={"user_id": user_id, "title": "Duplicate ID"}
                     )
-                    await db_session.commit()
-            except Exception:
-                await db_session.rollback()
+            except Exception as e:
+                # If unexpected error, let test framework handle it
+                logger.error(f"Unexpected error in transaction test: {e}")
+                raise
         
         # Verify first thread still exists after rollback
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             found_thread = await thread_repository.get_by_id(db_session, thread1.id)
             assert found_thread is not None
             assert found_thread.metadata_["title"] == "Valid Thread"
@@ -342,12 +343,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_creation_websocket_manager_integration(self, real_services_manager, clean_test_data):
+    async def test_thread_creation_websocket_manager_integration(self, database_manager, clean_test_data):
         """Test 7: Thread creation integrates properly with WebSocket manager.
         
         Business Value: Real-time notifications keep users informed.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create user execution context with WebSocket manager
@@ -367,7 +367,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         thread_id = f"test_thread_{uuid.uuid4()}"
         
         # Create thread through service
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_service.create_thread(
                 db_session=db_session,
                 user_id=user_id,
@@ -384,12 +384,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_creation_performance_under_load(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_creation_performance_under_load(self, database_manager, thread_repository, clean_test_data):
         """Test 8: Thread creation performance under concurrent load.
         
         Business Value: System scales to support business growth.
         """
-        services = real_services_manager
         num_threads = 20
         user_id = f"test_user_{uuid.uuid4()}"
         
@@ -398,7 +397,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         async def create_thread_batch(batch_id: int):
             """Create a batch of threads."""
             batch_threads = []
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 for i in range(5):  # 5 threads per batch
                     thread = await thread_repository.create(
                         db=db_session,
@@ -408,7 +407,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                         metadata_={"user_id": user_id, "title": f"Load Test Thread {batch_id}-{i}"}
                     )
                     batch_threads.append(thread)
-                await db_session.commit()
             return batch_threads
         
         # Create threads in batches concurrently
@@ -438,16 +436,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_status_updates_active_completed_archived(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_status_updates_active_completed_archived(self, database_manager, thread_repository, clean_test_data):
         """Test 9: Thread status transitions through active -> completed -> archived.
         
         Business Value: Users can organize and manage conversation lifecycle.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -455,28 +452,26 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 created_at=int(time.time()),
                 metadata_={"user_id": user_id, "status": "active", "title": "Status Test"}
             )
-            await db_session.commit()
         
         # Update to completed
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread_obj = await thread_repository.get_by_id(db_session, thread.id)
             thread_obj.metadata_["status"] = "completed"
             thread_obj.metadata_["completed_at"] = int(time.time())
-            await db_session.commit()
         
         # Verify completed status
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             updated_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert updated_thread.metadata_["status"] == "completed"
             assert "completed_at" in updated_thread.metadata_
         
         # Archive thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             success = await thread_repository.archive_thread(db_session, thread.id)
             assert success is True
         
         # Verify archived status
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             archived_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert archived_thread.metadata_["status"] == "archived"
             assert "archived_at" in archived_thread.metadata_
@@ -485,16 +480,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_metadata_updates_and_persistence(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_metadata_updates_and_persistence(self, database_manager, thread_repository, clean_test_data):
         """Test 10: Thread metadata updates persist correctly.
         
         Business Value: Rich conversation context enables better AI interactions.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread with initial metadata
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -507,7 +501,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     "priority": "low"
                 }
             )
-            await db_session.commit()
         
         # Update metadata multiple times
         updates = [
@@ -517,13 +510,12 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         ]
         
         for update in updates:
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread_obj = await thread_repository.get_by_id(db_session, thread.id)
                 thread_obj.metadata_.update(update)
-                await db_session.commit()
         
         # Verify final state
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             final_thread = await thread_repository.get_by_id(db_session, thread.id)
             metadata = final_thread.metadata_
             
@@ -538,18 +530,17 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_last_activity_timestamp_updates(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_last_activity_timestamp_updates(self, database_manager, thread_repository, clean_test_data):
         """Test 11: Thread activity timestamps update correctly.
         
         Business Value: Users can see recent conversation activity.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         initial_time = int(time.time())
         
         # Create thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -561,7 +552,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     "last_activity": initial_time
                 }
             )
-            await db_session.commit()
         
         # Simulate activity updates
         activity_times = []
@@ -570,14 +560,13 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             activity_time = int(time.time())
             activity_times.append(activity_time)
             
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread_obj = await thread_repository.get_by_id(db_session, thread.id)
                 thread_obj.metadata_["last_activity"] = activity_time
                 thread_obj.metadata_["activity_count"] = i + 1
-                await db_session.commit()
         
         # Verify timestamps are sequential and preserved
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             final_thread = await thread_repository.get_by_id(db_session, thread.id)
             
             assert final_thread.metadata_["last_activity"] == activity_times[-1]
@@ -588,17 +577,16 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_user_id_validation_and_security(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_user_id_validation_and_security(self, database_manager, thread_repository, clean_test_data):
         """Test 12: Thread user_id validation prevents unauthorized access.
         
         Business Value: Data security ensures user privacy and compliance.
         """
-        services = real_services_manager
         user1_id = f"test_user1_{uuid.uuid4()}"
         user2_id = f"test_user2_{uuid.uuid4()}"
         
         # Create thread for user1
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -606,28 +594,26 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 created_at=int(time.time()),
                 metadata_={"user_id": user1_id, "title": "User1's Thread"}
             )
-            await db_session.commit()
         
         # Test user isolation - user2 cannot find user1's threads
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             user2_threads = await thread_repository.find_by_user(db_session, user2_id)
             assert len(user2_threads) == 0
         
         # Test user1 can find their threads
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             user1_threads = await thread_repository.find_by_user(db_session, user1_id)
             assert len(user1_threads) == 1
             assert user1_threads[0].id == thread.id
             assert user1_threads[0].metadata_["user_id"] == user1_id
         
         # Test cannot modify user_id to another user
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread_obj = await thread_repository.get_by_id(db_session, thread.id)
             original_user = thread_obj.metadata_["user_id"]
             
             # Attempt to change user_id
             thread_obj.metadata_["user_id"] = user2_id
-            await db_session.commit()
             
             # Verify the change (this test validates the system allows it,
             # but business logic should prevent it)
@@ -639,16 +625,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_state_transitions_validation(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_state_transitions_validation(self, database_manager, thread_repository, clean_test_data):
         """Test 13: Thread state transitions follow business rules.
         
         Business Value: Consistent state management improves user experience.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread in draft state
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -661,7 +646,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     "state_history": ["draft"]
                 }
             )
-            await db_session.commit()
         
         # Valid transitions: draft -> active -> completed -> archived
         valid_transitions = [
@@ -671,7 +655,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         ]
         
         for from_state, to_state in valid_transitions:
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread_obj = await thread_repository.get_by_id(db_session, thread.id)
                 
                 # Verify current state
@@ -682,16 +666,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 thread_obj.metadata_["state_history"].append(to_state)
                 thread_obj.metadata_[f"{to_state}_at"] = int(time.time())
                 
-                await db_session.commit()
             
             # Verify transition
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 updated_thread = await thread_repository.get_by_id(db_session, thread.id)
                 assert updated_thread.metadata_["status"] == to_state
                 assert to_state in updated_thread.metadata_["state_history"]
         
         # Verify final state
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             final_thread = await thread_repository.get_by_id(db_session, thread.id)
             expected_history = ["draft", "active", "completed", "archived"]
             assert final_thread.metadata_["state_history"] == expected_history
@@ -700,7 +683,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services  
-    async def test_thread_state_websocket_event_propagation(self, real_services_manager, websocket_test_client, clean_test_data):
+    async def test_thread_state_websocket_event_propagation(self, database_manager, websocket_test_client, clean_test_data):
         """Test 14: Thread state changes trigger appropriate WebSocket events.
         
         Business Value: Real-time UI updates for state changes.
@@ -719,7 +702,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             thread_id = f"test_thread_{uuid.uuid4()}"
             
             # Create thread
-            async with real_services_manager.get_database_session() as db_session:
+            async with database_manager.get_database_session() as db_session:
                 thread = await thread_service.create_thread(
                     db_session=db_session,
                     user_id=user_id,
@@ -728,7 +711,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 )
             
             # Update thread status
-            async with real_services_manager.get_database_session() as db_session:
+            async with database_manager.get_database_session() as db_session:
                 await thread_service.update_thread_status(
                     db_session=db_session,
                     thread_id=thread_id,
@@ -747,16 +730,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_state_concurrent_update_handling(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_state_concurrent_update_handling(self, database_manager, thread_repository, clean_test_data):
         """Test 15: Thread state updates handle concurrent modifications safely.
         
         Business Value: Data integrity under concurrent user actions.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -769,16 +751,14 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     "update_count": 0
                 }
             )
-            await db_session.commit()
         
         # Simulate concurrent updates
         async def update_thread_state(update_id: int):
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread_obj = await thread_repository.get_by_id(db_session, thread.id)
                 current_count = thread_obj.metadata_.get("update_count", 0)
                 thread_obj.metadata_["update_count"] = current_count + 1
                 thread_obj.metadata_[f"update_{update_id}"] = int(time.time())
-                await db_session.commit()
                 return update_id
         
         # Run concurrent updates
@@ -789,7 +769,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         successful_updates = [r for r in results if isinstance(r, int)]
         
         # Verify final state is consistent
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             final_thread = await thread_repository.get_by_id(db_session, thread.id)
             final_count = final_thread.metadata_["update_count"]
             
@@ -805,16 +785,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_state_recovery_after_errors(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_state_recovery_after_errors(self, database_manager, thread_repository, clean_test_data):
         """Test 16: Thread state recovery after system errors.
         
         Business Value: System resilience maintains conversation availability.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -827,10 +806,9 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     "checkpoint": "initial"
                 }
             )
-            await db_session.commit()
         
         # Simulate error during update
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             try:
                 thread_obj = await thread_repository.get_by_id(db_session, thread.id)
                 thread_obj.metadata_["status"] = "updating"
@@ -840,13 +818,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 if True:  # Force error condition
                     raise DatabaseError("Simulated system error")
                     
-                await db_session.commit()
             except DatabaseError:
-                await db_session.rollback()
                 self.logger.info("Simulated error handled with rollback")
         
         # Verify thread state is consistent (should be original state)
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             recovered_thread = await thread_repository.get_by_id(db_session, thread.id)
             
             # Should be back to original state due to rollback
@@ -854,15 +830,14 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert recovered_thread.metadata_["checkpoint"] == "initial"
             
         # Test recovery by updating again
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread_obj = await thread_repository.get_by_id(db_session, thread.id)
             thread_obj.metadata_["status"] = "recovered"
             thread_obj.metadata_["checkpoint"] = "post_recovery"
             thread_obj.metadata_["recovery_timestamp"] = int(time.time())
-            await db_session.commit()
         
         # Verify successful recovery
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             final_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert final_thread.metadata_["status"] == "recovered"
             assert final_thread.metadata_["checkpoint"] == "post_recovery"
@@ -876,19 +851,18 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_get_thread_by_id_with_user_isolation(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_get_thread_by_id_with_user_isolation(self, database_manager, thread_repository, clean_test_data):
         """Test 17: Get thread by ID respects user isolation.
         
         Business Value: Users can only access their own conversations.
         """
-        services = real_services_manager
         user1_id = f"test_user1_{uuid.uuid4()}"
         user2_id = f"test_user2_{uuid.uuid4()}"
         
         # Create threads for different users
         threads = []
         for i, user_id in enumerate([user1_id, user2_id]):
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread = await thread_repository.create(
                     db=db_session,
                     id=f"test_thread_{user_id}_{uuid.uuid4()}",
@@ -897,22 +871,21 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     metadata_={"user_id": user_id, "title": f"Thread {i} for {user_id}"}
                 )
                 threads.append(thread)
-                await db_session.commit()
         
         # Test user1 can access their thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             user1_thread = await thread_repository.get_by_id(db_session, threads[0].id)
             assert user1_thread is not None
             assert user1_thread.metadata_["user_id"] == user1_id
         
         # Test user2 can access their thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             user2_thread = await thread_repository.get_by_id(db_session, threads[1].id)
             assert user2_thread is not None
             assert user2_thread.metadata_["user_id"] == user2_id
         
         # Test cross-user access (business logic should prevent this)
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Raw repository access doesn't enforce user isolation - that's business layer
             cross_access_thread = await thread_repository.get_by_id(db_session, threads[0].id)
             assert cross_access_thread is not None
@@ -923,12 +896,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_list_threads_for_user_with_pagination(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_list_threads_for_user_with_pagination(self, database_manager, thread_repository, clean_test_data):
         """Test 18: List threads with pagination support.
         
         Business Value: Users can browse their conversation history efficiently.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create multiple threads for user
@@ -936,7 +908,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         created_threads = []
         
         for i in range(thread_count):
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread = await thread_repository.create(
                     db=db_session,
                     id=f"test_thread_{i:02d}_{uuid.uuid4()}",
@@ -945,11 +917,10 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     metadata_={"user_id": user_id, "title": f"Thread {i:02d}"}
                 )
                 created_threads.append(thread)
-                await db_session.commit()
                 await asyncio.sleep(0.01)  # Small delay for timestamp separation
         
         # Test getting all threads for user
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             all_threads = await thread_repository.find_by_user(db_session, user_id)
             
             assert len(all_threads) == thread_count
@@ -961,7 +932,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert thread_titles[0].startswith("Thread 1") or thread_titles[0].startswith("Thread 0")
         
         # Test pagination simulation (repository level)
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Get threads with LIMIT and OFFSET simulation
             result = await db_session.execute(
                 text("""
@@ -996,12 +967,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_search_with_filters(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_search_with_filters(self, database_manager, thread_repository, clean_test_data):
         """Test 19: Thread search with metadata and content filters.
         
         Business Value: Users can find specific conversations quickly.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create threads with different metadata for searching
@@ -1014,7 +984,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         ]
         
         for i, thread_data in enumerate(search_threads):
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread = await thread_repository.create(
                     db=db_session,
                     id=f"test_search_thread_{i}_{uuid.uuid4()}",
@@ -1022,10 +992,9 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     created_at=int(time.time()),
                     metadata_={"user_id": user_id, **thread_data}
                 )
-                await db_session.commit()
         
         # Test 1: Search by tag
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             result = await db_session.execute(
                 text("""
                     SELECT * FROM threads 
@@ -1038,7 +1007,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert len(aws_threads) == 2  # AWS Cost and AWS Lambda
         
         # Test 2: Search by priority
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             result = await db_session.execute(
                 text("""
                     SELECT * FROM threads 
@@ -1051,7 +1020,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert len(high_priority_threads) == 2  # AWS Cost and Cost Analysis
         
         # Test 3: Text search in title
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             result = await db_session.execute(
                 text("""
                     SELECT * FROM threads 
@@ -1064,7 +1033,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert len(cost_threads) == 2  # AWS Cost and Cost Analysis
         
         # Test 4: Complex filter (AWS threads with high priority)
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             result = await db_session.execute(
                 text("""
                     SELECT * FROM threads 
@@ -1081,12 +1050,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_access_control_validation(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_access_control_validation(self, database_manager, thread_repository, clean_test_data):
         """Test 20: Thread access control prevents unauthorized access.
         
         Business Value: Data security and privacy compliance.
         """
-        services = real_services_manager
         user1_id = f"test_user1_{uuid.uuid4()}"
         user2_id = f"test_user2_{uuid.uuid4()}"
         admin_user_id = f"admin_user_{uuid.uuid4()}"
@@ -1100,7 +1068,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         
         thread_ids = []
         for thread_data in test_threads:
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 thread = await thread_repository.create(
                     db=db_session,
                     id=f"test_access_thread_{uuid.uuid4()}",
@@ -1109,21 +1077,20 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     metadata_=thread_data
                 )
                 thread_ids.append(thread.id)
-                await db_session.commit()
         
         # Test 1: Users can only see their own threads
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             user1_threads = await thread_repository.find_by_user(db_session, user1_id)
             assert len(user1_threads) == 1
             assert user1_threads[0].metadata_["title"] == "User1 Private Thread"
         
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             user2_threads = await thread_repository.find_by_user(db_session, user2_id)
             assert len(user2_threads) == 1
             assert user2_threads[0].metadata_["title"] == "User2 Confidential Thread"
         
         # Test 2: Verify classification-based access (would need business logic)
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Query by classification (admin view)
             result = await db_session.execute(
                 text("""
@@ -1137,7 +1104,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert any(row.metadata_["title"] == "Admin System Thread" for row in system_threads)
         
         # Test 3: Cross-user access attempt (should be prevented by business layer)
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Raw access works - business layer should prevent this
             other_user_thread = await thread_repository.get_by_id(db_session, thread_ids[1])
             assert other_user_thread is not None
@@ -1148,12 +1115,11 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_thread_retrieval_performance_optimization(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_thread_retrieval_performance_optimization(self, database_manager, thread_repository, clean_test_data):
         """Test 21: Thread retrieval performance with large datasets.
         
         Business Value: System responsiveness as conversation history grows.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create a large number of threads
@@ -1165,7 +1131,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         # Create threads in batches
         for batch in range(0, thread_count, batch_size):
             batch_threads = []
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 for i in range(batch, min(batch + batch_size, thread_count)):
                     thread_data = {
                         "user_id": user_id,
@@ -1181,7 +1147,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                         metadata_=thread_data
                     )
                     batch_threads.append(thread)
-                await db_session.commit()
         
         creation_time = time.time() - start_time
         
@@ -1189,18 +1154,18 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         retrieval_start = time.time()
         
         # Test 1: Get all threads for user
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             all_threads = await thread_repository.find_by_user(db_session, user_id)
             assert len(all_threads) == thread_count
         
         # Test 2: Get specific thread by ID
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             specific_thread = await thread_repository.get_by_id(db_session, all_threads[50].id)
             assert specific_thread is not None
             assert specific_thread.metadata_["index"] == 50
         
         # Test 3: Filtered query performance
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             result = await db_session.execute(
                 text("""
                     SELECT * FROM threads 
@@ -1224,7 +1189,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         concurrent_start = time.time()
         
         async def concurrent_retrieval():
-            async with services.get_database_session() as db_session:
+            async with database_manager.get_session() as db_session:
                 threads = await thread_repository.find_by_user(db_session, user_id)
                 return len(threads)
         
@@ -1246,16 +1211,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_soft_delete_thread_archived_status(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_soft_delete_thread_archived_status(self, database_manager, thread_repository, clean_test_data):
         """Test 22: Soft delete thread with archived status.
         
         Business Value: Users can restore accidentally deleted conversations.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -1263,36 +1227,34 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 created_at=int(time.time()),
                 metadata_={"user_id": user_id, "title": "Soft Delete Test", "status": "active"}
             )
-            await db_session.commit()
         
         # Soft delete (archive) thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             success = await thread_repository.archive_thread(db_session, thread.id)
             assert success is True
         
         # Verify soft delete
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             archived_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert archived_thread is not None  # Still exists
             assert archived_thread.metadata_["status"] == "archived"
             assert "archived_at" in archived_thread.metadata_
         
         # Verify archived thread doesn't appear in active list
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             active_threads = await thread_repository.get_active_threads(db_session, user_id)
             archived_ids = [t.id for t in active_threads]
             assert thread.id not in archived_ids
         
         # Test restoration (change status back to active)
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread_obj = await thread_repository.get_by_id(db_session, thread.id)
             thread_obj.metadata_["status"] = "active"
             thread_obj.metadata_["restored_at"] = int(time.time())
             del thread_obj.metadata_["archived_at"]  # Remove archived timestamp
-            await db_session.commit()
         
         # Verify restoration
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             active_threads = await thread_repository.get_active_threads(db_session, user_id)
             restored_ids = [t.id for t in active_threads]
             assert thread.id in restored_ids
@@ -1301,16 +1263,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_hard_delete_thread_with_cleanup(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_hard_delete_thread_with_cleanup(self, database_manager, thread_repository, clean_test_data):
         """Test 23: Hard delete thread with complete cleanup.
         
         Business Value: Complete data removal for privacy compliance.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread with associated messages
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -1336,10 +1297,9 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     }
                 )
             
-            await db_session.commit()
         
         # Verify thread and messages exist
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Check thread exists
             found_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert found_thread is not None
@@ -1353,7 +1313,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert message_count == 3
         
         # Hard delete - remove thread and messages
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Delete messages first (foreign key constraint)
             await db_session.execute(
                 text("DELETE FROM messages WHERE thread_id = :thread_id"),
@@ -1366,10 +1326,9 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 {"thread_id": thread.id}
             )
             
-            await db_session.commit()
         
         # Verify complete removal
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Thread should not exist
             deleted_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert deleted_thread is None
@@ -1386,16 +1345,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_delete_thread_cascade_effects(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_delete_thread_cascade_effects(self, database_manager, thread_repository, clean_test_data):
         """Test 24: Thread deletion cascade effects on related data.
         
         Business Value: Data consistency during conversation removal.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread with complex relationships
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -1428,10 +1386,9 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             # Update parent with child references
             thread.metadata_["child_thread_ids"] = [ct.id for ct in child_threads]
             
-            await db_session.commit()
         
         # Create messages and runs for main thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Create messages
             for i in range(5):
                 await db_session.execute(
@@ -1449,10 +1406,9 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                     }
                 )
             
-            await db_session.commit()
         
         # Verify initial state
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Main thread exists
             main_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert main_thread is not None
@@ -1472,7 +1428,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             assert result.scalar() == 5
         
         # Test cascade delete strategy: Delete children first, then parent
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Step 1: Handle child threads
             for child_thread in child_threads:
                 # Soft delete child threads
@@ -1496,10 +1452,9 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 {"thread_id": thread.id}
             )
             
-            await db_session.commit()
         
         # Verify cascade deletion results
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             # Main thread deleted
             main_thread = await thread_repository.get_by_id(db_session, thread.id)
             assert main_thread is None
@@ -1521,16 +1476,15 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_delete_thread_with_concurrent_access(self, real_services_manager, thread_repository, clean_test_data):
+    async def test_delete_thread_with_concurrent_access(self, database_manager, thread_repository, clean_test_data):
         """Test 25: Thread deletion with concurrent access attempts.
         
         Business Value: System stability during concurrent operations.
         """
-        services = real_services_manager
         user_id = f"test_user_{uuid.uuid4()}"
         
         # Create thread
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             thread = await thread_repository.create(
                 db=db_session,
                 id=f"test_thread_{uuid.uuid4()}",
@@ -1538,7 +1492,6 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
                 created_at=int(time.time()),
                 metadata_={"user_id": user_id, "title": "Concurrent Delete Test", "status": "active"}
             )
-            await db_session.commit()
         
         # Create multiple concurrent operations
         results = []
@@ -1547,33 +1500,31 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
             """Perform concurrent operations on the thread."""
             try:
                 if operation_type == "read":
-                    async with services.get_database_session() as db_session:
+                    async with database_manager.get_session() as db_session:
                         found_thread = await thread_repository.get_by_id(db_session, thread.id)
                         return {"type": "read", "id": operation_id, "success": found_thread is not None}
                 
                 elif operation_type == "update":
-                    async with services.get_database_session() as db_session:
+                    async with database_manager.get_session() as db_session:
                         thread_obj = await thread_repository.get_by_id(db_session, thread.id)
                         if thread_obj:
                             thread_obj.metadata_[f"update_{operation_id}"] = int(time.time())
-                            await db_session.commit()
                             return {"type": "update", "id": operation_id, "success": True}
                         else:
                             return {"type": "update", "id": operation_id, "success": False}
                 
                 elif operation_type == "delete":
-                    async with services.get_database_session() as db_session:
+                    async with database_manager.get_session() as db_session:
                         # Soft delete
                         success = await thread_repository.archive_thread(db_session, thread.id)
                         return {"type": "delete", "id": operation_id, "success": success}
                 
                 elif operation_type == "hard_delete":
-                    async with services.get_database_session() as db_session:
+                    async with database_manager.get_session() as db_session:
                         await db_session.execute(
                             text("DELETE FROM threads WHERE id = :thread_id"),
                             {"thread_id": thread.id}
                         )
-                        await db_session.commit()
                         return {"type": "hard_delete", "id": operation_id, "success": True}
                 
             except Exception as e:
@@ -1612,7 +1563,7 @@ class TestThreadLifecycleComprehensive(BaseIntegrationTest):
         assert len(successful_deletes) >= 1
         
         # Verify final state - thread should be archived
-        async with services.get_database_session() as db_session:
+        async with database_manager.get_session() as db_session:
             final_thread = await thread_repository.get_by_id(db_session, thread.id)
             if final_thread:  # If still exists, should be archived
                 assert final_thread.metadata_.get("status") == "archived"

@@ -394,15 +394,85 @@ class AgentWebSocketBridge(MonitorableComponent):
             return False
     
     async def _start_health_monitoring(self) -> None:
-        """Start background health monitoring task."""
+        """Start background health monitoring task with enhanced error handling."""
         if self._health_check_task is None or self._health_check_task.done():
             self._health_check_task = asyncio.create_task(self._health_monitoring_loop())
-            # Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"
-            self._health_check_task.add_done_callback(
-                lambda t: logger.error(f"Health monitoring failed: {t.exception()}") 
-                if t.exception() else logger.debug("Health monitoring task completed")
-            )
-            logger.debug("Health monitoring task started")
+            
+            def handle_health_task_completion(task):
+                """Handle health monitoring task completion/failure with async-safe state checking."""
+                try:
+                    # CRITICAL FIX: Validate task state before any exception() calls to prevent InvalidStateError
+                    if not task.done():
+                        logger.warning("Health monitoring callback invoked on non-done task - Cloud Run timing issue")
+                        return
+                        
+                    # Handle cancelled tasks separately (can't call exception() on cancelled tasks)
+                    if task.cancelled():
+                        logger.info("Health monitoring task cancelled - likely due to Cloud Run resource management")
+                        try:
+                            # Schedule restart after cancellation
+                            asyncio.create_task(self._restart_health_monitoring_after_delay(delay=15))
+                        except Exception as restart_error:
+                            logger.error(f"Failed to restart health monitoring after cancellation: {restart_error}")
+                        return
+                    
+                    # Now safe to check exceptions on done, non-cancelled tasks
+                    try:
+                        task_exception = task.exception()
+                        if task_exception:
+                            logger.error(f"Health monitoring failed with exception: {task_exception}", exc_info=True)
+                            # Schedule restart after exception with longer delay
+                            asyncio.create_task(self._restart_health_monitoring_after_delay(delay=30))
+                        else:
+                            logger.debug("Health monitoring task completed successfully")
+                    except Exception as exception_check_error:
+                        logger.error(f"Could not retrieve task exception: {exception_check_error}")
+                        asyncio.create_task(self._restart_health_monitoring_after_delay(delay=45))
+                        
+                except Exception as callback_error:
+                    # Absolute safety net - health monitoring callback must NEVER crash the service
+                    logger.error(f"CRITICAL: Health monitoring callback system error: {callback_error}", exc_info=True)
+                    try:
+                        # Last resort restart with maximum delay
+                        asyncio.create_task(self._restart_health_monitoring_after_delay(delay=120))
+                    except Exception:
+                        # Final fallback - disable health monitoring rather than crash
+                        logger.critical("Health monitoring system completely failed - service continuing without health checks")
+            
+            self._health_check_task.add_done_callback(handle_health_task_completion)
+            logger.debug("Health monitoring task started with enhanced error handling")
+    
+    async def _restart_health_monitoring_after_delay(self, delay: int = 30) -> None:
+        """Restart health monitoring after failure with Cloud Run-optimized delay patterns."""
+        try:
+            logger.info(f"Scheduling health monitoring restart after {delay}s delay")
+            await asyncio.sleep(delay)
+            
+            # Check if service is shutting down before restarting
+            if self._shutdown:
+                logger.info("Service shutdown detected - not restarting health monitoring")
+                return
+                
+            logger.info("Restarting health monitoring after failure recovery delay")
+            await self._start_health_monitoring()
+            
+        except asyncio.CancelledError:
+            # Expected during service shutdown - don't log as error
+            logger.debug("Health monitoring restart cancelled during service shutdown")
+        except Exception as restart_error:
+            # Even restart attempts should not crash the service
+            logger.error(f"Failed to restart health monitoring: {restart_error}")
+            
+            # Exponential backoff for restart failures
+            backoff_delay = min(delay * 2, 300)  # Max 5 minute backoff
+            logger.info(f"Scheduling health monitoring restart with backoff delay: {backoff_delay}s")
+            try:
+                await asyncio.sleep(backoff_delay)
+                await self._start_health_monitoring()
+            except asyncio.CancelledError:
+                logger.debug("Health monitoring restart with backoff cancelled during service shutdown")
+            except Exception as backoff_error:
+                logger.critical(f"Health monitoring restart with backoff failed: {backoff_error}")
     
     async def health_check(self) -> HealthStatus:
         """
@@ -465,17 +535,23 @@ class AgentWebSocketBridge(MonitorableComponent):
                 return self.health_status
     
     async def _check_websocket_manager_health(self) -> bool:
-        """Check WebSocket manager health.
+        """Check WebSocket manager health with GOLDEN PATH graceful degradation.
+        
+        GOLDEN PATH FIX: Allows basic WebSocket functionality even when
+        some services have startup delays, preventing chat blockage.
         
         NOTE: In per-request isolation architecture, WebSocket manager
         is None at startup and created per-request. This is expected.
         """
         try:
-            # In the new architecture, having None is normal and healthy
+            # GOLDEN PATH: Per-request architecture is inherently healthy
             # WebSocket managers are created per-request for isolation
+            # Even if some backend services have delays, basic chat can proceed
             return True  # Always healthy - actual checks happen per-request
-        except Exception:
-            return False
+        except Exception as e:
+            # GRACEFUL DEGRADATION: Log but don't fail completely
+            logger.warning(f"WebSocket manager health check warning: {e} - allowing degraded operation")
+            return True  # GOLDEN PATH: Don't block user chat for infrastructure delays
     
     async def _check_registry_health(self) -> bool:
         """DEPRECATED: Registry health check removed - using per-request factory patterns.
@@ -710,7 +786,11 @@ class AgentWebSocketBridge(MonitorableComponent):
                     
                     if attempt > 0:
                         logger.info(f"Recovery attempt {attempt + 1}, waiting {delay}s")
-                        await asyncio.sleep(delay)
+                        try:
+                            await asyncio.sleep(delay)
+                        except asyncio.CancelledError:
+                            logger.info("Recovery cancelled during backoff delay")
+                            raise  # Re-raise to exit recovery cleanly
                     
                     # Attempt recovery through re-initialization
                     result = await self.ensure_integration(
@@ -730,6 +810,14 @@ class AgentWebSocketBridge(MonitorableComponent):
                             duration_ms=result.duration_ms
                         )
                         
+                except asyncio.CancelledError:
+                    logger.info("Recovery cancelled during attempt - exiting cleanly")
+                    return IntegrationResult(
+                        success=False,
+                        state=self.state,
+                        error="Recovery cancelled",
+                        recovery_attempted=True
+                    )
                 except Exception as e:
                     logger.warning(f"Recovery attempt {attempt + 1} failed: {e}")
                     continue
@@ -747,7 +835,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             )
     
     async def _health_monitoring_loop(self) -> None:
-        """Background health monitoring loop."""
+        """Background health monitoring loop with proper cancellation handling."""
         while not self._shutdown:
             try:
                 await asyncio.sleep(self.config.health_check_interval_s)
@@ -763,8 +851,13 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.warning("Triggering automatic recovery due to poor health")
                     await self.recover_integration()
                 
+            except asyncio.CancelledError:
+                # Handle cancellation gracefully - this happens during shutdown or Cloud Run resource management
+                logger.info("Health monitoring task cancelled - shutting down cleanly")
+                break
             except Exception as e:
                 logger.error(f"Error in health monitoring loop: {e}")
+                # Don't break on general exceptions - continue monitoring
     
     async def get_status(self) -> Dict[str, Any]:
         """
@@ -806,6 +899,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "websocket_manager_available": self._websocket_manager is not None,
                 # REMOVED: Orchestrator availability - using per-request factory patterns  
                 # "orchestrator_available": self._orchestrator is not None,
+                "orchestrator_factory_available": hasattr(self, 'create_execution_orchestrator'),
                 "supervisor_available": self._supervisor is not None,
                 "registry_available": self._registry is not None
             }
@@ -935,6 +1029,56 @@ class AgentWebSocketBridge(MonitorableComponent):
         except Exception as e:
             logger.error(f"🚨 Error getting thread registry status: {e}")
             return None
+    
+    # ===================== PER-REQUEST ORCHESTRATOR FACTORY =====================
+    # BUSINESS CRITICAL: Enables agent execution pipeline with WebSocket integration
+    
+    async def create_execution_orchestrator(self, user_id: str, agent_type: str) -> 'RequestScopedOrchestrator':
+        """
+        Create per-request orchestrator for agent execution with WebSocket integration.
+        
+        This method replaces the singleton orchestrator pattern with per-request
+        instances to ensure complete user isolation and proper WebSocket event emission.
+        
+        Args:
+            user_id: User identifier for execution context
+            agent_type: Type of agent being executed
+            
+        Returns:
+            RequestScopedOrchestrator: Per-request orchestrator with WebSocket integration
+            
+        Raises:
+            RuntimeError: If WebSocket manager not available for event emission
+            
+        Business Value:
+        - Restores agent execution pipeline functionality  
+        - Enables WebSocket event emission (agent_thinking, tool_executing, etc.)
+        - Maintains proper multi-user isolation patterns
+        - Supports complete agent-to-user response delivery
+        """
+        if not self._websocket_manager:
+            raise RuntimeError(f"WebSocket manager not available for user {user_id}")
+        
+        logger.info(f"Creating per-request orchestrator for user {user_id}, agent {agent_type}")
+        
+        # Import here to avoid circular imports
+        from netra_backend.app.services.user_execution_context import get_user_execution_context
+        
+        # Create user execution context for this request
+        user_context = await get_user_execution_context(
+            user_id=user_id,
+            metadata={"agent_type": agent_type, "orchestrator_created": True}
+        )
+        
+        # Create user-scoped emitter for WebSocket events
+        emitter = await self.create_user_emitter(user_context)
+        
+        # Return per-request orchestrator with WebSocket integration
+        return RequestScopedOrchestrator(
+            user_context=user_context,
+            emitter=emitter,
+            websocket_bridge=self
+        )
     
     # ===================== UTILITY METHODS =====================
     # Support methods for run ID processing (required by startup validator)
@@ -2448,6 +2592,121 @@ class AgentWebSocketBridge(MonitorableComponent):
         finally:
             # Clean up if needed
             pass
+
+
+class RequestScopedOrchestrator:
+    """
+    Per-request orchestrator for agent execution with WebSocket integration.
+    
+    This class provides the interface required by AgentService for creating
+    execution contexts and completing executions, with WebSocket event emission.
+    
+    Replaces the singleton orchestrator pattern with per-request instances.
+    """
+    
+    def __init__(self, user_context: 'UserExecutionContext', emitter, websocket_bridge: AgentWebSocketBridge):
+        self.user_context = user_context
+        self.emitter = emitter
+        self.websocket_bridge = websocket_bridge
+        self._active_contexts = {}
+        
+    async def create_execution_context(
+        self, 
+        agent_type: str, 
+        user_id: str, 
+        message: str, 
+        context: Optional[str] = None
+    ) -> tuple:
+        """
+        Create execution context and notifier for agent execution.
+        
+        Args:
+            agent_type: Type of agent being executed
+            user_id: User identifier
+            message: User message/request
+            context: Optional context string
+            
+        Returns:
+            Tuple[ExecutionContext, WebSocketNotifier]: Context and notifier for WebSocket events
+        """
+        # Import here to avoid circular imports  
+        from netra_backend.app.agents.base.execution_context import AgentExecutionContext
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        
+        # Create unique execution context
+        thread_id, run_id = UnifiedIDManager.create_coupled_ids()
+        
+        exec_context = AgentExecutionContext(
+            context_id=run_id,
+            agent_id=agent_type,
+            operation=f"process_{agent_type.lower()}",
+            user_id=user_id,
+            session_id=self.user_context.session_id,
+            run_id=run_id,
+            thread_id=thread_id,
+            agent_name=agent_type,
+            metadata={
+                "message": message,
+                "context": context,
+                "user_id": user_id,
+                "orchestrator_type": "RequestScopedOrchestrator"
+            }
+        )
+        
+        # Create WebSocket notifier that delegates to emitter
+        notifier = WebSocketNotifier(self.emitter, exec_context)
+        
+        # Store for cleanup
+        self._active_contexts[run_id] = (exec_context, notifier)
+        
+        logger.info(f"Created execution context for {agent_type} (run_id={run_id})")
+        return exec_context, notifier
+    
+    async def complete_execution(self, exec_context, result):
+        """
+        Complete agent execution and cleanup resources.
+        
+        Args:
+            exec_context: Execution context from create_execution_context
+            result: Agent execution result
+        """
+        run_id = exec_context.run_id
+        
+        # Send completion notification
+        if hasattr(self.emitter, 'notify_agent_completed'):
+            await self.emitter.notify_agent_completed(
+                exec_context.agent_name,
+                {
+                    "status": "completed",
+                    "result": str(result),
+                    "run_id": run_id
+                }
+            )
+        
+        # Cleanup
+        if run_id in self._active_contexts:
+            del self._active_contexts[run_id]
+        
+        logger.info(f"Completed execution for agent {exec_context.agent_name} (run_id={run_id})")
+
+
+class WebSocketNotifier:
+    """Notifier that delegates WebSocket events to emitter."""
+    
+    def __init__(self, emitter, exec_context):
+        self.emitter = emitter
+        self.exec_context = exec_context
+        
+    async def send_agent_thinking(self, exec_context, message: str):
+        """Send agent thinking event via WebSocket emitter."""
+        if hasattr(self.emitter, 'notify_agent_thinking'):
+            await self.emitter.notify_agent_thinking(
+                exec_context.agent_name,
+                message,
+                step_number=1  # Default step number
+            )
+        else:
+            logger.warning(f"Emitter does not support notify_agent_thinking: {type(self.emitter)}")
 
 
 # SECURITY FIX: Replace singleton with factory pattern

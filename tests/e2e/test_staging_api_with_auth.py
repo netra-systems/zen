@@ -30,11 +30,11 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture
 async def auth_helper():
     """Provide auth helper for tests with GCP staging configuration."""
-    # Use staging service URLs from task requirements
+    # Use staging service URLs from task requirements - LOAD BALANCER ENDPOINTS
     auth_helper = StagingAuthHelper()
     auth_helper.staging_auth_url = "https://auth.staging.netrasystems.ai"
-    auth_helper.staging_backend_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-    auth_helper.staging_frontend_url = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
+    auth_helper.staging_backend_url = "https://api.staging.netrasystems.ai"
+    auth_helper.staging_frontend_url = "https://app.staging.netrasystems.ai"
     return auth_helper
 
 

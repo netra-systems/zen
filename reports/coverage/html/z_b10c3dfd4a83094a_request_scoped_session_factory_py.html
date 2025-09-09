@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_b10c3dfd4a83094a_row_level_security_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 16:26 -0700
+            created at 2025-09-09 12:17 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -187,7 +187,7 @@
     <p class="mis show_mis"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_lock</span> <span class="op">=</span> <span class="nam">asyncio</span><span class="op">.</span><span class="nam">Lock</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_cleanup_task</span><span class="op">:</span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">asyncio</span><span class="op">.</span><span class="nam">Task</span><span class="op">]</span> <span class="op">=</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_leak_detection_enabled</span> <span class="op">=</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_max_session_lifetime_ms</span> <span class="op">=</span> <span class="num">300000</span>  <span class="com"># 5 minutes</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_max_session_lifetime_ms</span> <span class="op">=</span> <span class="num">30000</span>   <span class="com"># WEBSOCKET OPTIMIZATION: Reduced from 5min to 30s for faster turnover</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_leak_detection_interval</span> <span class="op">=</span> <span class="num">60</span>  <span class="com"># 1 minute</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">        <span class="com"># Start background cleanup task</span>&nbsp;</span><span class="r"></span></p>
@@ -819,7 +819,7 @@
             <a class="nav" href="z_b10c3dfd4a83094a_row_level_security_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-08 16:26 -0700
+            created at 2025-09-09 12:17 -0700
         </p>
     </div>
 </footer>

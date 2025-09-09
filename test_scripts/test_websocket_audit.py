@@ -3,7 +3,7 @@
 import asyncio
 import sys
 from pathlib import Path
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 sys.path.append(str(Path(__file__).parent))
 

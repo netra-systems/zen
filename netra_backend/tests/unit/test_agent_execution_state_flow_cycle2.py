@@ -310,7 +310,7 @@ class TestAgentExecutionStateFlow:
             timeout_states.append(MockAgentExecutionState.THINKING)
             
             # Simulate very slow processing that would timeout
-            await asyncio.sleep(10)  # This should be interrupted by timeout
+            await asyncio.sleep(2)  # This should be interrupted by timeout
             
             timeout_states.append(MockAgentExecutionState.COMPLETED)  # Should not reach here
             return mock_agent_state

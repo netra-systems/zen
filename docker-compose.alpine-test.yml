@@ -160,13 +160,11 @@ services:
       WORKERS: 2
       SERVICE_ID: backend-test-alpine
       JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
-      SERVICE_SECRET: test_service_secret
+      SERVICE_SECRET: test_service_secret_32_character_minimum_length_required
       FERNET_KEY: hMT-Xu0HfnNhKf-J5sKXMJLnCfCiSUQnVdE1yc6Xqzg=
     ports:
       - "${ALPINE_TEST_BACKEND_PORT:-8002}:8000"
     depends_on:
-      alpine-test-migration:
-        condition: service_completed_successfully
       alpine-test-postgres:
         condition: service_healthy
         restart: true
@@ -213,7 +211,7 @@ services:
       REDIS_URL: redis://alpine-test-redis:6379
       TEST_MODE: "true"
       JWT_SECRET_KEY: rsWwwvq8X6mCSuNv-TMXHDCfb96Xc-Dbay9MZy6EDCU
-      SERVICE_SECRET: test_service_secret
+      SERVICE_SECRET: test_service_secret_32_character_minimum_length_required
       SERVICE_ID: auth-test-alpine
     ports:
       - "${ALPINE_TEST_AUTH_PORT:-8083}:8081"

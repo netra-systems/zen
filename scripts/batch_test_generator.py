@@ -232,7 +232,7 @@ Business Value: {business_value}
 import pytest
 import asyncio
 from netra_backend.{module_path} import {class_names}
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 
 @pytest.mark.integration
 class Test{main_class}Integration:
@@ -241,7 +241,7 @@ class Test{main_class}Integration:
     @pytest.fixture
     async def db_session(self):
         """Get test database session"""
-        async with get_db_session() as session:
+        async with get_db() as session:
             yield session
     
     async def test_database_operations(self, db_session):

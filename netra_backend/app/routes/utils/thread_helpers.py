@@ -42,6 +42,7 @@ from netra_backend.app.routes.utils.thread_handlers import (
     handle_get_messages_request,
     handle_get_thread_request,
     handle_list_threads_request,
+    handle_send_message_request,
     handle_update_thread_request,
     update_thread_metadata_fields,
 )

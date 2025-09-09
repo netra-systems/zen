@@ -38,6 +38,14 @@ import platform
 import shutil
 from shared.isolated_environment import get_env
 
+# Import WebSocket for health checking
+try:
+    import websockets
+    WEBSOCKET_AVAILABLE = True
+except ImportError:
+    WEBSOCKET_AVAILABLE = False
+    warnings.warn("websockets package not available - WebSocket health checks disabled")
+
 # Use IsolatedEnvironment for all environment access
 env = get_env()
 
@@ -248,6 +256,16 @@ class EnvironmentType(Enum):
     STAGING = "staging"  # Staging environment
     PRODUCTION = "production"  # Production-like images
     DEVELOPMENT = "development"  # Development images
+
+
+class ServiceType(Enum):
+    """Docker service types for the Netra platform"""
+    BACKEND = "backend"
+    AUTH = "auth"  
+    FRONTEND = "frontend"
+    POSTGRES = "postgres"
+    REDIS = "redis"
+    CLICKHOUSE = "clickhouse"
 
 
 class ServiceMode(Enum):
@@ -2500,8 +2518,32 @@ class UnifiedDockerManager:
                             last_check=time.time()
                         )
                 
-                elif service in ["backend", "auth", "frontend"]:
-                    # HTTP services - check health endpoint
+                elif service == "backend":
+                    # Backend service - check both HTTP and WebSocket health
+                    # First check HTTP health endpoint
+                    health_url = f"http://{mapping.host}:{mapping.external_port}/health"
+                    http_healthy = await self._check_http_health(health_url, self.config.health_check_timeout)
+                    
+                    if http_healthy:
+                        # HTTP is healthy, now check WebSocket endpoint
+                        ws_url = f"ws://{mapping.host}:{mapping.external_port}/ws"
+                        ws_healthy = await self._check_websocket_health(ws_url, self.config.health_check_timeout)
+                        
+                        if ws_healthy:
+                            response_time = (time.time() - start_time) * 1000
+                            _get_logger().debug(f"✅ Backend service fully healthy (HTTP + WebSocket): {mapping.external_port}")
+                            return ServiceHealth(
+                                service_name=service,
+                                is_healthy=True,
+                                port=mapping.external_port,
+                                response_time_ms=response_time,
+                                last_check=time.time()
+                            )
+                        else:
+                            _get_logger().warning(f"⚠️ Backend HTTP healthy but WebSocket failed: {mapping.external_port}")
+                    
+                elif service in ["auth", "frontend"]:
+                    # HTTP services - check health endpoint only
                     health_url = f"http://{mapping.host}:{mapping.external_port}/health"
                     is_healthy = await self._check_http_health(health_url, self.config.health_check_timeout)
                     if is_healthy:
@@ -2562,6 +2604,60 @@ class UnifiedDockerManager:
                     "Install with: pip install aiohttp. No fallback connectivity checks allowed."
                 )
         except Exception:
+            return False
+
+    async def _check_websocket_health(self, ws_url: str, timeout: float) -> bool:
+        """Check WebSocket health with actual handshake test.
+        
+        This method performs a real WebSocket connection handshake to validate
+        that the WebSocket endpoint is properly functioning, not just accepting HTTP requests.
+        
+        Args:
+            ws_url: WebSocket URL (e.g., "ws://localhost:8000/ws")
+            timeout: Connection timeout in seconds
+            
+        Returns:
+            True if WebSocket handshake succeeds, False otherwise
+        """
+        if not WEBSOCKET_AVAILABLE:
+            _get_logger().warning("⚠️ WebSocket health check skipped - websockets package not available")
+            return False
+        
+        try:
+            # Perform actual WebSocket handshake test
+            async with asyncio.wait_for(
+                websockets.connect(
+                    ws_url,
+                    open_timeout=timeout,
+                    close_timeout=2.0,
+                    ping_timeout=None,  # Disable ping for health check
+                    max_size=None,      # No message size limit for health check
+                ),
+                timeout=timeout
+            ) as websocket:
+                # Successfully connected and performed handshake
+                # Send a minimal health check message
+                await websocket.send('{"type": "health_check"}')
+                
+                # Try to receive any response (or timeout gracefully)
+                try:
+                    await asyncio.wait_for(websocket.recv(), timeout=2.0)
+                except asyncio.TimeoutError:
+                    # No response is acceptable - connection handshake succeeded
+                    pass
+                
+                _get_logger().debug(f"✅ WebSocket health check succeeded: {ws_url}")
+                return True
+                
+        except (websockets.exceptions.ConnectionClosed,
+                websockets.exceptions.InvalidStatusCode,
+                websockets.exceptions.InvalidHandshake,
+                asyncio.TimeoutError,
+                OSError) as e:
+            _get_logger().debug(f"❌ WebSocket health check failed for {ws_url}: {e}")
+            return False
+        except Exception as e:
+            _get_logger().warning(f"⚠️ Unexpected error in WebSocket health check for {ws_url}: {e}")
             return False
 
     def _configure_service_environment(self, discovered_ports: Optional[Dict[str, int]] = None) -> None:
@@ -3372,6 +3468,67 @@ class UnifiedDockerManager:
             return self.wait_for_services(services, timeout=self.HEALTH_CHECK_TIMEOUT)
             
         return True
+    
+    async def ensure_services_running(self, services: List[str], timeout: int = 60) -> bool:
+        """
+        Ensure specified services are running and healthy.
+        
+        This method checks if services are already running and healthy, and starts them
+        if they are not. It's the entry point for integration tests that need specific
+        services to be available.
+        
+        Args:
+            services: List of service names to ensure are running
+            timeout: Maximum time to wait for services to be healthy
+            
+        Returns:
+            True if all services are running and healthy, False otherwise
+        """
+        if not services:
+            _get_logger().warning("No services specified to ensure running")
+            return True
+            
+        _get_logger().info(f"🔍 Ensuring services are running: {', '.join(services)}")
+        
+        # Perform memory pre-flight check
+        if not self.perform_memory_pre_flight_check():
+            _get_logger().error("❌ Memory pre-flight check failed - cannot ensure services safely")
+            return False
+        
+        # Check which services are already running and healthy
+        running_services = []
+        services_to_start = []
+        
+        for service in services:
+            if service not in self.SERVICES:
+                _get_logger().error(f"❌ Unknown service: {service}")
+                return False
+                
+            if await self.check_container_reusable(service):
+                running_services.append(service)
+                _get_logger().info(f"✅ Service {service} is already running and healthy")
+            else:
+                services_to_start.append(service)
+                _get_logger().info(f"⚠️ Service {service} needs to be started")
+        
+        # Start services that are not running
+        if services_to_start:
+            _get_logger().info(f"🚀 Starting {len(services_to_start)} services: {', '.join(services_to_start)}")
+            start_success = await self.start_services_smart(services_to_start, wait_healthy=True)
+            if not start_success:
+                _get_logger().error(f"❌ Failed to start required services: {', '.join(services_to_start)}")
+                return False
+        
+        # Final health check for all requested services
+        _get_logger().info(f"🏥 Final health check for all services: {', '.join(services)}")
+        health_check_success = self.wait_for_services(services, timeout=timeout)
+        
+        if health_check_success:
+            _get_logger().info(f"✅ All services are running and healthy: {', '.join(services)}")
+        else:
+            _get_logger().error(f"❌ Health check failed for services: {', '.join(services)}")
+            
+        return health_check_success
     
     def _check_base_images(self) -> bool:
         """
@@ -4905,3 +5062,31 @@ class ServiceOrchestrator(UnifiedDockerManager):
 
 # Removed duplicate UnifiedDockerManager class that was causing circular inheritance
 # The main UnifiedDockerManager class (starting at line 192) is the correct implementation
+
+# Export all public classes and enums
+__all__ = [
+    "UnifiedDockerManager",
+    "ServiceOrchestrator", 
+    "EnvironmentType",
+    "ServiceType",
+    "ServiceMode",
+    "ContainerState",
+    "ServiceStatus",
+    "DockerIntrospector",
+    "IntrospectionReport",
+    "DockerPortDiscovery",
+    "ServicePortMapping",
+    "DynamicPortAllocator",
+    "PortRange",
+    "PortAllocationResult",
+    "allocate_test_ports",
+    "release_test_ports",
+    "DockerRateLimiter",
+    "execute_docker_command",
+    "get_docker_rate_limiter",
+    "DockerResourceMonitor",
+    "ResourceThresholdLevel",
+    "DockerResourceSnapshot",
+    "MemoryGuardian",
+    "TestProfile"
+]

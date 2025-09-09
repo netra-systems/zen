@@ -21,8 +21,8 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.interface import (
     ExecutionContext,
     ExecutionResult,
-    WebSocketManagerProtocol,
 )
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability import (

@@ -9,7 +9,7 @@ import json
 import uuid
 import time
 
-BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+BACKEND_URL = "https://api.staging.netrasystems.ai"
 AUTH_SERVICE_URL = "https://auth.staging.netrasystems.ai"
 
 async def test_all():

@@ -4,6 +4,7 @@
 
 ### 🏗️ Core Architecture (Start Here)
 
+- **[🚀 Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** 🎯 - **MISSION CRITICAL**: Complete user journey analysis from connection to response delivery, identifies critical race conditions and WebSocket event requirements ($500K+ ARR dependency)
 - **[SSOT Index](../reports/ssot-compliance/SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
 - **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams including child context hierarchies
 - **[UVS Triage Architecture Transition](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** 🆕 - **NEW**: Unified Validation System with intelligent data sufficiency states and 2-agent model
@@ -145,13 +146,14 @@ The system uses factory patterns extensively:
 
 ## 📖 Essential Reading Order
 
-1. **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Start here for system overview including child context patterns
-2. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
-3. **[Golden Agent Index](./GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
-4. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
-5. [Tool Dispatcher Migration Guide](../reports/archived/TOOL_DISPATCHER_DEDUPLICATION_REPORT.md) - Learn isolation patterns
-6. [WebSocket Modernization Report](../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
-7. [Learnings Index](../SPEC/learnings/index.xml) - Critical patterns and known issues
+1. **[🚀 Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **START HERE**: Complete user journey with critical issues and business impact
+2. **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory-based system overview including child context patterns
+3. **[Agent Architecture Disambiguation Guide](./AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarify component relationships
+4. **[Golden Agent Index](./GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns
+5. [Agent System Architecture](./AGENT_SYSTEM_ARCHITECTURE.md) - Understand agent execution
+6. [Tool Dispatcher Migration Guide](../reports/archived/TOOL_DISPATCHER_DEDUPLICATION_REPORT.md) - Learn isolation patterns
+7. [WebSocket Modernization Report](../reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - Event delivery system
+8. [Learnings Index](../SPEC/learnings/index.xml) - Critical patterns and known issues
 
 ## 📚 Documentation Archive
 

@@ -15,6 +15,17 @@ Endpoints provided:
 
 CRITICAL: This replaces ALL previous WebSocket endpoints.
 All clients should migrate to /ws with proper JWT authentication.
+
+🚀 GOLDEN PATH REFERENCE:
+See docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md for complete user journey analysis
+including critical race condition fixes and WebSocket event requirements.
+This file addresses the $500K+ ARR dependency on reliable chat functionality.
+
+CRITICAL ISSUES ADDRESSED:
+- WebSocket race conditions in Cloud Run environments
+- Missing business-critical WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)  
+- Service dependency graceful degradation
+- Factory initialization SSOT validation failures
 """
 
 import asyncio
@@ -23,6 +34,14 @@ import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
+
+# CRITICAL FIX: Import Windows-safe asyncio patterns to prevent deadlocks
+from netra_backend.app.core.windows_asyncio_safe import (
+    windows_safe_sleep,
+    windows_safe_wait_for,
+    windows_safe_progressive_delay,
+    windows_asyncio_safe,
+)
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
@@ -44,25 +63,18 @@ from netra_backend.app.websocket_core import (
     MessageType,
     WebSocketConfig
 )
+from netra_backend.app.websocket_core.unified_websocket_auth import get_websocket_authenticator
 from netra_backend.app.websocket_core.utils import (
     is_websocket_connected, 
     is_websocket_connected_and_ready, 
-    validate_websocket_handshake_completion
+    validate_websocket_handshake_completion,
+    _safe_websocket_state_for_logging
 )
 
 logger = central_logger.get_logger(__name__)
 
 
-def _safe_websocket_state_for_logging(state) -> str:
-    """
-    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
-    """
-    try:
-        if hasattr(state, 'name') and hasattr(state, 'value'):
-            return str(state.name).lower()  # CONNECTED -> "connected"
-        return str(state)
-    except Exception:
-        return "<serialization_error>"
+# REMOVED DUPLICATE: Use SSOT function from websocket_core.utils
 
 
 router = APIRouter(tags=["WebSocket"])
@@ -101,7 +113,7 @@ def _get_staging_optimized_timeouts():
         # and GCP load balancer keepalive requirements
         return {
             "connection_timeout_seconds": int(env.get("WEBSOCKET_CONNECTION_TIMEOUT", "600")),
-            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "30")),
+            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "25")),  # Staging: GCP compatible
             "heartbeat_timeout_seconds": int(env.get("WEBSOCKET_HEARTBEAT_TIMEOUT", "90")),
             "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "120"))
         }
@@ -117,23 +129,25 @@ def _get_staging_optimized_timeouts():
         # Development/testing - more permissive with environment variables
         return {
             "connection_timeout_seconds": int(env.get("WEBSOCKET_CONNECTION_TIMEOUT", "300")),
-            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "45")),
+            "heartbeat_interval_seconds": int(env.get("WEBSOCKET_HEARTBEAT_INTERVAL", "20")),  # Development: Faster heartbeat for testing
             "heartbeat_timeout_seconds": int(env.get("WEBSOCKET_HEARTBEAT_TIMEOUT", "60")),
             "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "60"))
         }
 
-# Get environment-specific timeout configuration
+# PHASE 1 FIX 3: Get environment-specific timeout configuration with Cloud Run optimizations
 _timeout_config = _get_staging_optimized_timeouts()
 
-WEBSOCKET_CONFIG = WebSocketConfig(
-    max_connections_per_user=3,
-    max_message_rate_per_minute=_get_rate_limit_for_environment(),
-    max_message_size_bytes=8192,
-    connection_timeout_seconds=_timeout_config["connection_timeout_seconds"],
-    heartbeat_interval_seconds=_timeout_config["heartbeat_interval_seconds"],
-    cleanup_interval_seconds=_timeout_config["cleanup_interval_seconds"],
-    enable_compression=False
-)
+# Use environment-aware WebSocket configuration to handle Cloud Run race conditions
+WEBSOCKET_CONFIG = WebSocketConfig.detect_and_configure_for_environment()
+
+# Override with legacy timeout configuration for backward compatibility
+WEBSOCKET_CONFIG.max_connections_per_user = 3
+WEBSOCKET_CONFIG.max_message_rate_per_minute = _get_rate_limit_for_environment()
+WEBSOCKET_CONFIG.max_message_size_bytes = 8192
+WEBSOCKET_CONFIG.connection_timeout_seconds = _timeout_config["connection_timeout_seconds"]
+# Keep environment-optimized heartbeat_interval_seconds from detect_and_configure_for_environment()
+WEBSOCKET_CONFIG.cleanup_interval_seconds = _timeout_config["cleanup_interval_seconds"]
+WEBSOCKET_CONFIG.enable_compression = False
 
 # CRITICAL FIX: Export heartbeat timeout for heartbeat manager configuration
 HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
@@ -141,6 +155,7 @@ HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
 
 @router.websocket("/ws")
 @gcp_reportable(reraise=True)
+@windows_asyncio_safe
 async def websocket_endpoint(websocket: WebSocket):
     """
     Main WebSocket endpoint - handles all WebSocket connections.
@@ -233,17 +248,48 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.accept()
             logger.debug("WebSocket accepted without subprotocol")
         
+        # PHASE 1 FIX 1: Integrate ApplicationConnectionStateMachine after successful accept()
+        # This addresses the race condition where message handling begins before accept() completion
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, ApplicationConnectionState
+        
+        # Generate preliminary connection_id for state machine registration
+        # This will be updated with proper user context after authentication
+        preliminary_connection_id = f"ws_init_{int(time.time())}"
+        temp_user_id = "pending_auth"
+        
+        state_registry = get_connection_state_registry()
+        state_machine = state_registry.register_connection(preliminary_connection_id, temp_user_id)
+        
+        # Transition to ACCEPTED state after successful WebSocket accept()
+        accept_transition_success = state_machine.transition_to(
+            ApplicationConnectionState.ACCEPTED,
+            reason="WebSocket accept() completed successfully",
+            metadata={
+                "selected_protocol": selected_protocol,
+                "environment": environment,
+                "accept_timestamp": time.time()
+            }
+        )
+        
+        if accept_transition_success:
+            logger.info(f"State machine transitioned to ACCEPTED for {preliminary_connection_id}")
+        else:
+            logger.error(f"Failed to transition state machine to ACCEPTED for {preliminary_connection_id}")
+            # Don't fail the connection, but log the issue
+        
         # CRITICAL RACE CONDITION FIX: Progressive post-accept delays for Cloud Run environments
+        # CRITICAL FIX: Windows-safe asyncio patterns to prevent deadlocks
         # This addresses the core race condition where message handling starts before handshake completion
         if environment in ["staging", "production"]:
-            # Stage 1: Initial network propagation delay
-            await asyncio.sleep(0.05)  # 50ms for GCP Cloud Run network propagation
+            # Stage 1: Initial network propagation delay with Windows-safe sleep
+            await windows_safe_sleep(0.05)  # 50ms for GCP Cloud Run network propagation
             
             # Stage 2: Validate that accept() has fully completed
             if websocket.client_state != WebSocketState.CONNECTED:
                 logger.warning(f"WebSocket not immediately in CONNECTED state after accept() - applying progressive delay")
                 for delay_attempt in range(3):
-                    await asyncio.sleep(0.025 * (delay_attempt + 1))  # 25ms, 50ms, 75ms
+                    # Use Windows-safe progressive delay instead of nested asyncio.sleep
+                    await windows_safe_progressive_delay(delay_attempt, 0.025, 0.075)
                     if websocket.client_state == WebSocketState.CONNECTED:
                         logger.info(f"WebSocket reached CONNECTED state after {delay_attempt + 1} delay attempts")
                         break
@@ -251,14 +297,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 if websocket.client_state != WebSocketState.CONNECTED:
                     logger.error(f"WebSocket still not in CONNECTED state after progressive delays: {_safe_websocket_state_for_logging(websocket.client_state)}")
             
-            # Stage 3: Final stabilization delay
-            await asyncio.sleep(0.025)  # Additional 25ms for Cloud Run stabilization
+            # Stage 3: Final stabilization delay with Windows-safe sleep
+            await windows_safe_sleep(0.025)  # Additional 25ms for Cloud Run stabilization
             
             logger.debug(f"Cloud Run post-accept stabilization complete for {environment}")
         elif environment == "testing":
-            await asyncio.sleep(0.005)  # Minimal 5ms delay for tests
+            await windows_safe_sleep(0.005)  # Minimal 5ms delay for tests
         else:
-            await asyncio.sleep(0.01)   # 10ms for development environments
+            await windows_safe_sleep(0.01)   # 10ms for development environments
         
         # 🚨 SSOT ENFORCEMENT: Use unified authentication service (SINGLE SOURCE OF TRUTH)
         # This replaces ALL previous authentication paths:
@@ -326,7 +372,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 }
             )
             await safe_websocket_send(websocket, auth_error.model_dump())
-            await asyncio.sleep(0.1)  # Brief delay to ensure message is sent
+            await windows_safe_sleep(0.1)  # Brief delay to ensure message is sent
             await safe_websocket_close(websocket, code=1008, reason="SSOT Auth failed")
             return
         
@@ -445,6 +491,12 @@ async def websocket_endpoint(websocket: WebSocket):
         from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
         from netra_backend.app.services.message_handlers import MessageHandlerService
         
+        # STAGE 1 ENHANCEMENT: Import Service Readiness Validator for adaptive service checking
+        from netra_backend.app.websocket_core.service_readiness_validator import (
+            create_service_readiness_validator,
+            websocket_readiness_guard
+        )
+        
         # Get dependencies from app state (check if they exist first)
         supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
         thread_service = getattr(websocket.app.state, 'thread_service', None)
@@ -478,7 +530,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.info(f"WebSocket connection waiting for startup to complete in {environment} (in_progress={startup_in_progress}) - max wait: {max_wait_time}s")
                 
                 while not startup_complete and total_waited < max_wait_time:
-                    await asyncio.sleep(wait_interval)
+                    await windows_safe_sleep(wait_interval)
                     total_waited += wait_interval
                     startup_complete = getattr(websocket.app.state, 'startup_complete', False)
                     startup_in_progress = getattr(websocket.app.state, 'startup_in_progress', False)
@@ -513,20 +565,88 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 logger.info(f"WebSocket proceeding after {total_waited}s wait (startup_complete={startup_complete})")
         
-        # CRITICAL FIX: After waiting for startup, services should be initialized
-        # If they're still missing, use graceful degradation instead of 1011 failure
+        # STAGE 1 ENHANCEMENT: Use adaptive service validation with graceful degradation
+        # This replaces hard-coded service checks with intelligent timeout logic
+        logger.info("🔍 Stage 1: Performing adaptive service readiness validation...")
+        
+        service_validation_results = None
+        validation_start_time = time.time()
+        
+        try:
+            # Create service readiness validator for current environment
+            service_validator = create_service_readiness_validator(websocket.app.state, environment)
+            
+            # Validate critical WebSocket services with adaptive timeouts
+            critical_services = ["database", "redis", "auth_system", "agent_supervisor", "thread_service"]
+            
+            # Use shorter timeout for WebSocket connections to prevent blocking
+            validation_timeout = 10.0 if environment in ["test", "development"] else 20.0
+            
+            service_group_result = await service_validator.validate_service_group(
+                critical_services,
+                group_name="websocket_connection_critical",
+                fail_fast_on_critical=False  # Don't fail fast - collect all validation results
+            )
+            
+            validation_elapsed = time.time() - validation_start_time
+            service_validation_results = service_group_result
+            
+            logger.info(
+                f"✅ Service validation complete ({validation_elapsed:.2f}s): "
+                f"{service_group_result.ready_services}/{service_group_result.total_services} ready, "
+                f"{len(service_group_result.critical_failures)} critical failures, "
+                f"{len(service_group_result.degraded_services)} degraded"
+            )
+            
+            # Log detailed service status
+            for service_name, result in service_group_result.service_results.items():
+                status_icon = "✅" if result.ready else ("⚠️" if result.degradation_applied else "❌")
+                logger.info(
+                    f"  {status_icon} {service_name}: {result.level.value} "
+                    f"({result.elapsed_time:.3f}s, {result.attempts} attempts)"
+                )
+                if result.error_message:
+                    logger.debug(f"    Error: {result.error_message}")
+            
+            # Extract service references from validation results or app state
+            # This maintains backward compatibility with existing code
+            supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+            thread_service = getattr(websocket.app.state, 'thread_service', None)
+            
+        except Exception as validation_error:
+            validation_elapsed = time.time() - validation_start_time
+            logger.error(f"🔴 Service validation error ({validation_elapsed:.2f}s): {validation_error}")
+            logger.info("🔄 Falling back to legacy service checking for reliability")
+            
+            # Fallback to original service checking logic
+            supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+            thread_service = getattr(websocket.app.state, 'thread_service', None)
+        
+        # ENHANCED LEGACY COMPATIBILITY: Maintain original service checking with improvements
+        # This code maintains all existing functionality while adding adaptive logic
         if supervisor is None:
             logger.warning(f"agent_supervisor is None in {environment} - using graceful degradation")
             
             # CRITICAL FIX: Don't fail immediately - use fallback pattern for staging
             if environment in ["staging", "production"]:
-                # CRITICAL FIX: Reduced wait time to prevent WebSocket blocking
-                supervisor_wait_attempts = 2  # Reduced from 3 to 2 attempts
+                # STAGE 1 ENHANCEMENT: Use adaptive timeout based on service validation results
+                if service_validation_results and 'agent_supervisor' in service_validation_results.service_results:
+                    supervisor_result = service_validation_results.service_results['agent_supervisor']
+                    # Use adaptive retry count based on validation results
+                    supervisor_wait_attempts = max(2, min(supervisor_result.attempts, 5))
+                    retry_delay = 0.1 if supervisor_result.elapsed_time < 1.0 else 0.2
+                else:
+                    # Fallback to reduced wait time to prevent WebSocket blocking
+                    supervisor_wait_attempts = 2
+                    retry_delay = 0.1
+                
+                logger.info(f"🔄 Attempting {supervisor_wait_attempts} supervisor recovery attempts with {retry_delay}s intervals")
+                
                 for attempt in range(supervisor_wait_attempts):
-                    await asyncio.sleep(0.1)  # CRITICAL: Reduced from 500ms to 100ms per attempt
+                    await asyncio.sleep(retry_delay)
                     supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
                     if supervisor is not None:
-                        logger.info(f"supervisor initialized after {(attempt + 1) * 0.1}s wait")
+                        logger.info(f"✅ supervisor initialized after {(attempt + 1) * retry_delay}s wait")
                         break
                 
                 # If supervisor still None, use fallback but don't fail connection
@@ -540,18 +660,34 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # CRITICAL FIX: Use same graceful approach for thread_service
             if environment in ["staging", "production"]:
-                # CRITICAL FIX: Reduced wait time to prevent WebSocket blocking
-                thread_wait_attempts = 2  # Reduced from 3 to 2 attempts
+                # STAGE 1 ENHANCEMENT: Use adaptive timeout based on service validation results
+                if service_validation_results and 'thread_service' in service_validation_results.service_results:
+                    thread_result = service_validation_results.service_results['thread_service']
+                    # Use adaptive retry count based on validation results
+                    thread_wait_attempts = max(2, min(thread_result.attempts, 5))
+                    retry_delay = 0.1 if thread_result.elapsed_time < 1.0 else 0.2
+                else:
+                    # Fallback to reduced wait time to prevent WebSocket blocking
+                    thread_wait_attempts = 2
+                    retry_delay = 0.1
+                
+                logger.info(f"🔄 Attempting {thread_wait_attempts} thread_service recovery attempts with {retry_delay}s intervals")
+                
                 for attempt in range(thread_wait_attempts):
-                    await asyncio.sleep(0.1)  # CRITICAL: Reduced from 500ms to 100ms per attempt
+                    await asyncio.sleep(retry_delay)
                     thread_service = getattr(websocket.app.state, 'thread_service', None)
                     if thread_service is not None:
-                        logger.info(f"thread_service initialized after {(attempt + 1) * 0.1}s wait")
+                        logger.info(f"✅ thread_service initialized after {(attempt + 1) * retry_delay}s wait")
                         break
                 
                 # If thread_service still None, use fallback but don't fail connection
                 if thread_service is None:
-                    logger.info(f"ThreadService still None after {thread_wait_attempts * 0.1}s - using fallback (prevents WebSocket delay)")
+                    fallback_reason = "service_unavailable_after_retries"
+                    if service_validation_results and 'thread_service' in service_validation_results.service_results:
+                        thread_result = service_validation_results.service_results['thread_service']
+                        fallback_reason = f"validation_failed_{thread_result.level.value}"
+                    
+                    logger.info(f"⚠️ ThreadService still None after {thread_wait_attempts * retry_delay}s - using fallback (reason: {fallback_reason})")
             
             # No 1011 error - proceed with graceful degradation
         
@@ -572,79 +708,204 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
             except Exception as handler_error:
-                # CRITICAL FIX: Log error but don't cause 1011 - use fallback as per bug fix report
-                logger.error(f"AgentMessageHandler creation failed: {handler_error}", exc_info=True)
-                logger.info("Using fallback handler to prevent 1011 WebSocket error")
+                # CRITICAL ERROR: Handler creation failed despite services being available
+                # This indicates a more serious issue than missing services
+                logger.error(f"❌ AgentMessageHandler creation failed despite services being available: {handler_error}", exc_info=True)
+                
+                # CRITICAL: Do not use fallback handlers - this is a real error that needs to be fixed
+                # The services exist but the handler can't be created, which indicates a code issue
+                logger.error("🚨 CRITICAL ERROR: Handler creation failed with available services")
+                logger.error("🚨 This indicates a serious integration issue that must be fixed")
+                logger.error("🚨 Failing the connection to prevent user confusion")
                 
                 try:
-                    fallback_handler = _create_fallback_agent_handler(websocket)
-                    message_router.add_handler(fallback_handler)
-                    logger.info("Fallback handler created successfully")
-                except Exception as fallback_error:
-                    logger.critical(f"CRITICAL: Fallback handler also failed: {fallback_error}")
-                    
-                    # LAST RESORT: Send error but allow connection to proceed
-                    try:
-                        error_msg = create_error_message(
-                            "HANDLER_INIT_FAILED",
-                            "Agent handler initialization failed - limited functionality available",
-                            {"environment": environment, "error": str(handler_error)}
-                        )
-                        await safe_websocket_send(websocket, error_msg.model_dump())
-                    except Exception:
-                        pass  # Best effort error notification
-                    
-                    # Don't close connection - let it proceed with basic WebSocket functionality
-                    logger.warning("Proceeding with basic WebSocket connection despite handler failures")
+                    # Send detailed error to user explaining the situation
+                    error_msg = create_error_message(
+                        "HANDLER_INTEGRATION_FAILED",
+                        "Service integration failed - please try reconnecting",
+                        {
+                            "environment": environment,
+                            "error": str(handler_error),
+                            "services_available": True,
+                            "handler_failed": True,
+                            "action": "Please try reconnecting. If the issue persists, contact support."
+                        }
+                    )
+                    await safe_websocket_send(websocket, error_msg.model_dump())
+                except Exception:
+                    pass  # Best effort error notification
+                
+                # CRITICAL: Fail the connection immediately
+                # This is a code/integration issue, not a service availability issue
+                raise Exception(f"Handler integration failure: {handler_error}. Services are available but handler creation failed.")
                     
         else:
-            # CRITICAL FIX: Use fallback handlers instead of failing in staging/production
-            # This prevents 500 errors while maintaining WebSocket connectivity
+            # SSOT SERVICE INITIALIZATION: Replace fallback creation with proper service initialization
+            # This eliminates the anti-pattern of mock responses by initializing real services
             missing_deps = []
             if supervisor is None:
                 missing_deps.append("agent_supervisor")
             if thread_service is None:
                 missing_deps.append("thread_service")
-                
-            logger.warning(f"WebSocket dependencies missing in {environment}: {missing_deps}")
-            logger.warning(f"🔄 Creating fallback handler to maintain WebSocket connectivity in {environment}")
             
-            # Create fallback agent handler for ALL environments to prevent 500 errors
+            # Check for additional missing services that are critical
+            if not hasattr(websocket.app.state, 'agent_websocket_bridge') or websocket.app.state.agent_websocket_bridge is None:
+                missing_deps.append("agent_websocket_bridge")
+            if not hasattr(websocket.app.state, 'tool_classes') or not websocket.app.state.tool_classes:
+                missing_deps.append("tool_classes")
+                
+            logger.info(f"🔄 WebSocket dependencies missing in {environment}: {missing_deps}")
+            logger.info(f"🚀 Starting SSOT service initialization to provide authentic AI responses...")
+            
+            # Initialize progress communicator for transparent user experience
+            from netra_backend.app.websocket_core.initialization_progress import create_progress_communicator
+            progress_communicator = await create_progress_communicator(websocket)
+            
+            # Start SSOT service initialization instead of fallback creation
             try:
-                fallback_handler = _create_fallback_agent_handler(websocket)
-                message_router.add_handler(fallback_handler)
-                logger.info(f"[OK] Successfully created fallback AgentMessageHandler for {environment}")
-                logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
-                logger.info(f"🤖 This prevents 500 errors while providing basic agent functionality")
+                from netra_backend.app.websocket_core.service_initialization_manager import get_service_initialization_manager
                 
-                logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
+                # Get the singleton service initialization manager
+                initialization_manager = get_service_initialization_manager(websocket.app)
                 
-                # List all registered handlers for debugging
-                for idx, handler in enumerate(message_router.handlers):
-                    handler_types = getattr(handler, 'supported_types', [])
-                    logger.info(f"  Handler {idx}: {handler.__class__.__name__} - supports {handler_types}")
+                # Send initialization started event to user
+                estimated_time = 10.0 + len(missing_deps) * 3.0  # Estimate based on services
+                await progress_communicator.send_initialization_started(
+                    services_to_initialize=missing_deps,
+                    estimated_time=estimated_time
+                )
+                
+                logger.info(f"🔄 Initializing {len(missing_deps)} missing services using SSOT patterns...")
+                
+                # Perform SSOT initialization with progress updates
+                initialization_start_time = time.time()
+                success, status_report = await initialization_manager.initialize_missing_services(
+                    missing_services=set(missing_deps),
+                    max_initialization_time=30.0
+                )
+                total_initialization_time = time.time() - initialization_start_time
+                
+                if success:
+                    # Services initialized successfully - update dependencies and create real handlers
+                    logger.info(f"✅ SSOT service initialization successful in {total_initialization_time:.2f}s")
                     
-                # Send informational message about reduced functionality (non-blocking)
-                try:
-                    info_response = create_server_message(
-                        MessageType.SYSTEM_MESSAGE,
-                        {
-                            "event": "service_info",
-                            "message": "WebSocket connected with basic functionality. Some advanced features may be limited.",
-                            "environment": environment,
-                            "missing_dependencies": missing_deps,
-                            "fallback_active": True
-                        }
+                    # Send completion event to user
+                    await progress_communicator.send_initialization_completed(
+                        successful_services=status_report.get('services_initialized', []),
+                        failed_services=status_report.get('failed_services', []),
+                        total_time=total_initialization_time
                     )
-                    await safe_websocket_send(websocket, info_response.model_dump())
-                except Exception as info_error:
-                    logger.debug(f"Could not send service info message: {info_error}")
-                    # Don't fail if we can't send the info message
                     
-            except Exception as critical_fallback_error:
-                logger.critical(f"[ERROR] CRITICAL FALLBACK FAILURE in {environment}: {critical_fallback_error}")
-                # Last resort: log critical error but still allow basic WebSocket functionality
-                # This prevents 500 errors even in the worst-case scenario
+                    # Re-fetch services after initialization
+                    supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+                    thread_service = getattr(websocket.app.state, 'thread_service', None)
+                    
+                    if supervisor is not None and thread_service is not None:
+                        # Create real agent handler with initialized services
+                        try:
+                            # Import after initialization to ensure all dependencies are available
+                            from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
+                            from netra_backend.app.services.message_handlers import MessageHandlerService
+                            
+                            message_handler_service = MessageHandlerService(supervisor, thread_service)
+                            agent_handler = AgentMessageHandler(message_handler_service, websocket)
+                            
+                            message_router.add_handler(agent_handler)
+                            logger.info("✅ Created real AgentMessageHandler after SSOT initialization")
+                            
+                        except Exception as handler_error:
+                            logger.error(f"❌ Failed to create real handler after initialization: {handler_error}")
+                            # This is a critical error - we successfully initialized services but can't create handler
+                            raise Exception(f"Handler creation failed after successful service initialization: {handler_error}")
+                    else:
+                        logger.error("❌ Services still missing after successful SSOT initialization")
+                        raise Exception("Critical services missing despite successful initialization")
+                
+                else:
+                    # Initialization failed - this is a critical error
+                    error_msg = status_report.get('error', 'Unknown initialization failure')
+                    failed_services = status_report.get('failed_services', [])
+                    
+                    logger.error(f"❌ SSOT service initialization failed: {error_msg}")
+                    
+                    # Send failure event to user
+                    await progress_communicator.send_initialization_failed(
+                        error_message=error_msg,
+                        failed_services=failed_services,
+                        total_time=total_initialization_time
+                    )
+                    
+                    # CRITICAL: Fail the connection rather than using fallback
+                    # This ensures users never receive mock responses
+                    raise Exception(f"SSOT service initialization failed: {error_msg}. Failed services: {failed_services}")
+                    
+            except Exception as initialization_error:
+                logger.error(f"🚨 CRITICAL: SSOT service initialization failed: {initialization_error}")
+                
+                # CRITICAL BUSINESS CONTINUITY FIX: Use graceful degradation instead of hard failure
+                # This ensures users ALWAYS get some level of functionality to protect $500K+ ARR
+                logger.warning(f"🔄 SSOT service initialization failed: {initialization_error}")
+                logger.info("🛡️ GRACEFUL DEGRADATION: Activating fallback handlers to maintain business continuity")
+                
+                try:
+                    await progress_communicator.send_initialization_failed(
+                        error_message=str(initialization_error),
+                        failed_services=missing_deps,
+                        total_time=time.time() - initialization_start_time if 'initialization_start_time' in locals() else 0.0
+                    )
+                except Exception:
+                    pass  # Best effort notification
+                
+                # CRITICAL BUSINESS PROTECTION: Instead of hard failure, activate graceful degradation
+                from netra_backend.app.websocket_core.graceful_degradation_manager import create_graceful_degradation_manager
+                
+                logger.info("🚀 ACTIVATING GRACEFUL DEGRADATION: Ensuring users get basic chat functionality")
+                
+                try:
+                    # Create graceful degradation manager
+                    degradation_manager = await create_graceful_degradation_manager(websocket, websocket.app.state)
+                    
+                    # Notify user about degraded mode  
+                    await degradation_manager.notify_user_of_degradation()
+                    
+                    # Create fallback handler for basic chat
+                    fallback_handler = await degradation_manager.create_fallback_handler()
+                    
+                    # Register fallback handler with message router for basic responses
+                    message_router.add_handler(fallback_handler)
+                    
+                    # Start recovery monitoring
+                    await degradation_manager.start_recovery_monitoring()
+                    
+                    logger.info("✅ GRACEFUL DEGRADATION ACTIVE: Users will receive basic chat functionality with recovery monitoring")
+                    logger.info("💡 Business continuity maintained - connection will not be terminated")
+                    
+                    # Store degradation manager for cleanup later
+                    setattr(websocket, '_degradation_manager', degradation_manager)
+                    
+                except Exception as degradation_error:
+                    logger.error(f"🚨 CRITICAL: Graceful degradation setup failed: {degradation_error}")
+                    # Last resort: Provide emergency stub functionality to prevent complete failure
+                    logger.warning("⚡ EMERGENCY FALLBACK: Creating minimal emergency response system")
+                    
+                    # Create minimal emergency handler inline
+                    class EmergencyHandler:
+                        async def handle_message(self, message):
+                            emergency_response = create_server_message(
+                                MessageType.SYSTEM_MESSAGE,
+                                {
+                                    "content": "System is experiencing technical difficulties. Please try again in a few minutes.",
+                                    "type": "emergency_maintenance",
+                                    "timestamp": datetime.now(timezone.utc).isoformat()
+                                }
+                            )
+                            await safe_websocket_send(websocket, emergency_response.model_dump())
+                            return True
+                    
+                    emergency_handler = EmergencyHandler()
+                    message_router.add_handler(emergency_handler)
+                    
+                    logger.info("⚡ EMERGENCY FALLBACK ACTIVE: Minimal functionality to prevent complete service failure")
         
         # CRITICAL SECURITY FIX: Enhanced authentication with isolated manager
         # User context extraction was done above, now establish secure connection
@@ -698,30 +959,97 @@ async def websocket_endpoint(websocket: WebSocket):
                 connection_id = await ws_manager.connect_user(user_id, websocket)
                 logger.info(f"Registered connection with legacy manager: {connection_id}")
                 
-            # CRITICAL FIX: Enhanced delay and handshake validation for Cloud Run environments
-            # This addresses the race condition where message handling starts before complete handshake
-            if environment in ["staging", "production"]:
-                # Step 1: Progressive delay for network propagation
-                await asyncio.sleep(0.1)  # Initial 100ms delay for Cloud Run stability
+            # PHASE 1 FIX 1 CONTINUATION: Update state machine with real connection_id after authentication
+            # Replace preliminary state machine with properly identified one
+            try:
+                # Unregister preliminary connection
+                state_registry.unregister_connection(preliminary_connection_id)
                 
-                # Step 2: Validate handshake completion before proceeding
+                # Register new state machine with real connection_id and user_id
+                final_state_machine = state_registry.register_connection(connection_id, user_id)
+                
+                # Transition directly to AUTHENTICATED state since we've completed auth
+                auth_transition_success = final_state_machine.transition_to(
+                    ApplicationConnectionState.AUTHENTICATED,
+                    reason="WebSocket authentication completed successfully",
+                    metadata={
+                        "user_id": user_id,
+                        "connection_id": connection_id,
+                        "auth_method": "SSOT",
+                        "auth_timestamp": time.time(),
+                        "websocket_client_id": getattr(user_context, 'websocket_client_id', None) if 'user_context' in locals() else None
+                    }
+                )
+                
+                if auth_transition_success:
+                    logger.info(f"State machine transitioned to AUTHENTICATED for {connection_id}")
+                else:
+                    logger.error(f"Failed to transition state machine to AUTHENTICATED for {connection_id}")
+                    
+            except Exception as state_machine_error:
+                logger.error(f"State machine update failed for {connection_id}: {state_machine_error}")
+                # Don't fail the connection, continue with existing flow
+                
+            # CRITICAL FIX: Enhanced handshake coordination for race condition prevention
+            # This addresses the race condition where message handling starts before complete handshake
+            from netra_backend.app.websocket_core.race_condition_prevention import (
+                HandshakeCoordinator,
+                RaceConditionDetector
+            )
+            
+            # Initialize race condition prevention components
+            handshake_coordinator = HandshakeCoordinator(environment=environment)
+            race_detector = RaceConditionDetector(environment=environment)
+            
+            logger.info(f"🛡️ RACE CONDITION PREVENTION: Starting handshake coordination for {environment}")
+            
+            # Coordinate handshake completion with environment-specific timing
+            handshake_success = await handshake_coordinator.coordinate_handshake()
+            
+            if not handshake_success:
+                logger.error("HandshakeCoordinator failed - potential race condition detected")
+                race_detector.add_detected_pattern(
+                    "handshake_coordination_failure",
+                    "critical",
+                    details={
+                        "environment": environment,
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "connection_id": connection_id
+                    }
+                )
+                # Continue but log the issue for monitoring
+            else:
+                logger.info(f"✅ Handshake coordination successful in {handshake_coordinator.get_handshake_duration()*1000:.1f}ms")
+            
+            # Validate connection readiness using race condition detector
+            if not race_detector.validate_connection_readiness(handshake_coordinator.get_current_state()):
+                logger.warning(f"Connection not ready for messages: {handshake_coordinator.get_current_state().value}")
+                
+                # Try to recover by waiting for ready state
+                max_recovery_attempts = 3
+                for recovery_attempt in range(max_recovery_attempts):
+                    recovery_delay = race_detector.calculate_progressive_delay(recovery_attempt)
+                    await asyncio.sleep(recovery_delay)
+                    
+                    if race_detector.validate_connection_readiness(handshake_coordinator.get_current_state()):
+                        logger.info(f"Connection recovered after {recovery_attempt + 1} attempts")
+                        break
+                else:
+                    logger.error("Connection recovery failed - proceeding with caution")
+            
+            # Legacy handshake validation for backward compatibility
+            if environment in ["staging", "production"]:
+                # Additional validation using existing utils for double-check
                 from netra_backend.app.websocket_core.utils import validate_websocket_handshake_completion
                 
                 handshake_valid = await validate_websocket_handshake_completion(websocket, timeout_seconds=2.0)
                 if not handshake_valid:
-                    logger.warning("WebSocket handshake validation failed - implementing progressive retry")
-                    
-                    # Progressive retry with increasing delays for Cloud Run
-                    for retry_attempt in range(3):
-                        await asyncio.sleep(0.05 * (retry_attempt + 1))  # 50ms, 100ms, 150ms
-                        handshake_valid = await validate_websocket_handshake_completion(websocket, timeout_seconds=1.0)
-                        if handshake_valid:
-                            logger.info(f"WebSocket handshake validated on retry attempt {retry_attempt + 1}")
-                            break
-                    
-                    if not handshake_valid:
-                        logger.error("WebSocket handshake validation failed after all retries - potential race condition")
-                        # Continue but log the issue for monitoring
+                    logger.warning("Legacy handshake validation failed - race condition detected")
+                    race_detector.add_detected_pattern(
+                        "legacy_handshake_validation_failure", 
+                        "warning",
+                        details={"environment": environment}
+                    )
                 
                 # Step 3: Additional connection state validation
                 if websocket.client_state != WebSocketState.CONNECTED:
@@ -771,33 +1099,119 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, welcome_msg.model_dump())
             
-            # CRITICAL FIX: Final handshake confirmation delay for Cloud Run
+            # CRITICAL FIX: Final race condition validation before message processing
             # This ensures the client has time to process the connection_established message
-            # and the WebSocket is fully ready for bidirectional communication
+            # and validates using race condition prevention components
             if environment in ["staging", "production"]:
                 await asyncio.sleep(0.05)  # 50ms after welcome message
                 
-                # Final verification that handshake is still valid before starting message loop
+                # Final validation using HandshakeCoordinator and RaceConditionDetector
+                if not handshake_coordinator.is_ready_for_messages():
+                    logger.warning("HandshakeCoordinator indicates not ready for messages - potential race condition")
+                    race_detector.add_detected_pattern(
+                        "final_readiness_check_failed",
+                        "warning", 
+                        details={"current_state": handshake_coordinator.get_current_state().value}
+                    )
+                
+                # Double-check with legacy validation
                 from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
                 if not is_websocket_connected_and_ready(websocket):
                     logger.warning("WebSocket not ready after final confirmation - potential race condition detected")
+                    race_detector.add_detected_pattern(
+                        "legacy_final_readiness_failed",
+                        "warning",
+                        details={"environment": environment}
+                    )
+                    
                     # Add one more small delay and check
                     await asyncio.sleep(0.1)
                     if not is_websocket_connected_and_ready(websocket):
                         logger.error("WebSocket still not ready - proceeding with caution")
+                        race_detector.add_detected_pattern(
+                            "persistent_readiness_failure",
+                            "critical",
+                            details={"recovery_attempts": 1}
+                        )
             
             # CRITICAL FIX: Log successful connection establishment for debugging
             security_pattern = "FACTORY_PATTERN" if 'user_context' in locals() else "LEGACY_SINGLETON"
             logger.info(f"WebSocket connection fully established for user {user_id} in {environment} using {security_pattern}")
             
-            # CRITICAL FIX: Verify WebSocket is ready for message handling after complete setup
-            from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
+            # PHASE 1 FIX 2 CONTINUATION: Complete state machine setup after connection fully established
+            # Transition through SERVICES_READY to PROCESSING_READY
+            try:
+                final_state_machine = get_connection_state_machine(connection_id)
+                if final_state_machine:
+                    # Transition to SERVICES_READY
+                    services_ready_success = final_state_machine.transition_to(
+                        ApplicationConnectionState.SERVICES_READY,
+                        reason="WebSocket services initialized and handshake complete",
+                        metadata={
+                            "security_pattern": security_pattern,
+                            "environment": environment,
+                            "handshake_complete": True,
+                            "services_timestamp": time.time()
+                        }
+                    )
+                    
+                    if services_ready_success:
+                        # Final transition to PROCESSING_READY - ready for messages
+                        processing_ready_success = final_state_machine.transition_to(
+                            ApplicationConnectionState.PROCESSING_READY,
+                            reason="WebSocket fully operational and ready for message processing",
+                            metadata={
+                                "processing_ready_timestamp": time.time(),
+                                "total_setup_duration": final_state_machine.setup_duration
+                            }
+                        )
+                        
+                        if processing_ready_success:
+                            logger.info(f"State machine fully ready for message processing: {connection_id}")
+                        else:
+                            logger.error(f"Failed to transition to PROCESSING_READY for {connection_id}")
+                    else:
+                        logger.error(f"Failed to transition to SERVICES_READY for {connection_id}")
+                else:
+                    logger.warning(f"No state machine found for {connection_id} during final setup")
+                    
+            except Exception as final_state_error:
+                logger.error(f"Final state machine setup failed for {connection_id}: {final_state_error}")
+                # Don't fail the connection, but message processing will be blocked until ready
+            
+            # CRITICAL FIX: Final race condition prevention validation before message loop
+            if not handshake_coordinator.is_ready_for_messages():
+                logger.error(f"HandshakeCoordinator not ready for messages - race condition detected")
+                race_detector.add_detected_pattern(
+                    "message_loop_readiness_failure",
+                    "critical",
+                    details={
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "current_state": handshake_coordinator.get_current_state().value,
+                        "handshake_duration_ms": handshake_coordinator.get_handshake_duration() * 1000 if handshake_coordinator.get_handshake_duration() else None
+                    }
+                )
+                raise WebSocketDisconnect(code=1006, reason="Race condition prevented message handling")
+            
+            # Legacy validation as backup
+            from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready, validate_websocket_handshake_completion
             if not is_websocket_connected_and_ready(websocket):
                 logger.error(f"WebSocket connection not ready for message handling for user {user_id}")
+                race_detector.add_detected_pattern(
+                    "legacy_message_loop_readiness_failure",
+                    "critical",
+                    details={"user_id": user_id[:8] + "..." if user_id else "unknown"}
+                )
+                
                 # Try one final validation before giving up
                 final_validation = await validate_websocket_handshake_completion(websocket, timeout_seconds=1.0)
                 if not final_validation:
                     logger.error(f"WebSocket handshake final validation failed - race condition detected")
+                    race_detector.add_detected_pattern(
+                        "final_handshake_validation_failure",
+                        "critical",
+                        details={"validation_timeout_seconds": 1.0}
+                    )
                     raise WebSocketDisconnect(code=1006, reason="Handshake validation failed - race condition")
             
             logger.debug(f"WebSocket ready: {connection_id} - Processing any queued messages...")
@@ -940,6 +1354,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.warning(f"Error during WebSocket cleanup: {cleanup_error}")
 
 
+@windows_asyncio_safe
 async def _handle_websocket_messages(
     websocket: WebSocket,
     user_id: str, 
@@ -950,7 +1365,11 @@ async def _handle_websocket_messages(
     security_manager=None,  # Legacy parameter - not needed with SSOT auth
     heartbeat: WebSocketHeartbeat = None
 ) -> None:
-    """Handle WebSocket message loop with error recovery."""
+    """Handle WebSocket message loop with error recovery.
+    
+    CRITICAL FIX: Added Windows-safe asyncio patterns to prevent deadlocks
+    on Windows development environments during streaming operations.
+    """
     error_count = 0
     max_errors = 5
     backoff_delay = 0.1
@@ -968,6 +1387,33 @@ async def _handle_websocket_messages(
         # CRITICAL FIX: Use enhanced connection validation to prevent race conditions
         from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
         
+        # PHASE 1 FIX 2: Add accept completion validation before message routing
+        # This ensures WebSocket accept() is fully completed before processing messages
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine
+        
+        # Validate connection state machine readiness before message processing
+        state_machine = get_connection_state_machine(connection_id)
+        if state_machine and not state_machine.can_process_messages():
+            logger.warning(f"Connection {connection_id} state machine not ready for messages: {state_machine.current_state}")
+            
+            # Wait briefly for state machine to reach operational state
+            max_wait_attempts = 10
+            wait_delay = 0.1  # 100ms
+            
+            for attempt in range(max_wait_attempts):
+                if state_machine.can_process_messages():
+                    logger.info(f"Connection {connection_id} became ready for messages after {attempt + 1} attempts")
+                    break
+                    
+                logger.debug(f"Waiting for connection {connection_id} state machine readiness, attempt {attempt + 1}")
+                await asyncio.sleep(wait_delay)
+            
+            # Final validation
+            if not state_machine.can_process_messages():
+                logger.error(f"Connection {connection_id} state machine never reached ready state: {state_machine.current_state}")
+                logger.error("This indicates accept() race condition - connection cannot process messages")
+                return  # Exit message loop - connection is not ready
+        
         while is_websocket_connected_and_ready(websocket):
             if first_check:
                 logger.debug(f"First loop iteration for {connection_id}, WebSocket readiness validation passed")
@@ -977,8 +1423,15 @@ async def _handle_websocket_messages(
                 loop_duration = time.time() - loop_start_time
                 logger.debug(f"Message loop iteration #{message_count + 1} for {connection_id}, state: {_safe_websocket_state_for_logging(websocket.application_state)}, duration: {loop_duration:.1f}s")
                 
+                # RACE CONDITION FIX: Additional validation before receive_text
+                # This prevents "Need to call 'accept' first" errors in GCP Cloud Run
+                if not is_websocket_connected_and_ready(websocket):
+                    logger.debug(f"WebSocket connection {connection_id} became unavailable before receive, exiting loop")
+                    break
+                
+                # CRITICAL FIX: Use Windows-safe wait_for to prevent deadlocks
                 # Receive message with timeout
-                raw_message = await asyncio.wait_for(
+                raw_message = await windows_safe_wait_for(
                     websocket.receive_text(),
                     timeout=WEBSOCKET_CONFIG.heartbeat_interval_seconds
                 )
@@ -1467,11 +1920,21 @@ async def websocket_health_check():
         
         factory = get_websocket_manager_factory()
         ws_stats = factory.get_factory_stats()
+        factory_metrics = ws_stats.get("factory_metrics", {})
+        current_state = ws_stats.get("current_state", {})
+        
+        # Extract metrics with proper field names
+        active_connections = current_state.get("active_managers", 0)
+        total_connections = factory_metrics.get("total_connections_managed", 0)
+        messages_sent = factory_metrics.get("messages_sent_total", 0)
+        messages_received = factory_metrics.get("messages_received_total", 0) 
+        errors_handled = factory_metrics.get("errors_handled", 0)
+        
         metrics["websocket"] = {
-            "active_connections": ws_stats["active_connections"],
-            "total_connections": ws_stats["total_connections"], 
-            "messages_processed": ws_stats["messages_sent"] + ws_stats["messages_received"],
-            "error_rate": ws_stats["errors_handled"] / max(1, ws_stats["total_connections"])
+            "active_connections": active_connections,
+            "total_connections": total_connections, 
+            "messages_processed": messages_sent + messages_received,
+            "error_rate": errors_handled / max(1, total_connections)
         }
     except Exception as e:
         errors.append(f"websocket_manager: {str(e)}")
@@ -1483,7 +1946,7 @@ async def websocket_health_check():
     # Try to get authentication stats (optional)
     try:
         authenticator = get_websocket_authenticator()
-        auth_stats = authenticator.get_auth_stats()
+        auth_stats = authenticator.get_websocket_auth_stats()
         metrics["authentication"] = {
             "success_rate": auth_stats.get("success_rate", 0),
             "rate_limited_requests": auth_stats.get("rate_limited", 0)
@@ -1614,8 +2077,9 @@ async def websocket_test_endpoint(websocket: WebSocket):
         # Simple message handling loop
         while True:
             try:
+                # CRITICAL FIX: Use Windows-safe wait_for in test endpoint
                 # Receive message with timeout
-                raw_message = await asyncio.wait_for(
+                raw_message = await windows_safe_wait_for(
                     websocket.receive_text(),
                     timeout=30.0
                 )

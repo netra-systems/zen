@@ -232,7 +232,7 @@ class TestUnifiedToolExecutionBusiness(SSotBaseTestCase):
             
             async def run(self, **kwargs):
                 # Simulate hung business analysis
-                await asyncio.sleep(60)  # Way longer than timeout
+                await asyncio.sleep(5)  # Longer than test timeout to trigger timeout behavior
                 return {"analysis": "never_completes"}
         
         slow_tool = SlowBusinessTool()

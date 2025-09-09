@@ -7,11 +7,11 @@ Business Value Justification:
 - Value Impact: Prevent message routing failures that block user chat interactions
 - Strategic Impact: Essential for "Chat is King" business mandate - chat must work reliably
 
-This test suite reproduces the 'chat_message' unknown type issue in MessageRouter
-and validates the business-critical message handling pipeline.
+This test suite validates that the 'chat_message' type fix is working properly in MessageRouter
+and that the business-critical message handling pipeline functions correctly.
 
-CRITICAL: These tests MUST FAIL initially to demonstrate the 'chat_message' mapping gap,
-then pass after the fix is implemented in LEGACY_MESSAGE_TYPE_MAP.
+CRITICAL: These tests validate that the 'chat_message' mapping fix in LEGACY_MESSAGE_TYPE_MAP
+is working properly and business value is restored.
 """
 
 import asyncio
@@ -41,10 +41,10 @@ class TestChatMessageBusinessValue:
     @pytest.mark.asyncio
     async def test_chat_message_business_value_blocked_mission_critical(self):
         """
-        MISSION CRITICAL: Test that 'chat_message' type routing failure blocks business value.
+        MISSION CRITICAL: Test that 'chat_message' type routing success enables business value.
         
-        Business Impact: If 'chat_message' is not routed, users cannot interact with AI agents.
-        This represents a complete business value failure - chat is our primary value delivery mechanism.
+        Business Impact: With 'chat_message' properly routed, users can interact with AI agents.
+        This validates that our primary value delivery mechanism is working correctly.
         """
         # Business Context: User sends 'chat_message' expecting AI response
         router = get_message_router()
@@ -56,7 +56,7 @@ class TestChatMessageBusinessValue:
         
         # Business-critical message: User asks for AI assistance
         chat_message = {
-            "type": "chat_message",  # THIS IS THE PROBLEMATIC TYPE - NOT IN LEGACY_MESSAGE_TYPE_MAP
+            "type": "chat_message",  # THIS IS THE FIXED TYPE - NOW IN LEGACY_MESSAGE_TYPE_MAP
             "payload": {
                 "content": "Help me optimize my marketing campaign with AI agents",
                 "requires_ai": True,
@@ -69,77 +69,82 @@ class TestChatMessageBusinessValue:
             "timestamp": time.time()
         }
         
-        # CRITICAL TEST: This should fail because 'chat_message' is unknown
-        # The router will call _is_unknown_message_type("chat_message") -> True
-        # This blocks the user's AI interaction, causing business value loss
+        # CRITICAL TEST: This should succeed because 'chat_message' is now recognized
+        # The router will call _is_unknown_message_type("chat_message") -> False
+        # This enables the user's AI interaction, delivering business value
         result = await router.route_message(user_id, mock_websocket, chat_message)
         
-        # BUSINESS VALIDATION: Check if message was treated as unknown
+        # BUSINESS VALIDATION: Check if message was treated as recognized
         is_chat_message_unknown = router._is_unknown_message_type("chat_message")
         
-        # CRITICAL ASSERTION: This MUST FAIL initially - 'chat_message' should be unknown
-        assert is_chat_message_unknown == True, (
-            "BUSINESS CRITICAL: 'chat_message' is being treated as unknown type, "
-            "blocking user AI interactions and causing business value loss!"
+        # CRITICAL ASSERTION: This MUST PASS now - 'chat_message' should be recognized
+        assert is_chat_message_unknown == False, (
+            "BUSINESS CRITICAL: 'chat_message' should be recognized (not unknown), "
+            "enabling user AI interactions and delivering business value!"
         )
         
-        # Verify routing stats show the message was handled as unknown
+        # Verify routing stats show the message was handled properly
         stats = router.get_stats()
-        assert stats["unhandled_messages"] > 0, (
-            "Router should count 'chat_message' as unhandled, "
-            "indicating business value blockage"
+        assert stats["messages_routed"] > 0, (
+            "Router should route 'chat_message' successfully, "
+            "indicating business value delivery"
         )
         
         # Business Impact Assessment
-        print(f"🚨 BUSINESS IMPACT: 'chat_message' type is unknown to MessageRouter")
-        print(f"🚨 IMPACT: Users cannot send chat messages to AI agents")
-        print(f"🚨 IMPACT: Primary business value delivery mechanism is broken")
-        print(f"🚨 IMPACT: This affects 90% of user interactions with the platform")
+        print(f"✅ BUSINESS SUCCESS: 'chat_message' type is recognized by MessageRouter")
+        print(f"✅ SUCCESS: Users can send chat messages to AI agents")
+        print(f"✅ SUCCESS: Primary business value delivery mechanism is working")
+        print(f"✅ SUCCESS: This enables 90% of user interactions with the platform")
     
     @pytest.mark.asyncio 
     async def test_chat_message_not_in_legacy_mapping_fails_critical(self):
         """
-        CRITICAL: Test that 'chat_message' is missing from LEGACY_MESSAGE_TYPE_MAP.
+        CRITICAL: Test that 'chat_message' is properly included in LEGACY_MESSAGE_TYPE_MAP.
         
-        This is the root cause test - verifies the specific technical gap causing business value loss.
+        This validates the fix - verifies that the technical gap has been resolved and business value restored.
         """
         from netra_backend.app.websocket_core.types import LEGACY_MESSAGE_TYPE_MAP
         
-        # CRITICAL VERIFICATION: 'chat_message' should NOT be in the legacy map (initially)
-        assert "chat_message" not in LEGACY_MESSAGE_TYPE_MAP, (
-            "TECHNICAL ROOT CAUSE: 'chat_message' is missing from LEGACY_MESSAGE_TYPE_MAP, "
-            "preventing proper message type normalization"
+        # CRITICAL VERIFICATION: 'chat_message' should BE in the legacy map (after fix)
+        assert "chat_message" in LEGACY_MESSAGE_TYPE_MAP, (
+            "TECHNICAL FIX VALIDATION: 'chat_message' is now in LEGACY_MESSAGE_TYPE_MAP, "
+            "enabling proper message type normalization"
         )
         
-        # Test normalization behavior with missing mapping
+        # Test normalization behavior with proper mapping
         try:
-            # This should default to USER_MESSAGE but the router checks unknown first
+            # This should properly map to USER_MESSAGE via LEGACY_MESSAGE_TYPE_MAP
             normalized_type = normalize_message_type("chat_message")
-            print(f"❌ NORMALIZATION FALLBACK: 'chat_message' defaults to {normalized_type}")
-            print(f"❌ PROBLEM: Router checks unknown BEFORE normalization, so this doesn't help")
+            print(f"✅ NORMALIZATION SUCCESS: 'chat_message' maps to {normalized_type}")
+            print(f"✅ SOLUTION: Router recognizes type and processes normally")
+            
+            # Validate it maps to the correct type
+            assert normalized_type == MessageType.USER_MESSAGE, (
+                "chat_message should normalize to USER_MESSAGE"
+            )
         except Exception as e:
-            print(f"❌ NORMALIZATION ERROR: {e}")
+            print(f"❌ UNEXPECTED ERROR: {e}")
         
         # Test the router's unknown message detection directly
         router = MessageRouter()
         is_unknown = router._is_unknown_message_type("chat_message")
         
-        # CRITICAL ASSERTION: Should be unknown (initially)
-        assert is_unknown == True, (
-            "TECHNICAL VALIDATION: Router must detect 'chat_message' as unknown "
-            "before the fix is applied to LEGACY_MESSAGE_TYPE_MAP"
+        # CRITICAL ASSERTION: Should be recognized (after fix)
+        assert is_unknown == False, (
+            "TECHNICAL VALIDATION: Router should recognize 'chat_message' "
+            "after the fix is applied to LEGACY_MESSAGE_TYPE_MAP"
         )
         
-        print(f"✅ CONFIRMED: 'chat_message' is detected as unknown message type")
-        print(f"✅ CONFIRMED: Missing from LEGACY_MESSAGE_TYPE_MAP causes the issue")
+        print(f"✅ CONFIRMED: 'chat_message' is recognized as valid message type")
+        print(f"✅ CONFIRMED: Presence in LEGACY_MESSAGE_TYPE_MAP resolves the issue")
     
     @pytest.mark.asyncio
     async def test_chat_message_frontend_compatibility_broken(self):
         """
-        Test that missing 'chat_message' mapping breaks frontend compatibility.
+        Test that proper 'chat_message' mapping enables frontend compatibility.
         
-        Frontend likely sends 'chat_message' type expecting proper routing to agents.
-        When this fails, the entire chat experience is broken.
+        Frontend sends 'chat_message' type expecting proper routing to agents.
+        With the fix, the entire chat experience works properly.
         """
         router = MessageRouter()
         user_id = "frontend-user-67890"

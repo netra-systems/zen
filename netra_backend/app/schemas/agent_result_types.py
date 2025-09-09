@@ -20,3 +20,9 @@ class TypedAgentResult(BaseModel):
     execution_time_ms: Optional[float] = Field(None, description="Execution time in milliseconds")
     timestamp: datetime = Field(default_factory=datetime.now, description="Result timestamp")
     metadata: Optional[JsonCompatibleDict] = Field(None, description="Additional metadata")
+    
+    # Additional fields for compatibility with agent_observability usage
+    agent_name: Optional[str] = Field(None, description="Name of the agent that produced this result")
+    error_message: Optional[str] = Field(None, description="Alias for error field")
+    result_data: Optional[AgentExecutionResult] = Field(None, description="Alias for result field")
+    metrics: Optional[JsonCompatibleDict] = Field(None, description="Agent execution metrics")

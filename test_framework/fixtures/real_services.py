@@ -20,6 +20,8 @@ from typing import Dict, Any, AsyncGenerator
 import pytest
 from contextlib import asynccontextmanager
 
+logger = logging.getLogger(__name__)
+
 try:
     from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
     from sqlalchemy.exc import OperationalError
@@ -38,10 +40,16 @@ except ImportError:
     logger.warning("UnifiedDockerManager not available - using fallback")
     UnifiedDockerManager = None
 
-logger = logging.getLogger(__name__)
+try:
+    import redis.asyncio as redis
+    import fakeredis.aioredis as fake_redis
+except ImportError:
+    logger.warning("Redis libraries not available - Redis fixtures will fail")
+    redis = None
+    fake_redis = None
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 async def real_postgres_connection():
     """REAL PostgreSQL connection for integration testing.
     
@@ -95,8 +103,8 @@ async def real_postgres_connection():
         docker_manager = UnifiedDockerManager()
         
         try:
-            env_info = docker_manager.acquire_environment("test", use_alpine=True)
-            logger.info(f"Acquired test environment: {env_info}")
+            env_name, env_info = docker_manager.acquire_environment()
+            logger.info(f"Acquired test environment: {env_name} with ports: {env_info}")
         except Exception as e:
             raise RuntimeError(f"Failed to acquire Docker test environment: {e}")
         
@@ -211,6 +219,92 @@ async def with_test_database(real_postgres_connection):
 
 
 @pytest.fixture(scope="function")
+async def real_redis_fixture():
+    """REAL Redis fixture for integration testing with fallback to in-memory Redis.
+    
+    This fixture provides an actual Redis connection when available (Docker/local Redis)
+    or falls back to an in-memory Redis implementation for environments without Docker.
+    This ensures Redis cache integration tests can run in all environments.
+    
+    CRITICAL: Per CLAUDE.md - Uses REAL Redis when available, in-memory fallback
+    when Docker unavailable. NO mocks for integration testing.
+    
+    Yields:
+        redis.Redis: Async Redis client (real or in-memory)
+    """
+    env = get_env()
+    
+    if redis is None:
+        raise RuntimeError(
+            "Redis libraries not available. Install: pip install redis fakeredis"
+        )
+    
+    redis_client = None
+    
+    try:
+        # First attempt: Real Redis connection (Docker or local)
+        redis_host = env.get("REDIS_HOST", "localhost")
+        redis_port = int(env.get("REDIS_PORT", "6381"))  # Test Redis port
+        redis_db = int(env.get("REDIS_DB", "1"))  # Test database
+        
+        real_redis_url = f"redis://{redis_host}:{redis_port}/{redis_db}"
+        
+        # Create Redis client for real Redis
+        redis_client = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            decode_responses=True,
+            socket_timeout=2.0,  # Quick timeout for testing
+            socket_connect_timeout=2.0
+        )
+        
+        # Test real Redis connection
+        await redis_client.ping()
+        logger.info(f"Connected to REAL Redis at {redis_host}:{redis_port}")
+        
+        yield redis_client
+        
+    except Exception as redis_error:
+        logger.info(f"Real Redis not available ({redis_error}), using in-memory Redis")
+        
+        # Fallback: In-memory Redis using fakeredis (CLAUDE.md compliant fallback)
+        if fake_redis is None:
+            raise RuntimeError(
+                f"Real Redis unavailable and fakeredis not installed: {redis_error}\n"
+                "Install fakeredis: pip install fakeredis"
+            )
+        
+        try:
+            # Create in-memory Redis client
+            redis_client = fake_redis.FakeRedis(
+                decode_responses=True,
+                version=(7, 0, 0)  # Redis 7.0 compatibility
+            )
+            
+            # Verify in-memory Redis works
+            await redis_client.ping()
+            logger.info("Using in-memory Redis (fakeredis) for integration testing")
+            
+            yield redis_client
+            
+        except Exception as fallback_error:
+            raise RuntimeError(
+                f"Both real Redis and in-memory fallback failed:\n"
+                f"Real Redis: {redis_error}\n"
+                f"In-memory Redis: {fallback_error}"
+            )
+    
+    finally:
+        # Cleanup Redis connection
+        if redis_client:
+            try:
+                await redis_client.aclose()
+            except Exception as e:
+                logger.warning(f"Failed to close Redis connection: {e}")
+
+
+@pytest.fixture(scope="function")
 async def real_services_fixture(real_postgres_connection, with_test_database):
     """REAL services fixture - provides access to actual running services.
     
@@ -236,16 +330,29 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     # Determine service URLs based on environment
     backend_port = env.get("BACKEND_PORT", "8000")
     auth_port = env.get("AUTH_SERVICE_PORT", "8081")
+    redis_port = env.get("REDIS_PORT", "6381")  # Test Redis port
     
     backend_url = f"http://localhost:{backend_port}"
     auth_url = f"http://localhost:{auth_port}"
+    redis_url = f"redis://localhost:{redis_port}"
     
     # Validate services are reachable (optional - don't fail if not available)
     services_available = {
         "backend": False,
         "auth": False,
-        "database": postgres_info["available"]
+        "database": postgres_info["available"],
+        "redis": False
     }
+    
+    # Test Redis connection
+    try:
+        import redis
+        redis_client = redis.Redis.from_url(redis_url, socket_timeout=2)
+        redis_client.ping()
+        services_available["redis"] = True
+        redis_client.close()
+    except Exception:
+        logger.info("Redis service not reachable - tests will use URL only")
     
     try:
         import aiohttp
@@ -270,8 +377,10 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     yield {
         "backend_url": backend_url,
         "auth_url": auth_url,
+        "redis_url": redis_url,
         "postgres": postgres_info["engine"],
         "db": db_session,
+        "redis": redis_url,  # Add redis key for compatibility
         "database_url": postgres_info["database_url"],
         "environment": postgres_info["environment"],
         "services_available": services_available,

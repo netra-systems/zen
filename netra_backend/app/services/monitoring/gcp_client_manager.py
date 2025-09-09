@@ -139,6 +139,17 @@ class GCPClientManager:
                 "error": str(e),
                 "timestamp": datetime.now(timezone.utc)
             }
+    
+    async def get_error_reporting_client_async(self):
+        """Get error reporting client - async version for integration tests."""
+        if not self._initialized:
+            await self.initialize()
+        return self.get_error_reporting_client()
+    
+    async def initialize_client(self):
+        """Initialize client and return error reporting client for service integration."""
+        await self.initialize()
+        return self.get_error_reporting_client()
 
 
 # Mock clients for testing/development

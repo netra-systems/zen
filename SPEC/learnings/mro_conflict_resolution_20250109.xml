@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <title>MRO Conflict Resolution - Diamond Inheritance Pattern Fix</title>
+        <date>2025-01-09</date>
+        <impact>critical</impact>
+        <business_value>unblocks_integration_tests_protecting_120k_mrr</business_value>
+        <category>inheritance_patterns</category>
+        <claude_md_section>3.6</claude_md_section>
+    </metadata>
+
+    <problem>
+        <description>
+            TestLoadBalancerHeaderPropagation(BaseIntegrationTest, WebSocketIntegrationTest) 
+            created diamond inheritance pattern causing MRO conflict blocking ALL integration tests.
+        </description>
+        <error_message>
+            TypeError: Cannot create a consistent method resolution order (MRO) 
+            for bases BaseIntegrationTest, WebSocketIntegrationTest
+        </error_message>
+        <root_cause>
+            Diamond Problem: WebSocketIntegrationTest already inherits from BaseIntegrationTest,
+            so inheriting from both creates circular MRO dependency.
+        </root_cause>
+    </problem>
+
+    <solution>
+        <approach>Single Inheritance Pattern</approach>
+        <implementation>
+            Changed: class TestLoadBalancerHeaderPropagation(BaseIntegrationTest, WebSocketIntegrationTest)
+            To: class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest)
+        </implementation>
+        <rationale>
+            WebSocketIntegrationTest already inherits all BaseIntegrationTest functionality,
+            so single inheritance provides complete access without conflicts.
+        </rationale>
+    </solution>
+
+    <validation>
+        <mro_hierarchy>
+            TestLoadBalancerHeaderPropagation → WebSocketIntegrationTest → 
+            BaseIntegrationTest → ABC → object
+        </mro_hierarchy>
+        <functionality_preserved>
+            - setup_method ✓
+            - async_setup ✓ 
+            - async_teardown ✓
+            - assert_business_value_delivered ✓
+            - verify_websocket_event_delivery ✓
+            - All test methods accessible ✓
+        </functionality_preserved>
+        <business_impact>
+            Integration tests can now execute to validate authentication header propagation
+            that protects $120K+ MRR authentication infrastructure.
+        </business_impact>
+    </validation>
+
+    <patterns>
+        <diamond_inheritance>
+            <problem>
+                Multiple inheritance from parent and child classes creates MRO conflicts
+            </problem>
+            <solution>
+                Always inherit from the most derived class only - it provides full functionality
+            </solution>
+            <detection>
+                RuntimeError on class creation with "Cannot create consistent MRO" message
+            </detection>
+        </diamond_inheritance>
+        
+        <prevention>
+            <mro_analysis>
+                Always analyze inheritance chains before creating multiple inheritance patterns
+            </mro_analysis>
+            <visualization>
+                Draw inheritance diagrams to identify diamond patterns before implementation
+            </visualization>
+            <prefer_single>
+                Prefer single inheritance or composition over complex multiple inheritance
+            </prefer_single>
+        </prevention>
+    </patterns>
+
+    <claude_md_compliance>
+        <section_3_6>
+            <mro_report>Comprehensive MRO analysis completed per Section 3.6 requirements</mro_report>
+            <five_whys>Five Whys analysis identified root cause as diamond inheritance pattern</five_whys>
+            <method_shadowing>No method shadowing conflicts detected</method_shadowing>
+            <ssot_solution>Single inheritance maintains SSOT principle while eliminating conflicts</ssot_solution>
+        </section_3_6>
+    </claude_md_compliance>
+
+    <lessons_learned>
+        <inheritance_design>
+            1. Always check inheritance chains before multiple inheritance
+            2. Diamond patterns are common with test base classes
+            3. Single inheritance from most derived class usually sufficient
+            4. MRO errors block entire test execution - high business impact
+        </inheritance_design>
+        
+        <test_architecture>
+            1. Test base classes should document their inheritance clearly
+            2. Prefer composition over inheritance for complex test patterns
+            3. Validate test class creation in CI to catch MRO issues early
+            4. Integration tests are critical for business value validation
+        </test_architecture>
+
+        <ssot_principles>
+            1. One inheritance path provides complete functionality
+            2. Multiple paths to same functionality violate SSOT
+            3. Single inheritance preserves functionality while eliminating conflicts
+            4. Business value must be preserved during refactoring
+        </ssot_principles>
+    </lessons_learned>
+
+    <files_affected>
+        <file>netra_backend/tests/integration/test_load_balancer_header_propagation.py</file>
+        <change>Modified inheritance declaration to single inheritance</change>
+        <impact>Unblocked ALL integration tests execution</impact>
+    </files_affected>
+
+    <future_prevention>
+        <automated_checks>
+            Add MRO validation to test discovery phase
+        </automated_checks>
+        <documentation>
+            Document inheritance patterns in test base classes
+        </documentation>
+        <code_review>
+            Include inheritance pattern review in checklist
+        </code_review>
+    </future_prevention>
+</learning>

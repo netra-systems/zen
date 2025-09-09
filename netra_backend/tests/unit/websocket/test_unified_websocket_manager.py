@@ -711,7 +711,7 @@ class TestUnifiedWebSocketManagerUnit(SSotAsyncTestCase, unittest.TestCase):
     async def test_stop_background_task(self):
         """Test stopping background task."""
         async def long_running_task():
-            await asyncio.sleep(10)  # Long running task
+            await asyncio.sleep(2)  # Long running task
         
         task_name = await self.manager.start_monitored_background_task(
             "stop_test", long_running_task

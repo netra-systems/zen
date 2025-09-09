@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from tests.e2e.service_manager import RealServicesManager, ServiceProcess
+    from tests.e2e.real_services_manager import RealServicesManager, ServiceProcess
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ class RealServicesContext:
     
     def __init__(self, project_root=None):
         """Initialize context manager."""
-        from tests.e2e.service_manager import RealServicesManager
+        from tests.e2e.real_services_manager import RealServicesManager
         self.manager = RealServicesManager(project_root)
         self.monitor = ServiceHealthMonitor(self.manager)
     

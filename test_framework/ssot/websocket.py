@@ -1252,11 +1252,13 @@ async def create_test_websocket_manager():
 
 # Backward compatibility aliases
 RealWebSocketTestClient = WebSocketTestClient
+WebSocketTestHelper = WebSocketTestUtility  # Alias for WebSocketTestUtility
 
 # Export SSOT WebSocket utilities
 __all__ = [
     'WebSocketTestUtility',
     'WebSocketTestClient',
+    'WebSocketTestHelper',
     'RealWebSocketTestClient',
     'WebSocketMessage', 
     'WebSocketEventType',

@@ -28,9 +28,43 @@ from dataclasses import dataclass
 logger = logging.getLogger(__name__)
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
+from shared.types.core_types import UserID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 from tests.e2e.staging_config import StagingTestConfig, staging_urls
+
+
+@dataclass
+class AuthenticatedUser:
+    """
+    Represents an authenticated user for E2E testing.
+    
+    This class provides a strongly-typed representation of authenticated users
+    created by E2EAuthHelper.create_authenticated_user() for integration tests.
+    
+    CRITICAL: This is the SSOT for authenticated user data in E2E tests.
+    All integration tests MUST use this class to represent authenticated users.
+    
+    Attributes:
+        user_id: Unique user identifier (strongly typed)
+        email: User email address
+        full_name: User display name
+        jwt_token: Authentication token for API/WebSocket requests
+        permissions: List of user permissions
+        created_at: User creation timestamp
+        is_test_user: Flag indicating this is a test user
+    """
+    user_id: str
+    email: str
+    full_name: str
+    jwt_token: str
+    permissions: List[str]
+    created_at: str
+    is_test_user: bool = True
+    
+    def get_strongly_typed_user_id(self) -> UserID:
+        """Get strongly typed UserID for this authenticated user."""
+        return ensure_user_id(self.user_id)
 
 
 @dataclass
@@ -324,6 +358,148 @@ class E2EAuthHelper:
         decoded = self._decode_token(token)
         return decoded.get("sub", "unknown-user")
     
+    async def create_test_user_with_auth(
+        self,
+        email: str,
+        password: Optional[str] = None,
+        name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        additional_claims: Optional[Dict[str, Any]] = None,
+        base_url: Optional[str] = None,
+        permissions: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a test user with authentication for E2E testing.
+        
+        This is the SSOT method that tests are expecting to import.
+        It creates a user with authentication and returns the complete auth result.
+        
+        Args:
+            email: User email address (required)
+            password: User password (optional, auto-generated if not provided)
+            name: User display name (optional, derived from email if not provided)
+            user_id: User ID (optional, auto-generated if not provided)
+            additional_claims: Additional JWT claims (optional)
+            base_url: Base URL for auth service (optional, uses config if not provided)
+            permissions: User permissions (optional, defaults to ["read", "write"])
+            
+        Returns:
+            Dict containing user data, JWT token, and authentication info
+        """
+        # Generate missing values
+        if password is None:
+            password = "test_password_123"
+        if name is None:
+            # Extract name from email
+            name = email.split('@')[0].replace('_', ' ').title()
+        if user_id is None:
+            # Use the proper SSOT ID generation for compatibility with strongly typed IDs
+            try:
+                from netra_backend.app.core.unified_id_manager import generate_user_id
+                user_id = generate_user_id()
+            except ImportError:
+                # Fallback to UUID format if unified ID manager not available
+                user_id = f"user_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        if permissions is None:
+            permissions = ["read", "write"]
+            
+        # Merge additional claims with default permissions
+        final_permissions = permissions.copy()
+        if additional_claims and "role" in additional_claims:
+            final_permissions.append(f"role:{additional_claims['role']}")
+        
+        # Create JWT token for the user
+        jwt_token = self.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=final_permissions
+        )
+        
+        # Build auth result in the format tests expect
+        auth_result = {
+            "user_id": user_id,
+            "email": email,
+            "name": name,
+            "full_name": name,
+            "access_token": jwt_token,
+            "jwt_token": jwt_token,  # Some tests expect this key
+            "token": jwt_token,      # Some tests expect this key
+            "permissions": final_permissions,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "is_test_user": True,
+            "auth_success": True,
+            "user": {
+                "id": user_id,
+                "email": email,
+                "name": name,
+                "permissions": final_permissions
+            }
+        }
+        
+        # Add additional claims to the result if provided
+        if additional_claims:
+            auth_result.update(additional_claims)
+            
+        return auth_result
+
+    async def create_authenticated_user(
+        self,
+        email: Optional[str] = None,
+        full_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        permissions: Optional[List[str]] = None
+    ) -> AuthenticatedUser:
+        """
+        Create an authenticated user for E2E testing.
+        
+        This is the SSOT method for creating authenticated users in integration tests.
+        It creates a complete AuthenticatedUser object with JWT token and all required attributes.
+        
+        Args:
+            email: User email (auto-generated if not provided)
+            full_name: User display name (auto-generated if not provided)
+            user_id: User ID (auto-generated if not provided)
+            permissions: User permissions (defaults to ["read", "write"])
+            
+        Returns:
+            AuthenticatedUser instance with JWT token and user data
+        """
+        # Generate missing values
+        if user_id is None:
+            # Use the proper SSOT ID generation for compatibility with strongly typed IDs
+            try:
+                from netra_backend.app.core.unified_id_manager import generate_user_id
+                user_id = generate_user_id()
+            except ImportError:
+                # Fallback to UUID format if unified ID manager not available
+                user_id = f"user_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        if email is None:
+            email = f"e2e_test_{uuid.uuid4().hex[:8]}@example.com"
+        if full_name is None:
+            full_name = f"E2E Test User {uuid.uuid4().hex[:8]}"
+        if permissions is None:
+            permissions = ["read", "write"]
+        
+        # Create JWT token for the user
+        jwt_token = self.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=permissions
+        )
+        
+        # Create AuthenticatedUser instance
+        auth_user = AuthenticatedUser(
+            user_id=user_id,
+            email=email,
+            full_name=full_name,
+            jwt_token=jwt_token,
+            permissions=permissions,
+            created_at=datetime.now(timezone.utc).isoformat(),
+            is_test_user=True
+        )
+        
+        return auth_user
+    
     async def create_authenticated_session(self) -> aiohttp.ClientSession:
         """
         Create an authenticated aiohttp session.
@@ -476,6 +652,83 @@ class E2EAuthHelper:
         print(f"[INFO] Token works with E2E WebSocket detection headers")
         
         return token
+    
+    async def validate_jwt_token(self, token: str) -> Dict[str, Any]:
+        """
+        Validate JWT token and return validation result.
+        
+        This method validates the JWT token structure, signature, and expiry.
+        It's the SSOT method for JWT validation in E2E tests.
+        
+        Args:
+            token: JWT token to validate
+            
+        Returns:
+            Dict containing validation result with 'valid' boolean and optional error details
+        """
+        try:
+            # First check basic structure
+            parts = token.split('.')
+            if len(parts) != 3:
+                return {
+                    "valid": False,
+                    "error": "Invalid JWT token structure",
+                    "details": "JWT must have 3 parts separated by dots"
+                }
+            
+            # Try to decode and validate the token
+            try:
+                decoded = jwt.decode(
+                    token, 
+                    self.config.jwt_secret, 
+                    algorithms=["HS256"],
+                    options={"verify_exp": True}  # Check expiry
+                )
+                
+                # Check required claims
+                required_claims = ["sub", "email", "exp", "iat"]
+                missing_claims = [claim for claim in required_claims if claim not in decoded]
+                if missing_claims:
+                    return {
+                        "valid": False,
+                        "error": "Missing required claims",
+                        "details": f"Missing: {missing_claims}"
+                    }
+                
+                return {
+                    "valid": True,
+                    "user_id": decoded.get("sub"),
+                    "email": decoded.get("email"),
+                    "permissions": decoded.get("permissions", []),
+                    "expires_at": decoded.get("exp"),
+                    "issued_at": decoded.get("iat")
+                }
+                
+            except jwt.ExpiredSignatureError:
+                return {
+                    "valid": False,
+                    "error": "Token has expired",
+                    "details": "JWT token is past its expiration time"
+                }
+            except jwt.InvalidSignatureError:
+                return {
+                    "valid": False,
+                    "error": "Invalid token signature",
+                    "details": "JWT signature verification failed"
+                }
+            except jwt.InvalidTokenError as e:
+                return {
+                    "valid": False,
+                    "error": "Invalid token",
+                    "details": str(e)
+                }
+                
+        except Exception as e:
+            return {
+                "valid": False,
+                "error": "Token validation failed",
+                "details": f"Unexpected error: {str(e)}"
+            }
 
 
 class E2EWebSocketAuthHelper(E2EAuthHelper):
@@ -642,6 +895,100 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
 
 
 # SSOT Convenience Functions for Backwards Compatibility
+async def create_test_user_with_auth(
+    email: str,
+    name: Optional[str] = None,
+    password: Optional[str] = None,
+    user_id: Optional[str] = None,
+    additional_claims: Optional[Dict[str, Any]] = None,
+    base_url: Optional[str] = None,
+    environment: str = "test",
+    permissions: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    """
+    SSOT standalone function for creating test users with authentication.
+    
+    This is the function that tests import directly. It creates a complete 
+    authenticated user and returns all auth data needed for E2E testing.
+    
+    Args:
+        email: User email address (required)
+        name: User display name (optional, derived from email if not provided)
+        password: User password (optional, auto-generated if not provided)
+        user_id: User ID (optional, auto-generated if not provided)
+        additional_claims: Additional JWT claims (optional)
+        base_url: Base URL for auth service (optional)
+        environment: Test environment ('test', 'staging', etc.)
+        permissions: User permissions (optional, defaults to ["read", "write"])
+        
+    Returns:
+        Dict containing user data, JWT token, and authentication info
+    """
+    auth_helper = E2EAuthHelper(environment=environment)
+    return await auth_helper.create_test_user_with_auth(
+        email=email,
+        name=name,
+        password=password,
+        user_id=user_id,
+        additional_claims=additional_claims,
+        base_url=base_url,
+        permissions=permissions
+    )
+
+
+def get_jwt_token_for_user(
+    user_id: str,
+    email: str,
+    permissions: Optional[List[str]] = None,
+    environment: str = "test",
+    exp_minutes: int = 30
+) -> str:
+    """
+    SSOT function for getting JWT tokens for specific users.
+    
+    This is a convenience function that creates a JWT token for a given user.
+    Tests use this when they need just the token without full user creation.
+    
+    Args:
+        user_id: User ID for the token
+        email: User email address
+        permissions: User permissions (defaults to ["read", "write"])
+        environment: Test environment
+        exp_minutes: Token expiry in minutes
+        
+    Returns:
+        Valid JWT token string
+    """
+    auth_helper = E2EAuthHelper(environment=environment)
+    return auth_helper.create_test_jwt_token(
+        user_id=user_id,
+        email=email,
+        permissions=permissions or ["read", "write"],
+        exp_minutes=exp_minutes
+    )
+
+
+async def validate_jwt_token(
+    token: str,
+    environment: str = "test"
+) -> Dict[str, Any]:
+    """
+    SSOT function for validating JWT tokens.
+    
+    This validates a JWT token and returns validation results.
+    Tests use this to verify token validity and extract claims.
+    
+    Args:
+        token: JWT token to validate
+        environment: Test environment
+        
+    Returns:
+        Dict containing validation result with 'valid' boolean and claims
+    """
+    auth_helper = E2EAuthHelper(environment=environment)
+    return await auth_helper.validate_jwt_token(token)
+
+
 async def create_authenticated_user(
     environment: str = "test",
     user_id: Optional[str] = None,
@@ -796,10 +1143,18 @@ def get_test_jwt_token(
 
 # SSOT Export - All e2e tests MUST use these
 __all__ = [
+    "AuthenticatedUser",
     "E2EAuthConfig",
     "E2EAuthHelper", 
+    "E2EAuthenticationHelper",          # Alias for E2EAuthHelper for backwards compatibility
     "E2EWebSocketAuthHelper",
+    "create_test_user_with_auth",       # New SSOT function for E2E tests
+    "get_jwt_token_for_user",           # New SSOT function for JWT tokens
+    "validate_jwt_token",               # New SSOT function for JWT validation
     "create_authenticated_user",
     "create_authenticated_user_context",
     "get_test_jwt_token"
 ]
+
+# Backwards compatibility alias - some tests import E2EAuthenticationHelper
+E2EAuthenticationHelper = E2EAuthHelper

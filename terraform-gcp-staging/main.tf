@@ -10,13 +10,13 @@ resource "google_storage_bucket" "terraform_state" {
   name          = "${var.project_id}-terraform-state"
   location      = var.region
   force_destroy = false
-  
+
   versioning {
     enabled = true
   }
-  
+
   uniform_bucket_level_access = true
-  
+
   lifecycle_rule {
     condition {
       age = 30
@@ -25,7 +25,7 @@ resource "google_storage_bucket" "terraform_state" {
       type = "Delete"
     }
   }
-  
+
   labels = var.labels
 }
 
@@ -42,7 +42,7 @@ resource "google_project_service" "required_apis" {
     "cloudbuild.googleapis.com",
     "artifactregistry.googleapis.com"
   ])
-  
+
   project            = var.project_id
   service            = each.value
   disable_on_destroy = false
@@ -66,9 +66,9 @@ resource "random_password" "app_password" {
 
 # Local values for computed configurations
 locals {
-  db_instance_name = "${var.environment}-postgres-${random_id.db_suffix.hex}"
+  db_instance_name    = "${var.environment}-postgres-${random_id.db_suffix.hex}"
   redis_instance_name = "${var.environment}-redis-${random_id.db_suffix.hex}"
-  
+
   # Connection strings
   postgres_connection_string = format(
     "postgresql://%s:%s@%s/%s",
@@ -77,7 +77,7 @@ locals {
     google_sql_database_instance.postgres.public_ip_address,
     var.database_name
   )
-  
+
   app_connection_string = format(
     "postgresql://%s:%s@%s/%s",
     var.app_database_user,
@@ -85,7 +85,7 @@ locals {
     google_sql_database_instance.postgres.public_ip_address,
     var.database_name
   )
-  
+
   # Cloud SQL proxy connection string for Cloud Run
   cloudsql_connection_string = format(
     "postgresql://%s:%s@/%s?host=/cloudsql/%s:%s:%s",

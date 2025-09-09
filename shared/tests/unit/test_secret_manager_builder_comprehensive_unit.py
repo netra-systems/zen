@@ -211,10 +211,8 @@ class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
 
     def test_real_validation_failure_no_jwt_secret_hard_error(self):
         """Test real validation fails hard when JWT secret is not available."""
-        # Ensure no JWT secret is set in environment
-        self.env.reset()
-        
-        builder = SecretManagerBuilder()
+        # Create builder with explicitly empty environment to force failure
+        builder = SecretManagerBuilder(env_vars={})
         
         # Real validation should fail hard
         is_valid, error = builder.validate()
@@ -443,7 +441,7 @@ class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
         
         # Real validation
         self.assertIsInstance(jwt_secret, str)
-        self.assertEqual(len(jwt_secret), 32)
+        self.assertEqual(len(jwt_secret), 34)  # Actual length of "real_auth_jwt_secret_32_chars_long"
         self.assertEqual(jwt_secret, "real_auth_jwt_secret_32_chars_long")
 
     def test_real_auth_builder_service_secret_retrieval(self):
@@ -906,7 +904,7 @@ class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
         deployment_configs = [
             {"ENVIRONMENT": "development", "JWT_SECRET_KEY": "rapid_dev_jwt_secret_32_characters"},
             {"ENVIRONMENT": "staging", "JWT_SECRET_KEY": "rapid_staging_jwt_secret_32_chars"},
-            {"ENVIRONMENT": "production", "JWT_SECRET_KEY": "rapid_prod_jwt_secret_32_chars_"}
+            {"ENVIRONMENT": "production", "JWT_SECRET_KEY": "rapid_prod_jwt_secret_32_chars_ok"}
         ]
         
         start_time = time.time()

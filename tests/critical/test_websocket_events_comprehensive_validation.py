@@ -114,7 +114,7 @@ class UserSession:
     """Tracks a user's WebSocket session and events."""
     user_id: str
     connection_id: str
-    websocket: Optional[websockets.client.WebSocketClientProtocol] = None
+    websocket: Optional[websockets.ClientConnection] = None
     events: List[WebSocketEvent] = field(default_factory=list)
     expected_events: Set[str] = field(default_factory=set)
     received_events: Set[str] = field(default_factory=set)
@@ -376,7 +376,7 @@ class RealWebSocketConnectionManager:
     
     def __init__(self, config: WebSocketTestConfig):
         self.config = config
-        self.connections: Dict[str, websockets.client.WebSocketClientProtocol] = {}
+        self.connections: Dict[str, websockets.ClientConnection] = {}
         self.connection_tasks: Dict[str, asyncio.Task] = {}
         self.event_capture = ComprehensiveEventCapture()
         self.is_running = True
@@ -427,7 +427,7 @@ class RealWebSocketConnectionManager:
             logger.error(f"Failed to connect WebSocket for user {user_id}: {e}")
             return False
     
-    async def _listen_for_events(self, user_id: str, websocket: websockets.client.WebSocketClientProtocol):
+    async def _listen_for_events(self, user_id: str, websocket: websockets.ClientConnection):
         """Listen for WebSocket events from a connection."""
         try:
             async for message in websocket:

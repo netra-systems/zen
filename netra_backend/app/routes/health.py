@@ -290,6 +290,67 @@ async def _handle_clickhouse_error(error: Exception) -> None:
     logger.error(f"ClickHouse check failed: {error}")
     raise
 
+
+async def _check_gcp_websocket_readiness() -> Dict[str, Any]:
+    """
+    Check GCP WebSocket readiness to prevent 1011 errors.
+    
+    CRITICAL: This check validates that all required services are ready
+    before GCP Cloud Run routes WebSocket connections.
+    """
+    try:
+        from netra_backend.app.middleware.gcp_websocket_readiness_middleware import websocket_readiness_health_check
+        from fastapi import Request
+        
+        # Get app state from request context (if available)
+        # For health checks, we'll use a mock request
+        class MockRequest:
+            def __init__(self):
+                self.app = type('MockApp', (), {'state': None})()
+        
+        # Try to get actual app state if available in global context
+        try:
+            import inspect
+            frame = inspect.currentframe()
+            while frame:
+                if 'request' in frame.f_locals and hasattr(frame.f_locals['request'], 'app'):
+                    mock_request = frame.f_locals['request']
+                    break
+                frame = frame.f_back
+            else:
+                mock_request = MockRequest()
+        except:
+            mock_request = MockRequest()
+        
+        # Get app state - will be None if not available
+        app_state = getattr(mock_request.app, 'state', None)
+        
+        # Run WebSocket readiness check
+        health_result = await websocket_readiness_health_check(app_state)
+        
+        return {
+            "status": health_result.get("status", "unknown"),
+            "websocket_ready": health_result.get("websocket_ready", False),
+            "details": health_result.get("details", {})
+        }
+        
+    except ImportError:
+        # GCP WebSocket validator not available - assume ready for non-GCP environments
+        return {
+            "status": "healthy",
+            "websocket_ready": True,
+            "details": {"validator_available": False}
+        }
+        
+    except Exception as e:
+        # WebSocket readiness check failed
+        logger.warning(f"GCP WebSocket readiness check failed: {e}")
+        return {
+            "status": "degraded",
+            "websocket_ready": False,
+            "details": {"error": str(e)}
+        }
+
 async def _check_redis_connection() -> None:
     """Check Redis connection for staging environment."""
     config = unified_config_manager.get_config()
@@ -342,6 +403,9 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
         # Initialize status for external services
         clickhouse_status = "unavailable"
         redis_status = "unavailable"
+        
+        # GCP WebSocket readiness check - CRITICAL for preventing 1011 errors
+        websocket_readiness_status = await _check_gcp_websocket_readiness()
         
         # CRITICAL FIX: Handle ClickHouse and Redis checks with proper environment-specific logic
         # This prevents race conditions between different environment configurations
@@ -409,6 +473,7 @@ async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
             "core_db": postgres_status,
             "clickhouse_db": clickhouse_status,
             "redis_db": redis_status,
+            "websocket_readiness": websocket_readiness_status,
             "details": health_status
         }
         
@@ -472,15 +537,16 @@ async def ready(request: Request) -> Dict[str, Any]:
             
             async with get_db() as db:
                 try:
-                    # CRITICAL FIX: Reduce timeout to align with faster database check (6.0s total allows for retries)
-                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=6.0)
+                    # CRITICAL FIX: Increase timeout to accommodate GCP validator's actual validation times
+                    # GCP WebSocket validator needs up to 30s, so allow 45s total for safety margin
+                    result = await asyncio.wait_for(_check_readiness_status(db), timeout=45.0)
                     return result
                 except asyncio.TimeoutError:
-                    logger.error("Readiness check exceeded 6 second timeout")
+                    logger.error("Readiness check exceeded 45 second timeout")
                     return _create_error_response(503, {
                         "status": "unhealthy",
-                        "message": "Readiness check timeout",
-                        "timeout_seconds": 6
+                        "message": "Readiness check timeout - services taking longer than expected to initialize",
+                        "timeout_seconds": 45
                     })
                 except Exception as check_error:
                     logger.error(f"Readiness check failed: {check_error}")
@@ -816,3 +882,127 @@ async def get_redis_health() -> Dict[str, Any]:
                 "ping": False
             }
         }
+
+
+@router.get("/startup")
+@router.head("/startup")
+async def startup_health(request: Request, db: AsyncSession = Depends(get_request_scoped_db_session)) -> Dict[str, Any]:
+    """
+    Comprehensive startup health check for Cloud Run startup probe.
+    
+    This endpoint is specifically designed for Cloud Run startup probes and implements
+    a more thorough readiness check than the standard health endpoint. It verifies:
+    1. Database initialization and table existence
+    2. Redis connection stability
+    3. WebSocket manager readiness
+    4. Service startup completion
+    
+    CRITICAL: This endpoint fixes the Cloud Run 503 WebSocket errors by ensuring
+    proper service initialization timing and prevents health checks from starting
+    before all required services are ready.
+    
+    Returns 200 when ready, 503 when still initializing or unhealthy.
+    """
+    logger.info("Startup health check initiated")
+    
+    try:
+        # Check if basic health is available first
+        basic_health = await health_interface.get_health_status(HealthLevel.BASIC)
+        
+        if not basic_health.get("healthy", False):
+            logger.warning(f"Basic health check failed: {basic_health}")
+            return Response(
+                content=json.dumps({
+                    "status": "not_ready",
+                    "reason": "basic_health_failed", 
+                    "details": basic_health,
+                    "timestamp": time.time()
+                }),
+                status_code=503,
+                headers={"Content-Type": "application/json"}
+            )
+        
+        # Enhanced startup checks for Cloud Run environment
+        startup_checks = {}
+        all_ready = True
+        
+        # 1. Database readiness with retry logic (critical for 503 fix)
+        try:
+            # Verify database tables exist (prevents startup failures from missing migrations)
+            await asyncio.wait_for(_check_database_connection(db), timeout=10.0)
+            startup_checks["database"] = {"status": "ready", "message": "Database connection and tables verified"}
+        except Exception as e:
+            logger.error(f"Database startup check failed: {e}")
+            startup_checks["database"] = {"status": "not_ready", "error": str(e)}
+            all_ready = False
+        
+        # 2. Redis connection stability (prevents race conditions)
+        try:
+            await asyncio.wait_for(_check_redis_connection(), timeout=5.0)
+            startup_checks["redis"] = {"status": "ready", "message": "Redis connection stable"}
+        except Exception as e:
+            logger.warning(f"Redis startup check failed: {e}")
+            startup_checks["redis"] = {"status": "not_ready", "error": str(e)}
+            # Redis is non-critical for startup in some environments
+            if unified_config_manager.get_config().environment not in ["staging", "development"]:
+                all_ready = False
+        
+        # 3. WebSocket readiness check (prevents 503 WebSocket upgrade failures)
+        try:
+            websocket_status = await _check_gcp_websocket_readiness()
+            if websocket_status.get("websocket_ready", False):
+                startup_checks["websocket"] = {"status": "ready", "message": "WebSocket services initialized"}
+            else:
+                startup_checks["websocket"] = {"status": "not_ready", "details": websocket_status}
+                all_ready = False
+        except Exception as e:
+            logger.error(f"WebSocket startup check failed: {e}")
+            startup_checks["websocket"] = {"status": "not_ready", "error": str(e)}
+            all_ready = False
+        
+        # 4. Service startup completion check
+        try:
+            from netra_backend.app.smd import SMD
+            if hasattr(SMD, '_startup_complete') and SMD._startup_complete:
+                startup_checks["startup_module"] = {"status": "ready", "message": "Service startup complete"}
+            else:
+                startup_checks["startup_module"] = {"status": "not_ready", "message": "Service startup in progress"}
+                all_ready = False
+        except Exception as e:
+            logger.warning(f"Startup module check failed: {e}")
+            startup_checks["startup_module"] = {"status": "unknown", "error": str(e)}
+        
+        # Build response
+        if all_ready:
+            logger.info("Startup health check passed - service ready")
+            return {
+                "status": "ready",
+                "message": "Service fully initialized and ready for traffic",
+                "timestamp": time.time(),
+                "checks": startup_checks,
+                "version": "1.0.0"
+            }
+        else:
+            logger.warning(f"Startup health check failed - service not ready: {startup_checks}")
+            return Response(
+                content=json.dumps({
+                    "status": "not_ready", 
+                    "message": "Service initialization in progress",
+                    "timestamp": time.time(),
+                    "checks": startup_checks
+                }),
+                status_code=503,
+                headers={"Content-Type": "application/json"}
+            )
+            
+    except Exception as e:
+        logger.error(f"Startup health check exception: {e}", exc_info=True)
+        return Response(
+            content=json.dumps({
+                "status": "error",
+                "message": f"Startup health check failed: {str(e)}",
+                "timestamp": time.time()
+            }),
+            status_code=503,
+            headers={"Content-Type": "application/json"}
+        )

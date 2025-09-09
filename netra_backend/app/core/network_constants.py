@@ -234,14 +234,17 @@ class URLConstants:
     # Production domains
     PRODUCTION_FRONTEND: Final[str] = "https://netrasystems.ai"
     PRODUCTION_APP: Final[str] = "https://app.netrasystems.ai"
-    STAGING_FRONTEND: Final[str] = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
-    STAGING_APP: Final[str] = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+    
+    # Legacy staging constants (DEPRECATED - use STAGING_*_URL instead)
+    STAGING_FRONTEND: Final[str] = "https://app.staging.netrasystems.ai"
+    STAGING_APP: Final[str] = "https://api.staging.netrasystems.ai"
     
     # GCP Staging Service URLs - SSOT for all staging services
-    STAGING_BACKEND_URL: Final[str] = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+    # CRITICAL: Use load balancer endpoints, not direct Cloud Run URLs
+    STAGING_BACKEND_URL: Final[str] = "https://api.staging.netrasystems.ai"
     STAGING_AUTH_URL: Final[str] = "https://auth.staging.netrasystems.ai"
-    STAGING_FRONTEND_URL: Final[str] = "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app"
-    STAGING_WEBSOCKET_URL: Final[str] = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
+    STAGING_FRONTEND_URL: Final[str] = "https://app.staging.netrasystems.ai"
+    STAGING_WEBSOCKET_URL: Final[str] = "wss://api.staging.netrasystems.ai/ws"
     
     @classmethod
     def build_http_url(cls, 
@@ -283,8 +286,12 @@ class URLConstants:
         if environment == "production":
             return [cls.PRODUCTION_FRONTEND, cls.PRODUCTION_APP]
         elif environment == "staging":
-            return [cls.STAGING_FRONTEND, cls.STAGING_APP,
-                   cls.build_http_url(port=ServicePorts.FRONTEND_DEFAULT)]
+            return [
+                cls.STAGING_FRONTEND_URL,  # Load balancer frontend
+                cls.STAGING_BACKEND_URL,   # Load balancer backend  
+                cls.STAGING_AUTH_URL,      # Load balancer auth
+                cls.build_http_url(port=ServicePorts.FRONTEND_DEFAULT)  # Local dev
+            ]
         else:
             # Development environment - support dynamic ports
             # Include common development ports and patterns

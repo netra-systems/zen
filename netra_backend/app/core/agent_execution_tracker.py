@@ -23,6 +23,9 @@ from typing import Dict, List, Optional, Any, Set
 from collections import defaultdict
 import logging
 
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
 logger = logging.getLogger(__name__)
 
 
@@ -172,7 +175,17 @@ class AgentExecutionTracker:
         Returns:
             Unique execution ID
         """
-        execution_id = f"exec_{uuid.uuid4().hex[:12]}_{int(time.time())}"
+        # Use UnifiedIDManager for structured execution ID with audit trail
+        id_manager = UnifiedIDManager()
+        execution_id = id_manager.generate_id(
+            IDType.EXECUTION,
+            prefix="exec",
+            context={
+                "agent_name": agent_name,
+                "operation": "execution",
+                "timestamp": int(time.time())
+            }
+        )
         
         now = datetime.now(timezone.utc)
         record = ExecutionRecord(

@@ -408,7 +408,7 @@ class TestAuthSecurityPatternsIntegration(BaseIntegrationTest):
         )
         
         assert password_history_test["reuse_prevented"] is True
-        assert "password recently used" in password_history_test["error_message"].lower()
+        assert "password was recently used" in password_history_test["error_message"].lower()
         
         self.logger.info("Password security enforcement patterns validation successful")
     
@@ -553,12 +553,21 @@ class TestAuthSecurityPatternsIntegration(BaseIntegrationTest):
             failed_attempts = len([a for a in self._login_attempts[email] if not a["success"]])
             remaining = max(0, self.security_config["max_login_attempts"] - failed_attempts)
             
-            return {
-                "success": False,
-                "error_message": f"Invalid credentials. {remaining} attempts remaining.",
-                "remaining_attempts": remaining,
-                "locked_out": remaining == 0
-            }
+            # When account is locked out, provide clear security messaging
+            if remaining == 0:
+                return {
+                    "success": False,
+                    "error_message": "Account locked due to too many failed attempts. Try again later.",
+                    "remaining_attempts": remaining,
+                    "locked_out": True
+                }
+            else:
+                return {
+                    "success": False,
+                    "error_message": f"Invalid credentials. {remaining} attempts remaining.",
+                    "remaining_attempts": remaining,
+                    "locked_out": False
+                }
     
     async def _simulate_lockout_expiry(self, email: str) -> None:
         """Simulate lockout duration expiry."""
@@ -845,12 +854,14 @@ class TestAuthSecurityPatternsIntegration(BaseIntegrationTest):
             access_token = secrets.token_urlsafe(32)
             
             return {
+                "success": True,  # Consistent interface for bypass attempt testing
                 "mfa_valid": True,
                 "login_complete": True,
                 "access_token": access_token
             }
         else:
             return {
+                "success": False,  # Consistent interface for bypass attempt testing
                 "mfa_valid": False,
                 "error_message": "Invalid MFA code"
             }

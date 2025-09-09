@@ -361,7 +361,7 @@ class TestAgentCreationAndManagement:
 class TestToolDispatcherIntegration:
     """Test tool dispatcher creation and enhancement."""
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
+    @patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher')
     async def test_create_tool_dispatcher_for_user_creates_isolated_dispatcher(
         self, mock_unified_dispatcher, mock_llm_manager, test_user_context
     ):
@@ -386,7 +386,7 @@ class TestToolDispatcherIntegration:
             enable_admin_tools=False
         )
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
+    @patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher')
     async def test_create_tool_dispatcher_for_user_with_admin_tools(
         self, mock_unified_dispatcher, mock_llm_manager, test_user_context
     ):
@@ -410,7 +410,7 @@ class TestToolDispatcherIntegration:
             enable_admin_tools=True
         )
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
+    @patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher')
     async def test_default_dispatcher_factory_uses_unified_dispatcher(
         self, mock_unified_dispatcher, mock_llm_manager, test_user_context
     ):
@@ -456,7 +456,7 @@ class TestToolDispatcherIntegration:
         
         # Assert
         assert registry._legacy_dispatcher == mock_dispatcher
-        assert registry.tool_dispatcher is None  # Still returns None
+        assert registry.tool_dispatcher == mock_dispatcher  # Returns the set value for backward compatibility
 
 
 @pytest.mark.asyncio

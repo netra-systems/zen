@@ -56,7 +56,7 @@ class UserAgentSession:
     """
     
     def __init__(self, user_id: str):
-        if not user_id or not isinstance(user_id, str):
+        if not user_id or not isinstance(user_id, str) or not user_id.strip():
             raise ValueError("user_id must be a non-empty string")
             
         self.user_id = user_id
@@ -82,12 +82,19 @@ class UserAgentSession:
         
         self._websocket_manager = manager
         
+        # If manager is None, don't create a bridge
+        if manager is None:
+            self._websocket_bridge = None
+            logger.debug(f"WebSocket manager set to None for user {self.user_id} - no bridge created")
+            return
+        
         # Create user context if not provided
         if user_context is None:
             user_context = UserExecutionContext(
                 user_id=self.user_id,
                 request_id=f"session_{self.user_id}_{id(self)}",
-                thread_id=f"thread_{self.user_id}_{id(self)}"
+                thread_id=f"thread_{self.user_id}_{id(self)}",
+                run_id=f"session_run_{self.user_id}_{id(self)}"
             )
         
         # Use factory to create properly isolated bridge
@@ -226,6 +233,7 @@ class AgentLifecycleManager:
     
     async def trigger_cleanup(self, user_id: str) -> None:
         """Trigger emergency cleanup for user."""
+        cleanup_success = False
         try:
             # FIXED: Access user sessions from the registry directly
             if not self._registry:
@@ -235,13 +243,21 @@ class AgentLifecycleManager:
             user_session = self._registry._user_sessions.get(user_id)
             if user_session:
                 await user_session.cleanup_all_agents()
-                # Remove from registry
-                if user_id in self._registry._user_sessions:
-                    del self._registry._user_sessions[user_id]
+                cleanup_success = True
                 
-            logger.info(f"✅ Emergency cleanup completed for user {user_id}")
         except Exception as e:
             logger.error(f"Emergency cleanup failed for user {user_id}: {e}")
+        finally:
+            # CRITICAL: Always remove session from registry to prevent memory leaks,
+            # even if cleanup_all_agents() failed
+            if self._registry and user_id in self._registry._user_sessions:
+                del self._registry._user_sessions[user_id]
+                logger.debug(f"Removed user session {user_id} from registry")
+                
+            if cleanup_success:
+                logger.info(f"✅ Emergency cleanup completed for user {user_id}")
+            else:
+                logger.warning(f"⚠️ Emergency cleanup completed with errors for user {user_id}, but session was removed from registry")
 
 
 class AgentRegistry(UniversalAgentRegistry):
@@ -280,8 +296,11 @@ class AgentRegistry(UniversalAgentRegistry):
         self._lifecycle_manager = AgentLifecycleManager(registry=self)  # FIXED: Pass registry reference
         self._created_at = datetime.now(timezone.utc)
         
-        # DEPRECATED: Legacy tool_dispatcher for backward compatibility
-        # New code should use tool_dispatcher_factory for per-user isolation
+        # FIXED: Track background tasks to prevent timeout issues
+        self._background_tasks: List[asyncio.Task] = []
+        
+        # BACKWARD COMPATIBILITY: Initialize legacy dispatcher to None
+        # New code should use create_tool_dispatcher_for_user() for proper SSOT compliance  
         self._legacy_dispatcher = None
         
         logger.info("🔄 Enhanced AgentRegistry initialized with CanonicalToolDispatcher SSOT pattern")
@@ -305,12 +324,31 @@ class AgentRegistry(UniversalAgentRegistry):
     async def cleanup(self):
         """Clean up all user sessions and resources."""
         async with self._session_lock:
-            # Clean up all user sessions
-            for user_id in list(self._user_sessions.keys()):
-                await self.cleanup_user_session(user_id)
+            # FIXED: Cancel and await background tasks first to prevent timeout
+            if self._background_tasks:
+                logger.debug(f"Cancelling {len(self._background_tasks)} background tasks")
+                for task in self._background_tasks:
+                    if not task.done():
+                        task.cancel()
+                
+                # Wait for tasks to finish cancellation (with timeout)
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(*self._background_tasks, return_exceptions=True),
+                        timeout=1.0  # Short timeout to prevent hanging
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning("Some background tasks did not cancel within timeout")
+                except Exception as e:
+                    logger.debug(f"Expected exception during task cancellation: {e}")
+                
+                self._background_tasks.clear()
             
-            # Clear legacy state
-            self._legacy_dispatcher = None
+            # Clean up all user sessions (use private method to avoid deadlock)
+            for user_id in list(self._user_sessions.keys()):
+                await self._cleanup_user_session_unlocked(user_id)
+            
+            # SSOT: No legacy state to clear - using factory patterns
             
         logger.info("✅ AgentRegistry cleanup complete")
     
@@ -338,19 +376,53 @@ class AgentRegistry(UniversalAgentRegistry):
                 if hasattr(self, 'websocket_manager') and self.websocket_manager is not None:
                     try:
                         from netra_backend.app.services.user_execution_context import UserExecutionContext
+                        import uuid
                         user_context = UserExecutionContext(
                             user_id=user_id,
-                            request_id=f"session_init_{user_id}_{id(self)}",
-                            thread_id=f"session_thread_{user_id}"
+                            request_id=str(uuid.uuid4()),
+                            thread_id=f"session_thread_{user_id}",
+                            run_id=f"session_run_{user_id}_{uuid.uuid4().hex[:8]}"
                         )
                         await user_session.set_websocket_manager(self.websocket_manager, user_context)
                         logger.debug(f"Set WebSocket manager on new user session for {user_id}")
                     except Exception as e:
                         logger.warning(f"Failed to set WebSocket manager on new user session for {user_id}: {e}")
+                else:
+                    logger.debug(f"No WebSocket manager to set for new session. hasattr: {hasattr(self, 'websocket_manager')}, value: {getattr(self, 'websocket_manager', None)}")
                 
                 self._user_sessions[user_id] = user_session
                 logger.info(f"🔐 Created isolated session for user {user_id}")
             return self._user_sessions[user_id]
+    
+    async def _cleanup_user_session_unlocked(self, user_id: str) -> Dict[str, Any]:
+        """PRIVATE: Cleanup user session without acquiring lock (assumes lock is already held).
+        
+        This is used internally by cleanup() to avoid deadlock.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            Cleanup metrics
+        """
+        if not user_id:
+            raise ValueError("user_id is required")
+            
+        cleanup_metrics = {'user_id': user_id, 'cleaned_agents': 0, 'status': 'no_session'}
+        
+        if user_id in self._user_sessions:
+            user_session = self._user_sessions[user_id]
+            session_metrics = user_session.get_metrics()
+            # Store the agent count before cleanup
+            cleanup_metrics['cleaned_agents'] = session_metrics.get('agent_count', 0)
+            
+            await user_session.cleanup_all_agents()
+            del self._user_sessions[user_id]
+            
+            cleanup_metrics['status'] = 'cleaned'
+            logger.info(f"🧹 Cleaned up user session for {user_id}")
+        
+        return cleanup_metrics
     
     async def cleanup_user_session(self, user_id: str) -> Dict[str, Any]:
         """Complete cleanup of user session and all associated agents.
@@ -363,23 +435,8 @@ class AgentRegistry(UniversalAgentRegistry):
         Returns:
             Cleanup metrics
         """
-        if not user_id:
-            raise ValueError("user_id is required")
-            
         async with self._session_lock:
-            cleanup_metrics = {'user_id': user_id, 'cleaned_agents': 0, 'status': 'no_session'}
-            
-            if user_id in self._user_sessions:
-                user_session = self._user_sessions[user_id]
-                cleanup_metrics.update(user_session.get_metrics())
-                
-                await user_session.cleanup_all_agents()
-                del self._user_sessions[user_id]
-                
-                cleanup_metrics['status'] = 'cleaned'
-                logger.info(f"🧹 Cleaned up user session for {user_id}")
-            
-            return cleanup_metrics
+            return await self._cleanup_user_session_unlocked(user_id)
     
     async def create_agent_for_user(self, user_id: str, agent_type: str, 
                                    user_context: 'UserExecutionContext',
@@ -553,7 +610,7 @@ class AgentRegistry(UniversalAgentRegistry):
             
             for user_id in users_to_cleanup:
                 try:
-                    user_metrics = await self.cleanup_user_session(user_id)
+                    user_metrics = await self._cleanup_user_session_unlocked(user_id)
                     cleanup_report['users_cleaned'] += 1
                     cleanup_report['agents_cleaned'] += user_metrics.get('cleaned_agents', 0)
                 except Exception as e:
@@ -584,8 +641,30 @@ class AgentRegistry(UniversalAgentRegistry):
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
             return
         
-        # Store at registry level for new user sessions
-        super().set_websocket_manager(manager)  # Call parent class method
+        # FIXED: Direct assignment instead of inheritance violation
+        # Store at registry level using UniversalRegistry's interface
+        self.websocket_manager = manager
+        
+        # Use the standard bridge factory to create proper interface
+        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        
+        # Create a default user context for registry-level bridge
+        import uuid
+        default_context = UserExecutionContext(
+            user_id="test_registry_system",
+            request_id=f"websocket_setup_{uuid.uuid4().hex[:8]}",
+            thread_id="test_registry_thread",
+            run_id=f"websocket_run_{uuid.uuid4().hex[:8]}"
+        )
+        
+        # Create and set the standardized AgentWebSocketBridge  
+        try:
+            bridge = create_agent_websocket_bridge(default_context)
+            super().set_websocket_bridge(bridge)  # Use correct parent interface
+            logger.debug("Registry WebSocket bridge created using factory pattern")
+        except Exception as e:
+            logger.warning(f"Failed to create registry WebSocket bridge: {e}")
         
         # Propagate to all existing user sessions asynchronously
         # We use asyncio.create_task to avoid blocking in sync context
@@ -603,7 +682,7 @@ class AgentRegistry(UniversalAgentRegistry):
                                 request_id=f"websocket_update_{user_id}_{id(self)}",
                                 thread_id=f"ws_thread_{user_id}"
                             )
-                            # Set WebSocket manager on user session
+                            # Set WebSocket manager on user session using factory pattern
                             await user_session.set_websocket_manager(manager, user_context)
                             logger.debug(f"Updated WebSocket manager for user {user_id}")
                         except Exception as e:
@@ -617,8 +696,18 @@ class AgentRegistry(UniversalAgentRegistry):
                 # Try to get the current event loop
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
-                    # If loop is running, schedule the task
-                    asyncio.create_task(update_user_sessions())
+                    # If loop is running, schedule the task and track it
+                    task = asyncio.create_task(update_user_sessions())
+                    self._background_tasks.append(task)
+                    # Clean up completed tasks to prevent memory leak
+                    def cleanup_task(finished_task):
+                        try:
+                            if finished_task in self._background_tasks:
+                                self._background_tasks.remove(finished_task)
+                        except (ValueError, AttributeError):
+                            # Task might have been removed already during cleanup
+                            pass
+                    task.add_done_callback(cleanup_task)
                 else:
                     # If no loop is running, we can't schedule async tasks
                     logger.warning("No event loop running - user sessions will get WebSocket manager on next access")
@@ -644,10 +733,30 @@ class AgentRegistry(UniversalAgentRegistry):
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
             return
         
-        # Store at registry level for new user sessions
-        super().set_websocket_manager(manager)  # Call parent class method
+        # FIXED: Direct assignment and proper bridge creation
+        self.websocket_manager = manager
         
-        # Propagate to all existing user sessions
+        # Use the standard bridge factory to create proper interface
+        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+        
+        # Create a default user context for registry-level bridge
+        import uuid
+        default_context = UserExecutionContext(
+            user_id="test_registry_system_async",
+            request_id=f"websocket_setup_async_{uuid.uuid4().hex[:8]}",
+            thread_id="test_registry_thread_async",
+            run_id=f"websocket_run_async_{uuid.uuid4().hex[:8]}"
+        )
+        
+        # Create and set the standardized AgentWebSocketBridge
+        try:
+            bridge = create_agent_websocket_bridge(default_context)
+            super().set_websocket_bridge(bridge)  # Use correct parent interface
+            logger.debug(f"Registry WebSocket bridge created using factory pattern (async): {getattr(self, 'websocket_manager', 'NOT SET')}")
+        except Exception as e:
+            logger.warning(f"Failed to create registry WebSocket bridge (async): {e}")
+        
+        # Propagate to all existing user sessions using factory pattern
         if self._user_sessions:
             logger.info(f"Propagating WebSocket manager to {len(self._user_sessions)} existing user sessions")
             
@@ -660,13 +769,13 @@ class AgentRegistry(UniversalAgentRegistry):
                         thread_id=f"ws_thread_{user_id}",
                         run_id=f"ws_run_{user_id}_{id(self)}"
                     )
-                    # Set WebSocket manager on user session
+                    # Set WebSocket manager on user session using factory pattern
                     await user_session.set_websocket_manager(manager, user_context)
                     logger.debug(f"Updated WebSocket manager for user {user_id}")
                 except Exception as e:
                     logger.error(f"Failed to update WebSocket manager for user {user_id}: {e}")
         
-        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async)")
+        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async) - using AgentWebSocketBridge interface")
     
     # Override get method to pass WebSocket bridge to factories
     def get(self, key: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:
@@ -814,20 +923,20 @@ class AgentRegistry(UniversalAgentRegistry):
         WARNING: This returns None to prevent usage of non-isolated dispatchers.
         New code should use create_tool_dispatcher_for_user() for proper isolation.
         """
-        if self._legacy_dispatcher is None:
-            logger.warning(
-                "⚠️ DEPRECATED: Accessing tool_dispatcher property is deprecated.\n"
-                "Use create_tool_dispatcher_for_user(user_context) for proper user isolation."
-            )
-        return self._legacy_dispatcher
+        logger.warning(
+            "⚠️ DEPRECATED: Accessing tool_dispatcher property is deprecated.\n"
+            "Use create_tool_dispatcher_for_user(user_context) for proper user isolation."
+        )
+        return None
     
     @tool_dispatcher.setter  
     def tool_dispatcher(self, value):
         """DEPRECATED: Legacy setter for backward compatibility."""
         logger.warning(
-            "⚠️ DEPRECATED: Setting tool_dispatcher is deprecated and ignored.\n"
+            "⚠️ DEPRECATED: Setting tool_dispatcher is deprecated.\n"
             "Use tool_dispatcher_factory parameter in constructor for custom factories."
         )
+        # BACKWARD COMPATIBILITY: Store value for legacy tests, but getter still returns None
         self._legacy_dispatcher = value
     
     async def _default_dispatcher_factory(self, user_context: 'UserExecutionContext', 
@@ -1119,26 +1228,55 @@ class AgentRegistry(UniversalAgentRegistry):
             logger.error(f"Failed to register agent {name}: {e}")
             self.registration_errors[name] = str(e)
     
-    async def register_agent_safely(self, name: str, agent_class: Type['BaseAgent'], **kwargs) -> bool:
-        """Register an agent safely with error handling."""
+    async def register_agent_safely(self, name: str, agent_class: Type['BaseAgent'], 
+                                   user_context: 'UserExecutionContext' = None,
+                                   **kwargs) -> bool:
+        """Register an agent safely with error handling using SSOT factory patterns.
+        
+        MIGRATED: Now uses proper factory pattern instead of legacy dispatcher.
+        
+        Args:
+            name: Agent name for registration
+            agent_class: Agent class to instantiate
+            user_context: Required for proper user isolation (creates default if None)
+            **kwargs: Additional arguments for agent construction
+        """
         try:
-            logger.info(f"Attempting to register agent: {name}")
+            logger.info(f"Attempting to register agent: {name} using SSOT factory pattern")
             
-            # Create agent instance
+            # SSOT: Create proper user context if not provided
+            if user_context is None:
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                import uuid
+                user_context = UserExecutionContext(
+                    user_id="test_agent_creation_system",
+                    request_id=f"register_{name}_{uuid.uuid4().hex[:8]}",
+                    thread_id=f"test_registry_thread_{name}",
+                    run_id=f"register_run_{name}_{uuid.uuid4().hex[:8]}"
+                )
+            
+            # SSOT: Use factory to create properly isolated tool dispatcher
+            tool_dispatcher = await self.create_tool_dispatcher_for_user(
+                user_context=user_context,
+                websocket_bridge=None,  # Bridge will be set when WebSocket manager is configured
+                enable_admin_tools=False
+            )
+            
+            # Create agent instance with proper isolation
             agent = agent_class(
                 self.llm_manager,
-                self.tool_dispatcher,
+                tool_dispatcher,
                 **kwargs
             )
             
             # Register using UniversalRegistry
             self.register(name, agent)
             
-            logger.info(f"Successfully registered agent: {name}")
+            logger.info(f"Successfully registered agent: {name} with isolated dispatcher")
             return True
             
         except Exception as e:
-            error_msg = f"Failed to register agent {name}: {str(e)}"
+            error_msg = f"Failed to register agent {name} with SSOT pattern: {str(e)}"
             logger.error(error_msg)
             self.registration_errors[name] = error_msg
             return False

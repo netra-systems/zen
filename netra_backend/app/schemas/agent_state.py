@@ -14,6 +14,9 @@ class CheckpointType(str, Enum):
     RECOVERY = "recovery"
     PHASE_TRANSITION = "phase_transition"
     FULL = "full"
+    CRITICAL = "critical"
+    INTERMEDIATE = "intermediate"
+    PIPELINE_COMPLETE = "pipeline_complete"
 
 
 class RecoveryType(str, Enum):

@@ -1,6 +1,6 @@
 from shared.isolated_environment import get_env
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils_test_utils.test_redis_manager import RedisTestManager
+from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python3
 from unittest.mock import AsyncMock, Mock, patch, MagicMock

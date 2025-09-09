@@ -60,7 +60,7 @@
             # REMOVED_SYNTAX_ERROR: UnifiedE2ETestHarness,
             # REMOVED_SYNTAX_ERROR: create_e2e_harness,
             
-            # REMOVED_SYNTAX_ERROR: from tests.e2e.service_manager import RealServicesManager
+            # REMOVED_SYNTAX_ERROR: from tests.e2e.real_services_manager import RealServicesManager
             # REMOVED_SYNTAX_ERROR: from tests.e2e.config import ( )
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

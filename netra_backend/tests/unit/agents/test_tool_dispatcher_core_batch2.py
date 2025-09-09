@@ -238,8 +238,8 @@ class TestToolDispatcherCoreUnit(SSotBaseTestCase):
         from langchain_core.tools import BaseTool
         
         class TestTool(BaseTool):
-            name = "test_base_tool"
-            description = "Test BaseTool"
+            name: str = "test_base_tool"
+            description: str = "Test BaseTool"
             
             def _run(self, *args, **kwargs):
                 return "test result"

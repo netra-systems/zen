@@ -7,8 +7,8 @@ import asyncio
 import httpx
 import json
 
-AUTH_SERVICE_URL = "https://netra-auth-staging-pnovr5vsba-uc.a.run.app"
-BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+AUTH_SERVICE_URL = "https://auth.staging.netrasystems.ai"
+BACKEND_URL = "https://api.staging.netrasystems.ai"
 
 async def investigate_endpoints():
     """Investigate available endpoints on both staging services"""

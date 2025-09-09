@@ -22,8 +22,8 @@ class CategoryPriority(Enum):
     OPTIONAL = 5    # Optional (experimental, legacy)
 
 
-class CategoryType(Enum):
-    """Category types for organizational purposes"""
+class TestOrganizationType(Enum):
+    """Test organization types for categorization purposes."""
     FUNCTIONAL = "functional"       # Feature-based tests
     TECHNICAL = "technical"         # Implementation-based tests
     QUALITY = "quality"            # Quality assurance tests
@@ -33,13 +33,17 @@ class CategoryType(Enum):
     E2E = "e2e"                    # End-to-end tests
 
 
+# Backward compatibility alias - DEPRECATED: Use TestOrganizationType instead  
+CategoryType = TestOrganizationType
+
+
 @dataclass
 class TestCategory:
     """Enhanced test category with full hierarchy and dependency support"""
     name: str
     description: str
     priority: CategoryPriority = CategoryPriority.MEDIUM
-    category_type: CategoryType = CategoryType.FUNCTIONAL
+    category_type: TestOrganizationType = TestOrganizationType.FUNCTIONAL
     timeout_seconds: int = 300
     
     # Hierarchy and relationships
@@ -159,7 +163,7 @@ class TestCategory:
             name=data["name"],
             description=data["description"],
             priority=CategoryPriority[data.get("priority", "MEDIUM")],
-            category_type=CategoryType(data.get("category_type", "functional")),
+            category_type=TestOrganizationType(data.get("category_type", "functional")),
             timeout_seconds=data.get("timeout_seconds", 300),
             parent=data.get("parent"),
             children=set(data.get("children", [])),
@@ -229,7 +233,7 @@ class CategorySystem:
                 name="smoke",
                 description="Quick validation tests for pre-commit checks",
                 priority=CategoryPriority.CRITICAL,
-                category_type=CategoryType.QUALITY,
+                category_type=TestOrganizationType.QUALITY,
                 timeout_seconds=60,
                 estimated_duration=timedelta(minutes=1),
                 max_parallel_instances=4,
@@ -239,7 +243,7 @@ class CategorySystem:
                 name="startup", 
                 description="System startup and initialization tests",
                 priority=CategoryPriority.CRITICAL,
-                category_type=CategoryType.TECHNICAL,
+                category_type=TestOrganizationType.TECHNICAL,
                 timeout_seconds=180,
                 estimated_duration=timedelta(minutes=3),
                 database_dependent=True,
@@ -251,7 +255,7 @@ class CategorySystem:
                 name="unit",
                 description="Unit tests for individual components",
                 priority=CategoryPriority.HIGH,
-                category_type=CategoryType.FUNCTIONAL,
+                category_type=TestOrganizationType.FUNCTIONAL,
                 timeout_seconds=300,
                 estimated_duration=timedelta(minutes=5),
                 parallel_safe=True,
@@ -262,7 +266,7 @@ class CategorySystem:
                 name="security",
                 description="Security and authentication tests",
                 priority=CategoryPriority.HIGH,
-                category_type=CategoryType.SECURITY,
+                category_type=TestOrganizationType.SECURITY,
                 timeout_seconds=300,
                 estimated_duration=timedelta(minutes=5),
                 database_dependent=True,
@@ -272,7 +276,7 @@ class CategorySystem:
                 name="database",
                 description="Database and data persistence tests", 
                 priority=CategoryPriority.HIGH,
-                category_type=CategoryType.TECHNICAL,
+                category_type=TestOrganizationType.TECHNICAL,
                 timeout_seconds=300,
                 estimated_duration=timedelta(minutes=5),
                 database_dependent=True,
@@ -286,7 +290,7 @@ class CategorySystem:
                 name="integration",
                 description="Integration tests for feature validation",
                 priority=CategoryPriority.MEDIUM,
-                category_type=CategoryType.INTEGRATION,
+                category_type=TestOrganizationType.INTEGRATION,
                 timeout_seconds=600,
                 estimated_duration=timedelta(minutes=10),
                 dependencies={"unit", "database"},
@@ -297,7 +301,7 @@ class CategorySystem:
                 name="api",
                 description="API endpoint and route tests",
                 priority=CategoryPriority.MEDIUM,
-                category_type=CategoryType.FUNCTIONAL,
+                category_type=TestOrganizationType.FUNCTIONAL,
                 timeout_seconds=300,
                 estimated_duration=timedelta(minutes=5),
                 dependencies={"database"},
@@ -308,7 +312,7 @@ class CategorySystem:
                 name="websocket",
                 description="WebSocket communication tests",
                 priority=CategoryPriority.MEDIUM,
-                category_type=CategoryType.TECHNICAL,
+                category_type=TestOrganizationType.TECHNICAL,
                 timeout_seconds=300,
                 estimated_duration=timedelta(minutes=5),
                 dependencies={"unit"},
@@ -320,7 +324,7 @@ class CategorySystem:
                 name="agent",
                 description="AI agent and workflow tests",
                 priority=CategoryPriority.MEDIUM,
-                category_type=CategoryType.FUNCTIONAL,
+                category_type=TestOrganizationType.FUNCTIONAL,
                 timeout_seconds=600,
                 estimated_duration=timedelta(minutes=10),
                 dependencies={"unit", "database"},
@@ -334,7 +338,7 @@ class CategorySystem:
                 name="frontend",
                 description="React component and UI tests",
                 priority=CategoryPriority.LOW,
-                category_type=CategoryType.FUNCTIONAL,
+                category_type=TestOrganizationType.FUNCTIONAL,
                 timeout_seconds=300,
                 estimated_duration=timedelta(minutes=5),
                 parallel_safe=True,
@@ -345,7 +349,7 @@ class CategorySystem:
                 name="performance",
                 description="Performance and load tests",
                 priority=CategoryPriority.LOW,
-                category_type=CategoryType.PERFORMANCE,
+                category_type=TestOrganizationType.PERFORMANCE,
                 timeout_seconds=1800,
                 estimated_duration=timedelta(minutes=30),
                 dependencies={"integration"},
@@ -360,7 +364,7 @@ class CategorySystem:
                 name="e2e",
                 description="End-to-end user journey tests",
                 priority=CategoryPriority.LOW,
-                category_type=CategoryType.E2E,
+                category_type=TestOrganizationType.E2E,
                 timeout_seconds=1800,
                 estimated_duration=timedelta(minutes=30),
                 dependencies={"integration", "api", "frontend"},
@@ -376,7 +380,7 @@ class CategorySystem:
                 name="real_e2e",
                 description="E2E tests with real LLM calls and services",
                 priority=CategoryPriority.LOW,
-                category_type=CategoryType.E2E,
+                category_type=TestOrganizationType.E2E,
                 timeout_seconds=1800,
                 estimated_duration=timedelta(minutes=30),
                 dependencies={"e2e"},
@@ -391,7 +395,7 @@ class CategorySystem:
                 name="real_services",
                 description="Service integration tests with real services",
                 priority=CategoryPriority.LOW,
-                category_type=CategoryType.INTEGRATION,
+                category_type=TestOrganizationType.INTEGRATION,
                 timeout_seconds=900,
                 estimated_duration=timedelta(minutes=15),
                 dependencies={"integration"},
@@ -457,7 +461,7 @@ class CategorySystem:
         """Get all categories with specified priority"""
         return [cat for cat in self.categories.values() if cat.priority == priority]
     
-    def get_categories_by_type(self, category_type: CategoryType) -> List[TestCategory]:
+    def get_categories_by_type(self, category_type: TestOrganizationType) -> List[TestCategory]:
         """Get all categories of specified type"""
         return [cat for cat in self.categories.values() if cat.category_type == category_type]
     
@@ -717,7 +721,7 @@ class CategorySystem:
             stats["by_priority"][priority.name] = len(self.get_categories_by_priority(priority))
         
         # Count by type
-        for category_type in CategoryType:
+        for category_type in TestOrganizationType:
             stats["by_type"][category_type.value] = len(self.get_categories_by_type(category_type))
         
         # Calculate other statistics

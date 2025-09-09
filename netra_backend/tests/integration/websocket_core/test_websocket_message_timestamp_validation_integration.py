@@ -30,7 +30,7 @@ from netra_backend.app.websocket_core.types import (
     create_standard_message
 )
 from netra_backend.app.websocket_core.unified_init import get_unified_websocket_manager
-from netra_backend.app.database.request_scoped_session_factory import get_database_session
+from netra_backend.app.database.request_scoped_session_factory import get_isolated_session
 from test_framework.ssot.websocket import WebSocketTestHelper
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -49,7 +49,7 @@ class TestWebSocketTimestampValidationIntegration:
     @pytest.fixture
     async def db_session(self):
         """Get real database session."""
-        async with get_database_session() as session:
+        async with get_isolated_session(user_id="integration_test_user") as session:
             yield session
 
     @pytest.fixture

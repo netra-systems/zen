@@ -116,9 +116,8 @@ class TestAuthServiceBusinessLogic(BaseIntegrationTest):
             assert user_data["email"] == "test@business.com"
         
         # Test that duplicate test user registration follows business rules
-        duplicate_data = self.auth_service.register_test_user("test@business.com", "AnotherPass123!")
-        # Should create new entry or handle appropriately based on business rules
-        assert duplicate_data["email"] == "test@business.com"
+        with pytest.raises(ValueError, match="User with this email already registered"):
+            duplicate_data = self.auth_service.register_test_user("test@business.com", "AnotherPass123!")
 
     @pytest.mark.integration
     async def test_oauth_user_creation_business_flow(self):

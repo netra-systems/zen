@@ -40,9 +40,12 @@ from netra_backend.app.websocket_core.types import (
     convert_jsonrpc_to_websocket_message,
     normalize_message_type
 )
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.websocket_core.utils import is_websocket_connected
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.timestamp_utils import safe_convert_timestamp
 
 logger = central_logger.get_logger(__name__)
 
@@ -108,12 +111,68 @@ class ConnectionHandler(BaseMessageHandler):
                 logger.warning(f"Unexpected connection message type: {message.type}")
                 return False
             
+            # CRITICAL FIX: Fail-fast response validation to prevent silent failures
+            # Root cause: Handler returns True even when send fails, masking connection issues
             if is_websocket_connected(websocket):
-                await websocket.send_json(response.model_dump(mode='json'))
-            return True
+                try:
+                    # Use safe WebSocket send with retry logic for better reliability
+                    from netra_backend.app.websocket_core.utils import safe_websocket_send
+                    send_success = await safe_websocket_send(websocket, response.model_dump(mode='json'))
+                    if not send_success:
+                        logger.warning(f"Failed to send connection response to user {user_id} - WebSocket send failed")
+                        return False
+                    
+                    logger.debug(f"Connection response sent successfully to user {user_id}")
+                    return True
+                except Exception as send_error:
+                    logger.error(f"Exception during WebSocket send to user {user_id}: {send_error}")
+                    return False
+            else:
+                logger.warning(f"Cannot send connection response to user {user_id} - WebSocket not connected")
+                return False
             
         except Exception as e:
-            logger.error(f"Error in ConnectionHandler for user {user_id}: {e}")
+            # CRITICAL FIX: Enhanced error logging with full exception context and traceback
+            # Root cause: Line 119 truncated exception details masking real issues
+            import traceback
+            from shared.isolated_environment import get_env
+            
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            # Enhanced error context for GCP Cloud Run debugging
+            error_context = {
+                "user_id": user_id,
+                "message_type": str(message.type),
+                "websocket_state": "unknown",
+                "environment": environment,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "full_traceback": traceback.format_exc()
+            }
+            
+            # Try to get WebSocket state for debugging
+            try:
+                if hasattr(websocket, 'client_state'):
+                    error_context["websocket_state"] = websocket.client_state.name if hasattr(websocket.client_state, 'name') else str(websocket.client_state)
+                elif hasattr(websocket, 'application_state'):
+                    error_context["websocket_state"] = websocket.application_state.name if hasattr(websocket.application_state, 'name') else str(websocket.application_state)
+            except Exception:
+                error_context["websocket_state"] = "state_check_failed"
+            
+            # Environment-specific logging
+            if environment in ["staging", "production"]:
+                logger.error(f"🚨 CRITICAL ConnectionHandler failure in {environment} for user {user_id}")
+                logger.error(f"Error type: {error_context['error_type']}")
+                logger.error(f"WebSocket state: {error_context['websocket_state']}")
+                logger.error(f"Message type: {error_context['message_type']}")
+                logger.error(f"Full error: {error_context['error_message']}")
+                logger.error(f"Stack trace: {error_context['full_traceback']}")
+            else:
+                logger.error(f"ConnectionHandler error for user {user_id}: {error_context}")
+            
+            # CRITICAL FIX: Return False to indicate failure (fail-fast pattern)
+            # Root cause: Silent failures where handler returns True even when failing
             return False
 
 
@@ -516,8 +575,8 @@ class UserMessageHandler(BaseMessageHandler):
     
     def __init__(self):
         super().__init__([
-            MessageType.USER_MESSAGE,
-            MessageType.CHAT,
+            # USER_MESSAGE and CHAT are handled by AgentMessageHandler for agent execution
+            # This handler only handles system and thread-related messages
             MessageType.SYSTEM_MESSAGE,
             MessageType.AGENT_RESPONSE,
             MessageType.AGENT_PROGRESS,
@@ -541,9 +600,7 @@ class UserMessageHandler(BaseMessageHandler):
             logger.info(f"Processing {message.type} from {user_id}: {message.payload.get('content', '')[:100]}")
             
             # Handle different message subtypes
-            if message.type in [MessageType.USER_MESSAGE, MessageType.CHAT]:
-                return await self._handle_user_message(user_id, websocket, message)
-            elif message.type == MessageType.AGENT_RESPONSE:
+            if message.type == MessageType.AGENT_RESPONSE:
                 return await self._handle_agent_response(user_id, websocket, message)
             else:
                 # Generic handling
@@ -841,12 +898,17 @@ class BatchMessageHandler(BaseMessageHandler):
                 del self.batch_timers[user_id]
             
             # Create batch
-            import uuid
+            # Use UnifiedIDManager for batch ID generation with audit trail
+            id_manager = UnifiedIDManager()
             batch = MessageBatch(
                 messages=messages,
                 connection_id=f"ws_{user_id}",
                 user_id=user_id,
-                batch_id=str(uuid.uuid4()),
+                batch_id=id_manager.generate_id(
+                    IDType.WEBSOCKET,
+                    prefix="batch",
+                    context={"user_id": user_id, "message_count": len(messages)}
+                ),
                 total_size_bytes=sum(len(json.dumps(msg.content)) for msg in messages)
             )
             
@@ -887,7 +949,9 @@ class MessageRouter:
     """Routes messages to appropriate handlers."""
     
     def __init__(self):
-        self.handlers: List[MessageHandler] = [
+        # Separate lists: custom handlers get precedence over built-in handlers
+        self.custom_handlers: List[MessageHandler] = []
+        self.builtin_handlers: List[MessageHandler] = [
             ConnectionHandler(),
             TypingHandler(),
             HeartbeatHandler(),
@@ -913,18 +977,58 @@ class MessageRouter:
         self.startup_grace_period_seconds = 10.0  # 10 second grace period
         
         # Log initialization for debugging
-        logger.info(f"MessageRouter initialized with {len(self.handlers)} base handlers")
-        for handler in self.handlers:
+        logger.info(f"MessageRouter initialized with {len(self.builtin_handlers)} base handlers")
+        for handler in self.builtin_handlers:
             logger.debug(f"  - {handler.__class__.__name__}: {getattr(handler, 'supported_types', [])}")
     
+    @property
+    def handlers(self) -> List[MessageHandler]:
+        """Get all handlers in priority order: custom handlers first, then built-in handlers."""
+        return self.custom_handlers + self.builtin_handlers
+    
     def add_handler(self, handler: MessageHandler) -> None:
-        """Add a message handler to the router."""
-        self.handlers.append(handler)
+        """Add a custom message handler to the router.
+        
+        Custom handlers are added to the custom_handlers list and take precedence 
+        over built-in handlers. Among custom handlers, first registered wins.
+        
+        Args:
+            handler: The message handler to add
+        """
+        # Append to custom handlers list (first registered wins among custom handlers)
+        self.custom_handlers.append(handler)
+        position = len(self.custom_handlers) - 1
+        logger.info(f"Added custom handler {handler.__class__.__name__} at custom position {position}")
     
     def remove_handler(self, handler: MessageHandler) -> None:
         """Remove a message handler from the router."""
-        if handler in self.handlers:
-            self.handlers.remove(handler)
+        # Try to remove from custom handlers first
+        if handler in self.custom_handlers:
+            self.custom_handlers.remove(handler)
+            logger.info(f"Removed custom handler {handler.__class__.__name__}")
+        elif handler in self.builtin_handlers:
+            self.builtin_handlers.remove(handler)
+            logger.info(f"Removed built-in handler {handler.__class__.__name__}")
+        else:
+            logger.warning(f"Handler {handler.__class__.__name__} not found for removal")
+    
+    def insert_handler(self, handler: MessageHandler, index: int = 0) -> None:
+        """Insert handler at specific position in the custom handlers list.
+        
+        Args:
+            handler: The message handler to insert
+            index: Position to insert at in custom handlers (0 = highest precedence, default)
+        """
+        try:
+            self.custom_handlers.insert(index, handler)
+            logger.info(f"Inserted custom handler {handler.__class__.__name__} at position {index}")
+        except IndexError:
+            self.custom_handlers.append(handler)
+            logger.warning(f"Invalid index {index}, appended {handler.__class__.__name__} to end of custom handlers")
+
+    def get_handler_order(self) -> List[str]:
+        """Get ordered list of handler class names for debugging."""
+        return [h.__class__.__name__ for h in self.handlers]
     
     async def route_message(self, user_id: str, websocket: WebSocket,
                           raw_message: Dict[str, Any]) -> bool:
@@ -978,10 +1082,14 @@ class MessageRouter:
         msg_type = raw_message.get("type", "user_message")
         normalized_type = normalize_message_type(msg_type)
         
+        # Convert timestamp safely to handle various formats (ISO strings, Unix floats, etc.)
+        raw_timestamp = raw_message.get("timestamp")
+        converted_timestamp = safe_convert_timestamp(raw_timestamp, fallback_to_current=True)
+        
         return WebSocketMessage(
             type=normalized_type,
             payload=raw_message.get("payload", raw_message),
-            timestamp=raw_message.get("timestamp", time.time()),
+            timestamp=converted_timestamp,
             message_id=raw_message.get("message_id"),
             user_id=raw_message.get("user_id"),
             thread_id=raw_message.get("thread_id")
@@ -989,9 +1097,18 @@ class MessageRouter:
     
     def _find_handler(self, message_type: MessageType) -> Optional[MessageHandler]:
         """Find handler that can process the message type."""
-        for handler in self.handlers:
-            if handler.can_handle(message_type):
+        logger.debug(f"Finding handler for {message_type}, checking {len(self.handlers)} handlers")
+        
+        for i, handler in enumerate(self.handlers):
+            handler_name = handler.__class__.__name__
+            can_handle = handler.can_handle(message_type)
+            logger.debug(f"  [{i}] {handler_name}.can_handle({message_type}) = {can_handle}")
+            
+            if can_handle:
+                logger.info(f"Selected handler [{i}] {handler_name} for {message_type}")
                 return handler
+        
+        logger.warning(f"No handler found for message type {message_type}")
         return None
     
     def _is_unknown_message_type(self, message_type: str) -> bool:
@@ -1096,14 +1213,20 @@ class MessageRouter:
         
         # Add handler-specific stats
         handler_stats = {}
-        for handler in self.handlers:
+        handler_order = []
+        
+        for i, handler in enumerate(self.handlers):
             handler_name = handler.__class__.__name__
+            handler_order.append(f"[{i}] {handler_name}")
+            
             if hasattr(handler, 'get_stats'):
                 handler_stats[handler_name] = handler.get_stats()
             else:
                 handler_stats[handler_name] = {"status": "active"}
         
         stats["handler_stats"] = handler_stats
+        stats["handler_order"] = handler_order  # Track handler precedence
+        stats["handler_count"] = len(self.handlers)
         
         # CRITICAL FIX: Add startup grace period status
         stats["handler_status"] = self.check_handler_status_with_grace_period()

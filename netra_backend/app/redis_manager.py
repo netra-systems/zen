@@ -140,21 +140,30 @@ class RedisManager:
                 redis_url = backend_env.get_redis_url()
                 
                 # For tests: Use test-specific Redis port if available
-                current_loop = None
-                try:
-                    current_loop = asyncio.get_running_loop()
-                    # In test environment, use port 6381 instead of 6379
-                    if hasattr(current_loop, '_pytest_test_loop') or 'pytest' in str(current_loop):
+                # CRITICAL FIX: Proper test environment detection using multiple indicators
+                is_test_environment = (
+                    get_env().get("PYTEST_CURRENT_TEST") is not None or
+                    get_env().get("TESTING", "").lower() == "true" or
+                    get_env().get("TEST_COLLECTION_MODE") == "1" or
+                    get_env().get("ENVIRONMENT", "").lower() in ["test", "testing"] or
+                    get_env().get("TEST_DISABLE_REDIS", "true").lower() == "false"
+                )
+                
+                if is_test_environment:
+                    # Use test Redis port 6381 instead of 6379, and database 0 instead of 15
+                    if ':6379/' in redis_url:
                         redis_url = redis_url.replace(':6379/', ':6381/')
-                        logger.debug(f"Test environment detected - using Redis URL: {redis_url}")
-                except RuntimeError:
-                    pass
+                    if '/15' in redis_url:
+                        redis_url = redis_url.replace('/15', '/0')
+                    logger.info(f"Test environment detected - using Redis URL: {redis_url}")
+                else:
+                    logger.debug(f"Production environment - using Redis URL: {redis_url}")
                 
                 # Create new client instance in current event loop
                 self._client = redis.from_url(redis_url, decode_responses=True)
                 
-                # Test connection with timeout
-                await asyncio.wait_for(self._client.ping(), timeout=5.0)
+                # Test connection with timeout (reduced for faster readiness checks)
+                await asyncio.wait_for(self._client.ping(), timeout=2.0)
                 
                 # Connection successful
                 self._connected = True
@@ -243,8 +252,8 @@ class RedisManager:
                 
                 if self._connected and self._client:
                     try:
-                        # Health check with timeout
-                        await asyncio.wait_for(self._client.ping(), timeout=5.0)
+                        # Health check with timeout (reduced for faster feedback)
+                        await asyncio.wait_for(self._client.ping(), timeout=2.0)
                         self._last_health_check = time.time()
                         logger.debug("Redis health check passed")
                         
@@ -353,7 +362,7 @@ class RedisManager:
         if self._client and current_loop:
             try:
                 # Test if client works in current loop by attempting a simple ping
-                await asyncio.wait_for(self._client.ping(), timeout=0.1)
+                await asyncio.wait_for(self._client.ping(), timeout=0.5)
             except (RuntimeError, asyncio.TimeoutError, Exception) as e:
                 # Client not working in current loop - force reconnection
                 logger.info(f"Redis client loop mismatch detected: {e.__class__.__name__} - forcing reconnection")

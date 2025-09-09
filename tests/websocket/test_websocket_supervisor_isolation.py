@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.types import (
     WebSocketMessage, MessageType, WebSocketConnectionState, ConnectionInfo
 )
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.db.database_manager import DatabaseManager
 
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig

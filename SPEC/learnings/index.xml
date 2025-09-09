@@ -857,6 +857,35 @@
         </related-specs>
     </learning>
     
+    <learning id="windows-asyncio-safe-platform-detection-audit-2025-09-09">
+        <title>Windows Asyncio Safe Platform Detection - Audit Results</title>
+        <category>Windows Compatibility/Platform Detection/Cross-Platform</category>
+        <keywords>windows, asyncio, cross-platform, platform-detection, deadlocks, websocket-streaming, production-code, runtime-detection, business-value-justification</keywords>
+        <path>windows_asyncio_safe_platform_detection_audit_20250909.xml</path>
+        <critical-takeaway>
+            WindowsAsyncioSafe patterns are legitimate production code addressing real Windows asyncio deadlocks 
+            that affect revenue-generating WebSocket streaming ($40K+ MRR protection). Uses runtime platform 
+            detection with zero overhead for non-Windows platforms. Code properly classified as production 
+            cross-platform compatibility layer, NOT test infrastructure. SSOT implementation correctly placed.
+        </critical-takeaway>
+        <severity>MEDIUM</severity>
+        <business-impact>Revenue protection - prevents WebSocket streaming deadlocks that could affect $40K+ MRR</business-impact>
+        <prevention>
+            Runtime platform detection is appropriate for cross-platform compatibility layers.
+            Clear BVJ documentation helps distinguish production needs from test needs.
+            Platform-specific code with "safe" naming can be mistaken for test infrastructure.
+        </prevention>
+        <cross-references>
+            <spec>SPEC/conventions.xml</spec>
+            <spec>SPEC/core.xml</spec>
+            <file>netra_backend/app/core/windows_asyncio_safe.py</file>
+            <file>netra_backend/app/routes/websocket.py</file>
+            <file>test_framework/decorators.py</file>
+            <learning>SPEC/learnings/ssot_consolidation_20250825.xml</learning>
+            <report>reports/p1_critical_fixes_implementation_report.md</report>
+        </cross-references>
+    </learning>
+    
     <learning id="frontend-docker-size-optimization-2025-08-31">
         <title>Frontend Docker Image 94% Size Reduction - Next.js Standalone Mode</title>
         <category>Infrastructure/Docker/Frontend</category>
@@ -3382,6 +3411,88 @@
             <learning-ref>cold_start_audit.xml</learning-ref>
             <learning-ref>auth_startup_validation_critical.xml</learning-ref>
             <learning-ref>clickhouse_graceful_failure.xml</learning-ref>
+        </related-learnings>
+    </learning>
+
+
+    <learning id="golden-path-user-flow-analysis-2025-01-09">
+        <title>Golden Path User Flow Analysis - Complete System Documentation</title>
+        <category>WebSocket/User-Experience/System-Architecture/Critical</category>
+        <keywords>golden-path, user-flow, websocket-events, chat-functionality, race-conditions, service-dependencies, business-value, persistence-exit-points</keywords>
+        <path>golden_path_user_flow_analysis_20250109.xml</path>
+        <critical-takeaway>
+            Complete analysis of user journey from connection to response delivery reveals critical race conditions 
+            in WebSocket handshake, missing business-critical WebSocket events, and service dependency issues. 
+            Chat functionality represents 90% of delivered value ($500K+ ARR) - any break in this flow directly 
+            impacts revenue. Five WebSocket events are mandatory for user experience: agent_started, agent_thinking, 
+            tool_executing, tool_completed, agent_completed.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>$500K+ ARR dependency - chat functionality drives core business value and user retention</business-impact>
+        <prevention>
+            <rule>Always emit all 5 WebSocket events during agent execution</rule>
+            <rule>Implement progressive delays for Cloud Run WebSocket handshake</rule>
+            <rule>Use graceful degradation when services unavailable</rule>
+            <rule>Validate Factory pattern SSOT compliance for user isolation</rule>
+            <rule>Monitor race conditions and connection failures in production</rule>
+        </prevention>
+        <anti-regression-measures>
+            <test-requirement>E2E tests must validate all 5 WebSocket events</test-requirement>
+            <monitoring>WebSocket connection success rate tracking</monitoring>
+            <monitoring>Race condition detection in Cloud Run environments</monitoring>
+            <code-review>Any WebSocket or agent execution changes require golden path validation</code-review>
+        </anti-regression-measures>
+        <cross-references>
+            <file>docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md</file>
+            <file>netra_backend/app/routes/websocket.py</file>
+            <file>netra_backend/app/agents/supervisor_ssot.py</file>
+            <file>reports/archived/USER_CONTEXT_ARCHITECTURE.md</file>
+        </cross-references>
+        <related-learnings>
+            <learning-ref>websocket_v2_migration_critical_miss_20250905.xml</learning-ref>
+            <learning-ref>agent_execution_order_fix_20250904.xml</learning-ref>
+            <learning-ref>context_creation_vs_getter_pattern_fix_20250908.xml</learning-ref>
+        </related-learnings>
+    </learning>
+
+
+    <learning id="golden-path-user-flow-analysis-2025-01-09">
+        <title>Golden Path User Flow Analysis - Complete System Documentation</title>
+        <category>WebSocket/User-Experience/System-Architecture/Critical</category>
+        <keywords>golden-path, user-flow, websocket-events, chat-functionality, race-conditions, service-dependencies, business-value, persistence-exit-points</keywords>
+        <path>golden_path_user_flow_analysis_20250109.xml</path>
+        <critical-takeaway>
+            Complete analysis of user journey from connection to response delivery reveals critical race conditions 
+            in WebSocket handshake, missing business-critical WebSocket events, and service dependency issues. 
+            Chat functionality represents 90% of delivered value ($500K+ ARR) - any break in this flow directly 
+            impacts revenue. Five WebSocket events are mandatory for user experience: agent_started, agent_thinking, 
+            tool_executing, tool_completed, agent_completed.
+        </critical-takeaway>
+        <severity>CRITICAL</severity>
+        <business-impact>$500K+ ARR dependency - chat functionality drives core business value and user retention</business-impact>
+        <prevention>
+            <rule>Always emit all 5 WebSocket events during agent execution</rule>
+            <rule>Implement progressive delays for Cloud Run WebSocket handshake</rule>
+            <rule>Use graceful degradation when services unavailable</rule>
+            <rule>Validate Factory pattern SSOT compliance for user isolation</rule>
+            <rule>Monitor race conditions and connection failures in production</rule>
+        </prevention>
+        <anti-regression-measures>
+            <test-requirement>E2E tests must validate all 5 WebSocket events</test-requirement>
+            <monitoring>WebSocket connection success rate tracking</monitoring>
+            <monitoring>Race condition detection in Cloud Run environments</monitoring>
+            <code-review>Any WebSocket or agent execution changes require golden path validation</code-review>
+        </anti-regression-measures>
+        <cross-references>
+            <file>docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md</file>
+            <file>netra_backend/app/routes/websocket.py</file>
+            <file>netra_backend/app/agents/supervisor_ssot.py</file>
+            <file>reports/archived/USER_CONTEXT_ARCHITECTURE.md</file>
+        </cross-references>
+        <related-learnings>
+            <learning-ref>websocket_v2_migration_critical_miss_20250905.xml</learning-ref>
+            <learning-ref>agent_execution_order_fix_20250904.xml</learning-ref>
+            <learning-ref>context_creation_vs_getter_pattern_fix_20250908.xml</learning-ref>
         </related-learnings>
     </learning>
 </specification>

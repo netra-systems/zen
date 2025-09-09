@@ -109,15 +109,14 @@ class UnifiedIdGenerator:
         base_timestamp = int(time.time() * 1000)
         counter_base = _get_next_counter()
         
-        # CRITICAL FIX: Use consistent ID pattern for both thread_id and run_id
+        # CRITICAL FIX: Use proper SSOT format for both thread_id and run_id 
         # This prevents the pattern mismatch that causes WebSocket manager cleanup failures
-        base_id = f"{operation}_{base_timestamp}"
         random_part = secrets.token_hex(4)
         
-        # Generate related but CONSISTENT IDs - thread_id contains same base as run_id
-        thread_id = f"thread_{base_id}_{counter_base}_{random_part}"
-        run_id = f"{base_id}"  # run_id is the base that thread_id contains
-        request_id = f"req_{operation}_{base_timestamp}_{counter_base + 1}_{secrets.token_hex(4)}"
+        # Generate SSOT-compliant IDs using proper format: [prefix_]type_counter_uuid8
+        thread_id = f"thread_{operation}_{counter_base}_{random_part}"
+        run_id = f"run_{operation}_{counter_base + 1}_{secrets.token_hex(4)}"
+        request_id = f"req_{operation}_{counter_base + 2}_{secrets.token_hex(4)}"
         
         return thread_id, run_id, request_id
     
@@ -398,7 +397,12 @@ class UnifiedIdGenerator:
             
             # Create new session
             if thread_id:
-                session_thread_id = thread_id
+                # CRITICAL FIX: Generate user-specific internal thread ID for multi-user isolation
+                # Even when users provide the same thread_id (like "shared_thread_name"),
+                # each user must get a unique internal thread_id to prevent cross-user data leakage
+                user_prefix = user_id[:8] if len(user_id) >= 8 else user_id
+                thread_suffix = thread_id[:8] if len(thread_id) >= 8 else thread_id
+                session_thread_id = cls.generate_base_id(f"thread_{user_prefix}_{thread_suffix}_{operation}", True, 8)
             else:
                 session_thread_id = cls.generate_base_id(f"thread_{operation}", True, 8)
             
@@ -502,6 +506,15 @@ class UnifiedIdGenerator:
                 del cls._active_sessions[key]
                 
             return len(keys_to_remove)
+    
+    @classmethod
+    def reset_global_counter(cls) -> None:
+        """Reset global counter for test isolation.
+        
+        This method provides the class method interface expected by test code
+        while delegating to the module-level reset function to maintain SSOT.
+        """
+        reset_global_counter()
 
 
 # Convenience functions for common use cases

@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional
 
 from netra_backend.app.core.configuration.base import (
     config_manager as unified_config_manager,
+    reload_unified_config,
 )
 
 # Import from the actual unified configuration system
@@ -50,7 +51,6 @@ def get_config() -> AppConfig:
 def reload_config() -> None:
     """Reload configuration - compatibility layer."""
     try:
-        from netra_backend.app.core.configuration.base import reload_unified_config
         reload_unified_config()
         # Clear the cache
         get_settings.cache_clear()
@@ -60,4 +60,4 @@ def reload_config() -> None:
 
 
 # Export compatibility functions
-__all__ = ["get_settings", "get_config", "reload_config"]
+__all__ = ["get_settings", "get_config", "reload_config", "reload_unified_config"]

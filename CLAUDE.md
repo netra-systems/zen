@@ -20,6 +20,9 @@ CREATION OF "SIMPLE" OR "STANDALONE" ETC. TYPE FILES IS STRICTLY FORBIDDEN.
 CLAUDE.MD (THIS FILE) KNOWS BEST! NEVER ATTEMPT TO "OVERRIDE". NO EXCEPTIONS.
 ** ULTRA ULTRA CRITICAL **
 
+CONTEXT COMPACT
+WHEN YOU GET TO 50% OF YOUR CONTEXT WINDOW USAGE YOU MUST RUN /COMPACT
+
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
@@ -93,9 +96,14 @@ agents from getting stuck:
   * **Think with Nuance:** Use "wise mind" middle-ground thinking.
   CHEATING ON TESTS = ABOMINATION
 
-## 0\. Current Mission: Stabilize Core Systems
+## 0\. Current Mission: GOLDEN PATH
 
-Your primary mission is to get existing systems fully operational. **Maintain the current feature set.**
+CRITICAL: Your primary mission is get "Golden Path" as defined here working: GOLDEN_PATH_USER_FLOW_COMPLETE.md. 
+NOT all systems need to be stable at the moment. Accept lower priority issues to get Golden path working that is most important
+
+**Maintain the current feature set.**
+DO not make ANY new features unless strictly merging and refactoring existing methods into SSOT methods
+or adding clarity SSOT classes for misleading errors (e.g. "Auth" errors that should actually be another class because class is crossing it's bounds)
 
 **MUST ALWAYS THINK ABOUT:**
   * **0.1: Business Value and Systems Up:** The point is to have a working real system. Tests exists to serve the working system. The system exists to serve the business. Business > Real System > Tests.
@@ -479,7 +487,7 @@ The following events MUST be sent during agent execution to enable meaningful AI
 
 **Key Integration Points:**
 - `AgentRegistry.set_websocket_manager()` MUST enhance tool dispatcher
-- `ExecutionEngine` MUST have WebSocketNotifier initialized
+- `ExecutionEngine` MUST have AgentWebSocketBridge initialized
 - `EnhancedToolExecutionEngine` MUST wrap tool execution
 - See [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
 

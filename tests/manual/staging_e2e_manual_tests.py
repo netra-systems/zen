@@ -328,7 +328,7 @@ import aiohttp
 
 # REMOVED_SYNTAX_ERROR: async def main():
     # REMOVED_SYNTAX_ERROR: """Main entry point."""
-    # REMOVED_SYNTAX_ERROR: staging_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+    # REMOVED_SYNTAX_ERROR: staging_url = "https://api.staging.netrasystems.ai"
 
     # REMOVED_SYNTAX_ERROR: async with StagingE2ETester(staging_url) as tester:
         # REMOVED_SYNTAX_ERROR: await tester.run_all_tests()

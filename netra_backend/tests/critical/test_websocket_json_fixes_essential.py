@@ -9,8 +9,8 @@ import json
 import pytest
 from fastapi.websockets import WebSocketState
 
-# Test the core fix
-from netra_backend.app.services.websocket_connection_pool import _safe_websocket_state_for_logging
+# Test the core fix - import from SSOT location
+from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 
 
 class TestWebSocketJSONSerializationFixes:

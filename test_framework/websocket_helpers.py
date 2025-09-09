@@ -64,6 +64,37 @@ def assert_websocket_events(events: List[Dict[str, Any]], expected_event_types: 
         )
 
 
+def assert_websocket_events_sent(events: List[Dict[str, Any]], expected_events: List[str]):
+    """
+    Assert that all expected WebSocket events were sent during agent execution.
+    
+    This is the SSOT function for WebSocket event validation used across all tests.
+    It ensures the critical 5 events required for business value delivery are present.
+    
+    Args:
+        events: List of WebSocket events received
+        expected_events: List of expected event types
+        
+    Raises:
+        AssertionError: If any expected events are missing
+    """
+    if not events:
+        raise AssertionError(
+            f"No WebSocket events received, but expected: {expected_events}. "
+            f"This indicates a critical failure in agent-to-user communication."
+        )
+    
+    received_event_types = [event.get("type", "unknown") for event in events]
+    missing_events = [event for event in expected_events if event not in received_event_types]
+    
+    if missing_events:
+        raise AssertionError(
+            f"CRITICAL FAILURE: Missing required WebSocket events: {missing_events}. "
+            f"Golden Path REQUIRES all events for business value delivery. "
+            f"Events received: {received_event_types}"
+        )
+
+
 def create_test_agent(*args, **kwargs):
     """Create test agent - placeholder implementation."""
     return MagicMock()
@@ -182,17 +213,10 @@ class MockWebSocketConnection:
     
     async def _add_mock_responses(self):
         """Add mock responses to simulate WebSocket events."""
-        mock_events = [
-            {"type": "connection_ack", "timestamp": time.time()},
-            {"type": "agent_started", "agent_name": "test_agent", "timestamp": time.time()},
-            {"type": "agent_thinking", "reasoning": "Mock reasoning", "timestamp": time.time()},
-            {"type": "tool_executing", "tool_name": "mock_tool", "timestamp": time.time()},
-            {"type": "tool_completed", "tool_name": "mock_tool", "results": {}, "timestamp": time.time()},
-            {"type": "agent_completed", "response": "Mock response", "timestamp": time.time()}
-        ]
-        
-        for event in mock_events:
-            await self._receive_queue.put(json.dumps(event))
+        # UPDATED: No longer pre-populate responses
+        # All responses now come dynamically from send() method based on actual messages
+        # This enables proper error scenario testing
+        pass
     
     async def send(self, message: str):
         """Mock send method - validates message and handles malformed events."""
@@ -203,7 +227,7 @@ class MockWebSocketConnection:
             # Try to parse the message as JSON
             parsed_message = json.loads(message)
             
-            # Check for various malformed scenarios
+            # Check for various malformed scenarios and specific error test patterns
             error_response = None
             
             # Check for missing required fields
@@ -221,21 +245,57 @@ class MockWebSocketConnection:
                     "message": "Message type is required",
                     "timestamp": time.time()
                 }
-            elif parsed_message.get("type") == "invalid_type":
+            
+            # CRITICAL: Handle specific error scenarios from create_error_scenario_message()
+            elif parsed_message.get("type") == "connection_test" and parsed_message.get("action") == "force_disconnect":
+                # connection_error scenario
                 error_response = {
                     "type": "error",
-                    "error": "unknown_message_type", 
-                    "message": f"Unknown message type: {parsed_message.get('type')}",
+                    "error": "connection_error",
+                    "message": "WebSocket connection forced disconnect",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "invalid_type":
+                # message_processing_error scenario
+                error_response = {
+                    "type": "error",
+                    "error": "message_processing_error", 
+                    "message": "Unable to process message with invalid type",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_started" and parsed_message.get("agent_name") == "non_existent_agent":
+                # agent_execution_error scenario
+                error_response = {
+                    "type": "error",
+                    "error": "agent_execution_error",
+                    "message": "Agent 'non_existent_agent' does not exist or cannot be started",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "tool_executing" and parsed_message.get("tool_name") == "invalid_tool":
+                # tool_execution_error scenario
+                error_response = {
+                    "type": "error",
+                    "error": "tool_execution_error",
+                    "message": "Tool 'invalid_tool' is not available or failed to execute",
                     "timestamp": time.time()
                 }
             elif parsed_message.get("type") == "agent_started" and not parsed_message.get("user_id"):
+                # authentication_error scenario (missing user_id)
                 error_response = {
                     "type": "error",
-                    "error": "missing_user_id",
-                    "message": "user_id is required for agent_started events",
+                    "error": "authentication_error",
+                    "message": "user_id is required for agent_started events - authentication failed",
                     "timestamp": time.time()
                 }
-            elif parsed_message.get("type") == "agent_thinking" and parsed_message.get("reasoning") is None:
+            elif parsed_message.get("type") == "invalid_operation":
+                # Generic invalid operation error for ordering tests
+                error_response = {
+                    "type": "error",
+                    "error": "invalid_operation",
+                    "message": "The requested operation is not valid or supported",
+                    "timestamp": time.time()
+                }
+            elif parsed_message.get("type") == "agent_thinking" and "reasoning" in parsed_message and parsed_message.get("reasoning") is None:
                 error_response = {
                     "type": "error",
                     "error": "invalid_reasoning",
@@ -550,6 +610,14 @@ class WebSocketTestHelpers:
         except Exception:
             pass  # Ignore cleanup errors
 
+
+# Aliases for backward compatibility
+WebSocketTestHelper = WebSocketTestHelpers
+
+# Standalone function aliases for commonly used methods
+create_test_websocket_connection = WebSocketTestHelpers.create_test_websocket_connection
+
+
 # =============================================================================
 # MOCK WEBSOCKET IMPLEMENTATIONS
 # =============================================================================
@@ -604,9 +672,41 @@ class MockWebSocket:
         text = await self.receive_text()
         return json.loads(text)
         
-    async def close(self, code: int = 1000):
-        """Mock close method"""
+    async def accept(self):
+        """Mock accept method for WebSocket connection.
+        
+        This method is required for proper WebSocket handshake simulation.
+        Sets the connection state to CONNECTED and initializes connection info.
+        """
+        if self.should_disconnect:
+            raise WebSocketDisconnect(code=1000, reason="Connection rejected")
+        
+        self.state = WebSocketState.CONNECTED
+        
+        # Initialize connection metadata
+        if not hasattr(self, 'connection_time'):
+            import time
+            self.connection_time = time.time()
+        
+        # Log connection acceptance for debugging
+        try:
+            from netra_backend.app.logging_config import central_logger
+            logger = central_logger.get_logger("mock_websocket")
+            logger.debug(f"MockWebSocket accepted connection for user {self.user_id}")
+        except ImportError:
+            pass  # Silently continue if logging not available
+
+    async def close(self, code: int = 1000, reason: str = ""):
+        """Mock close method with optional reason parameter"""
         self.state = WebSocketState.DISCONNECTED
+        
+        # Log disconnection for debugging
+        try:
+            from netra_backend.app.logging_config import central_logger
+            logger = central_logger.get_logger("mock_websocket")
+            logger.debug(f"MockWebSocket closed connection for user {self.user_id} (code: {code}, reason: {reason})")
+        except ImportError:
+            pass  # Silently continue if logging not available
         
     def simulate_disconnect(self):
         """Simulate connection disconnect"""
