@@ -30,6 +30,7 @@ import time
 from typing import Dict, Any, Optional, List
 import pytest
 from unittest.mock import patch
+from sqlalchemy import text
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
@@ -159,7 +160,7 @@ class TestGoldenPathSystemAuthFix(SSotBaseTestCase):
                     assert hasattr(session, 'execute'), "Session must have execute method"
                     
                     # Test basic database operation
-                    result = await session.execute("SELECT 1 as test_value")
+                    result = await session.execute(text("SELECT 1 as test_value"))
                     row = result.fetchone()
                     assert row is not None, "Database query must return results"
                     

@@ -388,6 +388,63 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     }
 
 
+@pytest.fixture(scope="function")
+async def integration_services_fixture():
+    """
+    INTEGRATION SERVICES FIXTURE - Service abstraction layer for integration tests.
+    
+    This fixture provides service abstractions that work with real services when
+    available or gracefully degrade to in-memory alternatives for integration testing.
+    
+    CRITICAL: This enables integration tests to run with --no-docker flag.
+    
+    Yields:
+        IntegrationServiceManager: Service manager with connected abstractions
+    """
+    try:
+        from test_framework.service_abstraction.integration_service_abstraction import IntegrationServiceManager
+    except ImportError:
+        logger.error("Integration service abstraction not available")
+        yield None
+        return
+    
+    env = get_env()
+    
+    # Configure service abstractions based on environment
+    config = {
+        "database": {
+            "host": env.get("TEST_POSTGRES_HOST", "localhost"),
+            "port": int(env.get("TEST_POSTGRES_PORT", "5434")),
+            "user": env.get("TEST_POSTGRES_USER", "test_user"),
+            "password": env.get("TEST_POSTGRES_PASSWORD", "test_password"),
+            "database": env.get("TEST_POSTGRES_DB", "netra_test")
+        },
+        "websocket": {
+            "url": env.get("TEST_WEBSOCKET_URL", "ws://localhost:8000/ws")
+        }
+    }
+    
+    service_manager = IntegrationServiceManager(config)
+    
+    try:
+        # Connect to all services
+        connection_results = await service_manager.connect_all()
+        logger.info(f"Integration services connected: {connection_results}")
+        
+        # Verify at least database connection worked
+        if not connection_results.get("database", False):
+            logger.warning("Database connection failed - integration tests may not work properly")
+        
+        yield service_manager
+        
+    finally:
+        # Cleanup
+        try:
+            await service_manager.disconnect_all()
+        except Exception as e:
+            logger.warning(f"Error during integration services cleanup: {e}")
+
+
 @asynccontextmanager
 async def real_database_session(real_services_fixture) -> AsyncGenerator[Any, None]:
     """Context manager for real database session.

@@ -32,6 +32,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 from pathlib import Path
 import pytest
+from sqlalchemy import text
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
@@ -515,7 +516,7 @@ class TestConfigurationManagementIntegration(BaseIntegrationTest):
             engine = create_async_engine(database_url, pool_pre_ping=True)
             
             async with engine.begin() as conn:
-                result = await conn.execute("SELECT 1 as test_value")
+                result = await conn.execute(text("SELECT 1 as test_value"))
                 row = result.fetchone()
                 query_successful = row and row.test_value == 1
             
