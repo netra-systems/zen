@@ -1046,8 +1046,7 @@ class ExecutionEngine:
             success=False,
             error=str(error),
             agent_name=context.agent_name if context else "unknown",
-            run_id=context.run_id if context else None,
-            duration=(datetime.utcnow() - start_time).total_seconds() if start_time else 0
+            duration=(time.time() - start_time) if start_time else 0
         )
 
     # Fallback management delegation
@@ -1071,8 +1070,7 @@ class ExecutionEngine:
             success=False,
             error=str(error),
             agent_name=context.agent_name if context else "unknown",
-            run_id=context.run_id if context else None,
-            duration=(datetime.utcnow() - start_time).total_seconds() if start_time else 0
+            duration=(time.time() - start_time) if start_time else 0
         )
     
     def _prepare_retry_context(self, context: AgentExecutionContext) -> None:
@@ -1103,9 +1101,8 @@ class ExecutionEngine:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=self.AGENT_EXECUTION_TIMEOUT,
+            duration=self.AGENT_EXECUTION_TIMEOUT,
             error=f"Agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-            state=None,
             metadata={'timeout': True, 'timeout_duration': self.AGENT_EXECUTION_TIMEOUT}
         )
     
@@ -1115,9 +1112,8 @@ class ExecutionEngine:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=0.0,
+            duration=0.0,
             error=str(error),
-            state=None,
             metadata={'unexpected_error': True, 'error_type': type(error).__name__}
         )
     
