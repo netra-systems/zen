@@ -236,6 +236,11 @@ class BusinessErrorRecoveryManager:
             # Simulate service call (80% success rate after retries)
             if random.random() > 0.2:  # 80% success rate
                 error.business_continuity_maintained = True
+                
+                # Business Rule: Authentication errors require user notification even when retry succeeds
+                if error.category == ErrorCategory.AUTHENTICATION:
+                    error.user_facing_message = "We're having trouble verifying your account. Please try again in a moment."
+                
                 return True
                 
         return False
