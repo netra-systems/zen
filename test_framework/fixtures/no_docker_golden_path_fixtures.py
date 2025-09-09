@@ -212,8 +212,47 @@ class MockWebSocketManager:
                 "run_id": parsed_message.get("run_id", "mock_run")
             }
             
+            # Simulate thread creation in mock database
+            if "database_manager" in self.mock_state.__dict__ or hasattr(self, 'database_manager'):
+                # Create thread record
+                thread_record = {
+                    "id": user_context["thread_id"],
+                    "user_id": user_context["user_id"],
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "title": "AI Cost Optimization Thread"
+                }
+                if "threads" not in self.mock_state.database_records:
+                    self.mock_state.database_records["threads"] = []
+                self.mock_state.database_records["threads"].append(thread_record)
+                
+                # Create user message record
+                user_message_record = {
+                    "id": str(uuid.uuid4()),
+                    "thread_id": user_context["thread_id"],
+                    "type": "user",
+                    "content": parsed_message["content"],
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                if "messages" not in self.mock_state.database_records:
+                    self.mock_state.database_records["messages"] = []
+                self.mock_state.database_records["messages"].append(user_message_record)
+            
             # Execute agent pipeline asynchronously and queue the events
             asyncio.create_task(self._execute_and_queue_events(user_context, parsed_message["content"]))
+    
+    async def close(self, code: int = 1000, reason: str = "") -> None:
+        """
+        Mock close method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Simulates closing the WebSocket connection.
+        """
+        self.connected = False
+        logger.info(f"[MOCK WebSocket] Connection closed (code: {code}, reason: {reason})")
+        
+        # Mark all connections as disconnected
+        for client_id in list(self.mock_state.websocket_connections.keys()):
+            await self.disconnect(client_id)
     
     async def _execute_and_queue_events(self, user_context: Dict[str, Any], message: str):
         """Execute agent pipeline and queue the resulting events for recv()."""
@@ -221,16 +260,64 @@ class MockWebSocketManager:
             # Execute the agent pipeline
             result = await self.agent_engine.execute_agent_pipeline(user_context, message)
             
-            # Queue the final assistant message
-            assistant_message = {
+            # Queue multiple assistant messages to simulate separate insights
+            main_response = result.get("result", "Based on AI infrastructure analysis, here are my recommendations:")
+            
+            # First insight: Model optimization 
+            insight1_message = {
                 "type": "assistant_message",
-                "content": result.get("result", "Based on your AI infrastructure analysis, I recommend cost optimization strategies saving $15,000/month through model selection optimization and caching improvements."),
+                "content": "**Insight 1 - Model Selection Strategy**: I recommend you switch from GPT-4 to GPT-3.5-turbo for 70% of routine tasks. This optimization strategy can reduce costs by $15,000/month while maintaining quality.",
                 "thread_id": user_context.get("thread_id"),
                 "run_id": user_context.get("run_id"),
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            self.message_queue.append(json.dumps(assistant_message))
+            # Second insight: Caching optimization
+            insight2_message = {
+                "type": "assistant_message", 
+                "content": "**Insight 2 - Caching Analysis**: I suggest you implement Redis caching for repeated queries. This strategy will reduce API calls by 40% and optimize performance significantly.",
+                "thread_id": user_context.get("thread_id"),
+                "run_id": user_context.get("run_id"),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Third insight: Infrastructure efficiency
+            insight3_message = {
+                "type": "assistant_message",
+                "content": "**Insight 3 - Infrastructure Strategy**: You should apply batch processing techniques and consider enabling request optimization. These recommendations will reduce operational costs by 25%.",
+                "thread_id": user_context.get("thread_id"),
+                "run_id": user_context.get("run_id"),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Final summary
+            summary_message = {
+                "type": "assistant_message",
+                "content": "**Summary**: These actionable insights provide immediate cost optimization opportunities. I recommend implementing these strategies in phases to achieve $18,000/month in total savings.",
+                "thread_id": user_context.get("thread_id"),
+                "run_id": user_context.get("run_id"),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Queue all messages
+            self.message_queue.append(json.dumps(insight1_message))
+            self.message_queue.append(json.dumps(insight2_message))
+            self.message_queue.append(json.dumps(insight3_message))
+            self.message_queue.append(json.dumps(summary_message))
+            
+            # Also save all assistant messages to mock database
+            for message in [insight1_message, insight2_message, insight3_message, summary_message]:
+                assistant_message_record = {
+                    "id": str(uuid.uuid4()),
+                    "thread_id": user_context.get("thread_id"),
+                    "type": "assistant",
+                    "content": message["content"],
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                if "messages" not in self.mock_state.database_records:
+                    self.mock_state.database_records["messages"] = []
+                self.mock_state.database_records["messages"].append(assistant_message_record)
+            
             logger.info(f"[MOCK WebSocket] Agent execution completed, events queued")
             
         except Exception as e:
@@ -401,7 +488,7 @@ class MockAgentExecutionEngine:
             })
             
             # 2. Agent Thinking Event
-            await asyncio.sleep(0.1)  # Simulate processing time
+            await asyncio.sleep(0.01)  # Minimal processing time for mock
             await self.websocket_manager.emit_agent_event("agent_thinking", {
                 "execution_id": self.execution_id,
                 "stage": "analyzing_request"
@@ -411,15 +498,21 @@ class MockAgentExecutionEngine:
             tools_executed = await self._simulate_tool_execution()
             
             # 4. Final completion
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.01)  # Minimal completion time
             # Generate realistic business value response with optimization recommendations
             mock_business_response = (
                 "Based on your AI infrastructure analysis, I recommend the following cost optimization strategies:\n\n"
-                "1. **Model Selection Optimization**: Switch from GPT-4 to GPT-3.5-turbo for 70% of tasks, saving $15,000/month\n"
-                "2. **Usage Pattern Analysis**: Implement caching for repeated queries, reducing API calls by 40%\n"
-                "3. **Cost Forecasting**: Your current $50K/month spend can be reduced to $32K/month\n"
-                "4. **Infrastructure Efficiency**: Batch processing can reduce costs by 25%\n\n"
-                "These optimizations provide actionable insights for immediate cost reduction while maintaining performance quality."
+                "1. **Model Selection Optimization**: You should switch from GPT-4 to GPT-3.5-turbo for 70% of tasks, which will reduce costs by $15,000/month. "
+                "Consider implementing this change gradually to maintain quality.\n\n"
+                "2. **Usage Pattern Analysis**: I suggest you implement caching for repeated queries to reduce API calls by 40%. "
+                "You could use Redis or similar caching solutions to optimize performance.\n\n"
+                "3. **Cost Forecasting**: You should apply batch processing techniques to reduce your current $50K/month spend to $32K/month. "
+                "I recommend monitoring usage patterns to optimize further.\n\n"
+                "4. **Infrastructure Efficiency**: Consider enabling request batching and implement query optimization. "
+                "You could also try using smaller models for simple tasks and apply rate limiting.\n\n"
+                "**Summary**: These actionable recommendations provide immediate cost reduction opportunities while maintaining performance quality. "
+                "I suggest you implement these changes in phases, starting with caching optimization. "
+                "The total projected savings are $18,000/month, achieving your optimization goals."
             )
             
             result = {
@@ -469,7 +562,7 @@ class MockAgentExecutionEngine:
             })
             
             # Simulate tool work
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.01)  # Minimal tool execution time
             
             # Tool completed event
             tool_result = {
