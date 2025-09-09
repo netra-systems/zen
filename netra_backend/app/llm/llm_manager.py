@@ -224,6 +224,48 @@ class LLMManager:
                 return response_model()
             except Exception:
                 raise ValueError(f"Cannot create {response_model.__name__} from response: {text_response}")
+
+    async def agenerate(
+        self, 
+        prompts: List[str], 
+        temperature: float = 0.3, 
+        max_tokens: int = 2000,
+        **kwargs
+    ):
+        """Legacy compatibility method for agenerate interface.
+        
+        This method provides backward compatibility with existing code that expects
+        the agenerate interface. It maps to the modern ask_llm_full interface.
+        
+        Args:
+            prompts: List of prompts (only first prompt is used)
+            temperature: Temperature parameter (ignored in current implementation)
+            max_tokens: Max tokens parameter (ignored in current implementation)
+            **kwargs: Additional arguments (ignored)
+            
+        Returns:
+            Mock response object with generations structure for compatibility
+        """
+        if not prompts:
+            raise ValueError("At least one prompt must be provided")
+            
+        # Use the first prompt
+        prompt = prompts[0]
+        
+        # Get the actual response using the modern interface
+        response = await self.ask_llm_full(prompt, "default", use_cache=True)
+        
+        # Create a mock response object that matches the expected interface
+        # This maintains compatibility with existing parsing code
+        class MockGeneration:
+            def __init__(self, text: str):
+                self.text = text
+        
+        class MockResponse:
+            def __init__(self, content: str):
+                self.generations = [[MockGeneration(content)]]
+                
+        return MockResponse(response.content)
     
     async def _make_llm_request(self, prompt: str, config_name: str) -> str:
         """Make an actual LLM request.
