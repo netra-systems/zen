@@ -22,7 +22,7 @@ from netra_backend.app.db.clickhouse import (
     _is_real_database_test,
     _should_disable_clickhouse_for_tests
 )
-from test_framework.ssot.test_context_decorator import TestContextValidationError
+from test_framework.ssot.test_context_decorator import ContextValidationError
 
 
 @pytest.mark.integration
