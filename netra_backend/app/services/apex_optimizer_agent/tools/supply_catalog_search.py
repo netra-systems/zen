@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from sqlmodel import select
 
 from netra_backend.app.db.models_postgres import SupplyOption
-from netra_backend.app.database import get_db_session
+from netra_backend.app.database import get_db
 from netra_backend.app.services.apex_optimizer_agent.tools.base import (
     BaseTool,
     ToolMetadata,

@@ -220,10 +220,10 @@ async def check_dependencies(
     # Check PostgreSQL
     try:
         import time
-        from netra_backend.app.database import get_db_session
+        from netra_backend.app.database import get_db
         
         start = time.time()
-        async with get_db_session() as session:
+        async with get_db() as session:
             result = await session.execute("SELECT version()")
             version = result.scalar()
         latency = (time.time() - start) * 1000

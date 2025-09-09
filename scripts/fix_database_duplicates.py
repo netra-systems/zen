@@ -71,7 +71,7 @@ def fix_database_imports(file_path: str) -> bool:
         # Replace session imports
         content = re.sub(
             r'from netra_backend\.app\.db\.session import get_db_session',
-            'from netra_backend.app.database import get_db_session',
+            'from netra_backend.app.database import get_db',
             content
         )
         
