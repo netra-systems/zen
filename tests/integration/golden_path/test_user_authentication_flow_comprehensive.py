@@ -78,7 +78,7 @@ class TestUserAuthenticationFlowComprehensive(
     
     def setup_method(self, method=None):
         """Setup comprehensive authentication test environment."""
-        super().setup_method(method)
+        super().setup_method()
         
         # Initialize environment
         self.env = get_env()
