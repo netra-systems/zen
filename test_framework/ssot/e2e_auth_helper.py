@@ -175,7 +175,7 @@ class E2EAuthHelper:
             Valid JWT token string
         """
         email = email or self.config.test_user_email
-        permissions = permissions or ["read", "write"]
+        permissions = permissions if permissions is not None else ["read", "write"]
         
         # Create token payload
         payload = {
