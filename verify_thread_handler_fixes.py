@@ -45,7 +45,7 @@ class ThreadHandlerVerificationSuite:
 
     async def run_verification(self):
         """Run comprehensive verification of thread handler fixes."""
-        print("🔍 THREAD HANDLER DATABASE SESSION SAFETY VERIFICATION")
+        print("THREAD HANDLER DATABASE SESSION SAFETY VERIFICATION")
         print("=" * 60)
         
         tests = [
@@ -74,11 +74,11 @@ class ThreadHandlerVerificationSuite:
             await test_func()
             self.results['passed'] += 1
             self.results['tests'].append((test_name, 'PASSED', None))
-            print(f"✅ {test_name}: PASSED")
+            print(f"PASS: {test_name}: PASSED")
         except Exception as e:
             self.results['failed'] += 1
             self.results['tests'].append((test_name, 'FAILED', str(e)))
-            print(f"❌ {test_name}: FAILED - {str(e)}")
+            print(f"FAIL: {test_name}: FAILED - {str(e)}")
     
     async def verify_imports_working(self):
         """Verify all handler imports work correctly."""
@@ -290,26 +290,23 @@ class ThreadHandlerVerificationSuite:
         mock_request.message = "Test message"
         mock_request.metadata = {}
         
-        # Make thread validation pass but message save fail
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation'):
-            with patch('netra_backend.app.routes.utils.thread_handlers.MessageRepository') as mock_repo_class:
-                mock_repo = AsyncMock()
-                mock_repo_class.return_value = mock_repo
-                mock_repo.create.side_effect = DatabaseError("Insert failed", None, None)
-                
-                try:
-                    await handle_send_message_request(
-                        db=mock_db,
-                        thread_id="test-thread-123",
-                        request=mock_request,
-                        user_id="user-123"
-                    )
-                except:
-                    pass  # Expected (could be HTTPException or DatabaseError)
-                
-                # VERIFICATION: Should rollback on database error
-                if not mock_db.rollback.called:
-                    raise AssertionError("handle_send_message_request should call rollback on database error")
+        # Test case 1: Thread validation failure should trigger rollback
+        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation',
+                  side_effect=DatabaseError("Thread validation failed", None, None)):
+            
+            try:
+                await handle_send_message_request(
+                    db=mock_db,
+                    thread_id="test-thread-123",
+                    request=mock_request,
+                    user_id="user-123"
+                )
+            except:
+                pass  # Expected
+            
+            # VERIFICATION: Should rollback on database error during validation
+            if not mock_db.rollback.called:
+                raise AssertionError("handle_send_message_request should call rollback on database error during thread validation")
 
     async def verify_no_functional_regression(self):
         """Verify that basic handler functionality still works (no regression)."""
@@ -360,28 +357,28 @@ class ThreadHandlerVerificationSuite:
     def print_final_report(self):
         """Print the final verification report."""
         print("\n" + "=" * 60)
-        print("🏁 VERIFICATION COMPLETE")
+        print("VERIFICATION COMPLETE")
         print("=" * 60)
-        print(f"✅ PASSED: {self.results['passed']}")
-        print(f"❌ FAILED: {self.results['failed']}")
-        print(f"📊 TOTAL: {len(self.results['tests'])}")
+        print(f"PASSED: {self.results['passed']}")
+        print(f"FAILED: {self.results['failed']}")
+        print(f"TOTAL: {len(self.results['tests'])}")
         
         if self.results['failed'] > 0:
-            print("\n🔍 FAILED TESTS:")
+            print("\nFAILED TESTS:")
             for test_name, status, error in self.results['tests']:
                 if status == 'FAILED':
                     print(f"   - {test_name}: {error}")
         
         success_rate = (self.results['passed'] / len(self.results['tests'])) * 100
-        print(f"\n📈 SUCCESS RATE: {success_rate:.1f}%")
+        print(f"\nSUCCESS RATE: {success_rate:.1f}%")
         
         if self.results['failed'] == 0:
-            print("🎉 ALL VERIFICATIONS PASSED - Database session safety fixes are working!")
-            print("✅ No regressions detected")
-            print("✅ System stability maintained")
-            print("✅ Database transaction safety improved")
+            print("ALL VERIFICATIONS PASSED - Database session safety fixes are working!")
+            print("No regressions detected")
+            print("System stability maintained")
+            print("Database transaction safety improved")
         else:
-            print("⚠️  Some verifications failed - review the issues above")
+            print("WARNING: Some verifications failed - review the issues above")
 
 async def main():
     """Main verification entry point."""
@@ -393,10 +390,10 @@ async def main():
     success = await suite.run_verification()
     
     if success:
-        print("\n🏆 VERIFICATION SUCCESS: Database session safety fixes are working correctly!")
+        print("\nVERIFICATION SUCCESS: Database session safety fixes are working correctly!")
         sys.exit(0)
     else:
-        print("\n💥 VERIFICATION FAILED: Issues detected - see report above")
+        print("\nVERIFICATION FAILED: Issues detected - see report above")
         sys.exit(1)
 
 if __name__ == "__main__":

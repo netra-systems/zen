@@ -815,7 +815,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             )
     
     async def _health_monitoring_loop(self) -> None:
-        """Background health monitoring loop."""
+        """Background health monitoring loop with proper cancellation handling."""
         while not self._shutdown:
             try:
                 await asyncio.sleep(self.config.health_check_interval_s)
@@ -831,8 +831,13 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.warning("Triggering automatic recovery due to poor health")
                     await self.recover_integration()
                 
+            except asyncio.CancelledError:
+                # Handle cancellation gracefully - this happens during shutdown or Cloud Run resource management
+                logger.info("Health monitoring task cancelled - shutting down cleanly")
+                break
             except Exception as e:
                 logger.error(f"Error in health monitoring loop: {e}")
+                # Don't break on general exceptions - continue monitoring
     
     async def get_status(self) -> Dict[str, Any]:
         """

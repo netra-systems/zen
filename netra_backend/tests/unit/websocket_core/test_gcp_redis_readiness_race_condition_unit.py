@@ -326,8 +326,7 @@ class TestGCPRedisReadinessRaceCondition:
         )
         
         validator = GCPWebSocketInitializationValidator(app_state)
-        validator.is_gcp_environment = True
-        validator.environment = "staging"
+        validator.update_environment_configuration("staging", True)
         
         # Wait for Redis initialization
         await asyncio.sleep(0.5)
@@ -438,8 +437,7 @@ class TestGCPRedisReadinessRaceCondition:
         )
         
         validator = GCPWebSocketInitializationValidator(app_state)
-        validator.is_gcp_environment = True
-        validator.environment = "staging"
+        validator.update_environment_configuration("staging", True)
         
         # Run complete validation
         start_time = time.time()
@@ -518,7 +516,7 @@ class TestRaceConditionPerformanceBenchmarks:
             )
             
             validator = GCPWebSocketInitializationValidator(app_state)
-            validator.is_gcp_environment = True
+            validator.update_environment_configuration("staging", True)
             
             # Wait for connection
             await asyncio.sleep(scenario["conn"] + 0.1)

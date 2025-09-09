@@ -1,460 +1,354 @@
-"""
-Test Thread Handlers Three-Tier Integration - DESIGNED TO FAIL
+"""Test Thread Handlers Three-Tier Integration - Unit Tests
 
-These tests expose that handle_send_message_request bypasses three-tier architecture.
-They will FAIL until proper integration is implemented.
+This test suite validates that thread handlers should use three-tier storage 
+instead of direct PostgreSQL operations.
 
-Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Improve Chat UX & System Reliability
-- Value Impact: Fast message confirmation + background persistence
-- Strategic Impact: Core chat functionality performance
-
-CRITICAL: These tests are DESIGNED TO FAIL with current implementation.
-They expose the architectural violations in thread message handling.
+Expected Failures: 9+ failures showing PostgreSQL blocking operations 
+that should use Redis-first three-tier storage.
 """
 
 import asyncio
-import json
 import pytest
 import time
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import Mock, AsyncMock, patch
+from datetime import datetime
 
-from netra_backend.app.routes.utils.thread_handlers import handle_send_message_request
+from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.routes.utils.thread_handlers import (
+    handle_list_threads_request,
+    handle_create_thread_request,
+)
+from shared.types import RunID, UserID, ThreadID
 
 
 class TestThreadHandlersThreeTierIntegration:
-    """Unit tests for thread handlers three-tier integration - FAILING TESTS."""
+    """Test thread handlers integration with three-tier storage architecture."""
     
-    @pytest.mark.unit
-    async def test_send_message_returns_immediately_after_redis_cache(self):
-        """FAILING TEST: Should return to user immediately after Redis cache, not after PostgreSQL commit.
-        
-        CURRENT ISSUE: handle_send_message_request() waits for PostgreSQL commit (~500ms)
-        EXPECTED: Return after Redis cache (~50ms) with background PostgreSQL persistence
-        
-        This test WILL FAIL because current implementation is synchronous with PostgreSQL.
-        """
-        mock_db = AsyncMock()
-        mock_request = MagicMock()
-        mock_request.message = "Test immediate response - should be fast"
-        mock_request.metadata = {"performance_test": True, "expected_latency": "sub_100ms"}
-        
-        start_time = time.time()
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.UnifiedMessageStorageService') as mock_storage, \
-             patch('netra_backend.app.routes.utils.thread_handlers.asyncio.create_task') as mock_create_task, \
-             patch('netra_backend.app.routes.utils.thread_handlers.MessageRepository') as mock_repo:
-            
-            mock_validation.return_value = MagicMock(id="thread-immediate-test")
-            
-            # Mock the storage service that SHOULD exist
-            mock_storage_instance = AsyncMock()
-            mock_storage.return_value = mock_storage_instance
-            mock_storage_instance.save_to_redis_immediate.return_value = {
-                "success": True,
-                "message_id": "msg-immediate-123",
-                "redis_latency_ms": 45
+    @pytest.fixture
+    def mock_db_session(self):
+        """Create mock database session."""
+        session = AsyncMock(spec=AsyncSession)
+        session.rollback = AsyncMock()
+        return session
+    
+    @pytest.fixture
+    def sample_thread_data(self):
+        """Create sample thread data."""
+        return {
+            'title': 'Test Thread for Three-Tier Integration',
+            'metadata': {
+                'user_id': str(UserID.generate()),
+                'created_via': 'api_test',
+                'priority': 'normal'
             }
-            
-            # Mock repository to simulate current slow behavior
-            mock_repo_instance = AsyncMock()
-            mock_repo.return_value = mock_repo_instance
-            
-            # Call function - should be fast with three-tier architecture
-            result = await handle_send_message_request(mock_db, "thread-immediate-test", mock_request, "user-immediate")
-            
-            end_time = time.time()
-            execution_time_ms = (end_time - start_time) * 1000
-            
-            # TEST WILL FAIL: Current implementation takes >100ms due to PostgreSQL blocking
-            assert execution_time_ms < 100, f"Should return in <100ms with Redis tier, took {execution_time_ms}ms"
-            
-            # Should create background task for PostgreSQL persistence (not blocking)
-            mock_create_task.assert_called_once()
-            
-            # Should return message immediately after Redis cache
-            assert result['id'] is not None
-            assert result['thread_id'] == "thread-immediate-test"
-            assert result.get('tier_used') == 'redis'
-            assert result.get('background_persistence') is True
-
-    @pytest.mark.unit
-    async def test_websocket_notification_sent_immediately(self):
-        """FAILING TEST: Should send WebSocket notification immediately when message received.
+        }
+    
+    @pytest.fixture
+    def user_id(self):
+        """Create sample user ID."""
+        return str(UserID.generate())
+    
+    def test_list_threads_should_use_redis_cache_first(self, mock_db_session, user_id):
+        """FAILING TEST: list threads should check Redis cache before PostgreSQL."""
+        # This test WILL FAIL because there's no Redis integration in thread handlers
         
-        CURRENT ISSUE: handle_send_message_request() has no WebSocket integration
-        EXPECTED: Immediate WebSocket notification for real-time user feedback
-        
-        This test WILL FAIL because there's no WebSocket notification system.
-        """
-        mock_db = AsyncMock() 
-        mock_request = MagicMock()
-        mock_request.message = "Test WebSocket notification - should be immediate"
-        mock_request.metadata = {"websocket_test": True, "notification_required": True}
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.WebSocketNotificationService') as mock_websocket, \
-             patch('netra_backend.app.routes.utils.thread_handlers.MessageRepository') as mock_repo:
+        with patch('netra_backend.app.routes.utils.thread_handlers.get_user_threads') as mock_get_threads:
+            mock_get_threads.return_value = []
             
-            mock_validation.return_value = MagicMock(id="thread-websocket-test")
-            
-            # Mock WebSocket notification service that SHOULD exist
-            mock_websocket_instance = AsyncMock()
-            mock_websocket.return_value = mock_websocket_instance
-            mock_websocket_instance.send_message_received_notification.return_value = {
-                "notification_sent": True,
-                "notification_id": "notif-ws-123",
-                "latency_ms": 12
-            }
-            
-            mock_repo_instance = AsyncMock()
-            mock_repo.return_value = mock_repo_instance
-            
-            # Call function
-            await handle_send_message_request(mock_db, "thread-websocket-test", mock_request, "user-websocket")
-            
-            # TEST WILL FAIL: WebSocketNotificationService doesn't exist 
-            mock_websocket_instance.send_message_received_notification.assert_called_once()
-            
-            # Verify notification payload structure
-            call_args = mock_websocket_instance.send_message_received_notification.call_args[0]
-            notification_data = call_args[0]
-            
-            assert notification_data['type'] == 'message_received'
-            assert notification_data['thread_id'] == 'thread-websocket-test'
-            assert notification_data['user_id'] == 'user-websocket'
-            assert notification_data['status'] == 'processing'
-            assert 'message_id' in notification_data
-            assert 'timestamp' in notification_data
-
-    @pytest.mark.unit
-    async def test_background_postgresql_persistence_after_redis_success(self):
-        """FAILING TEST: PostgreSQL persistence should happen in background after Redis success.
-        
-        CURRENT ISSUE: PostgreSQL persistence is synchronous and blocking
-        EXPECTED: Async background persistence for non-blocking user experience
-        
-        This test WILL FAIL because current implementation blocks on PostgreSQL.
-        """
-        mock_db = AsyncMock()
-        mock_request = MagicMock()
-        mock_request.message = "Test background PostgreSQL persistence"
-        mock_request.metadata = {"async_test": True, "persistence_mode": "background"}
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.BackgroundPersistenceService') as mock_bg_service, \
-             patch('netra_backend.app.routes.utils.thread_handlers.asyncio.create_task') as mock_create_task:
-            
-            mock_validation.return_value = MagicMock(id="thread-bg-test")
-            
-            # Mock background persistence service that SHOULD exist
-            mock_bg_service_instance = AsyncMock()
-            mock_bg_service.return_value = mock_bg_service_instance
-            mock_bg_service_instance.schedule_postgresql_persistence.return_value = {
-                "task_id": "bg-persist-123",
-                "scheduled": True,
-                "estimated_completion_ms": 400
-            }
-            
-            # Call function
-            result = await handle_send_message_request(mock_db, "thread-bg-test", mock_request, "user-bg")
-            
-            # TEST WILL FAIL: BackgroundPersistenceService doesn't exist
-            mock_bg_service_instance.schedule_postgresql_persistence.assert_called_once()
-            
-            # Should create async task for background persistence
-            mock_create_task.assert_called_once()
-            
-            # Verify task creation for background work
-            task_call_args = mock_create_task.call_args[0][0]
-            assert asyncio.iscoroutine(task_call_args), "Should create coroutine task for background persistence"
-            
-            # Result should indicate background processing
-            assert result.get('background_task_id') is not None
-            assert result.get('persistence_mode') == 'background'
-
-    @pytest.mark.unit  
-    async def test_error_handling_with_three_tier_fallback(self):
-        """FAILING TEST: Should handle Redis failures with graceful PostgreSQL fallback.
-        
-        CURRENT ISSUE: No Redis integration means no Redis failures to handle
-        EXPECTED: Graceful fallback to PostgreSQL when Redis is unavailable
-        
-        This test WILL FAIL because there's no Redis integration to fail.
-        """
-        mock_db = AsyncMock()
-        mock_request = MagicMock() 
-        mock_request.message = "Test error handling with tier fallback"
-        mock_request.metadata = {"error_test": True, "fallback_test": True}
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.TierFallbackService') as mock_fallback, \
-             patch('netra_backend.app.routes.utils.thread_handlers.redis_manager') as mock_redis:
-            
-            mock_validation.return_value = MagicMock(id="thread-fallback-test")
-            
-            # Simulate Redis failure
-            mock_redis.set.side_effect = Exception("Redis connection failed")
-            
-            # Mock fallback service that SHOULD exist
-            mock_fallback_instance = AsyncMock()
-            mock_fallback.return_value = mock_fallback_instance
-            mock_fallback_instance.fallback_to_postgresql.return_value = {
-                "success": True,
-                "tier_used": "postgresql",
-                "fallback_reason": "redis_unavailable",
-                "message_id": "msg-fallback-123"
-            }
-            
-            # Call function - should handle Redis failure gracefully  
-            result = await handle_send_message_request(mock_db, "thread-fallback-test", mock_request, "user-fallback")
-            
-            # TEST WILL FAIL: TierFallbackService doesn't exist
-            mock_fallback_instance.fallback_to_postgresql.assert_called_once()
-            
-            # Should succeed despite Redis failure
-            assert result['id'] is not None
-            assert result.get('tier_used') == 'postgresql'
-            assert result.get('fallback_reason') == 'redis_unavailable'
-            assert result.get('warning') == 'degraded_performance_redis_unavailable'
-
-    @pytest.mark.unit
-    async def test_message_id_generation_consistency_across_tiers(self):
-        """FAILING TEST: Message IDs should be consistent across all storage tiers.
-        
-        CURRENT ISSUE: Only PostgreSQL message creation, no cross-tier ID consistency
-        EXPECTED: Same message ID used in Redis, PostgreSQL, and eventually ClickHouse
-        
-        This test WILL FAIL because there's no cross-tier ID management.
-        """
-        mock_db = AsyncMock()
-        mock_request = MagicMock()
-        mock_request.message = "Test message ID consistency across tiers"
-        mock_request.metadata = {"id_consistency_test": True}
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.MessageIdGenerator') as mock_id_gen, \
-             patch('netra_backend.app.routes.utils.thread_handlers.CrossTierIdTracker') as mock_tracker:
-            
-            mock_validation.return_value = MagicMock(id="thread-id-consistency")
-            
-            # Mock ID generation service that SHOULD exist
-            mock_id_gen_instance = MagicMock()
-            mock_id_gen.return_value = mock_id_gen_instance
-            mock_id_gen_instance.generate_cross_tier_id.return_value = "msg-consistent-id-456"
-            
-            # Mock cross-tier tracking that SHOULD exist
-            mock_tracker_instance = AsyncMock()
-            mock_tracker.return_value = mock_tracker_instance
-            mock_tracker_instance.track_message_across_tiers.return_value = {
-                "message_id": "msg-consistent-id-456",
-                "redis_key": "message:active:msg-consistent-id-456",
-                "postgresql_id": "msg-consistent-id-456",
-                "clickhouse_future_id": "msg-consistent-id-456"
-            }
-            
-            # Call function
-            result = await handle_send_message_request(mock_db, "thread-id-consistency", mock_request, "user-id-test")
-            
-            # TEST WILL FAIL: MessageIdGenerator and CrossTierIdTracker don't exist
-            mock_id_gen_instance.generate_cross_tier_id.assert_called_once()
-            mock_tracker_instance.track_message_across_tiers.assert_called_once()
-            
-            # Verify consistent ID usage
-            tracked_id = mock_tracker_instance.track_message_across_tiers.call_args[0][0]
-            assert tracked_id == "msg-consistent-id-456"
-            assert result['id'] == "msg-consistent-id-456"
-
-    @pytest.mark.unit
-    async def test_performance_monitoring_during_message_handling(self):
-        """FAILING TEST: Should monitor performance metrics during message operations.
-        
-        CURRENT ISSUE: No performance monitoring exists in message handling
-        EXPECTED: Track latency, tier performance, and SLA compliance
-        
-        This test WILL FAIL because there's no performance monitoring.
-        """
-        mock_db = AsyncMock()
-        mock_request = MagicMock()
-        mock_request.message = "Test performance monitoring during handling"
-        mock_request.metadata = {"performance_monitoring_test": True}
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.MessagePerformanceMonitor') as mock_perf_monitor:
-            
-            mock_validation.return_value = MagicMock(id="thread-perf-monitor")
-            
-            # Mock performance monitor that SHOULD exist
-            mock_perf_monitor_instance = AsyncMock()
-            mock_perf_monitor.return_value = mock_perf_monitor_instance
-            
-            mock_perf_monitor_instance.start_operation_tracking.return_value = "perf-track-789"
-            mock_perf_monitor_instance.complete_operation_tracking.return_value = {
-                "tracking_id": "perf-track-789",
-                "total_latency_ms": 85,
-                "redis_latency_ms": 45,
-                "postgresql_latency_ms": 40,
-                "sla_compliance": True,  # <100ms target met
-                "performance_grade": "A"
-            }
-            
-            # Call function
-            result = await handle_send_message_request(mock_db, "thread-perf-monitor", mock_request, "user-perf")
-            
-            # TEST WILL FAIL: MessagePerformanceMonitor doesn't exist
-            mock_perf_monitor_instance.start_operation_tracking.assert_called_once()
-            mock_perf_monitor_instance.complete_operation_tracking.assert_called_once()
-            
-            # Should include performance metrics in result
-            assert result.get('performance_metrics') is not None
-            assert result['performance_metrics']['total_latency_ms'] < 100
-            assert result['performance_metrics']['sla_compliance'] is True
-
-    @pytest.mark.unit
-    async def test_audit_trail_creation_for_message_operations(self):
-        """FAILING TEST: Should create audit trails for message operations.
-        
-        CURRENT ISSUE: No audit trail creation in current implementation
-        EXPECTED: Complete audit trails per SPEC compliance requirements
-        
-        This test WILL FAIL because there's no audit trail implementation.
-        """
-        mock_db = AsyncMock()
-        mock_request = MagicMock()
-        mock_request.message = "Test audit trail creation for compliance"
-        mock_request.metadata = {"audit_test": True, "compliance_required": True}
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.AuditTrailService') as mock_audit:
-            
-            mock_validation.return_value = MagicMock(id="thread-audit-test")
-            
-            # Mock audit service that SHOULD exist per SPEC compliance
-            mock_audit_instance = AsyncMock()
-            mock_audit.return_value = mock_audit_instance
-            mock_audit_instance.create_message_audit_entry.return_value = {
-                "audit_id": "audit-msg-101",
-                "operation": "message_create",
-                "user_id": "user-audit",
-                "thread_id": "thread-audit-test",
-                "timestamp": int(time.time()),
-                "tier_operations": ["redis_write", "postgresql_scheduled"],
-                "compliance_validated": True
-            }
-            
-            # Call function  
-            result = await handle_send_message_request(mock_db, "thread-audit-test", mock_request, "user-audit")
-            
-            # TEST WILL FAIL: AuditTrailService doesn't exist
-            mock_audit_instance.create_message_audit_entry.assert_called_once()
-            
-            # Verify audit entry details
-            audit_call_args = mock_audit_instance.create_message_audit_entry.call_args[0][0]
-            assert audit_call_args['operation'] == 'message_create'
-            assert audit_call_args['user_id'] == 'user-audit'
-            assert audit_call_args['thread_id'] == 'thread-audit-test'
-            
-            # Result should include audit reference
-            assert result.get('audit_id') is not None
-            assert result.get('compliance_validated') is True
-
-    @pytest.mark.unit
-    async def test_rate_limiting_integration_with_three_tier_storage(self):
-        """FAILING TEST: Should integrate rate limiting with three-tier message storage.
-        
-        CURRENT ISSUE: No rate limiting exists in message handling
-        EXPECTED: Rate limiting with tier-aware storage optimization
-        
-        This test WILL FAIL because there's no rate limiting implementation.
-        """
-        mock_db = AsyncMock()
-        mock_request = MagicMock()
-        mock_request.message = "Test rate limiting with tier storage"
-        mock_request.metadata = {"rate_limit_test": True}
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.RateLimitingService') as mock_rate_limit:
-            
-            mock_validation.return_value = MagicMock(id="thread-rate-limit")
-            
-            # Mock rate limiting service that SHOULD exist
-            mock_rate_limit_instance = AsyncMock()
-            mock_rate_limit.return_value = mock_rate_limit_instance
-            mock_rate_limit_instance.check_and_record_request.return_value = {
-                "allowed": True,
-                "remaining_requests": 45,
-                "reset_time": int(time.time()) + 3600,
-                "tier_optimization": "redis_preferred"  # Use Redis for rate-limited users
-            }
-            
-            # Call function
-            result = await handle_send_message_request(mock_db, "thread-rate-limit", mock_request, "user-rate-limit")
-            
-            # TEST WILL FAIL: RateLimitingService doesn't exist
-            mock_rate_limit_instance.check_and_record_request.assert_called_once()
-            
-            # Should include rate limit info in response
-            assert result.get('rate_limit_info') is not None
-            assert result['rate_limit_info']['remaining_requests'] == 45
-            assert result.get('tier_optimization') == 'redis_preferred'
-
-    @pytest.mark.unit
-    async def test_concurrent_message_handling_with_proper_isolation(self):
-        """FAILING TEST: Should handle concurrent messages with proper user isolation.
-        
-        CURRENT ISSUE: No concurrency isolation in current implementation
-        EXPECTED: Thread-safe operations with user context isolation
-        
-        This test WILL FAIL because there's no concurrency handling.
-        """
-        mock_db = AsyncMock()
-        
-        # Simulate concurrent requests from different users
-        concurrent_requests = []
-        for i in range(3):
-            mock_request = MagicMock()
-            mock_request.message = f"Concurrent message {i}"
-            mock_request.metadata = {"concurrency_test": True, "request_id": i}
-            concurrent_requests.append({
-                "request": mock_request,
-                "thread_id": f"thread-concurrent-{i}",
-                "user_id": f"user-concurrent-{i}"
-            })
-        
-        with patch('netra_backend.app.routes.utils.thread_handlers.get_thread_with_validation', new_callable=AsyncMock) as mock_validation, \
-             patch('netra_backend.app.routes.utils.thread_handlers.ConcurrencyIsolationService') as mock_isolation:
-            
-            mock_validation.return_value = MagicMock(id="thread-concurrent-test")
-            
-            # Mock isolation service that SHOULD exist
-            mock_isolation_instance = AsyncMock()
-            mock_isolation.return_value = mock_isolation_instance
-            mock_isolation_instance.ensure_user_isolation.return_value = {
-                "isolation_context": "isolated",
-                "safe_to_proceed": True,
-                "concurrency_level": "safe"
-            }
-            
-            # Execute concurrent requests
-            tasks = []
-            for req_data in concurrent_requests:
-                task = handle_send_message_request(
-                    mock_db,
-                    req_data["thread_id"], 
-                    req_data["request"],
-                    req_data["user_id"]
+            # Should use Redis cache manager for fast thread listing
+            with patch('netra_backend.app.routes.utils.thread_handlers.thread_cache_manager') as mock_cache:
+                mock_cache.get_cached_threads.return_value = None  # Cache miss
+                
+                result = asyncio.run(
+                    handle_list_threads_request(mock_db_session, user_id, 0, 20)
                 )
-                tasks.append(task)
+                
+                # Should attempt Redis cache first
+                mock_cache.get_cached_threads.assert_called_with(user_id, 0, 20)
+                
+                # Should cache results after PostgreSQL query
+                mock_cache.cache_threads_result.assert_called()
+                
+                assert hasattr(mock_cache, 'get_cached_threads'), \
+                    "Thread handlers should use Redis cache for fast thread listing"
+    
+    def test_list_threads_performance_with_redis_cache(self, mock_db_session, user_id):
+        """FAILING TEST: Thread listing should be <50ms with Redis cache."""
+        # This test WILL FAIL because no Redis caching exists
+        
+        with patch('netra_backend.app.routes.utils.thread_handlers.thread_cache_manager') as mock_cache:
+            # Simulate Redis cache hit
+            cached_threads = [
+                {'id': str(ThreadID.generate()), 'title': 'Cached Thread 1'},
+                {'id': str(ThreadID.generate()), 'title': 'Cached Thread 2'}
+            ]
+            mock_cache.get_cached_threads.return_value = cached_threads
             
-            results = await asyncio.gather(*tasks)
+            start_time = time.time()
+            result = asyncio.run(
+                handle_list_threads_request(mock_db_session, user_id, 0, 20)
+            )
+            execution_time_ms = (time.time() - start_time) * 1000
             
-            # TEST WILL FAIL: ConcurrencyIsolationService doesn't exist
-            assert mock_isolation_instance.ensure_user_isolation.call_count == 3
+            # Should be very fast with Redis cache
+            assert execution_time_ms < 50, \
+                f"Thread listing with Redis cache should be <50ms, was {execution_time_ms:.2f}ms"
             
-            # All requests should succeed with proper isolation
-            assert len(results) == 3
-            for result in results:
-                assert result['id'] is not None
-                assert result.get('isolation_verified') is True
+            # Should not hit PostgreSQL at all
+            mock_db_session.execute.assert_not_called()
+    
+    def test_create_thread_should_use_three_tier_storage(self, mock_db_session, sample_thread_data, user_id):
+        """FAILING TEST: Thread creation should use three-tier storage pattern."""
+        # This test WILL FAIL because thread creation only uses PostgreSQL
+        
+        with patch.multiple('netra_backend.app.routes.utils.thread_handlers',
+                           redis_thread_manager=Mock(),
+                           postgresql_thread_manager=Mock(),
+                           create_thread_record=AsyncMock()) as mocks:
+            
+            mocks['create_thread_record'].return_value = Mock(id=str(ThreadID.generate()))
+            
+            result = asyncio.run(
+                handle_create_thread_request(mock_db_session, sample_thread_data, user_id)
+            )
+            
+            # Should save to Redis immediately for fast access
+            assert hasattr(mocks['redis_thread_manager'], 'cache_thread'), \
+                "Should cache new thread in Redis for fast access"
+            
+            mocks['redis_thread_manager'].cache_thread.assert_called()
+            
+            # Should use three-tier storage coordinator
+            assert hasattr(mocks['postgresql_thread_manager'], 'save_with_redis_coordination'), \
+                "Should coordinate PostgreSQL saves with Redis cache"
+    
+    def test_thread_operations_should_update_all_storage_tiers(self, mock_db_session, user_id):
+        """FAILING TEST: Thread updates should propagate across all storage tiers."""
+        # This test WILL FAIL because no multi-tier update coordination exists
+        
+        thread_id = str(ThreadID.generate())
+        update_data = {'title': 'Updated Thread Title'}
+        
+        with patch.multiple('netra_backend.app.routes.utils.thread_handlers',
+                           redis_thread_manager=Mock(),
+                           postgresql_thread_manager=Mock(),
+                           clickhouse_analytics_manager=Mock()) as mocks:
+            
+            # This should fail because update_thread_across_tiers doesn't exist
+            result = asyncio.run(
+                handle_update_thread_across_tiers(mock_db_session, thread_id, update_data)
+            )
+            
+            # Should update Redis cache
+            mocks['redis_thread_manager'].update_cached_thread.assert_called_with(thread_id, update_data)
+            
+            # Should update PostgreSQL record
+            mocks['postgresql_thread_manager'].update_thread_record.assert_called_with(thread_id, update_data)
+            
+            # Should update ClickHouse analytics
+            mocks['clickhouse_analytics_manager'].record_thread_update.assert_called_with(thread_id, update_data)
+            
+            assert result['tiers_updated'] == ['redis', 'postgresql', 'clickhouse'], \
+                "Should update all storage tiers when thread is modified"
+    
+    def test_thread_handlers_should_implement_cache_warming(self, mock_db_session, user_id):
+        """FAILING TEST: Should implement cache warming for frequently accessed threads."""
+        # This test WILL FAIL because cache warming doesn't exist
+        
+        with patch('netra_backend.app.routes.utils.thread_handlers.cache_warming_manager') as mock_warmer:
+            # Should warm cache for active user
+            asyncio.run(warm_thread_cache_for_user(user_id))
+            
+            mock_warmer.warm_user_threads.assert_called_with(user_id)
+            
+            # Should preload recent threads into Redis
+            mock_warmer.preload_recent_threads.assert_called()
+            
+            assert hasattr(mock_warmer, 'warm_user_threads'), \
+                "Should have cache warming capabilities for performance optimization"
+    
+    def test_thread_handlers_should_handle_cache_invalidation(self, mock_db_session, sample_thread_data, user_id):
+        """FAILING TEST: Should invalidate cache when threads are modified."""
+        # This test WILL FAIL because cache invalidation logic doesn't exist
+        
+        with patch('netra_backend.app.routes.utils.thread_handlers.cache_invalidation_manager') as mock_invalidator:
+            # Create thread should invalidate user's thread list cache
+            result = asyncio.run(
+                handle_create_thread_request(mock_db_session, sample_thread_data, user_id)
+            )
+            
+            mock_invalidator.invalidate_user_thread_cache.assert_called_with(user_id)
+            
+            # Should invalidate related caches
+            mock_invalidator.invalidate_thread_count_cache.assert_called_with(user_id)
+            
+            assert hasattr(mock_invalidator, 'invalidate_user_thread_cache'), \
+                "Should have cache invalidation when threads are modified"
+    
+    def test_thread_handlers_should_use_read_replicas_for_queries(self, mock_db_session, user_id):
+        """FAILING TEST: Should use read replicas for read-heavy operations."""
+        # This test WILL FAIL because read replica routing doesn't exist
+        
+        with patch('netra_backend.app.routes.utils.thread_handlers.database_router') as mock_router:
+            mock_router.get_read_session.return_value = mock_db_session
+            
+            # List operations should use read replicas
+            result = asyncio.run(
+                handle_list_threads_request(mock_db_session, user_id, 0, 20)
+            )
+            
+            mock_router.get_read_session.assert_called(), \
+                "Read operations should use read replicas for performance"
+            
+            # Write operations should use write master
+            mock_router.get_write_session.assert_not_called(), \
+                "List operations should not use write master"
+    
+    def test_thread_handlers_should_implement_batch_operations(self, mock_db_session, user_id):
+        """FAILING TEST: Should support batch operations for efficiency."""
+        # This test WILL FAIL because batch operations don't exist
+        
+        thread_ids = [str(ThreadID.generate()) for _ in range(10)]
+        
+        with patch('netra_backend.app.routes.utils.thread_handlers.batch_thread_processor') as mock_batch:
+            # Should support batch archiving
+            result = asyncio.run(
+                handle_batch_archive_threads(mock_db_session, thread_ids, user_id)
+            )
+            
+            mock_batch.archive_threads_batch.assert_called_with(thread_ids)
+            
+            # Should update all tiers in batch
+            mock_batch.update_redis_batch.assert_called()
+            mock_batch.update_postgresql_batch.assert_called()
+            mock_batch.archive_clickhouse_batch.assert_called()
+            
+            assert hasattr(mock_batch, 'archive_threads_batch'), \
+                "Should support batch operations for efficiency"
+    
+    def test_thread_handlers_should_provide_storage_tier_health_monitoring(self, mock_db_session, user_id):
+        """FAILING TEST: Should monitor health of all storage tiers."""
+        # This test WILL FAIL because storage health monitoring doesn't exist
+        
+        with patch('netra_backend.app.routes.utils.thread_handlers.storage_health_monitor') as mock_monitor:
+            mock_monitor.check_redis_health.return_value = {'status': 'healthy', 'latency_ms': 2}
+            mock_monitor.check_postgresql_health.return_value = {'status': 'healthy', 'latency_ms': 15}
+            mock_monitor.check_clickhouse_health.return_value = {'status': 'degraded', 'latency_ms': 1200}
+            
+            # Should check storage health before operations
+            health_status = asyncio.run(get_storage_tier_health())
+            
+            assert 'redis' in health_status, "Should monitor Redis health"
+            assert 'postgresql' in health_status, "Should monitor PostgreSQL health"
+            assert 'clickhouse' in health_status, "Should monitor ClickHouse health"
+            
+            # Should adapt behavior based on health
+            assert health_status['recommendations']['use_redis'] is True
+            assert health_status['recommendations']['avoid_clickhouse'] is True
+
+
+class TestThreadHandlersPerformanceRequirements:
+    """Test performance requirements for thread handlers with three-tier storage."""
+    
+    def test_thread_listing_performance_requirements(self, user_id):
+        """FAILING TEST: Thread listing should meet performance SLAs."""
+        # This test WILL FAIL because performance optimizations don't exist
+        
+        # Simulate large number of threads
+        mock_db_session = AsyncMock()
+        
+        # With Redis cache: <100ms
+        with patch('netra_backend.app.routes.utils.thread_handlers.thread_cache_manager') as mock_cache:
+            mock_cache.get_cached_threads.return_value = [{'id': f'thread_{i}'} for i in range(50)]
+            
+            start_time = time.time()
+            result = asyncio.run(
+                handle_list_threads_request(mock_db_session, user_id, 0, 50)
+            )
+            cached_time_ms = (time.time() - start_time) * 1000
+            
+            assert cached_time_ms < 100, \
+                f"Cached thread listing should be <100ms, was {cached_time_ms:.2f}ms"
+        
+        # Without cache: <500ms
+        mock_cache.get_cached_threads.return_value = None
+        with patch('netra_backend.app.routes.utils.thread_handlers.get_user_threads') as mock_get:
+            mock_get.return_value = [{'id': f'thread_{i}'} for i in range(50)]
+            
+            start_time = time.time()
+            result = asyncio.run(
+                handle_list_threads_request(mock_db_session, user_id, 0, 50)
+            )
+            uncached_time_ms = (time.time() - start_time) * 1000
+            
+            assert uncached_time_ms < 500, \
+                f"Uncached thread listing should be <500ms, was {uncached_time_ms:.2f}ms"
+
+
+class TestCurrentThreadHandlerLimitations:
+    """Tests that expose current limitations in thread handler architecture."""
+    
+    def test_thread_handlers_only_use_postgresql(self, user_id):
+        """FAILING TEST: Expose that thread handlers only use PostgreSQL."""
+        mock_db_session = AsyncMock()
+        
+        # This exposes the architectural limitation
+        with patch('netra_backend.app.routes.utils.thread_handlers.get_user_threads') as mock_get:
+            mock_get.return_value = []
+            
+            # All operations go directly to PostgreSQL
+            result = asyncio.run(
+                handle_list_threads_request(mock_db_session, user_id, 0, 20)
+            )
+            
+            # No Redis integration exists
+            with pytest.raises(ImportError):
+                from netra_backend.app.routes.utils.thread_handlers import thread_cache_manager
+        
+        pytest.fail(
+            "ARCHITECTURAL LIMITATION: Thread handlers only use PostgreSQL. "
+            "No Redis caching, no ClickHouse analytics, no three-tier storage benefits."
+        )
+    
+    def test_no_performance_monitoring_in_handlers(self):
+        """FAILING TEST: Expose lack of performance monitoring in thread handlers."""
+        # Import the actual module to check its capabilities
+        import netra_backend.app.routes.utils.thread_handlers as handlers
+        
+        # No performance monitoring exists
+        assert not hasattr(handlers, 'measure_operation_time'), \
+            "PERFORMANCE GAP: No operation timing measurement"
+        
+        assert not hasattr(handlers, 'log_slow_operations'), \
+            "PERFORMANCE GAP: No slow operation logging"
+        
+        assert not hasattr(handlers, 'get_handler_performance_metrics'), \
+            "PERFORMANCE GAP: No performance metrics collection"
+        
+        pytest.fail(
+            "PERFORMANCE GAP: Thread handlers have no performance monitoring. "
+            "Cannot identify bottlenecks or optimize user experience."
+        )
+
+
+# Mock functions that should exist but don't
+async def handle_update_thread_across_tiers(db_session, thread_id, update_data):
+    """Mock function that should exist for three-tier updates."""
+    raise NotImplementedError("Three-tier thread updates not implemented")
+
+async def warm_thread_cache_for_user(user_id):
+    """Mock function that should exist for cache warming."""
+    raise NotImplementedError("Thread cache warming not implemented")
+
+async def handle_batch_archive_threads(db_session, thread_ids, user_id):
+    """Mock function that should exist for batch operations."""
+    raise NotImplementedError("Batch thread operations not implemented")
+
+async def get_storage_tier_health():
+    """Mock function that should exist for storage health monitoring."""
+    raise NotImplementedError("Storage tier health monitoring not implemented")
+
+
+if __name__ == "__main__":
+    # Run tests to demonstrate thread handler limitations
+    pytest.main([__file__, "-v", "--tb=short"])
