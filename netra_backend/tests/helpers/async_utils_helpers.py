@@ -128,9 +128,14 @@ async def create_close_connection():
     return close_connection
 
 def create_slow_connection_factory():
-    """Create slow connection factory for timeout tests"""
+    """Create slow connection factory for timeout tests
+    
+    CRITICAL: Uses 0.1s delay to simulate slow connections without blocking unit tests.
+    Unit tests must complete quickly (CLAUDE.MD compliance).
+    For actual timeout testing, use test-specific timeouts, not long sleeps.
+    """
     async def create_connection():
-        await asyncio.sleep(10)
+        await asyncio.sleep(0.1)  # Reduced from 10s to 0.1s for unit test stability
         return "connection"
     return create_connection
 
