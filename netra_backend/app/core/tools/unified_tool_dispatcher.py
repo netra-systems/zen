@@ -255,15 +255,21 @@ class UnifiedToolDispatcher:
         
         return instance
     
-    def _init_components(self, tools: Optional[List['BaseTool']] = None, **kwargs):
+    def _init_components(self, tools: Optional[List['BaseTool']] = None, registry: Optional['ToolRegistry'] = None, **kwargs):
         """Initialize core components."""
         # Import here to avoid circular dependencies
         from netra_backend.app.core.registry.universal_registry import ToolRegistry
         from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         
-        # Core components
-        self.registry = ToolRegistry()
+        # CRITICAL FIX: Use pre-created registry if provided to prevent proliferation
+        if registry is not None:
+            self.registry = registry
+            logger.debug(f"Using pre-created registry {getattr(registry, 'name', 'unknown')} for dispatcher {getattr(self, 'dispatcher_id', 'unknown')}")
+        else:
+            self.registry = ToolRegistry()
+            logger.debug(f"Created new registry for dispatcher {getattr(self, 'dispatcher_id', 'unknown')}")
+            
         self.validator = ToolValidator()
         self.executor = UnifiedToolExecutionEngine(
             websocket_bridge=self._create_websocket_bridge() if self.websocket_manager else None
