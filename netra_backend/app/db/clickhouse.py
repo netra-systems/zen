@@ -164,6 +164,7 @@ _clickhouse_cache = ClickHouseCache()
 # Real services only per CLAUDE.md section 2.4
 
 
+@test_decorator(allow_production=True, message="Context detection function - being migrated to test-only")
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
     from shared.isolated_environment import get_env
@@ -175,6 +176,7 @@ def _is_testing_environment() -> bool:
     config = get_configuration()
     return config.environment == "testing"
 
+@test_decorator()
 def _is_real_database_test() -> bool:
     """Check if this is a test that explicitly requires real database connections."""
     import sys
@@ -196,6 +198,7 @@ def _is_real_database_test() -> bool:
     
     return False
 
+@test_decorator(allow_production=True, message="Test context detection - called from production code paths")
 def _should_disable_clickhouse_for_tests() -> bool:
     """Check if ClickHouse should be disabled for the current test context."""
     from shared.isolated_environment import get_env
@@ -231,6 +234,7 @@ def _should_disable_clickhouse_for_tests() -> bool:
     # For all other tests, default to enabled (will use NoOp client in testing environment)
     return False
 
+@test_decorator(allow_production=True, message="Mock decision function - called from production connection logic")
 def use_mock_clickhouse() -> bool:
     """Determine if mock ClickHouse should be used.
     
@@ -445,10 +449,12 @@ class NoOpClickHouseClient:
     CRITICAL FIX: Simulates realistic error conditions that tests expect.
     """
     
+    @test_decorator()
     def __init__(self):
         """Initialize NoOp client with connection tracking."""
         self._connected = True
     
+    @test_decorator()
     @test_decorator()
     async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Execute no-op query - simulates realistic query behaviors."""
@@ -487,21 +493,25 @@ class NoOpClickHouseClient:
         return []
     
     @test_decorator()
+    @test_decorator()
     async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Execute no-op query (alias for execute)."""
         return await self.execute(query, params)
     
+    @test_decorator()
     @test_decorator()
     async def test_connection(self) -> bool:
         """Simulate connection test based on connection state."""
         return self._connected
     
     @test_decorator()
+    @test_decorator()
     async def disconnect(self) -> None:
         """No-op disconnect - updates connection state."""
         logger.debug("[ClickHouse NoOp] Simulated disconnect")
         self._connected = False
 
+@test_decorator()
 @asynccontextmanager
 async def _create_test_noop_client():
     """Create a no-op ClickHouse client for testing environments.

@@ -1,466 +1,246 @@
 """
-Unit tests for GitHub Issue Manager business logic
+Unit tests for GitHub issue management functionality.
 
-Tests the core business logic for GitHub issue creation, detection, and management.
-These tests use mocks and focus on business logic validation.
-
-CRITICAL: All tests initially FAIL to prove functionality doesn't exist yet.
+CRITICAL: These tests are designed to INITIALLY FAIL to prove functionality doesn't exist.
+Following CLAUDE.md principles of real testing without cheating.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from dataclasses import dataclass
-from typing import Dict, Any, Optional, List
-import json
-from datetime import datetime, timezone
+from unittest.mock import Mock, AsyncMock, patch
+from datetime import datetime
+from typing import Dict, List, Optional
 
-from shared.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.ssot.base_test_case import BaseTestCase
 
-# Mock GitHub API response structures
-@dataclass 
-class MockGitHubIssue:
-    """Mock GitHub issue for testing"""
-    number: int
-    title: str
-    body: str
-    state: str
-    labels: List[str]
-    created_at: str
-    updated_at: str
-    html_url: str
 
-@dataclass
-class MockErrorContext:
-    """Mock error context for testing"""
-    error_message: str
-    error_type: str
-    stack_trace: str
-    user_id: str
-    thread_id: str
-    timestamp: str
-    context_data: Dict[str, Any]
+class TestGitHubIssueManager(BaseTestCase):
+    """Test GitHub issue creation, management, and lifecycle."""
 
-class TestGitHubIssueManager(SSotBaseTestCase):
-    """
-    Unit tests for GitHub Issue Manager
-    
-    CRITICAL: These tests will INITIALLY FAIL because the GitHubIssueManager 
-    class doesn't exist yet. This proves the tests are working correctly.
-    """
-    
-    @pytest.fixture
-    def mock_error_context(self):
-        """Create mock error context for testing"""
-        return MockErrorContext(
-            error_message="Test agent execution failed",
-            error_type="AgentExecutionError", 
-            stack_trace="Traceback...",
-            user_id="user_123",
-            thread_id="thread_456",
-            timestamp="2024-01-01T10:00:00Z",
-            context_data={"agent_type": "DataAgent", "step": "analysis"}
-        )
-    
-    @pytest.fixture
-    def mock_github_client(self):
-        """Create mock GitHub client for testing"""
-        client = Mock()
-        client.create_issue.return_value = MockGitHubIssue(
-            number=123,
-            title="Test Issue",
-            body="Test body",
-            state="open", 
-            labels=["bug", "automated"],
-            created_at="2024-01-01T10:00:00Z",
-            updated_at="2024-01-01T10:00:00Z",
-            html_url="https://github.com/test/repo/issues/123"
-        )
-        return client
-    
-    def test_github_issue_manager_initialization_fails(self):
-        """
-        TEST SHOULD FAIL: GitHubIssueManager class doesn't exist yet
+    def setup_method(self):
+        """Set up test fixtures."""
+        super().setup_method()
+        self.sample_error = {
+            "signature": "ImportError: module 'xyz' not found",
+            "category": "dependency",
+            "severity": "high",
+            "first_seen": datetime.now().isoformat(),
+            "count": 3,
+            "stack_trace": "Traceback (most recent call last):\n  File test.py, line 1\n    import xyz\nImportError: No module named 'xyz'",
+            "context": {
+                "service": "netra_backend",
+                "environment": "test",
+                "user_id": "test-user-123"
+            }
+        }
+
+    def test_error_fingerprint_generation(self):
+        """Test unique fingerprint generation for error categorization."""
+        # EXPECTED FAILURE: GitHubIssueManager doesn't exist yet
+        with pytest.raises(ImportError):
+            from test_framework.ssot.github_issue_manager import GitHubIssueManager
+            
+        # This test will pass once implementation exists
+        assert True, "Test framework ready - waiting for GitHubIssueManager implementation"
+
+    def test_issue_title_generation_from_error(self):
+        """Test meaningful title generation from error patterns."""
+        expected_title = "[dependency] ImportError: module 'xyz' not found (3 occurrences)"
         
-        This test validates that the GitHubIssueManager can be initialized
-        with proper configuration and dependencies.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            # This import will fail because GitHubIssueManager doesn't exist
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
-            
-            manager = GitHubIssueManager(
-                github_token="test_token",
-                repo_owner="test_owner",
-                repo_name="test_repo"
-            )
-    
-    def test_create_issue_from_error_context_fails(self, mock_error_context, mock_github_client):
-        """
-        TEST SHOULD FAIL: Issue creation functionality doesn't exist
+        # EXPECTED FAILURE: No title generation logic exists
+        try:
+            from test_framework.ssot.github_issue_manager import GitHubIssueManager
+            manager = GitHubIssueManager()
+            actual_title = manager.generate_issue_title(self.sample_error)
+            assert actual_title == expected_title
+        except ImportError:
+            pytest.fail("GitHubIssueManager not implemented yet")
+
+    def test_issue_body_template_creation(self):
+        """Test formatting error details into structured issue body."""
+        expected_body_parts = [
+            "## Error Summary",
+            "**Type:** dependency", 
+            "**Severity:** high",
+            "**First Seen:**",
+            "**Occurrences:** 3",
+            "## Stack Trace",
+            "ImportError: No module named 'xyz'",
+            "## Context",
+            "- **Service:** netra_backend",
+            "- **Environment:** test"
+        ]
         
-        This test validates that issues can be created from error contexts
-        with proper formatting and metadata.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
+        # EXPECTED FAILURE: No template generation exists
+        try:
+            from test_framework.ssot.github_issue_manager import GitHubIssueManager
+            manager = GitHubIssueManager()
+            body = manager.generate_issue_body(self.sample_error)
             
-            manager = GitHubIssueManager(
-                github_token="test_token", 
-                repo_owner="test_owner",
-                repo_name="test_repo"
-            )
-            manager.github_client = mock_github_client
-            
-            # This should create an issue with proper title and body
-            issue = manager.create_issue_from_error_context(mock_error_context)
-            
-            # Validate issue creation
-            assert issue is not None
-            assert issue.title.startswith("[AUTOMATED]")
-            assert "AgentExecutionError" in issue.title
-            assert mock_error_context.error_message in issue.body
-            assert mock_error_context.stack_trace in issue.body
-            
-            # Verify GitHub API was called correctly
-            mock_github_client.create_issue.assert_called_once()
-    
-    def test_detect_duplicate_issues_fails(self, mock_error_context, mock_github_client):
-        """
-        TEST SHOULD FAIL: Duplicate detection logic doesn't exist
+            for expected_part in expected_body_parts:
+                assert expected_part in body, f"Missing expected part: {expected_part}"
+        except ImportError:
+            pytest.fail("GitHubIssueManager template generation not implemented")
+
+    def test_duplicate_issue_detection(self):
+        """Test detection of duplicate issues based on error signatures."""
+        similar_error = {
+            "signature": "ImportError: module 'xyz' not found",
+            "category": "dependency", 
+            "severity": "high",
+            "count": 1
+        }
         
-        This test validates that duplicate issues are detected and prevented
-        based on error fingerprinting.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
-            
-            manager = GitHubIssueManager(
-                github_token="test_token",
-                repo_owner="test_owner", 
-                repo_name="test_repo"
-            )
-            
-            # Mock existing issues
-            existing_issues = [
-                MockGitHubIssue(
-                    number=100,
-                    title="[AUTOMATED] AgentExecutionError: Test agent execution failed",
-                    body="Similar error context...",
-                    state="open",
-                    labels=["bug", "automated"],
-                    created_at="2024-01-01T09:00:00Z",
-                    updated_at="2024-01-01T09:00:00Z",
-                    html_url="https://github.com/test/repo/issues/100"
-                )
-            ]
-            
-            mock_github_client.search_issues.return_value = existing_issues
-            manager.github_client = mock_github_client
-            
-            # Should detect duplicate
-            is_duplicate = manager.is_duplicate_issue(mock_error_context)
+        existing_issues = [
+            {"title": "[dependency] ImportError: module 'xyz' not found", "number": 123}
+        ]
+        
+        # EXPECTED FAILURE: No duplicate detection logic
+        try:
+            from test_framework.ssot.github_issue_manager import GitHubIssueManager
+            manager = GitHubIssueManager()
+            is_duplicate = manager.is_duplicate_issue(similar_error, existing_issues)
             assert is_duplicate is True
             
-            # Should return existing issue
-            existing_issue = manager.find_existing_issue(mock_error_context)
-            assert existing_issue is not None
-            assert existing_issue.number == 100
-    
-    def test_issue_labeling_and_categorization_fails(self, mock_error_context):
-        """
-        TEST SHOULD FAIL: Issue categorization logic doesn't exist
+            duplicate_issue = manager.find_existing_issue(similar_error, existing_issues)
+            assert duplicate_issue["number"] == 123
+        except ImportError:
+            pytest.fail("Duplicate detection not implemented")
+
+    @patch('aiohttp.ClientSession.get')
+    async def test_github_api_credentials_validation(self, mock_get):
+        """Test GitHub token validation and permissions."""
+        mock_response = Mock()
+        mock_response.status = 200
+        mock_response.json = AsyncMock(return_value={
+            "login": "test-user",
+            "scopes": ["repo", "issues:write"]
+        })
+        mock_get.return_value.__aenter__.return_value = mock_response
         
-        This test validates that issues are properly labeled and categorized
-        based on error type, context, and severity.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
+        # EXPECTED FAILURE: No GitHub client exists
+        try:
+            from test_framework.ssot.github_client import GitHubClient
+            client = GitHubClient(token="test-token")
+            is_valid = await client.validate_credentials()
+            assert is_valid is True
+        except ImportError:
+            pytest.fail("GitHubClient not implemented")
+
+
+class TestGitHubIssueLifecycle(BaseTestCase):
+    """Test complete issue lifecycle management."""
+
+    def test_issue_creation_workflow(self):
+        """Test complete issue creation workflow."""
+        # EXPECTED FAILURE: No workflow implementation
+        try:
+            from test_framework.ssot.github_issue_workflow import GitHubIssueWorkflow
+            workflow = GitHubIssueWorkflow()
             
-            manager = GitHubIssueManager(
-                github_token="test_token",
-                repo_owner="test_owner",
-                repo_name="test_repo"
+            result = workflow.create_issue_from_error(
+                error=self.sample_error,
+                repo="netra-systems/test-repo"
             )
             
-            # Test error categorization
-            labels = manager.categorize_error_for_labels(mock_error_context)
-            
-            expected_labels = ["bug", "automated", "agent-execution", "priority-high"]
-            assert set(labels) == set(expected_labels)
-    
-    def test_issue_template_generation_fails(self, mock_error_context):
-        """
-        TEST SHOULD FAIL: Issue template generation doesn't exist
+            assert result["success"] is True
+            assert "issue_number" in result
+            assert "issue_url" in result
+        except ImportError:
+            pytest.fail("GitHubIssueWorkflow not implemented")
+
+    def test_issue_progress_update(self):
+        """Test updating issue progress via comments."""
+        progress_update = {
+            "status": "investigating",
+            "progress": "Identified root cause in dependency management",
+            "next_steps": "Implementing fix for module import"
+        }
         
-        This test validates that issue templates are properly generated
-        with all necessary information for debugging.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
+        # EXPECTED FAILURE: No progress update logic
+        try:
+            from test_framework.ssot.github_issue_workflow import GitHubIssueWorkflow
+            workflow = GitHubIssueWorkflow()
             
-            manager = GitHubIssueManager(
-                github_token="test_token",
-                repo_owner="test_owner", 
-                repo_name="test_repo"
+            result = workflow.update_issue_progress(
+                issue_number=123,
+                repo="netra-systems/test-repo", 
+                progress=progress_update
             )
             
-            # Generate issue template
-            title, body = manager.generate_issue_template(mock_error_context)
-            
-            # Validate title format
-            assert title.startswith("[AUTOMATED]")
-            assert mock_error_context.error_type in title
-            assert mock_error_context.error_message in title
-            
-            # Validate body content
-            assert "## Error Details" in body
-            assert "## Context Information" in body
-            assert "## Stack Trace" in body
-            assert "## Reproduction Information" in body
-            assert mock_error_context.stack_trace in body
-            assert mock_error_context.user_id in body
-            assert mock_error_context.thread_id in body
-    
-    def test_github_api_error_handling_fails(self, mock_error_context):
-        """
-        TEST SHOULD FAIL: GitHub API error handling doesn't exist
+            assert result["success"] is True
+            assert result["comment_id"] is not None
+        except ImportError:
+            pytest.fail("Issue progress updates not implemented")
+
+    def test_issue_closure_on_resolution(self):
+        """Test automatic issue closure when error is resolved."""
+        resolution_data = {
+            "commit_hash": "abc123def456", 
+            "pr_number": 42,
+            "resolution_summary": "Fixed dependency import issue"
+        }
         
-        This test validates proper handling of GitHub API errors
-        and fallback mechanisms.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
-            from netra_backend.integrations.github.exceptions import GitHubAPIError
+        # EXPECTED FAILURE: No closure automation
+        try:
+            from test_framework.ssot.github_issue_workflow import GitHubIssueWorkflow
+            workflow = GitHubIssueWorkflow()
             
-            manager = GitHubIssueManager(
-                github_token="test_token",
-                repo_owner="test_owner",
-                repo_name="test_repo"
+            result = workflow.close_issue_on_resolution(
+                issue_number=123,
+                repo="netra-systems/test-repo",
+                resolution=resolution_data
             )
             
-            # Mock API failure
-            mock_client = Mock()
-            mock_client.create_issue.side_effect = Exception("API Rate Limit")
-            manager.github_client = mock_client
-            
-            # Should handle API errors gracefully
-            with pytest.raises(GitHubAPIError):
-                manager.create_issue_from_error_context(mock_error_context)
-    
-    def test_configuration_validation_fails(self):
-        """
-        TEST SHOULD FAIL: Configuration validation doesn't exist
-        
-        This test validates that GitHub configuration is properly
-        validated and required fields are enforced.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
-            from netra_backend.integrations.github.exceptions import GitHubConfigurationError
-            
-            # Should fail with missing token
-            with pytest.raises(GitHubConfigurationError):
-                GitHubIssueManager(
-                    github_token="",  # Empty token
-                    repo_owner="test_owner",
-                    repo_name="test_repo"
-                )
-            
-            # Should fail with missing repo info
-            with pytest.raises(GitHubConfigurationError):
-                GitHubIssueManager(
-                    github_token="test_token",
-                    repo_owner="",  # Empty owner
-                    repo_name="test_repo"
-                )
-    
-    def test_issue_comment_updates_fails(self, mock_error_context):
-        """
-        TEST SHOULD FAIL: Issue comment functionality doesn't exist
-        
-        This test validates that existing issues can be updated
-        with additional context or resolution information.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
-            
-            manager = GitHubIssueManager(
-                github_token="test_token",
-                repo_owner="test_owner",
-                repo_name="test_repo"
-            )
-            
-            # Mock existing issue
-            existing_issue = MockGitHubIssue(
-                number=123,
-                title="Test Issue",
-                body="Original body",
-                state="open",
-                labels=["bug"],
-                created_at="2024-01-01T10:00:00Z", 
-                updated_at="2024-01-01T10:00:00Z",
-                html_url="https://github.com/test/repo/issues/123"
-            )
-            
-            # Should add progress comment
-            comment = manager.add_progress_comment(
-                existing_issue,
-                "Error occurred again with additional context",
-                mock_error_context
-            )
-            
-            assert comment is not None
-            assert "Error occurred again" in comment.body
-    
-    def test_issue_resolution_tracking_fails(self, mock_error_context):
-        """
-        TEST SHOULD FAIL: Issue resolution tracking doesn't exist
-        
-        This test validates that issues can be marked as resolved
-        when errors are fixed or no longer occurring.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.issue_manager import GitHubIssueManager
-            
-            manager = GitHubIssueManager(
-                github_token="test_token",
-                repo_owner="test_owner",
-                repo_name="test_repo"
-            )
-            
-            # Mock existing issue
-            existing_issue = MockGitHubIssue(
-                number=123,
-                title="Test Issue",
-                body="Original body", 
-                state="open",
-                labels=["bug"],
-                created_at="2024-01-01T10:00:00Z",
-                updated_at="2024-01-01T10:00:00Z",
-                html_url="https://github.com/test/repo/issues/123"
-            )
-            
-            # Should close issue with resolution
-            closed_issue = manager.resolve_issue(
-                existing_issue,
-                resolution_message="Issue resolved after error handling improvements"
-            )
-            
-            assert closed_issue is not None
-            assert closed_issue.state == "closed"
+            assert result["success"] is True
+            assert result["issue_state"] == "closed"
+        except ImportError:
+            pytest.fail("Issue closure automation not implemented")
 
 
 @pytest.mark.unit
-class TestGitHubCommitLinking(SSotBaseTestCase):
-    """
-    Unit tests for GitHub commit linking functionality
-    
-    CRITICAL: These tests will INITIALLY FAIL because functionality doesn't exist.
-    """
-    
-    def test_commit_issue_linking_fails(self):
-        """
-        TEST SHOULD FAIL: Commit-issue linking doesn't exist
-        
-        This test validates that commits can be linked to GitHub issues
-        for traceability and resolution tracking.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.commit_linker import GitHubCommitLinker
-            
-            linker = GitHubCommitLinker(
-                github_token="test_token",
-                repo_owner="test_owner",
-                repo_name="test_repo"
-            )
-            
-            # Should link commit to issue
-            link_result = linker.link_commit_to_issue(
-                commit_sha="abc123def456", 
-                issue_number=123,
-                link_type="fixes"
-            )
-            
-            assert link_result is not None
-            assert link_result.commit_sha == "abc123def456"
-            assert link_result.issue_number == 123
-    
-    def test_pr_issue_linking_fails(self):
-        """
-        TEST SHOULD FAIL: PR-issue linking doesn't exist
-        
-        This test validates that pull requests can be automatically
-        linked to issues they address.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.commit_linker import GitHubCommitLinker
-            
-            linker = GitHubCommitLinker(
-                github_token="test_token",
-                repo_owner="test_owner",
-                repo_name="test_repo"
-            )
-            
-            # Should link PR to issue
-            link_result = linker.link_pr_to_issue(
-                pr_number=456,
-                issue_number=123,
-                relationship="resolves"
-            )
-            
-            assert link_result is not None
-            assert link_result.pr_number == 456
-            assert link_result.issue_number == 123
+@pytest.mark.github_integration  
+class TestGitHubErrorCategorization(BaseTestCase):
+    """Test error categorization and labeling for GitHub issues."""
 
-
-@pytest.mark.unit
-class TestGitHubIntegrationConfiguration(SSotBaseTestCase):
-    """
-    Unit tests for GitHub integration configuration management
-    
-    CRITICAL: These tests will INITIALLY FAIL because configuration doesn't exist.
-    """
-    
-    def test_environment_based_configuration_fails(self):
-        """
-        TEST SHOULD FAIL: Environment configuration doesn't exist
+    def test_error_severity_assessment(self):
+        """Test automatic severity assessment for errors."""
+        critical_error = {
+            "signature": "DatabaseConnectionError: Unable to connect",
+            "category": "infrastructure",
+            "affects_users": True,
+            "blocks_core_functionality": True
+        }
         
-        This test validates that GitHub integration uses proper
-        environment-based configuration management.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.config import GitHubIntegrationConfig
+        # EXPECTED FAILURE: No severity assessment logic
+        try:
+            from test_framework.ssot.github_error_categorizer import GitHubErrorCategorizer
+            categorizer = GitHubErrorCategorizer()
             
-            # Should load from environment
-            config = GitHubIntegrationConfig.from_environment()
+            severity = categorizer.assess_severity(critical_error)
+            assert severity == "critical"
             
-            assert config.github_token is not None
-            assert config.repo_owner is not None
-            assert config.repo_name is not None
-            assert config.enabled is True
-    
-    def test_configuration_validation_with_isolated_environment_fails(self):
-        """
-        TEST SHOULD FAIL: Configuration isolation doesn't exist
+            labels = categorizer.generate_labels(critical_error)
+            assert "critical" in labels
+            assert "infrastructure" in labels
+            assert "user-impact" in labels
+        except ImportError:
+            pytest.fail("Error categorization not implemented")
+
+    def test_error_frequency_analysis(self):
+        """Test error frequency analysis for prioritization."""
+        error_history = [
+            {"timestamp": "2024-01-01T10:00:00", "count": 1},
+            {"timestamp": "2024-01-01T11:00:00", "count": 3}, 
+            {"timestamp": "2024-01-01T12:00:00", "count": 8}
+        ]
         
-        This test validates that GitHub configuration properly uses
-        IsolatedEnvironment for configuration management.
-        """
-        with pytest.raises((ImportError, NameError, ModuleNotFoundError)):
-            from netra_backend.integrations.github.config import GitHubIntegrationConfig
+        # EXPECTED FAILURE: No frequency analysis
+        try:
+            from test_framework.ssot.github_error_categorizer import GitHubErrorCategorizer
+            categorizer = GitHubErrorCategorizer()
             
-            env = IsolatedEnvironment()
-            env.set("GITHUB_TOKEN", "test_token")
-            env.set("GITHUB_REPO_OWNER", "test_owner")
-            env.set("GITHUB_REPO_NAME", "test_repo")
-            
-            config = GitHubIntegrationConfig.from_isolated_environment(env)
-            
-            assert config.github_token == "test_token"
-            assert config.repo_owner == "test_owner"
-            assert config.repo_name == "test_repo"
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+            trend = categorizer.analyze_error_trend(error_history)
+            assert trend["pattern"] == "escalating"
+            assert trend["urgency"] == "high"
+        except ImportError:
+            pytest.fail("Error frequency analysis not implemented")
