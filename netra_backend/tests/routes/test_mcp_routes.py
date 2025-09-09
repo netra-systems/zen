@@ -19,7 +19,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-from netra_backend.tests.routes.test_route_fixtures import (
+from netra_backend.tests.test_route_fixtures import (
     TEST_MCP_REQUEST,
     CommonResponseValidators,
     basic_test_client,

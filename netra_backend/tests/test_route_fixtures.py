@@ -5,7 +5,7 @@ import pytest
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import additional fixtures from routes test fixtures  
-from netra_backend.tests.routes.test_route_fixtures import TEST_DOCUMENT_DATA, TEST_MCP_REQUEST, authenticated_test_client
+from netra_backend.tests.test_route_fixtures import TEST_DOCUMENT_DATA, TEST_MCP_REQUEST, authenticated_test_client
 
 # Override TEST_USER_DATA to match admin routes test expectations
 TEST_USER_DATA = {

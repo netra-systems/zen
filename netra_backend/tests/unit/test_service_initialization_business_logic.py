@@ -24,7 +24,6 @@ from netra_backend.app.services.service_initialization.service_initializer impor
 from netra_backend.app.services.service_initialization.dependency_manager import DependencyManager
 from netra_backend.app.services.service_initialization.health_checker import HealthChecker
 from netra_backend.app.services.service_initialization.graceful_degradation_handler import GracefulDegradationHandler
-from test_framework.mock_factory import MockFactory
 
 
 class TestServiceInitializationBusinessLogic:

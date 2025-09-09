@@ -59,7 +59,7 @@ class LoadTestResult:
     error_rate: float
 
 
-class TestPerformanceTimingRequirements(BaseIntegrationTest, ServiceOrchestrationIntegrationTest):
+class TestPerformanceTimingRequirements(ServiceOrchestrationIntegrationTest):
     """Test performance and timing requirements with real service integration."""
     
     def setup_method(self):

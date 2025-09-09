@@ -51,7 +51,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ThreadID, ensure_user_id, ensure_thread_id
-from test_framework.base_unit_test import BaseUnitTest
+from test_framework.base import BaseUnitTest
 
 
 class TestWebSocketConnectionLifecycleBusinessLogic(BaseUnitTest):

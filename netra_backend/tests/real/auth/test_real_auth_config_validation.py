@@ -35,7 +35,7 @@ from netra_backend.app.main import app
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import test framework
-from test_framework.docker_manager import UnifiedDockerManager
+from test_framework.docker_test_manager import UnifiedDockerManager
 
 # Use isolated environment for all env access
 env = IsolatedEnvironment()

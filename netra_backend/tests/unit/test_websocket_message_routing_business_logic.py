@@ -25,7 +25,6 @@ from netra_backend.app.websocket_core.message_queue import WebSocketMessageQueue
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 from netra_backend.app.websocket_core.batch_message_handler import BatchMessageHandler
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from test_framework.mock_factory import MockFactory
 
 
 class TestWebSocketMessageRoutingBusinessLogic:

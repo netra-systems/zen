@@ -24,7 +24,6 @@ from netra_backend.app.database.connection_manager import DatabaseConnectionMana
 from netra_backend.app.database.transaction_handler import TransactionHandler
 from netra_backend.app.database.connection_pool import ConnectionPool
 from netra_backend.app.database.retry_handler import DatabaseRetryHandler
-from test_framework.mock_factory import MockFactory
 
 
 class TestDatabaseConnectionBusinessLogic:

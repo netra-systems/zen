@@ -26,7 +26,6 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     validate_websocket_token_business_logic
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from test_framework.mock_factory import MockFactory
 
 
 class TestUnifiedWebSocketAuthBusinessLogic:
