@@ -506,6 +506,15 @@ class UnifiedIdGenerator:
                 del cls._active_sessions[key]
                 
             return len(keys_to_remove)
+    
+    @classmethod
+    def reset_global_counter(cls) -> None:
+        """Reset global counter for test isolation.
+        
+        This method provides the class method interface expected by test code
+        while delegating to the module-level reset function to maintain SSOT.
+        """
+        reset_global_counter()
 
 
 # Convenience functions for common use cases

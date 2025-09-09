@@ -286,4 +286,178 @@ if missing_events:
 
 ---
 
+## 🏊‍♂️ Golden Path Testing Swimlanes
+
+**CRITICAL: Testing swimlanes enable parallel test development and execution across 15 major system areas, each with equal business value and isolation boundaries.**
+
+### 🎯 Core Business Value Areas (High Priority)
+
+#### 1. **Authentication & Authorization Testing**
+- **Business Value:** $500K+ ARR depends on secure multi-user access
+- **Scope:** JWT validation, OAuth flows, session management, user isolation
+- **Test Categories:** auth unit, auth integration, auth e2e, auth staging
+- **Key Files:** `tests/*/test_auth*.py`, `test_framework/ssot/e2e_auth_helper.py`
+- **Isolation:** Self-contained auth test suites with dedicated test users
+
+#### 2. **WebSocket Real-Time Communication**
+- **Business Value:** Core chat experience delivery mechanism
+- **Scope:** Connection lifecycle, event emission, race conditions, handshake timing
+- **Test Categories:** websocket unit, websocket integration, websocket e2e
+- **Key Files:** `tests/*/test_websocket*.py`, `tests/mission_critical/test_websocket_agent_events_suite.py`
+- **Isolation:** Separate WebSocket test clients per test suite
+
+#### 3. **Agent Execution & Orchestration**
+- **Business Value:** AI-powered problem solving is our primary differentiator
+- **Scope:** Agent lifecycle, tool dispatch, execution context, progress tracking
+- **Test Categories:** agent unit, agent integration, agent e2e
+- **Key Files:** `tests/*/test_agent*.py`, `tests/*/test_*_sub_agent.py`
+- **Isolation:** Factory-based agent isolation per test execution
+
+#### 4. **Database Operations & Persistence**
+- **Business Value:** User data integrity and multi-tenancy support
+- **Scope:** PostgreSQL operations, transaction handling, user isolation, data consistency
+- **Test Categories:** db unit, db integration, db e2e
+- **Key Files:** `tests/*/test_db*.py`, `tests/*/test_*_persistence.py`
+- **Isolation:** Separate test databases with transaction rollback
+
+#### 5. **Configuration & Environment Management**
+- **Business Value:** Deployment stability across dev/staging/production
+- **Scope:** Environment variable handling, config validation, service discovery
+- **Test Categories:** config unit, config integration, config staging
+- **Key Files:** `tests/*/test_config*.py`, `tests/*/test_environment*.py`
+- **Isolation:** Environment-specific test configurations
+
+### 🔧 Infrastructure & Integration Areas (Medium Priority)
+
+#### 6. **Service Dependency Management**
+- **Business Value:** System reliability and graceful degradation
+- **Scope:** Service health checks, dependency injection, failure handling
+- **Test Categories:** dependency unit, dependency integration, dependency e2e
+- **Key Files:** `tests/*/test_service_dependency*.py`, `tests/*/test_health*.py`
+- **Isolation:** Mock external services in unit tests, real services in integration
+
+#### 7. **Tool Execution & Dispatching**
+- **Business Value:** Agent capabilities and problem-solving tools
+- **Scope:** Tool registration, execution timeout, result handling, security
+- **Test Categories:** tool unit, tool integration, tool e2e
+- **Key Files:** `tests/*/test_tool*.py`, `tests/*/test_dispatch*.py`
+- **Isolation:** Sandboxed tool execution environments
+
+#### 8. **WebSocket Event System**
+- **Business Value:** Real-time user experience and progress visibility
+- **Scope:** Event emission, subscription, delivery guarantees, ordering
+- **Test Categories:** event unit, event integration, event e2e
+- **Key Files:** `tests/*/test_event*.py`, `tests/*/test_websocket_events*.py`
+- **Isolation:** Event bus isolation per test execution
+
+#### 9. **State Management & Context**
+- **Business Value:** User session continuity and multi-user isolation
+- **Scope:** User context, thread management, state persistence, cleanup
+- **Test Categories:** state unit, state integration, state e2e
+- **Key Files:** `tests/*/test_state*.py`, `tests/*/test_context*.py`
+- **Isolation:** Separate state containers per test user
+
+#### 10. **Error Handling & Recovery**
+- **Business Value:** System resilience and user experience quality
+- **Scope:** Exception handling, circuit breakers, retry logic, graceful degradation
+- **Test Categories:** error unit, error integration, error e2e
+- **Key Files:** `tests/*/test_error*.py`, `tests/*/test_recovery*.py`
+- **Isolation:** Controlled failure injection and monitoring
+
+### 🎨 User Experience & Interface Areas (Medium Priority)
+
+#### 11. **Frontend WebSocket Integration**
+- **Business Value:** User interface responsiveness and real-time updates
+- **Scope:** React WebSocket provider, connection management, UI state sync
+- **Test Categories:** frontend unit, frontend integration, frontend e2e
+- **Key Files:** `frontend/tests/**/test_websocket*.js`, `cypress/e2e/websocket*.cy.js`
+- **Isolation:** Separate browser contexts per test scenario
+
+#### 12. **Chat Interface & User Flow**
+- **Business Value:** Primary user interaction and value delivery channel
+- **Scope:** Message display, typing indicators, agent progress, error states
+- **Test Categories:** chat unit, chat integration, chat e2e
+- **Key Files:** `frontend/tests/**/test_chat*.js`, `cypress/e2e/chat*.cy.js`
+- **Isolation:** Dedicated test user sessions and chat threads
+
+#### 13. **API Layer & Route Testing**
+- **Business Value:** System integration and external service compatibility
+- **Scope:** REST endpoints, request validation, response formatting, rate limiting
+- **Test Categories:** api unit, api integration, api e2e
+- **Key Files:** `tests/*/test_api*.py`, `tests/*/test_routes*.py`
+- **Isolation:** API client isolation with separate authentication tokens
+
+### 📊 Analytics & Performance Areas (Lower Priority)
+
+#### 14. **Performance & Load Testing**
+- **Business Value:** Scalability for growth and enterprise tier support
+- **Scope:** Concurrent users, WebSocket connections, memory usage, response times
+- **Test Categories:** performance unit, performance integration, performance staging
+- **Key Files:** `tests/performance/test_*.py`, `tests/load/test_*.py`
+- **Isolation:** Dedicated performance test environments
+
+#### 15. **Monitoring & Observability**
+- **Business Value:** Operational excellence and proactive issue resolution
+- **Scope:** Logging, metrics, tracing, alerting, dashboard validation
+- **Test Categories:** monitoring unit, monitoring integration, monitoring e2e
+- **Key Files:** `tests/*/test_monitoring*.py`, `tests/*/test_metrics*.py`
+- **Isolation:** Separate monitoring namespaces per test execution
+
+## 🚧 Swimlane Coordination Rules
+
+### ✅ **Safe Parallel Execution**
+- **Unit Tests:** Completely isolated - no coordination required
+- **Integration Tests:** Service-level isolation - minimal coordination needed
+- **E2E Tests:** User-level isolation - coordinate test data cleanup
+- **Staging Tests:** Environment isolation - coordinate deployment timing
+
+### 🚨 **Coordination Required**
+- **Shared Test Fixtures:** `test_framework/` modifications need sync
+- **Database Schema:** Test database migrations must be sequential
+- **Authentication Helper:** `e2e_auth_helper.py` changes affect all swimlanes
+- **Docker Services:** Container configuration changes need coordination
+- **Environment Variables:** Test environment configs require sync
+
+### 📋 **Swimlane Assignment Strategy**
+
+#### **Development Phase Assignment:**
+```bash
+# Parallel development - each swimlane can work independently
+Agent 1: Authentication testing swimlane
+Agent 2: WebSocket communication swimlane  
+Agent 3: Agent execution testing swimlane
+Agent 4: Database operations swimlane
+Agent 5: Configuration management swimlane
+```
+
+#### **Integration Phase Assignment:**
+```bash
+# Cross-swimlane integration - requires coordination
+Agent A: Auth + WebSocket integration
+Agent B: Agent + Database integration  
+Agent C: Config + Service dependency integration
+Agent D: Frontend + Backend integration
+Agent E: Performance + Monitoring integration
+```
+
+### 🎯 **Execution Priority Matrix**
+
+| Priority | Swimlanes | Execution Order | Business Impact |
+|----------|-----------|-----------------|-----------------|
+| **P0** | Auth, WebSocket, Agent | Immediate | Revenue blocking |
+| **P1** | Database, Config, Service Dep | Within 24h | User experience |
+| **P2** | Tools, Events, State | Within 48h | Feature quality |
+| **P3** | Frontend, Chat, API | Within 72h | User interface |
+| **P4** | Performance, Monitoring | Weekly | Operational |
+
+### 📊 **Success Metrics Per Swimlane**
+
+- **Coverage Target:** Each swimlane maintains 85%+ test coverage
+- **Execution Time:** Unit tests <5min, Integration <15min, E2E <30min
+- **Isolation Score:** 95%+ tests run independently without side effects
+- **Coordination Overhead:** <10% of development time spent on cross-swimlane sync
+- **Failure Detection:** 100% of critical business scenarios have failing tests when broken
+
+---
+
 **This test plan ensures the Golden Path user flow delivers reliable, valuable chat interactions that support the core business model through comprehensive validation of all critical WebSocket infrastructure components.**

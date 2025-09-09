@@ -309,7 +309,7 @@ class ServiceAvailabilityDetector:
             import websockets
             
             # Attempt WebSocket connection with timeout
-            async with websockets.connect(ws_url, timeout=self.timeout) as websocket:
+            async with websockets.connect(ws_url, open_timeout=self.timeout) as websocket:
                 response_time_ms = (time.time() - start_time) * 1000
                 
                 # Try to send a ping

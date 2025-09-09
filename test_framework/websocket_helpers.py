@@ -64,6 +64,37 @@ def assert_websocket_events(events: List[Dict[str, Any]], expected_event_types: 
         )
 
 
+def assert_websocket_events_sent(events: List[Dict[str, Any]], expected_events: List[str]):
+    """
+    Assert that all expected WebSocket events were sent during agent execution.
+    
+    This is the SSOT function for WebSocket event validation used across all tests.
+    It ensures the critical 5 events required for business value delivery are present.
+    
+    Args:
+        events: List of WebSocket events received
+        expected_events: List of expected event types
+        
+    Raises:
+        AssertionError: If any expected events are missing
+    """
+    if not events:
+        raise AssertionError(
+            f"No WebSocket events received, but expected: {expected_events}. "
+            f"This indicates a critical failure in agent-to-user communication."
+        )
+    
+    received_event_types = [event.get("type", "unknown") for event in events]
+    missing_events = [event for event in expected_events if event not in received_event_types]
+    
+    if missing_events:
+        raise AssertionError(
+            f"CRITICAL FAILURE: Missing required WebSocket events: {missing_events}. "
+            f"Golden Path REQUIRES all events for business value delivery. "
+            f"Events received: {received_event_types}"
+        )
+
+
 def create_test_agent(*args, **kwargs):
     """Create test agent - placeholder implementation."""
     return MagicMock()
@@ -578,6 +609,14 @@ class WebSocketTestHelpers:
                 await websocket.close()
         except Exception:
             pass  # Ignore cleanup errors
+
+
+# Aliases for backward compatibility
+WebSocketTestHelper = WebSocketTestHelpers
+
+# Standalone function aliases for commonly used methods
+create_test_websocket_connection = WebSocketTestHelpers.create_test_websocket_connection
+
 
 # =============================================================================
 # MOCK WEBSOCKET IMPLEMENTATIONS

@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for shared\isolated_environment.py: 31.96%</title>
+    <title>Coverage for shared/isolated_environment.py: 31.83%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
-    <link rel="stylesheet" href="style_cb_dca529e9.css" type="text/css">
-    <script src="coverage_html_cb_497bf287.js" defer></script>
+    <link rel="stylesheet" href="style_cb_6b508a39.css" type="text/css">
+    <script src="coverage_html_cb_6fb7b396.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>shared\isolated_environment.py</b>:
-            <span class="pc_cov">31.96%</span>
+            <span class="text">Coverage for </span><b>shared/isolated_environment.py</b>:
+            <span class="pc_cov">31.83%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,17 +55,17 @@
         </aside>
         <h2>
             <span class="text">776 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">248<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">528<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">247<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">529<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">80<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
-            <a id="prevFileLink" class="nav" href="z_a14eb562ffd42b1a_unified_id_generator_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="prevFileLink" class="nav" href="z_981b6e30505595ba_unified_id_generator_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_b1f7512934231ee3_isolation_score_monitor_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-09 12:17 -0700
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
+            created at 2025-09-09 12:46 -0700
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -269,8 +269,8 @@
     <p class="pln"><span class="n"><a id="t187" href="#t187">187</a></span><span class="t">            <span class="com"># CRITICAL FIX: Auto-enable isolation during test contexts to ensure test defaults are available</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t188" href="#t188">188</a></span><span class="t">            <span class="com"># This ensures OAuth test credentials are accessible during CentralConfigurationValidator execution</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t189" href="#t189">189</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_is_test_context</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t190" href="#t190">190</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_isolation_enabled</span> <span class="op">=</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t">                <span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">"Auto-enabled isolation for test context - OAuth test credentials now available"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t190" href="#t190">190</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_isolation_enabled</span> <span class="op">=</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t191" href="#t191">191</a></span><span class="t">                <span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">"Auto-enabled isolation for test context - OAuth test credentials now available"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t192" href="#t192">192</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t193" href="#t193">193</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">_initialized</span> <span class="op">=</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">"Unified IsolatedEnvironment initialized"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -402,7 +402,7 @@
     <p class="run"><span class="n"><a id="t320" href="#t320">320</a></span><span class="t">        <span class="key">if</span> <span class="str">'pytest'</span> <span class="key">in</span> <span class="nam">sys</span><span class="op">.</span><span class="nam">modules</span> <span class="key">and</span> <span class="nam">hasattr</span><span class="op">(</span><span class="nam">sys</span><span class="op">.</span><span class="nam">modules</span><span class="op">[</span><span class="str">'pytest'</span><span class="op">]</span><span class="op">,</span> <span class="str">'main'</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t321" href="#t321">321</a></span><span class="t">            <span class="com"># Only consider it a test if pytest is actively running</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t322" href="#t322">322</a></span><span class="t">            <span class="key">if</span> <span class="nam">hasattr</span><span class="op">(</span><span class="nam">sys</span><span class="op">,</span> <span class="str">'_pytest_running'</span><span class="op">)</span> <span class="key">or</span> <span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'PYTEST_CURRENT_TEST'</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t323" href="#t323">323</a></span><span class="t">                <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t323" href="#t323">323</a></span><span class="t">                <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t324" href="#t324">324</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t325" href="#t325">325</a></span><span class="t">        <span class="com"># Check for test environment variables using internal access to avoid recursion</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t326" href="#t326">326</a></span><span class="t">        <span class="nam">test_indicators</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
@@ -425,14 +425,14 @@
     <p class="pln"><span class="n"><a id="t343" href="#t343">343</a></span><span class="t">            <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t344" href="#t344">344</a></span><span class="t">                <span class="com"># For other indicators, check for boolean values</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t345" href="#t345">345</a></span><span class="t">                <span class="key">if</span> <span class="nam">value</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span> <span class="key">in</span> <span class="op">[</span><span class="str">'true'</span><span class="op">,</span> <span class="str">'1'</span><span class="op">,</span> <span class="str">'yes'</span><span class="op">,</span> <span class="str">'on'</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t346" href="#t346">346</a></span><span class="t">                    <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t346" href="#t346">346</a></span><span class="t">                    <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t347" href="#t347">347</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t348" href="#t348">348</a></span><span class="t">        <span class="com"># Check if ENVIRONMENT is set to testing (direct access, not via self.get())</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t349" href="#t349">349</a></span><span class="t">        <span class="nam">env_value</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'ENVIRONMENT'</span><span class="op">,</span> <span class="str">''</span><span class="op">)</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t350" href="#t350">350</a></span><span class="t">        <span class="key">if</span> <span class="nam">env_value</span> <span class="key">in</span> <span class="op">[</span><span class="str">'test'</span><span class="op">,</span> <span class="str">'testing'</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t349" href="#t349">349</a></span><span class="t">        <span class="nam">env_value</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">'ENVIRONMENT'</span><span class="op">,</span> <span class="str">''</span><span class="op">)</span><span class="op">.</span><span class="nam">lower</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t350" href="#t350">350</a></span><span class="t">        <span class="key">if</span> <span class="nam">env_value</span> <span class="key">in</span> <span class="op">[</span><span class="str">'test'</span><span class="op">,</span> <span class="str">'testing'</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t351" href="#t351">351</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t352" href="#t352">352</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t354" href="#t354">354</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t355" href="#t355">355</a></span><span class="t">    <span class="key">def</span> <span class="nam">_get_test_environment_defaults</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">str</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t356" href="#t356">356</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
@@ -496,11 +496,11 @@
     <p class="pln"><span class="n"><a id="t414" href="#t414">414</a></span><span class="t"><span class="str">        immediately reflected in the isolated environment, providing seamless</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t415" href="#t415">415</a></span><span class="t"><span class="str">        integration between pytest mocking and IsolatedEnvironment.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t416" href="#t416">416</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t417" href="#t417">417</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_isolation_enabled</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t417" href="#t417">417</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_isolation_enabled</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t418" href="#t418">418</a></span><span class="t">            <span class="com"># Merge os.environ changes into isolated vars</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t419" href="#t419">419</a></span><span class="t">            <span class="com"># This allows test patches to be immediately available</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t420" href="#t420">420</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">_isolated_vars</span><span class="op">.</span><span class="nam">update</span><span class="op">(</span><span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t421" href="#t421">421</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">"Synced isolated vars with os.environ for test context"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t420" href="#t420">420</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">_isolated_vars</span><span class="op">.</span><span class="nam">update</span><span class="op">(</span><span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t421" href="#t421">421</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">"Synced isolated vars with os.environ for test context"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t422" href="#t422">422</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t423" href="#t423">423</a></span><span class="t">    <span class="key">def</span> <span class="nam">_expand_shell_commands</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">value</span><span class="op">:</span> <span class="nam">str</span><span class="op">)</span> <span class="op">-></span> <span class="nam">str</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t424" href="#t424">424</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
@@ -605,9 +605,9 @@
     <p class="run"><span class="n"><a id="t523" href="#t523">523</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">_isolation_enabled</span> <span class="op">=</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t524" href="#t524">524</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t525" href="#t525">525</a></span><span class="t">            <span class="key">if</span> <span class="nam">backup_original</span> <span class="key">and</span> <span class="key">not</span> <span class="nam">was_already_enabled</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t526" href="#t526">526</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_original_environ_backup</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t526" href="#t526">526</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_original_environ_backup</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t527" href="#t527">527</a></span><span class="t">                <span class="com"># Save original state for reset_to_original()</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t528" href="#t528">528</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_original_state</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t528" href="#t528">528</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_original_state</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t529" href="#t529">529</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t530" href="#t530">530</a></span><span class="t">            <span class="com"># Always refresh isolated vars when explicitly requested or first time enabling</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t531" href="#t531">531</a></span><span class="t">            <span class="key">if</span> <span class="nam">refresh_vars</span> <span class="key">or</span> <span class="key">not</span> <span class="nam">was_already_enabled</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -618,7 +618,7 @@
     <p class="pln"><span class="n"><a id="t536" href="#t536">536</a></span><span class="t">            <span class="com"># CRITICAL TEST INTEGRATION: In test context, sync isolated vars with os.environ</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t537" href="#t537">537</a></span><span class="t">            <span class="com"># This ensures test patches (patch.dict(os.environ, ...)) are immediately available</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t538" href="#t538">538</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_is_test_context</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t539" href="#t539">539</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_sync_with_os_environ</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t539" href="#t539">539</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">_sync_with_os_environ</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t540" href="#t540">540</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t541" href="#t541">541</a></span><span class="t">            <span class="com"># Ensure preserved variables remain in os.environ</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t542" href="#t542">542</a></span><span class="t">            <span class="key">for</span> <span class="nam">key</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">PRESERVE_IN_OS_ENVIRON</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -632,7 +632,7 @@
     <p class="run"><span class="n"><a id="t550" href="#t550">550</a></span><span class="t">            <span class="key">if</span> <span class="nam">was_already_enabled</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t551" href="#t551">551</a></span><span class="t">                <span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Environment isolation refreshed with </span><span class="op">{</span><span class="nam">len</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">_isolated_vars</span><span class="op">)</span><span class="op">}</span><span class="fst"> variables</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t552" href="#t552">552</a></span><span class="t">            <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t553" href="#t553">553</a></span><span class="t">                <span class="nam">logger</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">"Environment isolation enabled"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t553" href="#t553">553</a></span><span class="t">                <span class="nam">logger</span><span class="op">.</span><span class="nam">info</span><span class="op">(</span><span class="str">"Environment isolation enabled"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t554" href="#t554">554</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t555" href="#t555">555</a></span><span class="t">    <span class="key">def</span> <span class="nam">disable_isolation</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">restore_original</span><span class="op">:</span> <span class="nam">bool</span> <span class="op">=</span> <span class="key">False</span><span class="op">)</span> <span class="op">-></span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t556" href="#t556">556</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
@@ -667,7 +667,7 @@
     <p class="pln"><span class="n"><a id="t585" href="#t585">585</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t586" href="#t586">586</a></span><span class="t">    <span class="key">def</span> <span class="nam">is_isolated</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">bool</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t587" href="#t587">587</a></span><span class="t">        <span class="str">"""Check if isolation mode is enabled."""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t588" href="#t588">588</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_isolation_enabled</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t588" href="#t588">588</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_isolation_enabled</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t589" href="#t589">589</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t590" href="#t590">590</a></span><span class="t">    <span class="key">def</span> <span class="nam">is_isolation_enabled</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">bool</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t591" href="#t591">591</a></span><span class="t">        <span class="str">"""Check if isolation mode is enabled (alias for compatibility)."""</span>&nbsp;</span><span class="r"></span></p>
@@ -690,8 +690,8 @@
     <p class="pln"><span class="n"><a id="t608" href="#t608">608</a></span><span class="t">                <span class="com"># If not in isolated vars but we're in test context, sync with os.environ</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t609" href="#t609">609</a></span><span class="t">                <span class="com"># This allows pytest patches to be picked up, but only if not already in isolated vars</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t610" href="#t610">610</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_is_test_context</span><span class="op">(</span><span class="op">)</span> <span class="key">and</span> <span class="nam">key</span> <span class="key">in</span> <span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t611" href="#t611">611</a></span><span class="t">                    <span class="nam">value</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">[</span><span class="nam">key</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t612" href="#t612">612</a></span><span class="t">                    <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_expand_shell_commands</span><span class="op">(</span><span class="nam">value</span><span class="op">)</span> <span class="key">if</span> <span class="nam">value</span> <span class="key">else</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t611" href="#t611">611</a></span><span class="t">                    <span class="nam">value</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">environ</span><span class="op">[</span><span class="nam">key</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t612" href="#t612">612</a></span><span class="t">                    <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_expand_shell_commands</span><span class="op">(</span><span class="nam">value</span><span class="op">)</span> <span class="key">if</span> <span class="nam">value</span> <span class="key">else</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t613" href="#t613">613</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t614" href="#t614">614</a></span><span class="t">                <span class="com"># CRITICAL FIX: Provide OAuth test credentials as built-in defaults during test context</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t615" href="#t615">615</a></span><span class="t">                <span class="com"># This ensures CentralConfigurationValidator can always find required test OAuth credentials</span>&nbsp;</span><span class="r"></span></p>
@@ -1825,12 +1825,12 @@
 <footer>
     <div class="content">
         <p>
-            <a class="nav" href="z_a14eb562ffd42b1a_unified_id_generator_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="z_981b6e30505595ba_unified_id_generator_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_b1f7512934231ee3_isolation_score_monitor_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.4">coverage.py v7.10.4</a>,
-            created at 2025-09-09 12:17 -0700
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
+            created at 2025-09-09 12:46 -0700
         </p>
     </div>
 </footer>
