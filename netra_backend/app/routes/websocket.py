@@ -673,91 +673,153 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 logger.info(f"Total handlers after registration: {len(message_router.handlers)}")
             except Exception as handler_error:
-                # CRITICAL FIX: Log error but don't cause 1011 - use fallback as per bug fix report
-                logger.error(f"AgentMessageHandler creation failed: {handler_error}", exc_info=True)
-                logger.info("Using fallback handler to prevent 1011 WebSocket error")
+                # CRITICAL ERROR: Handler creation failed despite services being available
+                # This indicates a more serious issue than missing services
+                logger.error(f"❌ AgentMessageHandler creation failed despite services being available: {handler_error}", exc_info=True)
+                
+                # CRITICAL: Do not use fallback handlers - this is a real error that needs to be fixed
+                # The services exist but the handler can't be created, which indicates a code issue
+                logger.error("🚨 CRITICAL ERROR: Handler creation failed with available services")
+                logger.error("🚨 This indicates a serious integration issue that must be fixed")
+                logger.error("🚨 Failing the connection to prevent user confusion")
                 
                 try:
-                    fallback_handler = _create_fallback_agent_handler(websocket)
-                    message_router.add_handler(fallback_handler)
-                    logger.info("Fallback handler created successfully")
-                except Exception as fallback_error:
-                    logger.critical(f"CRITICAL: Fallback handler also failed: {fallback_error}")
-                    
-                    # LAST RESORT: Send error but allow connection to proceed
-                    try:
-                        error_msg = create_error_message(
-                            "HANDLER_INIT_FAILED",
-                            "Agent handler initialization failed - limited functionality available",
-                            {"environment": environment, "error": str(handler_error)}
-                        )
-                        await safe_websocket_send(websocket, error_msg.model_dump())
-                    except Exception:
-                        pass  # Best effort error notification
-                    
-                    # Don't close connection - let it proceed with basic WebSocket functionality
-                    logger.warning("Proceeding with basic WebSocket connection despite handler failures")
+                    # Send detailed error to user explaining the situation
+                    error_msg = create_error_message(
+                        "HANDLER_INTEGRATION_FAILED",
+                        "Service integration failed - please try reconnecting",
+                        {
+                            "environment": environment,
+                            "error": str(handler_error),
+                            "services_available": True,
+                            "handler_failed": True,
+                            "action": "Please try reconnecting. If the issue persists, contact support."
+                        }
+                    )
+                    await safe_websocket_send(websocket, error_msg.model_dump())
+                except Exception:
+                    pass  # Best effort error notification
+                
+                # CRITICAL: Fail the connection immediately
+                # This is a code/integration issue, not a service availability issue
+                raise Exception(f"Handler integration failure: {handler_error}. Services are available but handler creation failed.")
                     
         else:
-            # CRITICAL FIX: Use fallback handlers instead of failing in staging/production
-            # This prevents 500 errors while maintaining WebSocket connectivity
+            # SSOT SERVICE INITIALIZATION: Replace fallback creation with proper service initialization
+            # This eliminates the anti-pattern of mock responses by initializing real services
             missing_deps = []
             if supervisor is None:
                 missing_deps.append("agent_supervisor")
             if thread_service is None:
                 missing_deps.append("thread_service")
-                
-            logger.warning(f"WebSocket dependencies missing in {environment}: {missing_deps}")
-            logger.warning(f"🔄 Creating fallback handler to maintain WebSocket connectivity in {environment}")
             
-            # Create fallback agent handler for ALL environments to prevent 500 errors
+            # Check for additional missing services that are critical
+            if not hasattr(websocket.app.state, 'agent_websocket_bridge') or websocket.app.state.agent_websocket_bridge is None:
+                missing_deps.append("agent_websocket_bridge")
+            if not hasattr(websocket.app.state, 'tool_classes') or not websocket.app.state.tool_classes:
+                missing_deps.append("tool_classes")
+                
+            logger.info(f"🔄 WebSocket dependencies missing in {environment}: {missing_deps}")
+            logger.info(f"🚀 Starting SSOT service initialization to provide authentic AI responses...")
+            
+            # Initialize progress communicator for transparent user experience
+            from netra_backend.app.websocket_core.initialization_progress import create_progress_communicator
+            progress_communicator = await create_progress_communicator(websocket)
+            
+            # Start SSOT service initialization instead of fallback creation
             try:
-                fallback_handler = _create_fallback_agent_handler(websocket)
-                message_router.add_handler(fallback_handler)
-                logger.info(f"[OK] Successfully created fallback AgentMessageHandler for {environment}")
-                logger.info(f"🤖 Fallback handler can handle: {fallback_handler.supported_types}")
-                logger.info(f"🤖 This prevents 500 errors while providing basic agent functionality")
+                from netra_backend.app.websocket_core.service_initialization_manager import get_service_initialization_manager
                 
-                logger.info(f"🤖 Total handlers registered: {len(message_router.handlers)}")
+                # Get the singleton service initialization manager
+                initialization_manager = get_service_initialization_manager(websocket.app)
                 
-                # List all registered handlers for debugging
-                for idx, handler in enumerate(message_router.handlers):
-                    handler_types = getattr(handler, 'supported_types', [])
-                    logger.info(f"  Handler {idx}: {handler.__class__.__name__} - supports {handler_types}")
+                # Send initialization started event to user
+                estimated_time = 10.0 + len(missing_deps) * 3.0  # Estimate based on services
+                await progress_communicator.send_initialization_started(
+                    services_to_initialize=missing_deps,
+                    estimated_time=estimated_time
+                )
+                
+                logger.info(f"🔄 Initializing {len(missing_deps)} missing services using SSOT patterns...")
+                
+                # Perform SSOT initialization with progress updates
+                initialization_start_time = time.time()
+                success, status_report = await initialization_manager.initialize_missing_services(
+                    missing_services=set(missing_deps),
+                    max_initialization_time=30.0
+                )
+                total_initialization_time = time.time() - initialization_start_time
+                
+                if success:
+                    # Services initialized successfully - update dependencies and create real handlers
+                    logger.info(f"✅ SSOT service initialization successful in {total_initialization_time:.2f}s")
                     
-                # STAGE 1 ENHANCEMENT: Send enhanced service status with validation details
-                try:
-                    service_info = {
-                        "event": "service_status",
-                        "message": "WebSocket connected with fallback functionality",
-                        "environment": environment,
-                        "missing_dependencies": missing_deps,
-                        "fallback_active": True
-                    }
-                    
-                    # Add service validation details if available
-                    if service_validation_results:
-                        service_info.update({
-                            "services_ready": f"{service_validation_results.ready_services}/{service_validation_results.total_services}",
-                            "validation_time": f"{service_validation_results.total_elapsed_time:.2f}s",
-                            "degraded_services": service_validation_results.degraded_services,
-                            "critical_failures": service_validation_results.critical_failures,
-                            "graceful_degradation": service_validation_results.graceful_degradation_active
-                        })
-                    
-                    info_response = create_server_message(
-                        MessageType.SYSTEM_MESSAGE,
-                        service_info
+                    # Send completion event to user
+                    await progress_communicator.send_initialization_completed(
+                        successful_services=status_report.get('services_initialized', []),
+                        failed_services=status_report.get('failed_services', []),
+                        total_time=total_initialization_time
                     )
-                    await safe_websocket_send(websocket, info_response.model_dump())
-                except Exception as info_error:
-                    logger.debug(f"Could not send service info message: {info_error}")
-                    # Don't fail if we can't send the info message
                     
-            except Exception as critical_fallback_error:
-                logger.critical(f"[ERROR] CRITICAL FALLBACK FAILURE in {environment}: {critical_fallback_error}")
-                # Last resort: log critical error but still allow basic WebSocket functionality
-                # This prevents 500 errors even in the worst-case scenario
+                    # Re-fetch services after initialization
+                    supervisor = getattr(websocket.app.state, 'agent_supervisor', None)
+                    thread_service = getattr(websocket.app.state, 'thread_service', None)
+                    
+                    if supervisor is not None and thread_service is not None:
+                        # Create real agent handler with initialized services
+                        try:
+                            # Import after initialization to ensure all dependencies are available
+                            from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
+                            from netra_backend.app.services.message_handlers import MessageHandlerService
+                            
+                            message_handler_service = MessageHandlerService(supervisor, thread_service)
+                            agent_handler = AgentMessageHandler(message_handler_service, websocket)
+                            
+                            message_router.add_handler(agent_handler)
+                            logger.info("✅ Created real AgentMessageHandler after SSOT initialization")
+                            
+                        except Exception as handler_error:
+                            logger.error(f"❌ Failed to create real handler after initialization: {handler_error}")
+                            # This is a critical error - we successfully initialized services but can't create handler
+                            raise Exception(f"Handler creation failed after successful service initialization: {handler_error}")
+                    else:
+                        logger.error("❌ Services still missing after successful SSOT initialization")
+                        raise Exception("Critical services missing despite successful initialization")
+                
+                else:
+                    # Initialization failed - this is a critical error
+                    error_msg = status_report.get('error', 'Unknown initialization failure')
+                    failed_services = status_report.get('failed_services', [])
+                    
+                    logger.error(f"❌ SSOT service initialization failed: {error_msg}")
+                    
+                    # Send failure event to user
+                    await progress_communicator.send_initialization_failed(
+                        error_message=error_msg,
+                        failed_services=failed_services,
+                        total_time=total_initialization_time
+                    )
+                    
+                    # CRITICAL: Fail the connection rather than using fallback
+                    # This ensures users never receive mock responses
+                    raise Exception(f"SSOT service initialization failed: {error_msg}. Failed services: {failed_services}")
+                    
+            except Exception as initialization_error:
+                logger.error(f"🚨 CRITICAL: SSOT service initialization failed: {initialization_error}")
+                
+                # Send error to user and fail the connection
+                try:
+                    await progress_communicator.send_initialization_failed(
+                        error_message=str(initialization_error),
+                        failed_services=missing_deps,
+                        total_time=time.time() - initialization_start_time if 'initialization_start_time' in locals() else 0.0
+                    )
+                except Exception:
+                    pass  # Best effort notification
+                
+                # CRITICAL: Raise the error to fail the connection
+                # This eliminates fallback handler creation completely
+                raise Exception(f"WebSocket connection failed: Unable to initialize required services. {initialization_error}")
         
         # CRITICAL SECURITY FIX: Enhanced authentication with isolated manager
         # User context extraction was done above, now establish secure connection
