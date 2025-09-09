@@ -267,7 +267,7 @@ class MockAgentCoreAdvanced:
         
         if not self.should_succeed:
             if self.failure_mode == "timeout":
-                await asyncio.sleep(35)  # Force timeout (>30s)
+                await asyncio.sleep(5)  # Force timeout behavior for testing
             elif self.failure_mode == "connection_error":
                 raise ConnectionError("Database connection lost during execution")
             elif self.failure_mode == "validation_error":

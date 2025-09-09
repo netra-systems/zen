@@ -37,6 +37,8 @@ from shared.types.core_types import (
     UserID, ConnectionID, WebSocketID,
     ensure_user_id, ensure_websocket_id
 )
+# Import generate_websocket_id from the SSOT location
+from netra_backend.app.core.unified_id_manager import generate_websocket_id
 
 logger = central_logger.get_logger(__name__)
 

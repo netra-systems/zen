@@ -271,11 +271,16 @@ class UserExecutionEngine:
     def _create_mock_tool_dispatcher(self):
         """Create mock tool dispatcher using SSOT mock protection."""
         from shared.test_only_guard import test_only, require_test_mode
-        from test_framework.ssot.mocks import get_mock_factory
         
         # SSOT Guard: This function should only run in test mode
         require_test_mode("_create_mock_tool_dispatcher", 
                          "Mock tool dispatcher creation should only happen in tests")
+        
+        # Conditionally import test_framework to avoid production dependencies
+        try:
+            from test_framework.ssot.mocks import get_mock_factory
+        except ImportError:
+            raise ImportError("test_framework not available - mock creation not supported in production")
         
         # Use SSOT MockFactory for consistent mock creation
         mock_factory = get_mock_factory()

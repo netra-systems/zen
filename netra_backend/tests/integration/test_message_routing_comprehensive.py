@@ -139,7 +139,9 @@ class TestMessageRoutingCore(BaseIntegrationTest):
             # Verify routing stats updated
             stats = router.get_stats()
             assert stats["messages_routed"] > 0
-            assert case["type"] in str(stats["message_types"])
+            # Check if the message type appears in stats (handle both string and enum representations)
+            message_types_str = str(stats["message_types"])
+            assert case["type"] in message_types_str.lower() or case["type"].upper() in message_types_str
         
         logger.info("✅ Basic message routing test completed")
     

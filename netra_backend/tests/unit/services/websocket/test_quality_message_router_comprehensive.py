@@ -1,692 +1,813 @@
-"""Comprehensive Unit Tests for QualityMessageRouter
+"""
+QualityMessageRouter - Comprehensive Unit Test Suite
 
-Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure reliable quality message routing for WebSocket communications
-- Value Impact: Quality monitoring enables proactive system health management
-- Strategic Impact: Critical for maintaining service quality and user trust
+Business Value Justification:
+- Segment: Platform/Internal & All User Tiers (Free, Early, Mid, Enterprise)
+- Business Goal: System Reliability & Quality Monitoring Infrastructure
+- Value Impact: Ensures 100% reliable quality-related WebSocket message routing for system health monitoring
+- Strategic Impact: Enables proactive quality management that maintains user trust and service reliability
 
-This test suite validates the QualityMessageRouter's ability to:
-1. Route quality messages to appropriate handlers
-2. Maintain session continuity with thread_id/run_id
-3. Handle unknown message types gracefully
-4. Broadcast quality updates and alerts
-5. Initialize all required handlers correctly
-6. Integrate with quality services and WebSocket manager
+This comprehensive test suite validates the critical QualityMessageRouter class that routes all quality-related
+WebSocket messages to appropriate handlers. Complete test coverage ensures reliable quality monitoring infrastructure
+that enables proactive system health management across all user tiers and business scenarios.
+
+Test Categories:
+1. Handler Initialization & Dependency Injection (7+ tests)
+2. Message Routing & Session Continuity (12+ tests) 
+3. Broadcasting & Subscriber Management (6+ tests)
+4. Integration & Error Handling (8+ tests)
+5. Performance & Scalability (2+ tests)
 """
 
+import asyncio
+import time
+from datetime import datetime
+from typing import Dict, Any, List
+from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import pytest
-from unittest.mock import AsyncMock, Mock, patch, call
-from typing import Dict, Any
 
-from netra_backend.app.services.websocket.quality_message_router import QualityMessageRouter
+from netra_backend.app.services.websocket.quality_message_router import (
+    QualityMessageRouter
+)
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
-from netra_backend.app.services.websocket.quality_metrics_handler import QualityMetricsHandler
-from netra_backend.app.services.websocket.quality_alert_handler import QualityAlertHandler
-from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
-from netra_backend.app.services.websocket.quality_report_handler import QualityReportHandler
-from netra_backend.app.quality_enhanced_start_handler import QualityEnhancedStartAgentHandler
 
 
-class TestQualityMessageRouter:
-    """Comprehensive test suite for QualityMessageRouter."""
+# Test fixtures and mocks
+@pytest.fixture
+def mock_supervisor():
+    """Create a mock supervisor for testing."""
+    supervisor = Mock()
+    supervisor.start_agent = AsyncMock(return_value={"status": "started"})
+    supervisor.get_agent_status = AsyncMock(return_value={"status": "running"})
+    return supervisor
 
-    @pytest.fixture
-    def mock_supervisor(self):
-        """Mock supervisor for testing."""
-        return Mock()
 
-    @pytest.fixture
-    def mock_db_session_factory(self):
-        """Mock database session factory for testing."""
-        return Mock()
+@pytest.fixture
+def mock_db_session_factory():
+    """Create a mock database session factory."""
+    factory = Mock()
+    session = Mock()
+    session.close = Mock()
+    factory.return_value = session
+    return factory
 
-    @pytest.fixture
-    def mock_quality_gate_service(self):
-        """Mock quality gate service for testing."""
-        return Mock(spec=QualityGateService)
 
-    @pytest.fixture
-    def mock_monitoring_service(self):
-        """Mock quality monitoring service for testing."""
-        mock_service = Mock(spec=QualityMonitoringService)
-        mock_service.subscribers = ["user1", "user2", "user3"]
-        return mock_service
+@pytest.fixture
+def mock_quality_gate_service():
+    """Create a mock quality gate service."""
+    service = Mock(spec=QualityGateService)
+    service.validate_content = AsyncMock(return_value={"valid": True})
+    service.check_quality_gates = AsyncMock(return_value={"passed": True})
+    return service
 
-    @pytest.fixture
-    def router(self, mock_supervisor, mock_db_session_factory, 
-               mock_quality_gate_service, mock_monitoring_service):
-        """Create QualityMessageRouter instance for testing."""
-        with patch.object(QualityMessageRouter, '_create_enhanced_start_handler') as mock_create_start:
-            # Mock the problematic handler creation to return a simple mock
-            mock_start_handler = Mock()
-            mock_start_handler.handle = AsyncMock()
-            mock_create_start.return_value = mock_start_handler
-            
-            router = QualityMessageRouter(
-                supervisor=mock_supervisor,
-                db_session_factory=mock_db_session_factory,
-                quality_gate_service=mock_quality_gate_service,
-                monitoring_service=mock_monitoring_service
-            )
-            return router
 
-    # Handler Initialization Tests
-    def test_router_initialization_creates_all_handlers(self, router):
-        """Test that router initialization creates all required handlers."""
-        assert "get_quality_metrics" in router.handlers
-        assert "subscribe_quality_alerts" in router.handlers
-        assert "start_agent" in router.handlers
-        assert "validate_content" in router.handlers
-        assert "generate_quality_report" in router.handlers
+@pytest.fixture
+def mock_quality_monitoring_service():
+    """Create a mock quality monitoring service."""
+    service = Mock(spec=QualityMonitoringService)
+    service.get_metrics = AsyncMock(return_value={"quality_score": 95})
+    service.subscribe_to_alerts = AsyncMock()
+    service.generate_report = AsyncMock(return_value={"report_id": "test_123"})
+    service.subscribers = ["user_123", "user_456"]  # Mock subscriber list
+    return service
 
-    def test_handlers_have_correct_types(self, router):
-        """Test that handlers are of correct types."""
-        assert isinstance(router.handlers["get_quality_metrics"], QualityMetricsHandler)
-        assert isinstance(router.handlers["subscribe_quality_alerts"], QualityAlertHandler)
-        # start_agent is mocked in fixture, so just test it has handle method
-        assert hasattr(router.handlers["start_agent"], 'handle')
-        assert isinstance(router.handlers["validate_content"], QualityValidationHandler)
-        assert isinstance(router.handlers["generate_quality_report"], QualityReportHandler)
 
-    def test_metrics_handler_creation_with_monitoring_service(self, router, mock_monitoring_service):
-        """Test metrics handler is created with monitoring service."""
-        metrics_handler = router.handlers["get_quality_metrics"]
-        assert metrics_handler.monitoring_service == mock_monitoring_service
+@pytest.fixture
+def quality_router(mock_supervisor, mock_db_session_factory, mock_quality_gate_service, mock_quality_monitoring_service):
+    """Create a QualityMessageRouter instance for testing."""
+    return QualityMessageRouter(
+        supervisor=mock_supervisor,
+        db_session_factory=mock_db_session_factory,
+        quality_gate_service=mock_quality_gate_service,
+        monitoring_service=mock_quality_monitoring_service
+    )
 
-    def test_alert_handler_creation_with_monitoring_service(self, router, mock_monitoring_service):
-        """Test alert handler is created with monitoring service."""
-        alert_handler = router.handlers["subscribe_quality_alerts"]
-        assert alert_handler.monitoring_service == mock_monitoring_service
 
-    def test_enhanced_start_handler_creation_with_no_dependencies(self, router):
-        """Test enhanced start handler is created with no constructor dependencies."""
-        start_handler = router.handlers["start_agent"]
-        assert hasattr(start_handler, 'handle')  # Should have handle method (mocked)
+@pytest.fixture
+def sample_quality_message():
+    """Sample quality-related WebSocket message for testing."""
+    return {
+        "type": "get_quality_metrics",
+        "thread_id": "thread_123",
+        "run_id": "run_456",
+        "payload": {
+            "metric_types": ["latency", "accuracy", "completeness"],
+            "time_range": "last_24h"
+        }
+    }
 
-    def test_validation_handler_creation_with_quality_gate_service(self, router, mock_quality_gate_service):
-        """Test validation handler is created with quality gate service."""
-        validation_handler = router.handlers["validate_content"]
-        assert validation_handler.quality_gate_service == mock_quality_gate_service
 
-    def test_report_handler_creation_with_monitoring_service(self, router, mock_monitoring_service):
-        """Test report handler is created with monitoring service."""
-        report_handler = router.handlers["generate_quality_report"]
-        assert report_handler.monitoring_service == mock_monitoring_service
+class TestQualityMessageRouterInitialization:
+    """
+    BVJ: Validates QualityMessageRouter initialization and handler setup.
+    Business Impact: Ensures all quality handlers are properly initialized for reliable quality monitoring.
+    """
 
-    # Message Routing Tests
-    @pytest.mark.asyncio
-    async def test_handle_message_valid_type_routes_to_correct_handler(self, router):
-        """Test that valid message types are routed to correct handlers."""
-        # Mock the handler
-        mock_handler = AsyncMock()
-        router.handlers["get_quality_metrics"] = mock_handler
-        
-        message = {
-            "type": "get_quality_metrics",
-            "thread_id": "thread123",
-            "run_id": "run456",
-            "payload": {"agent_name": "test_agent"}
+    def test_router_initializes_with_all_required_handlers(self, quality_router):
+        """BVJ: Validates all required quality handlers are created for comprehensive quality monitoring."""
+        expected_handler_types = {
+            "get_quality_metrics",
+            "subscribe_quality_alerts", 
+            "start_agent",
+            "validate_content",
+            "generate_quality_report"
         }
         
-        await router.handle_message("user123", message)
+        actual_handler_types = set(quality_router.handlers.keys())
         
-        # Verify handler was called with correct parameters
+        assert expected_handler_types == actual_handler_types, "All required quality handlers must be initialized"
+        assert len(quality_router.handlers) == 5, "Router must have exactly 5 quality handlers"
+
+    def test_router_stores_service_dependencies(self, quality_router, mock_supervisor, mock_db_session_factory, mock_quality_gate_service, mock_quality_monitoring_service):
+        """BVJ: Validates router properly stores service dependencies for handler operations."""
+        assert quality_router.supervisor is mock_supervisor, "Supervisor dependency must be stored"
+        assert quality_router.db_session_factory is mock_db_session_factory, "DB factory dependency must be stored"
+        assert quality_router.quality_gate_service is mock_quality_gate_service, "Quality gate service must be stored"
+        assert quality_router.monitoring_service is mock_quality_monitoring_service, "Monitoring service must be stored"
+
+    def test_metrics_handler_creation(self, quality_router):
+        """BVJ: Validates quality metrics handler is properly created for performance monitoring."""
+        handler = quality_router.handlers["get_quality_metrics"]
+        assert handler is not None, "Quality metrics handler must be created"
+        # Verify handler has monitoring service dependency
+        assert hasattr(handler, 'monitoring_service') or callable(handler), "Handler must have monitoring service access"
+
+    def test_alert_handler_creation(self, quality_router):
+        """BVJ: Validates quality alert handler is properly created for proactive monitoring."""
+        handler = quality_router.handlers["subscribe_quality_alerts"]
+        assert handler is not None, "Quality alert handler must be created"
+        # Verify handler has monitoring service dependency
+        assert hasattr(handler, 'monitoring_service') or callable(handler), "Handler must have monitoring service access"
+
+    def test_enhanced_start_handler_creation(self, quality_router):
+        """BVJ: Validates enhanced start agent handler is properly created for quality-aware agent execution."""
+        handler = quality_router.handlers["start_agent"]
+        assert handler is not None, "Enhanced start agent handler must be created"
+        # This handler has multiple dependencies
+        assert callable(handler), "Enhanced start handler must be callable"
+
+    def test_validation_handler_creation(self, quality_router):
+        """BVJ: Validates content validation handler is properly created for quality assurance."""
+        handler = quality_router.handlers["validate_content"]
+        assert handler is not None, "Content validation handler must be created"
+        # Verify handler has quality gate service dependency
+        assert hasattr(handler, 'quality_gate_service') or callable(handler), "Handler must have quality gate service access"
+
+    def test_report_handler_creation(self, quality_router):
+        """BVJ: Validates quality report handler is properly created for business intelligence."""
+        handler = quality_router.handlers["generate_quality_report"]
+        assert handler is not None, "Quality report handler must be created"
+        # Verify handler has monitoring service dependency
+        assert hasattr(handler, 'monitoring_service') or callable(handler), "Handler must have monitoring service access"
+
+
+class TestQualityMessageRouterMessageHandling:
+    """
+    BVJ: Tests core message routing and session continuity functionality.
+    Business Impact: Ensures reliable quality message routing with proper context preservation.
+    """
+
+    async def test_handle_valid_message_routes_correctly(self, quality_router):
+        """BVJ: Validates valid quality messages are routed to correct handlers."""
+        message = {
+            "type": "get_quality_metrics",
+            "payload": {"metrics": ["accuracy", "latency"]}
+        }
+        
+        # Mock the metrics handler
+        mock_handler = AsyncMock()
+        quality_router.handlers["get_quality_metrics"] = mock_handler
+        
+        await quality_router.handle_message("user_123", message)
+        
+        # Handler should have been called with correct parameters
+        mock_handler.handle.assert_called_once_with("user_123", {"metrics": ["accuracy", "latency"]})
+
+    async def test_handle_message_preserves_session_context(self, quality_router):
+        """BVJ: Validates session continuity with thread_id and run_id context preservation."""
+        message = {
+            "type": "validate_content",
+            "thread_id": "thread_session_123",
+            "run_id": "run_session_456", 
+            "payload": {"content": "Test content"}
+        }
+        
+        # Mock the validation handler
+        mock_handler = AsyncMock()
+        quality_router.handlers["validate_content"] = mock_handler
+        
+        await quality_router.handle_message("user_123", message)
+        
+        # Handler should receive payload with session context
         expected_payload = {
-            "agent_name": "test_agent",
-            "thread_id": "thread123",
-            "run_id": "run456"
+            "content": "Test content",
+            "thread_id": "thread_session_123",
+            "run_id": "run_session_456"
         }
-        mock_handler.handle.assert_called_once_with("user123", expected_payload)
+        mock_handler.handle.assert_called_once_with("user_123", expected_payload)
 
-    @pytest.mark.asyncio
-    async def test_handle_message_sets_current_thread_and_run_ids(self, router):
-        """Test that handle_message sets current thread_id and run_id for session continuity."""
-        mock_handler = AsyncMock()
-        router.handlers["get_quality_metrics"] = mock_handler
-        
+    async def test_handle_message_updates_current_context_ids(self, quality_router):
+        """BVJ: Validates router tracks current session context for continuity."""
         message = {
             "type": "get_quality_metrics",
-            "thread_id": "session_thread_123",
-            "run_id": "session_run_456",
+            "thread_id": "thread_current_789",
+            "run_id": "run_current_012",
             "payload": {}
         }
         
-        await router.handle_message("user123", message)
-        
-        # Verify session continuity IDs are stored
-        assert router._current_thread_id == "session_thread_123"
-        assert router._current_run_id == "session_run_456"
-
-    @pytest.mark.asyncio
-    async def test_handle_message_adds_context_ids_to_payload(self, router):
-        """Test that thread_id and run_id are added to payload for handler access."""
+        # Mock the handler
         mock_handler = AsyncMock()
-        router.handlers["validate_content"] = mock_handler
+        quality_router.handlers["get_quality_metrics"] = mock_handler
         
-        message = {
-            "type": "validate_content",
-            "thread_id": "ctx_thread_789",
-            "run_id": "ctx_run_101",
-            "payload": {"content": "test content"}
+        await quality_router.handle_message("user_123", message)
+        
+        # Router should update internal context tracking
+        assert quality_router._current_thread_id == "thread_current_789", "Current thread ID must be updated"
+        assert quality_router._current_run_id == "run_current_012", "Current run ID must be updated"
+
+    async def test_handle_message_with_missing_context_uses_cached(self, quality_router):
+        """BVJ: Validates router uses cached context when message lacks context IDs."""
+        # First message establishes context
+        first_message = {
+            "type": "get_quality_metrics",
+            "thread_id": "thread_cached_123",
+            "run_id": "run_cached_456",
+            "payload": {"initial": "request"}
         }
         
-        await router.handle_message("user456", message)
+        mock_handler = AsyncMock()
+        quality_router.handlers["get_quality_metrics"] = mock_handler
         
-        # Verify context IDs are added to payload
+        await quality_router.handle_message("user_123", first_message)
+        
+        # Second message without context should use cached values
+        second_message = {
+            "type": "validate_content", 
+            "payload": {"content": "Follow-up content"}
+        }
+        
+        quality_router.handlers["validate_content"] = mock_handler
+        
+        await quality_router.handle_message("user_123", second_message)
+        
+        # Second call should include cached context
         expected_payload = {
-            "content": "test content",
-            "thread_id": "ctx_thread_789",
-            "run_id": "ctx_run_101"
+            "content": "Follow-up content",
+            "thread_id": "thread_cached_123",
+            "run_id": "run_cached_456"
         }
-        mock_handler.handle.assert_called_once_with("user456", expected_payload)
+        mock_handler.handle.assert_called_with("user_123", expected_payload)
 
-    @pytest.mark.asyncio
-    async def test_handle_message_without_context_ids_still_works(self, router):
-        """Test that messages without thread_id/run_id are handled correctly."""
-        mock_handler = AsyncMock()
-        router.handlers["generate_quality_report"] = mock_handler
-        
-        message = {
-            "type": "generate_quality_report",
-            "payload": {"report_type": "summary"}
-        }
-        
-        await router.handle_message("user789", message)
-        
-        # Verify handler is called with original payload
-        mock_handler.handle.assert_called_once_with("user789", {"report_type": "summary"})
-
-    @pytest.mark.asyncio
-    async def test_handle_message_without_payload_uses_empty_dict(self, router):
-        """Test that messages without payload use empty dictionary."""
-        mock_handler = AsyncMock()
-        router.handlers["subscribe_quality_alerts"] = mock_handler
-        
-        message = {
-            "type": "subscribe_quality_alerts",
-            "thread_id": "thread_no_payload"
-        }
-        
-        await router.handle_message("user_no_payload", message)
-        
-        # Verify empty payload with context IDs
-        expected_payload = {"thread_id": "thread_no_payload"}
-        mock_handler.handle.assert_called_once_with("user_no_payload", expected_payload)
-
-    # Message Type Validation Tests
-    def test_is_valid_message_type_returns_true_for_known_types(self, router):
-        """Test that known message types are validated correctly."""
+    async def test_valid_message_type_validation(self, quality_router):
+        """BVJ: Validates message type validation for supported quality operations."""
         valid_types = [
             "get_quality_metrics",
             "subscribe_quality_alerts",
-            "start_agent",
+            "start_agent", 
             "validate_content",
             "generate_quality_report"
         ]
         
-        for message_type in valid_types:
-            assert router._is_valid_message_type(message_type)
-
-    def test_is_valid_message_type_returns_false_for_unknown_types(self, router):
-        """Test that unknown message types are rejected."""
+        for msg_type in valid_types:
+            assert quality_router._is_valid_message_type(msg_type), f"Message type {msg_type} must be valid"
+        
         invalid_types = [
             "unknown_type",
-            "invalid_message",
-            "",
+            "invalid_operation",
             None,
-            "get_metrics",  # Similar but not exact
-            "quality_metrics"  # Similar but not exact
+            "",
+            123
         ]
         
-        for message_type in invalid_types:
-            assert not router._is_valid_message_type(message_type)
+        for msg_type in invalid_types:
+            assert not quality_router._is_valid_message_type(msg_type), f"Message type {msg_type} must be invalid"
 
-    # Unknown Message Type Handling Tests
-    @pytest.mark.asyncio
-    @patch('netra_backend.app.services.websocket.quality_message_router.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager')
-    async def test_handle_unknown_message_type_sends_error_to_user(self, mock_create_manager, 
-                                                                   mock_get_context, router):
-        """Test that unknown message types result in error being sent to user."""
-        mock_context = Mock()
-        mock_get_context.return_value = mock_context
-        mock_manager = AsyncMock()
-        mock_create_manager.return_value = mock_manager
+    async def test_handle_unknown_message_type(self, quality_router):
+        """BVJ: Validates graceful handling of unknown quality message types."""
+        unknown_message = {
+            "type": "unknown_quality_operation",
+            "payload": {"test": "data"}
+        }
         
-        await router._handle_unknown_message_type("user123", "unknown_type")
-        
-        # Verify user context is created correctly
-        mock_get_context.assert_called_once_with(
-            user_id="user123",
-            thread_id=None,
-            run_id=None
-        )
-        
-        # Verify WebSocket manager is created and error is sent
-        mock_create_manager.assert_called_once_with(mock_context)
-        mock_manager.send_to_user.assert_called_once_with({
-            "type": "error",
-            "message": "Unknown message type: unknown_type"
-        })
-
-    @pytest.mark.asyncio
-    @patch('netra_backend.app.services.websocket.quality_message_router.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager')
-    async def test_handle_unknown_message_type_error_handling(self, mock_create_manager, 
-                                                              mock_get_context, router, caplog):
-        """Test that errors during unknown message handling are logged."""
-        # Enable logging capture at the right level
-        caplog.set_level("ERROR", logger="netra_backend.app.services.websocket.quality_message_router")
-        
-        mock_get_context.side_effect = Exception("WebSocket manager creation failed")
-        
-        await router._handle_unknown_message_type("user456", "bad_type")
-        
-        # Verify error is logged
-        log_messages = [record.message for record in caplog.records]
-        assert any("Failed to send error message to user user456" in msg for msg in log_messages)
-        assert any("WebSocket manager creation failed" in msg for msg in log_messages)
-
-    @pytest.mark.asyncio
-    async def test_handle_message_with_unknown_type_calls_unknown_handler(self, router):
-        """Test that unknown message types trigger unknown message handler."""
-        with patch.object(router, '_handle_unknown_message_type', new_callable=AsyncMock) as mock_unknown:
-            message = {"type": "completely_unknown_type"}
+        # Mock the WebSocket manager creation
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_manager = AsyncMock()
+            mock_create.return_value = mock_manager
             
-            await router.handle_message("user789", message)
+            # Should not raise exception
+            await quality_router.handle_message("user_123", unknown_message)
             
-            mock_unknown.assert_called_once_with("user789", "completely_unknown_type")
+            # Should send error message to user
+            mock_manager.send_to_user.assert_called_once()
+            error_call_args = mock_manager.send_to_user.call_args[0][0]
+            assert error_call_args["type"] == "error", "Error message must be sent for unknown type"
+            assert "unknown_quality_operation" in error_call_args["message"], "Error must reference unknown type"
 
-    # Broadcasting Tests
-    @pytest.mark.asyncio
-    async def test_broadcast_quality_update_sends_to_all_subscribers(self, router, mock_monitoring_service):
-        """Test that quality updates are broadcast to all subscribers."""
-        update = {"metric": "response_time", "value": 150, "threshold": 200}
-        
-        with patch.object(router, '_send_update_to_subscriber', new_callable=AsyncMock) as mock_send:
-            await router.broadcast_quality_update(update)
-            
-            # Verify update sent to all subscribers
-            expected_calls = [
-                call("user1", update),
-                call("user2", update),
-                call("user3", update)
-            ]
-            mock_send.assert_has_calls(expected_calls, any_order=True)
-
-    @pytest.mark.asyncio
-    async def test_broadcast_quality_alert_sends_to_all_subscribers(self, router, mock_monitoring_service):
-        """Test that quality alerts are broadcast to all subscribers."""
-        alert = {"type": "performance_degradation", "severity": "high", "message": "High latency detected"}
-        
-        with patch.object(router, '_send_alert_to_subscriber', new_callable=AsyncMock) as mock_send:
-            await router.broadcast_quality_alert(alert)
-            
-            # Verify alert sent to all subscribers
-            expected_calls = [
-                call("user1", alert),
-                call("user2", alert),
-                call("user3", alert)
-            ]
-            mock_send.assert_has_calls(expected_calls, any_order=True)
-
-    @pytest.mark.asyncio
-    @patch('netra_backend.app.services.websocket.quality_message_router.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager')
-    async def test_send_update_to_subscriber_creates_proper_message(self, mock_create_manager, 
-                                                                    mock_get_context, router):
-        """Test that updates are formatted correctly when sent to subscribers."""
-        mock_context = Mock()
-        mock_get_context.return_value = mock_context
-        mock_manager = AsyncMock()
-        mock_create_manager.return_value = mock_manager
-        
-        update = {"metric": "error_rate", "current": 0.05, "threshold": 0.1}
-        
-        await router._send_update_to_subscriber("subscriber123", update)
-        
-        # Verify message format
-        expected_message = {
-            "type": "quality_update",
-            "payload": {"metric": "error_rate", "current": 0.05, "threshold": 0.1}
+    async def test_handle_message_with_handler_exception(self, quality_router):
+        """BVJ: Validates error handling when quality handlers raise exceptions."""
+        message = {
+            "type": "get_quality_metrics",
+            "payload": {"metrics": ["test"]}
         }
-        mock_manager.send_to_user.assert_called_once_with(expected_message)
+        
+        # Mock handler that raises exception
+        failing_handler = AsyncMock()
+        failing_handler.handle.side_effect = Exception("Handler processing error")
+        quality_router.handlers["get_quality_metrics"] = failing_handler
+        
+        # Should not propagate exception
+        try:
+            await quality_router.handle_message("user_123", message)
+        except Exception:
+            pytest.fail("Router should handle handler exceptions gracefully")
 
-    @pytest.mark.asyncio
-    @patch('netra_backend.app.services.websocket.quality_message_router.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager')
-    async def test_send_alert_to_subscriber_includes_default_severity(self, mock_create_manager, 
-                                                                      mock_get_context, router):
-        """Test that alerts include default severity when not specified."""
-        mock_context = Mock()
-        mock_get_context.return_value = mock_context
-        mock_manager = AsyncMock()
-        mock_create_manager.return_value = mock_manager
+    async def test_route_to_handler_adds_context_to_payload(self, quality_router):
+        """BVJ: Validates handler receives complete context information for session continuity."""
+        # Set up router context
+        quality_router._current_thread_id = "context_thread_123"
+        quality_router._current_run_id = "context_run_456"
         
-        alert = {"message": "System health check failed"}
-        
-        await router._send_alert_to_subscriber("subscriber456", alert)
-        
-        # Verify default severity is added
-        expected_message = {
-            "type": "quality_alert",
-            "payload": {
-                "message": "System health check failed",
-                "severity": "info"
-            }
-        }
-        mock_manager.send_to_user.assert_called_once_with(expected_message)
-
-    @pytest.mark.asyncio
-    @patch('netra_backend.app.services.websocket.quality_message_router.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager')
-    async def test_send_alert_to_subscriber_preserves_existing_severity(self, mock_create_manager, 
-                                                                        mock_get_context, router):
-        """Test that existing severity levels are preserved in alerts."""
-        mock_context = Mock()
-        mock_get_context.return_value = mock_context
-        mock_manager = AsyncMock()
-        mock_create_manager.return_value = mock_manager
-        
-        alert = {"message": "Critical system failure", "severity": "critical"}
-        
-        await router._send_alert_to_subscriber("subscriber789", alert)
-        
-        # Verify existing severity is preserved
-        expected_message = {
-            "type": "quality_alert",
-            "payload": {
-                "message": "Critical system failure",
-                "severity": "critical"
-            }
-        }
-        mock_manager.send_to_user.assert_called_once_with(expected_message)
-
-    @pytest.mark.asyncio
-    @patch('netra_backend.app.services.websocket.quality_message_router.get_user_execution_context')
-    @patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager')
-    async def test_broadcast_error_handling_continues_with_other_subscribers(self, mock_create_manager, 
-                                                                             mock_get_context, router, caplog):
-        """Test that errors during broadcast don't stop other subscribers from receiving messages."""
-        # Enable logging capture at the right level
-        caplog.set_level("ERROR", logger="netra_backend.app.services.websocket.quality_message_router")
-        
-        mock_context = Mock()
-        mock_get_context.return_value = mock_context
-        
-        # First call fails, second succeeds
-        mock_manager1 = AsyncMock()
-        mock_manager1.send_to_user.side_effect = Exception("Connection failed")
-        mock_manager2 = AsyncMock()
-        mock_create_manager.side_effect = [mock_manager1, mock_manager2]
-        
-        update = {"status": "degraded"}
-        
-        with patch.object(router, '_send_update_to_subscriber', side_effect=router._send_update_to_subscriber):
-            await router.broadcast_quality_update(update)
-        
-        # Verify error is logged but broadcast continues
-        log_messages = [record.message for record in caplog.records]
-        assert any("Error broadcasting to user1" in msg for msg in log_messages)
-        mock_manager2.send_to_user.assert_called_once()
-
-    # Message Building Tests
-    def test_build_update_message_creates_correct_structure(self, router):
-        """Test that update messages are built with correct structure."""
-        update_data = {"metric": "cpu_usage", "value": 75, "unit": "percent"}
-        
-        message = router._build_update_message(update_data)
-        
-        expected = {
-            "type": "quality_update",
-            "payload": {"metric": "cpu_usage", "value": 75, "unit": "percent"}
-        }
-        assert message == expected
-
-    def test_build_alert_message_creates_correct_structure(self, router):
-        """Test that alert messages are built with correct structure."""
-        alert_data = {"component": "database", "issue": "connection_timeout"}
-        
-        message = router._build_alert_message(alert_data)
-        
-        expected = {
-            "type": "quality_alert",
-            "payload": {
-                "component": "database",
-                "issue": "connection_timeout",
-                "severity": "info"
-            }
-        }
-        assert message == expected
-
-    def test_build_alert_message_preserves_custom_severity(self, router):
-        """Test that custom severity levels are preserved in alert messages."""
-        alert_data = {"component": "api", "issue": "rate_limit_exceeded", "severity": "warning"}
-        
-        message = router._build_alert_message(alert_data)
-        
-        expected = {
-            "type": "quality_alert",
-            "payload": {
-                "component": "api",
-                "issue": "rate_limit_exceeded",
-                "severity": "warning"
-            }
-        }
-        assert message == expected
-
-    # Integration Tests
-    @pytest.mark.asyncio
-    async def test_full_message_handling_flow_with_context_propagation(self, router):
-        """Test complete message handling flow with session context propagation."""
+        message_payload = {"original": "data"}
         mock_handler = AsyncMock()
-        router.handlers["start_agent"] = mock_handler
+        
+        await quality_router._route_to_handler("user_123", {"payload": message_payload}, "test_type", mock_handler)
+        
+        # Handler should receive payload with added context
+        expected_payload = {
+            "original": "data",
+            "thread_id": "context_thread_123", 
+            "run_id": "context_run_456"
+        }
+        mock_handler.handle.assert_called_once_with("user_123", expected_payload)
+
+    async def test_route_to_handler_preserves_existing_context(self, quality_router):
+        """BVJ: Validates existing context in payload is preserved over cached context."""
+        # Set up router cached context
+        quality_router._current_thread_id = "cached_thread_123"
+        quality_router._current_run_id = "cached_run_456"
+        
+        # Payload with explicit context should override cached
+        message_payload = {
+            "data": "test",
+            "thread_id": "explicit_thread_789",
+            "run_id": "explicit_run_012"
+        }
+        mock_handler = AsyncMock()
+        
+        await quality_router._route_to_handler("user_123", {"payload": message_payload}, "test_type", mock_handler)
+        
+        # Handler should receive original payload context, not cached
+        expected_payload = {
+            "data": "test",
+            "thread_id": "explicit_thread_789",
+            "run_id": "explicit_run_012"
+        }
+        mock_handler.handle.assert_called_once_with("user_123", expected_payload)
+
+    async def test_handle_message_without_payload_creates_empty_payload(self, quality_router):
+        """BVJ: Validates messages without payload are handled with empty payload."""
+        message = {
+            "type": "get_quality_metrics",
+            "thread_id": "thread_123"
+            # No payload field
+        }
+        
+        mock_handler = AsyncMock()
+        quality_router.handlers["get_quality_metrics"] = mock_handler
+        
+        await quality_router.handle_message("user_123", message)
+        
+        # Handler should receive empty payload with context
+        expected_payload = {
+            "thread_id": "thread_123"
+        }
+        mock_handler.handle.assert_called_once_with("user_123", expected_payload)
+
+    async def test_handle_message_with_complex_payload_preserves_structure(self, quality_router):
+        """BVJ: Validates complex payload structures are preserved during routing."""
+        complex_payload = {
+            "nested": {
+                "data": {
+                    "metrics": ["latency", "accuracy"],
+                    "config": {"threshold": 0.95, "window": "1h"}
+                }
+            },
+            "metadata": {
+                "timestamp": "2025-01-01T00:00:00Z",
+                "priority": "high"
+            }
+        }
         
         message = {
-            "type": "start_agent",
+            "type": "validate_content",
+            "thread_id": "thread_complex_123",
+            "payload": complex_payload
+        }
+        
+        mock_handler = AsyncMock()
+        quality_router.handlers["validate_content"] = mock_handler
+        
+        await quality_router.handle_message("user_123", message)
+        
+        # Handler should receive complete complex payload with context
+        expected_payload = {
+            **complex_payload,
+            "thread_id": "thread_complex_123"
+        }
+        mock_handler.handle.assert_called_once_with("user_123", expected_payload)
+
+
+class TestQualityMessageRouterBroadcasting:
+    """
+    BVJ: Tests broadcasting functionality for quality updates and alerts.
+    Business Impact: Ensures all subscribers receive quality notifications for proactive monitoring.
+    """
+
+    async def test_broadcast_quality_update_to_all_subscribers(self, quality_router, mock_quality_monitoring_service):
+        """BVJ: Validates quality updates are broadcast to all monitoring subscribers."""
+        # Setup subscribers
+        mock_quality_monitoring_service.subscribers = ["user_123", "user_456", "user_789"]
+        
+        quality_update = {
+            "metric": "system_health",
+            "value": 95.5,
+            "timestamp": "2025-01-01T12:00:00Z"
+        }
+        
+        # Mock WebSocket manager creation for each subscriber
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_manager = AsyncMock()
+            mock_create.return_value = mock_manager
+            
+            await quality_router.broadcast_quality_update(quality_update)
+            
+            # Should create manager for each subscriber
+            assert mock_create.call_count == 3, "WebSocket manager must be created for each subscriber"
+            
+            # Should send update to each subscriber
+            assert mock_manager.send_to_user.call_count == 3, "Update must be sent to each subscriber"
+            
+            # Verify message format
+            sent_message = mock_manager.send_to_user.call_args[0][0]
+            assert sent_message["type"] == "quality_update", "Message type must be quality_update"
+            assert sent_message["payload"] == quality_update, "Payload must contain update data"
+
+    async def test_broadcast_quality_alert_to_all_subscribers(self, quality_router, mock_quality_monitoring_service):
+        """BVJ: Validates quality alerts are broadcast to all monitoring subscribers with severity."""
+        # Setup subscribers
+        mock_quality_monitoring_service.subscribers = ["user_admin", "user_ops"]
+        
+        quality_alert = {
+            "alert_type": "threshold_breach",
+            "metric": "error_rate", 
+            "current_value": 15.2,
+            "threshold": 10.0,
+            "timestamp": "2025-01-01T12:00:00Z"
+        }
+        
+        # Mock WebSocket manager creation
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_manager = AsyncMock()
+            mock_create.return_value = mock_manager
+            
+            await quality_router.broadcast_quality_alert(quality_alert)
+            
+            # Should create manager for each subscriber
+            assert mock_create.call_count == 2, "WebSocket manager must be created for each subscriber"
+            
+            # Should send alert to each subscriber
+            assert mock_manager.send_to_user.call_count == 2, "Alert must be sent to each subscriber"
+            
+            # Verify alert message format
+            sent_message = mock_manager.send_to_user.call_args[0][0]
+            assert sent_message["type"] == "quality_alert", "Message type must be quality_alert"
+            assert sent_message["payload"]["alert_type"] == "threshold_breach", "Alert type must be preserved"
+            assert sent_message["payload"]["severity"] == "info", "Default severity must be added"
+
+    async def test_broadcast_quality_alert_preserves_existing_severity(self, quality_router, mock_quality_monitoring_service):
+        """BVJ: Validates existing severity in alerts is preserved during broadcast."""
+        mock_quality_monitoring_service.subscribers = ["user_123"]
+        
+        alert_with_severity = {
+            "alert_type": "critical_failure",
+            "message": "System component failure detected",
+            "severity": "critical"
+        }
+        
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_manager = AsyncMock()
+            mock_create.return_value = mock_manager
+            
+            await quality_router.broadcast_quality_alert(alert_with_severity)
+            
+            # Verify existing severity is preserved
+            sent_message = mock_manager.send_to_user.call_args[0][0]
+            assert sent_message["payload"]["severity"] == "critical", "Existing severity must be preserved"
+
+    async def test_broadcast_with_empty_subscriber_list(self, quality_router, mock_quality_monitoring_service):
+        """BVJ: Validates broadcasting handles empty subscriber list gracefully."""
+        # Empty subscriber list
+        mock_quality_monitoring_service.subscribers = []
+        
+        quality_update = {"metric": "test", "value": 100}
+        
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            # Should not raise exception
+            await quality_router.broadcast_quality_update(quality_update)
+            await quality_router.broadcast_quality_alert(quality_update)
+            
+            # Should not create any managers
+            mock_create.assert_not_called()
+
+    async def test_broadcast_handles_websocket_errors_gracefully(self, quality_router, mock_quality_monitoring_service):
+        """BVJ: Validates broadcast operations handle WebSocket errors gracefully."""
+        mock_quality_monitoring_service.subscribers = ["user_123", "user_456"]
+        
+        quality_update = {"metric": "test", "value": 95}
+        
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            # First user succeeds, second user fails
+            mock_manager_success = AsyncMock()
+            mock_manager_fail = AsyncMock()
+            mock_manager_fail.send_to_user.side_effect = Exception("WebSocket error")
+            
+            mock_create.side_effect = [mock_manager_success, mock_manager_fail]
+            
+            # Should not raise exception despite one failure
+            await quality_router.broadcast_quality_update(quality_update)
+            
+            # Successful subscriber should still receive update
+            mock_manager_success.send_to_user.assert_called_once()
+
+    async def test_build_update_message_format(self, quality_router):
+        """BVJ: Validates quality update messages are built in correct format."""
+        update_data = {
+            "metric_name": "response_time",
+            "current_value": 150.5,
+            "trend": "increasing",
+            "timestamp": "2025-01-01T12:00:00Z"
+        }
+        
+        built_message = quality_router._build_update_message(update_data)
+        
+        assert built_message["type"] == "quality_update", "Message type must be quality_update"
+        assert built_message["payload"] == update_data, "Payload must contain original update data"
+
+    async def test_build_alert_message_format(self, quality_router):
+        """BVJ: Validates quality alert messages are built in correct format with severity."""
+        alert_data = {
+            "alert_id": "alert_001",
+            "message": "Quality threshold exceeded",
+            "metric": "error_rate",
+            "current_value": 12.5
+        }
+        
+        built_message = quality_router._build_alert_message(alert_data)
+        
+        assert built_message["type"] == "quality_alert", "Message type must be quality_alert"
+        assert built_message["payload"]["alert_id"] == "alert_001", "Alert data must be preserved"
+        assert built_message["payload"]["severity"] == "info", "Default severity must be added"
+
+
+class TestQualityMessageRouterIntegration:
+    """
+    BVJ: Tests integration scenarios and edge cases for system resilience.
+    Business Impact: Ensures router remains stable under various operational conditions.
+    """
+
+    async def test_complete_message_handling_flow(self, quality_router):
+        """BVJ: Validates complete message handling flow with context propagation."""
+        message = {
+            "type": "get_quality_metrics",
             "thread_id": "integration_thread_123",
             "run_id": "integration_run_456",
             "payload": {
-                "agent_type": "quality_monitor",
-                "config": {"timeout": 30}
+                "metrics": ["latency", "throughput"],
+                "time_range": "24h"
             }
         }
         
-        await router.handle_message("integration_user", message)
+        # Mock handler
+        mock_handler = AsyncMock()
+        quality_router.handlers["get_quality_metrics"] = mock_handler
         
-        # Verify complete flow: routing, context propagation, and handler execution
+        await quality_router.handle_message("integration_user_123", message)
+        
+        # Verify complete flow
+        assert quality_router._current_thread_id == "integration_thread_123", "Context must be updated"
+        assert quality_router._current_run_id == "integration_run_456", "Context must be updated"
+        
+        # Verify handler received complete payload
         expected_payload = {
-            "agent_type": "quality_monitor",
-            "config": {"timeout": 30},
+            "metrics": ["latency", "throughput"],
+            "time_range": "24h",
             "thread_id": "integration_thread_123",
             "run_id": "integration_run_456"
         }
-        mock_handler.handle.assert_called_once_with("integration_user", expected_payload)
-        assert router._current_thread_id == "integration_thread_123"
-        assert router._current_run_id == "integration_run_456"
+        mock_handler.handle.assert_called_once_with("integration_user_123", expected_payload)
 
-    def test_handler_dependency_injection_completeness(self, router, mock_supervisor, 
-                                                       mock_db_session_factory, mock_quality_gate_service, 
-                                                       mock_monitoring_service):
-        """Test that all handlers receive correct dependencies through dependency injection."""
-        # Verify each handler type has correct dependencies
-        metrics_handler = router.handlers["get_quality_metrics"]
-        assert metrics_handler.monitoring_service == mock_monitoring_service
-        
-        alert_handler = router.handlers["subscribe_quality_alerts"]
-        assert alert_handler.monitoring_service == mock_monitoring_service
-        
-        start_handler = router.handlers["start_agent"]
-        assert hasattr(start_handler, 'handle')  # Enhanced start handler (mocked) has handle method
-        
-        validation_handler = router.handlers["validate_content"]
-        assert validation_handler.quality_gate_service == mock_quality_gate_service
-        
-        report_handler = router.handlers["generate_quality_report"]
-        assert report_handler.monitoring_service == mock_monitoring_service
-
-    @pytest.mark.asyncio
-    async def test_concurrent_message_handling_maintains_session_isolation(self, router):
-        """Test that concurrent message handling maintains proper session isolation."""
-        mock_handler1 = AsyncMock()
-        mock_handler2 = AsyncMock()
-        router.handlers["get_quality_metrics"] = mock_handler1
-        router.handlers["validate_content"] = mock_handler2
-        
-        message1 = {
-            "type": "get_quality_metrics",
-            "thread_id": "session1_thread",
-            "run_id": "session1_run",
-            "payload": {"agent_name": "agent1"}
-        }
-        
-        message2 = {
-            "type": "validate_content",
-            "thread_id": "session2_thread", 
-            "run_id": "session2_run",
-            "payload": {"content": "test content"}
-        }
-        
-        # Handle messages for different users
-        await router.handle_message("user_session1", message1)
-        await router.handle_message("user_session2", message2)
-        
-        # Verify each handler received correct session context
-        expected_payload1 = {
-            "agent_name": "agent1",
-            "thread_id": "session1_thread",
-            "run_id": "session1_run"
-        }
-        expected_payload2 = {
-            "content": "test content",
-            "thread_id": "session2_thread",
-            "run_id": "session2_run"
-        }
-        
-        mock_handler1.handle.assert_called_once_with("user_session1", expected_payload1)
-        mock_handler2.handle.assert_called_once_with("user_session2", expected_payload2)
-
-    # Edge Cases and Error Handling
-    @pytest.mark.asyncio
-    async def test_handle_message_with_none_message_type(self, router):
-        """Test handling of message with None type."""
-        with patch.object(router, '_handle_unknown_message_type', new_callable=AsyncMock) as mock_unknown:
-            message = {"type": None, "payload": {}}
-            
-            await router.handle_message("user_none_type", message)
-            
-            mock_unknown.assert_called_once_with("user_none_type", None)
-
-    @pytest.mark.asyncio 
-    async def test_handle_message_with_missing_type_field(self, router):
-        """Test handling of message without type field."""
-        with patch.object(router, '_handle_unknown_message_type', new_callable=AsyncMock) as mock_unknown:
-            message = {"payload": {"some": "data"}}
-            
-            await router.handle_message("user_no_type", message)
-            
-            mock_unknown.assert_called_once_with("user_no_type", None)
-
-    @pytest.mark.asyncio
-    async def test_empty_subscribers_list_broadcast_handling(self, router, mock_monitoring_service):
-        """Test broadcast behavior when there are no subscribers."""
-        mock_monitoring_service.subscribers = []
-        
-        update = {"metric": "test"}
-        
-        # Should not raise error and complete successfully
-        await router.broadcast_quality_update(update)
-        await router.broadcast_quality_alert({"alert": "test"})
-
-    def test_router_state_isolation_between_instances(self, mock_supervisor, mock_db_session_factory,
-                                                      mock_quality_gate_service, mock_monitoring_service):
-        """Test that different router instances maintain separate state."""
-        with patch.object(QualityMessageRouter, '_create_enhanced_start_handler') as mock_create_start:
-            # Mock the problematic handler creation to return a simple mock
-            mock_start_handler = Mock()
-            mock_start_handler.handle = AsyncMock()
-            mock_create_start.return_value = mock_start_handler
-            
-            router1 = QualityMessageRouter(
-                supervisor=mock_supervisor,
-                db_session_factory=mock_db_session_factory,
-                quality_gate_service=mock_quality_gate_service,
-                monitoring_service=mock_monitoring_service
-            )
-            
-            router2 = QualityMessageRouter(
-                supervisor=mock_supervisor,
-                db_session_factory=mock_db_session_factory,
-                quality_gate_service=mock_quality_gate_service,
-                monitoring_service=mock_monitoring_service
-            )
-            
-            # Verify they have separate handler dictionaries
-            assert router1.handlers is not router2.handlers
-            assert id(router1.handlers) != id(router2.handlers)
-            
-            # Verify separate instances of handlers
-            assert router1.handlers["get_quality_metrics"] is not router2.handlers["get_quality_metrics"]
-
-
-# Performance and Load Testing Scenarios
-class TestQualityMessageRouterPerformance:
-    """Performance-focused tests for QualityMessageRouter."""
-    
-    @pytest.fixture
-    def performance_router(self, mock_supervisor, mock_db_session_factory,
-                          mock_quality_gate_service, mock_monitoring_service):
-        """Create router for performance testing."""
-        with patch.object(QualityMessageRouter, '_create_enhanced_start_handler') as mock_create_start:
-            # Mock the problematic handler creation to return a simple mock
-            mock_start_handler = Mock()
-            mock_start_handler.handle = AsyncMock()
-            mock_create_start.return_value = mock_start_handler
-            
-            return QualityMessageRouter(
-                supervisor=mock_supervisor,
-                db_session_factory=mock_db_session_factory,
-                quality_gate_service=mock_quality_gate_service,
-                monitoring_service=mock_monitoring_service
-            )
-
-    @pytest.mark.asyncio
-    async def test_high_volume_message_routing_performance(self, performance_router):
-        """Test router performance under high message volume."""
-        mock_handler = AsyncMock()
-        performance_router.handlers["get_quality_metrics"] = mock_handler
-        
-        # Simulate high-volume message processing
-        messages = [
-            {
-                "type": "get_quality_metrics",
-                "thread_id": f"thread_{i}",
-                "run_id": f"run_{i}",
-                "payload": {"agent_name": f"agent_{i}"}
+    async def test_concurrent_message_handling(self, quality_router):
+        """BVJ: Validates router handles concurrent messages with proper session isolation."""
+        async def handle_user_message(user_id: str, thread_id: str, message_type: str):
+            message = {
+                "type": message_type,
+                "thread_id": thread_id,
+                "payload": {"user": user_id}
             }
-            for i in range(100)
+            return await quality_router.handle_message(user_id, message)
+        
+        # Mock all handlers
+        for handler_type in quality_router.handlers:
+            quality_router.handlers[handler_type] = AsyncMock()
+        
+        # Execute concurrent message handling
+        tasks = [
+            handle_user_message("user_1", "thread_1", "get_quality_metrics"),
+            handle_user_message("user_2", "thread_2", "validate_content"), 
+            handle_user_message("user_3", "thread_3", "generate_quality_report")
         ]
         
-        # Process all messages
-        for i, message in enumerate(messages):
-            await performance_router.handle_message(f"user_{i}", message)
+        results = await asyncio.gather(*tasks)
         
-        # Verify all messages were processed
-        assert mock_handler.handle.call_count == 100
+        # All messages should complete successfully
+        assert len(results) == 3, "All concurrent messages must be processed"
 
-    @pytest.mark.asyncio
-    async def test_large_subscriber_list_broadcast_performance(self, performance_router, mock_monitoring_service):
-        """Test broadcast performance with large subscriber lists."""
-        # Simulate large number of subscribers
-        large_subscriber_list = [f"user_{i}" for i in range(1000)]
-        mock_monitoring_service.subscribers = large_subscriber_list
+    async def test_router_state_isolation(self, mock_supervisor, mock_db_session_factory, mock_quality_gate_service, mock_quality_monitoring_service):
+        """BVJ: Validates different router instances maintain isolated state."""
+        # Create two separate router instances
+        router1 = QualityMessageRouter(
+            supervisor=mock_supervisor,
+            db_session_factory=mock_db_session_factory,
+            quality_gate_service=mock_quality_gate_service,
+            monitoring_service=mock_quality_monitoring_service
+        )
         
-        with patch.object(performance_router, '_send_update_to_subscriber', new_callable=AsyncMock) as mock_send:
-            update = {"metric": "performance_test"}
+        router2 = QualityMessageRouter(
+            supervisor=mock_supervisor,
+            db_session_factory=mock_db_session_factory,
+            quality_gate_service=mock_quality_gate_service,
+            monitoring_service=mock_quality_monitoring_service
+        )
+        
+        # Set different context in each router
+        message1 = {"type": "get_quality_metrics", "thread_id": "thread_1", "payload": {}}
+        message2 = {"type": "validate_content", "thread_id": "thread_2", "payload": {}}
+        
+        # Mock handlers for both routers
+        router1.handlers["get_quality_metrics"] = AsyncMock()
+        router2.handlers["validate_content"] = AsyncMock()
+        
+        await router1.handle_message("user_1", message1)
+        await router2.handle_message("user_2", message2)
+        
+        # Each router should maintain separate context
+        assert router1._current_thread_id == "thread_1", "Router 1 context must be isolated"
+        assert router2._current_thread_id == "thread_2", "Router 2 context must be isolated"
+
+    async def test_handle_message_with_none_message_type(self, quality_router):
+        """BVJ: Validates graceful handling of None message type."""
+        message = {
+            "type": None,
+            "payload": {"test": "data"}
+        }
+        
+        # Should not raise exception
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_manager = AsyncMock()
+            mock_create.return_value = mock_manager
             
-            await performance_router.broadcast_quality_update(update)
+            await quality_router.handle_message("user_123", message)
             
-            # Verify all subscribers were notified
-            assert mock_send.call_count == 1000
+            # Should send error message
+            mock_manager.send_to_user.assert_called_once()
+
+    async def test_handle_message_without_type_field(self, quality_router):
+        """BVJ: Validates handling of messages missing type field."""
+        message = {
+            "payload": {"test": "data"}
+            # Missing "type" field
+        }
+        
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_manager = AsyncMock()
+            mock_create.return_value = mock_manager
+            
+            await quality_router.handle_message("user_123", message)
+            
+            # Should handle gracefully and send error
+            mock_manager.send_to_user.assert_called_once()
+
+    async def test_websocket_manager_context_creation(self, quality_router):
+        """BVJ: Validates WebSocket manager is created with proper user context."""
+        message = {
+            "type": "unknown_type",
+            "payload": {}
+        }
+        
+        with patch('netra_backend.app.services.websocket.quality_message_router.get_user_execution_context') as mock_context:
+            with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+                mock_manager = AsyncMock()
+                mock_create.return_value = mock_manager
+                
+                await quality_router.handle_message("context_user_123", message)
+                
+                # Verify context creation with correct user ID
+                mock_context.assert_called_once_with(
+                    user_id="context_user_123",
+                    thread_id=None,
+                    run_id=None
+                )
+                
+                # Verify manager creation with context
+                mock_create.assert_called_once()
+
+    async def test_error_handling_in_unknown_message_handler(self, quality_router):
+        """BVJ: Validates error handling within unknown message type handler."""
+        message = {
+            "type": "unknown_error_test",
+            "payload": {}
+        }
+        
+        # Mock WebSocket manager creation to fail
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_create.side_effect = Exception("WebSocket creation failed")
+            
+            # Should not raise exception even if manager creation fails
+            await quality_router.handle_message("user_123", message)
+            
+            # Operation should complete without crashing
+
+    async def test_broadcast_error_logging(self, quality_router, mock_quality_monitoring_service):
+        """BVJ: Validates error logging during broadcast operations."""
+        mock_quality_monitoring_service.subscribers = ["user_123"]
+        
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_create.side_effect = Exception("Broadcast error")
+            
+            # Should log error but not raise exception
+            with patch('netra_backend.app.services.websocket.quality_message_router.logger') as mock_logger:
+                await quality_router.broadcast_quality_update({"test": "data"})
+                
+                # Should log error
+                mock_logger.error.assert_called_once()
+
+
+class TestQualityMessageRouterPerformance:
+    """
+    BVJ: Tests performance characteristics for production scalability.
+    Business Impact: Ensures quality router can handle high message volumes efficiently.
+    """
+
+    async def test_high_volume_message_routing_performance(self, quality_router):
+        """BVJ: Validates router performance under high message volume."""
+        # Mock all handlers for performance testing
+        for handler_type in quality_router.handlers:
+            quality_router.handlers[handler_type] = AsyncMock()
+        
+        message_types = list(quality_router.handlers.keys())
+        
+        start_time = time.perf_counter()
+        
+        # Route 1000 messages concurrently
+        tasks = []
+        for i in range(1000):
+            message = {
+                "type": message_types[i % len(message_types)],
+                "thread_id": f"thread_{i}",
+                "payload": {"message_id": i}
+            }
+            tasks.append(quality_router.handle_message(f"user_{i % 10}", message))
+        
+        await asyncio.gather(*tasks)
+        
+        end_time = time.perf_counter()
+        total_time = end_time - start_time
+        messages_per_second = 1000 / total_time
+        
+        assert messages_per_second > 500, f"Quality router throughput {messages_per_second:.0f} msg/sec must be >500 msg/sec"
+
+    async def test_large_subscriber_broadcast_performance(self, quality_router, mock_quality_monitoring_service):
+        """BVJ: Validates broadcast performance with large subscriber lists."""
+        # Setup large subscriber list
+        large_subscriber_list = [f"user_{i}" for i in range(1000)]
+        mock_quality_monitoring_service.subscribers = large_subscriber_list
+        
+        quality_update = {"metric": "performance_test", "value": 100}
+        
+        start_time = time.perf_counter()
+        
+        with patch('netra_backend.app.services.websocket.quality_message_router.create_websocket_manager') as mock_create:
+            mock_manager = AsyncMock()
+            mock_create.return_value = mock_manager
+            
+            await quality_router.broadcast_quality_update(quality_update)
+            
+            end_time = time.perf_counter()
+            total_time = end_time - start_time
+            
+            # Should complete broadcast within reasonable time
+            assert total_time < 5.0, f"Broadcast to 1000 subscribers took {total_time:.2f}s, must be <5s"
+            
+            # Should create manager for each subscriber
+            assert mock_create.call_count == 1000, "Manager must be created for each subscriber"

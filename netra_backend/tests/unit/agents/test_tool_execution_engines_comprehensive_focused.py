@@ -122,7 +122,7 @@ class RealMockTool:
                 if self.fail_mode == "permission_denied":
                     raise PermissionError(f"User not authorized for {self.name}")
                 elif self.fail_mode == "timeout":
-                    await asyncio.sleep(10)  # Force timeout
+                    await asyncio.sleep(2)  # Force timeout
                 elif self.fail_mode == "invalid_input":
                     raise ValueError(f"Invalid input for {self.name}")
                 else:

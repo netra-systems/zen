@@ -66,11 +66,7 @@ class QualityMessageRouter:
 
     def _create_enhanced_start_handler(self) -> QualityEnhancedStartAgentHandler:
         """Create enhanced start agent handler."""
-        return QualityEnhancedStartAgentHandler(
-            self.supervisor, 
-            self.db_session_factory, 
-            self.quality_gate_service
-        )
+        return QualityEnhancedStartAgentHandler()
 
     def _create_validation_handler(self) -> QualityValidationHandler:
         """Create validation handler."""

@@ -124,6 +124,46 @@ def setup_auth_middleware(app: FastAPI) -> None:
     logger.debug("Authentication middleware configured with WebSocket exclusions")
 
 
+def setup_gcp_websocket_readiness_middleware(app: FastAPI) -> None:
+    """
+    Setup GCP WebSocket readiness middleware to prevent 1011 errors.
+    
+    CRITICAL: This middleware prevents GCP Cloud Run from accepting WebSocket
+    connections before required services are ready, which causes 1011 errors.
+    
+    SSOT COMPLIANCE: Uses the unified GCP WebSocket initialization validator.
+    """
+    try:
+        from netra_backend.app.middleware.gcp_websocket_readiness_middleware import (
+            GCPWebSocketReadinessMiddleware
+        )
+        from shared.isolated_environment import get_env
+        
+        env_manager = get_env()
+        environment = env_manager.get('ENVIRONMENT', '').lower()
+        is_gcp = environment in ['staging', 'production']
+        
+        # Only add middleware in GCP environments
+        if is_gcp:
+            # GCP environments need longer timeout due to Cloud SQL connection delays
+            timeout_seconds = 90.0 if environment == 'staging' else 60.0
+            
+            app.add_middleware(
+                GCPWebSocketReadinessMiddleware,
+                timeout_seconds=timeout_seconds
+            )
+            logger.info(f"GCP WebSocket readiness middleware added for {environment} environment (timeout: {timeout_seconds}s)")
+        else:
+            logger.debug(f"GCP WebSocket readiness middleware skipped for {environment} environment")
+            
+    except ImportError as e:
+        logger.warning(f"GCP WebSocket readiness middleware not available: {e}")
+    except Exception as e:
+        logger.error(f"Error setting up GCP WebSocket readiness middleware: {e}")
+        # Don't fail app startup if middleware setup fails
+        pass
+
+
 def setup_session_middleware(app: FastAPI) -> None:
     """Setup session middleware."""
     from netra_backend.app.clients.auth_client_core import AuthServiceClient

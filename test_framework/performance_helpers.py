@@ -9,7 +9,7 @@ import asyncio
 import functools
 import time
 from contextlib import asynccontextmanager, contextmanager
-from typing import Any, Callable, Optional, TypeVar, Union
+from typing import Any, Callable, Optional, TypeVar, Union, Dict, List, Tuple
 from unittest.mock import patch
 
 T = TypeVar('T')
@@ -320,3 +320,332 @@ def mock_time_consuming_operations():
         # Add common slow operations here
         spec=True
     )
+
+
+# Performance Profiling Classes for State Machine Benchmarks
+class PerformanceProfiler:
+    """
+    Comprehensive performance profiler for benchmarking state machine operations.
+    
+    Provides CPU profiling, memory tracking, and execution timing for performance tests.
+    Designed specifically for validating state machine performance SLAs.
+    """
+    
+    def __init__(self):
+        self.measurements = {}
+        self.start_times = {}
+        self.memory_baseline = 0
+        
+    def start_profiling(self, operation_name: str):
+        """Start profiling an operation."""
+        self.start_times[operation_name] = time.perf_counter()
+        
+    def end_profiling(self, operation_name: str) -> float:
+        """End profiling and return duration in milliseconds."""
+        if operation_name not in self.start_times:
+            raise ValueError(f"No profiling started for operation: {operation_name}")
+            
+        duration = (time.perf_counter() - self.start_times[operation_name]) * 1000
+        self.measurements[operation_name] = duration
+        del self.start_times[operation_name]
+        return duration
+        
+    def get_measurements(self) -> Dict[str, float]:
+        """Get all recorded measurements."""
+        return self.measurements.copy()
+        
+    def clear_measurements(self):
+        """Clear all measurements."""
+        self.measurements.clear()
+        self.start_times.clear()
+
+
+class MemoryTracker:
+    """
+    Memory usage tracker for state machine performance tests.
+    
+    Tracks memory consumption during state machine operations to ensure
+    memory efficiency requirements are met.
+    """
+    
+    def __init__(self):
+        self.baseline_memory = 0
+        self.peak_memory = 0
+        self.memory_samples = []
+        
+    def set_baseline(self):
+        """Set baseline memory usage."""
+        try:
+            import psutil
+            process = psutil.Process()
+            self.baseline_memory = process.memory_info().rss / (1024 * 1024)  # MB
+        except ImportError:
+            # Fallback if psutil not available
+            self.baseline_memory = 0
+            
+    def record_memory_sample(self, label: str = None):
+        """Record current memory usage."""
+        try:
+            import psutil
+            process = psutil.Process()
+            current_memory = process.memory_info().rss / (1024 * 1024)  # MB
+            self.memory_samples.append({
+                'timestamp': time.time(),
+                'memory_mb': current_memory,
+                'memory_from_baseline': current_memory - self.baseline_memory,
+                'label': label or f'sample_{len(self.memory_samples)}'
+            })
+            
+            if current_memory > self.peak_memory:
+                self.peak_memory = current_memory
+                
+        except ImportError:
+            # Fallback if psutil not available
+            self.memory_samples.append({
+                'timestamp': time.time(),
+                'memory_mb': 0,
+                'memory_from_baseline': 0,
+                'label': label or f'sample_{len(self.memory_samples)}'
+            })
+            
+    def get_peak_usage(self) -> float:
+        """Get peak memory usage from baseline in MB."""
+        return self.peak_memory - self.baseline_memory
+        
+    def get_current_usage(self) -> float:
+        """Get current memory usage from baseline in MB."""
+        try:
+            import psutil
+            process = psutil.Process()
+            current_memory = process.memory_info().rss / (1024 * 1024)  # MB
+            return current_memory - self.baseline_memory
+        except ImportError:
+            return 0
+            
+    def get_memory_samples(self) -> List[Dict[str, Any]]:
+        """Get all memory samples."""
+        return self.memory_samples.copy()
+
+
+class ConcurrencyBenchmark:
+    """
+    Concurrency benchmarker for testing state machine performance under load.
+    
+    Manages concurrent operations and tracks performance metrics during
+    multi-threaded state machine usage.
+    """
+    
+    def __init__(self, max_workers: int = 10):
+        self.max_workers = max_workers
+        self.operation_results = []
+        self.error_count = 0
+        self.success_count = 0
+        
+    def run_concurrent_operations(self, operation_func: Callable, operation_args: List[Any], timeout: float = 30.0) -> Dict[str, Any]:
+        """
+        Run multiple operations concurrently and collect performance metrics.
+        
+        Args:
+            operation_func: Function to execute concurrently
+            operation_args: List of argument tuples for each operation
+            timeout: Maximum time to wait for all operations
+            
+        Returns:
+            Dictionary with performance metrics
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
+        
+        start_time = time.perf_counter()
+        operation_times = []
+        
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Submit all operations
+            futures = [
+                executor.submit(self._timed_operation, operation_func, args)
+                for args in operation_args
+            ]
+            
+            # Collect results
+            try:
+                for future in as_completed(futures, timeout=timeout):
+                    try:
+                        duration, result = future.result()
+                        operation_times.append(duration)
+                        self.operation_results.append(result)
+                        self.success_count += 1
+                    except Exception as e:
+                        self.error_count += 1
+                        self.operation_results.append({'error': str(e)})
+                        
+            except TimeoutError:
+                self.error_count += len([f for f in futures if not f.done()])
+                
+        total_duration = time.perf_counter() - start_time
+        
+        # Calculate metrics
+        if operation_times:
+            import statistics
+            metrics = {
+                'total_operations': len(operation_args),
+                'successful_operations': self.success_count,
+                'failed_operations': self.error_count,
+                'total_duration_seconds': total_duration,
+                'operations_per_second': len(operation_args) / total_duration if total_duration > 0 else 0,
+                'mean_operation_time_ms': statistics.mean(operation_times),
+                'min_operation_time_ms': min(operation_times),
+                'max_operation_time_ms': max(operation_times),
+                'operation_times': operation_times
+            }
+            
+            if len(operation_times) >= 2:
+                metrics['stdev_operation_time_ms'] = statistics.stdev(operation_times)
+                
+            if len(operation_times) >= 20:
+                metrics['p95_operation_time_ms'] = statistics.quantiles(operation_times, n=20)[18]
+                
+            if len(operation_times) >= 100:
+                metrics['p99_operation_time_ms'] = statistics.quantiles(operation_times, n=100)[98]
+                
+        else:
+            metrics = {
+                'total_operations': len(operation_args),
+                'successful_operations': 0,
+                'failed_operations': self.error_count,
+                'total_duration_seconds': total_duration,
+                'operations_per_second': 0,
+                'mean_operation_time_ms': 0,
+                'operation_times': []
+            }
+            
+        return metrics
+        
+    def _timed_operation(self, operation_func: Callable, args: Any) -> Tuple[float, Any]:
+        """Execute operation with timing."""
+        start_time = time.perf_counter()
+        try:
+            if isinstance(args, (list, tuple)):
+                result = operation_func(*args)
+            else:
+                result = operation_func(args)
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            return duration_ms, result
+        except Exception as e:
+            duration_ms = (time.perf_counter() - start_time) * 1000
+            return duration_ms, {'error': str(e)}
+            
+    def reset_metrics(self):
+        """Reset all collected metrics."""
+        self.operation_results.clear()
+        self.error_count = 0
+        self.success_count = 0
+
+
+class StatisticalAnalyzer:
+    """
+    Statistical analyzer for performance test results.
+    
+    Provides statistical analysis of performance measurements to validate
+    SLA compliance and detect performance regressions.
+    """
+    
+    def __init__(self):
+        self.samples = {}
+        
+    def add_samples(self, test_name: str, samples: List[float]):
+        """Add performance samples for a test."""
+        if test_name not in self.samples:
+            self.samples[test_name] = []
+        self.samples[test_name].extend(samples)
+        
+    def analyze_distribution(self, test_name: str) -> Dict[str, float]:
+        """Analyze statistical distribution of samples."""
+        if test_name not in self.samples or not self.samples[test_name]:
+            return {}
+            
+        samples = self.samples[test_name]
+        import statistics
+        
+        analysis = {
+            'count': len(samples),
+            'min': min(samples),
+            'max': max(samples),
+            'mean': statistics.mean(samples),
+            'median': statistics.median(samples)
+        }
+        
+        if len(samples) >= 2:
+            analysis['stdev'] = statistics.stdev(samples)
+            analysis['variance'] = statistics.variance(samples)
+            
+        if len(samples) >= 4:
+            analysis['q1'] = statistics.quantiles(samples, n=4)[0]
+            analysis['q3'] = statistics.quantiles(samples, n=4)[2]
+            analysis['iqr'] = analysis['q3'] - analysis['q1']
+            
+        if len(samples) >= 20:
+            quantiles = statistics.quantiles(samples, n=20)
+            analysis['p90'] = quantiles[17]
+            analysis['p95'] = quantiles[18]
+            analysis['p99'] = quantiles[19] if len(samples) >= 100 else analysis['p95']
+            
+        return analysis
+        
+    def check_sla_compliance(self, test_name: str, sla_targets: Dict[str, float]) -> Dict[str, Any]:
+        """Check if test results meet SLA targets."""
+        analysis = self.analyze_distribution(test_name)
+        if not analysis:
+            return {'compliant': False, 'reason': 'No samples available'}
+            
+        violations = []
+        for metric, target in sla_targets.items():
+            if metric in analysis and analysis[metric] > target:
+                violations.append({
+                    'metric': metric,
+                    'target': target,
+                    'actual': analysis[metric],
+                    'violation_ratio': analysis[metric] / target
+                })
+                
+        return {
+            'compliant': len(violations) == 0,
+            'violations': violations,
+            'analysis': analysis
+        }
+        
+    def detect_regression(self, test_name: str, baseline_metrics: Dict[str, float], tolerance: float = 1.5) -> Dict[str, Any]:
+        """Detect performance regression compared to baseline."""
+        current_analysis = self.analyze_distribution(test_name)
+        if not current_analysis:
+            return {'regression_detected': False, 'reason': 'No current samples'}
+            
+        regressions = []
+        for metric, baseline_value in baseline_metrics.items():
+            if metric in current_analysis:
+                current_value = current_analysis[metric]
+                ratio = current_value / baseline_value if baseline_value > 0 else float('inf')
+                
+                if ratio > tolerance:
+                    regressions.append({
+                        'metric': metric,
+                        'baseline': baseline_value,
+                        'current': current_value,
+                        'regression_ratio': ratio,
+                        'tolerance': tolerance
+                    })
+                    
+        return {
+            'regression_detected': len(regressions) > 0,
+            'regressions': regressions,
+            'current_analysis': current_analysis
+        }
+        
+    def get_all_samples(self) -> Dict[str, List[float]]:
+        """Get all collected samples."""
+        return {name: samples.copy() for name, samples in self.samples.items()}
+        
+    def clear_samples(self, test_name: str = None):
+        """Clear samples for a specific test or all tests."""
+        if test_name:
+            self.samples.pop(test_name, None)
+        else:
+            self.samples.clear()

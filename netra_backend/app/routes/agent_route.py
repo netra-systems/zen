@@ -1,7 +1,7 @@
 """Agent routes - Main agent endpoint handlers."""
 from typing import Any, Dict, Optional, Annotated
 
-from fastapi import APIRouter, Depends, Request, WebSocket
+from fastapi import APIRouter, Depends, Request, WebSocket, HTTPException
 from pydantic import BaseModel, Field
 
 from netra_backend.app.agents.supervisor_consolidated import (
@@ -393,5 +393,69 @@ async def stream_response(
     except Exception as e:
         logger.error(f"Streaming response failed for user {context.user_id}: {e}")
         raise
+
+
+# ============================================================================
+# FRONTEND COMPATIBILITY ENDPOINTS - Required for frontend connectivity
+# ============================================================================
+
+class AgentExecuteV2Request(BaseModel):
+    """Request model for v2 execute endpoint that frontend expects."""
+    message: str = Field(..., description="Message to process")
+    thread_id: Optional[str] = Field(None, description="Thread ID for conversation continuity")
+    agent_type: Optional[str] = Field("supervisor", description="Agent type to execute")
+    context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
+
+
+class AgentExecuteV2Response(BaseModel):
+    """Response model for v2 execute endpoint."""
+    run_id: str = Field(..., description="Run ID for tracking execution")
+    status: str = Field(..., description="Execution status")
+    message: str = Field(..., description="Response message")
+    user_id: str = Field(..., description="User ID")
+    thread_id: str = Field(..., description="Thread ID")
+    session_scoped: bool = Field(True, description="Uses request-scoped dependencies")
+
+
+@router.post("/v2/execute", response_model=AgentExecuteV2Response)
+async def execute_agent_v2(
+    request: AgentExecuteV2Request,
+    context: RequestScopedContextDep,
+    supervisor: RequestScopedSupervisorDep
+) -> AgentExecuteV2Response:
+    """Execute agent v2 - Main endpoint for frontend agent execution.
+    
+    This endpoint provides the /api/agent/v2/execute functionality that the frontend expects.
+    It uses the existing run_agent_v2 functionality with proper schema mapping.
+    """
+    logger.info(f"Processing execute_agent_v2 for user {context.user_id}, thread {context.thread_id}")
+    
+    try:
+        # Use thread_id from request if provided, otherwise use context
+        effective_thread_id = request.thread_id or context.thread_id
+        
+        # Execute using request-scoped supervisor (same as run_agent_v2)
+        await supervisor.run(
+            request.message, 
+            context.run_id, 
+            stream_updates=True
+        )
+        
+        return AgentExecuteV2Response(
+            run_id=context.run_id,
+            status="started",
+            message=f"Agent execution started successfully",
+            user_id=context.user_id,
+            thread_id=effective_thread_id,
+            session_scoped=True
+        )
+        
+    except Exception as e:
+        logger.error(f"Agent v2 execution failed for user {context.user_id}: {e}")
+        # Re-raise to let FastAPI handle the error response
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Agent execution failed: {str(e)}"
+        )
 
 

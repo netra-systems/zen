@@ -179,6 +179,53 @@ class GCPErrorReporter:
             
         except Exception as e:
             logger.error(f"Failed to report message to GCP: {e}")
+    
+    async def report_error(self, 
+                          error: Exception, 
+                          context: Optional[Dict[str, Any]] = None) -> bool:
+        """Report an error to GCP Error Reporting with business context.
+        
+        Args:
+            error: The exception to report
+            context: Business context including user_id, error_type, etc.
+            
+        Returns:
+            bool: True if error was reported successfully, False otherwise
+        """
+        if not self.enabled or not self.client:
+            logger.debug(f"GCP error reporting not enabled, skipping: {type(error).__name__}")
+            return False
+        
+        if not self._check_rate_limit():
+            logger.warning("GCP error reporting rate limit exceeded")
+            return False
+        
+        try:
+            # Extract context information
+            user_id = None
+            http_context = None
+            extra_context = {}
+            
+            if context:
+                user_id = context.get('user_id')
+                http_context = context.get('http_context')
+                # Copy all context as extra context
+                extra_context.update(context)
+            
+            # Report the exception with context
+            self.report_exception(
+                exception=error,
+                user=user_id,
+                http_context=http_context,
+                extra_context=extra_context
+            )
+            
+            logger.debug(f"Successfully reported error to GCP: {type(error).__name__}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to report error to GCP: {e}")
+            return False
 
 
 # Singleton instance

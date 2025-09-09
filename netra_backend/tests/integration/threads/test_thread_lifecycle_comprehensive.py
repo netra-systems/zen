@@ -72,9 +72,12 @@ async def database_manager():
     env.set('USE_REAL_SERVICES', 'true', source='integration_test')
     env.set('SKIP_MOCKS', 'true', source='integration_test')
     
-    db_manager = DatabaseManager()
-    await db_manager.initialize()
-    return db_manager
+    try:
+        db_manager = DatabaseManager()
+        await db_manager.initialize()
+        return db_manager
+    except Exception as e:
+        pytest.skip(f"Real database not available for integration testing: {e}")
 
 
 @pytest.fixture

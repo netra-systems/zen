@@ -252,12 +252,13 @@ class AgentExecutionCore:
                     result.metrics = self._calculate_performance_metrics(start_time, heartbeat)
                     return result
                 else:
-                    # Agent didn't return proper result format
+                    # Agent didn't return proper result format - wrap result in standard format
                     return AgentExecutionResult(
                         success=True,
                         agent_name=context.agent_name,
                         duration=duration,
-                        metrics=self._calculate_performance_metrics(start_time, heartbeat)
+                        metrics=self._calculate_performance_metrics(start_time, heartbeat),
+                        data=result  # Store the actual agent result in data field
                     )
                     
         except asyncio.TimeoutError:

@@ -7,7 +7,7 @@ import time
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.auth_integration.auth import get_current_active_user
@@ -106,6 +106,39 @@ async def get_thread_messages(
     """Get messages for a specific thread"""
     handler = lambda: handle_get_messages_request(db, thread_id, current_user.id, limit, offset)
     return await handle_route_with_error_logging(handler, f"getting messages for thread {thread_id}")
+
+
+class SendMessageRequest(BaseModel):
+    """Request model for sending a message to a thread."""
+    message: str = Field(..., description="Message content to send")
+    metadata: Optional[dict] = Field(None, description="Additional message metadata")
+
+
+class SendMessageResponse(BaseModel):
+    """Response model for sending a message to a thread."""
+    id: str = Field(..., description="Message ID")
+    thread_id: str = Field(..., description="Thread ID")
+    content: str = Field(..., description="Message content")
+    role: str = Field(..., description="Message role (user/assistant)")
+    created_at: int = Field(..., description="Creation timestamp")
+
+
+@router.post("/{thread_id}/messages", response_model=SendMessageResponse)
+async def send_thread_message(
+    thread_id: str, 
+    request: SendMessageRequest,
+    db: DbDep, 
+    current_user = Depends(get_current_active_user)
+):
+    """Send a message to a specific thread"""
+    from netra_backend.app.routes.utils.thread_helpers import handle_send_message_request
+    
+    handler = lambda: handle_send_message_request(
+        db, thread_id, request, current_user.id
+    )
+    return await handle_route_with_error_logging(
+        handler, f"sending message to thread {thread_id}"
+    )
 
 @router.post("/{thread_id}/auto-rename")
 async def auto_rename_thread(

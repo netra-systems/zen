@@ -26,6 +26,11 @@ Spawn a sub agent to PLAN ONLY the update, align, or creation of:
 the required unit, integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused on THE ISSUE YOU WROTE DOWN.
 Save the plan to the same debugging log.
 
+2.1) GITHUB ISSUE INTEGRATION
+Update existing issue or create new GITHUB ISSUE 
+using tools shown in GITHUB_INTEGRATION_IMPLEMENTATION_REPORT.md
+
+
 3) EXECUTE THE PLAN with new spawned sub agent
 Save the status updates to the same debugging log.
 
