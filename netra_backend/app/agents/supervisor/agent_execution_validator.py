@@ -436,15 +436,15 @@ class AgentExecutionValidator:
                 },
                 "agent_timeout": {
                     "free": {
-                        "user_message": "Your request took too long to process (30 second limit). Please try with a simpler request, or upgrade for longer processing times.",
+                        "user_message": "Your request reached the timeout limit (30 seconds). Please retry with a simpler request, or upgrade for longer processing times and additional support.",
                         "recovery_action": "retry_with_simpler_request"
                     },
                     "early": {
-                        "user_message": "Your request timed out after 60 seconds. Consider breaking down complex requests, or upgrade to Enterprise for extended processing time.",
+                        "user_message": "Your request reached the timeout limit after 60 seconds. Consider simplifying your request and retry, or upgrade to Enterprise for extended processing time and support.",
                         "recovery_action": "retry_with_simpler_request"
                     },
                     "enterprise": {
-                        "user_message": "Your request timed out after 5 minutes. This may indicate a complex analysis - please try again or contact support if the issue persists.",
+                        "user_message": "Your request reached the timeout limit after 5 minutes. Please simplify your request and retry, or contact our support team if the issue persists.",
                         "recovery_action": "retry_with_simpler_request"
                     }
                 }
