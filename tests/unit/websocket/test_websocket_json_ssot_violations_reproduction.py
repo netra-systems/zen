@@ -37,9 +37,9 @@ from netra_backend.app.websocket_core.types import (
     normalize_message_type
 )
 from netra_backend.app.websocket_core.handlers import (
-    process_websocket_message,
-    MessageProcessor,
-    handle_agent_request_message
+    MessageRouter,
+    AgentRequestHandler,
+    get_message_router
 )
 from netra_backend.app.services.websocket.message_handler import StartAgentHandler
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -234,8 +234,8 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
         
         Expected to FAIL until remediation is complete.
         """
-        # Create message processor to test routing
-        processor = MessageProcessor()
+        # Create message router to test routing
+        router = get_message_router()
         
         # Test routing with invalid message types that should fail SSOT validation
         invalid_routing_cases = [
@@ -256,15 +256,17 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
         
         for case in invalid_routing_cases:
             try:
-                # Try to route invalid message
-                result = await processor.route_message(
+                # Try to route invalid message - create a WebSocket message first
+                test_message = create_standard_message(
                     message_type=case["type"],
-                    data=case["data"],
-                    user_id=f"test_user_{uuid.uuid4().hex[:8]}"
+                    data=case["data"]
                 )
                 
+                # Try to find a handler for this message type
+                handler = router.get_handler(test_message.type)
+                
                 # If routing succeeds, we have an SSOT violation
-                if result is not None:
+                if handler is not None:
                     routing_violations.append(f"SSOT VIOLATION: Invalid message routed successfully: {case}")
                     
             except (ValueError, KeyError, AttributeError, NotImplementedError) as e:
@@ -282,11 +284,9 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
             )
             
             # This should NOT fail if SSOT is working
-            result = await processor.route_message(
-                message_type=valid_message.type,
-                data=valid_message.data,
-                user_id=f"test_user_{uuid.uuid4().hex[:8]}"
-            )
+            handler = router.get_handler(valid_message.type)
+            if handler is None:
+                routing_violations.append(f"CRITICAL: Valid message failed to find handler: {valid_message.type}")
             
             # Valid message should route (or at least not raise an exception)
             
