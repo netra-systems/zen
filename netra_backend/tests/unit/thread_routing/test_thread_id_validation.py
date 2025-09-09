@@ -25,23 +25,23 @@ from netra_backend.app.core.unified_id_manager import (
 from netra_backend.app.websocket_core.protocols import ensure_thread_id_type
 from netra_backend.app.core.user_execution_context import UserExecutionContext
 from shared.types import ThreadID, UserID
-from test_framework.ssot.base_test_case import BaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestThreadIDValidation(BaseTestCase):
+class TestThreadIDValidation(SSotBaseTestCase):
     """Test thread ID validation with SSOT patterns."""
     
-    def setUp(self) -> None:
+    def setup_method(self, method=None) -> None:
         """Set up test fixtures following SSOT patterns."""
-        super().setUp()
+        super().setup_method(method)
         self.id_manager = UnifiedIDManager()
         self.test_user_id = "user_test_12345"
         self.test_thread_id = "thread_test_67890"
         
-    def tearDown(self) -> None:
+    def teardown_method(self, method=None) -> None:
         """Clean up test resources."""
         self.id_manager.clear_all()
-        super().tearDown()
+        super().teardown_method(method)
     
     # Thread ID Format Validation Tests
     

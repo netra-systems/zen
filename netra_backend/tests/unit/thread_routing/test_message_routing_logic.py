@@ -31,15 +31,15 @@ from netra_backend.app.services.websocket.message_queue import (
     message_queue
 )
 from netra_backend.app.llm.llm_defaults import LLMModel
-from test_framework.ssot.base_test_case import BaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRoutingLogic(BaseTestCase):
+class TestMessageRoutingLogic(SSotBaseTestCase):
     """Test message routing logic with SSOT patterns."""
     
-    def setUp(self) -> None:
+    def setup_method(self, method=None) -> None:
         """Set up test fixtures following SSOT patterns."""
-        super().setUp()
+        super().setup_method(method)
         self.mock_supervisor = Mock()
         self.mock_db_session_factory = Mock()
         self.message_service = MessageHandlerService(
@@ -49,9 +49,9 @@ class TestMessageRoutingLogic(BaseTestCase):
         self.test_user_id = "user_test_12345"
         self.test_thread_id = "thread_test_67890"
     
-    def tearDown(self) -> None:
+    def teardown_method(self, method=None) -> None:
         """Clean up test resources."""
-        super().tearDown()
+        super().teardown_method(method)
     
     # Message Type Routing Tests
     
