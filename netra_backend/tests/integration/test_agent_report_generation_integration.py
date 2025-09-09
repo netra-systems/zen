@@ -812,23 +812,23 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         db = real_services_fixture["db"]
         
         # Create enterprise user expecting professional reports
-        user_id = UserID.generate()
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
         user = User(
-            id=str(user_id), 
+            id=user_id, 
             email="enterprise@bigcorp.com", 
             name="Enterprise Executive",
             subscription_tier="enterprise"
         )
         db.add(user)
         
-        thread_id = ThreadID.generate()
-        thread = Thread(id=str(thread_id), user_id=str(user_id), title="Executive Dashboard")
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
+        thread = Thread(id=thread_id, user_id=user_id, title="Executive Dashboard")
         db.add(thread)
         await db.commit()
         
         # Generate professionally structured report
         executive_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
             "report_version": "1.0",
             "agent_type": "executive_analyzer",
             "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -960,9 +960,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Store professionally formatted report
         message = Message(
             id=executive_report["report_id"],
-            thread_id=str(thread_id),
-            user_id=str(user_id),
-            run_id=str(RunID.generate()),
+            thread_id=thread_id,
+            user_id=user_id,
+            run_id=UnifiedIdGenerator.generate_base_id("run_test"),
             message_type=MessageType.AGENT_RESPONSE,
             content=str(executive_report),
             metadata={
@@ -1027,12 +1027,12 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         db = real_services_fixture["db"]
         
         # Create user for comprehensive analysis
-        user_id = UserID.generate()
-        user = User(id=str(user_id), email="analyst@company.com", name="Business Analyst")
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
+        user = User(id=user_id, email="analyst@company.com", name="Business Analyst")
         db.add(user)
         
-        thread_id = ThreadID.generate()
-        thread = Thread(id=str(thread_id), user_id=str(user_id), title="Tool-Enhanced Analysis")
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
+        thread = Thread(id=thread_id, user_id=user_id, title="Tool-Enhanced Analysis")
         db.add(thread)
         await db.commit()
         
@@ -1108,7 +1108,7 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         
         # Generate comprehensive report incorporating all tool results
         tool_enhanced_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
             "agent_type": "comprehensive_multi_tool_analyzer",
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "tool_execution_summary": {
@@ -1195,9 +1195,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Store tool-enhanced report
         message = Message(
             id=tool_enhanced_report["report_id"],
-            thread_id=str(thread_id),
-            user_id=str(user_id),
-            run_id=str(RunID.generate()),
+            thread_id=thread_id,
+            user_id=user_id,
+            run_id=UnifiedIdGenerator.generate_base_id("run_test"),
             message_type=MessageType.AGENT_RESPONSE,
             content=str(tool_enhanced_report),
             metadata={
@@ -1262,23 +1262,23 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         redis = real_services_fixture["redis"]
         
         # Create user with tracking requirements
-        user_id = UserID.generate()
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
         user = User(
-            id=str(user_id),
+            id=user_id,
             email="tracked@enterprise.com", 
             name="Tracked User",
             subscription_tier="enterprise"
         )
         db.add(user)
         
-        thread_id = ThreadID.generate()
-        thread = Thread(id=str(thread_id), user_id=str(user_id), title="Analytics Test")
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
+        thread = Thread(id=thread_id, user_id=user_id, title="Analytics Test")
         db.add(thread)
         await db.commit()
         
         # Generate report with comprehensive tracking metadata
         tracked_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
             "agent_type": "analytics_tracked_agent",
             "generated_at": datetime.now(timezone.utc).isoformat(),
             
@@ -1302,7 +1302,7 @@ class TestAgentReportGeneration(BaseIntegrationTest):
             "tracking_metadata": {
                 # User analytics
                 "user_analytics": {
-                    "user_id": str(user_id),
+                    "user_id": user_id,
                     "subscription_tier": "enterprise",
                     "user_timezone": "UTC-8",
                     "user_session_duration": 45.7,  # minutes
@@ -1373,9 +1373,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Store report with metadata
         message = Message(
             id=tracked_report["report_id"],
-            thread_id=str(thread_id),
-            user_id=str(user_id),
-            run_id=str(RunID.generate()),
+            thread_id=thread_id,
+            user_id=user_id,
+            run_id=UnifiedIdGenerator.generate_base_id("run_test"),
             message_type=MessageType.AGENT_RESPONSE,
             content=str(tracked_report),
             metadata={
@@ -1390,7 +1390,7 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Store tracking data in Redis for analytics
         tracking_key = f"report_analytics:{user_id}:{tracked_report['report_id']}"
         await redis.hset(tracking_key, mapping={
-            "user_id": str(user_id),
+            "user_id": user_id,
             "report_id": tracked_report["report_id"],
             "generation_time": tracked_report["tracking_metadata"]["generation_metrics"]["generation_time_seconds"],
             "business_value": tracked_report["tracking_metadata"]["business_metrics"]["estimated_user_savings"],
@@ -1461,23 +1461,23 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         db = real_services_fixture["db"]
         
         # Create quality-conscious user
-        user_id = UserID.generate()
+        user_id = UnifiedIdGenerator.generate_base_id("user_test")
         user = User(
-            id=str(user_id),
+            id=user_id,
             email="quality@company.com", 
             name="Quality User",
             subscription_tier="enterprise"
         )
         db.add(user)
         
-        thread_id = ThreadID.generate()
-        thread = Thread(id=str(thread_id), user_id=str(user_id), title="Completeness Test")
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_test")
+        thread = Thread(id=thread_id, user_id=user_id, title="Completeness Test")
         db.add(thread)
         await db.commit()
         
         # Test Case 1: Complete high-quality report
         complete_report = {
-            "report_id": str(MessageID.generate()),
+            "report_id": UnifiedIdGenerator.generate_message_id("report", user_id),
             "agent_type": "comprehensive_quality_agent",
             "generated_at": datetime.now(timezone.utc).isoformat(),
             
@@ -1632,9 +1632,9 @@ class TestAgentReportGeneration(BaseIntegrationTest):
         # Store complete report
         message = Message(
             id=complete_report["report_id"],
-            thread_id=str(thread_id),
-            user_id=str(user_id),
-            run_id=str(RunID.generate()),
+            thread_id=thread_id,
+            user_id=user_id,
+            run_id=UnifiedIdGenerator.generate_base_id("run_test"),
             message_type=MessageType.AGENT_RESPONSE,
             content=str(complete_report),
             metadata={

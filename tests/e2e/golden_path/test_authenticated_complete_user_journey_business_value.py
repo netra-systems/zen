@@ -41,9 +41,8 @@ from typing import Dict, List, Any, Optional
 
 # SSOT imports following absolute import rules - AUTHENTICATION FOCUSED
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.e2e_auth_helper import (
-    E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user_context
-)
+from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from test_framework.websocket_helpers import WebSocketTestHelpers, assert_websocket_events
 
@@ -57,7 +56,9 @@ import websockets
 
 
 @pytest.mark.e2e
+@pytest.mark.integration
 @pytest.mark.real_services
+@pytest.mark.asyncio
 @pytest.mark.authentication_compliance
 class TestAuthenticatedCompleteUserJourneyBusinessValue(SSotAsyncTestCase):
     """
