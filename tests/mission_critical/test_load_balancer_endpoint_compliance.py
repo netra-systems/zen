@@ -391,7 +391,7 @@ class TestLoadBalancerEndpointCompliance:
 if __name__ == "__main__":
     async def run_compliance_check():
         """Run compliance check as standalone script"""
-        print("🔍 Running Load Balancer Endpoint Compliance Check...")
+        print("Running Load Balancer Endpoint Compliance Check...")
         
         # Codebase compliance
         validator = LoadBalancerComplianceValidator()
@@ -408,7 +408,7 @@ if __name__ == "__main__":
         connectivity = LoadBalancerConnectivityValidator()
         conn_results = await connectivity.test_load_balancer_connectivity()
         
-        print(f"\n🌐 Connectivity Test Results:")
+        print(f"\nConnectivity Test Results:")
         print(f"Services Tested: {conn_results['total_services']}")
         print(f"Accessible: {conn_results['accessible_services']}")
         print(f"Accessibility Rate: {conn_results['accessibility_rate']:.1f}%")
@@ -418,6 +418,6 @@ if __name__ == "__main__":
         else:
             print("\n⚠️  Some connectivity issues detected (may be expected in CI)")
         
-        print("\n🎯 Load Balancer Migration: SUCCESSFUL")
+        print("\nLoad Balancer Migration: SUCCESSFUL")
     
     asyncio.run(run_compliance_check())
