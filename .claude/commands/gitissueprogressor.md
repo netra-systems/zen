@@ -56,6 +56,14 @@ otherwise go back and ensure that any code changes exclusively add value as one 
 do not introduce new problems.
 7.1) UPDATE a comment on the ISSUE with PROOF  following @GITHUB_STYLE_GUIDE.md  .
 
+8) Staging Deploy SNST :  Spawn a sub agent PROVE THAT THE CHANGES WORK OR FAIL IN STAGING.
+8.1) Deploy the backend service if it hasn't been deployed last 3 minutes. 
+8.2) WAIT for service revision success or failure.
+8.3) Read service logs to audit no net new breaking changes
+8.4) Run relevant tests on staging gcp (either newly created tests and relevant existing e2e tests related to this)
+8.5) UPDATE a comment with Staging deploy information  following @GITHUB_STYLE_GUIDE.md  .
+8.6) IF new directly related and significant issues introduced log them and exit process, restart process from 1) (exit this agent and go back to main loop so it can spawn new agents)
+
 8) PR AND CLOSURE: SNST:
 8.1) Git commit remaining related work in conceptual batches. 
 8.2) Make a NEW PR (Pull Request).

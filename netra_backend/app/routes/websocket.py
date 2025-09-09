@@ -70,6 +70,10 @@ from netra_backend.app.websocket_core.utils import (
     validate_websocket_handshake_completion,
     _safe_websocket_state_for_logging
 )
+from netra_backend.app.websocket_core.connection_state_machine import (
+    get_connection_state_machine,
+    ApplicationConnectionState
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -1420,11 +1424,9 @@ async def _handle_websocket_messages(
     try:
         first_check = True
         # CRITICAL FIX: Use enhanced connection validation to prevent race conditions
-        from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
         
         # PHASE 1 FIX 2: Add accept completion validation before message routing
         # This ensures WebSocket accept() is fully completed before processing messages
-        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine
         
         # Validate connection state machine readiness before message processing
         state_machine = get_connection_state_machine(connection_id)
