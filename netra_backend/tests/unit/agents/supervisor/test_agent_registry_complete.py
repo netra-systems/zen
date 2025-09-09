@@ -499,10 +499,8 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_monitor_memory_usage_healthy_session(self, test_user_id):
         """Test memory monitoring with healthy session."""
-        manager = AgentLifecycleManager()
-        
-        # Create mock session with metrics
-        mock_session = Mock()
+        # FIXED: Create a mock registry and set it on the manager
+        mock_registry = Mock()
         mock_user_session = Mock()
         metrics = {
             'user_id': test_user_id,
@@ -510,10 +508,11 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
             'uptime_seconds': 3600,  # 1 hour
         }
         mock_user_session.get_metrics = Mock(return_value=metrics)
-        mock_session.get = Mock(return_value=mock_user_session)
         
-        session_ref = weakref.ref(mock_session)
-        manager._user_sessions[test_user_id] = session_ref
+        # FIXED: Mock the registry's _user_sessions dict with direct session (not weak ref)
+        mock_registry._user_sessions = {test_user_id: mock_user_session}
+        
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         result = await manager.monitor_memory_usage(test_user_id)
         
@@ -525,10 +524,8 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_monitor_memory_usage_detects_issues(self, test_user_id):
         """Test memory monitoring detects threshold violations."""
-        manager = AgentLifecycleManager()
-        
-        # Create session exceeding thresholds
-        mock_session = Mock()
+        # FIXED: Create a mock registry and set it on the manager
+        mock_registry = Mock()
         mock_user_session = Mock()
         metrics = {
             'user_id': test_user_id,
@@ -536,10 +533,11 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
             'uptime_seconds': 90000,  # 25 hours, exceeds max_session_age_hours (24)
         }
         mock_user_session.get_metrics = Mock(return_value=metrics)
-        mock_session.get = Mock(return_value=mock_user_session)
         
-        session_ref = weakref.ref(mock_session)
-        manager._user_sessions[test_user_id] = session_ref
+        # FIXED: Mock the registry's _user_sessions dict with direct session (not weak ref)
+        mock_registry._user_sessions = {test_user_id: mock_user_session}
+        
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         result = await manager.monitor_memory_usage(test_user_id)
         
@@ -551,13 +549,13 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_monitor_memory_usage_handles_exceptions(self, test_user_id):
         """Test memory monitoring handles exceptions gracefully."""
-        manager = AgentLifecycleManager()
+        # FIXED: Create a mock registry that will raise exception when accessing user sessions
+        mock_registry = Mock()
+        mock_user_session = Mock()
+        mock_user_session.get_metrics = Mock(side_effect=Exception("Monitoring failed"))
+        mock_registry._user_sessions = {test_user_id: mock_user_session}
         
-        # Create session that will raise exception
-        mock_session = Mock()
-        mock_session.get = Mock(side_effect=Exception("Monitoring failed"))
-        session_ref = weakref.ref(mock_session)
-        manager._user_sessions[test_user_id] = session_ref
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         result = await manager.monitor_memory_usage(test_user_id)
         
@@ -568,39 +566,42 @@ class TestAgentLifecycleManagerComplete(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_trigger_cleanup_success(self, test_user_id):
         """Test successful cleanup trigger."""
-        manager = AgentLifecycleManager()
-        
-        # Create mock session
-        mock_session = Mock()
+        # FIXED: Create a mock registry and set it on the manager
+        mock_registry = Mock()
         mock_user_session = Mock()
         mock_user_session.cleanup_all_agents = AsyncMock()
-        mock_session.get = Mock(return_value=mock_user_session)
         
-        session_ref = weakref.ref(mock_session)
-        manager._user_sessions[test_user_id] = session_ref
+        # Create dict-like object that supports both get() and deletion
+        user_sessions_dict = {test_user_id: mock_user_session}
+        mock_registry._user_sessions = user_sessions_dict
+        
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         await manager.trigger_cleanup(test_user_id)
         
-        # Verify cleanup was called and session was removed
+        # Verify cleanup was called and session was removed from registry
         mock_user_session.cleanup_all_agents.assert_called_once()
-        assert test_user_id not in manager._user_sessions
+        assert test_user_id not in mock_registry._user_sessions
     
     @pytest.mark.asyncio
     async def test_trigger_cleanup_handles_exceptions(self, test_user_id):
         """Test cleanup trigger handles exceptions gracefully."""
-        manager = AgentLifecycleManager()
+        # FIXED: Create a mock registry that will raise exception during cleanup
+        mock_registry = Mock()
+        mock_user_session = Mock()
+        mock_user_session.cleanup_all_agents = AsyncMock(side_effect=Exception("Cleanup failed"))
         
-        # Create session that will raise exception
-        mock_session = Mock()
-        mock_session.get = Mock(side_effect=Exception("Cleanup failed"))
-        session_ref = weakref.ref(mock_session)
-        manager._user_sessions[test_user_id] = session_ref
+        # Create dict-like object that supports both get() and deletion
+        user_sessions_dict = {test_user_id: mock_user_session}
+        mock_registry._user_sessions = user_sessions_dict
+        
+        manager = AgentLifecycleManager(registry=mock_registry)
         
         # Should not raise exception
         await manager.trigger_cleanup(test_user_id)
         
-        # Session should still be removed
-        assert test_user_id not in manager._user_sessions
+        # Session should still be removed from registry despite the exception
+        assert test_user_id not in mock_registry._user_sessions
 
 
 # ============================================================================
