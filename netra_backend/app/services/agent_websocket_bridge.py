@@ -1062,11 +1062,12 @@ class AgentWebSocketBridge(MonitorableComponent):
         logger.info(f"Creating per-request orchestrator for user {user_id}, agent {agent_type}")
         
         # Import here to avoid circular imports
-        from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
-        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        from netra_backend.app.core.unified_id_manager import generate_thread_id, generate_execution_id
         
-        # Create proper UserExecutionContext for this request using the SSOT class
-        thread_id, run_id = UnifiedIDManager.create_coupled_ids()
+        # Create proper UserExecutionContext for this request using the accepted type
+        thread_id = generate_thread_id()
+        run_id = generate_execution_id()
         user_context = UserExecutionContext(
             user_id=user_id,
             thread_id=thread_id,
@@ -2636,10 +2637,11 @@ class RequestScopedOrchestrator:
         """
         # Import here to avoid circular imports  
         from netra_backend.app.agents.base.execution_context import AgentExecutionContext
-        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        from netra_backend.app.core.unified_id_manager import generate_thread_id, generate_execution_id
         
         # Create unique execution context
-        thread_id, run_id = UnifiedIDManager.create_coupled_ids()
+        thread_id = generate_thread_id()
+        run_id = generate_execution_id()
         
         exec_context = AgentExecutionContext(
             context_id=run_id,
