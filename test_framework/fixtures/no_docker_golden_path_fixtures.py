@@ -66,6 +66,8 @@ class MockWebSocketManager:
         self.client_id = f"mock_ws_{uuid.uuid4().hex[:8]}"
         self.connected = True
         self.events_sent = []
+        self.agent_engine = None  # Will be set later
+        self.message_queue = []  # Queue for messages to be received
     
     async def connect(self, client_id: str, user_context: Dict[str, Any]) -> bool:
         """Simulate WebSocket connection establishment."""
@@ -92,6 +94,15 @@ class MockWebSocketManager:
         
         self.mock_state.websocket_events_sent.append(event)
         self.events_sent.append(event)
+        
+        # Queue the event as a WebSocket message for recv()
+        websocket_message = {
+            "type": event_type,
+            "data": data,
+            "timestamp": event["timestamp"],
+            "client_id": client_id or self.client_id
+        }
+        self.message_queue.append(json.dumps(websocket_message))
         
         # Validate critical WebSocket events for business value
         critical_events = ["agent_started", "agent_thinking", "tool_executing", 
@@ -128,6 +139,110 @@ class MockWebSocketManager:
         critical_events = ["agent_started", "agent_thinking", "tool_executing", 
                           "tool_completed", "agent_completed"]
         return len([e for e in self.events_sent if e["event_type"] in critical_events])
+    
+    async def recv(self, timeout: Optional[float] = None) -> str:
+        """
+        Mock recv method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Returns messages from the queue (including agent events) or default messages.
+        """
+        # Check if we have any queued messages from agent execution
+        if self.message_queue:
+            message = self.message_queue.pop(0)
+            logger.debug(f"[MOCK WebSocket] Returning queued message: {json.loads(message).get('type', 'unknown')}")
+            return message
+        
+        # Wait a bit for agent execution to generate events
+        await asyncio.sleep(0.1)
+        
+        # Check again after waiting
+        if self.message_queue:
+            message = self.message_queue.pop(0)
+            logger.debug(f"[MOCK WebSocket] Returning queued message: {json.loads(message).get('type', 'unknown')}")
+            return message
+        
+        # Simulate typical WebSocket message as fallback
+        mock_message = {
+            "type": "connection_ready",
+            "data": "Mock WebSocket message",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "connection_count": len(self.mock_state.websocket_connections)
+        }
+        return json.dumps(mock_message)
+    
+    async def send(self, message: str) -> None:
+        """
+        Mock send method for standard WebSocket interface compatibility.
+        
+        This method is used by tests that expect the manager to act like a WebSocket connection.
+        Parses the message and stores it in the events_sent list.
+        If this is a user message, triggers mock agent execution.
+        """
+        try:
+            parsed_message = json.loads(message)
+        except json.JSONDecodeError:
+            # If not JSON, treat as plain text
+            parsed_message = {"type": "text", "data": message}
+        
+        # Store as sent event
+        event = {
+            "event_type": parsed_message.get("type", "message"),
+            "data": parsed_message,
+            "client_id": self.client_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "mock_source": "MockWebSocketManager.send()"
+        }
+        
+        self.mock_state.websocket_events_sent.append(event)
+        self.events_sent.append(event)
+        logger.debug(f"[MOCK WebSocket] Manager sent: {parsed_message.get('type', 'unknown')}")
+        
+        # If this is a user message and we have an agent engine, trigger agent execution
+        if (parsed_message.get("type") == "user_message" and 
+            self.agent_engine is not None and 
+            "content" in parsed_message):
+            
+            logger.info(f"[MOCK WebSocket] Triggering agent execution for user message")
+            
+            # Create user context for agent execution
+            user_context = {
+                "user_id": parsed_message.get("user_id", "mock_user"),
+                "thread_id": parsed_message.get("thread_id", "mock_thread"),
+                "run_id": parsed_message.get("run_id", "mock_run")
+            }
+            
+            # Execute agent pipeline asynchronously and queue the events
+            asyncio.create_task(self._execute_and_queue_events(user_context, parsed_message["content"]))
+    
+    async def _execute_and_queue_events(self, user_context: Dict[str, Any], message: str):
+        """Execute agent pipeline and queue the resulting events for recv()."""
+        try:
+            # Execute the agent pipeline
+            result = await self.agent_engine.execute_agent_pipeline(user_context, message)
+            
+            # Queue the final assistant message
+            assistant_message = {
+                "type": "assistant_message",
+                "content": result.get("result", "Based on your AI infrastructure analysis, I recommend cost optimization strategies saving $15,000/month through model selection optimization and caching improvements."),
+                "thread_id": user_context.get("thread_id"),
+                "run_id": user_context.get("run_id"),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            self.message_queue.append(json.dumps(assistant_message))
+            logger.info(f"[MOCK WebSocket] Agent execution completed, events queued")
+            
+        except Exception as e:
+            logger.error(f"[MOCK WebSocket] Agent execution failed: {e}")
+            # Queue an error message
+            error_message = {
+                "type": "error",
+                "content": f"Agent execution failed: {str(e)}",
+                "thread_id": user_context.get("thread_id"),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            self.message_queue.append(json.dumps(error_message))
 
 
 class MockDatabaseManager:
@@ -297,12 +412,22 @@ class MockAgentExecutionEngine:
             
             # 4. Final completion
             await asyncio.sleep(0.1)
+            # Generate realistic business value response with optimization recommendations
+            mock_business_response = (
+                "Based on your AI infrastructure analysis, I recommend the following cost optimization strategies:\n\n"
+                "1. **Model Selection Optimization**: Switch from GPT-4 to GPT-3.5-turbo for 70% of tasks, saving $15,000/month\n"
+                "2. **Usage Pattern Analysis**: Implement caching for repeated queries, reducing API calls by 40%\n"
+                "3. **Cost Forecasting**: Your current $50K/month spend can be reduced to $32K/month\n"
+                "4. **Infrastructure Efficiency**: Batch processing can reduce costs by 25%\n\n"
+                "These optimizations provide actionable insights for immediate cost reduction while maintaining performance quality."
+            )
+            
             result = {
                 "execution_id": self.execution_id,
                 "status": "completed",
                 "tools_executed": len(tools_executed),
                 "execution_time": time.time() - execution_start,
-                "result": "Mock agent execution completed successfully"
+                "result": mock_business_response
             }
             
             await self.websocket_manager.emit_agent_event("agent_completed", result)
@@ -384,6 +509,9 @@ async def _create_no_docker_golden_path_services() -> Dict[str, Any]:
     database_manager = MockDatabaseManager(mock_state)
     redis_manager = MockRedisManager(mock_state)
     agent_engine = MockAgentExecutionEngine(mock_state, websocket_manager)
+    
+    # Wire up the agent engine to the websocket manager
+    websocket_manager.agent_engine = agent_engine
     
     # Create service context
     services = {
