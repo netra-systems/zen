@@ -41,30 +41,12 @@ from netra_backend.app.clients.auth_client_core import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 
 logger = central_logger.get_logger(__name__)
 
 
-def _safe_websocket_state_for_logging(state) -> str:
-    """
-    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
-    
-    CRITICAL FIX: GCP Cloud Run structured logging cannot serialize WebSocketState
-    enum objects directly. This causes "Object of type WebSocketState is not JSON serializable"
-    errors that manifest as 503/1011 WebSocket failures.
-    
-    Args:
-        state: WebSocketState enum or any object that needs safe logging
-        
-    Returns:
-        String representation safe for JSON serialization
-    """
-    try:
-        if hasattr(state, 'name') and hasattr(state, 'value'):
-            return str(state.name).lower()  # CONNECTED -> "connected"
-        return str(state)
-    except Exception:
-        return "<serialization_error>"
+# REMOVED DUPLICATE: Use SSOT function from websocket_core.utils
 
 
 class AuthResult:

@@ -67,22 +67,14 @@ from netra_backend.app.websocket_core.unified_websocket_auth import get_websocke
 from netra_backend.app.websocket_core.utils import (
     is_websocket_connected, 
     is_websocket_connected_and_ready, 
-    validate_websocket_handshake_completion
+    validate_websocket_handshake_completion,
+    _safe_websocket_state_for_logging
 )
 
 logger = central_logger.get_logger(__name__)
 
 
-def _safe_websocket_state_for_logging(state) -> str:
-    """
-    Safely convert WebSocketState enum to string for GCP Cloud Run structured logging.
-    """
-    try:
-        if hasattr(state, 'name') and hasattr(state, 'value'):
-            return str(state.name).lower()  # CONNECTED -> "connected"
-        return str(state)
-    except Exception:
-        return "<serialization_error>"
+# REMOVED DUPLICATE: Use SSOT function from websocket_core.utils
 
 
 router = APIRouter(tags=["WebSocket"])

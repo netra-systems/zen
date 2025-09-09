@@ -438,6 +438,9 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "tool_executing": MessageType.AGENT_PROGRESS,
     "tool_completed": MessageType.AGENT_PROGRESS,
     
+    # CRITICAL FIX: Add missing execute_agent mapping (causes Tests 23 & 25 failures)
+    "execute_agent": MessageType.START_AGENT,
+    
     # Typing indicators
     "typing": MessageType.USER_TYPING,
     "typing_started": MessageType.TYPING_STARTED,
