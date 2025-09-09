@@ -125,6 +125,25 @@ class WebSocketHandshakeTimingValidator:
             if elapsed > timeout:
                 break
         
+        # If still not successful, continue polling until timeout
+        # This handles cases where handshake completes after progressive delays
+        while not validation_results["success"] and (time.time() - start_time) < timeout:
+            validation_results["validation_attempts"] += 1
+            
+            # Check if handshake completed during extended polling
+            if hasattr(connection, 'is_ready') and connection.is_ready():
+                validation_results["success"] = True
+                validation_results["handshake_time"] = time.time() - start_time
+                break
+            
+            # Continue race condition detection during polling
+            elapsed = time.time() - start_time
+            if elapsed > 1.0 and not validation_results["race_condition_detected"]:
+                validation_results["race_condition_detected"] = True
+            
+            # Short polling interval
+            await asyncio.sleep(0.1)
+        
         # Continue waiting until timeout is reached to respect minimum timeout
         # This ensures test expectations about minimum validation time are met
         final_elapsed = time.time() - start_time
