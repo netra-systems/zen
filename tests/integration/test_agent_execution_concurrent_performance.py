@@ -98,7 +98,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
     @pytest.mark.performance
     @pytest.mark.real_services
     async def test_concurrent_agent_execution_performance(self, real_services_fixture):
-        \"\"\"
+        """
         Test agent execution performance with concurrent users.
         
         Performance SLA:

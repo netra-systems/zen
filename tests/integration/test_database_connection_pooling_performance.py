@@ -260,7 +260,116 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
             
             result = {"operation_id": operation_id, "success": False, "error": None}
             
-            try:\n                operation_start = time.time()\n                \n                # Vary operation complexity to simulate real workload\n                complexity = operation_id % 5\n                if complexity == 0:\n                    # Simple query\n                    await db.execute("SELECT 1")\n                elif complexity == 1:\n                    # Medium complexity\n                    await db.execute("SELECT generate_series(1, 10)")\n                elif complexity == 2:\n                    # Higher complexity\n                    await db.execute("SELECT COUNT(*) FROM generate_series(1, 100)")\n                elif complexity == 3:\n                    # With parameters\n                    await db.execute("SELECT $1 as param, generate_series(1, $2)", operation_id, min(20, operation_id % 30))\n                else:\n                    # Complex aggregation\n                    await db.execute("SELECT AVG(value), COUNT(*) FROM generate_series(1, $1) as value GROUP BY value % 5", min(50, operation_id % 60))\n                \n                operation_time = time.time() - operation_start\n                \n                result["success"] = True\n                result["operation_time"] = operation_time\n                stress_metrics["successful_operations"] += 1\n                \n            except asyncio.TimeoutError:\n                stress_metrics["timeout_errors"] += 1\n                result["error"] = "timeout"\n            except Exception as e:\n                stress_metrics["connection_errors"] += 1\n                result["error"] = str(e)\n            finally:\n                async with active_operations_lock:\n                    active_operations.discard(operation_id)\n                stress_metrics["total_operations"] += 1\n            \n            return result\n        \n        # Run stress test\n        print(f"🔥 Starting database stress test for {stress_duration}s...")\n        stress_start = time.time()\n        end_time = stress_start + stress_duration\n        operation_counter = 0\n        \n        # Launch operations continuously during stress period\n        stress_tasks = []\n        while time.time() < end_time:\n            # Launch new operation\n            task = asyncio.create_task(stress_database_operation(operation_counter))\n            stress_tasks.append(task)\n            operation_counter += 1\n            \n            # Limit concurrent operations to prevent system overload\n            if len(stress_tasks) >= max_concurrent_connections:\n                # Wait for some operations to complete\n                done, pending = await asyncio.wait(stress_tasks, return_when=asyncio.FIRST_COMPLETED, timeout=0.1)\n                stress_tasks = list(pending)\n            \n            await asyncio.sleep(operation_frequency)\n        \n        # Wait for remaining operations to complete\n        if stress_tasks:\n            await asyncio.gather(*stress_tasks, return_exceptions=True)\n        \n        stress_end = time.time()\n        actual_stress_duration = stress_end - stress_start\n        \n        # Test recovery after stress\n        recovery_start = time.time()\n        \n        # Perform simple operations to test recovery\n        recovery_operations = 10\n        recovery_results = []\n        \n        for i in range(recovery_operations):\n            try:\n                await db.execute("SELECT 1 as recovery_test")\n                recovery_results.append(True)\n            except Exception as e:\n                recovery_results.append(False)\n                print(f"Recovery operation {i} failed: {e}")\n            await asyncio.sleep(0.1)\n        \n        recovery_time = time.time() - recovery_start\n        stress_metrics["recovery_time"] = recovery_time\n        recovery_success_rate = sum(recovery_results) / len(recovery_results)\n        \n        # Calculate final metrics\n        operations_per_second = stress_metrics["total_operations"] / actual_stress_duration\n        success_rate = stress_metrics["successful_operations"] / stress_metrics["total_operations"] if stress_metrics["total_operations"] > 0 else 0\n        \n        # Stress test assertions - more lenient than normal operations\n        assert success_rate >= 0.70, f"Stress test success rate {success_rate:.3f} below 70% threshold"\n        assert recovery_success_rate >= 0.90, f"Recovery success rate {recovery_success_rate:.3f} below 90% threshold"\n        assert recovery_time < 5.0, f"Recovery time {recovery_time:.2f}s exceeds 5s limit"\n        \n        print(f"✅ Database Connection Pool Stress Test Results:")\n        print(f"   Stress duration: {actual_stress_duration:.2f}s")\n        print(f"   Total operations: {stress_metrics['total_operations']}")\n        print(f"   Successful operations: {stress_metrics['successful_operations']}")\n        print(f"   Failed operations: {stress_metrics['failed_operations']}")\n        print(f"   Operations/second: {operations_per_second:.1f}")\n        print(f"   Success rate: {success_rate:.3f}")\n        print(f"   Peak concurrent operations: {stress_metrics['peak_concurrent_operations']}")\n        print(f"   Connection errors: {stress_metrics['connection_errors']}")\n        print(f"   Timeout errors: {stress_metrics['timeout_errors']}")\n        print(f"   Recovery time: {recovery_time:.2f}s")\n        print(f"   Recovery success rate: {recovery_success_rate:.3f}")\n    \n    @pytest.mark.integration\n    @pytest.mark.performance\n    @pytest.mark.real_services\n    async def test_connection_pool_efficiency_patterns(self, real_services_fixture):\n        """
+            try:
+                operation_start = time.time()
+                
+                # Vary operation complexity to simulate real workload
+                complexity = operation_id % 5
+                if complexity == 0:
+                    # Simple query
+                    await db.execute("SELECT 1")
+                elif complexity == 1:
+                    # Medium complexity
+                    await db.execute("SELECT generate_series(1, 10)")
+                elif complexity == 2:
+                    # Higher complexity
+                    await db.execute("SELECT COUNT(*) FROM generate_series(1, 100)")
+                elif complexity == 3:
+                    # With parameters
+                    await db.execute("SELECT $1 as param, generate_series(1, $2)", operation_id, min(20, operation_id % 30))
+                else:
+                    # Complex aggregation
+                    await db.execute("SELECT AVG(value), COUNT(*) FROM generate_series(1, $1) as value GROUP BY value % 5", min(50, operation_id % 60))
+                
+                operation_time = time.time() - operation_start
+                
+                result["success"] = True
+                result["operation_time"] = operation_time
+                stress_metrics["successful_operations"] += 1
+                
+            except asyncio.TimeoutError:
+                stress_metrics["timeout_errors"] += 1
+                result["error"] = "timeout"
+            except Exception as e:
+                stress_metrics["connection_errors"] += 1
+                result["error"] = str(e)
+            finally:
+                async with active_operations_lock:
+                    active_operations.discard(operation_id)
+                stress_metrics["total_operations"] += 1
+            
+            return result
+        
+        # Run stress test
+        print(f"🔥 Starting database stress test for {stress_duration}s...")
+        stress_start = time.time()
+        end_time = stress_start + stress_duration
+        operation_counter = 0
+        
+        # Launch operations continuously during stress period
+        stress_tasks = []
+        while time.time() < end_time:
+            # Launch new operation
+            task = asyncio.create_task(stress_database_operation(operation_counter))
+            stress_tasks.append(task)
+            operation_counter += 1
+            
+            # Limit concurrent operations to prevent system overload
+            if len(stress_tasks) >= max_concurrent_connections:
+                # Wait for some operations to complete
+                done, pending = await asyncio.wait(stress_tasks, return_when=asyncio.FIRST_COMPLETED, timeout=0.1)
+                stress_tasks = list(pending)
+            
+            await asyncio.sleep(operation_frequency)
+        
+        # Wait for remaining operations to complete
+        if stress_tasks:
+            await asyncio.gather(*stress_tasks, return_exceptions=True)
+        
+        stress_end = time.time()
+        actual_stress_duration = stress_end - stress_start
+        
+        # Test recovery after stress
+        recovery_start = time.time()
+        
+        # Perform simple operations to test recovery
+        recovery_operations = 10
+        recovery_results = []
+        
+        for i in range(recovery_operations):
+            try:
+                await db.execute("SELECT 1 as recovery_test")
+                recovery_results.append(True)
+            except Exception as e:
+                recovery_results.append(False)
+                print(f"Recovery operation {i} failed: {e}")
+            await asyncio.sleep(0.1)
+        
+        recovery_time = time.time() - recovery_start
+        stress_metrics["recovery_time"] = recovery_time
+        recovery_success_rate = sum(recovery_results) / len(recovery_results)
+        
+        # Calculate final metrics
+        operations_per_second = stress_metrics["total_operations"] / actual_stress_duration
+        success_rate = stress_metrics["successful_operations"] / stress_metrics["total_operations"] if stress_metrics["total_operations"] > 0 else 0
+        
+        # Stress test assertions - more lenient than normal operations
+        assert success_rate >= 0.70, f"Stress test success rate {success_rate:.3f} below 70% threshold"
+        assert recovery_success_rate >= 0.90, f"Recovery success rate {recovery_success_rate:.3f} below 90% threshold"
+        assert recovery_time < 5.0, f"Recovery time {recovery_time:.2f}s exceeds 5s limit"
+        
+        print(f"✅ Database Connection Pool Stress Test Results:")
+        print(f"   Stress duration: {actual_stress_duration:.2f}s")
+        print(f"   Total operations: {stress_metrics['total_operations']}")
+        print(f"   Successful operations: {stress_metrics['successful_operations']}")
+        print(f"   Failed operations: {stress_metrics['failed_operations']}")
+        print(f"   Operations/second: {operations_per_second:.1f}")
+        print(f"   Success rate: {success_rate:.3f}")
+        print(f"   Peak concurrent operations: {stress_metrics['peak_concurrent_operations']}")
+        print(f"   Connection errors: {stress_metrics['connection_errors']}")
+        print(f"   Timeout errors: {stress_metrics['timeout_errors']}")
+        print(f"   Recovery time: {recovery_time:.2f}s")
+        print(f"   Recovery success rate: {recovery_success_rate:.3f}")\n    \n    @pytest.mark.integration\n    @pytest.mark.performance\n    @pytest.mark.real_services\n    async def test_connection_pool_efficiency_patterns(self, real_services_fixture):\n        """
         Test database connection pool efficiency with various usage patterns.
         
         Performance SLA:

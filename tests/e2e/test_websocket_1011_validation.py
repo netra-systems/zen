@@ -37,10 +37,8 @@ logger = central_logger.get_logger(__name__)
 
 def generate_test_user_id(suffix: str = "") -> str:
     """Generate a valid user ID for testing."""
-    base_uuid = str(uuid.uuid4())
-    if suffix:
-        return f"{base_uuid}_{suffix}"
-    return base_uuid
+    # Use plain UUID format for compatibility
+    return str(uuid.uuid4())
 
 
 class TestWebSocket1011Prevention:

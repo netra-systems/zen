@@ -402,7 +402,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             deadlock_count = 0
             
             async def concurrent_balance_transfer(transfer_id: int) -> Dict[str, Any]:
-                \"\"\"Perform a balance transfer with proper transaction isolation.\"\"\"
+                """Perform a balance transfer with proper transaction isolation."""
                 try:
                     # Random transfer between accounts
                     from_account = random.randint(0, account_count - 1)
