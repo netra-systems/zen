@@ -19,8 +19,8 @@ from datetime import datetime, timezone
 from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 from contextlib import asynccontextmanager
 
-# Import UnifiedIDManager for SSOT ID generation
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+# Import UnifiedIdGenerator for SSOT ID generation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState, WebSocketDisconnect
@@ -40,8 +40,7 @@ from shared.types.core_types import (
     UserID, ConnectionID, WebSocketID,
     ensure_user_id, ensure_websocket_id
 )
-# Import generate_websocket_id from the SSOT location
-from netra_backend.app.core.unified_id_manager import generate_websocket_id
+# No separate imports needed - using UnifiedIdGenerator directly
 
 logger = central_logger.get_logger(__name__)
 
@@ -79,12 +78,12 @@ def _safe_websocket_state_for_logging(state) -> str:
         return "<serialization_error>"
 
 
-def generate_connection_id(user_id: Union[str, UserID], prefix: str = "conn") -> ConnectionID:
+def generate_connection_id(user_id: Union[str, UserID], prefix: str = "ws_conn") -> ConnectionID:
     """Generate unique connection ID with type safety.
     
     Args:
         user_id: User ID (accepts both str and UserID)
-        prefix: Prefix for connection ID
+        prefix: Prefix for connection ID (should be ws_conn for consistency)
         
     Returns:
         Strongly typed ConnectionID
@@ -92,25 +91,15 @@ def generate_connection_id(user_id: Union[str, UserID], prefix: str = "conn") ->
     # Ensure user_id is validated
     validated_user_id = ensure_user_id(user_id)
     
-    # Use UnifiedIDManager for consistent ID generation with audit trail
-    id_manager = UnifiedIDManager()
-    connection_id = id_manager.generate_id(
-        IDType.WEBSOCKET,
-        prefix=prefix,
-        context={"user_id": str(validated_user_id), "component": "websocket_connection"}
-    )
+    # Use UnifiedIdGenerator for SSOT ID generation
+    connection_id = UnifiedIdGenerator.generate_websocket_connection_id(str(validated_user_id))
     
     return ConnectionID(connection_id)
 
 
 def generate_message_id() -> str:
-    """Generate unique message ID using UnifiedIDManager."""
-    id_manager = UnifiedIDManager()
-    return id_manager.generate_id(
-        IDType.WEBSOCKET,
-        prefix="msg",
-        context={"component": "websocket_message"}
-    )
+    """Generate unique message ID using UnifiedIdGenerator."""
+    return UnifiedIdGenerator.generate_base_id("uid", include_random=True, random_length=8)
 
 
 def get_current_timestamp() -> float:

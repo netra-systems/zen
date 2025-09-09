@@ -37,6 +37,7 @@ from threading import RLock
 import logging
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from shared.types.execution_types import StronglyTypedUserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.logging_config import central_logger
@@ -145,37 +146,44 @@ def _validate_ssot_user_context(user_context: Any) -> None:
     """
     CRITICAL FIX: Comprehensive SSOT UserExecutionContext validation with defensive fallback.
     
-    This function validates that the provided user_context is the correct SSOT
-    UserExecutionContext type with all required attributes, preventing the type
+    This function validates that the provided user_context is a valid UserExecutionContext
+    type (either legacy or SSOT) with all required attributes, preventing the type
     inconsistencies that cause 1011 WebSocket errors.
     
-    Enhanced with defensive validation to prevent hard failures.
+    Enhanced to support both legacy and SSOT types during migration period.
     
     Args:
-        user_context: Object to validate as SSOT UserExecutionContext
+        user_context: Object to validate as UserExecutionContext (legacy or SSOT)
         
     Raises:
         ValueError: If validation fails with detailed error information
     """
     try:
-        # CRITICAL FIX: Validate SSOT UserExecutionContext type
-        if not isinstance(user_context, UserExecutionContext):
+        # CRITICAL FIX: Accept both legacy and SSOT UserExecutionContext types
+        is_legacy_type = isinstance(user_context, UserExecutionContext)
+        is_ssot_type = isinstance(user_context, StronglyTypedUserExecutionContext)
+        
+        if not (is_legacy_type or is_ssot_type):
             # Enhanced error message with type information  
             actual_type = type(user_context)
-            expected_module = "netra_backend.app.services.user_execution_context"
             actual_module = getattr(actual_type, '__module__', 'unknown')
             
             logger.error(
-                f"SSOT VIOLATION: Expected UserExecutionContext, got {actual_type.__name__} from {actual_module}. "
-                f"This indicates incomplete SSOT migration."
+                f"TYPE VALIDATION FAILED: Expected UserExecutionContext (legacy or SSOT), got {actual_type.__name__} from {actual_module}. "
+                f"Accepted types: netra_backend.app.services.user_execution_context.UserExecutionContext (legacy) or "
+                f"shared.types.execution_types.StronglyTypedUserExecutionContext (SSOT)."
             )
             
             raise ValueError(
-                f"SSOT VIOLATION: Expected netra_backend.app.services.user_execution_context.UserExecutionContext, "
-                f"got {actual_type}. "
-                f"Expected module: {expected_module}, Actual module: {actual_module}. "
-                f"This indicates incomplete SSOT migration - factory pattern requires SSOT compliance."
+                f"TYPE VALIDATION FAILED: Expected UserExecutionContext (legacy or SSOT), got {actual_type}. "
+                f"Accepted types: netra_backend.app.services.user_execution_context.UserExecutionContext (legacy) or "
+                f"shared.types.execution_types.StronglyTypedUserExecutionContext (SSOT). "
+                f"Factory pattern requires compatible UserExecutionContext implementation."
             )
+        
+        # Log which type we're validating for debugging
+        context_type_name = "SSOT StronglyTypedUserExecutionContext" if is_ssot_type else "Legacy UserExecutionContext"
+        logger.debug(f"Validating {context_type_name} for factory pattern")
         
         # CRITICAL FIX: Validate all required SSOT attributes are present
         required_attrs = ['user_id', 'thread_id', 'websocket_client_id', 'run_id', 'request_id']
@@ -308,13 +316,20 @@ def _validate_ssot_user_context_staging_safe(user_context: Any) -> None:
                 f"module={context_module}, user_id={repr(user_id_value)}"
             )
             
-            # Critical validation #1: Must be correct type
-            if not isinstance(user_context, UserExecutionContext):
+            # Critical validation #1: Must be compatible type (legacy or SSOT)
+            is_legacy_type = isinstance(user_context, UserExecutionContext)
+            is_ssot_type = isinstance(user_context, StronglyTypedUserExecutionContext)
+            
+            if not (is_legacy_type or is_ssot_type):
                 logger.error(
-                    f"STAGING TYPE MISMATCH: Expected UserExecutionContext from netra_backend.app.services.user_execution_context, "
+                    f"STAGING TYPE MISMATCH: Expected UserExecutionContext (legacy or SSOT), "
                     f"got {context_type} from {context_module}"
                 )
-                raise ValueError(f"STAGING CRITICAL: Expected UserExecutionContext, got {context_type}")
+                raise ValueError(f"STAGING CRITICAL: Expected UserExecutionContext (legacy or SSOT), got {context_type}")
+            
+            # Log which type we're using for debugging
+            context_type_name = "SSOT StronglyTypedUserExecutionContext" if is_ssot_type else "Legacy UserExecutionContext"
+            logger.debug(f"STAGING VALIDATION: Using {context_type_name}")
             
             # Critical validation #2: Must have user_id
             if not hasattr(user_context, 'user_id'):
@@ -692,8 +707,17 @@ class IsolatedWebSocketManager(WebSocketManagerProtocol):
         Raises:
             ValueError: If user_context is invalid
         """
-        if not isinstance(user_context, UserExecutionContext):
-            raise ValueError("user_context must be a UserExecutionContext instance")
+        # CRITICAL FIX: Accept both legacy and SSOT UserExecutionContext types
+        is_legacy_type = isinstance(user_context, UserExecutionContext)
+        is_ssot_type = isinstance(user_context, StronglyTypedUserExecutionContext)
+        
+        if not (is_legacy_type or is_ssot_type):
+            raise ValueError(
+                "user_context must be a UserExecutionContext instance (legacy or SSOT). "
+                f"Got {type(user_context).__name__} from {getattr(type(user_context), '__module__', 'unknown')}. "
+                "Expected: netra_backend.app.services.user_execution_context.UserExecutionContext (legacy) or "
+                "shared.types.execution_types.StronglyTypedUserExecutionContext (SSOT)"
+            )
         
         self.user_context = user_context
         self._connections: Dict[str, WebSocketConnection] = {}
@@ -1336,8 +1360,17 @@ class WebSocketManagerFactory:
             ValueError: If user_context is invalid
             RuntimeError: If resource limits are exceeded
         """
-        if not isinstance(user_context, UserExecutionContext):
-            raise ValueError("user_context must be a UserExecutionContext instance")
+        # CRITICAL FIX: Accept both legacy and SSOT UserExecutionContext types
+        is_legacy_type = isinstance(user_context, UserExecutionContext)
+        is_ssot_type = isinstance(user_context, StronglyTypedUserExecutionContext)
+        
+        if not (is_legacy_type or is_ssot_type):
+            raise ValueError(
+                "user_context must be a UserExecutionContext instance (legacy or SSOT). "
+                f"Got {type(user_context).__name__} from {getattr(type(user_context), '__module__', 'unknown')}. "
+                "Expected: netra_backend.app.services.user_execution_context.UserExecutionContext (legacy) or "
+                "shared.types.execution_types.StronglyTypedUserExecutionContext (SSOT)"
+            )
         
         isolation_key = self._generate_isolation_key(user_context)
         user_id = user_context.user_id

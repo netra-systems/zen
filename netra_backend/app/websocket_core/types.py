@@ -17,8 +17,8 @@ import time
 import uuid
 from pydantic import BaseModel, Field
 
-# Import UnifiedIDManager for SSOT ID generation
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+# Import UnifiedIdGenerator for SSOT ID generation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
 class WebSocketConnectionState(str, Enum):
@@ -104,11 +104,7 @@ class ConnectionInfo(BaseModel):
     """WebSocket connection information."""
     model_config = {"arbitrary_types_allowed": True}
     
-    connection_id: str = Field(default_factory=lambda: UnifiedIDManager().generate_id(
-        IDType.WEBSOCKET, 
-        prefix="conn", 
-        context={"component": "websocket_connection"}
-    ))
+    connection_id: Optional[str] = None
     user_id: str
     websocket: Optional[Any] = None  # WebSocket instance
     thread_id: Optional[str] = None
@@ -122,6 +118,12 @@ class ConnectionInfo(BaseModel):
     client_info: Optional[Dict[str, Any]] = None
     state: WebSocketConnectionState = WebSocketConnectionState.ACTIVE
     failure_count: int = 0  # Track state transition failures
+    
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.connection_id is None:
+            # Generate connection_id using user_id for proper pattern
+            self.connection_id = UnifiedIdGenerator.generate_websocket_connection_id(self.user_id)
     
     def transition_to_failed(self):
         """Transition connection to failed state."""
@@ -490,10 +492,10 @@ def create_standard_message(msg_type: Union[str, MessageType],
         type=normalized_type,
         payload=payload,
         timestamp=time.time(),
-        message_id=UnifiedIDManager().generate_id(
-            IDType.WEBSOCKET,
-            prefix="msg", 
-            context={"msg_type": str(normalized_type.value), "user_id": user_id}
+        message_id=UnifiedIdGenerator.generate_base_id(
+            f"msg_{str(normalized_type.value)}", 
+            include_random=True,
+            random_length=8
         ),
         user_id=user_id,
         thread_id=thread_id
@@ -583,7 +585,11 @@ def generate_default_message(
         type=normalized_type,
         payload=data or {},
         timestamp=time.time(),
-        message_id=str(uuid.uuid4()),
+        message_id=UnifiedIdGenerator.generate_base_id(
+            f"msg_{str(normalized_type.value)}", 
+            include_random=True,
+            random_length=8
+        ),
         user_id=user_id,
         thread_id=thread_id
     )
