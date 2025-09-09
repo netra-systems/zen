@@ -14,6 +14,8 @@ import pytest
 from typing import Any, Dict, Optional, AsyncIterator
 from abc import ABC, abstractmethod
 
+logger = logging.getLogger(__name__)
+
 from shared.isolated_environment import get_env
 from test_framework.real_services import RealServicesManager, get_real_services
 

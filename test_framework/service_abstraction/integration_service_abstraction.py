@@ -230,6 +230,8 @@ class IntegrationDatabaseService(IntegrationServiceAbstraction):
             return
             
         async with self._engine.begin() as conn:
+            from sqlalchemy import text
+            
             # Users table
             await conn.execute(text('''
                 CREATE TABLE IF NOT EXISTS users (
@@ -507,7 +509,8 @@ class IntegrationWebSocketService(IntegrationServiceAbstraction):
     async def send_event(self, websocket_id: str, event: Dict[str, Any]) -> None:
         """Send event through WebSocket connection."""
         if websocket_id not in self._connections:
-            raise ValueError(f"WebSocket connection {websocket_id} not found")
+            logger.warning(f"WebSocket connection {websocket_id} not found - skipping event {event.get('type', 'unknown')}")
+            return
         
         event_data = {
             "websocket_id": websocket_id,
