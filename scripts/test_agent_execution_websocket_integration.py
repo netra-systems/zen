@@ -17,7 +17,7 @@ import sys
 import json
 import time
 from typing import Dict, List, Optional, Any
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 
 # Add project root for imports

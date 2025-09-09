@@ -68,7 +68,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
 # Production System Imports for Real Service Testing
-from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id, generate_run_id
+from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id, UnifiedIDManager
 
 
 # ============================================================================
@@ -419,7 +419,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         
         # Generate unique IDs for this request using SSOT patterns
         thread_id = generate_thread_id()
-        run_id = generate_run_id()
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         # Store IDs in context
         context.thread_id = thread_id
@@ -1433,7 +1433,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 "maintaining or improving AI service quality."
             ),
             "thread_id": generate_thread_id(),
-            "run_id": generate_run_id(),
+            "run_id": UnifiedIDManager.generate_run_id(generate_thread_id()),
             "user_id": context.authenticated_user.user_id,
             "metadata": {
                 "business_context": "enterprise_cfo_optimization",
@@ -2230,7 +2230,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 "Ensure all recommendations comply with SOC2 and GDPR requirements."
             ),
             "thread_id": generate_thread_id(),
-            "run_id": generate_run_id(),
+            "run_id": UnifiedIDManager.generate_run_id(generate_thread_id()),
             "user_id": context.authenticated_user.user_id,
             "audit_metadata": {
                 "contains_pii": True,
