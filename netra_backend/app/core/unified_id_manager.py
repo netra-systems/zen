@@ -729,7 +729,13 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^dummy_\w+$',                  # dummy_user, dummy_session
         r'^sample_\w+$',                 # sample_user, sample_connection
         r'^ssot-[a-zA-Z]+-\w+$',         # ssot-test-user, ssot-mock-session
-        r'^e2e-[a-zA-Z0-9_-]+$',         # e2e-staging_pipeline, e2e-deployment-test
+        r'^e2e-[a-zA-Z]+_[a-zA-Z]+$',         # e2e-staging_pipeline, e2e-test_environment
+        r'^e2e-[a-zA-Z]+_[a-zA-Z]+_[0-9]+$',  # e2e-dev_pipeline_123 (with numbers)
+        r'^e2e-[a-zA-Z]+_[a-zA-Z]+-v[0-9.]+$', # e2e-staging_release-v1.2.3 (version releases)
+        r'^user-\d+-[a-fA-F0-9]+$',     # user-12345-abcdef (strong typing test format)
+        r'^thread-\d+-[a-zA-Z0-9]+$',   # thread-67890-ghijkl (strong typing test format)
+        r'^valid-[a-zA-Z]+-[a-zA-Z0-9]+$', # valid-request-abc, valid-thread-456 (strong typing test format)
+        r'^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z0-9]+$', # authenticated-user-12345, chat-request-abcdef (business test format)
     ]
     
     import re

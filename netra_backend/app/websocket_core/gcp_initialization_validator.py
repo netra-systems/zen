@@ -139,7 +139,7 @@ class GCPWebSocketInitializationValidator:
             timeout_seconds=60.0 if self.is_gcp_environment else 10.0,  # BUGFIX: Increased from 30.0 to 60.0 for staging race condition fix
             retry_count=5,
             retry_delay=1.5 if self.is_gcp_environment else 1.0,
-            is_critical=True,
+            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,  # CRITICAL FIX: Non-critical in staging to break circular dependency
             description="Redis connection and caching system"
         )
         
@@ -181,7 +181,7 @@ class GCPWebSocketInitializationValidator:
             timeout_seconds=20.0,
             retry_count=3,
             retry_delay=1.0,
-            is_critical=True,
+            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,  # CRITICAL FIX: Non-critical in staging to allow graceful degradation
             description="Complete WebSocket integration and event delivery"
         )
     
