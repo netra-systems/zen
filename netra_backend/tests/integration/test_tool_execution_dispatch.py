@@ -21,6 +21,7 @@ import tempfile
 import time
 from typing import Any, Dict, Optional, List
 from unittest.mock import AsyncMock, MagicMock, patch
+from pydantic import Field
 from langchain_core.tools import BaseTool
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
@@ -39,15 +40,19 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 class MockBusinessTool(BaseTool):
     """Mock business tool for integration testing - represents real tool interface."""
     
-    name = "business_analyzer"
-    description = "Analyzes business metrics and KPIs"
+    name: str = "business_analyzer"
+    description: str = "Analyzes business metrics and KPIs"
+    tool_id: str = "business_analyzer_001"
+    execution_count: int = 0
+    last_input: Optional[Dict[str, Any]] = None
+    execution_history: List[Dict[str, Any]] = Field(default_factory=list)
     
-    def __init__(self, tool_id: str = None):
-        super().__init__()
-        self.tool_id = tool_id or "business_analyzer_001"
-        self.execution_count = 0
-        self.last_input = None
-        self.execution_history = []
+    def __init__(self, tool_id: str = None, **kwargs):
+        if tool_id:
+            kwargs['tool_id'] = tool_id
+        if 'execution_history' not in kwargs:
+            kwargs['execution_history'] = []
+        super().__init__(**kwargs)
         
     def _run(self, query: str, **kwargs) -> str:
         """Synchronous tool execution."""
@@ -82,14 +87,18 @@ class MockBusinessTool(BaseTool):
 class MockDataProcessingTool(BaseTool):
     """Mock data processing tool for integration testing."""
     
-    name = "data_processor"
-    description = "Processes and transforms data"
+    name: str = "data_processor"
+    description: str = "Processes and transforms data"
+    tool_id: str = "data_processor_001"
+    processed_records: int = 0
+    processing_errors: List[str] = Field(default_factory=list)
     
-    def __init__(self, tool_id: str = None):
-        super().__init__()
-        self.tool_id = tool_id or "data_processor_001"
-        self.processed_records = 0
-        self.processing_errors = []
+    def __init__(self, tool_id: str = None, **kwargs):
+        if tool_id:
+            kwargs['tool_id'] = tool_id
+        if 'processing_errors' not in kwargs:
+            kwargs['processing_errors'] = []
+        super().__init__(**kwargs)
         
     def _run(self, dataset: str, **kwargs) -> str:
         """Synchronous data processing."""

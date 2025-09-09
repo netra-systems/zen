@@ -16,7 +16,7 @@ from unittest.mock import AsyncMock
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.universal_registry import UniversalAgentRegistry
+from netra_backend.app.core.registry.universal_registry import AgentRegistry as UniversalAgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.isolated_environment import IsolatedEnvironment

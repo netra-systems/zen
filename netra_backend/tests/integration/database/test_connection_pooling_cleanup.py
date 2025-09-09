@@ -78,7 +78,7 @@ class TestConnectionPoolingCleanup(BaseIntegrationTest):
         
         # Setup connection pool configuration
         env = IsolatedEnvironment()
-        db_builder = DatabaseURLBuilder(env.get_env_dict())
+        db_builder = DatabaseURLBuilder(env.as_dict())
         db_url = db_builder.get_url_for_environment()
         
         if not db_url:
