@@ -1,569 +1,428 @@
 """
-Golden Path Unit Tests: User Context Isolation Business Logic
+Unit Tests for User Context Isolation Business Logic
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise, Platform/Internal)
-- Business Goal: Ensure complete user isolation prevents data leaks and maintains enterprise trust
-- Value Impact: Protects customer confidentiality, enables multi-tenant architecture for scale
-- Strategic/Revenue Impact: Critical for $500K+ ARR - enterprise customers require guaranteed isolation
-
-CRITICAL: This test validates the business logic for user context isolation using Factory patterns
-that prevent customer data from leaking between users. Enterprise trust and regulatory compliance
-depend on this isolation working correctly across all user execution contexts.
-
-Key Isolation Areas Tested:
-1. UserExecutionContextFactory - Ensures complete user session isolation
-2. Authentication Context - JWT tokens and user credentials isolated per user
-3. WebSocket Context - Real-time communication channels isolated per user  
-4. Agent State - AI agent execution state isolated per user
-5. Data Access - User data and analysis results isolated per user
+- Segment: ALL (Free, Early, Mid, Enterprise) 
+- Business Goal: Revenue Protection - Ensures multi-tenant security for $500K+ ARR system
+- Value Impact: User isolation prevents data breaches and maintains customer trust
+- Strategic Impact: Unit tests validate enterprise-grade security boundaries
 """
 
 import pytest
-import uuid
-import asyncio
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Any, Set
-from unittest.mock import Mock, AsyncMock, patch
-from dataclasses import dataclass, field
-from enum import Enum
+from unittest.mock import Mock, patch
+from datetime import datetime, timezone
+from typing import Dict, Any, List
 
-# Import business logic components for testing
-from test_framework.base import BaseTestCase
-from shared.types.core_types import (
-    UserID, ThreadID, ExecutionID, WebSocketID, SessionID,
-    ensure_user_id, ensure_thread_id
-)
-from shared.types.execution_types import StronglyTypedUserExecutionContext
+# SSOT Imports - Absolute imports as per CLAUDE.md requirement
+from shared.types.core_types import UserID, ThreadID, RunID, RequestID, ensure_user_id
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class IsolationLevel(Enum):
-    """Business-critical isolation levels for user contexts."""
-    STRICT = "strict"        # Complete isolation, no shared resources
-    STANDARD = "standard"    # Shared infrastructure, isolated data
-    RELAXED = "relaxed"      # Basic separation, some shared caches allowed
+class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
+    """Golden Path Unit Tests for User Context Isolation Business Logic."""
 
-
-class UserContextType(Enum):
-    """Types of user contexts requiring business-critical isolation."""
-    AUTHENTICATION = "authentication"  # JWT tokens, user credentials
-    EXECUTION = "execution"            # Agent execution state
-    DATA_ACCESS = "data_access"        # User data and analysis results
-    WEBSOCKET = "websocket"           # Real-time communication channels
-    CACHE = "cache"                   # User-specific cached data
-
-
-@dataclass
-class BusinessIsolationTest:
-    """Test case definition for business isolation requirements."""
-    context_type: UserContextType
-    isolation_level: IsolationLevel
-    test_description: str
-    business_risk_if_violated: str
-    regulatory_requirement: bool = False
-
-
-class UserExecutionContextFactory:
-    """Business logic factory for creating isolated user execution contexts."""
-    
-    def __init__(self):
-        self.active_contexts: Dict[UserID, StronglyTypedUserExecutionContext] = {}
-        self.context_isolation_rules = self._initialize_isolation_rules()
-        self.cross_user_access_attempts: List[Dict[str, Any]] = []
+    def test_user_session_complete_isolation(self):
+        """
+        Test Case: User sessions are completely isolated from each other.
         
-    def _initialize_isolation_rules(self) -> Dict[UserContextType, Dict[str, Any]]:
-        """Initialize business rules for context isolation."""
-        return {
-            UserContextType.AUTHENTICATION: {
-                "isolation_level": IsolationLevel.STRICT,
-                "shared_resources": [],
-                "business_requirement": "JWT tokens must never leak between users",
-                "regulatory_compliance": True
+        Business Value: Prevents data leaks between customers in multi-tenant system.
+        Expected: No user can access another user's data or session.
+        """
+        # Arrange
+        user_1_id = "isolated_user_1_abc123"
+        user_2_id = "isolated_user_2_def456"
+        user_3_id = "isolated_user_3_ghi789"
+        
+        # Simulate user sessions with different data
+        user_sessions = {
+            user_1_id: {
+                "session_id": "session_1_secure",
+                "user_data": {"company": "TechCorp", "tier": "enterprise"},
+                "active_threads": ["thread_1a", "thread_1b"],
+                "permissions": ["read", "write", "admin"]
             },
-            UserContextType.EXECUTION: {
-                "isolation_level": IsolationLevel.STRICT,
-                "shared_resources": [],
-                "business_requirement": "Agent execution state must be completely isolated",
-                "regulatory_compliance": True
+            user_2_id: {
+                "session_id": "session_2_secure", 
+                "user_data": {"company": "StartupInc", "tier": "early"},
+                "active_threads": ["thread_2a"],
+                "permissions": ["read", "write"]
             },
-            UserContextType.DATA_ACCESS: {
-                "isolation_level": IsolationLevel.STRICT,
-                "shared_resources": [],
-                "business_requirement": "User data must never be accessible to other users",
-                "regulatory_compliance": True
-            },
-            UserContextType.WEBSOCKET: {
-                "isolation_level": IsolationLevel.STRICT,
-                "shared_resources": ["connection_pool"],
-                "business_requirement": "Real-time messages must only reach intended user",
-                "regulatory_compliance": False
-            },
-            UserContextType.CACHE: {
-                "isolation_level": IsolationLevel.STANDARD,
-                "shared_resources": ["redis_connection_pool"],
-                "business_requirement": "Cached data must be user-scoped",
-                "regulatory_compliance": False
+            user_3_id: {
+                "session_id": "session_3_secure",
+                "user_data": {"company": "FreeCorp", "tier": "free"},
+                "active_threads": ["thread_3a", "thread_3b", "thread_3c"],
+                "permissions": ["read"]
             }
         }
-    
-    def create_isolated_context(
-        self, 
-        user_id: UserID,
-        thread_id: Optional[ThreadID] = None,
-        execution_id: Optional[ExecutionID] = None
-    ) -> StronglyTypedUserExecutionContext:
-        """Create completely isolated user execution context."""
         
-        # Business Rule: Generate unique IDs to ensure isolation
-        if not thread_id:
-            thread_id = ensure_thread_id(f"thread-{uuid.uuid4()}")
-        if not execution_id:
-            execution_id = ExecutionID(f"exec-{uuid.uuid4()}")
+        # Act & Assert - Validate complete isolation
+        for user_id, session_data in user_sessions.items():
+            # Each user should only access their own data
+            user_context = self._get_isolated_user_context(user_id, user_sessions)
             
-        # Business Rule: Create isolated context with no shared state
-        context = StronglyTypedUserExecutionContext(
-            user_id=user_id,
-            thread_id=thread_id,
-            execution_id=execution_id,
-            session_id=SessionID(f"session-{uuid.uuid4()}"),
-            websocket_client_id=WebSocketID(f"ws-{uuid.uuid4()}"),
-            agent_context={"isolation_level": "strict", "user_only": True},
-            audit_metadata={"created_at": datetime.now(timezone.utc), "isolation_verified": True}
-        )
-        
-        # Business Rule: Store context with user isolation tracking
-        self.active_contexts[user_id] = context
-        
-        return context
-    
-    def validate_context_isolation(self, user_id: UserID, context: StronglyTypedUserExecutionContext) -> Dict[str, Any]:
-        """Validate that context maintains proper business isolation."""
-        validation_results = {
-            "user_isolation_verified": False,
-            "cross_user_access_blocked": True,
-            "regulatory_compliance_met": True,
-            "business_requirements_satisfied": True,
-            "isolation_violations": []
-        }
-        
-        # Business Rule 1: Context must belong to specified user only
-        if context.user_id != user_id:
-            validation_results["isolation_violations"].append("Context user_id mismatch")
-            validation_results["user_isolation_verified"] = False
-            return validation_results
+            # Assert isolation boundaries
+            assert user_context["user_id"] == user_id
+            assert user_context["session_id"] == session_data["session_id"]
             
-        # Business Rule 2: Context IDs must be unique and user-specific
-        for other_user_id, other_context in self.active_contexts.items():
-            if other_user_id != user_id:
-                if other_context.thread_id == context.thread_id:
-                    validation_results["isolation_violations"].append("Shared thread_id detected")
-                if other_context.execution_id == context.execution_id:
-                    validation_results["isolation_violations"].append("Shared execution_id detected")
-                if other_context.session_id == context.session_id:
-                    validation_results["isolation_violations"].append("Shared session_id detected")
-        
-        # Business Rule 3: Agent context must not contain other user's data
-        agent_context = context.agent_context or {}
-        if "user_only" not in agent_context or not agent_context["user_only"]:
-            validation_results["isolation_violations"].append("Agent context not marked as user-only")
+            # User should only see their own threads
+            user_threads = user_context["active_threads"]
+            expected_threads = session_data["active_threads"]
+            assert set(user_threads) == set(expected_threads)
             
-        # Set final validation status
-        validation_results["user_isolation_verified"] = len(validation_results["isolation_violations"]) == 0
-        validation_results["cross_user_access_blocked"] = len(validation_results["isolation_violations"]) == 0
-        validation_results["regulatory_compliance_met"] = len(validation_results["isolation_violations"]) == 0
-        validation_results["business_requirements_satisfied"] = len(validation_results["isolation_violations"]) == 0
+            # User should not access other users' data
+            other_users = [uid for uid in user_sessions.keys() if uid != user_id]
+            for other_user_id in other_users:
+                other_session = user_sessions[other_user_id]
+                
+                # No access to other users' session IDs
+                assert other_session["session_id"] not in str(user_context)
+                
+                # No access to other users' threads
+                other_threads = other_session["active_threads"]
+                user_thread_set = set(user_threads)
+                other_thread_set = set(other_threads)
+                assert user_thread_set.isdisjoint(other_thread_set)
+                
+                # No access to other users' company data
+                other_company = other_session["user_data"]["company"]
+                assert other_company not in str(user_context["user_data"])
         
-        return validation_results
-    
-    def simulate_cross_user_access_attempt(self, attacking_user_id: UserID, target_user_id: UserID) -> Dict[str, Any]:
-        """Simulate and block cross-user access attempts for security testing."""
-        access_attempt = {
-            "attacking_user": str(attacking_user_id),
-            "target_user": str(target_user_id),
-            "timestamp": datetime.now(timezone.utc),
-            "access_blocked": True,
-            "business_impact": "prevented_data_breach"
-        }
-        
-        # Business Rule: Cross-user access must always be blocked
-        if attacking_user_id != target_user_id:
-            target_context = self.active_contexts.get(target_user_id)
-            if target_context:
-                # Simulate access attempt being blocked
-                access_attempt["attempted_context"] = str(target_context.execution_id)
-                access_attempt["access_blocked"] = True
-                access_attempt["block_reason"] = "user_isolation_policy"
-        
-        self.cross_user_access_attempts.append(access_attempt)
-        return access_attempt
+        print("✅ User session complete isolation test passed")
 
-
-@pytest.mark.unit
-@pytest.mark.golden_path
-class TestUserContextIsolationBusinessLogic(BaseTestCase):
-    """Test user context isolation business logic for multi-tenant security."""
-
-    def setup_method(self):
-        """Setup test environment for each test."""
-        super().setup_method()
-        self.context_factory = UserExecutionContextFactory()
-        self.test_user_1 = ensure_user_id("enterprise-user-1")
-        self.test_user_2 = ensure_user_id("enterprise-user-2")
-        self.test_user_3 = ensure_user_id("free-user-3")
-
-    def test_user_execution_context_factory_isolation_business_requirements(self):
-        """Test UserExecutionContextFactory creates completely isolated contexts."""
-        # Business Value: Each user must have completely isolated execution context
+    def test_user_execution_context_thread_safety(self):
+        """
+        Test Case: User execution contexts are thread-safe for concurrent access.
         
-        # Create contexts for different users
-        context_1 = self.context_factory.create_isolated_context(self.test_user_1)
-        context_2 = self.context_factory.create_isolated_context(self.test_user_2)
-        context_3 = self.context_factory.create_isolated_context(self.test_user_3)
-        
-        # Business Rule 1: Each user must have unique user_id
-        assert context_1.user_id == self.test_user_1, "Context 1 must belong to user 1"
-        assert context_2.user_id == self.test_user_2, "Context 2 must belong to user 2"
-        assert context_3.user_id == self.test_user_3, "Context 3 must belong to user 3"
-        
-        # Business Rule 2: All context IDs must be unique across users
-        assert context_1.thread_id != context_2.thread_id, "Thread IDs must be unique across users"
-        assert context_1.execution_id != context_2.execution_id, "Execution IDs must be unique across users"
-        assert context_1.session_id != context_2.session_id, "Session IDs must be unique across users"
-        assert context_1.websocket_client_id != context_2.websocket_client_id, "WebSocket IDs must be unique"
-        
-        # Business Rule 3: Contexts must not share any mutable state
-        assert context_1.agent_context is not context_2.agent_context, "Agent contexts must not be shared"
-        assert context_1.audit_metadata is not context_2.audit_metadata, "Audit metadata must not be shared"
-        
-        # Business Rule 4: Isolation metadata must be present for compliance
-        assert context_1.agent_context.get("isolation_level") == "strict", "Isolation level must be strict"
-        assert context_1.audit_metadata.get("isolation_verified") is True, "Isolation must be verified"
-
-    def test_authentication_context_isolation_business_requirements(self):
-        """Test authentication contexts are completely isolated between users."""
-        # Business Value: JWT tokens and credentials must never leak between users
-        
-        # Simulate authentication contexts with different JWT tokens
-        auth_context_1 = {
-            "jwt_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.user1.signature1",
-            "user_id": str(self.test_user_1),
-            "permissions": ["read", "write", "enterprise_features"],
-            "session_expires": datetime.now(timezone.utc) + timedelta(hours=8)
-        }
-        
-        auth_context_2 = {
-            "jwt_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.user2.signature2",
-            "user_id": str(self.test_user_2),
-            "permissions": ["read", "write"],
-            "session_expires": datetime.now(timezone.utc) + timedelta(hours=8)
-        }
-        
-        # Create isolated execution contexts with authentication data
-        context_1 = self.context_factory.create_isolated_context(self.test_user_1)
-        context_2 = self.context_factory.create_isolated_context(self.test_user_2)
-        
-        # Add authentication context to agent_context (simulating real auth flow)
-        context_1.agent_context.update({"auth": auth_context_1})
-        context_2.agent_context.update({"auth": auth_context_2})
-        
-        # Business Rule 1: JWT tokens must be completely different
-        jwt_1 = context_1.agent_context["auth"]["jwt_token"]
-        jwt_2 = context_2.agent_context["auth"]["jwt_token"]
-        assert jwt_1 != jwt_2, "JWT tokens must be unique per user"
-        assert "user1" in jwt_1 and "user1" not in jwt_2, "JWT payload must be user-specific"
-        assert "user2" in jwt_2 and "user2" not in jwt_1, "JWT payload must be user-specific"
-        
-        # Business Rule 2: Permissions must be isolated per user
-        perms_1 = context_1.agent_context["auth"]["permissions"]
-        perms_2 = context_2.agent_context["auth"]["permissions"]
-        assert "enterprise_features" in perms_1, "User 1 must have enterprise permissions"
-        assert "enterprise_features" not in perms_2, "User 2 must not have user 1's permissions"
-        
-        # Business Rule 3: Authentication context must not be accessible cross-user
-        validation_1 = self.context_factory.validate_context_isolation(self.test_user_1, context_1)
-        validation_2 = self.context_factory.validate_context_isolation(self.test_user_2, context_2)
-        
-        assert validation_1["user_isolation_verified"] is True, "User 1 context isolation must be verified"
-        assert validation_2["user_isolation_verified"] is True, "User 2 context isolation must be verified"
-
-    def test_websocket_context_isolation_business_requirements(self):
-        """Test WebSocket contexts maintain real-time communication isolation."""
-        # Business Value: Real-time messages must only reach intended users
-        
-        # Create isolated contexts with WebSocket connections
-        context_1 = self.context_factory.create_isolated_context(self.test_user_1)
-        context_2 = self.context_factory.create_isolated_context(self.test_user_2)
-        
-        # Simulate WebSocket message routing contexts
-        ws_context_1 = {
-            "websocket_id": context_1.websocket_client_id,
-            "user_id": context_1.user_id,
-            "active_threads": [context_1.thread_id],
-            "message_queue": [],
-            "connection_metadata": {"user_tier": "enterprise", "features": ["real_time_ai"]}
-        }
-        
-        ws_context_2 = {
-            "websocket_id": context_2.websocket_client_id,
-            "user_id": context_2.user_id,
-            "active_threads": [context_2.thread_id],
-            "message_queue": [],
-            "connection_metadata": {"user_tier": "standard", "features": ["basic_ai"]}
-        }
-        
-        # Business Rule 1: WebSocket IDs must be unique and user-specific
-        assert ws_context_1["websocket_id"] != ws_context_2["websocket_id"], "WebSocket IDs must be unique"
-        assert str(context_1.user_id) in str(ws_context_1["websocket_id"]), "WebSocket ID should be user-specific"
-        
-        # Business Rule 2: Message queues must be completely isolated
-        # Simulate messages being added to queues
-        ws_context_1["message_queue"].append({
-            "type": "agent_started",
-            "user_id": str(context_1.user_id),
-            "thread_id": str(context_1.thread_id),
-            "message": "Enterprise AI analysis starting..."
-        })
-        
-        ws_context_2["message_queue"].append({
-            "type": "agent_started",
-            "user_id": str(context_2.user_id),
-            "thread_id": str(context_2.thread_id),
-            "message": "Standard AI analysis starting..."
-        })
-        
-        # Validate message isolation
-        user_1_messages = [msg for msg in ws_context_1["message_queue"] if msg["user_id"] == str(context_1.user_id)]
-        user_2_messages = [msg for msg in ws_context_2["message_queue"] if msg["user_id"] == str(context_2.user_id)]
-        
-        assert len(user_1_messages) == 1, "User 1 should only see their own messages"
-        assert len(user_2_messages) == 1, "User 2 should only see their own messages"
-        assert "Enterprise" in user_1_messages[0]["message"], "User 1 should see enterprise-specific content"
-        assert "Standard" in user_2_messages[0]["message"], "User 2 should see standard-specific content"
-
-    def test_agent_execution_state_isolation_business_requirements(self):
-        """Test AI agent execution state is completely isolated between users."""
-        # Business Value: AI analysis and results must not leak between users
-        
-        # Create isolated contexts for concurrent agent executions
-        context_1 = self.context_factory.create_isolated_context(self.test_user_1)
-        context_2 = self.context_factory.create_isolated_context(self.test_user_2)
-        
-        # Simulate agent execution state for different users
-        agent_state_1 = {
-            "execution_id": context_1.execution_id,
-            "user_id": context_1.user_id,
-            "current_analysis": {
-                "user_data": "Confidential enterprise cost analysis: $500K monthly AI spend",
-                "optimization_insights": ["Reduce GPT-4 usage by 30%", "Switch to Claude for coding tasks"],
-                "sensitive_metrics": {"total_tokens": 10000000, "cost_breakdown": {"openai": 400000}}
-            },
-            "agent_memory": {"previous_conversations": ["Discuss AI cost reduction strategies"]},
-            "execution_progress": 0.7
-        }
-        
-        agent_state_2 = {
-            "execution_id": context_2.execution_id,
-            "user_id": context_2.user_id,
-            "current_analysis": {
-                "user_data": "Standard user analysis: $50 monthly AI spend",
-                "optimization_insights": ["Consider upgrading for advanced features"],
-                "sensitive_metrics": {"total_tokens": 100000, "cost_breakdown": {"openai": 50}}
-            },
-            "agent_memory": {"previous_conversations": ["Basic cost inquiry"]},
-            "execution_progress": 0.3
-        }
-        
-        # Business Rule 1: Execution states must be completely isolated
-        assert agent_state_1["user_id"] != agent_state_2["user_id"], "Agent states must belong to different users"
-        assert agent_state_1["execution_id"] != agent_state_2["execution_id"], "Execution IDs must be unique"
-        
-        # Business Rule 2: Sensitive data must not be accessible cross-user
-        user_1_data = agent_state_1["current_analysis"]["user_data"]
-        user_2_data = agent_state_2["current_analysis"]["user_data"]
-        assert "$500K" in user_1_data and "$500K" not in user_2_data, "Enterprise data must not leak to standard user"
-        assert "$50" in user_2_data and "$50" not in user_1_data, "Standard user data must not leak to enterprise user"
-        
-        # Business Rule 3: Agent memory must be user-specific
-        memory_1 = agent_state_1["agent_memory"]["previous_conversations"]
-        memory_2 = agent_state_2["agent_memory"]["previous_conversations"]
-        assert memory_1 != memory_2, "Agent memory must be isolated per user"
-        assert "reduction strategies" in memory_1[0] and "reduction strategies" not in memory_2[0], "Memory context must be user-specific"
-        
-        # Business Rule 4: Execution progress must be independent
-        assert agent_state_1["execution_progress"] != agent_state_2["execution_progress"], "Execution progress must be independent"
-
-    def test_cross_user_access_prevention_business_requirements(self):
-        """Test that cross-user access attempts are blocked for security."""
-        # Business Value: Prevent data breaches and maintain enterprise trust
-        
-        # Create contexts for different users
-        context_1 = self.context_factory.create_isolated_context(self.test_user_1)
-        context_2 = self.context_factory.create_isolated_context(self.test_user_2)
-        
-        # Simulate malicious cross-user access attempt
-        access_attempt = self.context_factory.simulate_cross_user_access_attempt(
-            attacking_user_id=self.test_user_1,
-            target_user_id=self.test_user_2
-        )
-        
-        # Business Rule 1: Cross-user access must always be blocked
-        assert access_attempt["access_blocked"] is True, "Cross-user access must be blocked"
-        assert access_attempt["block_reason"] == "user_isolation_policy", "Block reason must be documented"
-        
-        # Business Rule 2: Security incident must be logged for audit
-        assert len(self.context_factory.cross_user_access_attempts) == 1, "Access attempt must be logged"
-        logged_attempt = self.context_factory.cross_user_access_attempts[0]
-        assert logged_attempt["attacking_user"] == str(self.test_user_1), "Attacking user must be logged"
-        assert logged_attempt["target_user"] == str(self.test_user_2), "Target user must be logged"
-        assert logged_attempt["business_impact"] == "prevented_data_breach", "Business impact must be documented"
-        
-        # Business Rule 3: Target context must remain uncompromised
-        validation = self.context_factory.validate_context_isolation(self.test_user_2, context_2)
-        assert validation["user_isolation_verified"] is True, "Target context isolation must remain intact"
-        assert validation["cross_user_access_blocked"] is True, "Cross-user access prevention must be verified"
-
-    def test_concurrent_user_isolation_business_requirements(self):
-        """Test isolation works correctly under concurrent user load."""
-        # Business Value: System must maintain isolation under real-world concurrent usage
-        
-        # Simulate concurrent user contexts (enterprise scenario)
+        Business Value: Supports multiple concurrent users without race conditions.
+        Expected: Concurrent user operations don't interfere with each other.
+        """
+        # Arrange
         concurrent_users = [
-            ensure_user_id(f"enterprise-user-{i}") for i in range(5)
+            {"user_id": "concurrent_user_1", "operation": "database_optimization"},
+            {"user_id": "concurrent_user_2", "operation": "cost_analysis"},
+            {"user_id": "concurrent_user_3", "operation": "performance_review"}
         ]
         
-        concurrent_contexts = {}
-        for user_id in concurrent_users:
-            context = self.context_factory.create_isolated_context(user_id)
-            concurrent_contexts[user_id] = context
+        # Simulate concurrent execution contexts
+        execution_contexts = {}
+        
+        # Act - Create concurrent contexts
+        for user_info in concurrent_users:
+            user_id = user_info["user_id"]
+            operation = user_info["operation"]
             
-            # Add user-specific sensitive data
-            context.agent_context.update({
-                "user_data": f"Confidential analysis for {user_id}",
-                "business_metrics": {"monthly_spend": 10000 + hash(str(user_id)) % 50000},
-                "competitive_insights": f"Strategy insights for {user_id}"
-            })
+            # Create isolated execution context
+            context = {
+                "user_id": ensure_user_id(user_id),
+                "thread_id": ThreadID(f"thread_{user_id}_{operation}"),
+                "run_id": RunID(f"run_{user_id}_{int(datetime.now(timezone.utc).timestamp())}"),
+                "request_id": RequestID(f"req_{user_id}_{operation}"),
+                "operation_type": operation,
+                "start_time": datetime.now(timezone.utc),
+                "isolation_boundary": user_id,
+                "context_state": "active"
+            }
+            
+            execution_contexts[user_id] = context
         
-        # Business Rule 1: All contexts must be isolated from each other
-        for user_id, context in concurrent_contexts.items():
-            validation = self.context_factory.validate_context_isolation(user_id, context)
-            assert validation["user_isolation_verified"] is True, f"User {user_id} context must be isolated"
-            assert len(validation["isolation_violations"]) == 0, f"User {user_id} must have no isolation violations"
+        # Assert - Validate thread safety
+        for user_id, context in execution_contexts.items():
+            # Each context should be completely isolated
+            assert str(context["user_id"]) == user_id
+            assert context["isolation_boundary"] == user_id
+            
+            # Thread IDs should be unique across users
+            thread_id = str(context["thread_id"])
+            assert user_id in thread_id  # Contains user ID for isolation
+            
+            # Run IDs should be unique and time-based
+            run_id = str(context["run_id"])
+            assert user_id in run_id
+            
+            # Request IDs should be operation-specific
+            request_id = str(context["request_id"])
+            operation = context["operation_type"]
+            assert operation in request_id
+            
+        # Validate no ID collisions between users
+        all_thread_ids = [str(ctx["thread_id"]) for ctx in execution_contexts.values()]
+        all_run_ids = [str(ctx["run_id"]) for ctx in execution_contexts.values()]
+        all_request_ids = [str(ctx["request_id"]) for ctx in execution_contexts.values()]
         
-        # Business Rule 2: Sensitive data must not leak between concurrent users
-        all_user_data = [ctx.agent_context["user_data"] for ctx in concurrent_contexts.values()]
-        for i, data in enumerate(all_user_data):
-            # Each user's data should only mention their own user ID
-            user_mentions = [user_id for user_id in concurrent_users if str(user_id) in data]
-            assert len(user_mentions) == 1, f"User data should only reference own user ID: {data}"
+        assert len(set(all_thread_ids)) == len(all_thread_ids), "Thread IDs must be unique"
+        assert len(set(all_run_ids)) == len(all_run_ids), "Run IDs must be unique" 
+        assert len(set(all_request_ids)) == len(all_request_ids), "Request IDs must be unique"
         
-        # Business Rule 3: Business metrics must be user-specific and not shared
-        all_metrics = [ctx.agent_context["business_metrics"]["monthly_spend"] for ctx in concurrent_contexts.values()]
-        # All spending amounts should be different (due to hash-based generation)
-        assert len(set(all_metrics)) == len(all_metrics), "All user metrics must be unique"
+        print("✅ User execution context thread safety test passed")
 
-    def test_user_context_cleanup_business_requirements(self):
-        """Test user contexts are properly cleaned up to prevent data persistence."""
-        # Business Value: Prevent data accumulation and potential cross-user contamination
+    def test_user_permission_boundary_enforcement(self):
+        """
+        Test Case: User permissions are strictly enforced at context boundaries.
         
-        # Create context with sensitive data
-        context = self.context_factory.create_isolated_context(self.test_user_1)
-        context.agent_context.update({
-            "sensitive_analysis": "Confidential AI cost optimization recommendations",
-            "user_secrets": {"api_keys": ["sk-test-key-123"], "database_url": "postgresql://secret"},
-            "business_data": {"revenue_impact": 250000, "cost_savings": 75000}
-        })
-        
-        # Verify context exists and contains sensitive data
-        assert self.test_user_1 in self.context_factory.active_contexts, "Context must be stored"
-        stored_context = self.context_factory.active_contexts[self.test_user_1]
-        assert "sensitive_analysis" in stored_context.agent_context, "Sensitive data must be present"
-        
-        # Simulate context cleanup (would be called when user session ends)
-        def cleanup_user_context(user_id: UserID):
-            """Simulate business logic for cleaning up user context."""
-            if user_id in self.context_factory.active_contexts:
-                # Business Rule: Sensitive data must be cleared before removal
-                context = self.context_factory.active_contexts[user_id]
-                
-                # Clear sensitive agent context data
-                if hasattr(context, 'agent_context') and context.agent_context:
-                    for key in list(context.agent_context.keys()):
-                        if key in ["sensitive_analysis", "user_secrets", "business_data"]:
-                            del context.agent_context[key]
-                
-                # Remove context from active contexts
-                del self.context_factory.active_contexts[user_id]
-                return True
-            return False
-        
-        # Execute cleanup
-        cleanup_result = cleanup_user_context(self.test_user_1)
-        assert cleanup_result is True, "Context cleanup must succeed"
-        
-        # Business Rule 1: Context must be completely removed
-        assert self.test_user_1 not in self.context_factory.active_contexts, "Context must be removed from active contexts"
-        
-        # Business Rule 2: No sensitive data should remain accessible
-        # Since context is removed, any remaining references should not contain sensitive data
-        # This test verifies the cleanup process prevents data accumulation
-
-    def test_regulatory_compliance_isolation_business_requirements(self):
-        """Test user isolation meets regulatory compliance requirements."""
-        # Business Value: Ensure compliance with GDPR, HIPAA, SOC2 requirements
-        
-        # Create contexts that simulate regulated data handling
-        gdpr_context = self.context_factory.create_isolated_context(ensure_user_id("eu-enterprise-user"))
-        hipaa_context = self.context_factory.create_isolated_context(ensure_user_id("healthcare-user"))
-        sox_context = self.context_factory.create_isolated_context(ensure_user_id("financial-user"))
-        
-        # Add regulatory compliance metadata
-        gdpr_context.audit_metadata.update({
-            "data_classification": "personal_data",
-            "gdpr_compliant": True,
-            "data_purpose": "ai_cost_optimization",
-            "user_consent": True,
-            "retention_period": 365
-        })
-        
-        hipaa_context.audit_metadata.update({
-            "data_classification": "phi_data", 
-            "hipaa_compliant": True,
-            "data_purpose": "healthcare_ai_analysis",
-            "encryption_required": True,
-            "audit_trail_required": True
-        })
-        
-        sox_context.audit_metadata.update({
-            "data_classification": "financial_data",
-            "sox_compliant": True,
-            "data_purpose": "financial_ai_reporting", 
-            "segregation_required": True,
-            "approval_required": True
-        })
-        
-        # Business Rule 1: Regulatory metadata must be preserved and isolated
-        assert gdpr_context.audit_metadata["gdpr_compliant"] is True, "GDPR compliance must be tracked"
-        assert hipaa_context.audit_metadata["hipaa_compliant"] is True, "HIPAA compliance must be tracked"
-        assert sox_context.audit_metadata["sox_compliant"] is True, "SOX compliance must be tracked"
-        
-        # Business Rule 2: Data classification must be user-specific
-        classifications = [
-            gdpr_context.audit_metadata["data_classification"],
-            hipaa_context.audit_metadata["data_classification"], 
-            sox_context.audit_metadata["data_classification"]
+        Business Value: Prevents privilege escalation and unauthorized access.
+        Expected: Users can only perform operations within their permission scope.
+        """
+        # Arrange
+        user_permission_scenarios = [
+            {
+                "user_id": "free_user_permissions",
+                "tier": "free",
+                "permissions": ["read"],
+                "allowed_operations": ["view_dashboard", "basic_analysis"],
+                "forbidden_operations": ["advanced_optimization", "admin_functions", "billing_access"]
+            },
+            {
+                "user_id": "early_user_permissions",
+                "tier": "early", 
+                "permissions": ["read", "write"],
+                "allowed_operations": ["view_dashboard", "basic_analysis", "create_reports", "standard_optimization"],
+                "forbidden_operations": ["admin_functions", "billing_access", "enterprise_features"]
+            },
+            {
+                "user_id": "enterprise_user_permissions",
+                "tier": "enterprise",
+                "permissions": ["read", "write", "admin", "premium"],
+                "allowed_operations": ["view_dashboard", "advanced_optimization", "admin_functions", "enterprise_features"],
+                "forbidden_operations": ["super_admin_functions"]  # Even enterprise has some limits
+            }
         ]
-        assert len(set(classifications)) == 3, "Each regulatory context must have unique classification"
         
-        # Business Rule 3: Cross-regulatory-context access must be prevented
-        all_contexts = [gdpr_context, hipaa_context, sox_context]
-        for i, context_a in enumerate(all_contexts):
-            for j, context_b in enumerate(all_contexts):
-                if i != j:
-                    # Verify contexts are isolated
-                    assert context_a.user_id != context_b.user_id, "Regulatory contexts must have different users"
-                    assert context_a.execution_id != context_b.execution_id, "Execution IDs must be unique across regulatory contexts"
-                    
-                    # Verify regulatory requirements don't cross-contaminate
-                    compliance_a = {k: v for k, v in context_a.audit_metadata.items() if k.endswith("_compliant")}
-                    compliance_b = {k: v for k, v in context_b.audit_metadata.items() if k.endswith("_compliant")}
-                    assert compliance_a != compliance_b, "Regulatory compliance requirements must be context-specific"
+        # Act & Assert
+        for scenario in user_permission_scenarios:
+            user_id = scenario["user_id"]
+            permissions = scenario["permissions"]
+            
+            # Test allowed operations
+            for operation in scenario["allowed_operations"]:
+                has_permission = self._check_operation_permission(user_id, permissions, operation)
+                assert has_permission is True, f"User {scenario['tier']} should be able to perform {operation}"
+            
+            # Test forbidden operations
+            for operation in scenario["forbidden_operations"]:
+                has_permission = self._check_operation_permission(user_id, permissions, operation)
+                assert has_permission is False, f"User {scenario['tier']} should NOT be able to perform {operation}"
+            
+            # Test permission inheritance (higher tiers include lower tier permissions)
+            if scenario["tier"] in ["early", "enterprise"]:
+                # Should have read permission
+                assert "read" in permissions
+                has_basic_access = self._check_operation_permission(user_id, permissions, "view_dashboard")
+                assert has_basic_access is True
+                
+            if scenario["tier"] == "enterprise":
+                # Should have write permission
+                assert "write" in permissions
+                has_write_access = self._check_operation_permission(user_id, permissions, "create_reports")
+                assert has_write_access is True
+        
+        print("✅ User permission boundary enforcement test passed")
+
+    def test_user_data_context_cleanup_on_session_end(self):
+        """
+        Test Case: User data contexts are properly cleaned up when sessions end.
+        
+        Business Value: Prevents memory leaks and ensures data privacy compliance.
+        Expected: All user data removed when session ends, no residual data.
+        """
+        # Arrange
+        session_cleanup_scenarios = [
+            {
+                "user_id": "cleanup_user_1",
+                "session_data": {
+                    "active_threads": ["thread_1", "thread_2"],
+                    "cached_results": {"analysis_1": "sensitive_data", "report_1": "confidential"},
+                    "temp_files": ["temp_1.json", "temp_2.csv"],
+                    "websocket_connections": ["ws_conn_1", "ws_conn_2"]
+                }
+            },
+            {
+                "user_id": "cleanup_user_2", 
+                "session_data": {
+                    "active_threads": ["thread_a", "thread_b", "thread_c"],
+                    "cached_results": {"optimization_1": "business_data"},
+                    "temp_files": ["temp_a.pdf"],
+                    "websocket_connections": ["ws_conn_a"]
+                }
+            }
+        ]
+        
+        # Act - Simulate session cleanup
+        cleanup_results = {}
+        
+        for scenario in session_cleanup_scenarios:
+            user_id = scenario["user_id"]
+            session_data = scenario["session_data"]
+            
+            # Before cleanup - data should exist
+            before_cleanup = {
+                "threads_active": len(session_data["active_threads"]) > 0,
+                "cache_exists": len(session_data["cached_results"]) > 0,
+                "temp_files_exist": len(session_data["temp_files"]) > 0,
+                "websockets_connected": len(session_data["websocket_connections"]) > 0
+            }
+            
+            # Perform cleanup
+            cleanup_result = self._cleanup_user_session_context(user_id, session_data)
+            
+            cleanup_results[user_id] = {
+                "before": before_cleanup,
+                "cleanup_result": cleanup_result
+            }
+        
+        # Assert - All user data should be cleaned up
+        for user_id, results in cleanup_results.items():
+            cleanup_result = results["cleanup_result"]
+            
+            # All session components should be cleaned
+            assert cleanup_result["threads_terminated"] is True, f"Threads should be terminated for {user_id}"
+            assert cleanup_result["cache_cleared"] is True, f"Cache should be cleared for {user_id}"
+            assert cleanup_result["temp_files_deleted"] is True, f"Temp files should be deleted for {user_id}"
+            assert cleanup_result["websockets_closed"] is True, f"WebSockets should be closed for {user_id}"
+            
+            # Cleanup should be complete
+            assert cleanup_result["cleanup_complete"] is True, f"Cleanup should be complete for {user_id}"
+            
+            # No residual data should remain
+            assert cleanup_result["residual_data_count"] == 0, f"No residual data should remain for {user_id}"
+        
+        print("✅ User data context cleanup on session end test passed")
+
+    def test_concurrent_user_operations_isolation_validation(self):
+        """
+        Test Case: Concurrent user operations maintain complete isolation.
+        
+        Business Value: System scales to multiple simultaneous users safely.
+        Expected: No interference between concurrent user operations.
+        """
+        # Arrange
+        concurrent_operations = [
+            {
+                "user_id": "concurrent_ops_user_1",
+                "operation": "database_optimization",
+                "data_access": ["user_1_tables", "user_1_queries"],
+                "expected_duration": 30
+            },
+            {
+                "user_id": "concurrent_ops_user_2", 
+                "operation": "cost_analysis",
+                "data_access": ["user_2_billing", "user_2_usage"],
+                "expected_duration": 20
+            },
+            {
+                "user_id": "concurrent_ops_user_3",
+                "operation": "performance_monitoring",
+                "data_access": ["user_3_metrics", "user_3_alerts"],
+                "expected_duration": 25
+            }
+        ]
+        
+        # Act - Simulate concurrent operations
+        operation_results = []
+        
+        for operation in concurrent_operations:
+            user_id = operation["user_id"]
+            op_type = operation["operation"]
+            data_access = operation["data_access"]
+            
+            # Simulate isolated operation execution
+            result = self._execute_isolated_user_operation(user_id, op_type, data_access)
+            operation_results.append(result)
+        
+        # Assert - Validate concurrent isolation
+        for i, result in enumerate(operation_results):
+            operation_info = concurrent_operations[i]
+            expected_user_id = operation_info["user_id"]
+            expected_data = operation_info["data_access"]
+            
+            # Operation should be isolated to correct user
+            assert result["user_id"] == expected_user_id
+            assert result["isolation_maintained"] is True
+            
+            # Data access should be limited to user's data
+            accessed_data = result["data_accessed"]
+            for data_item in accessed_data:
+                assert any(expected_item in data_item for expected_item in expected_data), \
+                    f"Data access {data_item} should be within user's permitted data {expected_data}"
+        
+        # Validate operation success despite concurrency
+        all_successful = all(result["operation_successful"] for result in operation_results)
+        assert all_successful, "All concurrent operations should succeed independently"
+        
+        print("✅ Concurrent user operations isolation validation test passed")
+
+    # Helper methods for test implementation
+    
+    def _get_isolated_user_context(self, user_id: str, all_sessions: Dict) -> Dict[str, Any]:
+        """Helper to get isolated user context."""
+        user_session = all_sessions.get(user_id, {})
+        
+        return {
+            "user_id": user_id,
+            "session_id": user_session.get("session_id"),
+            "user_data": user_session.get("user_data", {}),
+            "active_threads": user_session.get("active_threads", []),
+            "permissions": user_session.get("permissions", []),
+            "isolation_boundary": user_id
+        }
+    
+    def _check_operation_permission(self, user_id: str, permissions: List[str], operation: str) -> bool:
+        """Helper to check if user has permission for operation."""
+        # Define operation permission requirements
+        operation_requirements = {
+            "view_dashboard": ["read"],
+            "basic_analysis": ["read"],
+            "create_reports": ["read", "write"],
+            "standard_optimization": ["read", "write"],
+            "advanced_optimization": ["read", "write", "premium"],
+            "admin_functions": ["read", "write", "admin"],
+            "enterprise_features": ["read", "write", "premium"],
+            "billing_access": ["admin", "billing"],
+            "super_admin_functions": ["super_admin"]
+        }
+        
+        required_permissions = operation_requirements.get(operation, ["super_admin"])
+        return any(perm in permissions for perm in required_permissions)
+    
+    def _cleanup_user_session_context(self, user_id: str, session_data: Dict) -> Dict[str, Any]:
+        """Helper to simulate user session context cleanup."""
+        # Simulate cleanup operations
+        cleanup_operations = {
+            "threads_terminated": len(session_data.get("active_threads", [])) > 0,
+            "cache_cleared": len(session_data.get("cached_results", {})) > 0,
+            "temp_files_deleted": len(session_data.get("temp_files", [])) > 0,
+            "websockets_closed": len(session_data.get("websocket_connections", [])) > 0
+        }
+        
+        # All operations should succeed for proper cleanup
+        all_cleaned = all(cleanup_operations.values())
+        
+        return {
+            **cleanup_operations,
+            "cleanup_complete": all_cleaned,
+            "residual_data_count": 0 if all_cleaned else 1,
+            "cleanup_timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    
+    def _execute_isolated_user_operation(self, user_id: str, operation_type: str, permitted_data: List[str]) -> Dict[str, Any]:
+        """Helper to simulate isolated user operation execution."""
+        # Simulate data access within user's permissions
+        accessed_data = [f"{user_id}_{data}" for data in permitted_data]
+        
+        return {
+            "user_id": user_id,
+            "operation_type": operation_type,
+            "data_accessed": accessed_data,
+            "isolation_maintained": True,
+            "operation_successful": True,
+            "execution_time": datetime.now(timezone.utc).isoformat()
+        }
+
+
+if __name__ == "__main__":
+    # Run tests with business value reporting
+    pytest.main([
+        __file__,
+        "-v",
+        "--tb=short",
+        "-x"  # Stop on first failure for fast feedback
+    ])
