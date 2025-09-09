@@ -172,6 +172,14 @@ class AgentExecutionCore:
                     websocket_manager=self.websocket_bridge
                 )
                 
+                # CRITICAL FIX: Send agent_started event for user visibility
+                if self.websocket_bridge:
+                    await self.websocket_bridge.notify_agent_started(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        context={"status": "starting", "phase": "initialization"}
+                    )
+                
                 # Get agent from registry
                 agent = self._get_agent_or_error(context.agent_name)
                 if isinstance(agent, AgentExecutionResult):
@@ -290,6 +298,15 @@ class AgentExecutionCore:
                         metadata={"result": "success"},
                         websocket_manager=self.websocket_bridge
                     )
+                    
+                    # CRITICAL FIX: Send agent_completed event for user closure
+                    if self.websocket_bridge:
+                        await self.websocket_bridge.notify_agent_completed(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            result={"status": "completed", "success": True, "data": result.data if hasattr(result, 'data') else None}
+                        )
+                    
                     self.state_tracker.complete_execution(state_exec_id, success=True)
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
@@ -315,6 +332,13 @@ class AgentExecutionCore:
                             run_id=context.run_id,
                             agent_name=context.agent_name,
                             error=result.error or "Agent execution failed"
+                        )
+                        
+                        # CRITICAL FIX: Also send agent_completed event for error cases
+                        await self.websocket_bridge.notify_agent_completed(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            result={"status": "completed", "success": False, "error": result.error or "Agent execution failed"}
                         )
                 
                 # Finish the span

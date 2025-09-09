@@ -357,6 +357,7 @@ class TestAuthServiceBusinessLogic:
         
         def verify_password_for_business(password: str, hashed: str) -> bool:
             # Extract salt and hash from stored hash
+            import hashlib
             parts = hashed.split('$')
             if len(parts) != 5:  # ['', 'pbkdf2', '100000', 'salt', 'hash']
                 return False
