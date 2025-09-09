@@ -546,6 +546,38 @@ def convert_jsonrpc_to_websocket_message(jsonrpc_msg: Dict[str, Any]) -> WebSock
     )
 
 
+def generate_default_message(
+    message_type: Union[str, MessageType],
+    user_id: str,
+    thread_id: str,
+    data: Optional[Dict[str, Any]] = None
+) -> WebSocketMessage:
+    """Generate a default WebSocket message with standard structure.
+    
+    This function provides compatibility for test cases that expect
+    a generate_default_message function with this signature.
+    
+    Args:
+        message_type: The type of message (string or MessageType enum)
+        user_id: User identifier
+        thread_id: Thread/conversation identifier
+        data: Optional data payload
+        
+    Returns:
+        WebSocketMessage: Standardized message with default values
+    """
+    normalized_type = normalize_message_type(message_type)
+    
+    return WebSocketMessage(
+        type=normalized_type,
+        payload=data or {},
+        timestamp=time.time(),
+        message_id=str(uuid.uuid4()),
+        user_id=user_id,
+        thread_id=thread_id
+    )
+
+
 # Batch Message Processing Types
 
 class MessageState(str, Enum):

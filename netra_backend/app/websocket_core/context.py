@@ -19,7 +19,7 @@ Key Features:
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
 import uuid
 
 from fastapi import WebSocket
@@ -206,3 +206,135 @@ class WebSocketContext:
             str: Unique key for isolating this user's data and operations
         """
         return f"ws_{self.user_id}_{self.thread_id}_{self.run_id}"
+
+
+@dataclass
+class WebSocketRequestContext:
+    """Request-oriented WebSocket context for testing and flexible usage.
+    
+    This class provides a more flexible WebSocket context that doesn't require
+    an actual WebSocket connection, making it suitable for testing scenarios
+    and contexts where we need WebSocket-like behavior without the connection.
+    
+    Key differences from WebSocketContext:
+    - Optional WebSocket connection (for testing)
+    - Allows arbitrary attribute storage
+    - More flexible for testing scenarios
+    - Compatible with existing test patterns
+    
+    Attributes:
+        user_id: User associated with this context
+        thread_id: Thread/conversation identifier
+        run_id: Current run/session identifier  
+        connection_info: Optional connection information
+        created_at: When the context was created
+        last_activity: Last time this context had activity
+    """
+    user_id: str
+    thread_id: str
+    run_id: str
+    connection_info: Optional[Any] = None
+    created_at: datetime = field(default_factory=datetime.utcnow)
+    last_activity: datetime = field(default_factory=datetime.utcnow)
+    _attributes: Dict[str, Any] = field(default_factory=dict)
+    
+    def __post_init__(self):
+        """Post-initialization validation and logging."""
+        # Validate required fields
+        if not self.user_id:
+            raise ValueError("user_id is required for WebSocketRequestContext")
+        if not self.thread_id:
+            raise ValueError("thread_id is required for WebSocketRequestContext")
+        if not self.run_id:
+            raise ValueError("run_id is required for WebSocketRequestContext")
+        
+        # Log context creation
+        logger.debug(
+            f"Created WebSocketRequestContext: user_id={self.user_id}, "
+            f"thread_id={self.thread_id}, run_id={self.run_id}"
+        )
+    
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Allow setting arbitrary attributes for testing flexibility."""
+        if name.startswith('_') or name in {
+            'user_id', 'thread_id', 'run_id', 'connection_info', 
+            'created_at', 'last_activity'
+        }:
+            # Use normal attribute setting for defined fields
+            super().__setattr__(name, value)
+        else:
+            # Store other attributes in the _attributes dict
+            if not hasattr(self, '_attributes'):
+                super().__setattr__('_attributes', {})
+            self._attributes[name] = value
+    
+    def __getattr__(self, name: str) -> Any:
+        """Allow getting arbitrary attributes for testing flexibility."""
+        if hasattr(self, '_attributes') and name in self._attributes:
+            return self._attributes[name]
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+    
+    @classmethod
+    def create_for_user(
+        cls,
+        user_id: str,
+        thread_id: str,
+        connection_info: Optional[Any] = None,
+        run_id: Optional[str] = None
+    ) -> "WebSocketRequestContext":
+        """Factory method to create WebSocketRequestContext for a user.
+        
+        Args:
+            user_id: User identifier
+            thread_id: Thread/conversation identifier  
+            connection_info: Optional connection information
+            run_id: Optional run identifier (auto-generated if not provided)
+            
+        Returns:
+            WebSocketRequestContext: Configured context for the user
+        """
+        if not run_id:
+            run_id = str(uuid.uuid4())
+        
+        context = cls(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            connection_info=connection_info
+        )
+        
+        logger.info(f"Created WebSocketRequestContext for user {user_id}, run {run_id}")
+        return context
+    
+    def update_activity(self) -> None:
+        """Update the last activity timestamp.
+        
+        Should be called whenever this context processes a message
+        or performs any activity. Useful for context lifecycle management.
+        """
+        self.last_activity = datetime.utcnow()
+        logger.debug(f"Updated activity timestamp for context {self.run_id}")
+    
+    def get_context_info(self) -> dict:
+        """Get context information for logging/debugging.
+        
+        Returns:
+            dict: Context information excluding sensitive data
+        """
+        return {
+            "user_id": self.user_id,
+            "thread_id": self.thread_id,
+            "run_id": self.run_id,
+            "created_at": self.created_at.isoformat(),
+            "last_activity": self.last_activity.isoformat(),
+            "has_connection_info": self.connection_info is not None,
+            "additional_attributes": list(self._attributes.keys()) if hasattr(self, '_attributes') else []
+        }
+    
+    def to_isolation_key(self) -> str:
+        """Generate a unique key for user isolation.
+        
+        Returns:
+            str: Unique key for isolating this user's data and operations
+        """
+        return f"wsreq_{self.user_id}_{self.thread_id}_{self.run_id}"
