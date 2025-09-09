@@ -254,7 +254,7 @@ async def websocket_endpoint(websocket: WebSocket):
         
         # PHASE 1 FIX 1: Integrate ApplicationConnectionStateMachine after successful accept()
         # This addresses the race condition where message handling begins before accept() completion
-        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, ApplicationConnectionState
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
         
         # Generate preliminary connection_id for state machine registration
         # This will be updated with proper user context after authentication
