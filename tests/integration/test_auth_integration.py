@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.database_skip_conditions import skip_if_database_unavailable
+from test_framework.ssot.database_skip_conditions import DatabaseAvailabilityChecker
 
 # Get environment instance first
 env = get_env()
@@ -23,9 +23,10 @@ def setup_database():
     FIXED: Changed from module to function scope to resolve fixture conflicts.
     """
     # Skip if database unavailable
-    skip_reason = skip_if_database_unavailable()
-    if skip_reason:
-        pytest.skip(skip_reason)
+    availability_checker = DatabaseAvailabilityChecker()
+    is_available, reason = availability_checker.check_postgresql_available()
+    if not is_available:
+        pytest.skip(f"PostgreSQL unavailable: {reason}")
     
     async def create_tables():
         # Initialize the database connection first

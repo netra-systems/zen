@@ -1,5 +1,6 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
+from unittest.mock import patch
 """
 Staging-Specific CORS Tests
 
