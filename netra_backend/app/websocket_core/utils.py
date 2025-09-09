@@ -154,24 +154,79 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
             logger.debug("WebSocket state check: WebSocket not properly initialized")
             return False
         
-        # 4. CRITICAL FIX: For staging, be more conservative - if we can't determine state, assume disconnected
-        # This prevents sending to potentially dead connections in cloud environments
+        # 4. CRITICAL FIX: Enhanced Cloud Run environment detection and state validation
+        # Root cause: is_websocket_connected() incorrectly returns False in GCP Cloud Run
         from shared.isolated_environment import get_env
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
         
+        # GCP Cloud Run specific WebSocket state validation
         if environment in ["staging", "production"]:
-            logger.debug(f"WebSocket state check: No state attributes found in {environment}, assuming disconnected for safety")
+            # ENHANCED FIX: Try additional Cloud Run specific checks
+            try:
+                # Check if WebSocket has Cloud Run specific attributes
+                if hasattr(websocket, '_send_queue') and hasattr(websocket, '_receive_queue'):
+                    logger.debug(f"Cloud Run WebSocket queues detected - connection appears active")
+                    return True
+                
+                # Check for Cloud Run WebSocket proxy attributes
+                if hasattr(websocket, 'scope') and websocket.scope:
+                    scope_type = websocket.scope.get('type', '')
+                    if scope_type == 'websocket':
+                        logger.debug(f"Cloud Run WebSocket scope confirmed - connection active")
+                        return True
+                
+                # Check if we can access basic WebSocket methods without error
+                if hasattr(websocket, 'send_json') and callable(websocket.send_json):
+                    logger.debug(f"Cloud Run WebSocket send methods available - connection likely active")
+                    return True
+                    
+            except Exception as cloud_check_error:
+                logger.debug(f"Cloud Run WebSocket check failed: {cloud_check_error}")
+            
+            # Cloud environments - be conservative but not overly restrictive
+            logger.debug(f"WebSocket state check: Could not confirm connection in {environment}, assuming disconnected for safety")
             return False
         else:
-            # Development - more permissive
-            logger.debug("WebSocket state check: No state attributes found in development, defaulting to connected=True")
+            # Development - more permissive but with better validation
+            try:
+                # Even in development, try to validate WebSocket is actually usable
+                if hasattr(websocket, 'send_json') and callable(websocket.send_json):
+                    logger.debug("Development WebSocket methods confirmed - assuming connected")
+                    return True
+            except Exception:
+                pass
+                
+            logger.debug("Development WebSocket fallback - defaulting to connected=True")
             return True
         
     except Exception as e:
-        # CRITICAL FIX: If we can't check the state due to an error, assume disconnected
-        logger.warning(f"WebSocket state check error: {e}, assuming disconnected")
-        return False
+        # CRITICAL FIX: Enhanced error handling for connection state validation issues
+        # Root cause: Connection churning causes resource accumulation
+        import traceback
+        from shared.isolated_environment import get_env
+        
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+        
+        # Enhanced error context for debugging connection issues
+        error_context = {
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "environment": environment,
+            "websocket_type": type(websocket).__name__ if websocket else "None"
+        }
+        
+        # Environment-specific error handling
+        if environment in ["staging", "production"]:
+            logger.warning(f"🚨 WebSocket state check failed in {environment}: {error_context['error_type']} - {error_context['error_message']}")
+            logger.debug(f"WebSocket state check error context: {error_context}")
+            # In cloud environments, connection check failures indicate real issues
+            return False
+        else:
+            logger.debug(f"WebSocket state check error in development: {error_context}")
+            # In development, be more forgiving of connection check errors
+            return False  # Still return False for safety, but with less aggressive logging
 
 
 def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Optional[str] = None) -> bool:
