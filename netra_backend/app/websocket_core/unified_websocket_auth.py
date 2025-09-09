@@ -363,6 +363,19 @@ class UnifiedWebSocketAuthenticator:
                     error_code=auth_result.error_code
                 )
             
+            # PHASE 1 FIX: Record circuit breaker success and cache result for concurrent access
+            await self._record_circuit_breaker_success()
+            
+            # Create successful auth result
+            websocket_auth_result = WebSocketAuthResult(
+                success=True,
+                user_context=user_context,
+                auth_result=auth_result
+            )
+            
+            # PHASE 1 FIX: Cache result for concurrent E2E contexts
+            await self._cache_concurrent_token_result(e2e_context, websocket_auth_result)
+            
             # Authentication successful - Enhanced success logging  
             success_debug = {
                 "user_id_prefix": auth_result.user_id[:8] if auth_result.user_id else '[NO_USER_ID]',
@@ -370,6 +383,7 @@ class UnifiedWebSocketAuthenticator:
                 "success_count": self._websocket_auth_successes + 1,
                 "success_rate": ((self._websocket_auth_successes + 1) / max(1, self._websocket_auth_attempts)) * 100,
                 "connection_state": str(connection_state),
+                "circuit_breaker_state": self._circuit_breaker["state"],
                 "permissions_count": len(auth_result.permissions) if auth_result.permissions else 0,
                 "websocket_info": {
                     "client_host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket.client else 'no_client',
@@ -382,19 +396,19 @@ class UnifiedWebSocketAuthenticator:
             logger.debug(f"✅ WEBSOCKET AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
             self._websocket_auth_successes += 1
             
-            return WebSocketAuthResult(
-                success=True,
-                user_context=user_context,
-                auth_result=auth_result
-            )
+            return websocket_auth_result
             
         except Exception as e:
+            # PHASE 1 FIX: Record circuit breaker failure for exceptions too
+            await self._record_circuit_breaker_failure()
+            
             # Enhanced exception debugging
             exception_debug = {
                 "exception_type": type(e).__name__,
                 "exception_message": str(e),
                 "connection_state": str(connection_state),
                 "websocket_available": websocket is not None,
+                "circuit_breaker_state": self._circuit_breaker["state"],
                 "client_info": {
                     "host": safe_get_attr(websocket.client, 'host', 'no_client') if websocket and websocket.client else 'no_client',
                     "port": safe_get_attr(websocket.client, 'port', 'no_client') if websocket and websocket.client else 'no_client'
