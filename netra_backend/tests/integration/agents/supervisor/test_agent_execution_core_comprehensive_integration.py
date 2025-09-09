@@ -59,7 +59,9 @@ class MockAgent:
         self.method_calls.append(("execute", state, run_id, should_return_result))
         
         if self.should_timeout:
-            await asyncio.sleep(10)  # Simulate timeout scenario
+            # Simulate timeout immediately without real delay - this triggers the same
+            # code path as real timeout in AgentExecutionCore._execute_with_protection
+            raise asyncio.TimeoutError("Simulated timeout for integration testing")
             
         await asyncio.sleep(self.execution_time)
         
@@ -187,17 +189,18 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         """Provide test user context."""
         return UserExecutionContext(
             user_id="test_user_123",
-            thread_id="test_thread_456", 
-            correlation_id="test_correlation_789",
-            permissions=["agent_execution", "tool_dispatch"]
+            thread_id="test_thread_456",
+            run_id="test_run_789"
         )
     
     @pytest.fixture
     def agent_context(self):
         """Provide agent execution context."""
         return AgentExecutionContext(
+            run_id=str(uuid4()),
+            thread_id="test_thread_456",
+            user_id="test_user_123", 
             agent_name="test_optimization_agent",
-            run_id=uuid4(),
             correlation_id="test_correlation_789",
             retry_count=0
         )
@@ -306,8 +309,10 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         
         # Setup: Multiple user contexts
         user1_context = AgentExecutionContext(
+            run_id=str(uuid4()),
+            thread_id="thread_1",
+            user_id="user_1",
             agent_name="isolation_test_agent",
-            run_id=uuid4(),
             correlation_id="user1_correlation"
         )
         user1_state = DeepAgentState()
@@ -316,8 +321,10 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         user1_state.context_data = {"user_data": "sensitive_user1_data"}
         
         user2_context = AgentExecutionContext(
+            run_id=str(uuid4()),
+            thread_id="thread_2",
+            user_id="user_2",
             agent_name="isolation_test_agent", 
-            run_id=uuid4(),
             correlation_id="user2_correlation"
         )
         user2_state = DeepAgentState()

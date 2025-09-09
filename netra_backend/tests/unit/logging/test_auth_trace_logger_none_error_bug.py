@@ -126,7 +126,7 @@ class TestAuthTraceLoggerNoneErrorBug:
     
     def test_system_user_403_error_scenario(self):
         """
-        Reproduce the specific scenario from bug reports with 'system' user.
+        VALIDATION: Confirm system user scenarios work correctly after bug fix.
         This mimics service-to-service auth failures.
         """
         context = AuthTraceContext(
@@ -145,11 +145,24 @@ class TestAuthTraceLoggerNoneErrorBug:
             "auth_method": "jwt_validation"
         }
         
-        # Should trigger the NoneType bug
-        with pytest.raises(Exception) as exc_info:
+        # Should now work correctly without exceptions
+        try:
             self.logger.log_failure(context, auth_error, additional_context)
-            
-        assert "'NoneType' object has no attribute 'update'" in str(exc_info.value)
+            fix_successful = True
+        except AttributeError as e:
+            if "'NoneType' object has no attribute 'update'" in str(e):
+                fix_successful = False
+                pytest.fail(f"Bug still exists: {e}")
+            else:
+                raise e
+                
+        assert fix_successful, "System user scenario should work after bug fix"
+        
+        # Verify error_context was properly initialized 
+        assert context.error_context is not None
+        assert isinstance(context.error_context, dict)
+        assert "service_name" in context.error_context
+        assert context.error_context["service_name"] == "agent_executor"
     
     def test_concurrent_log_failure_race_condition(self):
         """
