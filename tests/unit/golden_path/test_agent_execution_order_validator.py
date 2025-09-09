@@ -26,6 +26,7 @@ from unittest.mock import Mock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id, UnifiedIDManager
 
 
 class AgentType(Enum):
@@ -221,6 +222,15 @@ class AgentExecutionOrderValidator:
     ) -> List[AgentType]:
         """Get list of agents that can execute next based on completed agents."""
         executable = []
+        
+        # Check if the core Golden Path pipeline is complete
+        core_pipeline_complete = all(
+            agent in completed_agents for agent in self.required_order
+        )
+        
+        # If core pipeline is complete, no more agents should execute
+        if core_pipeline_complete:
+            return executable
         
         for agent_type in AgentType:
             if agent_type not in completed_agents:
@@ -433,9 +443,9 @@ class TestAgentExecutionOrderValidator(SSotAsyncTestCase):
     @pytest.mark.unit
     def test_execution_context_tracking(self):
         """Test tracking of agent execution contexts."""
-        user_id = UserID(self.id_generator.generate_user_id())
-        thread_id = ThreadID(self.id_generator.generate_thread_id())
-        run_id = RunID(self.id_generator.generate_run_id())
+        user_id = UserID(generate_user_id())
+        thread_id = ThreadID(generate_thread_id())
+        run_id = RunID(UnifiedIDManager.generate_run_id(str(thread_id)))
         
         # Create execution contexts
         data_context = AgentExecutionContext(
@@ -467,9 +477,9 @@ class TestAgentExecutionOrderValidator(SSotAsyncTestCase):
     @pytest.mark.unit  
     def test_actual_execution_order_validation(self):
         """Test validation of actual execution order from tracked contexts."""
-        user_id = UserID(self.id_generator.generate_user_id())
-        thread_id = ThreadID(self.id_generator.generate_thread_id())
-        run_id = RunID(self.id_generator.generate_run_id())
+        user_id = UserID(generate_user_id())
+        thread_id = ThreadID(generate_thread_id())
+        run_id = RunID(UnifiedIDManager.generate_run_id(str(thread_id)))
         
         # Create contexts with different start times to simulate execution order
         base_time = time.time()

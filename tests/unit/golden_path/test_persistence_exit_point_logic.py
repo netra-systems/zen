@@ -30,6 +30,7 @@ from unittest.mock import Mock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id, UnifiedIDManager
 
 
 class ExitPointType(Enum):
@@ -372,9 +373,10 @@ class TestPersistenceExitPointLogic(SSotAsyncTestCase):
         self.id_generator = UnifiedIdGenerator()
         
         # Test context
-        self.user_id = UserID(self.id_generator.generate_user_id())
-        self.thread_id = ThreadID(self.id_generator.generate_thread_id())
-        self.run_id = RunID(self.id_generator.generate_run_id())
+        self.user_id = UserID(generate_user_id())
+        self.thread_id = ThreadID(generate_thread_id())
+        thread_id_str = str(self.thread_id)
+        self.run_id = RunID(UnifiedIDManager.generate_run_id(thread_id_str))
         
         # Test metrics
         self.record_metric("test_category", "unit")

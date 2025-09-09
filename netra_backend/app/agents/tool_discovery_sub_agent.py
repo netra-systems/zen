@@ -24,7 +24,7 @@ from netra_backend.app.agents.triage.unified_triage_agent import ExtractedEntiti
 from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.database.session_manager import SessionManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -68,7 +68,7 @@ class ToolDiscoverySubAgent(BaseAgent):
         
         try:
             # Create database session manager (stub implementation)
-            session_mgr = DatabaseSessionManager()
+            session_mgr = SessionManager()
             
             # Validate preconditions
             if not await self._validate_preconditions(context):

@@ -312,6 +312,7 @@ class AgentExecutionMetrics(BaseModel):
     """Metrics for agent execution tracking."""
     
     execution_time: Optional[float] = Field(None, description="Total execution time in seconds")
+    execution_time_ms: Optional[float] = Field(0.0, description="Execution time in milliseconds")
     tool_calls_count: Optional[int] = Field(0, description="Number of tool calls made")
     context_length: Optional[int] = Field(None, description="Context length used")
     tokens_used: Optional[int] = Field(None, description="Total tokens consumed")

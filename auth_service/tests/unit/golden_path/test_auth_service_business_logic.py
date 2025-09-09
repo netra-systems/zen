@@ -21,8 +21,7 @@ from unittest.mock import Mock, MagicMock, patch
 
 # Import auth service business logic components
 from auth_service.auth_core.services.auth_service import AuthService
-from auth_service.auth_core.models import User
-from auth_service.auth_core.models.auth_models import UserCreate, UserLogin, TokenResponse
+from auth_service.auth_core.models.auth_models import User, UserCreate, UserLogin, TokenResponse
 from auth_service.auth_core.database.repository import AuthUserRepository
 
 
@@ -91,7 +90,7 @@ class TestAuthServiceBusinessLogic:
         assert decoded["name"] == mock_user.name, "Token must contain user name"
         assert decoded["is_active"] == mock_user.is_active, "Token must contain active status"
 
-    @patch('auth_service.app.services.auth_service.UserRepository')
+    @patch('auth_service.auth_core.database.repository.AuthUserRepository')
     def test_user_login_business_validation(self, mock_user_repository):
         """Test user login validation follows business logic."""
         # Setup mock repository
@@ -104,8 +103,8 @@ class TestAuthServiceBusinessLogic:
         )
         mock_user_repository.return_value.get_by_email.return_value = mock_user
         
-        # Mock password verification
-        with patch('auth_service.app.services.auth_service.verify_password') as mock_verify:
+        # Mock password verification - patch the method on AuthService instance
+        with patch.object(AuthService, 'verify_password') as mock_verify:
             mock_verify.return_value = True
             
             auth_service = AuthService()

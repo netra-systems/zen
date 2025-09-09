@@ -11,10 +11,8 @@ from netra_backend.app.llm.observability import (
     log_agent_input,
     log_agent_output,
 )
-from netra_backend.app.schemas.strict_types import (
-    AgentExecutionMetrics,
-    TypedAgentResult,
-)
+from netra_backend.app.schemas.agent_models import AgentExecutionMetrics
+from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 
 
 class AgentObservabilityMixin:

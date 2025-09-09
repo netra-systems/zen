@@ -759,6 +759,7 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^dummy_\w+$',                  # dummy_user, dummy_session
         r'^sample_\w+$',                 # sample_user, sample_connection
         r'^ssot-[a-zA-Z]+-\w+$',         # ssot-test-user, ssot-mock-session
+        r'^staging-e2e-user-\d+$',       # staging-e2e-user-001, staging-e2e-user-002 (staging E2E test users)
         r'^e2e-[a-zA-Z]+_[a-zA-Z]+$',         # e2e-staging_pipeline, e2e-test_environment
         r'^e2e-[a-zA-Z]+_[a-zA-Z]+_[0-9]+$',  # e2e-dev_pipeline_123 (with numbers)
         r'^e2e-[a-zA-Z]+_[a-zA-Z]+-v[0-9.]+$', # e2e-staging_release-v1.2.3 (version releases)

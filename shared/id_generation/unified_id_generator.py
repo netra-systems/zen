@@ -397,7 +397,12 @@ class UnifiedIdGenerator:
             
             # Create new session
             if thread_id:
-                session_thread_id = thread_id
+                # CRITICAL FIX: Generate user-specific internal thread ID for multi-user isolation
+                # Even when users provide the same thread_id (like "shared_thread_name"),
+                # each user must get a unique internal thread_id to prevent cross-user data leakage
+                user_prefix = user_id[:8] if len(user_id) >= 8 else user_id
+                thread_suffix = thread_id[:8] if len(thread_id) >= 8 else thread_id
+                session_thread_id = cls.generate_base_id(f"thread_{user_prefix}_{thread_suffix}_{operation}", True, 8)
             else:
                 session_thread_id = cls.generate_base_id(f"thread_{operation}", True, 8)
             
@@ -501,6 +506,15 @@ class UnifiedIdGenerator:
                 del cls._active_sessions[key]
                 
             return len(keys_to_remove)
+    
+    @classmethod
+    def reset_global_counter(cls) -> None:
+        """Reset global counter for test isolation.
+        
+        This method provides the class method interface expected by test code
+        while delegating to the module-level reset function to maintain SSOT.
+        """
+        reset_global_counter()
 
 
 # Convenience functions for common use cases

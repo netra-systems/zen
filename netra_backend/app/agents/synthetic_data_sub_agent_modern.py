@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.database.session_manager import DatabaseSessionManager
+    from netra_backend.app.database.session_manager import SessionManager
 
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
@@ -22,7 +22,7 @@ from netra_backend.app.core.unified_error_handler import agent_error_handler as 
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.agents.synthetic_data_approval_handler import (
     SyntheticDataApprovalHandler,
 )
@@ -160,7 +160,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
             raise TypeError(f"Expected UserExecutionContext, got {type(context)}")
         
         # Create database session manager (stub implementation)
-        db_manager = DatabaseSessionManager()
+        db_manager = SessionManager()
         
         try:
             # Use BaseAgent's WebSocket event emission capabilities
@@ -210,7 +210,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         return any(keyword in request_lower for keyword in synthetic_keywords)
 
     async def _execute_with_context(self, context: UserExecutionContext, 
-                                   stream_updates: bool, db_manager: 'DatabaseSessionManager') -> Dict[str, Any]:
+                                   stream_updates: bool, db_manager: 'SessionManager') -> Dict[str, Any]:
         """Execute generation workflow using UserExecutionContext.
         
         Args:

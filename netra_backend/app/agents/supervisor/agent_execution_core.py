@@ -114,14 +114,15 @@ class AgentExecutionCore:
                 # Add trace event
                 trace_context.add_event("agent.started")
                 
-                # CRITICAL: WebSocket event emission is handled by ExecutionEngine (SSOT)
-                # ExecutionEngine coordinates user-facing notifications with UserExecutionContext
-                # AgentExecutionCore focuses on pure execution without duplicate events
-                # Business Value: Prevents duplicate events while maintaining user feedback
-                
-                # Skip duplicate agent_started emission - ExecutionEngine already sent it
-                # Keep only execution-specific thinking events that provide unique value
+                # CRITICAL: Send agent_started event for business value and user transparency
+                # Business Value: Users must know agent has started working on their problem
+                # This is MISSION CRITICAL per CLAUDE.md Section 6 - WebSocket Agent Events
                 if self.websocket_bridge:
+                    await self.websocket_bridge.notify_agent_started(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        trace_context=trace_context.to_websocket_context()
+                    )
                     # CRITICAL: Send agent thinking event for real-time user feedback
                     # Business Value: Users see AI is working on their problem (Trust Building)
                     await self.websocket_bridge.notify_agent_thinking(
@@ -174,14 +175,30 @@ class AgentExecutionCore:
                         exec_id, 
                         error=result.error or "Unknown error"
                     )
+                    
+                    # CRITICAL: Send error notification for agent failures including death detection
+                    # Business Value: Users must be notified when agent fails or dies silently
+                    # This is MISSION CRITICAL per CLAUDE.md Section 6 - WebSocket Agent Events
+                    if self.websocket_bridge:
+                        await self.websocket_bridge.notify_agent_error(
+                            run_id=context.run_id,
+                            agent_name=context.agent_name,
+                            error=result.error or "Agent execution failed"
+                        )
                 
                 # Finish the span
                 trace_context.finish_span(span)
                 
-                # CRITICAL: WebSocket completion events are handled by ExecutionEngine (SSOT)
-                # ExecutionEngine sends comprehensive completion notifications with UserExecutionContext
-                # AgentExecutionCore focuses on execution tracking without duplicate events
-                # Business Value: Prevents duplicate completion events while maintaining user feedback
+                # CRITICAL: Send agent_completed event for business value and user closure
+                # Business Value: Users must know when agent has finished working on their problem
+                # This is MISSION CRITICAL per CLAUDE.md Section 6 - WebSocket Agent Events
+                if self.websocket_bridge and result.success:
+                    await self.websocket_bridge.notify_agent_completed(
+                        run_id=context.run_id,
+                        agent_name=context.agent_name,
+                        result=result.data if hasattr(result, 'data') else {"success": True},
+                        execution_time_ms=int((result.duration * 1000) if result.duration else 0)
+                    )
                 
                 return result
             

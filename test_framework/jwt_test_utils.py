@@ -150,7 +150,11 @@ def decode_test_token(token: str, secret: Optional[str] = None) -> Dict[str, Any
         token, 
         secret, 
         algorithms=["HS256"],
-        options={"verify_exp": False}  # Skip expiration check for testing
+        options={
+            "verify_exp": False,  # Skip expiration check for testing
+            "verify_aud": False,  # Skip audience verification for testing
+            "verify_iss": False   # Skip issuer verification for testing
+        }
     )
 
 

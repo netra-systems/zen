@@ -20,7 +20,7 @@ from netra_backend.app.core.type_validators import agent_type_safe
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext, validate_user_context
-from netra_backend.app.database.session_manager import DatabaseSessionManager
+from netra_backend.app.database.session_manager import SessionManager
 from netra_backend.app.schemas.shared_types import ValidationResult, NestedJsonDict
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
@@ -116,7 +116,7 @@ class ValidationSubAgent(BaseAgent):
         
         try:
             # Create database session manager (stub implementation)
-            session_mgr = DatabaseSessionManager()
+            session_mgr = SessionManager()
             
             # Emit thinking event (agent_started is handled by orchestrator)
             await self.emit_thinking("Starting comprehensive validation process")

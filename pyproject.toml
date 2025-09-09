@@ -32,7 +32,7 @@ addopts = [
 
 # Asyncio settings
 asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "session"
+asyncio_default_fixture_loop_scope = "function"
 
 # Collection optimization
 collect_ignore = [
