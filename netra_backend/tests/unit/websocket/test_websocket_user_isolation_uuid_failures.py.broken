@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory  
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
-from netra_backend.app.websocket_core.context import WebSocketRequestContext
+from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage
 from netra_backend.app.websocket_core.user_session_manager import UserSessionManager
 
@@ -168,7 +168,7 @@ class TestWebSocketUserIsolationUuidFailures:
         for user_id in users:
             user_contexts = []
             for i in range(2):
-                context = WebSocketRequestContext.create_for_user(
+                context = WebSocketContext.create_for_user(
                     user_id=user_id,
                     thread_id=f"{user_id}_thread_{i}",
                     connection_info=None
@@ -530,7 +530,7 @@ class TestWebSocketUserIsolationUuidFailures:
         target_user, malicious_user = users
         
         # Create context for target user
-        context = WebSocketRequestContext.create_for_user(
+        context = WebSocketContext.create_for_user(
             user_id=target_user,
             thread_id=f"{target_user}_secure_thread",
             connection_info=None

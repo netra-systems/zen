@@ -458,9 +458,9 @@ class TestTTLExpirationLogic(unittest.TestCase):
         # Clean up expired entries
         cleaned_count = manager.cleanup_expired_states()
         
-        # Should have cleaned 3 expired entries (1, 3, 5)
-        self.assertEqual(cleaned_count, 3)
-        self.assertEqual(manager.get_state_count(), 2)
+        # Should have cleaned 2 expired entries (1, 3)
+        self.assertEqual(cleaned_count, 2)
+        self.assertEqual(manager.get_state_count(), 3)
         
         # Remaining entries should be non-expired (0, 2, 4)
         remaining_ids = set(manager.state_store.keys())

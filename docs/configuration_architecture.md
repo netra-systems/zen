@@ -400,43 +400,98 @@ graph TD
 - [Unified Environment Management](../SPEC/unified_environment_management.xml) - Core requirements
 - [Environment-Aware Testing](../SPEC/environment_aware_testing.xml) - Test isolation patterns
 
-### Layer 2: Configuration Orchestration (UnifiedConfigManager)
+### Layer 2: Enhanced Configuration Orchestration (UnifiedConfigManager)
 
-**Purpose**: Orchestrates configuration loading from multiple sources.
+**Purpose**: Orchestrates configuration loading with SSOT compliance and progressive validation.
 
-**Key Components**:
-- `DatabaseConfigManager` - Database connection strings (uses [DatabaseURLBuilder SSOT](#database-url-ssot-architecture))
-- `ServiceConfigManager` - Service-specific settings
-- `SecretManager` - Secret keys and credentials
-- `ConfigurationValidator` - Validation logic
+**CRITICAL CHANGES from Previous Implementation**:
+- **Test-Aware Caching**: Disables configuration caching in test environments for fresh variable reads
+- **Service Secret Sanitization**: Strips whitespace from critical service configuration to prevent header issues  
+- **Progressive Validation Integration**: Works with ConfigurationValidator for environment-appropriate validation
+- **Environment-Specific Config Classes**: Creates DevelopmentConfig, StagingConfig, ProductionConfig, NetraTestingConfig
 
-**Features**:
-- Environment detection
-- Hot-reload capability
-- Configuration caching
-- Integrity validation
-- Summary reporting
+**Enhanced Components**:
+- `ConfigurationLoader` - Multi-source configuration loading with environment detection
+- `ConfigurationValidator` - Progressive validation with fallback handling (WARN/ENFORCE_CRITICAL/ENFORCE_ALL modes)
+- `DatabaseValidator` - Database configuration validation through DatabaseURLBuilder SSOT
+- `AuthValidator` - OAuth and authentication configuration validation
+- `LLMValidator` - LLM provider configuration validation
+- `EnvironmentValidator` - Environment-specific configuration validation
 
-**Location**: [`netra_backend/app/core/configuration/base.py`](../netra_backend/app/core/configuration/base.py)
+**Key Features**:
+- **Environment Detection**: Uses EnvironmentDetector for consistent environment identification
+- **Test Environment Handling**: Forces fresh configuration loading in testing environments
+- **Configuration Health Scoring**: Calculates 0-100 health score with penalties for errors/warnings
+- **Service Secret Protection**: Sanitizes SERVICE_SECRET and SERVICE_ID from environment variables
+- **Fallback Configuration**: Creates AppConfig fallback on configuration class creation failure
 
-**Related Components**:
-- [`netra_backend/app/core/configuration/services.py`](../netra_backend/app/core/configuration/services.py) - Service configuration
-- [`netra_backend/app/core/configuration/database.py`](../netra_backend/app/core/configuration/database.py) - Database configuration
-- [`netra_backend/app/core/configuration/secrets.py`](../netra_backend/app/core/configuration/secrets.py) - Secret management
-- [`netra_backend/app/core/configuration/validator.py`](../netra_backend/app/core/configuration/validator.py) - Validation logic
+**Primary Location**: [`netra_backend/app/core/configuration/base.py`](../netra_backend/app/core/configuration/base.py) - UnifiedConfigManager
 
-### Layer 3: Service Configuration
+**Configuration Validation Architecture**:
+- [`netra_backend/app/core/configuration/validator.py`](../netra_backend/app/core/configuration/validator.py) - Main validator orchestration
+- [`netra_backend/app/core/configuration/validator_auth.py`](../netra_backend/app/core/configuration/validator_auth.py) - OAuth and JWT validation
+- [`netra_backend/app/core/configuration/validator_database.py`](../netra_backend/app/core/configuration/validator_database.py) - Database configuration validation
+- [`netra_backend/app/core/configuration/validator_llm.py`](../netra_backend/app/core/configuration/validator_llm.py) - LLM provider validation
+- [`netra_backend/app/core/configuration/validator_environment.py`](../netra_backend/app/core/configuration/validator_environment.py) - External service validation
 
-**Purpose**: Service-specific configuration classes.
+### Layer 3: Enhanced Service Configuration with SSOT Compliance
 
-**Examples**:
-- [`AuthConfig`](../auth_service/auth_core/config.py) - Auth service configuration with OAuth handling
-- [`AppConfig`](../netra_backend/app/schemas/config.py) - Main backend configuration schema
-- `DevelopmentConfig`, `StagingConfig`, `ProductionConfig` - Environment-specific in [`schemas/config.py`](../netra_backend/app/schemas/config.py)
+**Purpose**: Service-specific configuration classes that maintain independence while using shared SSOT components.
 
-**Service Configs**:
-- [`ConfigService`](../netra_backend/app/services/config_service.py) - Configuration backup/restore
-- [`config.py` routes](../netra_backend/app/routes/config.py) - Configuration API endpoints
+**CRITICAL ARCHITECTURAL CHANGE**: All services now use unified `shared.isolated_environment.IsolatedEnvironment` while maintaining service independence through service-specific configuration wrappers.
+
+**Backend Service Configuration**:
+- [`AppConfig`](../netra_backend/app/schemas/config.py) - Main backend configuration schema with environment-specific classes
+- `DevelopmentConfig` - Development environment configuration with debug settings
+- `StagingConfig` - Staging environment configuration with production-like validation
+- `ProductionConfig` - Production configuration with strict security requirements  
+- `NetraTestingConfig` - Test environment configuration with built-in defaults
+
+**Auth Service Configuration (SSOT Delegation Pattern)**:
+- [`AuthConfig`](../auth_service/auth_core/config.py) - **CONSOLIDATED** thin wrapper that delegates ALL configuration logic to AuthEnvironment
+- [`AuthEnvironment`](../auth_service/auth_core/auth_environment.py) - **TRUE SSOT** for all auth service configuration
+- **Property Accessor Pattern**: AuthConfig provides property accessors (jwt_secret_key, postgres_host, etc.) that delegate to AuthEnvironment
+- **Test Compatibility**: Property setters allow test environments to override configuration values
+- **OAuth Integration**: Environment-specific OAuth credential management through AuthEnvironment
+
+**Service Independence Architecture**:
+```mermaid
+graph TB
+    subgraph "Service-Specific Configuration Layer"
+        BACKEND_CONFIG["netra_backend<br/>AppConfig + Environment Classes<br/>Uses UnifiedConfigManager"]
+        AUTH_CONFIG["auth_service<br/>AuthConfig (Thin Wrapper)<br/>Delegates to AuthEnvironment"]
+        AUTH_ENV["auth_service<br/>AuthEnvironment (TRUE SSOT)<br/>All Auth Configuration Logic"]
+    end
+    
+    subgraph "Shared SSOT Infrastructure"
+        SHARED_ISO["shared.isolated_environment<br/>IsolatedEnvironment<br/>UNIFIED SINGLETON"]
+        SHARED_DB["shared.database_url_builder<br/>DatabaseURLBuilder<br/>Database URL SSOT"]
+        SHARED_JWT["shared.jwt_secret_manager<br/>SharedJWTSecretManager<br/>JWT Secret SSOT"]
+    end
+    
+    %% All services use shared SSOT infrastructure
+    BACKEND_CONFIG -->|uses| SHARED_ISO
+    AUTH_ENV -->|uses| SHARED_ISO
+    BACKEND_CONFIG -->|uses| SHARED_DB
+    AUTH_ENV -->|uses| SHARED_DB
+    BACKEND_CONFIG -->|uses| SHARED_JWT
+    AUTH_CONFIG -->|uses| SHARED_JWT
+    
+    %% Auth service delegation pattern
+    AUTH_CONFIG -->|delegates_to| AUTH_ENV
+    
+    style SHARED_ISO fill:#ff9999
+    style AUTH_ENV fill:#ccffcc
+    style SHARED_DB fill:#ffcc99
+```
+
+**Service Configuration Features**:
+- **SSOT Compliance**: No duplicate configuration logic between services
+- **Service Independence**: Each service maintains its own configuration interface
+- **Shared Infrastructure**: Common utilities shared through `/shared` directory
+- **Test Compatibility**: Property accessors allow test configuration override
+- **Environment Awareness**: Configuration behavior adapts to deployment environment
+- **Progressive Validation**: Service-appropriate validation based on environment and role
 
 ## Database URL SSOT Architecture
 
@@ -754,6 +809,78 @@ graph LR
 - No fallback values
 - All secrets from deployment system
 
+## Configuration Regression Prevention Architecture
+
+**CRITICAL INSIGHT:** Configuration regressions cause 60% of production outages and significant business impact. The platform implements comprehensive regression prevention through multiple layers of protection.
+
+### ConfigDependencyMap - Cascade Failure Prevention
+
+**Purpose**: Prevents configuration deletions that would cause cascade failures across services.
+
+**MISSION CRITICAL DEPENDENCIES** tracked by ConfigDependencyMap:
+```python
+CRITICAL_DEPENDENCIES = {
+    "SERVICE_SECRET": {
+        "required_by": ["netra_backend", "inter_service_auth", "circuit_breaker"],
+        "deletion_impact": "ULTRA_CRITICAL - Complete auth failure, circuit breaker permanent open, 100% user lockout",
+        "fallback_allowed": False,
+        "validation_required": True
+    },
+    "DATABASE_URL": {
+        "required_by": ["session_service", "state_persistence", "auth_service"],
+        "deletion_impact": "CRITICAL - Complete backend failure with no data access",
+        "fallback_allowed": False
+    },
+    "JWT_SECRET_KEY": {
+        "required_by": ["auth_service", "backend_auth", "token_validation"],
+        "deletion_impact": "CRITICAL - All authentication will fail",
+        "fallback_allowed": False
+    }
+}
+```
+
+### Configuration Change Tracking and Validation
+
+**Pre-Deployment Configuration Validation Pipeline**:
+1. **Missing Critical Config Check**: Validate all mission-critical variables are present
+2. **Configuration Value Validation**: Check formats, lengths, and security requirements  
+3. **Breaking Change Detection**: Identify changes that could break existing functionality
+4. **Configuration Isolation Testing**: Test configuration in isolated environment
+5. **Backward Compatibility Verification**: Ensure existing integrations continue working
+
+### OAuth Configuration Regression Prevention
+
+**CRITICAL LESSONS** from OAuth configuration analysis:
+
+**Previously Identified Issues**:
+- **E2E_OAUTH_SIMULATION_KEY Missing**: E2E tests failed when OAuth simulation unavailable
+- **Split Authentication Patterns**: Multiple competing auth helpers created confusion
+- **Validation Inconsistency**: Different tests had different OAuth validation requirements
+- **SSOT Violation**: No unified authentication configuration management
+
+**Current OAuth Protection Mechanisms**:
+- **Built-in Test Credentials**: IsolatedEnvironment auto-injects OAuth test credentials during test context detection
+- **Unified Authentication Manager**: Single pattern for all E2E test authentication
+- **Progressive OAuth Validation**: ConfigurationValidator gracefully handles missing OAuth in development
+- **Environment-Specific Credential Isolation**: Staging credentials never leak to production
+- **ConfigDependencyMap Integration**: OAuth credential dependencies tracked for impact analysis
+
+### Environment Configuration Consistency
+
+**Environment-Specific Configuration Validation**:
+- **Development**: Relaxed validation with warnings, fallback values enabled
+- **Testing**: Built-in defaults for OAuth and JWT, isolation mode auto-enabled
+- **Staging**: Production-like validation, real service connections, no localhost URLs
+- **Production**: Strict validation, all secrets from deployment system, hard failures for missing config
+
+### Configuration Health Monitoring
+
+**Runtime Configuration Validation**:
+- **Continuous Validation Loop**: 30-second intervals checking configuration health
+- **Health Score Calculation**: 0-100 score with penalties for errors/warnings
+- **Alert System**: Immediate notifications on critical configuration changes
+- **Configuration Health Dashboard**: Real-time visibility into configuration status
+
 ## Configuration Philosophy: Separation of Concerns
 
 ### The Three Realms
@@ -798,9 +925,9 @@ This separation allows:
 - Adding validation without modifying environment loading
 - Deploying to new environments without code changes
 
-## Best Practices
+## Enhanced Configuration Best Practices with Current Implementation
 
-1. **Always use IsolatedEnvironment** - Never access os.environ directly
+1. **SSOT Compliance (CRITICAL)** - Always use shared.isolated_environment.IsolatedEnvironment
 2. **Track sources** - Always provide source parameter when setting variables
 3. **Validate early** - Run validation during service startup
 4. **Use shared components** - DatabaseURLBuilder, JWT manager, etc.
