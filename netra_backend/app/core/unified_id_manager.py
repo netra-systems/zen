@@ -729,6 +729,7 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^dummy_\w+$',                  # dummy_user, dummy_session
         r'^sample_\w+$',                 # sample_user, sample_connection
         r'^ssot-[a-zA-Z]+-\w+$',         # ssot-test-user, ssot-mock-session
+        r'^e2e-[a-zA-Z0-9_-]+$',         # e2e-staging_pipeline, e2e-deployment-test
     ]
     
     import re

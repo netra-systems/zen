@@ -76,8 +76,8 @@ class WebSocketEventSequenceValidator:
             if not self.pending_tools[tool_id]:
                 return False
         
-        # Rule 5: tool_executing requires a tool_id
-        if event_type == WebSocketEventType.TOOL_EXECUTING and tool_id is None:
+        # Rule 5: tool_executing requires a valid tool_id
+        if event_type == WebSocketEventType.TOOL_EXECUTING and (tool_id is None or not tool_id.strip()):
             return False
         
         return True

@@ -31,8 +31,12 @@ from netra_backend.app.services.database.message_repository import MessageReposi
 
 async def handle_list_threads_request(db: AsyncSession, user_id: str, offset: int, limit: int):
     """Handle list threads request logic."""
-    threads = await get_user_threads(db, user_id)
-    return await convert_threads_to_responses(db, threads, offset, limit)
+    try:
+        threads = await get_user_threads(db, user_id)
+        return await convert_threads_to_responses(db, threads, offset, limit)
+    except Exception as e:
+        await db.rollback()
+        raise
 
 
 def _validate_thread_creation(thread) -> None:
@@ -43,11 +47,15 @@ def _validate_thread_creation(thread) -> None:
 
 async def handle_create_thread_request(db: AsyncSession, thread_data, user_id: str):
     """Handle create thread request logic."""
-    thread_id = generate_thread_id()
-    metadata = prepare_thread_metadata(thread_data, user_id)
-    thread = await create_thread_record(db, thread_id, metadata)
-    _validate_thread_creation(thread)
-    return await build_thread_response(thread, 0, metadata.get("title"))
+    try:
+        thread_id = generate_thread_id()
+        metadata = prepare_thread_metadata(thread_data, user_id)
+        thread = await create_thread_record(db, thread_id, metadata)
+        _validate_thread_creation(thread)
+        return await build_thread_response(thread, 0, metadata.get("title"))
+    except Exception as e:
+        await db.rollback()
+        raise
 
 
 async def handle_get_thread_request(db: AsyncSession, thread_id: str, user_id: str):
@@ -55,15 +63,20 @@ async def handle_get_thread_request(db: AsyncSession, thread_id: str, user_id: s
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
-    logger.info(f"Getting thread {thread_id} for user {user_id}")
-    thread = await get_thread_with_validation(db, thread_id, user_id)
-    
-    logger.debug(f"Thread {thread_id} metadata: {thread.metadata_ if hasattr(thread, 'metadata_') else 'No metadata'}")
-    
-    message_count = await MessageRepository().count_by_thread(db, thread_id)
-    logger.debug(f"Thread {thread_id} has {message_count} messages")
-    
-    return await build_thread_response(thread, message_count)
+    try:
+        logger.info(f"Getting thread {thread_id} for user {user_id}")
+        thread = await get_thread_with_validation(db, thread_id, user_id)
+        
+        logger.debug(f"Thread {thread_id} metadata: {thread.metadata_ if hasattr(thread, 'metadata_') else 'No metadata'}")
+        
+        message_repo = MessageRepository()
+        message_count = await message_repo.count_by_thread(db, thread_id)
+        logger.debug(f"Thread {thread_id} has {message_count} messages")
+        
+        return await build_thread_response(thread, message_count)
+    except Exception as e:
+        await db.rollback()
+        raise
 
 
 def _initialize_thread_metadata(thread) -> None:
@@ -104,18 +117,27 @@ async def update_thread_metadata_fields(thread, thread_update):
 
 async def handle_update_thread_request(db: AsyncSession, thread_id: str, thread_update, user_id: str):
     """Handle update thread request logic."""
-    thread = await get_thread_with_validation(db, thread_id, user_id)
-    await update_thread_metadata_fields(thread, thread_update)
-    await db.commit()
-    message_count = await MessageRepository().count_by_thread(db, thread_id)
-    return await build_thread_response(thread, message_count)
+    try:
+        thread = await get_thread_with_validation(db, thread_id, user_id)
+        await update_thread_metadata_fields(thread, thread_update)
+        await db.commit()
+        message_repo = MessageRepository()
+        message_count = await message_repo.count_by_thread(db, thread_id)
+        return await build_thread_response(thread, message_count)
+    except Exception as e:
+        await db.rollback()
+        raise
 
 
 async def handle_delete_thread_request(db: AsyncSession, thread_id: str, user_id: str):
     """Handle delete thread request logic."""
-    await get_thread_with_validation(db, thread_id, user_id)
-    await archive_thread_safely(db, thread_id)
-    return {"message": "Thread archived successfully"}
+    try:
+        await get_thread_with_validation(db, thread_id, user_id)
+        await archive_thread_safely(db, thread_id)
+        return {"message": "Thread archived successfully"}
+    except Exception as e:
+        await db.rollback()
+        raise
 
 
 async def handle_get_messages_request(db: AsyncSession, thread_id: str, user_id: str, limit: int, offset: int):
@@ -123,25 +145,33 @@ async def handle_get_messages_request(db: AsyncSession, thread_id: str, user_id:
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
     
-    logger.info(f"Getting messages for thread {thread_id}, user {user_id}, limit {limit}, offset {offset}")
-    
-    thread = await get_thread_with_validation(db, thread_id, user_id)
-    logger.debug(f"Thread validation passed for {thread_id}")
-    
-    response = await build_thread_messages_response(db, thread_id, limit, offset)
-    logger.debug(f"Returning {len(response.get('messages', []))} messages for thread {thread_id}")
-    
-    return response
+    try:
+        logger.info(f"Getting messages for thread {thread_id}, user {user_id}, limit {limit}, offset {offset}")
+        
+        thread = await get_thread_with_validation(db, thread_id, user_id)
+        logger.debug(f"Thread validation passed for {thread_id}")
+        
+        response = await build_thread_messages_response(db, thread_id, limit, offset)
+        logger.debug(f"Returning {len(response.get('messages', []))} messages for thread {thread_id}")
+        
+        return response
+    except Exception as e:
+        await db.rollback()
+        raise
 
 
 async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: str):
     """Handle auto rename thread request logic."""
-    thread = await get_thread_with_validation(db, thread_id, user_id)
-    first_message = await get_first_user_message_safely(db, thread_id)
-    title = await generate_title_with_llm(first_message.content)
-    await update_thread_with_title(db, thread, title)
-    await send_thread_rename_notification(user_id, thread_id, title)
-    return await create_final_thread_response(db, thread, title)
+    try:
+        thread = await get_thread_with_validation(db, thread_id, user_id)
+        first_message = await get_first_user_message_safely(db, thread_id)
+        title = await generate_title_with_llm(first_message.content)
+        await update_thread_with_title(db, thread, title)
+        await send_thread_rename_notification(user_id, thread_id, title)
+        return await create_final_thread_response(db, thread, title)
+    except Exception as e:
+        await db.rollback()
+        raise
 
 
 async def handle_send_message_request(db: AsyncSession, thread_id: str, request, user_id: str):
@@ -154,25 +184,25 @@ async def handle_send_message_request(db: AsyncSession, thread_id: str, request,
     logger = central_logger.get_logger(__name__)
     logger.info(f"Sending message to thread {thread_id} for user {user_id}")
     
-    # Validate thread exists and user has access
-    thread = await get_thread_with_validation(db, thread_id, user_id)
-    logger.debug(f"Thread validation passed for {thread_id}")
-    
-    # Create message record
-    message_id = str(uuid4())
-    created_at = int(time.time())
-    
-    # Prepare message data
-    message_data = {
-        'id': message_id,
-        'thread_id': thread_id,
-        'role': 'user',  # Messages sent via this endpoint are user messages
-        'content': request.message,
-        'created_at': created_at,
-        'metadata_': request.metadata or {}
-    }
-    
     try:
+        # Validate thread exists and user has access
+        thread = await get_thread_with_validation(db, thread_id, user_id)
+        logger.debug(f"Thread validation passed for {thread_id}")
+        
+        # Create message record
+        message_id = str(uuid4())
+        created_at = int(time.time())
+        
+        # Prepare message data
+        message_data = {
+            'id': message_id,
+            'thread_id': thread_id,
+            'role': 'user',  # Messages sent via this endpoint are user messages
+            'content': request.message,
+            'created_at': created_at,
+            'metadata_': request.metadata or {}
+        }
+        
         # Save message to database
         message_repo = MessageRepository()
         await message_repo.create(db, **message_data)

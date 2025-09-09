@@ -17,6 +17,15 @@
 
 ## CRITICAL: Pre-Change Verification
 
+### 0. 🚀 GOLDEN PATH VERIFICATION (NEW - 2025-01-09) - MISSION CRITICAL
+**For ANY changes affecting WebSocket, agent execution, or user flow:**
+- [ ] **Review Golden Path:** Read [`docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](../docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) for complete user journey analysis
+- [ ] **Race Condition Check:** Verify changes don't introduce WebSocket handshake race conditions in Cloud Run
+- [ ] **WebSocket Events:** Ensure all 5 business-critical events are sent (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
+- [ ] **Service Dependencies:** Implement graceful degradation for missing supervisor/thread service dependencies
+- [ ] **Factory Validation:** Verify SSOT compliance in factory initialization to prevent 1011 errors
+- [ ] **Business Impact:** Consider $500K+ ARR dependency on chat functionality reliability
+
 ### 1. System Status Review
 - [ ] Check `MASTER_WIP_STATUS.md` for current system health
 - [ ] Review `SPEC/learnings/index.xml` for recent issues and fixes

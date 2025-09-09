@@ -27,6 +27,7 @@ SSOT Compliance:
 import asyncio
 import json  
 import pytest
+import sys
 import time
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -177,6 +178,12 @@ class MockWebSocketManagerFactory:
     
     def __init__(self):
         self.state = _mock_factory_state
+        
+    def reset_state(self):
+        """Reset factory state for clean tests."""
+        self.state["active_managers"] = 0
+        self.state["users_with_managers"] = 0
+        self.state["user_distribution"] = {}
         
     async def create_manager(self, user_context):
         """Create manager and track in factory state."""
@@ -774,10 +781,13 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         logger.info("✅ WebSocket connection state sync test completed")
     
     @pytest.mark.integration
-    @patch('netra_backend.app.websocket_core.websocket_manager_factory.get_websocket_manager_factory', side_effect=mock_get_websocket_manager_factory)
-    async def test_websocket_routing_table_consistency(self, isolated_env):
+    async def test_websocket_routing_table_consistency(self, isolated_env, monkeypatch):
         """Test routing table accuracy and consistency."""
+        # Patch the factory to return our mock
+        monkeypatch.setattr('netra_backend.tests.integration.test_message_routing_comprehensive.get_websocket_manager_factory', mock_get_websocket_manager_factory)
         factory = get_websocket_manager_factory()
+        # Reset factory state for clean test
+        factory.reset_state()
         
         # Create multiple users and connections
         routing_data = []
@@ -907,9 +917,13 @@ class TestMultiUserIsolation(BaseIntegrationTest):
     """Test multi-user isolation via Factory pattern and UserExecutionContext."""
     
     @pytest.mark.integration
-    async def test_multi_user_message_isolation(self, isolated_env):
+    async def test_multi_user_message_isolation(self, isolated_env, monkeypatch):
         """Test that messages don't leak between users."""
+        # Patch the factory to return our mock
+        monkeypatch.setattr('netra_backend.tests.integration.test_message_routing_comprehensive.get_websocket_manager_factory', mock_get_websocket_manager_factory)
         factory = get_websocket_manager_factory()
+        # Reset factory state for clean test
+        factory.reset_state()
         
         # Create two users with managers
         user1_id = ensure_user_id("isolation_user_1")
@@ -1084,9 +1098,13 @@ class TestMultiUserIsolation(BaseIntegrationTest):
         logger.info("✅ Multi-user concurrent routing test completed")
     
     @pytest.mark.integration
-    async def test_multi_user_factory_isolation(self, isolated_env):
+    async def test_multi_user_factory_isolation(self, isolated_env, monkeypatch):
         """Test Factory pattern isolation between users."""
+        # Patch the factory to return our mock
+        monkeypatch.setattr('netra_backend.tests.integration.test_message_routing_comprehensive.get_websocket_manager_factory', mock_get_websocket_manager_factory)
         factory = get_websocket_manager_factory()
+        # Reset factory state for clean test
+        factory.reset_state()
         
         # Create managers for different users
         isolation_keys = []
@@ -1099,7 +1117,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
                 run_id=str(uuid.uuid4())
             )
-            manager = await mock_create_websocket_manager(context)
+            manager = await factory.create_manager(context)
             
             # Generate isolation key (this is internal factory logic)
             isolation_key = f"{user_id}:{context.request_id}"
@@ -1168,9 +1186,13 @@ class TestMultiUserIsolation(BaseIntegrationTest):
         logger.info("✅ Multi-user context boundaries test completed")
     
     @pytest.mark.integration
-    async def test_multi_user_state_consistency(self, isolated_env):
+    async def test_multi_user_state_consistency(self, isolated_env, monkeypatch):
         """Test state consistency across multiple users."""
+        # Patch the factory to return our mock
+        monkeypatch.setattr('netra_backend.tests.integration.test_message_routing_comprehensive.get_websocket_manager_factory', mock_get_websocket_manager_factory)
         factory = get_websocket_manager_factory()
+        # Reset factory state for clean test
+        factory.reset_state()
         
         # Track state changes across users
         state_log = []
@@ -1183,7 +1205,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 thread_id=str(ensure_thread_id(str(uuid.uuid4()))),
                 run_id=str(uuid.uuid4())
             )
-            manager = await mock_create_websocket_manager(context)
+            manager = await factory.create_manager(context)
             
             # Add connections
             websocket = MockWebSocket(str(user_id), f"state_conn_{i}")

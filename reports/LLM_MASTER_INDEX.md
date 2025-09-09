@@ -4,6 +4,7 @@
 ## 🔴 CRITICAL: Cross-System Navigation
 
 **PRIMARY NAVIGATION INDEXES:**
+- **[🚀 `docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) - 🎯 MISSION CRITICAL: Complete user journey analysis with critical race conditions, WebSocket event requirements, and business impact ($500K+ ARR dependency)**
 - [`SPEC/CROSS_SYSTEM_MASTER_INDEX.md`](SPEC/CROSS_SYSTEM_MASTER_INDEX.md) - Complete cross-system navigation with health metrics
 - [`SPEC/SYSTEM_INTEGRATION_MAP.xml`](SPEC/SYSTEM_INTEGRATION_MAP.xml) - Detailed integration points and data flows
 - [`SPEC/cross_system_context_reference.md`](SPEC/cross_system_context_reference.md) - Complete system context
@@ -24,6 +25,8 @@
 ### By Task Type
 | Task | Go To | Key Files |
 |------|-------|-----------|
+| **User flow analysis** | [`docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) | **MISSION CRITICAL: Complete user journey** |
+| **WebSocket/Chat issues** | [`docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md) | **Race conditions, missing events, $500K+ ARR** |
 | **Review changes** | [`DEFINITION_OF_DONE_CHECKLIST.md`](DEFINITION_OF_DONE_CHECKLIST.md) | Module-specific checklists |
 | **Fix a bug** | [`SPEC/learnings/index.xml`](SPEC/learnings/index.xml) | Check learnings first |
 | **Add new feature** | [`SPEC/core.xml`](SPEC/core.xml) | Architecture patterns |

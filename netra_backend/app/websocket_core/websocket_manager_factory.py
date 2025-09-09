@@ -47,6 +47,9 @@ from shared.types.core_types import (
 )
 from typing import Union
 
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
 logger = central_logger.get_logger(__name__)
 
 
@@ -96,20 +99,22 @@ def create_defensive_user_execution_context(
                 operation="websocket_factory"
             )
         except Exception as id_gen_error:
-            logger.warning(f"UnifiedIdGenerator failed, using fallback: {id_gen_error}")
-            # Fallback to simple UUID generation
-            unique_suffix = str(uuid.uuid4())[:8]
-            timestamp = int(datetime.now(timezone.utc).timestamp())
-            thread_id = f"ws_thread_{timestamp}_{unique_suffix}"
-            run_id = f"ws_run_{timestamp}_{unique_suffix}" 
-            request_id = f"ws_req_{timestamp}_{unique_suffix}"
+            logger.warning(f"UnifiedIdGenerator failed, using UnifiedIDManager fallback: {id_gen_error}")
+            # Fallback to UnifiedIDManager instead of raw UUID
+            id_manager = UnifiedIDManager()
+            thread_id = id_manager.generate_id(IDType.THREAD, prefix="ws_thread", context={"user_id": user_id})
+            run_id = id_manager.generate_id(IDType.EXECUTION, prefix="ws_run", context={"user_id": user_id})
+            request_id = id_manager.generate_id(IDType.REQUEST, prefix="ws_req", context={"user_id": user_id})
         
         # Handle websocket_client_id defensively
         if websocket_client_id is None:
-            # Generate client ID if not provided
-            timestamp = int(datetime.now(timezone.utc).timestamp())
-            unique_suffix = str(uuid.uuid4())[:8]
-            websocket_client_id = f"ws_client_{user_id[:8]}_{timestamp}_{unique_suffix}"
+            # Generate client ID using UnifiedIDManager
+            id_manager = UnifiedIDManager()
+            websocket_client_id = id_manager.generate_id(
+                IDType.WEBSOCKET,
+                prefix="ws_client",
+                context={"user_id": user_id, "component": "client_connection"}
+            )
             logger.debug(f"Generated websocket_client_id: {websocket_client_id}")
         
         # Create UserExecutionContext with validated inputs

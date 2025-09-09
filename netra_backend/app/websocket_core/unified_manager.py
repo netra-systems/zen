@@ -15,6 +15,8 @@ from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
     ensure_user_id, ensure_thread_id, ensure_websocket_id
 )
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # Import the protocol after it's defined to avoid circular imports
 logger = central_logger.get_logger(__name__)
@@ -796,9 +798,14 @@ class UnifiedWebSocketManager:
     
     async def connect_user(self, user_id: str, websocket: Any) -> Any:
         """Legacy compatibility method for connecting a user."""
-        import uuid
         from datetime import datetime
-        connection_id = str(uuid.uuid4())
+        # Use UnifiedIDManager for consistent connection ID generation
+        id_manager = UnifiedIDManager()
+        connection_id = id_manager.generate_id(
+            IDType.WEBSOCKET,
+            prefix="conn",
+            context={"user_id": user_id, "component": "legacy_connection"}
+        )
         connection = WebSocketConnection(
             connection_id=connection_id,
             user_id=user_id,

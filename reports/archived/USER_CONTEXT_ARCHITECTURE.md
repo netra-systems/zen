@@ -14,6 +14,7 @@ This document serves as the authoritative guide to Netra's Factory-based isolati
 - **Comprehensive Validation:** Fail-fast validation prevents placeholder values and data corruption
 
 ## Related Documentation
+- **[🚀 Golden Path User Flow Analysis](../docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **MISSION CRITICAL**: Complete user journey analysis with critical issues, WebSocket race conditions, and business impact ($500K+ ARR dependency)
 - **[Documentation Hub](../docs/index.md)** - Central documentation index
 - **[Agent Architecture Disambiguation Guide](../docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies component relationships
 - **[Golden Agent Index](../docs/GOLDEN_AGENT_INDEX.md)** - Definitive agent implementation patterns

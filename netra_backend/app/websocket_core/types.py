@@ -17,6 +17,9 @@ import time
 import uuid
 from pydantic import BaseModel, Field
 
+# Import UnifiedIDManager for SSOT ID generation
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
 
 class WebSocketConnectionState(str, Enum):
     """WebSocket connection states."""
@@ -101,7 +104,11 @@ class ConnectionInfo(BaseModel):
     """WebSocket connection information."""
     model_config = {"arbitrary_types_allowed": True}
     
-    connection_id: str = Field(default_factory=lambda: f"conn_{uuid.uuid4().hex[:8]}")
+    connection_id: str = Field(default_factory=lambda: UnifiedIDManager().generate_id(
+        IDType.WEBSOCKET, 
+        prefix="conn", 
+        context={"component": "websocket_connection"}
+    ))
     user_id: str
     websocket: Optional[Any] = None  # WebSocket instance
     thread_id: Optional[str] = None
@@ -483,7 +490,11 @@ def create_standard_message(msg_type: Union[str, MessageType],
         type=normalized_type,
         payload=payload,
         timestamp=time.time(),
-        message_id=str(uuid.uuid4()),
+        message_id=UnifiedIDManager().generate_id(
+            IDType.WEBSOCKET,
+            prefix="msg", 
+            context={"msg_type": str(normalized_type.value), "user_id": user_id}
+        ),
         user_id=user_id,
         thread_id=thread_id
     )
