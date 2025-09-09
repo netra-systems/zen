@@ -36,7 +36,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from test_framework.database.test_database_manager import DatabaseTestManager
 from auth_service.core.auth_manager import AuthManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
@@ -44,7 +44,7 @@ from websocket import WebSocket
 
 from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
-    get_agent_websocket_bridge  # DEPRECATED singleton
+    # REMOVED: get_agent_websocket_bridge - deprecated singleton pattern removed
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
