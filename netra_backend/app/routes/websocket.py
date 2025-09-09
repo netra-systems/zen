@@ -35,6 +35,14 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
+# CRITICAL FIX: Import Windows-safe asyncio patterns to prevent deadlocks
+from netra_backend.app.core.windows_asyncio_safe import (
+    windows_safe_sleep,
+    windows_safe_wait_for,
+    windows_safe_progressive_delay,
+    windows_asyncio_safe,
+)
+
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
@@ -133,18 +141,20 @@ def _get_staging_optimized_timeouts():
             "cleanup_interval_seconds": int(env.get("WEBSOCKET_CLEANUP_INTERVAL", "60"))
         }
 
-# Get environment-specific timeout configuration
+# PHASE 1 FIX 3: Get environment-specific timeout configuration with Cloud Run optimizations
 _timeout_config = _get_staging_optimized_timeouts()
 
-WEBSOCKET_CONFIG = WebSocketConfig(
-    max_connections_per_user=3,
-    max_message_rate_per_minute=_get_rate_limit_for_environment(),
-    max_message_size_bytes=8192,
-    connection_timeout_seconds=_timeout_config["connection_timeout_seconds"],
-    heartbeat_interval_seconds=_timeout_config["heartbeat_interval_seconds"],
-    cleanup_interval_seconds=_timeout_config["cleanup_interval_seconds"],
-    enable_compression=False
-)
+# Use environment-aware WebSocket configuration to handle Cloud Run race conditions
+WEBSOCKET_CONFIG = WebSocketConfig.detect_and_configure_for_environment()
+
+# Override with legacy timeout configuration for backward compatibility
+WEBSOCKET_CONFIG.max_connections_per_user = 3
+WEBSOCKET_CONFIG.max_message_rate_per_minute = _get_rate_limit_for_environment()
+WEBSOCKET_CONFIG.max_message_size_bytes = 8192
+WEBSOCKET_CONFIG.connection_timeout_seconds = _timeout_config["connection_timeout_seconds"]
+# Keep environment-optimized heartbeat_interval_seconds from detect_and_configure_for_environment()
+WEBSOCKET_CONFIG.cleanup_interval_seconds = _timeout_config["cleanup_interval_seconds"]
+WEBSOCKET_CONFIG.enable_compression = False
 
 # CRITICAL FIX: Export heartbeat timeout for heartbeat manager configuration
 HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
@@ -244,17 +254,48 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.accept()
             logger.debug("WebSocket accepted without subprotocol")
         
+        # PHASE 1 FIX 1: Integrate ApplicationConnectionStateMachine after successful accept()
+        # This addresses the race condition where message handling begins before accept() completion
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, ApplicationConnectionState
+        
+        # Generate preliminary connection_id for state machine registration
+        # This will be updated with proper user context after authentication
+        preliminary_connection_id = f"ws_init_{int(time.time())}"
+        temp_user_id = "pending_auth"
+        
+        state_registry = get_connection_state_registry()
+        state_machine = state_registry.register_connection(preliminary_connection_id, temp_user_id)
+        
+        # Transition to ACCEPTED state after successful WebSocket accept()
+        accept_transition_success = state_machine.transition_to(
+            ApplicationConnectionState.ACCEPTED,
+            reason="WebSocket accept() completed successfully",
+            metadata={
+                "selected_protocol": selected_protocol,
+                "environment": environment,
+                "accept_timestamp": time.time()
+            }
+        )
+        
+        if accept_transition_success:
+            logger.info(f"State machine transitioned to ACCEPTED for {preliminary_connection_id}")
+        else:
+            logger.error(f"Failed to transition state machine to ACCEPTED for {preliminary_connection_id}")
+            # Don't fail the connection, but log the issue
+        
         # CRITICAL RACE CONDITION FIX: Progressive post-accept delays for Cloud Run environments
+        # CRITICAL FIX: Windows-safe asyncio patterns to prevent deadlocks
         # This addresses the core race condition where message handling starts before handshake completion
         if environment in ["staging", "production"]:
-            # Stage 1: Initial network propagation delay
-            await asyncio.sleep(0.05)  # 50ms for GCP Cloud Run network propagation
+            # Stage 1: Initial network propagation delay with Windows-safe sleep
+            await windows_safe_sleep(0.05)  # 50ms for GCP Cloud Run network propagation
             
             # Stage 2: Validate that accept() has fully completed
             if websocket.client_state != WebSocketState.CONNECTED:
                 logger.warning(f"WebSocket not immediately in CONNECTED state after accept() - applying progressive delay")
                 for delay_attempt in range(3):
-                    await asyncio.sleep(0.025 * (delay_attempt + 1))  # 25ms, 50ms, 75ms
+                    # Use Windows-safe progressive delay instead of nested asyncio.sleep
+                    await windows_safe_progressive_delay(delay_attempt, 0.025, 0.075)
                     if websocket.client_state == WebSocketState.CONNECTED:
                         logger.info(f"WebSocket reached CONNECTED state after {delay_attempt + 1} delay attempts")
                         break
@@ -262,14 +303,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 if websocket.client_state != WebSocketState.CONNECTED:
                     logger.error(f"WebSocket still not in CONNECTED state after progressive delays: {_safe_websocket_state_for_logging(websocket.client_state)}")
             
-            # Stage 3: Final stabilization delay
-            await asyncio.sleep(0.025)  # Additional 25ms for Cloud Run stabilization
+            # Stage 3: Final stabilization delay with Windows-safe sleep
+            await windows_safe_sleep(0.025)  # Additional 25ms for Cloud Run stabilization
             
             logger.debug(f"Cloud Run post-accept stabilization complete for {environment}")
         elif environment == "testing":
-            await asyncio.sleep(0.005)  # Minimal 5ms delay for tests
+            await windows_safe_sleep(0.005)  # Minimal 5ms delay for tests
         else:
-            await asyncio.sleep(0.01)   # 10ms for development environments
+            await windows_safe_sleep(0.01)   # 10ms for development environments
         
         # 🚨 SSOT ENFORCEMENT: Use unified authentication service (SINGLE SOURCE OF TRUTH)
         # This replaces ALL previous authentication paths:
@@ -337,7 +378,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 }
             )
             await safe_websocket_send(websocket, auth_error.model_dump())
-            await asyncio.sleep(0.1)  # Brief delay to ensure message is sent
+            await windows_safe_sleep(0.1)  # Brief delay to ensure message is sent
             await safe_websocket_close(websocket, code=1008, reason="SSOT Auth failed")
             return
         
@@ -495,7 +536,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.info(f"WebSocket connection waiting for startup to complete in {environment} (in_progress={startup_in_progress}) - max wait: {max_wait_time}s")
                 
                 while not startup_complete and total_waited < max_wait_time:
-                    await asyncio.sleep(wait_interval)
+                    await windows_safe_sleep(wait_interval)
                     total_waited += wait_interval
                     startup_complete = getattr(websocket.app.state, 'startup_complete', False)
                     startup_in_progress = getattr(websocket.app.state, 'startup_in_progress', False)
@@ -924,6 +965,37 @@ async def websocket_endpoint(websocket: WebSocket):
                 connection_id = await ws_manager.connect_user(user_id, websocket)
                 logger.info(f"Registered connection with legacy manager: {connection_id}")
                 
+            # PHASE 1 FIX 1 CONTINUATION: Update state machine with real connection_id after authentication
+            # Replace preliminary state machine with properly identified one
+            try:
+                # Unregister preliminary connection
+                state_registry.unregister_connection(preliminary_connection_id)
+                
+                # Register new state machine with real connection_id and user_id
+                final_state_machine = state_registry.register_connection(connection_id, user_id)
+                
+                # Transition directly to AUTHENTICATED state since we've completed auth
+                auth_transition_success = final_state_machine.transition_to(
+                    ApplicationConnectionState.AUTHENTICATED,
+                    reason="WebSocket authentication completed successfully",
+                    metadata={
+                        "user_id": user_id,
+                        "connection_id": connection_id,
+                        "auth_method": "SSOT",
+                        "auth_timestamp": time.time(),
+                        "websocket_client_id": getattr(user_context, 'websocket_client_id', None) if 'user_context' in locals() else None
+                    }
+                )
+                
+                if auth_transition_success:
+                    logger.info(f"State machine transitioned to AUTHENTICATED for {connection_id}")
+                else:
+                    logger.error(f"Failed to transition state machine to AUTHENTICATED for {connection_id}")
+                    
+            except Exception as state_machine_error:
+                logger.error(f"State machine update failed for {connection_id}: {state_machine_error}")
+                # Don't fail the connection, continue with existing flow
+                
             # CRITICAL FIX: Enhanced handshake coordination for race condition prevention
             # This addresses the race condition where message handling starts before complete handshake
             from netra_backend.app.websocket_core.race_condition_prevention import (
@@ -1071,6 +1143,47 @@ async def websocket_endpoint(websocket: WebSocket):
             # CRITICAL FIX: Log successful connection establishment for debugging
             security_pattern = "FACTORY_PATTERN" if 'user_context' in locals() else "LEGACY_SINGLETON"
             logger.info(f"WebSocket connection fully established for user {user_id} in {environment} using {security_pattern}")
+            
+            # PHASE 1 FIX 2 CONTINUATION: Complete state machine setup after connection fully established
+            # Transition through SERVICES_READY to PROCESSING_READY
+            try:
+                final_state_machine = get_connection_state_machine(connection_id)
+                if final_state_machine:
+                    # Transition to SERVICES_READY
+                    services_ready_success = final_state_machine.transition_to(
+                        ApplicationConnectionState.SERVICES_READY,
+                        reason="WebSocket services initialized and handshake complete",
+                        metadata={
+                            "security_pattern": security_pattern,
+                            "environment": environment,
+                            "handshake_complete": True,
+                            "services_timestamp": time.time()
+                        }
+                    )
+                    
+                    if services_ready_success:
+                        # Final transition to PROCESSING_READY - ready for messages
+                        processing_ready_success = final_state_machine.transition_to(
+                            ApplicationConnectionState.PROCESSING_READY,
+                            reason="WebSocket fully operational and ready for message processing",
+                            metadata={
+                                "processing_ready_timestamp": time.time(),
+                                "total_setup_duration": final_state_machine.setup_duration
+                            }
+                        )
+                        
+                        if processing_ready_success:
+                            logger.info(f"State machine fully ready for message processing: {connection_id}")
+                        else:
+                            logger.error(f"Failed to transition to PROCESSING_READY for {connection_id}")
+                    else:
+                        logger.error(f"Failed to transition to SERVICES_READY for {connection_id}")
+                else:
+                    logger.warning(f"No state machine found for {connection_id} during final setup")
+                    
+            except Exception as final_state_error:
+                logger.error(f"Final state machine setup failed for {connection_id}: {final_state_error}")
+                # Don't fail the connection, but message processing will be blocked until ready
             
             # CRITICAL FIX: Final race condition prevention validation before message loop
             if not handshake_coordinator.is_ready_for_messages():
@@ -1247,6 +1360,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.warning(f"Error during WebSocket cleanup: {cleanup_error}")
 
 
+@windows_asyncio_safe
 async def _handle_websocket_messages(
     websocket: WebSocket,
     user_id: str, 
@@ -1257,7 +1371,11 @@ async def _handle_websocket_messages(
     security_manager=None,  # Legacy parameter - not needed with SSOT auth
     heartbeat: WebSocketHeartbeat = None
 ) -> None:
-    """Handle WebSocket message loop with error recovery."""
+    """Handle WebSocket message loop with error recovery.
+    
+    CRITICAL FIX: Added Windows-safe asyncio patterns to prevent deadlocks
+    on Windows development environments during streaming operations.
+    """
     error_count = 0
     max_errors = 5
     backoff_delay = 0.1
@@ -1275,6 +1393,33 @@ async def _handle_websocket_messages(
         # CRITICAL FIX: Use enhanced connection validation to prevent race conditions
         from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
         
+        # PHASE 1 FIX 2: Add accept completion validation before message routing
+        # This ensures WebSocket accept() is fully completed before processing messages
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine
+        
+        # Validate connection state machine readiness before message processing
+        state_machine = get_connection_state_machine(connection_id)
+        if state_machine and not state_machine.can_process_messages():
+            logger.warning(f"Connection {connection_id} state machine not ready for messages: {state_machine.current_state}")
+            
+            # Wait briefly for state machine to reach operational state
+            max_wait_attempts = 10
+            wait_delay = 0.1  # 100ms
+            
+            for attempt in range(max_wait_attempts):
+                if state_machine.can_process_messages():
+                    logger.info(f"Connection {connection_id} became ready for messages after {attempt + 1} attempts")
+                    break
+                    
+                logger.debug(f"Waiting for connection {connection_id} state machine readiness, attempt {attempt + 1}")
+                await asyncio.sleep(wait_delay)
+            
+            # Final validation
+            if not state_machine.can_process_messages():
+                logger.error(f"Connection {connection_id} state machine never reached ready state: {state_machine.current_state}")
+                logger.error("This indicates accept() race condition - connection cannot process messages")
+                return  # Exit message loop - connection is not ready
+        
         while is_websocket_connected_and_ready(websocket):
             if first_check:
                 logger.debug(f"First loop iteration for {connection_id}, WebSocket readiness validation passed")
@@ -1290,8 +1435,9 @@ async def _handle_websocket_messages(
                     logger.debug(f"WebSocket connection {connection_id} became unavailable before receive, exiting loop")
                     break
                 
+                # CRITICAL FIX: Use Windows-safe wait_for to prevent deadlocks
                 # Receive message with timeout
-                raw_message = await asyncio.wait_for(
+                raw_message = await windows_safe_wait_for(
                     websocket.receive_text(),
                     timeout=WEBSOCKET_CONFIG.heartbeat_interval_seconds
                 )
@@ -1927,8 +2073,9 @@ async def websocket_test_endpoint(websocket: WebSocket):
         # Simple message handling loop
         while True:
             try:
+                # CRITICAL FIX: Use Windows-safe wait_for in test endpoint
                 # Receive message with timeout
-                raw_message = await asyncio.wait_for(
+                raw_message = await windows_safe_wait_for(
                     websocket.receive_text(),
                     timeout=30.0
                 )
