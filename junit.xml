@@ -1,1 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="11" time="25.396" timestamp="2025-09-08T17:11:28.846005-07:00" hostname="Anthony"><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthBusinessLogicValidation" name="test_user_registration_business_rules" time="1.504" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthBusinessLogicValidation" name="test_subscription_tier_access_control" time="0.002" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthBusinessLogicValidation" name="test_login_attempt_business_logic" time="0.002" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthBusinessLogicValidation" name="test_account_lifecycle_management" time="0.002" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthBusinessLogicValidation" name="test_business_rule_compliance_validation" time="0.002" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthCrossServiceValidation" name="test_cross_service_token_validation_business_logic" time="0.026" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthSecurityPolicyValidation" name="test_password_policy_business_rules" time="0.010" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthSecurityPolicyValidation" name="test_session_security_policy" time="0.006" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthIntegrationBusinessLogic" name="test_oauth_integration_business_rules" time="0.050" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthAuditBusinessLogic" name="test_audit_logging_business_rules" time="0.017" /><testcase classname="tests.unit.test_auth_business_logic_validation_comprehensive.TestAuthAuditBusinessLogic" name="test_compliance_reporting_business_logic" time="0.033" /></testsuite></testsuites>
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="3.166" timestamp="2025-09-08T18:23:34.252303-07:00" hostname="Shivanginis-MacBook-Pro.local"><testcase classname="tests.unit.test_auth_environment_comprehensive.TestRedisConfiguration" name="test_get_redis_url_environment_defaults" time="0.091"><failure message="Failed: DID NOT RAISE &lt;class 'ValueError'&gt;">self = &lt;test_auth_environment_comprehensive.TestRedisConfiguration object at 0x11c76eb40&gt;
+
+    def test_get_redis_url_environment_defaults(self):
+        """Test Redis URL returns environment-specific defaults."""
+        test_cases = [
+            ("production", None, ValueError),
+            ("staging", None, ValueError),
+            ("development", None, "redis://localhost:6379/1"),
+            ("test", None, "redis://localhost:6379/2"),
+            ("unknown", None, "redis://localhost:6379/1")
+        ]
+    
+        for env, config_value, expected in test_cases:
+            with patch.object(self.env, 'get_environment', return_value=env):
+                with patch.object(self.env.env, 'get', return_value=config_value):
+                    if isinstance(expected, type) and issubclass(expected, Exception):
+&gt;                       with pytest.raises(expected):
+E                       Failed: DID NOT RAISE &lt;class 'ValueError'&gt;
+
+auth_service/tests/unit/test_auth_environment_comprehensive.py:474: Failed</failure></testcase></testsuite></testsuites>

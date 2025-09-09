@@ -20,6 +20,7 @@ from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCir
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.logging_config import central_logger as logger
+from shared.isolated_environment import get_env
 from test_framework.ssot.test_context_decorator import test_decorator
 
 
@@ -167,7 +168,6 @@ _clickhouse_cache = ClickHouseCache()
 @test_decorator(allow_production=True, message="Context detection function - being migrated to test-only")
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
-    from shared.isolated_environment import get_env
     
     # Check TESTING environment variable directly for pytest compatibility
     if get_env().get("TESTING"):
@@ -180,7 +180,6 @@ def _is_testing_environment() -> bool:
 def _is_real_database_test() -> bool:
     """Check if this is a test that explicitly requires real database connections."""
     import sys
-    from shared.isolated_environment import get_env
     
     # Check if we're running under pytest
     if 'pytest' not in sys.modules:
@@ -201,7 +200,6 @@ def _is_real_database_test() -> bool:
 @test_decorator(allow_production=True, message="Test context detection - called from production code paths")
 def _should_disable_clickhouse_for_tests() -> bool:
     """Check if ClickHouse should be disabled for the current test context."""
-    from shared.isolated_environment import get_env
     
     # CRITICAL FIX: Check explicit disable flags first - these take precedence
     env = get_env()
@@ -270,12 +268,11 @@ def _extract_clickhouse_config(config):
         # For development environment, use dev Docker service values
         class DevClickHouseConfig:
             def __init__(self):
-                from shared.isolated_environment import get_env
                 import socket
                 env = get_env()
                 
                 # Smart host detection for local vs Docker development
-                default_host = env.get("CLICKHOUSE_HOST", "localhost")
+                default_host = env.get("CLICKHOUSE_HOST", "clickhouse-service")
                 
                 # Check if we're running locally or inside Docker network
                 # Try to resolve the Docker hostname to see if we're in Docker network
@@ -292,9 +289,9 @@ def _extract_clickhouse_config(config):
                     # The Docker compose maps 8124:8123 for dev-clickhouse
                     self.port = 8124
                 
-                self.user = env.get("CLICKHOUSE_USER", "netra")  # Docker dev user
-                self.password = env.get("CLICKHOUSE_PASSWORD", "netra123")  # Docker dev password
-                self.database = env.get("CLICKHOUSE_DB", "netra_analytics")  # Docker dev database
+                self.user = env.get("CLICKHOUSE_USER", "netra_dev")  # Docker dev user
+                self.password = env.get("CLICKHOUSE_PASSWORD", "dev123")  # Docker dev password
+                self.database = env.get("CLICKHOUSE_DB", "netra_dev_analytics")  # Docker dev database
                 self.secure = False
                 
                 logger.info(f"[ClickHouse Dev Config] Using host={self.host}, port={self.port}")
@@ -306,7 +303,6 @@ def _extract_clickhouse_config(config):
         # For staging environment, use ClickHouse Cloud configuration
         class StagingClickHouseConfig:
             def __init__(self):
-                from shared.isolated_environment import get_env
                 from urllib.parse import urlparse, parse_qs
                 env = get_env()
                 
@@ -374,7 +370,6 @@ def _extract_clickhouse_config(config):
         # For production environment, use ClickHouse Cloud configuration
         class ProductionClickHouseConfig:
             def __init__(self):
-                from shared.isolated_environment import get_env
                 from urllib.parse import urlparse, parse_qs
                 env = get_env()
                 
@@ -541,7 +536,6 @@ async def get_clickhouse_client(bypass_manager: bool = False):
         async with get_clickhouse_client() as client:
             results = await client.execute("SELECT * FROM events")
     """
-    from shared.isolated_environment import get_env
     
     # CRITICAL FIX: Check if ClickHouse should be disabled FIRST, before any connection attempts
     if use_mock_clickhouse():
@@ -679,7 +673,6 @@ async def _test_and_yield_client(client):
     Enhanced with async generator protection against corruption and staging-specific timeouts.
     """
     import asyncio
-    from shared.isolated_environment import get_env
     
     environment = get_env().get("ENVIRONMENT", "development").lower()
     client_yielded = False

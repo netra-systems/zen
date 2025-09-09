@@ -580,6 +580,10 @@ class ExecutionEngineFactory:
             # Clear state
             self._active_engines.clear()
             
+            # Update metrics after cleanup
+            self._factory_metrics['active_engines_count'] = 0
+            self._factory_metrics['total_engines_cleaned'] = self._factory_metrics.get('total_engines_created', 0)
+            
             logger.info("✅ ExecutionEngineFactory shutdown complete")
             
         except Exception as e:

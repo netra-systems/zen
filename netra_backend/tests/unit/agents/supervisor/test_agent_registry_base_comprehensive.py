@@ -782,8 +782,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             from test_framework.ssot.base_test_case import SsotTestMetrics
             self._metrics = SsotTestMetrics()
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
-    async def test_create_tool_dispatcher_for_user_creates_isolated_dispatcher(self, mock_unified_dispatcher):
+    async def test_create_tool_dispatcher_for_user_creates_isolated_dispatcher(self):
         """Test that create_tool_dispatcher_for_user creates isolated dispatcher.
         
         Business Value: Ensures proper tool isolation and security per user.
@@ -800,28 +799,29 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
-        mock_dispatcher = Mock()
-        mock_unified_dispatcher.create_for_user = AsyncMock(return_value=mock_dispatcher)
-        
-        # Act
-        result = await registry.create_tool_dispatcher_for_user(
-            user_context=test_user_context,
-            websocket_bridge=None,
-            enable_admin_tools=False
-        )
-        
-        # Assert
-        assert result == mock_dispatcher
-        mock_unified_dispatcher.create_for_user.assert_called_once_with(
-            user_context=test_user_context,
-            websocket_bridge=None,
-            enable_admin_tools=False
-        )
+        # Mock the UnifiedToolDispatcher at the point where it's imported inside the method
+        with patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher') as mock_unified_dispatcher:
+            mock_dispatcher = Mock()
+            mock_unified_dispatcher.create_for_user = AsyncMock(return_value=mock_dispatcher)
+            
+            # Act
+            result = await registry.create_tool_dispatcher_for_user(
+                user_context=test_user_context,
+                websocket_bridge=None,
+                enable_admin_tools=False
+            )
+            
+            # Assert
+            assert result == mock_dispatcher
+            mock_unified_dispatcher.create_for_user.assert_called_once_with(
+                user_context=test_user_context,
+                websocket_bridge=None,
+                enable_admin_tools=False
+            )
         
         self.record_metric("tool_dispatcher_creation_working", True)
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
-    async def test_create_tool_dispatcher_for_user_with_admin_tools(self, mock_unified_dispatcher):
+    async def test_create_tool_dispatcher_for_user_with_admin_tools(self):
         """Test tool dispatcher creation with admin tools enabled.
         
         Business Value: Enables advanced functionality for authorized users.
@@ -838,27 +838,28 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
-        mock_dispatcher = Mock()
-        mock_unified_dispatcher.create_for_user = AsyncMock(return_value=mock_dispatcher)
-        
-        # Act
-        result = await registry.create_tool_dispatcher_for_user(
-            user_context=test_user_context,
-            websocket_bridge=None,
-            enable_admin_tools=True
-        )
-        
-        # Assert
-        mock_unified_dispatcher.create_for_user.assert_called_once_with(
-            user_context=test_user_context,
-            websocket_bridge=None,
-            enable_admin_tools=True
-        )
+        # Mock the UnifiedToolDispatcher at the point where it's imported inside the method
+        with patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher') as mock_unified_dispatcher:
+            mock_dispatcher = Mock()
+            mock_unified_dispatcher.create_for_user = AsyncMock(return_value=mock_dispatcher)
+            
+            # Act
+            result = await registry.create_tool_dispatcher_for_user(
+                user_context=test_user_context,
+                websocket_bridge=None,
+                enable_admin_tools=True
+            )
+            
+            # Assert
+            mock_unified_dispatcher.create_for_user.assert_called_once_with(
+                user_context=test_user_context,
+                websocket_bridge=None,
+                enable_admin_tools=True
+            )
         
         self.record_metric("admin_tools_dispatcher_working", True)
     
-    @patch('netra_backend.app.agents.supervisor.agent_registry.UnifiedToolDispatcher')
-    async def test_default_dispatcher_factory_uses_unified_dispatcher(self, mock_unified_dispatcher):
+    async def test_default_dispatcher_factory_uses_unified_dispatcher(self):
         """Test that default dispatcher factory uses UnifiedToolDispatcher.
         
         Business Value: Ensures SSOT compliance for tool dispatching.
@@ -875,22 +876,24 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             run_id=f"unit_testing_run_{uuid.uuid4().hex[:8]}"
         )
         
-        mock_dispatcher = Mock()
-        mock_unified_dispatcher.create_for_user = AsyncMock(return_value=mock_dispatcher)
-        
-        # Act
-        result = await registry._default_dispatcher_factory(
-            user_context=test_user_context,
-            websocket_bridge=None
-        )
-        
-        # Assert
-        assert result == mock_dispatcher
-        mock_unified_dispatcher.create_for_user.assert_called_once_with(
-            user_context=test_user_context,
-            websocket_bridge=None,
-            enable_admin_tools=False
-        )
+        # Mock the UnifiedToolDispatcher at the point where it's imported inside the method
+        with patch('netra_backend.app.core.tools.unified_tool_dispatcher.UnifiedToolDispatcher') as mock_unified_dispatcher:
+            mock_dispatcher = Mock()
+            mock_unified_dispatcher.create_for_user = AsyncMock(return_value=mock_dispatcher)
+            
+            # Act
+            result = await registry._default_dispatcher_factory(
+                user_context=test_user_context,
+                websocket_bridge=None
+            )
+            
+            # Assert
+            assert result == mock_dispatcher
+            mock_unified_dispatcher.create_for_user.assert_called_once_with(
+                user_context=test_user_context,
+                websocket_bridge=None,
+                enable_admin_tools=False
+            )
         
         self.record_metric("default_factory_uses_unified", True)
     
@@ -926,7 +929,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         
         # Assert
         assert registry._legacy_dispatcher == mock_dispatcher
-        assert registry.tool_dispatcher is None  # Still returns None
+        assert registry.tool_dispatcher == mock_dispatcher  # Returns the set value for backward compatibility
         
         self.record_metric("legacy_dispatcher_setter_deprecated", True)
 

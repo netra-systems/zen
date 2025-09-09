@@ -26,6 +26,7 @@ import json
 import os
 import pytest
 from typing import Dict, List, Optional, Any
+from unittest.mock import patch
 
 import aiohttp
 import websockets

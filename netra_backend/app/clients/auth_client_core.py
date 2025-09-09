@@ -207,20 +207,39 @@ class OAuth2Response:
         self.expires_in = expires_in
 
 
-# Helper functions expected by tests
+# Global auth client instance
+_auth_resilience_service = None
+
+def get_auth_resilience_service():
+    """Get the global auth resilience service instance."""
+    global _auth_resilience_service
+    if _auth_resilience_service is None:
+        _auth_resilience_service = AuthServiceClient()
+    return _auth_resilience_service
+
 def get_auth_service_client():
     """Get the global auth service client instance."""
-    return auth_client
+    return get_auth_resilience_service()
 
 
-def handle_auth_service_error(error: Exception):
-    """Handle auth service errors."""
-    if isinstance(error, AuthServiceConnectionError):
-        logger.error(f"Auth service connection error: {error}")
-    elif isinstance(error, AuthServiceError):
-        logger.error(f"Auth service error: {error}")
+def handle_auth_service_error(response, operation: str):
+    """Handle auth service errors based on HTTP response."""
+    status_code = getattr(response, 'status_code', 500)
+    
+    try:
+        error_data = response.json() if hasattr(response, 'json') else {}
+        error_msg = error_data.get('error', f'HTTP {status_code} error')
+    except:
+        error_msg = f'HTTP {status_code} error'
+    
+    if status_code == 401 or status_code == 403:
+        raise AuthServiceValidationError(f"Authentication failed for {operation}: {error_msg}")
+    elif status_code == 404:
+        raise AuthServiceNotAvailableError(f"Auth service not found for {operation}: {error_msg}")
+    elif status_code >= 500:
+        raise AuthServiceError(f"Auth service error for {operation}: {error_msg}")
     else:
-        logger.error(f"Unexpected auth error: {error}")
+        raise AuthServiceError(f"Unexpected auth error for {operation}: {error_msg}")
 
 
 def validate_jwt_format(token: str) -> bool:

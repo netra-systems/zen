@@ -30,7 +30,7 @@ from shared.id_generation import UnifiedIdGenerator
 class TestWebSocketManagerMethodCompatibility:
     """Test suite to ensure WebSocket manager has all required methods."""
     
-    def test_isolated_manager_has_get_connection_id_by_websocket(self):
+    async def test_isolated_manager_has_get_connection_id_by_websocket(self):
         """
         Verify IsolatedWebSocketManager has get_connection_id_by_websocket method.
         
@@ -43,8 +43,8 @@ class TestWebSocketManagerMethodCompatibility:
             run_id="run_2025_09_08_14_45_00_def456"
         )
         
-        # Create isolated manager
-        manager = create_websocket_manager(context)
+        # Create isolated manager (FIXED: Added await)
+        manager = await create_websocket_manager(context)
         
         # Verify the method exists
         assert hasattr(manager, 'get_connection_id_by_websocket'), \
@@ -54,7 +54,7 @@ class TestWebSocketManagerMethodCompatibility:
         assert callable(getattr(manager, 'get_connection_id_by_websocket')), \
             "get_connection_id_by_websocket must be callable"
     
-    def test_isolated_manager_has_update_connection_thread(self):
+    async def test_isolated_manager_has_update_connection_thread(self):
         """
         Verify IsolatedWebSocketManager has update_connection_thread method.
         
@@ -67,8 +67,8 @@ class TestWebSocketManagerMethodCompatibility:
             run_id="run_2025_09_08_14_45_01_jkl012"
         )
         
-        # Create isolated manager
-        manager = create_websocket_manager(context)
+        # Create isolated manager (FIXED: Added await)
+        manager = await create_websocket_manager(context)
         
         # Verify the method exists
         assert hasattr(manager, 'update_connection_thread'), \
@@ -91,8 +91,8 @@ class TestWebSocketManagerMethodCompatibility:
             run_id="run_2025_09_08_14_45_02_pqr678"
         )
         
-        # Create isolated manager
-        manager = create_websocket_manager(context)
+        # Create isolated manager (FIXED: Added await)
+        manager = await create_websocket_manager(context)
         
         # Create a mock WebSocket
         websocket = AsyncMock()
@@ -137,8 +137,8 @@ class TestWebSocketManagerMethodCompatibility:
             run_id="run_2025_09_08_14_45_03_stu901"
         )
         
-        # Create isolated manager
-        manager = create_websocket_manager(context)
+        # Create isolated manager (FIXED: Added await)
+        manager = await create_websocket_manager(context)
         
         # Create a mock WebSocket
         websocket = AsyncMock()
@@ -194,8 +194,8 @@ class TestWebSocketManagerMethodCompatibility:
             run_id=f"run_{uuid.uuid4()}"
         )
         
-        # Create manager
-        ws_manager = create_websocket_manager(context)
+        # Create manager (FIXED: Added await)
+        ws_manager = await create_websocket_manager(context)
         
         # Create mock WebSocket
         websocket = AsyncMock()
@@ -226,7 +226,7 @@ class TestWebSocketManagerMethodCompatibility:
                 assert connection_id.startswith("ws_conn_"), \
                     "Fallback connection ID generation should work"
     
-    def test_all_required_methods_exist(self):
+    async def test_all_required_methods_exist(self):
         """
         Comprehensive test that all methods used by agent_handler.py exist.
         """
@@ -237,8 +237,8 @@ class TestWebSocketManagerMethodCompatibility:
             run_id="run_2025_09_08_14_45_05_vwx234"
         )
         
-        # Create isolated manager
-        manager = create_websocket_manager(context)
+        # Create isolated manager (FIXED: Added await)
+        manager = await create_websocket_manager(context)
         
         # List of all methods that agent_handler.py might call
         required_methods = [
@@ -272,15 +272,19 @@ if __name__ == "__main__":
     # Run tests
     test_instance = TestWebSocketManagerMethodCompatibility()
     
-    # Run synchronous tests
-    test_instance.test_isolated_manager_has_get_connection_id_by_websocket()
-    print("✓ test_isolated_manager_has_get_connection_id_by_websocket passed")
+    # Run async tests that were previously sync (FIXED: All tests are now async)
+    async def run_sync_like_tests():
+        await test_instance.test_isolated_manager_has_get_connection_id_by_websocket()
+        print("✓ test_isolated_manager_has_get_connection_id_by_websocket passed")
+        
+        await test_instance.test_isolated_manager_has_update_connection_thread()
+        print("✓ test_isolated_manager_has_update_connection_thread passed")
+        
+        await test_instance.test_all_required_methods_exist()
+        print("✓ test_all_required_methods_exist passed")
     
-    test_instance.test_isolated_manager_has_update_connection_thread()
-    print("✓ test_isolated_manager_has_update_connection_thread passed")
-    
-    test_instance.test_all_required_methods_exist()
-    print("✓ test_all_required_methods_exist passed")
+    # Run the tests that were previously sync
+    asyncio.run(run_sync_like_tests())
     
     # Run async tests
     async def run_async_tests():

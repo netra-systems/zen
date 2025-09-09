@@ -47,7 +47,7 @@ class TestAuthStartupConfiguration:
     def auth_env(self):
         """Get isolated auth environment with startup configuration."""
         env = get_env()
-        auth_env = AuthEnvironment(env)
+        auth_env = AuthEnvironment()
         
         # Set required startup configuration
         auth_env.set("JWT_SECRET_KEY", "test-jwt-secret-key-32-characters", source="test")
@@ -63,7 +63,7 @@ class TestAuthStartupConfiguration:
         auth_env.set("ENVIRONMENT", "test", source="test")
         auth_env.set("AUTH_SERVICE_PORT", "8083", source="test")
         
-        auth_env.load_environment()
+        # AuthEnvironment doesn't have load_environment, it loads automatically
         return auth_env
 
     @pytest.fixture

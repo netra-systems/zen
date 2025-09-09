@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
+import { flushSync } from 'react-dom';
 import userEvent from '@testing-library/user-event';
 
 // Import fixed components
@@ -36,18 +37,39 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
     // Reset ID counter for predictable testing
     TestIdUtils.reset();
     
-    // Setup unified WebSocket mock
-    setupUnifiedWebSocketMock(WebSocketMockConfigs.normal);
-  });
-
-  afterEach(() => {
-    // Cleanup WebSocket instances
+    // ENHANCED: Reset global WebSocket instance tracking
     if (global.mockWebSocketInstances) {
       global.mockWebSocketInstances.forEach(ws => {
         if (ws?.cleanup) ws.cleanup();
       });
       global.mockWebSocketInstances.length = 0;
     }
+    
+    // Initialize fresh instance array
+    global.mockWebSocketInstances = [];
+    
+    // Setup unified WebSocket mock
+    setupUnifiedWebSocketMock(WebSocketMockConfigs.normal);
+    
+    console.log('DEBUG: beforeEach - Reset WebSocket instances, count:', global.mockWebSocketInstances?.length || 0);
+  });
+
+  afterEach(() => {
+    // ENHANCED: Comprehensive WebSocket instance cleanup with debugging
+    console.log('DEBUG: afterEach - Cleaning up WebSocket instances, count:', global.mockWebSocketInstances?.length || 0);
+    
+    if (global.mockWebSocketInstances) {
+      global.mockWebSocketInstances.forEach((ws, index) => {
+        console.log(`DEBUG: Cleaning up WebSocket instance ${index}`);
+        if (ws?.cleanup) ws.cleanup();
+      });
+      global.mockWebSocketInstances.length = 0;
+    }
+    
+    // Force garbage collection of any remaining references
+    global.mockWebSocketInstances = [];
+    
+    console.log('DEBUG: afterEach - Cleanup completed');
   });
 
   describe('FIX 1: WebSocket Mock Race Conditions', () => {
@@ -62,16 +84,19 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
           const ws = new WebSocket('ws://test');
           
           ws.onopen = () => {
+            console.log('DEBUG: onopen handler called, adding to connectionEvents');
             connectionEvents.push('onopen');
             setStatus('connected');
           };
           
           ws.onerror = () => {
+            console.log('DEBUG: onerror handler called, adding to connectionEvents');
             connectionEvents.push('onerror');
             setStatus('error');
           };
           
           ws.onclose = () => {
+            console.log('DEBUG: onclose handler called, adding to connectionEvents');
             connectionEvents.push('onclose');
             setStatus('disconnected');
           };
@@ -99,7 +124,14 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
         expect(screen.getByTestId('status')).toHaveTextContent('connected');
       }, { timeout: 2000 });
 
+      // CRITICAL FIX: Wait for event propagation after connection status change
+      await waitFor(() => {
+        console.log('DEBUG: Checking connectionEvents length:', connectionEvents.length);
+        expect(connectionEvents.length).toBeGreaterThan(0);
+      }, { timeout: 1000 });
+
       // Verify event handlers were called in correct order
+      console.log('DEBUG: Final connectionEvents:', connectionEvents);
       expect(connectionEvents).toContain('onopen');
       console.log('✅ WebSocket timing race condition fix validated');
     });
@@ -329,14 +361,35 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
         const connect = React.useCallback(() => {
           const ws = new WebSocket('ws://chat-simulation');
           
-          ws.onopen = () => setConnectionStatus('connected');
-          ws.onerror = () => setConnectionStatus('error');
+          ws.onopen = () => {
+            console.log('DEBUG: Complex chat - WebSocket connected');
+            setConnectionStatus('connected');
+          };
+          
+          ws.onerror = () => {
+            console.log('DEBUG: Complex chat - WebSocket error');
+            setConnectionStatus('error');
+          };
+          
           ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setMessages(prev => [...prev, {
-              id: generateUniqueMessageId(data.type),
-              ...data
-            }]);
+            console.log('DEBUG: Complex chat - Message received:', event.data);
+            try {
+              const data = JSON.parse(event.data);
+              
+              // Use flushSync to force immediate state update and prevent batching issues
+              flushSync(() => {
+                setMessages(prev => {
+                  const newMessages = [...prev, {
+                    id: generateUniqueMessageId(data.type),
+                    ...data
+                  }];
+                  console.log('DEBUG: Complex chat - Messages updated, count:', newMessages.length);
+                  return newMessages;
+                });
+              });
+            } catch (error) {
+              console.error('DEBUG: Complex chat - Failed to parse message:', error);
+            }
           };
           
           wsRef.current = ws;
@@ -358,10 +411,27 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
               { type: 'agent_completed', data: { recommendations: ['Use reserved instances'] }}
             ];
             
-            for (const event of events) {
+            // CRITICAL FIX: Sequential event simulation with proper React state updates
+            for (let i = 0; i < events.length; i++) {
+              const event = events[i];
+              console.log(`DEBUG: About to simulate event ${i + 1}/5:`, event.type, 'readyState:', mockWs.readyState);
+              
+              // Ensure WebSocket is still in OPEN state
+              if (mockWs.readyState !== 1) { // UnifiedWebSocketMock.OPEN = 1
+                console.warn(`DEBUG: WebSocket not in OPEN state: ${mockWs.readyState}`);
+                break;
+              }
+              
+              // Simulate the message without act() wrapper to avoid loop termination
               mockWs.simulateMessage(event);
-              await new Promise(resolve => setTimeout(resolve, 10));
+              console.log(`DEBUG: Event ${i + 1}/5 simulated:`, event.type);
+              
+              // Wait for React state update to complete before next event
+              await new Promise(resolve => setTimeout(resolve, 150));
             }
+            
+            // Additional wait for final state update propagation
+            await new Promise(resolve => setTimeout(resolve, 100));
             console.log('DEBUG: Complex chat simulation completed');
           } else {
             console.warn('DEBUG: Complex chat - no simulateMessage method available');
@@ -397,15 +467,22 @@ describe('Comprehensive Frontend Test Fixes Validation', () => {
         expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
       });
 
-      // Simulate workflow
+      // CRITICAL FIX: Wait a moment to ensure WebSocket connection is fully established
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Simulate workflow - wrap the entire simulation in act()
       await act(async () => {
         await userEvent.click(screen.getByTestId('simulate'));
+        // Wait for the simulation to complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
       });
 
-      // Should receive all events without errors
+      // ENHANCED: Wait for simulation completion before checking message count
       await waitFor(() => {
+        const messageCount = screen.getByTestId('message-count').textContent;
+        console.log('DEBUG: Waiting for messages, current count:', messageCount);
         expect(screen.getByTestId('message-count')).toHaveTextContent('5');
-      }, { timeout: 5000 });
+      }, { timeout: 8000 }); // Increased timeout to account for longer delays
 
       // Check specific events were rendered
       expect(screen.getByTestId('message-user')).toBeInTheDocument();
