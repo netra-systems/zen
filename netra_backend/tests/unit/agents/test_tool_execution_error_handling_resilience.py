@@ -250,7 +250,7 @@ class TestToolExecutionErrorHandlingResilience(SSotAsyncTestCase):
             user_id="resilience_user_001",
             run_id=f"resilience_run_{int(time.time() * 1000)}",
             thread_id="resilience_thread_001",
-            session_id="resilience_session_001"
+            request_id=f"resilience_req_{int(time.time() * 1000)}"
         )
         
         self.agent_context = AgentExecutionContext(
