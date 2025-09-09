@@ -2,11 +2,12 @@
 
 ## Core Principles
 
-### 1. Lead with Impact
+### 1. Lead with Impact & Naunce
 - **First sentence = key takeaway**
 - Put the most critical information in the first 2 lines
 - Use the inverted pyramid structure (most important → details)
 - Keep naunces of importance, for example maybe it's a really important impact, yet a very small code change
+- For existing information sources prefer to link over recreating
 
 ### 2. Minimize Noise
 - Remove unnecessary pleasantries, filler words, and redundant information

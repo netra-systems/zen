@@ -279,8 +279,8 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
         # Test that valid messages DO route correctly (sanity check)
         try:
             valid_message = create_standard_message(
-                message_type=MessageType.AGENT_REQUEST,
-                data={"request": "valid test request"}
+                msg_type=MessageType.AGENT_REQUEST,
+                payload={"request": "valid test request"}
             )
             
             # This should NOT fail if SSOT is working

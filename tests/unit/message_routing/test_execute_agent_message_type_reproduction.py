@@ -81,8 +81,8 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
                 # Attempt routing with different case variations
                 try:
                     test_message = create_standard_message(
-                        message_type=variation,
-                        data=message_data
+                        msg_type=variation,
+                        payload=message_data
                     )
                     handler = router.get_handler(test_message.type)
                     
@@ -312,8 +312,8 @@ class TestExecuteAgentMessageTypeReproduction(BaseIntegrationTest):
             
             # Try to route message that might cause timeout
             test_message = create_standard_message(
-                message_type=MessageType.AGENT_REQUEST,
-                data={"agent_name": "timeout_agent", "user_request": "timeout test"}
+                msg_type=MessageType.AGENT_REQUEST,
+                payload={"agent_name": "timeout_agent", "user_request": "timeout test"}
             )
             
             # Simple synchronous handler lookup - timing it to check for performance issues
