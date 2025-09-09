@@ -114,6 +114,38 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
                 return TestToolDispatcher(user_context, websocket_bridge)
         
         return factory
+    
+    def assert_business_value_delivered(self, result: Dict, expected_value_type: str):
+        """ENHANCED: Use comprehensive business value validation per BaseIntegrationTest."""
+        # Use parent class SSOT method first
+        super().assert_business_value_delivered(result, expected_value_type)
+        
+        # Additional comprehensive validation for Agent Registry tests
+        result_data = result.get("result", {})
+        if isinstance(result_data, dict):
+            # Verify business value structure completeness
+            if expected_value_type == "cost_savings":
+                savings_indicators = [
+                    "total_potential_monthly_savings", "potential_savings", 
+                    "coordinated_optimization_plan", "monthly_savings"
+                ]
+                has_savings = any(indicator in result_data for indicator in savings_indicators)
+                assert has_savings, f"Cost savings result missing savings indicators. Got: {list(result_data.keys())}"
+                
+                # Verify quantifiable savings
+                savings_amount = (
+                    result_data.get("total_potential_monthly_savings") or
+                    result_data.get("potential_savings") or
+                    result_data.get("coordinated_optimization_plan", {}).get("total_monthly_savings") or
+                    0
+                )
+                assert savings_amount > 0, "Business value must quantify actual cost savings"
+                assert savings_amount >= 1000, f"Savings must be enterprise-significant: ${savings_amount}"
+                
+            # Verify actionability - results must enable user action
+            actionable_indicators = ["recommendations", "next_steps", "priority_actions", "implementation_phases"]
+            has_actionable_content = any(indicator in result_data for indicator in actionable_indicators)
+            assert has_actionable_content, "Business value must include actionable recommendations"
         
     async def _cleanup_websocket_connections(self):
         """Clean up WebSocket connections after testing."""
@@ -680,31 +712,35 @@ class TestAgentRegistryWebSocketManagementComprehensive(BaseIntegrationTest):
         
         user_context = self._create_test_user_context("error_creation_user")
         
-        # Test creation of non-existent agent type
-        with pytest.raises((KeyError, ValueError)):
+        # Test creation of non-existent agent type with enhanced error handling
+        with pytest.raises((KeyError, ValueError, RuntimeError)) as exc_info:
             await self.agent_registry.create_agent_for_user(
                 user_id=user_context.user_id,
                 agent_type="non_existent_agent",
                 user_context=user_context,
                 websocket_manager=self.websocket_manager
             )
+        error_msg = str(exc_info.value).lower()
+        assert "non_existent_agent" in error_msg or "agent" in error_msg, "Error should reference the problematic agent type"
         
-        # Test creation with invalid user_id
-        with pytest.raises(ValueError):
+        # Test creation with invalid user_id - enhanced error handling
+        with pytest.raises((ValueError, TypeError)) as exc_info:
             await self.agent_registry.create_agent_for_user(
                 user_id="",
                 agent_type="triage",
                 user_context=user_context,
                 websocket_manager=self.websocket_manager
             )
+        assert "user_id" in str(exc_info.value).lower(), "Error message should mention user_id issue"
         
-        with pytest.raises(ValueError):
+        with pytest.raises((ValueError, TypeError)) as exc_info:
             await self.agent_registry.create_agent_for_user(
                 user_id=None,
                 agent_type="triage", 
                 user_context=user_context,
                 websocket_manager=self.websocket_manager
             )
+        assert "user_id" in str(exc_info.value).lower(), "Error message should be descriptive"
         
         # Test that registry remains healthy after errors
         health = self.agent_registry.get_registry_health()

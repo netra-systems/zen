@@ -644,7 +644,7 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
         
         # Use Redis manager to store session
         try:
-            await self.redis_manager.set(session_key, json.dumps(session_data), expire_seconds=300)
+            await self.redis_manager.set(session_key, json.dumps(session_data), ex=300)
             
             # Verify Redis operation succeeded
             stored_data = await self.redis_manager.get(session_key)

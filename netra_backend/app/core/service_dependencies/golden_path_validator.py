@@ -9,6 +9,7 @@ that represents the core business value of the chat functionality.
 import asyncio
 import logging
 from typing import Any, Dict, List, Optional
+from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
 from .models import (
@@ -188,9 +189,9 @@ class GoldenPathValidator:
                 for table_name in critical_tables:
                     try:
                         # Check if table exists and has basic structure
-                        result = await session.execute(
+                        result = await session.execute(text(
                             f"SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '{table_name}'"
-                        )
+                        ))
                         table_exists = result.scalar() > 0
                         table_results[table_name] = table_exists
                     except Exception:
@@ -202,13 +203,13 @@ class GoldenPathValidator:
                 if all_tables_exist:
                     # Check for essential indexes on user tables (if possible)
                     try:
-                        index_result = await session.execute(
+                        index_result = await session.execute(text(
                             """
                             SELECT COUNT(*) as index_count
                             FROM pg_indexes 
                             WHERE tablename IN ('users', 'user_sessions')
                             """
-                        )
+                        ))
                         index_count = index_result.scalar() or 0
                         
                         return {
@@ -287,7 +288,7 @@ class GoldenPathValidator:
             test_session_data = {"user_id": "test", "created": "now"}
             
             # Test SET with expiration (typical for sessions)
-            await redis_manager.set(test_session_key, str(test_session_data), expire_seconds=300)
+            await redis_manager.set(test_session_key, str(test_session_data), ex=300)
             
             # Test GET
             retrieved_data = await redis_manager.get(test_session_key)

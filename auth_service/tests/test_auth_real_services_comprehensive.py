@@ -209,7 +209,7 @@ class TestRealRedisConnections:
         }
         
         # Store session data
-        await real_redis_manager.set_session(session_key, session_data, expire_seconds=3600)
+        await real_redis_manager.set_session(session_key, session_data, ex=3600)
         
         # Retrieve session data
         retrieved_data = await real_redis_manager.get_session(session_key)
@@ -223,7 +223,7 @@ class TestRealRedisConnections:
         token_jti = secrets.token_hex(32)
         
         # Add token to blacklist
-        await real_redis_manager.blacklist_token(token_jti, expire_seconds=3600)
+        await real_redis_manager.blacklist_token(token_jti, ex=3600)
         
         # Check if token is blacklisted
         is_blacklisted = await real_redis_manager.is_token_blacklisted(token_jti)

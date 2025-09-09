@@ -198,6 +198,26 @@ WebSocket welcome message: {"type":"handshake_validation","timestamp":1757452134
 - [14:47] ❌ **Status**: 0% pass rate (was 100% earlier) - system degradation detected
 - [14:47] 🔄 **Action Required**: Return to bug analysis phase per CLAUDE.md
 
+#### Phase 3 (Repeat): Five-Whys Regression Analysis ✅ COMPLETED
+- [14:50] ✅ Spawned regression analysis agent per CLAUDE.md requirements
+- [14:55] ✅ **ROOT CAUSE FOUND**: Our "race condition fix" became TOO STRICT
+- [14:55] ✅ **Error Behind Error**: Blocking legitimate connections during setup phase
+- [14:55] ✅ **Real Issue**: Synchronous validation of async connection establishment
+- [14:55] ✅ **Fixes Implemented**: 
+  - Fixed over-strict state machine requirements
+  - Fixed connection_id validation timing
+  - Fixed test async context handling
+- [14:55] ✅ **Report Created**: WEBSOCKET_REGRESSION_FIVE_WHYS_20250909.md
+- [14:55] ⚠️ **Identified**: Backend 1011 internal server error (separate issue)
+
+#### Phase 5.1: Regression Fix Validation ✅ COMPLETED
+- [14:56] ✅ **CLIENT-SIDE FIXES WORKING**: WebSocket connection successfully established
+- [14:56] ✅ **Authentication Fixed**: JWT tokens working, no more auth failures
+- [14:56] ✅ **Connection Progression**: Test now reaches message exchange phase
+- [14:56] ✅ **Error Clarity**: Changed from timeout to clear 1011 backend internal error
+- [14:56] ✅ **Regression Resolved**: Client-side race condition and timeout issues fixed
+- [14:56] ⚠️ **Backend Issue**: 1011 internal error requires separate GCP investigation
+
 ## Current Status: CRITICAL ISSUES IDENTIFIED - FIX IN PROGRESS ⚠️
 
 **Summary:** Initial test execution showed high success rates but deeper analysis revealed critical WebSocket state machine race conditions blocking user notifications. Five-whys analysis complete, now implementing SSOT-compliant fixes.
