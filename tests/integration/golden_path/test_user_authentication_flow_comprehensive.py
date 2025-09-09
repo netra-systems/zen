@@ -59,8 +59,11 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestUserAuthenticationFlowComprehensive(BaseIntegrationTest, DatabaseIntegrationTest, 
-                                               CacheIntegrationTest, WebSocketIntegrationTest):
+class TestUserAuthenticationFlowComprehensive(
+    DatabaseIntegrationTest, 
+    CacheIntegrationTest, 
+    WebSocketIntegrationTest
+):
     """
     Comprehensive test suite for golden path P0 user authentication flow.
     
