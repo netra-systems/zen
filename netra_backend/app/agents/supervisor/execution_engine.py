@@ -1103,9 +1103,8 @@ class ExecutionEngine:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=self.AGENT_EXECUTION_TIMEOUT,
+            duration=self.AGENT_EXECUTION_TIMEOUT,
             error=f"Agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-            state=None,
             metadata={'timeout': True, 'timeout_duration': self.AGENT_EXECUTION_TIMEOUT}
         )
     
@@ -1115,9 +1114,8 @@ class ExecutionEngine:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=0.0,
+            duration=0.0,
             error=str(error),
-            state=None,
             metadata={'unexpected_error': True, 'error_type': type(error).__name__}
         )
     
