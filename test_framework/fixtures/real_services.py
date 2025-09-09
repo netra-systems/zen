@@ -20,6 +20,8 @@ from typing import Dict, Any, AsyncGenerator
 import pytest
 from contextlib import asynccontextmanager
 
+logger = logging.getLogger(__name__)
+
 try:
     from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
     from sqlalchemy.exc import OperationalError
@@ -45,8 +47,6 @@ except ImportError:
     logger.warning("Redis libraries not available - Redis fixtures will fail")
     redis = None
     fake_redis = None
-
-logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="function")

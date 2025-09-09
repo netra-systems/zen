@@ -16,7 +16,7 @@ from fastapi.websockets import WebSocketState
 # Test the fixed components
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
-from netra_backend.app.services.websocket_connection_pool import _safe_websocket_state_for_logging
+from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
 
 
 class TestWebSocketJSONSerialization:

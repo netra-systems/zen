@@ -75,8 +75,8 @@ class TestToolDispatcherCoreBusiness(SSotBaseTestCase):
         
         # Cost Analysis Tool
         class CostAnalysisTool(BaseTool):
-            name = "aws_cost_analyzer"
-            description = "Analyzes AWS costs to identify optimization opportunities"
+            name: str = "aws_cost_analyzer"
+            description: str = "Analyzes AWS costs to identify optimization opportunities"
             
             def _run(self, account_id: str, time_range: str = "30d"):
                 return {
@@ -95,8 +95,8 @@ class TestToolDispatcherCoreBusiness(SSotBaseTestCase):
         
         # Data Query Tool
         class DataQueryTool(BaseTool):
-            name = "data_query_engine"
-            description = "Queries business data for analysis and insights"
+            name: str = "data_query_engine"
+            description: str = "Queries business data for analysis and insights"
             
             def _run(self, query: str, database: str = "analytics"):
                 return {

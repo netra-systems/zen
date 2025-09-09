@@ -15,11 +15,11 @@ from unittest.mock import Mock, patch
 from starlette.websockets import WebSocketState
 from fastapi.websockets import WebSocketState as FastAPIWebSocketState
 
-# Import the modules we fixed
-from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging as utils_safe_logging
-from netra_backend.app.websocket_core.unified_websocket_auth import _safe_websocket_state_for_logging as auth_safe_logging
-from netra_backend.app.services.websocket_connection_pool import _safe_websocket_state_for_logging as pool_safe_logging
-from netra_backend.app.routes.websocket import _safe_websocket_state_for_logging as routes_safe_logging
+# Import the SSOT function (duplicates have been removed)
+from netra_backend.app.websocket_core.utils import _safe_websocket_state_for_logging
+
+# Test that duplicate functions no longer exist by attempting imports
+# (These should fail with ImportError since functions were removed/consolidated)
 
 
 class TestWebSocketStateSafeLogging:

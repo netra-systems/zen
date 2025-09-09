@@ -86,8 +86,8 @@ class TestToolExecutionEngineBusiness(SSotBaseTestCase):
     def business_tool(self):
         """Create realistic business tool for testing."""
         class BusinessCostTool(BaseTool):
-            name = "business_cost_analyzer"
-            description = "Analyzes business costs and identifies optimization opportunities"
+            name: str = "business_cost_analyzer"
+            description: str = "Analyzes business costs and identifies optimization opportunities"
             
             def _run(self, department: str, time_period: str = "quarterly"):
                 return {
@@ -375,8 +375,8 @@ class TestToolExecutionEngineBusiness(SSotBaseTestCase):
         
         # Create complex business tool
         class ComplexAnalyticsTool(BaseTool):
-            name = "multi_dimensional_business_analyzer"
-            description = "Performs multi-dimensional business analysis with context awareness"
+            name: str = "multi_dimensional_business_analyzer"
+            description: str = "Performs multi-dimensional business analysis with context awareness"
             
             async def _arun(self, business_context: Dict[str, Any], analysis_type: str):
                 # Simulate complex business logic

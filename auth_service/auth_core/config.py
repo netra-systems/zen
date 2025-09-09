@@ -153,7 +153,20 @@ class AuthConfig:
     @property
     def jwt_token_expiry(self) -> int:
         """JWT token expiry property accessor."""
+        # Check for test override first
+        if 'jwt_token_expiry' in self._test_override_values:
+            return self._test_override_values['jwt_token_expiry']
         return self._auth_env.get_jwt_expiration_minutes() * 60  # Convert to seconds
+    
+    @jwt_token_expiry.setter
+    def jwt_token_expiry(self, value: int):
+        """JWT token expiry property setter for hot reload."""
+        self._test_override_values['jwt_token_expiry'] = value
+        if value is not None:
+            # Convert seconds to minutes for the underlying environment
+            minutes = value // 60
+            self._auth_env.env.set("JWT_TOKEN_EXPIRY", str(value), "hot_reload")
+            self._auth_env.env.set("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", str(minutes), "hot_reload")
     
     @property
     def require_https(self) -> bool:
@@ -164,6 +177,54 @@ class AuthConfig:
     def jwt_algorithm(self) -> str:
         """JWT algorithm property accessor."""
         return self._auth_env.get_jwt_algorithm()
+    
+    # Additional properties for hot reload testing
+    @property
+    def log_level(self) -> str:
+        """Log level property accessor."""
+        # Check for test override first
+        if 'log_level' in self._test_override_values:
+            return self._test_override_values['log_level']
+        from shared.isolated_environment import get_env
+        return get_env().get("LOG_LEVEL", "INFO")
+    
+    @log_level.setter 
+    def log_level(self, value: str):
+        """Log level property setter for hot reload."""
+        self._test_override_values['log_level'] = value
+        if value is not None:
+            from shared.isolated_environment import get_env
+            get_env().set("LOG_LEVEL", value, "hot_reload")
+    
+    @property
+    def rate_limit_per_minute(self) -> int:
+        """Rate limit per minute property accessor."""
+        # Check for test override first
+        if 'rate_limit_per_minute' in self._test_override_values:
+            return self._test_override_values['rate_limit_per_minute']
+        return self._auth_env.get_login_rate_limit()
+    
+    @rate_limit_per_minute.setter
+    def rate_limit_per_minute(self, value: int):
+        """Rate limit per minute property setter for hot reload."""
+        self._test_override_values['rate_limit_per_minute'] = value
+        if value is not None:
+            self._auth_env.env.set("RATE_LIMIT_PER_MINUTE", str(value), "hot_reload")
+    
+    @property 
+    def session_timeout(self) -> int:
+        """Session timeout property accessor."""
+        # Check for test override first
+        if 'session_timeout' in self._test_override_values:
+            return self._test_override_values['session_timeout']
+        return self._auth_env.get_session_ttl()
+    
+    @session_timeout.setter
+    def session_timeout(self, value: int):
+        """Session timeout property setter for hot reload."""
+        self._test_override_values['session_timeout'] = value
+        if value is not None:
+            self._auth_env.env.set("SESSION_TIMEOUT", str(value), "hot_reload")
     
     # Core Environment Methods - delegate to SSOT
     @staticmethod

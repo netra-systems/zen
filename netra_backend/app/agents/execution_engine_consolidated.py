@@ -31,12 +31,13 @@ from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.tool_dispatcher_consolidated import UnifiedToolDispatcher
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy.ext.asyncio import AsyncSession
 
+# Import UserExecutionContext outside TYPE_CHECKING to resolve forward references
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.agent_execution_tracker import (
     get_execution_tracker,
@@ -89,8 +90,45 @@ class AgentExecutionContext(BaseModel):
     request_id: Optional[str] = None
     thread_id: Optional[str] = None
     session_id: Optional[str] = None
-    user_context: Optional['UserExecutionContext'] = None
+    user_context: Optional[UserExecutionContext] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    @field_validator('user_context', mode='before')
+    @classmethod
+    def validate_user_context(cls, v):
+        """
+        Validate user_context field to properly handle UserExecutionContext dataclass instances.
+        
+        This validator fixes the Pydantic validation error by:
+        1. Accepting UserExecutionContext dataclass instances directly
+        2. Converting dictionaries to UserExecutionContext instances if needed
+        3. Handling None values appropriately
+        
+        Args:
+            v: The value being validated (can be None, dict, or UserExecutionContext instance)
+            
+        Returns:
+            Optional[UserExecutionContext]: The validated UserExecutionContext instance or None
+            
+        Raises:
+            ValueError: If the input cannot be converted to a valid UserExecutionContext
+        """
+        if v is None:
+            return None
+            
+        # If it's already a UserExecutionContext instance, return it directly
+        if isinstance(v, UserExecutionContext):
+            return v
+            
+        # If it's a dictionary, try to create a UserExecutionContext from it
+        if isinstance(v, dict):
+            try:
+                return UserExecutionContext(**v)
+            except (TypeError, ValueError) as e:
+                raise ValueError(f"Cannot create UserExecutionContext from dictionary: {e}")
+        
+        # If it's some other type, try to convert it (this handles edge cases)
+        raise ValueError(f"user_context must be None, a UserExecutionContext instance, or a dictionary, got {type(v)}")
     
     class Config:
         arbitrary_types_allowed = True
@@ -491,7 +529,7 @@ class ExecutionEngine:
         # Execute with timeout
         try:
             result = await asyncio.wait_for(
-                agent.execute(context.task, effective_user_context),
+                agent.execute(context.task, context.user_context),
                 timeout=self.config.agent_execution_timeout
             )
             
@@ -837,6 +875,10 @@ def get_execution_engine_factory():
     )
     return ExecutionEngineFactory
 
+
+# Rebuild Pydantic models to resolve forward references after all imports
+AgentExecutionContext.model_rebuild()
+AgentExecutionResult.model_rebuild()
 
 # Re-export for compatibility
 __all__ = [

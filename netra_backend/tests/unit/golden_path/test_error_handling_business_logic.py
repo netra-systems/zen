@@ -22,12 +22,15 @@ from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from decimal import Decimal
 
 # Import business logic components for testing
-from netra_backend.app.core.exceptions.websocket_exceptions import WebSocketError, WebSocketConnectionError
-from netra_backend.app.core.exceptions_database import DatabaseConnectionError, DataValidationError
+# WebSocket exception imports removed - not used in this test file  
+# from netra_backend.app.core.exceptions.websocket_exceptions import WebSocketEventEmissionError, WebSocketAgentEventError
+# Database exception imports removed - not used in this test file
+# from netra_backend.app.core.exceptions_database import DatabaseConnectionError  
+# from netra_backend.app.core.exceptions_file import DataValidationError
 from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from netra_backend.app.services.thread_service import _handle_database_error
 from netra_backend.app.services.cost_calculator import CostCalculatorService
-from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
@@ -161,23 +164,22 @@ class TestErrorHandlingBusinessContinuity:
         failed_result = AgentExecutionResult(
             agent_name="FailedBusinessAgent",
             success=False,
-            result_data={
-                "error": "LLM service temporarily unavailable",
+            data={
                 "error_code": "SERVICE_503",
                 "business_impact": "cost_analysis_delayed",
                 "recovery_suggestion": "retry_in_5_minutes"
             },
-            execution_time=2.0,
-            token_usage={"total": 0},
-            error_message="Business service temporarily unavailable. Please try again in a few minutes."
+            duration=2.0,
+            metrics={"token_usage": {"total": 0}},
+            error="LLM service temporarily unavailable"
         )
         
         # Business Rule: Failed execution should provide structured error information
         assert failed_result.success is False, "Failed execution should be marked as unsuccessful"
-        assert failed_result.error_message is not None, "Should provide user-friendly error message"
-        assert "error_code" in failed_result.result_data, "Should provide error code for tracking"
-        assert "business_impact" in failed_result.result_data, "Should identify business impact"
-        assert "recovery_suggestion" in failed_result.result_data, "Should provide recovery guidance"
+        assert failed_result.error is not None, "Should provide user-friendly error message"
+        assert "error_code" in failed_result.data, "Should provide error code for tracking"
+        assert "business_impact" in failed_result.data, "Should identify business impact"
+        assert "recovery_suggestion" in failed_result.data, "Should provide recovery guidance"
         
         # Business Rule: Error should not prevent workflow continuation
         workflow_can_continue = self._can_workflow_continue_after_error(failed_result)
@@ -186,7 +188,7 @@ class TestErrorHandlingBusinessContinuity:
     def _can_workflow_continue_after_error(self, failed_result: AgentExecutionResult) -> bool:
         """Helper to determine if workflow can continue after agent failure."""
         # Business Rule: Workflow continuation depends on error type and business impact
-        error_data = failed_result.result_data
+        error_data = failed_result.data
         
         # Critical errors that stop workflow
         critical_errors = ["USER_AUTH_FAILED", "BILLING_LIMIT_EXCEEDED", "SECURITY_VIOLATION"]

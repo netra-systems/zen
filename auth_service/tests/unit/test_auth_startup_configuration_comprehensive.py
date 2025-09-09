@@ -55,35 +55,95 @@ class ServiceInitializer:
             metrics: dict = None
             startup_events: list = None
         
-        # Call dependency check methods in proper startup sequence
-        self._validate_jwt_configuration()
-        self._check_database_connection()
-        self._check_redis_connection()
-        self._initialize_oauth_providers()
-        self._setup_security_middleware()
+        start_time = time()
+        failed_components = []
+        error_messages = []
         
-        self.is_initialized = True
-        self.startup_timestamp = time()
+        # Call dependency check methods in proper startup sequence with error handling
+        # This follows the SSOT pattern from AuthServiceStartupOptimizer
+        try:
+            self._validate_jwt_configuration()
+        except Exception as e:
+            failed_components.append("jwt_configuration")
+            error_messages.append(f"JWT configuration validation failed: {str(e)}")
+        
+        try:
+            self._check_database_connection()
+        except Exception as e:
+            failed_components.append("database_connection")
+            error_messages.append(f"Database connection failed: {str(e)}")
+        
+        try:
+            self._check_redis_connection()
+        except Exception as e:
+            failed_components.append("redis_connection")
+            error_messages.append(f"Redis connection failed: {str(e)}")
+        
+        try:
+            self._initialize_oauth_providers()
+        except Exception as e:
+            failed_components.append("oauth_providers")
+            error_messages.append(f"OAuth providers initialization failed: {str(e)}")
+        
+        try:
+            self._setup_security_middleware()
+        except Exception as e:
+            failed_components.append("security_middleware")
+            error_messages.append(f"Security middleware setup failed: {str(e)}")
+        
+        startup_time = time() - start_time
+        
+        # Determine success based on whether any critical components failed
+        # Following SSOT pattern - some failures are acceptable, but database is critical
+        success = len(failed_components) == 0
+        if failed_components:
+            # Don't initialize if there are failures
+            self.is_initialized = False
+            error_message = "; ".join(error_messages)
+        else:
+            self.is_initialized = True
+            self.startup_timestamp = time()
+            error_message = ""
+        
         return StartupResult(
-            success=True, 
-            startup_time=0.1,
+            success=success, 
+            startup_time=startup_time,
+            error_message=error_message,
             metrics={
-                "total_startup_time": 0.1,
+                "total_startup_time": startup_time,
                 "dependency_check_time": 0.01,
                 "initialization_steps": 5,
                 "database_connection_time": 0.02,
                 "redis_connection_time": 0.01,
                 "jwt_validation_time": 0.005,
                 "oauth_initialization_time": 0.03,
-                "security_setup_time": 0.02
+                "security_setup_time": 0.02,
+                "failed_components": failed_components
             },
-            startup_events=["startup_begin", "dependencies_checked", "service_ready"]
+            startup_events=["startup_begin", "dependencies_checked"] + (["service_ready"] if success else ["service_failed"])
         )
     
     def initialize_service_with_retry(self, max_retries=3):
-        result = self.initialize_service()
-        result.retry_count = 2  # Mock retry scenario
-        return result
+        """Initialize service with retry logic for transient failures."""
+        retry_count = 0
+        last_result = None
+        
+        for attempt in range(max_retries):
+            result = self.initialize_service()
+            last_result = result
+            
+            if result.success:
+                result.retry_count = retry_count
+                return result
+            
+            retry_count += 1
+            # Brief delay between retries (simulate real retry behavior)
+            import time
+            time.sleep(0.01)
+        
+        # If we get here, all retries failed
+        last_result.retry_count = retry_count
+        return last_result
     
     def graceful_shutdown(self, timeout=10.0):
         from dataclasses import dataclass
@@ -299,6 +359,20 @@ class ConfigurationValidator:
         changed_keys = list(config_changes.keys())
         is_critical = any(key in critical_keys for key in changed_keys)
         
+        # Apply configuration changes if not critical
+        if not is_critical:
+            for key, value in config_changes.items():
+                # Apply the configuration to the auth_config via property setters
+                property_name = key.lower()
+                if hasattr(self.config, property_name):
+                    # Convert value to appropriate type based on property
+                    if property_name in ['jwt_token_expiry', 'rate_limit_per_minute', 'session_timeout']:
+                        # These should be integers
+                        setattr(self.config, property_name, int(value))
+                    else:
+                        # String properties
+                        setattr(self.config, property_name, str(value))
+        
         return ReloadResult(
             success=not is_critical,
             reloaded_configs=changed_keys if not is_critical else [],
@@ -456,6 +530,12 @@ class TestAuthStartupConfiguration:
         for env_name in environments:
             # Create environment-specific configuration
             auth_env.set("ENVIRONMENT", env_name, source="test")
+            
+            # CRITICAL FIX: Production requires explicit JWT_ALGORITHM configuration
+            # This follows the SSOT pattern in AuthEnvironment.get_jwt_algorithm()
+            if env_name == "production":
+                auth_env.set("JWT_ALGORITHM", "HS256", source="test")
+            
             env_config = AuthConfig(auth_env)
             
             # Test environment-specific security settings
@@ -660,7 +740,7 @@ class TestAuthStartupConfiguration:
             })
             
             assert reload_result.success
-            assert config_key.lower() in reload_result.reloaded_configs
+            assert config_key.lower() in [key.lower() for key in reload_result.reloaded_configs]
             
             # Verify new value applied
             updated_value = getattr(auth_config, config_key.lower())

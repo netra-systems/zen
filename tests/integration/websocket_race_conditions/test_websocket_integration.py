@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional, Set
 from contextlib import asynccontextmanager
 
 # CRITICAL: Real service dependencies only - NO MOCKS per CLAUDE.md
-import aioredis
+import redis.asyncio as redis
 import websockets
 import httpx
 from fastapi.testclient import TestClient
@@ -33,8 +33,7 @@ from fastapi.testclient import TestClient
 # Import real WebSocket infrastructure components
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-from netra_backend.app.websocket_core.connection_manager import ConnectionManager  
-from netra_backend.app.websocket_core.message_router import MessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.utils import is_websocket_connected_and_ready
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.db.database_manager import DatabaseManager
@@ -86,7 +85,7 @@ class TestWebSocketRedisAuthRaceConditions:
         
         # Test Redis connection
         try:
-            redis_client = aioredis.from_url("redis://localhost:6381")  # Test Redis port
+            redis_client = redis.Redis.from_url("redis://localhost:6381")  # Test Redis port
             await redis_client.ping()
             await redis_client.close()
         except Exception as e:

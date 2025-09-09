@@ -46,8 +46,8 @@ class TestToolDispatcherCoreIntegration(SSotAsyncTestCase):
         from langchain_core.tools import BaseTool
         
         class IntegrationTestTool(BaseTool):
-            name = "integration_analyzer"
-            description = "Integration test analysis tool"
+            name: str = "integration_analyzer"
+            description: str = "Integration test analysis tool"
             
             def _run(self, data: str) -> str:
                 return f"Integration analysis: {data}"
@@ -57,8 +57,8 @@ class TestToolDispatcherCoreIntegration(SSotAsyncTestCase):
                 return f"Integration async analysis: {data}"
         
         class FailingIntegrationTool(BaseTool):
-            name = "failing_analyzer"
-            description = "Tool that simulates failures"
+            name: str = "failing_analyzer"
+            description: str = "Tool that simulates failures"
             
             def _run(self, data: str) -> str:
                 raise ValueError(f"Integration test failure: {data}")

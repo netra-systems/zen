@@ -69,8 +69,8 @@ class TestToolExecutionEngineIntegration(SSotAsyncTestCase):
         from langchain_core.tools import BaseTool
         
         class IntegrationExecutionTool(BaseTool):
-            name = "integration_execution_tool"
-            description = "Tool for integration execution testing"
+            name: str = "integration_execution_tool"
+            description: str = "Tool for integration execution testing"
             
             def _run(self, operation: str, timeout: int = 1) -> str:
                 import time
@@ -211,8 +211,8 @@ class TestToolExecutionEngineIntegration(SSotAsyncTestCase):
         from langchain_core.tools import BaseTool
         
         class FailingExecutionTool(BaseTool):
-            name = "failing_execution_tool"
-            description = "Tool that simulates execution failures"
+            name: str = "failing_execution_tool"
+            description: str = "Tool that simulates execution failures"
             
             def _run(self, failure_type: str) -> str:
                 if failure_type == "value_error":
@@ -270,8 +270,8 @@ class TestToolExecutionEngineIntegration(SSotAsyncTestCase):
         from langchain_core.tools import BaseTool
         
         class PerformanceExecutionTool(BaseTool):
-            name = "performance_execution_tool"
-            description = "Tool for measuring execution performance"
+            name: str = "performance_execution_tool"
+            description: str = "Tool for measuring execution performance"
             
             def _run(self, workload: str) -> str:
                 import time

@@ -21,7 +21,7 @@ from unittest.mock import Mock, MagicMock, patch
 
 # Import business logic components for testing
 from netra_backend.app.schemas.user import UserCreate, UserUpdate
-from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
 from netra_backend.app.schemas.llm_base_types import TokenUsage, LLMProvider
 from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier, ModelCostInfo
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, ensure_user_id
@@ -135,15 +135,15 @@ class TestDataValidationBusinessRules:
         valid_result = AgentExecutionResult(
             agent_name="BusinessAnalysisAgent",
             success=True,
-            result_data={
+            data={
                 "cost_analysis": {
                     "total_cost": 450.75,
                     "breakdown": {"gpt_4": 325.50, "gpt_3_5": 125.25}
                 },
                 "confidence_score": 0.95
             },
-            execution_time=3.2,
-            token_usage={"prompt": 150, "completion": 75, "total": 225},
+            duration=3.2,
+            metrics={"token_usage": {"prompt": 150, "completion": 75, "total": 225}},
             metadata={
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "version": "1.0"
@@ -159,13 +159,13 @@ class TestDataValidationBusinessRules:
         assert isinstance(valid_result.success, bool), "Success must be boolean"
         
         # Business Rule: Execution time must be tracked for performance analysis
-        assert valid_result.execution_time >= 0, "Execution time must be non-negative"
-        assert isinstance(valid_result.execution_time, (int, float)), "Execution time must be numeric"
+        assert valid_result.duration >= 0, "Execution time must be non-negative"
+        assert isinstance(valid_result.duration, (int, float)), "Execution time must be numeric"
         
         # Business Rule: Result data should contain business-relevant information
-        assert isinstance(valid_result.result_data, dict), "Result data must be structured"
-        if "cost_analysis" in valid_result.result_data:
-            cost_data = valid_result.result_data["cost_analysis"]
+        assert isinstance(valid_result.data, dict), "Result data must be structured"
+        if "cost_analysis" in valid_result.data:
+            cost_data = valid_result.data["cost_analysis"]
             assert "total_cost" in cost_data, "Cost analysis should include total"
             assert isinstance(cost_data["total_cost"], (int, float)), "Total cost should be numeric"
 

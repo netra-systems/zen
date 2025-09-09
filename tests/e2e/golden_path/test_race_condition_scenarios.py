@@ -43,18 +43,17 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 class TestRaceConditionScenarios(SSotAsyncTestCase):
     """Test race condition scenarios in Golden Path with real services."""
     
-    async def async_setup_method(self, method=None):
-        """Async setup for race condition E2E test components."""
-        await super().async_setup_method(method)
+    def setup_method(self, method=None):
+        """Setup with business context and metrics tracking."""
+        super().setup_method(method)
         
-        # Initialize components
-        self.environment = self.get_env_var("TEST_ENV", "test")
-        self.auth_helper = E2EAuthHelper(environment=self.environment)
-        self.websocket_helper = E2EWebSocketAuthHelper(environment=self.environment)
-        self.id_generator = UnifiedIdGenerator()
+        # Initialize test components to None (SSOT pattern)
+        self._auth_helper = None
+        self._websocket_helper = None
+        self._id_generator = UnifiedIdGenerator()
         
         # Test configuration
-        self.websocket_url = self.get_env_var("WEBSOCKET_URL", "ws://localhost:8000/ws")
+        self._websocket_url = self.get_env_var("WEBSOCKET_URL", "ws://localhost:8000/ws")
         
         # Test metrics
         self.record_metric("test_category", "e2e")
@@ -64,38 +63,35 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         # Track connections for cleanup
         self.active_connections = []
         
-    async def async_teardown_method(self, method=None):
+    def teardown_method(self, method=None):
         """Cleanup active WebSocket connections."""
-        try:
-            # Close any active connections
-            for connection in self.active_connections:
-                try:
-                    await WebSocketTestHelpers.close_test_connection(connection)
-                except:
-                    pass
-            
-        except Exception as e:
-            print(f"Warning: Connection cleanup failed: {e}")
-        
-        await super().async_teardown_method(method)
+        # Note: Active connections cleanup handled in individual tests
+        # since teardown_method is sync and connection cleanup is async
+        super().teardown_method(method)
     
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.asyncio
     async def test_rapid_connection_attempts_cloud_run_simulation(self, real_services_fixture):
         """Test rapid connection attempts simulating Cloud Run race conditions."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="rapid_connection_test@example.com",
-            environment=self.environment,
+            environment=self.get_env_var("TEST_ENV", "test"),
             websocket_enabled=True
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Test rapid connection attempts (simulating container startup race)
         rapid_attempts = 10
@@ -114,7 +110,7 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
                 
                 # Attempt connection with timeout
                 connection = await WebSocketTestHelpers.create_test_websocket_connection(
-                    url=self.websocket_url,
+                    url=self._websocket_url,
                     headers=ws_headers,
                     timeout=5.0,
                     user_id=str(user_context.user_id)
@@ -214,18 +210,24 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_message_sending_before_handshake_completion(self, real_services_fixture):
         """Test race condition when messages are sent before handshake completion."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="handshake_race_test@example.com",
-            environment=self.environment,
+            environment=self.get_env_var("TEST_ENV", "test"),
             websocket_enabled=True
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Test scenarios with different timing
         race_scenarios = [
@@ -243,7 +245,7 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
             try:
                 # Create WebSocket connection
                 connection = await WebSocketTestHelpers.create_test_websocket_connection(
-                    url=self.websocket_url,
+                    url=self._websocket_url,
                     headers=ws_headers,
                     timeout=10.0,
                     user_id=str(user_context.user_id)
@@ -365,18 +367,24 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_multiple_concurrent_handshakes_same_user(self, real_services_fixture):
         """Test multiple concurrent WebSocket handshakes from the same user."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="concurrent_handshakes_test@example.com",
-            environment=self.environment,
+            environment=self.get_env_var("TEST_ENV", "test"),
             websocket_enabled=True
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Create multiple concurrent connection attempts
         concurrent_connections = 5
@@ -465,7 +473,7 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         try:
             # Create WebSocket connection
             connection = await WebSocketTestHelpers.create_test_websocket_connection(
-                url=self.websocket_url,
+                url=self._websocket_url,
                 headers=ws_headers,
                 timeout=15.0,  # Longer timeout for concurrent scenarios
                 user_id=f"{user_context.user_id}_{connection_index}"
@@ -518,22 +526,28 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_service_restart_during_active_connections(self, real_services_fixture):
         """Test WebSocket behavior during simulated service restart."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="service_restart_test@example.com",
-            environment=self.environment,
+            environment=self.get_env_var("TEST_ENV", "test"),
             websocket_enabled=True
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Establish initial connection
         initial_connection = await WebSocketTestHelpers.create_test_websocket_connection(
-            url=self.websocket_url,
+            url=self._websocket_url,
             headers=ws_headers,
             timeout=10.0,
             user_id=str(user_context.user_id)
@@ -585,7 +599,7 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
             try:
                 # Attempt to reconnect
                 reconnection = await WebSocketTestHelpers.create_test_websocket_connection(
-                    url=self.websocket_url,
+                    url=self._websocket_url,
                     headers=ws_headers,
                     timeout=10.0,
                     user_id=str(user_context.user_id)
@@ -687,18 +701,24 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_golden_path_timing_requirements_under_race_conditions(self, real_services_fixture):
         """Test Golden Path timing requirements are met even with race conditions."""
+        # Initialize helpers if needed (SSOT pattern)
+        if not self._auth_helper:
+            environment = self.get_env_var("TEST_ENV", "test")
+            self._auth_helper = E2EAuthHelper(environment=environment)
+            self._websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
         # Create user context
         user_context = await create_authenticated_user_context(
             user_email="golden_path_timing_test@example.com",
-            environment=self.environment,
+            environment=self.get_env_var("TEST_ENV", "test"),
             websocket_enabled=True
         )
         
         # Get authentication
-        jwt_token = await self.auth_helper.get_staging_token_async(
+        jwt_token = await self._auth_helper.get_staging_token_async(
             email=user_context.agent_context.get('user_email')
         )
-        ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
+        ws_headers = self._websocket_helper.get_websocket_headers(jwt_token)
         
         # Test complete Golden Path flow under race condition scenarios
         golden_path_scenarios = [
@@ -734,7 +754,7 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
                 
                 # Create connection
                 connection = await WebSocketTestHelpers.create_test_websocket_connection(
-                    url=self.websocket_url,
+                    url=self._websocket_url,
                     headers=ws_headers,
                     timeout=10.0,
                     user_id=str(user_context.user_id)

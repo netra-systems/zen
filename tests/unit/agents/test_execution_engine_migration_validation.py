@@ -25,11 +25,13 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 from netra_backend.app.agents.supervisor.execution_factory import (
     ExecutionEngineFactory as SupervisorExecutionEngineFactory,
-    UserExecutionContext,
     IsolatedExecutionEngine
 )
+# SSOT: Import UserExecutionContext from services (canonical implementation)
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.mcp_execution_engine import (
-    MCPEnhancedExecutionEngine
+    MCPEnhancedExecutionEngine,
+    create_mcp_enhanced_engine
 )
 
 
@@ -38,12 +40,14 @@ class TestExecutionEngineMigrationValidation:
     
     @pytest.fixture
     def user_context(self):
-        """Create a test UserExecutionContext."""
+        """Create a test UserExecutionContext using SSOT services implementation."""
         return UserExecutionContext(
             user_id="test_user_123",
-            request_id="req_456",
-            thread_id="thread_789",
-            session_id="session_abc"
+            thread_id="thread_789", 
+            run_id="run_456",
+            request_id="req_789"
+            # Note: session_id not supported in services implementation - 
+            # database session is managed via db_session field instead
         )
     
     @pytest.fixture
@@ -178,31 +182,31 @@ class TestExecutionEngineMigrationValidation:
         self, user_context, mock_agent_registry, mock_websocket_bridge
     ):
         """Test that MCPEnhancedExecutionEngine properly handles UserExecutionContext."""
-        with patch('netra_backend.app.agents.supervisor.execution_engine.ExecutionEngine._init_from_factory'):
-            # Create MCP engine
-            engine = MCPEnhancedExecutionEngine(
-                registry=mock_agent_registry,
-                websocket_manager=mock_websocket_bridge
-            )
+        # Create MCP engine using factory method for proper user isolation
+        engine = create_mcp_enhanced_engine(
+            user_context=user_context,
+            registry=mock_agent_registry,
+            websocket_bridge=mock_websocket_bridge
+        )
+        
+        # Create agent execution context
+        agent_context = Mock()
+        agent_context.agent_name = "test_agent"
+        agent_context.user_id = user_context.user_id
+        agent_context.run_id = "test_run_123"
+        
+        # Set up user context with no MCP requirements
+        user_context.metadata['current_request'] = None
+        
+        # Mock parent execute_agent method
+        with patch.object(SupervisorExecutionEngine, 'execute_agent') as mock_parent_execute:
+            mock_parent_execute.return_value = AsyncMock()
             
-            # Create agent execution context
-            agent_context = Mock()
-            agent_context.agent_name = "test_agent"
-            agent_context.user_id = user_context.user_id
-            agent_context.run_id = "test_run_123"
+            # Execute with user context
+            result = await engine.execute_agent(agent_context, user_context)
             
-            # Set up user context with no MCP requirements
-            user_context.metadata['current_request'] = None
-            
-            # Mock parent execute_agent method
-            with patch.object(SupervisorExecutionEngine, 'execute_agent') as mock_parent_execute:
-                mock_parent_execute.return_value = AsyncMock()
-                
-                # Execute with user context
-                result = await engine.execute_agent(agent_context, user_context)
-                
-                # Validate that execution proceeded (no MCP required)
-                mock_parent_execute.assert_called_once_with(agent_context, user_context)
+            # Validate that execution proceeded (no MCP required)
+            mock_parent_execute.assert_called_once_with(agent_context, user_context)
     
     @pytest.mark.asyncio
     async def test_websocket_event_preservation(
@@ -272,14 +276,16 @@ class TestExecutionEngineMigrationValidation:
         # Create two different user contexts
         user1_context = UserExecutionContext(
             user_id="user_1",
-            request_id="req_1",
-            thread_id="thread_1"
+            thread_id="thread_1",
+            run_id="run_1",
+            request_id="req_1"
         )
         
         user2_context = UserExecutionContext(
             user_id="user_2",
-            request_id="req_2",
-            thread_id="thread_2"
+            thread_id="thread_2", 
+            run_id="run_2",
+            request_id="req_2"
         )
         
         # Mock components
@@ -313,9 +319,9 @@ class TestExecutionEngineMigrationValidation:
         assert engine1.user_context.request_id != engine2.user_context.request_id
         assert engine1.user_context.thread_id != engine2.user_context.thread_id
         
-        # Validate separate active_runs dictionaries
-        assert engine1.user_context.active_runs is not engine2.user_context.active_runs
-        assert engine1.user_context.run_history is not engine2.user_context.run_history
+        # Validate separate metadata dictionaries (SSOT services implementation)
+        assert engine1.user_context.agent_context is not engine2.user_context.agent_context
+        assert engine1.user_context.audit_metadata is not engine2.user_context.audit_metadata
         
         # Validate separate websocket emitters
         assert engine1.websocket_emitter is not engine2.websocket_emitter
@@ -344,8 +350,9 @@ class TestExecutionEngineMigrationValidation:
         # Create user context
         user_context = UserExecutionContext(
             user_id="factory_test_user",
-            request_id="factory_req_123",
-            thread_id="factory_thread_456"
+            thread_id="factory_thread_456",
+            run_id="factory_run_789",
+            request_id="factory_req_123"
         )
         
         # Create execution engine via factory
