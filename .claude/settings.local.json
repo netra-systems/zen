@@ -14,7 +14,11 @@
       "Bash(gcloud config set:*)",
       "Bash(docker:*)",
       "Bash(gh issue create:*)",
-      "Bash(gh repo view:*)"
+      "Bash(gh repo view:*)",
+      "Bash(git commit:*)",
+      "Bash(gcloud config get-value:*)",
+      "Bash(mkdir:*)",
+      "Bash(gh label:*)"
     ],
     "deny": [],
     "ask": []
