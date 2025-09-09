@@ -23,7 +23,7 @@ sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
 
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
@@ -229,7 +229,7 @@ async def main():
         logger.info("✅ The fix has been successfully implemented:")
         logger.info("   1. AgentRegistry.set_websocket_manager() enhances tool dispatcher")
         logger.info("   2. UnifiedToolExecutionEngine wraps tool execution with events")
-        logger.info("   3. WebSocketNotifier sends all required events")
+        logger.info("   3. AgentWebSocketBridge sends all required events")
         return 0
     else:
         logger.error("❌ TESTS FAILED - WebSocket events not working properly")

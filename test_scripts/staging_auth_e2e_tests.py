@@ -24,8 +24,8 @@ import httpx
 import jwt as pyjwt
 
 # Set up staging environment URLs
-BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
-AUTH_SERVICE_URL = "https://netra-auth-staging-pnovr5vsba-uc.a.run.app"
+BACKEND_URL = "https://api.staging.netrasystems.ai"
+AUTH_SERVICE_URL = "https://auth.staging.netrasystems.ai"
 
 class TestAuthCrossSystemStaging:
     """
@@ -323,7 +323,7 @@ class TestAuthCrossSystemStaging:
             origins = [
                 "https://malicious-site.com",
                 "http://localhost:3000",
-                "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app",
+                "https://app.staging.netrasystems.ai",
             ]
             
             for origin in origins:

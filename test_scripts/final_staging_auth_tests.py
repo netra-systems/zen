@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 
 # Correct endpoints discovered from backend config
-BACKEND_URL = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app"
+BACKEND_URL = "https://api.staging.netrasystems.ai"
 AUTH_SERVICE_URL = "https://auth.staging.netrasystems.ai"
 
 class StagingAuthTests:

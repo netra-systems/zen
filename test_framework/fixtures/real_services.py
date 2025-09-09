@@ -38,6 +38,14 @@ except ImportError:
     logger.warning("UnifiedDockerManager not available - using fallback")
     UnifiedDockerManager = None
 
+try:
+    import redis.asyncio as redis
+    import fakeredis.aioredis as fake_redis
+except ImportError:
+    logger.warning("Redis libraries not available - Redis fixtures will fail")
+    redis = None
+    fake_redis = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -208,6 +216,92 @@ async def with_test_database(real_postgres_connection):
                 await session.rollback()
             except Exception as e:
                 logger.warning(f"Failed to rollback database session: {e}")
+
+
+@pytest.fixture(scope="function")
+async def real_redis_fixture():
+    """REAL Redis fixture for integration testing with fallback to in-memory Redis.
+    
+    This fixture provides an actual Redis connection when available (Docker/local Redis)
+    or falls back to an in-memory Redis implementation for environments without Docker.
+    This ensures Redis cache integration tests can run in all environments.
+    
+    CRITICAL: Per CLAUDE.md - Uses REAL Redis when available, in-memory fallback
+    when Docker unavailable. NO mocks for integration testing.
+    
+    Yields:
+        redis.Redis: Async Redis client (real or in-memory)
+    """
+    env = get_env()
+    
+    if redis is None:
+        raise RuntimeError(
+            "Redis libraries not available. Install: pip install redis fakeredis"
+        )
+    
+    redis_client = None
+    
+    try:
+        # First attempt: Real Redis connection (Docker or local)
+        redis_host = env.get("REDIS_HOST", "localhost")
+        redis_port = int(env.get("REDIS_PORT", "6381"))  # Test Redis port
+        redis_db = int(env.get("REDIS_DB", "1"))  # Test database
+        
+        real_redis_url = f"redis://{redis_host}:{redis_port}/{redis_db}"
+        
+        # Create Redis client for real Redis
+        redis_client = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            decode_responses=True,
+            socket_timeout=2.0,  # Quick timeout for testing
+            socket_connect_timeout=2.0
+        )
+        
+        # Test real Redis connection
+        await redis_client.ping()
+        logger.info(f"Connected to REAL Redis at {redis_host}:{redis_port}")
+        
+        yield redis_client
+        
+    except Exception as redis_error:
+        logger.info(f"Real Redis not available ({redis_error}), using in-memory Redis")
+        
+        # Fallback: In-memory Redis using fakeredis (CLAUDE.md compliant fallback)
+        if fake_redis is None:
+            raise RuntimeError(
+                f"Real Redis unavailable and fakeredis not installed: {redis_error}\n"
+                "Install fakeredis: pip install fakeredis"
+            )
+        
+        try:
+            # Create in-memory Redis client
+            redis_client = fake_redis.FakeRedis(
+                decode_responses=True,
+                version=(7, 0, 0)  # Redis 7.0 compatibility
+            )
+            
+            # Verify in-memory Redis works
+            await redis_client.ping()
+            logger.info("Using in-memory Redis (fakeredis) for integration testing")
+            
+            yield redis_client
+            
+        except Exception as fallback_error:
+            raise RuntimeError(
+                f"Both real Redis and in-memory fallback failed:\n"
+                f"Real Redis: {redis_error}\n"
+                f"In-memory Redis: {fallback_error}"
+            )
+    
+    finally:
+        # Cleanup Redis connection
+        if redis_client:
+            try:
+                await redis_client.aclose()
+            except Exception as e:
+                logger.warning(f"Failed to close Redis connection: {e}")
 
 
 @pytest.fixture(scope="function")
