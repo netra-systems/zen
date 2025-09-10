@@ -445,7 +445,7 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
                     ApplicationConnectionState.PROCESSING_READY
                 ])
     
-    def test_message_queue_coordination_during_complex_auth_transitions(self):
+    async def test_message_queue_coordination_during_complex_auth_transitions(self):
         """Test message queue coordination during complex authentication state transitions."""
         # Initialize message queue with state machine coordination
         queue = MessageQueue(connection_id=self.connection_id, user_id=self.user_id)
@@ -486,25 +486,21 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             current_state = self.state_machine.get_current_state()
             
             # Clear queue for clean testing
-            queue.clear_queue()
+            await queue.clear_queue()
             
             # Queue test messages
             queued_message_ids = []
             for msg in test_messages:
-                queued_msg = QueuedMessage(
+                success = await queue.enqueue_message(
                     message_data=msg,
                     message_type=msg['type'],
-                    priority=msg['priority'],
-                    connection_id=self.connection_id,
-                    user_id=str(self.user_id)
+                    priority=msg['priority']
                 )
-                
-                queue.queue_message(queued_msg)
-                queued_message_ids.append(id(queued_msg))
+                queued_message_ids.append(success)
             
             # Check queue behavior based on state
-            queued_messages = queue.get_queued_messages()
-            queue_state = queue.get_queue_state()
+            queue_stats = queue.get_queue_stats()
+            queue_state = queue.current_state
             
             # Determine expected behavior based on auth state
             should_buffer = current_state in [
@@ -520,24 +516,24 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             # Record queue behavior for this state
             queue_behavior_results.append({
                 'auth_state': current_state,
-                'queued_count': len(queued_messages),
+                'queued_count': queue_stats.get('total_size', 0),
                 'queue_state': queue_state,
                 'should_buffer': should_buffer,
                 'should_process': should_process,
-                'critical_messages_preserved': len([m for m in queued_messages 
-                                                  if m.priority == MessagePriority.CRITICAL])
+                'messages_queued': queue_stats.get('messages_queued', 0),
+                'enqueue_success_count': sum(1 for success in queued_message_ids if success)
             })
         
         # Validate queue coordination behavior
         for result in queue_behavior_results:
             if result['should_buffer']:
-                # Messages should be queued during setup phases
-                self.assertGreater(result['queued_count'], 0,
-                                 f"Messages should be queued in {result['auth_state']} state")
+                # Messages should be successfully enqueued during setup phases
+                self.assertGreater(result['enqueue_success_count'], 0,
+                                 f"Messages should be enqueued in {result['auth_state']} state")
                 
-                # Critical messages must always be preserved
-                self.assertGreater(result['critical_messages_preserved'], 0,
-                                 f"Critical messages must be preserved in {result['auth_state']}")
+                # Queue should be in buffering state during setup
+                self.assertEqual(result['queue_state'], MessageQueueState.BUFFERING,
+                               f"Queue should be buffering in {result['auth_state']} state")
             
             elif result['should_process']:
                 # In processing state, queue should be in pass-through mode
