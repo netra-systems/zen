@@ -58,10 +58,20 @@
 3. **Add await**: If `get_env()` needs to be async, add `await` to all calls
 4. **Test coverage**: Add WebSocket integration tests for E2E detection logic
 
+## Test Plan Summary
+**Test Strategy**: Four-layer testing approach (Unit → Integration → E2E → Staging)
+**Focus**: Immediate detection of coroutine/environment access regressions
+**Compliance**: Real authentication, real services, fail-hard design
+**Categories**: 
+- Unit tests for environment function behavior
+- Integration tests for WebSocket+auth flows  
+- E2E tests for complete chat business value
+- Staging validation with load testing
+
 ## Working Log
 - [✓] Five Whys analysis completed
+- [✓] Test plan created (comprehensive 4-layer strategy)
+- [✓] GitHub issue created: https://github.com/netra-systems/netra-apex/issues/133
 - [ ] Code inspection at line 557 completed  
-- [ ] Test plan created
-- [ ] GitHub issue created
 - [ ] Fix implemented and tested
 - [ ] System stability validated
