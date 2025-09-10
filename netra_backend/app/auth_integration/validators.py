@@ -171,10 +171,24 @@ def _check_max_expiry(expires_at: datetime) -> bool:
 
 
 def validate_oauth_token(oauth_token: str) -> bool:
-    """Validate OAuth token format"""
-    if not oauth_token:
-        return False
-    return _check_oauth_token_length(oauth_token)
+    """
+    DEPRECATED: Validate OAuth token format
+    
+    This function now delegates to SSOT OAuth validation.
+    Use shared.configuration.central_config_validator.validate_oauth_token_comprehensive() instead.
+    """
+    try:
+        # SSOT OAuth validation - this replaces duplicate implementation
+        from shared.configuration.central_config_validator import validate_oauth_token_comprehensive
+        
+        # Use SSOT OAuth token validation
+        return validate_oauth_token_comprehensive(oauth_token)
+        
+    except ImportError:
+        # Fallback if SSOT not available
+        if not oauth_token:
+            return False
+        return _check_oauth_token_length(oauth_token)
 
 def _check_oauth_token_length(oauth_token: str) -> bool:
     """Check OAuth token length constraints."""

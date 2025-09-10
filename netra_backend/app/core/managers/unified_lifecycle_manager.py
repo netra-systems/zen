@@ -1,5 +1,5 @@
 """
-UnifiedLifecycleManager - SSOT for All Lifecycle Operations
+SystemLifecycle - SSOT for All Lifecycle Operations
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Risk Reduction, Development Velocity
@@ -20,6 +20,8 @@ Consolidates ALL lifecycle operations including:
 Factory Pattern: Supports multi-user isolation via user-scoped instances.
 Thread Safety: All operations are thread-safe and support concurrent users.
 WebSocket Integration: Coordinates with WebSocket manager for real-time notifications.
+
+NAMING MIGRATION: Renamed from UnifiedLifecycleManager to SystemLifecycle for business clarity.
 """
 
 import asyncio
@@ -83,7 +85,7 @@ class LifecycleMetrics:
     active_requests: int = 0
 
 
-class UnifiedLifecycleManager:
+class SystemLifecycle:
     """
     SSOT for all lifecycle operations across the Netra platform.
     
@@ -171,7 +173,7 @@ class UnifiedLifecycleManager:
         self._load_environment_config()
         
         logger.info(
-            f"UnifiedLifecycleManager initialized: user_id={user_id}, "
+            f"SystemLifecycle initialized: user_id={user_id}, "
             f"shutdown_timeout={shutdown_timeout}s, startup_timeout={startup_timeout}s"
         )
     
@@ -1068,12 +1070,12 @@ class UnifiedLifecycleManager:
 class LifecycleManagerFactory:
     """Factory for creating user-isolated lifecycle managers."""
     
-    _global_manager: Optional[UnifiedLifecycleManager] = None
-    _user_managers: Dict[str, UnifiedLifecycleManager] = {}
+    _global_manager: Optional[SystemLifecycle] = None
+    _user_managers: Dict[str, SystemLifecycle] = {}
     _lock = threading.Lock()
     
     @classmethod
-    def get_global_manager(cls) -> UnifiedLifecycleManager:
+    def get_global_manager(cls) -> SystemLifecycle:
         """Get global lifecycle manager instance."""
         if cls._global_manager is None:
             with cls._lock:
@@ -1086,7 +1088,7 @@ class LifecycleManagerFactory:
                     grace_period = int(env.get('HEALTH_GRACE_PERIOD', '5'))
                     startup_timeout = int(env.get('STARTUP_TIMEOUT', '60'))
                     
-                    cls._global_manager = UnifiedLifecycleManager(
+                    cls._global_manager = SystemLifecycle(
                         user_id=None,
                         shutdown_timeout=shutdown_timeout,
                         drain_timeout=drain_timeout,
@@ -1099,7 +1101,7 @@ class LifecycleManagerFactory:
         return cls._global_manager
     
     @classmethod
-    def get_user_manager(cls, user_id: str) -> UnifiedLifecycleManager:
+    def get_user_manager(cls, user_id: str) -> SystemLifecycle:
         """Get user-specific lifecycle manager instance."""
         if user_id not in cls._user_managers:
             with cls._lock:
@@ -1112,7 +1114,7 @@ class LifecycleManagerFactory:
                     grace_period = int(env.get('HEALTH_GRACE_PERIOD', '5'))
                     startup_timeout = int(env.get('STARTUP_TIMEOUT', '60'))
                     
-                    cls._user_managers[user_id] = UnifiedLifecycleManager(
+                    cls._user_managers[user_id] = SystemLifecycle(
                         user_id=user_id,
                         shutdown_timeout=shutdown_timeout,
                         drain_timeout=drain_timeout,

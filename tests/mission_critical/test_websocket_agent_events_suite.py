@@ -406,9 +406,9 @@ class TestRealWebSocketComponents:
             thread_id="test_thread"
         )
         
-        # Import and create WebSocket manager  
-        from netra_backend.app.websocket_core import get_websocket_manager
-        websocket_manager = get_websocket_manager()
+        # Import and create WebSocket manager using secure factory pattern
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        websocket_manager = await create_websocket_manager(user_context=user_context)
         
         # Test that tool dispatcher can be created and has proper integration points
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(
@@ -438,7 +438,9 @@ class TestRealWebSocketComponents:
         
         # Use real LLM manager instead of mock
         llm_manager = LLMManager()
-        ws_manager = get_websocket_manager()
+        # Use secure factory pattern for WebSocket manager
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        ws_manager = await create_websocket_manager(user_context=user_context)
         
         tool_dispatcher = UnifiedToolDispatcherFactory.create_for_request(
             user_context=user_context,
