@@ -346,12 +346,16 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         try:
             from netra_backend.app.agents.data_sub_agent.agent import DataAgent
             from netra_backend.app.llm.llm_manager import LLMManager
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Mock dependencies
             mock_llm_manager = MagicMock(spec=LLMManager)
+            mock_context = MagicMock(spec=UserExecutionContext)
+            mock_context.user_id = "test_user"
+            mock_context.session_id = "test_session"
             
             # Test data agent creation
-            data_agent = DataAgent(llm_manager=mock_llm_manager)
+            data_agent = DataAgent(context=mock_context, llm_manager=mock_llm_manager)
             
             data_agent_time = time.time() - start_time
             self._record_timing('data_agent_init', data_agent_time)

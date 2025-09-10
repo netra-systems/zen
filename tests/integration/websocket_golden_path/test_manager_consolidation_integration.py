@@ -98,7 +98,7 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                     user_id=self.test_user_id,
                     connection_id=self.test_connection_id
                 )
-                golden_path_violations.append("Manager creation unexpectedly succeeded")
+                # Manager creation succeeded as expected in fixed system
                 
                 # Step 3: Add WebSocket connection (if manager creation succeeded)
                 try:
@@ -118,8 +118,7 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                         
                         import asyncio
                         asyncio.run(manager.add_connection(ws_connection))
-                        # Note: add_connection doesn't return bool, it returns None on success
-                        golden_path_violations.append("Connection addition succeeded unexpectedly")
+                        # Connection addition succeeded as expected
                     else:
                         golden_path_violations.append("Manager missing add_connection method")
                         
@@ -128,13 +127,18 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                 
                 # Step 4: Test message sending
                 try:
-                    if hasattr(manager, 'send_message'):
+                    if hasattr(manager, 'send_to_user'):
+                        test_message = {"type": "agent_request", "content": "test message"}
+                        import asyncio
+                        asyncio.run(manager.send_to_user(self.test_user_id, test_message))
+                        # Message sending succeeded as expected
+                    elif hasattr(manager, 'send_message'):
                         test_message = {"type": "agent_request", "content": "test message"}
                         result = manager.send_message(self.test_user_id, test_message)
                         if not result:
                             golden_path_violations.append("Message sending failed")
                     else:
-                        golden_path_violations.append("Manager missing send_message method")
+                        golden_path_violations.append("Manager missing send_to_user or send_message method")
                         
                 except Exception as e:
                     golden_path_violations.append(f"Message sending error: {e}")
