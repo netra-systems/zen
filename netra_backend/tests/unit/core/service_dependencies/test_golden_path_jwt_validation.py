@@ -154,29 +154,33 @@ class TestGoldenPathJWTValidationFailure:
         assert "create_refresh_token" in result["message"]
 
     @pytest.mark.asyncio
-    async def test_unified_jwt_validator_not_recognized_by_golden_path(
+    async def test_unified_jwt_validator_properly_recognized_by_golden_path(
         self,
         golden_path_validator, 
         app_with_unified_jwt_validator,
         caplog
     ):
-        """Test that Golden Path Validator doesn't recognize UnifiedJWTValidator."""
+        """Test that Golden Path Validator properly recognizes UnifiedJWTValidator (FIXED)."""
         
-        # This test proves the architectural mismatch
-        # Golden Path expects app.state.key_manager but we have app.state.unified_jwt_validator
+        # This test verifies the fix - Golden Path Validator now properly recognizes unified_jwt_validator
         
         result = await golden_path_validator._validate_jwt_capabilities(app_with_unified_jwt_validator)
         
-        # EXPECT FAILURE - Golden Path doesn't know about unified_jwt_validator
-        assert result["success"] is False
-        assert result["details"]["key_manager"] is False
+        # EXPECT SUCCESS - Golden Path now recognizes unified_jwt_validator
+        assert result["success"] is True
+        assert result["details"]["validator_type"] == "unified_jwt_validator"
         
-        # Even though we have a working JWT validator, Golden Path can't see it
+        # Verify we have a working JWT validator and Golden Path can see it
         assert hasattr(app_with_unified_jwt_validator.state, 'unified_jwt_validator')
         assert app_with_unified_jwt_validator.state.unified_jwt_validator is not None
         
-        # But Golden Path still fails because it only looks for key_manager
-        assert result["message"] == "Key manager not available for JWT operations"
+        # Golden Path now succeeds because it checks for unified_jwt_validator first
+        assert "UnifiedJWTValidator" in result["message"]
+        
+        # Verify the required JWT capabilities are detected
+        assert result["details"]["create_access_token"] is True
+        assert result["details"]["verify_token"] is True
+        assert result["details"]["create_refresh_token"] is True
 
     @pytest.mark.asyncio
     async def test_golden_path_auth_requirement_integration(
