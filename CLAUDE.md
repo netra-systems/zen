@@ -209,39 +209,29 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 - **Health Check:** `python scripts/query_string_literals.py check-env staging`
 - **Update:** `python scripts/scan_string_literals.py`
 
-## 5\. Architecture and Conventions
+## 5. ARCHITECTURE & CONVENTIONS
 
 ### 5.1. Microservice Independence
+**100% Independent Services:**
+- Main Backend (`/netra_backend/app`)
+- Auth Service (`/auth_service`) 
+- Frontend (`/frontend`)
 
-All microservices MUST be 100% independent. See @independent_services.xml.
-
-  * Main Backend (`/netra_backend/app`)
-  * Auth Service (`/auth_service`)
-  * Frontend (`/frontend`)
-
-**CRITICAL CLARIFICATION - Shared Libraries Pattern:**
-Services MAY import from `/shared` for infrastructure libraries (like `shared.isolated_environment`).
-These are NOT service boundary violations because they're pure utilities with no business logic - 
-think of them as internal pip packages. See @shared_library_pattern.md 
-for the simple "pip package test" to determine what belongs in `/shared`.
+**Shared Libraries:** `/shared` utilities allowed (pure infrastructure, no business logic)
 
 ### 5.2. Naming Conventions
-
-  * **"Agent":** Only for LLM-based sub-agents. **"Executor/Manager":** For infrastructure patterns **"Service":** For specialized processors. **Utility:** Descriptive names without suffixes.
+- **Agent:** LLM-based sub-agents only
+- **Executor/Manager:** Infrastructure patterns
+- **Service:** Specialized processors
+- **Utility:** Descriptive names without suffixes
 
 ### 5.3. Directory Organization
-
-**Files MUST be placed in their designated locations.**
-
-  * **Service-Specific Tests:** Each service has its own `tests/` directory (e.g., `/netra_backend/tests/`). **NEVER mix tests between services.**
-  * **E2E Tests:** End-to-end tests go in `/tests/e2e/`.
-  * **Test Framework:** Shared utilities go in `/test_framework/`.
-  * **See @folder_structure_rules.md for full guidelines.**
+- **Service Tests:** Each service has own `tests/` directory
+- **E2E Tests:** `/tests/e2e/`
+- **Test Framework:** `/test_framework/`
 
 ### 5.4. Import Rules
-
-**ABSOLUTE IMPORTS ONLY.**
-  * **ALL Python files  use absolute imports** starting from the package root. **NEVER use relative imports (`.` or `..`)** in any Python file, including tests. See @import_management_architecture.xml for details.
+**ABSOLUTE IMPORTS ONLY** - No relative imports (`.` or `..`) anywhere
 
 -----
 
