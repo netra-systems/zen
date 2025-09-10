@@ -44,9 +44,21 @@ decoded_token = jwt.decode(
 - [x] Created GitHub issue #223
 - [x] Created progress tracker (this file)
 
-### Step 1: Discover and Plan Tests (NEXT)
-- [ ] 1.1: Find existing tests protecting against auth SSOT violations
-- [ ] 1.2: Plan test updates/creation for SSOT refactor validation
+### Step 1: Discover and Plan Tests ✅ COMPLETE
+- [x] 1.1: Found existing tests protecting against auth SSOT violations
+- [x] 1.2: Planned test updates/creation for SSOT refactor validation
+
+#### Key Findings:
+- **Rich test infrastructure exists** but gaps remain in SSOT violation detection
+- **Critical mission critical test** `/tests/mission_critical/test_golden_path_websocket_authentication.py` (885 lines)
+- **Existing SSOT compliance test** `/tests/integration/test_ssot_websocket_authentication_compliance.py` (451 lines)
+- **Backend JWT violation detection** `/tests/mission_critical/test_backend_jwt_violation_detection.py` (613 lines)
+
+#### Test Strategy:
+- **~20% New SSOT violation tests** (4-5 focused reproduction tests)
+- **~60% Existing test updates** (Update 12-15 existing tests for SSOT validation)
+- **~20% Coverage gap tests** (3-4 scenario tests not currently covered)
+- **Focus**: Tests must fail before fix, pass after fix
 
 ### Step 2: Execute Test Plan  
 - [ ] Create/update SSOT validation tests
