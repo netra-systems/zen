@@ -13,7 +13,7 @@ import warnings
 from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from test_framework.ssot.websocket import create_test_websocket_manager
 

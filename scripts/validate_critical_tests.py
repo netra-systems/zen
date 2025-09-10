@@ -13,7 +13,7 @@ if project_root not in sys.path:
 def validate_websocket_integration():
     """Validate WebSocket agent events integration."""
     try:
-        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.websocket_core.manager import WebSocketManager
         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry

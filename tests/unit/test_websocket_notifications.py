@@ -37,7 +37,7 @@
     # REMOVED_SYNTAX_ERROR: import pytest
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient

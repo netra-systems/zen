@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 import uuid
 from typing import Dict, Any
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

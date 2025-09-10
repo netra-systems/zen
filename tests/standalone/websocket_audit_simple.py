@@ -22,7 +22,7 @@ if project_root not in sys.path:
 # Import the improved components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from shared.types.core_types import AgentExecutionContext, create_execution_context_from_supervisor_style
 from fastapi.websockets import WebSocketState
 

@@ -14,7 +14,7 @@ without requiring actual WebSocket connections or external dependencies.
 import pytest
 from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 

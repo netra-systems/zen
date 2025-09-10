@@ -279,7 +279,7 @@ class TestWebSocketAgentEventsReal:
     async def test_agent_event_flow_real_websocket(self):
         """Test complete agent event flow with real WebSocket connections."""
         from netra_backend.app.websocket_core import WebSocketManager
-        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         
         # Setup real WebSocket connection

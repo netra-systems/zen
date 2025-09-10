@@ -52,7 +52,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.types import MessageType
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.event_monitor import EventType
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.base_agent import BaseAgent

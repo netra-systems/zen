@@ -20,7 +20,7 @@ from test_framework.real_services import get_real_services, RealServicesManager
 
 # Import production WebSocket components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.state import DeepAgentState
 
 

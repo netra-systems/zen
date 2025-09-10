@@ -44,7 +44,7 @@
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_manager import AgentManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.websocket_models import WebSocketMessage
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.logging_config import central_logger

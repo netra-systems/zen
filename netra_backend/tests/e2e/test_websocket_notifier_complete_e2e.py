@@ -44,7 +44,7 @@ from test_framework.ssot.websocket import WebSocketTestClient
 from shared.isolated_environment import get_env
 
 # Core imports for E2E WebSocket notification testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 

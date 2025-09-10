@@ -22,7 +22,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Imports
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.state import DeepAgentState

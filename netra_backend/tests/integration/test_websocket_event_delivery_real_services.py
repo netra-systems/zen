@@ -26,7 +26,7 @@ import json
 from typing import Dict, Any, List
 from datetime import datetime
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.ssot.real_services_test_fixtures import *

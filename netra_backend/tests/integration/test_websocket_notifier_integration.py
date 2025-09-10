@@ -41,7 +41,7 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
 # Core imports for WebSocket notifier integration testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 

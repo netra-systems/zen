@@ -16,7 +16,7 @@ import time
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from shared.types import UserID, ThreadID, RunID
 

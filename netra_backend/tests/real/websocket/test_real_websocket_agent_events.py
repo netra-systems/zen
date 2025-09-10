@@ -24,7 +24,7 @@ import websockets
 from websockets.exceptions import WebSocketException
 
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.tests.real_services_test_fixtures import skip_if_no_real_services
 from shared.isolated_environment import get_env
 

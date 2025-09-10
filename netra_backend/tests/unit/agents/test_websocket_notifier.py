@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 

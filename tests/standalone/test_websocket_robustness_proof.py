@@ -42,7 +42,7 @@ from loguru import logger
 # Import the improved components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from shared.types.core_types import AgentExecutionContext
 from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
 from fastapi.websockets import WebSocketState

@@ -57,7 +57,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
         
         # Test different import paths
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier as SupervisorNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier as SupervisorNotifier
             import_conflicts.append('supervisor.websocket_notifier')
         except ImportError:
             pass
@@ -83,7 +83,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
         implementations = []
         
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             implementations.append(('supervisor', WebSocketNotifier))
         except ImportError:
             pass
@@ -206,7 +206,7 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
     def test_direct_instantiation_bypasses_factory(self):
         """Test FAILS: Direct WebSocketNotifier instantiation bypasses factory pattern."""
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             # This should fail in proper SSOT implementation
             notifier = WebSocketNotifier(user_id="test_user")
@@ -225,7 +225,7 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
     def test_singleton_pattern_breaks_user_isolation(self):
         """Test FAILS: Singleton pattern breaks user isolation."""
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             # Test if singleton pattern exists
             notifier1 = WebSocketNotifier(user_id="user1")
@@ -450,7 +450,7 @@ class TestWebSocketNotifierLegacyCodeDetection(SSotBaseTestCase):
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                            if 'from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier' in content:
+                            if 'from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier' in content:
                                 if 'REMOVED_SYNTAX_ERROR' not in content:  # Exclude already commented lines
                                     deprecated_usage.append(file_path)
                     except (UnicodeDecodeError, PermissionError):
