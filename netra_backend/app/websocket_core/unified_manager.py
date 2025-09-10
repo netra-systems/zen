@@ -262,7 +262,7 @@ class RegistryCompat:
         return []
 
 
-class WebSocketManager:
+class UnifiedWebSocketManager:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
     
     🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
@@ -276,42 +276,9 @@ class WebSocketManager:
     - Per-user connection locks prevent race conditions during concurrent operations
     - Thread-safe connection management with user-specific isolation
     - Connection state validation prevents silent failures
-    
-    SSOT SINGLETON: This class enforces the Single Source of Truth pattern.
-    Only one instance can exist at any time to prevent SSOT violations.
     """
     
-    _instance = None
-    _initialization_lock = asyncio.Lock()
-    
-    def __new__(cls):
-        """
-        SSOT ENFORCEMENT: Ensure only one WebSocketManager instance exists.
-        
-        This prevents SSOT violations by enforcing singleton pattern.
-        Multiple instantiation attempts will return the same instance.
-        """
-        if cls._instance is None:
-            logger.info("Creating new WebSocketManager SSOT instance")
-            cls._instance = super(WebSocketManager, cls).__new__(cls)
-            cls._instance._initialized = False
-        else:
-            logger.debug("Returning existing WebSocketManager SSOT instance")
-        return cls._instance
-    
     def __init__(self):
-        """
-        Initialize WebSocketManager singleton instance.
-        
-        SSOT PROTECTION: Only initializes once, even if called multiple times.
-        This ensures singleton state consistency.
-        """
-        # Prevent re-initialization of singleton instance
-        if hasattr(self, '_initialized') and self._initialized:
-            logger.debug("WebSocketManager already initialized, skipping re-initialization")
-            return
-            
-        logger.info("Initializing WebSocketManager SSOT singleton")
         self._connections: Dict[str, WebSocketConnection] = {}
         self._user_connections: Dict[str, Set[str]] = {}
         self._lock = asyncio.Lock()
@@ -348,56 +315,7 @@ class WebSocketManager:
         self._last_health_check = datetime.utcnow()
         self._health_check_failures = 0
         
-        # Mark as initialized to prevent re-initialization
-        self._initialized = True
-        
-        logger.info("WebSocketManager SSOT singleton initialized with connection-level thread safety and enhanced error handling")
-    
-    @classmethod
-    def from_user_context(cls, user_context: 'UserExecutionContext') -> 'WebSocketManager':
-        """
-        Factory method to create WebSocketManager from UserExecutionContext.
-        
-        PHASE 1 SSOT FIX: This factory method provides the standard interface
-        that WebSocketManagerFactory expects, bridging the constructor signature
-        mismatch between factory and manager.
-        
-        Args:
-            user_context: UserExecutionContext containing user isolation data
-            
-        Returns:
-            WebSocketManager instance with proper user context association
-            
-        Raises:
-            ValueError: If user_context is invalid or missing required fields
-        """
-        if not user_context:
-            raise ValueError("user_context is required for WebSocket manager creation")
-        
-        # Validate that user_context has required fields
-        if not hasattr(user_context, 'user_id') or not user_context.user_id:
-            raise ValueError("user_context must have valid user_id")
-        
-        # Get the SSOT singleton instance
-        manager = cls()
-        
-        # Store user context in user-specific isolation container (not as instance attributes)
-        if not hasattr(manager, '_user_contexts'):
-            manager._user_contexts = {}
-        
-        # Associate user context with isolation key for this user
-        user_id = user_context.user_id
-        manager._user_contexts[user_id] = {
-            'user_context': user_context,
-            'user_id': user_id,
-            'thread_id': getattr(user_context, 'thread_id', None),
-            'run_id': getattr(user_context, 'run_id', None),
-            'websocket_client_id': getattr(user_context, 'websocket_client_id', None),
-            'created_at': datetime.utcnow()
-        }
-        
-        logger.info(f"Associated UserExecutionContext for user {user_id[:8]}... with SSOT WebSocketManager singleton")
-        return manager
+        logger.info("UnifiedWebSocketManager initialized with connection-level thread safety and enhanced error handling")
     
     async def _get_user_connection_lock(self, user_id: str) -> asyncio.Lock:
         """Get or create user-specific connection lock for thread safety.
@@ -763,31 +681,6 @@ class WebSocketManager:
         await self._store_failed_message(user_id, message, "no_active_connections_after_retry")
         # Don't return silently - emit to user notification system
         await self._emit_connection_error_notification(user_id, event_type)
-    
-    async def send_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
-        """
-        Send an event to a specific user - SSOT compatibility interface.
-        
-        CRITICAL SSOT FIX: This method was missing from the WebSocket manager interface,
-        causing test failures and SSOT violations. It delegates to emit_critical_event
-        to maintain consistency while providing the expected interface.
-        
-        This method prevents the interface violations identified in Issue #186:
-        - Provides consistent send_event interface across all managers
-        - Maintains backward compatibility with existing code
-        - Ensures all WebSocket managers expose the same event sending interface
-        
-        Args:
-            user_id: Target user ID (accepts both str and UserID)
-            event_type: Type of event to send (e.g., 'agent_started', 'tool_executing') 
-            data: Event payload data
-            
-        Raises:
-            ValueError: If user_id or event_type is invalid
-            RuntimeError: If WebSocket manager is not active
-        """
-        # Delegate to the comprehensive emit_critical_event method
-        await self.emit_critical_event(user_id, event_type, data)
     
     async def send_to_user_with_wait(self, user_id: str, message: Dict[str, Any], 
                                       wait_timeout: float = 3.0) -> bool:
@@ -2330,7 +2223,7 @@ class WebSocketManager:
 # 🚨 SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
 # Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
-def get_websocket_manager() -> WebSocketManager:
+def get_websocket_manager() -> UnifiedWebSocketManager:
     """
     🚨 CRITICAL SECURITY ERROR: This function has been REMOVED.
     
@@ -2374,9 +2267,3 @@ def get_websocket_manager() -> WebSocketManager:
     
     logger.critical(error_message)
     raise RuntimeError(error_message)
-
-
-# Backward compatibility alias
-# SSOT ENFORCEMENT: UnifiedWebSocketManager points to the same singleton class
-# This ensures both import paths return the exact same class instance
-UnifiedWebSocketManager = WebSocketManager
