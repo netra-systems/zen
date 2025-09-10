@@ -41,7 +41,7 @@ from netra_backend.tests.conftest_helpers import get_test_logger
 logger = get_test_logger(__name__)
 
 
-class TestGracefulDegradationTimeError:
+class TestGracefulDegradationCorrectTimeImport:
     """Test graceful degradation functionality that triggers NameError: name 'time' is not defined"""
 
     @pytest.fixture
@@ -151,49 +151,54 @@ class TestGracefulDegradationTimeError:
         logger.info("✅ VALIDATION PASSED: Timeout handling works correctly with proper time import")
 
     @pytest.mark.asyncio
-    async def test_check_service_health_exception_triggers_time_error(self, degradation_manager):
+    async def test_check_service_health_handles_exceptions_correctly(self, degradation_manager):
         """
-        Test that _check_service_health() triggers NameError during exception handling.
+        Test that _check_service_health() handles exceptions correctly with proper time import.
         
-        This test validates line 395: response_time=time.time() - check_start  
+        This test validates that line 395: response_time=time.time() - check_start works correctly.
         """
-        logger.info("🧪 TEST: Triggering service health exception response time NameError")
+        logger.info("🧪 TEST: Verifying exception handling works correctly with time import")
         
         # Mock a service that throws an exception
         mock_service = Mock()
         mock_service.health_check = AsyncMock(side_effect=ValueError("Service error"))
         
-        # This should trigger NameError: name 'time' is not defined on line 395
-        with pytest.raises(NameError) as exc_info:
-            await degradation_manager._check_service_health("error_service", mock_service)
+        # This should work correctly and handle exception with proper response time
+        result = await degradation_manager._check_service_health("error_service", mock_service)
         
-        error_message = str(exc_info.value)
-        logger.error(f"✅ EXPECTED EXCEPTION ERROR: {error_message}")
+        # Validate exception was handled correctly
+        assert isinstance(result, ServiceHealth)
+        assert result.status == ServiceStatus.UNAVAILABLE
+        assert "Service error" in result.error_message
+        assert result.response_time is not None
+        assert result.response_time >= 0
         
-        assert "name 'time' is not defined" in error_message
-        logger.info("✅ ROOT CAUSE VALIDATED: Exception response time calculation fails due to missing 'import time'")
+        logger.info("✅ VALIDATION PASSED: Exception handling works correctly with proper time import")
 
     @pytest.mark.asyncio
-    async def test_assess_service_availability_triggers_time_error(self, degradation_manager, mock_app_state):
+    async def test_assess_service_availability_works_correctly(self, degradation_manager, mock_app_state):
         """
-        Test that assess_service_availability() triggers NameError through service health checks.
+        Test that assess_service_availability() works correctly with proper time import.
         
-        This test validates the full flow that leads to time.time() usage.
+        This test validates the full flow works with time.time() usage.
         """
-        logger.info("🧪 TEST: Full service availability assessment triggering time errors")
+        logger.info("🧪 TEST: Full service availability assessment working correctly")
         
-        # This should trigger NameError when checking service health
-        with pytest.raises(NameError) as exc_info:
-            await degradation_manager.assess_service_availability()
+        # This should work correctly
+        degradation_context = await degradation_manager.assess_service_availability()
         
-        error_message = str(exc_info.value)
-        logger.error(f"✅ EXPECTED ASSESSMENT ERROR: {error_message}")
+        # Validate assessment results
+        assert isinstance(degradation_context, DegradationContext)
+        assert degradation_context.level is not None
+        assert isinstance(degradation_context.degraded_services, list)
+        assert isinstance(degradation_context.available_services, list)
+        assert isinstance(degradation_context.user_message, str)
+        assert isinstance(degradation_context.capabilities, dict)
         
-        assert "name 'time' is not defined" in error_message
-        logger.info("✅ ROOT CAUSE VALIDATED: Service availability assessment fails due to missing 'import time'")
+        logger.info("✅ VALIDATION PASSED: Service availability assessment works correctly with proper time import")
 
 
-class TestGracefulDegradationIntegrationTimeErrors:
+class TestGracefulDegradationIntegrationWorksCorrectly:
     """Integration tests for graceful degradation time errors in realistic scenarios."""
 
     @pytest.mark.asyncio
@@ -303,7 +308,7 @@ class TestGracefulDegradationIntegrationTimeErrors:
         logger.info("✅ ROOT CAUSE VALIDATED: Multiple service checks fail due to missing 'import time'")
 
 
-class TestDegradationManagerTimeErrorEdgeCases:
+class TestDegradationManagerCorrectBehavior:
     """Edge case tests for degradation manager time errors."""
 
     @pytest.mark.asyncio

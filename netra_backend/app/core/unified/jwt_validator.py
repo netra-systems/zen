@@ -127,6 +127,21 @@ class UnifiedJWTValidator:
                 valid=False,
                 error=str(e)
             )
+
+    async def verify_token(
+        self,
+        token: str,
+        token_type: Optional[TokenType] = None,
+        verify_exp: bool = True
+    ) -> TokenValidationResult:
+        """
+        Verify JWT token - compatibility method for Golden Path Validator.
+        
+        This method provides the interface expected by Golden Path Validator
+        and delegates to validate_token_jwt for actual validation.
+        """
+        logger.info("verify_token called - delegating to validate_token_jwt for Golden Path compatibility")
+        return await self.validate_token_jwt(token, token_type, verify_exp)
     
     def validate_token_sync(
         self,
