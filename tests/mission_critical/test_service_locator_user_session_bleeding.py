@@ -83,8 +83,7 @@ class TestServiceLocatorUserSessionBleeding(SSotAsyncTestCase):
             user_b_gets_user_a_service = locator_b.get(str)
             
             # If we reach here, the singleton violation exists
-            self.assertIsNot(
-                locator_a, locator_b,
+            assert locator_a is not locator_b, (
                 "🚨 CRITICAL SECURITY VIOLATION: ServiceLocator singleton shares instances between users! "
                 f"User A locator: {id(locator_a)}, User B locator: {id(locator_b)} - "
                 "This enables cross-user data access and violates user isolation. "
@@ -92,8 +91,7 @@ class TestServiceLocatorUserSessionBleeding(SSotAsyncTestCase):
             )
             
             # Additional isolation check
-            self.assertNotEqual(
-                user_b_gets_user_a_service.user_data["user_id"], self.user_a_id,
+            assert user_b_gets_user_a_service.user_data["user_id"] != self.user_a_id, (
                 "🚨 CRITICAL: User B can access User A's sensitive service data! "
                 "This is a catastrophic security breach enabling data leakage between users."
             )
@@ -101,10 +99,7 @@ class TestServiceLocatorUserSessionBleeding(SSotAsyncTestCase):
         except Exception as e:
             # If getting service fails, that's actually good - means no shared state
             # But we still need to check instance sharing
-            self.assertIsNot(
-                locator_a, locator_b,
-                f"🚨 ServiceLocator singleton violation detected: {e}"
-            )
+            assert locator_a is not locator_b, f"🚨 ServiceLocator singleton violation detected: {e}"
 
     async def test_service_locator_factory_registration_isolation(self):
         """
@@ -132,8 +127,7 @@ class TestServiceLocatorUserSessionBleeding(SSotAsyncTestCase):
             user_b_service = locator_b.get(str)
             
             # This should NOT contain User A's user ID
-            self.assertNotIn(
-                self.user_a_id, user_b_service,
+            assert self.user_a_id not in user_b_service, (
                 "🚨 FACTORY STATE BLEEDING: User B can access User A's factory registration! "
                 f"User B got: {user_b_service} which contains User A's ID: {self.user_a_id}"
             )
@@ -144,10 +138,7 @@ class TestServiceLocatorUserSessionBleeding(SSotAsyncTestCase):
             pass
             
         # Verify locators are different instances (should FAIL with singleton)
-        self.assertIsNot(
-            locator_a, locator_b,
-            "🚨 ServiceLocator singleton pattern prevents proper user isolation"
-        )
+        assert locator_a is not locator_b, "🚨 ServiceLocator singleton pattern prevents proper user isolation"
 
     async def test_concurrent_user_service_isolation_race_condition(self):
         """
@@ -194,12 +185,11 @@ class TestServiceLocatorUserSessionBleeding(SSotAsyncTestCase):
         )
         
         # Verify User A got their own service
-        self.assertEqual(user_a_result["user"], self.user_a_id)
+        assert user_a_result["user"] == self.user_a_id
         
         # CRITICAL: User B should NOT get User A's service
         if user_b_result is not None:
-            self.assertIsNone(
-                user_b_result,
+            assert user_b_result is None, (
                 "🚨 RACE CONDITION VIOLATION: User B accessed User A's service due to singleton sharing! "
                 f"User B received: {user_b_result} which belongs to User A: {self.user_a_id}. "
                 "This indicates catastrophic state bleeding in concurrent scenarios."
@@ -227,7 +217,7 @@ class TestServiceLocatorUserSessionBleeding(SSotAsyncTestCase):
                     previous_user_service = locator.get(f"user_service_{j}")
                     
                     # This should FAIL - previous users' services should not be accessible
-                    self.fail(
+                    assert False, (
                         f"🚨 MEMORY CONTAMINATION: User {i} can access User {j}'s service! "
                         f"Previous service: {previous_user_service}. "
                         "ServiceLocator singleton accumulates state across ALL users, "
