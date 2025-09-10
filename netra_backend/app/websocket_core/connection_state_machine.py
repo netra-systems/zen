@@ -28,6 +28,7 @@ from typing import Any, Dict, Optional, Set, Callable
 from dataclasses import dataclass, field
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.exceptions.agent_exceptions import AgentStateTransitionError
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 
 logger = central_logger.get_logger(__name__)
@@ -92,6 +93,180 @@ class StateTransitionInfo:
     timestamp: datetime
     reason: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+# Exception for state transition errors - alias to AgentStateTransitionError for SSOT
+class StateTransitionError(AgentStateTransitionError):
+    """Exception for connection state transition failures."""
+    
+    def __init__(self, message: str, connection_id: str = None, from_state: str = None, to_state: str = None):
+        super().__init__(
+            agent_name=f"ConnectionStateMachine({connection_id})" if connection_id else "ConnectionStateMachine",
+            from_state=from_state or "unknown",
+            to_state=to_state or "unknown", 
+            transition_error=message
+        )
+
+
+@dataclass
+class ConnectionStateTransition:
+    """
+    Represents an atomic connection state transition.
+    
+    Business Value: Provides atomic state change operations with validation
+    and rollback capabilities to prevent race conditions in WebSocket setup.
+    """
+    connection_id: str
+    from_state: ApplicationConnectionState
+    to_state: ApplicationConnectionState
+    user_id: UserID
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    reason: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def __post_init__(self):
+        """Validate transition data after initialization."""
+        if not self.connection_id:
+            raise ValueError("connection_id is required")
+        
+        if not isinstance(self.from_state, ApplicationConnectionState):
+            raise ValueError("from_state must be ApplicationConnectionState")
+            
+        if not isinstance(self.to_state, ApplicationConnectionState):
+            raise ValueError("to_state must be ApplicationConnectionState")
+            
+        self.user_id = ensure_user_id(self.user_id)
+
+
+class ConnectionStateValidator:
+    """
+    Validates connection state transitions according to business rules.
+    
+    Business Value: Enforces correct WebSocket setup flow preventing
+    message processing before connection is fully operational.
+    """
+    
+    @staticmethod
+    def is_valid_transition(from_state: ApplicationConnectionState, 
+                          to_state: ApplicationConnectionState) -> bool:
+        """
+        Validate if state transition is allowed according to business rules.
+        
+        Args:
+            from_state: Current state
+            to_state: Target state
+            
+        Returns:
+            True if transition is valid, False otherwise
+        """
+        # Terminal states can't transition (except FAILED can go to CONNECTING for retry)
+        if ApplicationConnectionState.is_terminal(from_state) and to_state != ApplicationConnectionState.CONNECTING:
+            return False
+        
+        # Define valid transitions
+        valid_transitions = {
+            ApplicationConnectionState.CONNECTING: {
+                ApplicationConnectionState.ACCEPTED,
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.ACCEPTED: {
+                ApplicationConnectionState.AUTHENTICATED,
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.AUTHENTICATED: {
+                ApplicationConnectionState.SERVICES_READY,
+                ApplicationConnectionState.DEGRADED,  # If services aren't available
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.SERVICES_READY: {
+                ApplicationConnectionState.PROCESSING_READY,
+                ApplicationConnectionState.DEGRADED,  # If partial services
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.PROCESSING_READY: {
+                ApplicationConnectionState.PROCESSING,
+                ApplicationConnectionState.IDLE,
+                ApplicationConnectionState.DEGRADED,
+                ApplicationConnectionState.CLOSING,
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.PROCESSING: {
+                ApplicationConnectionState.IDLE,
+                ApplicationConnectionState.PROCESSING_READY,
+                ApplicationConnectionState.DEGRADED,
+                ApplicationConnectionState.CLOSING,
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.IDLE: {
+                ApplicationConnectionState.PROCESSING,
+                ApplicationConnectionState.PROCESSING_READY,
+                ApplicationConnectionState.DEGRADED,
+                ApplicationConnectionState.CLOSING,
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.DEGRADED: {
+                ApplicationConnectionState.PROCESSING_READY,  # Recovery
+                ApplicationConnectionState.PROCESSING,
+                ApplicationConnectionState.IDLE,
+                ApplicationConnectionState.RECONNECTING,
+                ApplicationConnectionState.CLOSING,
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.RECONNECTING: {
+                ApplicationConnectionState.SERVICES_READY,
+                ApplicationConnectionState.PROCESSING_READY,
+                ApplicationConnectionState.DEGRADED,
+                ApplicationConnectionState.FAILED,
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.CLOSING: {
+                ApplicationConnectionState.CLOSED
+            },
+            ApplicationConnectionState.CLOSED: {},  # Terminal
+            ApplicationConnectionState.FAILED: {
+                ApplicationConnectionState.CONNECTING  # Allow retry
+            }
+        }
+        
+        return to_state in valid_transitions.get(from_state, set())
+    
+    @staticmethod
+    def validate_transition(transition: ConnectionStateTransition) -> bool:
+        """
+        Validate a complete transition object.
+        
+        Args:
+            transition: ConnectionStateTransition to validate
+            
+        Returns:
+            True if valid, False otherwise
+            
+        Raises:
+            StateTransitionError: If transition is invalid
+        """
+        if not transition.connection_id:
+            raise StateTransitionError(
+                "Connection ID is required", 
+                connection_id=transition.connection_id
+            )
+        
+        if not ConnectionStateValidator.is_valid_transition(transition.from_state, transition.to_state):
+            raise StateTransitionError(
+                f"Invalid transition: {transition.from_state} -> {transition.to_state}",
+                connection_id=transition.connection_id,
+                from_state=transition.from_state.value,
+                to_state=transition.to_state.value
+            )
+        
+        return True
 
 
 class ConnectionStateMachine:
@@ -429,6 +604,80 @@ class ConnectionStateMachine:
                 return False
             
             return True
+    
+    def get_current_state(self) -> ApplicationConnectionState:
+        """
+        Get the current connection state.
+        
+        This method provides compatibility with the test interface while
+        delegating to the existing current_state property.
+        
+        Returns:
+            Current ApplicationConnectionState
+        """
+        return self.current_state
+    
+    def execute_transition(self, transition: ConnectionStateTransition) -> bool:
+        """
+        Execute a state transition using a ConnectionStateTransition object.
+        
+        This method provides compatibility with the test interface while
+        delegating to the existing transition_to method.
+        
+        Args:
+            transition: ConnectionStateTransition object describing the transition
+            
+        Returns:
+            True if transition succeeded, False otherwise
+        """
+        # Validate the transition first
+        try:
+            ConnectionStateValidator.validate_transition(transition)
+        except StateTransitionError as e:
+            logger.warning(f"Transition validation failed: {e}")
+            return False
+        
+        # Verify the from_state matches current state
+        if transition.from_state != self.current_state:
+            logger.warning(
+                f"Transition from_state {transition.from_state} does not match "
+                f"current state {self.current_state} for connection {self.connection_id}"
+            )
+            return False
+        
+        # Execute the transition
+        return self.transition_to(
+            new_state=transition.to_state,
+            reason=transition.reason,
+            metadata=transition.metadata
+        )
+    
+    def _validate_transition(self, from_state: ApplicationConnectionState, to_state: ApplicationConnectionState) -> bool:
+        """
+        Validate transition for compatibility with test interface.
+        
+        This method provides compatibility while delegating to the existing
+        _is_valid_transition method.
+        
+        Args:
+            from_state: Starting state
+            to_state: Target state
+            
+        Returns:
+            True if valid, False otherwise
+            
+        Raises:
+            StateTransitionError: If transition is invalid
+        """
+        is_valid = self._is_valid_transition(from_state, to_state)
+        if not is_valid:
+            raise StateTransitionError(
+                f"Invalid transition: {from_state} -> {to_state}",
+                connection_id=self.connection_id,
+                from_state=from_state.value,
+                to_state=to_state.value
+            )
+        return is_valid
     
     def __repr__(self) -> str:
         """String representation for debugging."""

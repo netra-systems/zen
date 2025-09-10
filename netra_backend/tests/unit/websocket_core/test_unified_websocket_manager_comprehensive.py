@@ -1419,9 +1419,10 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         assert final_result["roi_analysis"]["confidence_score"] >= 0.9, "Low confidence in recommendations"
         assert len(final_result["prioritized_recommendations"]) >= 3, "Insufficient actionable recommendations"
         
-        # User Experience Validation
-        assert final_result["user_satisfaction_score"] >= 0.95, "Low user satisfaction"
-        assert final_result["execution_time"] < 60, "Agent took too long to deliver value"
+        # User Experience Validation - get data from the agent_completed message
+        agent_completed_message = all_messages[-1]
+        assert agent_completed_message["data"]["user_satisfaction_score"] >= 0.95, "Low user satisfaction"
+        assert agent_completed_message["data"]["execution_time"] < 60, "Agent took too long to deliver value"
         
         # Business Continuity Validation
         total_workflow_time = workflow_end_time - workflow_start_time

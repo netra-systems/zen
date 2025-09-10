@@ -26,6 +26,9 @@ WHEN YOU GET TO 50% OF YOUR CONTEXT WINDOW USAGE YOU MUST RUN /COMPACT
 KEEP CORE SYSTEM AS IS
 NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
 
+IT's OKAY TO DISABLE features not in GOLDEN PATH
+DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
+
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
@@ -40,6 +43,8 @@ this "repetition log" is focused on YOUR process itself.
 Review this log, any time you see repetition on a similar issue you must do ADDITIONAL
 SELF REFLECTION AND PROVE WITH EVIDENCE THAT YOUR APPRAOCH NOW IS NEW AND NOT REPEATING 
 THE PRIOR MISTAKES LOGGED.
+
+DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
 
 ## USE SUB AGENTS (TASKS) EVERY POSSIBLE TIME
 
@@ -362,6 +367,7 @@ At every opportunity spawn new subagent with dedicated focus mission and context
 4.  **Verification and proof implementation worked** QA review and regression testing. Use fail fast, starting with proving that newly created test suite now passes, then rest of tests related to this issue. repeat until all tests pass or 100 times.
 
 YOU MUST WORK HARD AND COMPLETE ALL OF YOUR WORK. YOU MUST KEEP GOING UNTIL THE WORK IS COMPLETE AND BE PATIENT.
+DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
 
 ### 3.6. MANDATORY COMPLEX REFACTORING PROCESS:
 
@@ -602,7 +608,7 @@ This is a non-exhaustive list of mission-critical specs.
 Direct OS.env access is FORBIDDEN except in each services canonical env config SSOT. Applies to ALL tests too. EACH SERVICE MUST MAINTAIN INDEPENDENCE. Import ONLY from the env of the service.
 
 -----
-
+DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
 YOU DO YOUR BEST WORK.
 
 ## 8\. System Status and Compliance Tracking
@@ -660,5 +666,7 @@ A user asking for "git commit" means: For EACH group of work that's related do a
 
 KEEP CORE SYSTEM AS IS
 NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
+DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK!
+GOlDEN PATH = MUST WORK
 
 **Final Reminder:** ULTRA THINK DEEPLY. CHEATING ON TESTS = ABOMINATION. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. YOU MUST ALWAYS SELF-REFLECT ON YOUR WORK AND SAVE IT IN UNIFIED REFLECTION JOURNAL. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**

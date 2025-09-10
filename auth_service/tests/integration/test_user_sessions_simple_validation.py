@@ -36,11 +36,12 @@ class TestUserSessionsSimpleValidation:
             pytest.skip("asyncpg not available - cannot test real PostgreSQL")
         
         # Get database connection info from environment
+        # Use test database that we just created
         host = os.getenv("POSTGRES_HOST", "localhost")
-        port = int(os.getenv("POSTGRES_PORT", "5432"))
-        database = os.getenv("POSTGRES_DB", "netra_dev")
-        user = os.getenv("POSTGRES_USER", "netra_user")
-        password = os.getenv("POSTGRES_PASSWORD", "netra_password")
+        port = int(os.getenv("POSTGRES_PORT", "5433"))  # Docker mapped port
+        database = os.getenv("POSTGRES_DB", "netra_test")  # Test database
+        user = os.getenv("POSTGRES_USER", "postgres")  # Test user
+        password = os.getenv("POSTGRES_PASSWORD", "postgres")  # Test password
         
         print(f"🔗 Connecting to PostgreSQL at {host}:{port}/{database}")
         
@@ -172,11 +173,12 @@ class TestUserSessionsSimpleValidation:
             pytest.skip("asyncpg not available - cannot test real PostgreSQL")
         
         # Get database connection info from environment
+        # Use test database that we just created
         host = os.getenv("POSTGRES_HOST", "localhost")
-        port = int(os.getenv("POSTGRES_PORT", "5432"))
-        database = os.getenv("POSTGRES_DB", "netra_dev")
-        user = os.getenv("POSTGRES_USER", "netra_user")
-        password = os.getenv("POSTGRES_PASSWORD", "netra_password")
+        port = int(os.getenv("POSTGRES_PORT", "5433"))  # Docker mapped port
+        database = os.getenv("POSTGRES_DB", "netra_test")  # Test database
+        user = os.getenv("POSTGRES_USER", "postgres")  # Test user
+        password = os.getenv("POSTGRES_PASSWORD", "postgres")  # Test password
         
         conn: Optional[asyncpg.Connection] = None
         

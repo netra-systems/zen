@@ -112,7 +112,7 @@ class TestUserSessionManagerInitialization(SSotBaseTestCase):
         self.record_metric("concurrent_users_tested", len(test_users))
         self.record_metric("isolation_verification_passed", True)
     
-    def test_manager_logging_initialization(self):
+    async def test_manager_logging_initialization(self):
         """
         Test UserSessionManager logs initialization properly.
         
@@ -451,7 +451,8 @@ class TestSessionCreation(SSotBaseTestCase):
         session_id = await self.manager.create_session(self.enterprise_user, complex_data)
         
         # Verify business outcomes - deep data preservation
-        stored_session = self.manager._sessions[session_id]
+        stored_session = await self.manager.get_session(session_id)
+        assert stored_session is not None, "Session should be retrievable"
         stored_data = stored_session["data"]
         
         # Verify deeply nested structure preservation
@@ -980,7 +981,8 @@ class TestSessionLifecycle(SSotBaseTestCase):
         session_id = await self.manager.create_session(self.test_user, session_data)
         
         # Verify session is active and mapped
-        assert session_id in self.manager._user_sessions[self.test_user], "Session should be in user mapping"
+        user_sessions = await self.manager.get_user_sessions(self.test_user)
+        assert session_id in user_sessions, "Session should be in user mapping"
         session = await self.manager.get_session(session_id)
         assert session["active"] is True, "Session should be active initially"
         
@@ -1218,48 +1220,52 @@ class TestSessionCleanupAndUtilities(SSotBaseTestCase):
         super().setup_method()
         self.manager = UserSessionManager()
     
-    def test_clear_all_sessions_resets_manager_state(self):
+    async def test_clear_all_sessions_resets_manager_state(self):
         """
         Test clear_all_sessions completely resets manager to initial state.
         
         Business Impact: Complete session clearing enables system reset,
         testing cleanup, and emergency resource recovery.
         """
-        # Create multiple users with sessions
+        # Create multiple users with sessions using public API
         users_and_sessions = [
             (UserID("cleanup-user-1"), {"workspace": "data1"}),
             (UserID("cleanup-user-2"), {"workspace": "data2"}),
             (UserID("cleanup-user-3"), {"workspace": "data3"})
         ]
         
-        # Manually create sessions to test cleanup
-        for i, (user_id, session_data) in enumerate(users_and_sessions):
-            session_id = f"session_{i}"
-            self.manager._sessions[session_id] = {
-                "user_id": user_id,
-                "data": session_data,
-                "active": True
-            }
-            if user_id not in self.manager._user_sessions:
-                self.manager._user_sessions[user_id] = set()
-            self.manager._user_sessions[user_id].add(session_id)
+        # Create sessions using public API to test cleanup
+        created_session_ids = []
+        for user_id, session_data in users_and_sessions:
+            session_id = await self.manager.create_session(user_id, session_data)
+            created_session_ids.append(session_id)
         
-        # Verify sessions exist before cleanup
-        assert len(self.manager._sessions) == 3, "Should have 3 sessions before cleanup"
-        assert len(self.manager._user_sessions) == 3, "Should have 3 user mappings before cleanup"
+        # Verify sessions exist before cleanup using public API
+        for session_id in created_session_ids:
+            session = await self.manager.get_session(session_id)
+            assert session is not None, f"Session {session_id} should exist before cleanup"
+        
+        # Verify users have sessions
+        for user_id, _ in users_and_sessions:
+            user_sessions = await self.manager.get_user_sessions(user_id)
+            assert len(user_sessions) > 0, f"User {user_id} should have sessions before cleanup"
         
         # Execute business logic
         self.manager.clear_all_sessions()
         
-        # Verify business outcomes - complete cleanup
-        assert len(self.manager._sessions) == 0, "All sessions should be cleared"
-        assert len(self.manager._user_sessions) == 0, "All user mappings should be cleared"
-        assert isinstance(self.manager._sessions, dict), "Sessions should remain dict type"
-        assert isinstance(self.manager._user_sessions, dict), "User sessions should remain dict type"
+        # Verify business outcomes - complete cleanup using public API
+        for session_id in created_session_ids:
+            session = await self.manager.get_session(session_id)
+            assert session is None, f"Session {session_id} should be cleared"
+        
+        # Verify all users have no sessions
+        for user_id, _ in users_and_sessions:
+            user_sessions = await self.manager.get_user_sessions(user_id)
+            assert len(user_sessions) == 0, f"User {user_id} should have no sessions after cleanup"
         
         # Record cleanup metrics
-        self.record_metric("sessions_cleared", 3)
-        self.record_metric("user_mappings_cleared", 3)
+        self.record_metric("sessions_cleared", len(created_session_ids))
+        self.record_metric("user_mappings_cleared", len(users_and_sessions))
         self.record_metric("complete_cleanup_successful", True)
     
     async def test_manager_handles_concurrent_operations(self):
@@ -1361,9 +1367,6 @@ class TestSessionCleanupAndUtilities(SSotBaseTestCase):
             }
         }
         
-        # Get initial memory baseline
-        initial_size = sys.getsizeof(self.manager._sessions) + sys.getsizeof(self.manager._user_sessions)
-        
         # Create session with large data
         session_id = await self.manager.create_session(test_user, large_data)
         
@@ -1375,18 +1378,30 @@ class TestSessionCleanupAndUtilities(SSotBaseTestCase):
         assert len(retrieved_session["data"]["conversation_history"]) == 1000, "All conversation history should be preserved"
         assert len(retrieved_session["data"]["analysis_results"]) == 100, "All analysis results should be preserved"
         
-        # Get final memory usage
-        final_size = sys.getsizeof(self.manager._sessions) + sys.getsizeof(self.manager._user_sessions)
-        memory_growth = final_size - initial_size
+        # Test that the system remains responsive with large data
+        import time
+        start_time = time.time()
+        
+        # Test multiple operations with large session
+        for _ in range(10):
+            test_session = await self.manager.get_session(session_id)
+            assert test_session is not None, "Large session should remain accessible"
+        
+        end_time = time.time()
+        operation_time = end_time - start_time
+        
+        # Verify system remains performant with large data
+        assert operation_time < 1.0, f"Operations should remain fast with large data (took {operation_time:.3f}s)"
         
         # Clean up large session
         close_result = await self.manager.close_session(session_id)
         assert close_result is True, "Large session should close successfully"
         
-        # Record memory metrics
+        # Record performance metrics instead of memory metrics
         self.record_metric("large_session_data_handled", True)
-        self.record_metric("memory_growth_bytes", memory_growth)
+        self.record_metric("large_session_operations_time_seconds", operation_time)
         self.record_metric("large_data_integrity_preserved", True)
+        self.record_metric("large_session_performance_acceptable", operation_time < 1.0)
     
     async def test_session_state_consistency_after_errors(self):
         """
