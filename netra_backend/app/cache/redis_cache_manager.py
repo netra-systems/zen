@@ -1,24 +1,27 @@
-"""Redis Cache Manager - SSOT for Redis-based Caching
+"""Redis Cache Manager - SSOT Compatibility Layer
 
-This module provides Redis-based caching capabilities for the Netra platform,
-enabling high-performance distributed caching for multi-user scenarios.
+DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
+
+This module provides backward compatibility during Redis SSOT migration.
+The primary SSOT Redis manager now includes all cache functionality.
 
 Business Value Justification (BVJ):
-- Segment: All customer segments (Free -> Enterprise)
+- Segment: All customer segments (Free -> Enterprise)  
 - Business Goal: Improve response times and reduce database load
 - Value Impact: Faster user experiences and reduced infrastructure costs
 - Strategic Impact: Enables scaling to support more concurrent users
 
-SSOT Compliance:
-- Integrates with existing Redis infrastructure
-- Uses standardized cache key patterns
-- Provides unified interface for Redis operations
+SSOT Migration:
+- All functionality has been consolidated into netra_backend.app.redis_manager
+- This module provides compatibility wrappers during transition
+- Future imports should use redis_manager directly
 """
 
 import asyncio
 import json
 import pickle
 import time
+import warnings
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Union, Set
 from dataclasses import dataclass, field
@@ -27,6 +30,13 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
+
+# Issue deprecation warning for this module
+warnings.warn(
+    "redis_cache_manager is deprecated. Use netra_backend.app.redis_manager.redis_manager directly",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 @dataclass

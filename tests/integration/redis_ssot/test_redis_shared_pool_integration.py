@@ -38,6 +38,9 @@ class TestRedisSharedPoolIntegration(unittest.TestCase):
         super().setUp()
         self.test_keys_created = set()
         self.redis_clients = []
+    
+    async def asyncTearDown(self):
+        """Async cleanup of test resources."""
         # Clean up test keys from all Redis instances
         for key in self.test_keys_created:
             try:
@@ -57,8 +60,6 @@ class TestRedisSharedPoolIntegration(unittest.TestCase):
                     await client.aclose()
             except Exception:
                 pass
-        
-        await super().asyncTearDown()
     
     async def test_redis_cache_auth_database_pool_sharing(self):
         """DESIGNED TO FAIL: Test Redis pool sharing between cache, auth, and database.
