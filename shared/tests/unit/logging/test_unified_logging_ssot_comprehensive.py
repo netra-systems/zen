@@ -901,9 +901,12 @@ class TestUnifiedLoggingSSOTGCPJSONFormatterCRITICAL(SSotBaseTestCase):
         
         formatter_func = logger_instance._get_json_formatter()
         
+        level_mock = MagicMock()
+        level_mock.name = 'INFO'
+        
         mock_record = {
             'time': datetime.now(UTC),
-            'level': MagicMock(name='INFO'),
+            'level': level_mock,
             'message': 'Context test message',
             'name': 'test.logger',
             'exception': None,
@@ -932,9 +935,12 @@ class TestUnifiedLoggingSSOTGCPJSONFormatterCRITICAL(SSotBaseTestCase):
             'boolean_field': True
         }
         
+        level_mock = MagicMock()
+        level_mock.name = 'DEBUG'
+        
         mock_record = {
             'time': datetime.now(UTC),
-            'level': MagicMock(name='DEBUG'),
+            'level': level_mock,
             'message': 'Extra data test',
             'name': 'test.logger',
             'exception': None,
@@ -957,9 +963,12 @@ class TestUnifiedLoggingSSOTGCPJSONFormatterCRITICAL(SSotBaseTestCase):
         logger_instance = UnifiedLoggingSSOT()
         formatter_func = logger_instance._get_json_formatter()
         
+        level_mock = MagicMock()
+        level_mock.name = 'INFO'
+        
         mock_record = {
             'time': datetime.now(UTC),
-            'level': MagicMock(name='INFO'),
+            'level': level_mock,
             'message': 'Timestamp test',
             'name': 'test.logger',
             'exception': None,
@@ -986,9 +995,12 @@ class TestUnifiedLoggingSSOTGCPJSONFormatterCRITICAL(SSotBaseTestCase):
             logger_instance = UnifiedLoggingSSOT()
             formatter_func = logger_instance._get_json_formatter()
             
+            level_mock = MagicMock()
+            level_mock.name = 'INFO'
+            
             mock_record = {
                 'time': datetime.now(UTC),
-                'level': MagicMock(name='INFO'),
+                'level': level_mock,
                 'message': 'Service name test',
                 'name': 'test.logger',
                 'exception': None,
@@ -2114,9 +2126,12 @@ class TestUnifiedLoggingSSOTPerformanceBenchmarks(SSotBaseTestCase):
         logger_instance = UnifiedLoggingSSOT()
         formatter_func = logger_instance._get_json_formatter()
         
+        level_mock = MagicMock()
+        level_mock.name = 'INFO'
+        
         mock_record = {
             'time': datetime.now(UTC),
-            'level': MagicMock(name='INFO'),
+            'level': level_mock,
             'message': 'Performance test message',
             'name': 'test.logger',
             'exception': None,
@@ -2249,9 +2264,12 @@ class TestUnifiedLoggingSSOTRegressionTests(SSotBaseTestCase):
             )
             
             formatter_func = logger_instance._get_json_formatter()
+            level_mock = MagicMock()
+            level_mock.name = 'ERROR'
+            
             mock_record = {
                 'time': datetime.now(UTC),
-                'level': MagicMock(name='ERROR'),
+                'level': level_mock,
                 'message': 'Critical staging error',
                 'name': 'staging.service',
                 'exception': mock_exception,
