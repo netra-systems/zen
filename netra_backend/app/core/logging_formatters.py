@@ -144,6 +144,35 @@ class LogFormatter:
         self._add_exception_info(record, entry)
         return entry.model_dump_json() + "\n"
     
+    def _format_traceback_for_gcp(self, exc_traceback) -> Optional[str]:
+        """Format traceback object into readable string for GCP logging.
+        
+        Handles both standard Python tracebacks and Loguru exception structures.
+        Returns single-line string with escaped newlines for GCP compatibility.
+        
+        Args:
+            exc_traceback: Traceback object or None
+            
+        Returns:
+            Formatted traceback string or None if no traceback available
+        """
+        if not exc_traceback:
+            return None
+            
+        try:
+            import traceback
+            # Convert traceback object to readable string format
+            traceback_lines = traceback.format_tb(exc_traceback)
+            if traceback_lines:
+                # Join all lines and escape newlines for single-line JSON
+                traceback_str = ''.join(traceback_lines)
+                return traceback_str.replace('\n', '\\n').replace('\r', '\\r')
+            else:
+                return None
+        except Exception as e:
+            # Fallback for any traceback processing errors
+            return f"Traceback processing error: {str(e)}"
+    
     def gcp_json_formatter(self, record) -> str:
         """Format log record as GCP Cloud Logging compatible JSON.
         
@@ -259,11 +288,10 @@ class LogFormatter:
                 # Add exception info if present
                 if exc := record.get("exception"):
                     if exc and hasattr(exc, 'type'):
-                        # Format traceback as single line for GCP
+                        # Format traceback using proper extraction method
                         traceback_str = None
                         if hasattr(exc, 'traceback') and exc.traceback:
-                            # Replace newlines with \n to keep JSON on single line
-                            traceback_str = str(exc.traceback).replace('\n', '\\n').replace('\r', '\\r')
+                            traceback_str = self._format_traceback_for_gcp(exc.traceback)
                         
                         gcp_entry['error'] = {
                             'type': exc.type.__name__ if hasattr(exc, 'type') and exc.type else None,
