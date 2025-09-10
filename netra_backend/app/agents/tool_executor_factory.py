@@ -125,7 +125,7 @@ class ToolExecutorFactory:
                     user_context, ws_manager
                 )
                 # Create adapter for backward compatibility
-                from netra_backend.app.agents.request_scoped_tool_dispatcher import WebSocketBridgeAdapter
+                from netra_backend.app.core.tools.unified_tool_dispatcher import WebSocketBridgeAdapter
                 websocket_bridge = WebSocketBridgeAdapter(websocket_emitter, user_context)
                 logger.debug(f"🔌 Created WebSocket bridge adapter for {user_context.get_correlation_id()}")
             else:

@@ -599,7 +599,7 @@ __all__ = [
     'ServiceUnavailableError',
     'ServiceConfigurationError',
     'ServiceEndpoints',
-    'DatabaseManager',
+    # DatabaseManager imported from SSOT location - not exported to avoid import conflicts
     'RedisManager', 
     'ClickHouseManager',
     'WebSocketTestClient',

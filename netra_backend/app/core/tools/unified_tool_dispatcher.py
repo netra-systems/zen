@@ -1413,6 +1413,123 @@ async def create_request_scoped_dispatcher(
 RequestScopedToolDispatcher = UnifiedToolDispatcher
 
 
+class WebSocketBridgeAdapter:
+    """Adapter from WebSocketEventEmitter to AgentWebSocketBridge interface.
+    
+    This adapter allows UnifiedToolExecutionEngine to work with the new
+    WebSocketEventEmitter while maintaining backward compatibility with the
+    existing AgentWebSocketBridge interface.
+    
+    The adapter translates method calls and ensures proper user context isolation.
+    """
+    
+    def __init__(self, websocket_emitter, user_context):
+        """Initialize the adapter.
+        
+        Args:
+            websocket_emitter: The WebSocketEventEmitter to adapt
+            user_context: User context for validation and agent name generation
+        """
+        self.websocket_emitter = websocket_emitter
+        self.user_context = user_context
+    
+    async def notify_tool_executing(
+        self,
+        run_id: str,
+        agent_name: str,
+        tool_name: str,
+        parameters: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Notify that a tool is executing."""
+        return await self.websocket_emitter.notify_tool_executing(
+            run_id, agent_name, tool_name, parameters
+        )
+    
+    async def notify_tool_completed(
+        self,
+        run_id: str,
+        agent_name: str,
+        tool_name: str,
+        result: Optional[Dict[str, Any]] = None,
+        execution_time_ms: Optional[float] = None
+    ) -> bool:
+        """Notify that a tool has completed."""
+        return await self.websocket_emitter.notify_tool_completed(
+            run_id, agent_name, tool_name, result, execution_time_ms
+        )
+    
+    async def notify_agent_started(
+        self,
+        run_id: str,
+        agent_name: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Notify that an agent has started."""
+        return await self.websocket_emitter.notify_agent_started(
+            run_id, agent_name, context
+        )
+    
+    async def notify_agent_thinking(
+        self,
+        run_id: str,
+        agent_name: str,
+        reasoning: str,
+        step_number: Optional[int] = None,
+        progress_percentage: Optional[float] = None
+    ) -> bool:
+        """Notify that an agent is thinking."""
+        return await self.websocket_emitter.notify_agent_thinking(
+            run_id, agent_name, reasoning, step_number, progress_percentage
+        )
+    
+    async def notify_agent_completed(
+        self,
+        run_id: str,
+        agent_name: str,
+        result: Optional[Dict[str, Any]] = None,
+        execution_time_ms: Optional[float] = None
+    ) -> bool:
+        """Notify that an agent has completed."""
+        return await self.websocket_emitter.notify_agent_completed(
+            run_id, agent_name, result, execution_time_ms
+        )
+    
+    async def notify_agent_error(
+        self,
+        run_id: str,
+        agent_name: str,
+        error: str,
+        error_context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Notify of an agent error."""
+        return await self.websocket_emitter.notify_agent_error(
+            run_id, agent_name, error, error_context
+        )
+    
+    async def notify_progress_update(
+        self,
+        run_id: str,
+        agent_name: str,
+        progress: Dict[str, Any]
+    ) -> bool:
+        """Notify of a progress update."""
+        return await self.websocket_emitter.notify_progress_update(
+            run_id, agent_name, progress
+        )
+    
+    async def notify_custom(
+        self,
+        run_id: str,
+        agent_name: str,
+        notification_type: str,
+        data: Dict[str, Any]
+    ) -> bool:
+        """Send custom notification."""
+        return await self.websocket_emitter.notify_custom(
+            run_id, agent_name, notification_type, data
+        )
+
+
 # ============================================================================
 # EXPORTS
 # ============================================================================

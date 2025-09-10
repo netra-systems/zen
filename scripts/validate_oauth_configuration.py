@@ -40,6 +40,9 @@ try:
     from auth_service.auth_core.routes.auth_routes import _determine_urls
     from fastapi.testclient import TestClient
     from auth_service.main import app
+    
+    # SSOT OAuth validation imports
+    from shared.configuration.central_config_validator import validate_oauth_configs_for_environment, get_central_validator
 except ImportError as e:
     print(f"ERROR: Failed to import required modules: {e}")
     print("Ensure you're running from the project root directory")
