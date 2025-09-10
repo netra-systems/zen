@@ -31,15 +31,15 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
 
 
-class TestRequestScopedToolDispatcherSSotCompliance(SSotAsyncTestCase):
+class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
     """Test SSOT compliance for RequestScopedToolDispatcher system.
     
     These tests should FAIL initially due to SSOT violations and PASS after consolidation.
     """
 
-    async def asyncSetUp(self):
+    def setUp(self):
         """Set up test fixtures."""
-        await super().asyncSetUp()
+        super().setUp()
         
         # Create test user contexts for isolation testing
         self.user_context_1 = UserExecutionContext(
@@ -169,7 +169,7 @@ class TestRequestScopedToolDispatcherSSotCompliance(SSotAsyncTestCase):
             f"Should have at most 1 SSOT factory + 1 convenience function after consolidation."
         )
 
-    async def test_websocket_events_consistent_delivery(self):
+    def test_websocket_events_consistent_delivery(self):
         """Test that WebSocket events are delivered consistently via unified implementation.
         
         EXPECTED: FAIL initially due to inconsistent event integration:
