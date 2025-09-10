@@ -45,7 +45,7 @@ import websockets
 from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
 
 # SSOT imports following CLAUDE.md absolute import requirements
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import (
     E2EWebSocketAuthHelper,
@@ -65,7 +65,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 
 
-class TestWebSocketRaceConditionsGoldenPath(BaseE2ETest):
+class TestWebSocketRaceConditionsGoldenPath(SSotAsyncTestCase):
     """
     E2E tests for WebSocket race conditions in complete golden path scenarios.
     

@@ -413,7 +413,7 @@ class TestUserExecutionEngineWebSocketIntegration(SSotAsyncTestCase):
                     result = AgentExecutionResult(
                         success=True,
                         agent_name="triage_agent",
-                        execution_time=0.5,
+                        duration=0.5,
                         data=None
                     )
                     await engine._send_user_agent_completed(context, result)

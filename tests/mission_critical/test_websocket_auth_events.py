@@ -35,7 +35,7 @@ from shared.isolated_environment import get_env
 # Import SSOT authentication and WebSocket utilities
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from test_framework.fixtures.real_services import real_services_fixture
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ class WebSocketAuthEventValidator:
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestWebSocketAuthEvents(BaseE2ETest):
+class TestWebSocketAuthEvents(SSotAsyncTestCase):
     """Mission Critical: WebSocket authentication with agent events for chat value."""
     
     @pytest.fixture(autouse=True)
@@ -535,7 +535,7 @@ class TestWebSocketAuthEvents(BaseE2ETest):
 @pytest.mark.mission_critical
 @pytest.mark.real_services
 @pytest.mark.websocket
-class TestWebSocketAuthPerformance(BaseE2ETest):
+class TestWebSocketAuthPerformance(SSotAsyncTestCase):
     """Mission Critical: WebSocket authentication performance under load."""
     
     async def test_websocket_auth_concurrent_connections(self):

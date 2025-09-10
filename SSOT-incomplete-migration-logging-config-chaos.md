@@ -30,11 +30,45 @@ Incomplete migration to unified logging SSOT - multiple systems coexist causing 
 6. PR and closure (Step 6)
 
 ## Files to Track:
-- TBD - Will be populated during discovery phase
+
+### Existing Test Files (60% of effort - must continue passing):
+- `netra_backend/tests/integration/logging/test_cross_service_log_correlation.py`
+- `tests/e2e/logging/test_end_to_end_logging_completeness.py`  
+- `netra_backend/tests/unit/test_logging_config_comprehensive.py` (1,079 lines)
+- `tests/telemetry/` directory (8 files - OpenTelemetry integration)
+
+### New SSOT Test Files (20% of effort - must fail initially, pass after fix):
+- `tests/unit/ssot/test_logging_ssot_validation.py`
+- `tests/integration/ssot/test_unified_log_correlation_integration.py`
+- `tests/e2e/ssot/test_golden_path_logging_ssot_e2e.py`
+- `tests/performance/ssot/test_logging_ssot_performance.py`
+
+### SSOT Violation Sources (For Remediation):
+- `netra_backend/app/logging_config.py` (UnifiedLogger primary)
+- `shared/logging/unified_logger_factory.py` (Factory pattern)
+- `netra_backend/app/core/logging_config.py` (Core logging)
+- `auth_service/auth_core/utils/logging_config.py` (Auth-specific)
+- `analytics_service/analytics_core/utils/logging_config.py` (Analytics-specific)
 
 ## Test Plan:
-- TBD - Will be defined in Step 1
+
+### Test Strategy Overview:
+- **Philosophy:** Tests will FAIL initially (proving SSOT violations), then PASS after remediation
+- **Distribution:** 20% Unit, 60% Integration, 20% E2E
+- **Focus:** Golden Path debugging capability restoration
+
+### Critical Test Scenarios:
+1. **SSOT Config Validation:** Prove only 1 logging config should exist (currently 5)
+2. **Cross-Service Correlation:** Validate unified correlation across all services
+3. **Golden Path E2E:** Complete user journey tracing in staging
+4. **Performance Impact:** SSOT logging <5% overhead
+
+### Success Criteria:
+- **Before Remediation:** New tests FAIL, proving violations exist
+- **After Remediation:** All tests PASS, proving unified logging works
+- **Business Impact:** Debug session time: hours → minutes
 
 ## Progress Log:
-- ✅ Step 0: SSOT Audit complete - Critical logging/tracing violations identified
-- ⏳ Step 1: Test discovery and planning (next)
+- ✅ Step 0: SSOT Audit complete - Critical logging/tracing violations identified  
+- ✅ Step 1: Test discovery complete - Found existing + planned new SSOT tests
+- ⏳ Step 2: Execute test plan (next)
