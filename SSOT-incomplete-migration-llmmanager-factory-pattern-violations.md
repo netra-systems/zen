@@ -1,7 +1,7 @@
 # SSOT Incomplete Migration: LLMManager Factory Pattern Violations
 
 **Issue Created:** 2025-01-09  
-**GitHub Issue:** [Pending creation]  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/224  
 **Status:** Discovery Phase Complete  
 **Priority:** CRITICAL - Blocking Golden Path  
 
