@@ -208,8 +208,18 @@ class TestEnvironmentDetection:
             self.env.reset_to_original()
             self.env.enable_isolation()
             
+            # For testing environment normalization, clear test context indicators
+            # to ensure we get proper environment detection without test interference
+            self.env.set("PYTEST_CURRENT_TEST", "", "normalization_test")
+            self.env.delete("PYTEST_CURRENT_TEST", "normalization_test")
+            self.env.set("TESTING", "false", "normalization_test")
+            self.env.set("TEST_MODE", "false", "normalization_test")
+            
             if input_env:  # Only set if not empty (testing default case)
                 self.env.set("ENVIRONMENT", input_env, "normalization_test")
+            else:
+                # For empty case, explicitly unset ENVIRONMENT to test default
+                self.env.delete("ENVIRONMENT", "normalization_test")
             
             backend_env = BackendEnvironment()
             actual_env = backend_env.get_environment()
@@ -265,6 +275,14 @@ class TestEnvironmentDetection:
         for case in test_context_cases:
             self.env.reset_to_original()
             self.env.enable_isolation()
+            
+            # For cases that expect False, explicitly unset pytest-related variables
+            if not case["expected"]:
+                # Clear pytest-related environment variables in isolation
+                self.env.set("PYTEST_CURRENT_TEST", "", f"test_context_{case['name']}")
+                self.env.delete("PYTEST_CURRENT_TEST", f"test_context_{case['name']}")
+                self.env.set("TESTING", "false", f"test_context_{case['name']}")
+                self.env.set("TEST_MODE", "false", f"test_context_{case['name']}")
             
             # Set test case variables
             for key, value in case["vars"].items():

@@ -107,7 +107,7 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 # Optimized health check for staging validation
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
 # Expose application port
 EXPOSE 8000
@@ -122,7 +122,7 @@ CMD ["sh", "-c", "\
     exec gunicorn netra_backend.app.main:app \
         -w ${WORKERS:-1} \
         -k uvicorn.workers.UvicornWorker \
-        --bind 0.0.0.0:8000 \
+        --bind 0.0.0.0:${PORT:-8000} \
         --timeout ${TIMEOUT:-300} \
         --graceful-timeout 30 \
         --max-requests 2000 \

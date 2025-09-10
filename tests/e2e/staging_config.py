@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 class StagingURLs:
     """Centralized staging environment URLs from deployed GCP services."""
     
-    # Primary staging URLs (GCP Cloud Run)
-    backend_url: str = "https://netra-backend-staging-701982941522.us-central1.run.app"
-    auth_url: str = "https://netra-auth-service-701982941522.us-central1.run.app"
-    frontend_url: str = "https://netra-frontend-staging-701982941522.us-central1.run.app"
+    # Primary staging URLs (Golden Path domains)
+    backend_url: str = "https://api.staging.netrasystems.ai"
+    auth_url: str = "https://auth.staging.netrasystems.ai"
+    frontend_url: str = "https://app.staging.netrasystems.ai"
     
     # WebSocket URL (derived from backend)
     @property

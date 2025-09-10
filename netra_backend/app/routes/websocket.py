@@ -370,6 +370,54 @@ async def websocket_endpoint(websocket: WebSocket):
         else:
             await windows_safe_sleep(0.015)  # Increased to 15ms for development environments
         
+        # ISSUE #135 SECONDARY FIX: Resource contention mitigation with connection pooling and request throttling
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+        
+        logger.info(f"🛡️ ISSUE #135 FIX: Applying resource contention mitigation for WebSocket connection")
+        
+        # Circuit breaker pattern for service dependency failures
+        circuit_breaker_state = await _check_websocket_service_circuit_breaker()
+        if circuit_breaker_state == "OPEN":
+            logger.warning(f"⚠️ CIRCUIT BREAKER OPEN: Service dependencies unavailable - graceful rejection")
+            await safe_websocket_close(
+                websocket, 
+                code=1013, 
+                reason="Service temporarily unavailable - retry in 30 seconds"
+            )
+            return
+        
+        # Connection pooling: Limit concurrent connections from same client
+        client_info = f"{getattr(websocket.client, 'host', 'unknown')}:{getattr(websocket.client, 'port', 'unknown')}" if websocket.client else "unknown_client"
+        connection_count = await _get_active_connections_for_client(client_info)
+        
+        # Environment-aware connection limits for Cloud Run
+        max_connections_per_client = 5 if environment in ["staging", "production"] else 10
+        
+        if connection_count >= max_connections_per_client:
+            logger.warning(f"🚫 CONNECTION LIMIT: Client {client_info} has {connection_count}/{max_connections_per_client} connections")
+            await safe_websocket_close(
+                websocket,
+                code=1008,
+                reason=f"Too many concurrent connections ({connection_count}/{max_connections_per_client})"
+            )
+            return
+        
+        # Request throttling: Check for rapid connection attempts 
+        throttle_result = await _check_connection_rate_limit(client_info)
+        if not throttle_result["allowed"]:
+            logger.warning(f"🚫 RATE LIMIT: Client {client_info} exceeded connection rate limit")
+            await safe_websocket_close(
+                websocket,
+                code=1008, 
+                reason=f"Rate limit exceeded - retry after {throttle_result['retry_after']}s"
+            )
+            return
+        
+        # Track this connection for pooling and throttling
+        await _register_client_connection(client_info, websocket)
+        
+        logger.info(f"✅ RESOURCE CHECKS PASSED: Client {client_info} - {connection_count + 1} active connections")
+        
         # 🚨 SSOT ENFORCEMENT: Use unified authentication service (SINGLE SOURCE OF TRUTH)
         # This replaces ALL previous authentication paths:
         # [ERROR] user_context_extractor.py - 4 duplicate JWT validation methods
@@ -437,7 +485,7 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, auth_error.model_dump())
             await windows_safe_sleep(0.1)  # Brief delay to ensure message is sent
-            await safe_websocket_close(websocket, code=1008, reason="SSOT Auth failed")
+            await safe_websocket_close(websocket, code=1011, reason="SSOT Auth failed")
             return
         
         # SSOT Authentication SUCCESS
@@ -452,9 +500,76 @@ async def websocket_endpoint(websocket: WebSocket):
             ws_manager = await create_websocket_manager(user_context)
             logger.info(f"🏭 FACTORY PATTERN: Created isolated WebSocket manager (id: {id(ws_manager)})")
         except Exception as factory_error:
-            # PHASE 1 FIX 1: Enhanced factory initialization resilience
-            # Instead of failing with 1011, use progressive fallback chain
-            from netra_backend.app.websocket_core.websocket_manager_factory import FactoryInitializationError
+            # ENHANCED ERROR REPORTING: Component-specific error diagnosis
+            from netra_backend.app.websocket_core.websocket_manager_factory import (
+                FactoryInitializationError, WebSocketComponentError, validate_websocket_component_health
+            )
+            
+            # STEP 1: Detailed component health diagnosis
+            logger.info("🔍 COMPONENT HEALTH DIAGNOSIS: Running comprehensive validation...")
+            health_report = validate_websocket_component_health(user_context)
+            
+            # STEP 2: Create component-specific error instead of generic 1011
+            if not health_report["healthy"]:
+                failed_components = health_report["failed_components"]
+                logger.error(f"🚨 COMPONENT FAILURES IDENTIFIED: {failed_components}")
+                
+                # Log detailed component status
+                for component, details in health_report["component_details"].items():
+                    status = details.get("status", "unknown")
+                    if status == "failed":
+                        error_code = details.get("error_code", 1011)
+                        logger.error(f"   ❌ {component}: {details.get('error', 'Unknown error')} (Code: {error_code})")
+                    elif status == "degraded":
+                        logger.warning(f"   ⚠️ {component}: {details.get('details', 'Degraded functionality')}")
+                    else:
+                        logger.info(f"   ✅ {component}: {details.get('details', 'Healthy')}")
+                
+                # Create specific error based on primary failure
+                primary_failure = failed_components[0] if failed_components else "unknown"
+                if "database" in failed_components:
+                    component_error = WebSocketComponentError.database_failure(
+                        f"Database connectivity failure: {health_report['component_details']['database']['error']}",
+                        user_id=user_context.user_id if user_context else None,
+                        details=health_report
+                    )
+                elif "factory" in failed_components:
+                    component_error = WebSocketComponentError.factory_failure(
+                        f"WebSocket factory initialization failure: {factory_error}",
+                        user_id=user_context.user_id if user_context else None,
+                        details=health_report,
+                        root_cause=factory_error
+                    )
+                elif "user_context" in failed_components:
+                    component_error = WebSocketComponentError.auth_failure(
+                        f"User authentication context failure: {health_report['component_details']['user_context']['error']}",
+                        user_id=user_context.user_id if user_context else None,
+                        details=health_report
+                    )
+                elif "environment" in failed_components:
+                    component_error = WebSocketComponentError.dependency_failure(
+                        f"Environment configuration failure: {health_report['component_details']['environment']['error']}",
+                        user_id=user_context.user_id if user_context else None,
+                        details=health_report
+                    )
+                else:
+                    component_error = WebSocketComponentError.factory_failure(
+                        f"Multiple component failures: {', '.join(failed_components)}",
+                        user_id=user_context.user_id if user_context else None,
+                        details=health_report,
+                        root_cause=factory_error
+                    )
+                
+                logger.error(f"🎯 SPECIFIC ERROR IDENTIFIED: {component_error.component} failure (Code: {component_error.error_code})")
+                
+                # Send specific error response instead of generic 1011
+                try:
+                    error_response = component_error.to_websocket_response()
+                    error_response["suggestions"] = health_report.get("error_suggestions", [])
+                    await safe_websocket_send(websocket, error_response)
+                    logger.info(f"📤 SPECIFIC ERROR SENT: Code {component_error.error_code} for {component_error.component} failure")
+                except Exception as send_error:
+                    logger.warning(f"Failed to send specific error response: {send_error}")
             
             logger.warning(f"🔄 FACTORY INITIALIZATION ISSUE: {factory_error}")
             logger.info("🛡️ PHASE 1 RESILIENCE: Activating progressive fallback chain")
@@ -1457,22 +1572,88 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.debug(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
     
     except Exception as e:
-        # PHASE 1 FIX 4: General exception handler resilience  
-        # Instead of 1011 internal error, attempt connection recovery
+        # ENHANCED EXCEPTION HANDLING: Component-specific error diagnosis and recovery
+        from netra_backend.app.websocket_core.websocket_manager_factory import (
+            WebSocketComponentError, validate_websocket_component_health
+        )
+        
         logger.error(f"WebSocket error: {e}", exc_info=True)
         
+        # Diagnose the error type and create specific error code
+        logger.info("🔍 ERROR DIAGNOSIS: Analyzing exception for component-specific reporting...")
+        health_report = validate_websocket_component_health()
+        
+        # Create specific error based on exception type and component health
+        if "auth" in str(e).lower() or isinstance(e, HTTPException):
+            error_obj = WebSocketComponentError.auth_failure(
+                f"Authentication error during WebSocket operation: {e}",
+                details=health_report,
+                root_cause=e
+            )
+        elif "database" in str(e).lower() or "db" in str(e).lower():
+            error_obj = WebSocketComponentError.database_failure(
+                f"Database error during WebSocket operation: {e}",
+                details=health_report,
+                root_cause=e
+            )
+        elif "redis" in str(e).lower() or "cache" in str(e).lower():
+            error_obj = WebSocketComponentError.redis_failure(
+                f"Redis/cache error during WebSocket operation: {e}",
+                details=health_report,
+                root_cause=e
+            )
+        elif "handler" in str(e).lower() or "message" in str(e).lower():
+            error_obj = WebSocketComponentError.handler_failure(
+                f"Message handler error during WebSocket operation: {e}",
+                details=health_report,
+                root_cause=e
+            )
+        elif "supervisor" in str(e).lower() or "agent" in str(e).lower():
+            error_obj = WebSocketComponentError.supervisor_failure(
+                f"Agent supervisor error during WebSocket operation: {e}",
+                details=health_report,
+                root_cause=e
+            )
+        elif "bridge" in str(e).lower() or "websocket" in str(e).lower():
+            error_obj = WebSocketComponentError.bridge_failure(
+                f"WebSocket bridge error during operation: {e}",
+                details=health_report,
+                root_cause=e
+            )
+        else:
+            error_obj = WebSocketComponentError.integration_failure(
+                f"General integration error during WebSocket operation: {e}",
+                details=health_report,
+                root_cause=e
+            )
+        
+        logger.error(f"🎯 ERROR CLASSIFIED: {error_obj.component} failure (Code: {error_obj.error_code})")
+        
         if is_websocket_connected(websocket):
-            # PHASE 1 RESILIENCE: Try to maintain connection instead of closing with 1011
-            logger.info("🛡️ PHASE 1 RESILIENCE: Attempting connection recovery instead of 1011 error")
+            # Enhanced resilience: Try to maintain connection with specific error reporting
+            logger.info(f"🛡️ ENHANCED RESILIENCE: Attempting recovery for {error_obj.component} failure instead of generic 1011 error")
             
-            # Send recovery message instead of error
+            # Send component-specific recovery message instead of generic 1011 error
             try:
+                # First try to send specific error details
+                error_response = error_obj.to_websocket_response()
+                error_response.update({
+                    "recovery_attempted": True,
+                    "connection_maintained": True,
+                    "component_health": health_report.get("summary", "Component health check failed")
+                })
+                await safe_websocket_send(websocket, error_response)
+                logger.info(f"📤 SPECIFIC ERROR SENT: Code {error_obj.error_code} for {error_obj.component} failure with recovery info")
+                
+                # Follow up with recovery message
                 recovery_msg = create_server_message(
                     MessageType.SYSTEM_MESSAGE,
                     {
                         "event": "connection_recovery",
-                        "message": "Experienced temporary issue but connection remains stable. You can continue chatting.",
-                        "code": "CONNECTION_RECOVERED",
+                        "message": f"Experienced {error_obj.component.lower()} issue but connection remains stable. You can continue chatting.",
+                        "code": f"RECOVERED_FROM_{error_obj.component.upper()}_ERROR",
+                        "error_code": error_obj.error_code,
+                        "component": error_obj.component,
                         "timestamp": datetime.now(timezone.utc).isoformat(),
                         "connection_maintained": True
                     }
@@ -1496,13 +1677,15 @@ async def websocket_endpoint(websocket: WebSocket):
                 logger.warning("🔄 RECOVERY FAILED: Will attempt graceful close instead of 1011")
                 
                 try:
-                    # Send final message before graceful close
+                    # Send final message before component-specific close
                     final_msg = create_server_message(
                         MessageType.SYSTEM_MESSAGE,
                         {
                             "event": "connection_closing",
-                            "message": "Connection needs to restart. Please reconnect for continued service.",
-                            "code": "GRACEFUL_RESTART",
+                            "message": f"Connection needs to restart due to {error_obj.component.lower()} issue. Please reconnect for continued service.",
+                            "code": f"RESTART_DUE_TO_{error_obj.component.upper()}_ERROR",
+                            "error_code": error_obj.error_code,
+                            "component": error_obj.component,
                             "timestamp": datetime.now(timezone.utc).isoformat()
                         }
                     )
@@ -1511,8 +1694,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 except Exception:
                     pass  # Best effort final message
                 
-                # Use graceful close code instead of 1011 internal error
-                await safe_websocket_close(websocket, code=1000, reason="Graceful restart")
+                # Use component-specific close code instead of generic 1011 internal error
+                close_code, close_reason = error_obj.get_close_code_and_reason()
+                await safe_websocket_close(websocket, code=close_code, reason=close_reason[:50])
     
     finally:
         # Clear GCP error reporting context
@@ -2471,3 +2655,159 @@ async def websocket_detailed_stats():
             }
         }
     }
+
+
+# ISSUE #135 SECONDARY FIX: Resource contention mitigation helper functions
+# Global state for connection tracking and rate limiting
+_active_client_connections = {}  # client_info -> list of connection references
+_connection_rate_limits = {}     # client_info -> {"count": int, "reset_time": float}
+_circuit_breaker_state = {
+    "state": "CLOSED",  # CLOSED, HALF_OPEN, OPEN
+    "failure_count": 0,
+    "failure_threshold": 5,
+    "reset_timeout": 30.0,
+    "last_failure_time": None
+}
+
+
+async def _check_websocket_service_circuit_breaker() -> str:
+    """
+    ISSUE #135 FIX: Check circuit breaker state for WebSocket service dependencies.
+    
+    Returns:
+        Circuit breaker state: 'CLOSED', 'HALF_OPEN', or 'OPEN'
+    """
+    current_time = time.time()
+    
+    # Check if circuit breaker should reset from OPEN to HALF_OPEN
+    if (_circuit_breaker_state["state"] == "OPEN" and 
+        _circuit_breaker_state["last_failure_time"] and
+        current_time - _circuit_breaker_state["last_failure_time"] > _circuit_breaker_state["reset_timeout"]):
+        
+        _circuit_breaker_state["state"] = "HALF_OPEN"
+        _circuit_breaker_state["failure_count"] = 0
+        logger.info("🔄 CIRCUIT BREAKER: Transitioning from OPEN to HALF_OPEN for testing")
+    
+    return _circuit_breaker_state["state"]
+
+
+async def _get_active_connections_for_client(client_info: str) -> int:
+    """
+    ISSUE #135 FIX: Get number of active connections for a client.
+    
+    Args:
+        client_info: Client identifier (host:port)
+        
+    Returns:
+        Number of active connections
+    """
+    if client_info not in _active_client_connections:
+        return 0
+    
+    # Clean up closed connections
+    active_connections = []
+    for conn_ref in _active_client_connections[client_info]:
+        try:
+            websocket = conn_ref()  # Call the weak reference
+            if websocket and hasattr(websocket, 'client_state'):
+                if websocket.client_state != WebSocketState.DISCONNECTED:
+                    active_connections.append(conn_ref)
+        except:
+            # Connection reference is invalid, skip it
+            pass
+    
+    _active_client_connections[client_info] = active_connections
+    return len(active_connections)
+
+
+async def _check_connection_rate_limit(client_info: str) -> Dict[str, Any]:
+    """
+    ISSUE #135 FIX: Check if client is within connection rate limits.
+    
+    Args:
+        client_info: Client identifier (host:port)
+        
+    Returns:
+        Dictionary with rate limit status
+    """
+    current_time = time.time()
+    
+    # Rate limit: 10 connections per minute
+    rate_limit_window = 60.0  # 60 seconds
+    max_connections_per_window = 10
+    
+    if client_info not in _connection_rate_limits:
+        _connection_rate_limits[client_info] = {
+            "count": 0,
+            "reset_time": current_time + rate_limit_window
+        }
+    
+    rate_limit = _connection_rate_limits[client_info]
+    
+    # Check if rate limit window has expired
+    if current_time >= rate_limit["reset_time"]:
+        # Reset the rate limit window
+        rate_limit["count"] = 0
+        rate_limit["reset_time"] = current_time + rate_limit_window
+    
+    # Check if client is within rate limit
+    if rate_limit["count"] >= max_connections_per_window:
+        return {
+            "allowed": False,
+            "retry_after": int(rate_limit["reset_time"] - current_time)
+        }
+    
+    # Increment connection count
+    rate_limit["count"] += 1
+    
+    return {
+        "allowed": True,
+        "retry_after": 0
+    }
+
+
+async def _register_client_connection(client_info: str, websocket: WebSocket) -> None:
+    """
+    ISSUE #135 FIX: Register a client connection for tracking.
+    
+    Args:
+        client_info: Client identifier (host:port)
+        websocket: WebSocket connection to track
+    """
+    import weakref
+    
+    if client_info not in _active_client_connections:
+        _active_client_connections[client_info] = []
+    
+    # Use weak reference to avoid memory leaks
+    conn_ref = weakref.ref(websocket)
+    _active_client_connections[client_info].append(conn_ref)
+    
+    logger.debug(f"📊 REGISTERED CONNECTION: {client_info} now has {len(_active_client_connections[client_info])} tracked connections")
+
+
+async def _record_service_failure() -> None:
+    """
+    ISSUE #135 FIX: Record a service failure for circuit breaker.
+    """
+    _circuit_breaker_state["failure_count"] += 1
+    _circuit_breaker_state["last_failure_time"] = time.time()
+    
+    # Trip circuit breaker if failure threshold reached
+    if _circuit_breaker_state["failure_count"] >= _circuit_breaker_state["failure_threshold"]:
+        if _circuit_breaker_state["state"] != "OPEN":
+            _circuit_breaker_state["state"] = "OPEN"
+            logger.warning(f"🚨 CIRCUIT BREAKER OPENED: {_circuit_breaker_state['failure_count']} consecutive failures")
+
+
+async def _record_service_success() -> None:
+    """
+    ISSUE #135 FIX: Record a service success for circuit breaker.
+    """
+    # Reset failure count on success
+    _circuit_breaker_state["failure_count"] = 0
+    
+    # Close circuit breaker if it was HALF_OPEN
+    if _circuit_breaker_state["state"] == "HALF_OPEN":
+        _circuit_breaker_state["state"] = "CLOSED"
+        logger.info("✅ CIRCUIT BREAKER CLOSED: Service restored after successful operation")

@@ -265,8 +265,8 @@ class BackendEnvironment:
     
     # Environment & Deployment
     def get_environment(self) -> str:
-        """Get current environment name."""
-        return self.env.get("ENVIRONMENT", "development").lower()
+        """Get current environment name with proper normalization."""
+        return self.env.get_environment_name()
     
     def is_production(self) -> bool:
         """Check if running in production."""
@@ -278,7 +278,7 @@ class BackendEnvironment:
     
     def is_development(self) -> bool:
         """Check if running in development."""
-        return self.get_environment() in ["development", "dev", "local"]
+        return self.get_environment() == "development"
     
     def is_testing(self) -> bool:
         """Check if running in test environment."""

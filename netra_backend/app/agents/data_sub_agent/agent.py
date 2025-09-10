@@ -44,6 +44,40 @@ class DataSubAgent(DataAgent):
             context=context,
             execution_priority=execution_priority
         )
+    
+    @classmethod
+    def create_agent_with_context(cls, user_context: 'UserExecutionContext') -> 'DataSubAgent':
+        """Create DataSubAgent with proper UserExecutionContext pattern.
+        
+        This method provides the correct constructor signature for the factory pattern,
+        avoiding the constructor parameter mismatch with BaseAgent.create_agent_with_context.
+        
+        Args:
+            user_context: User execution context for isolation
+            
+        Returns:
+            DataSubAgent instance configured for the user context
+        """
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+        
+        # Create dependencies (these will be injected later by the factory)
+        llm_manager = LLMManager()
+        tool_dispatcher = UnifiedToolDispatcher.create_for_user(user_context)
+        
+        # Create agent with correct constructor signature
+        agent = cls(
+            llm_manager=llm_manager,
+            tool_dispatcher=tool_dispatcher,
+            context=user_context,
+            execution_priority=1  # Data runs after triage
+        )
+        
+        # Set user context for WebSocket integration
+        if hasattr(agent, 'set_user_context'):
+            agent.set_user_context(user_context)
+        
+        return agent
 
 # Factory function for creating data agents (backward compatibility)
 def create_data_agent(

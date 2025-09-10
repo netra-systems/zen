@@ -171,7 +171,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
                     headers=ws_headers,
                     timeout=staging_conditions["connection_timeout"],  # Aggressive timeout
                     user_id=str(user_context.user_id),
-                    retry_attempts=1  # No retries to see raw failure
+                    max_retries=1  # No retries to see raw failure
                 )
                 
                 # If connection succeeds, track it

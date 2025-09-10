@@ -63,19 +63,55 @@ class DockerComposeParser:
         port_mappings = {}
         for port_mapping in ports:
             if isinstance(port_mapping, str) and ':' in port_mapping:
-                external, internal = port_mapping.split(':', 1)
-                # Handle environment variable substitution like ${DEV_POSTGRES_PORT:-5433}:5432
-                if external.startswith('${') and '}' in external:
+                # CRITICAL FIX: Handle environment variables with colon syntax correctly
+                # Need to find the LAST colon that separates external:internal ports
+                # not the colons inside ${VAR:-default} syntax
+                
+                if port_mapping.startswith('${') and '}:' in port_mapping:
+                    # Environment variable syntax: ${VAR:-default}:internal_port
+                    # Find the }:  to split correctly
+                    brace_colon_index = port_mapping.find('}:')
+                    if brace_colon_index != -1:
+                        external = port_mapping[:brace_colon_index + 1]  # Include the }
+                        internal = port_mapping[brace_colon_index + 2:]  # Skip }:
+                    else:
+                        # Fallback to original logic if format is unexpected
+                        external, internal = port_mapping.split(':', 1)
+                else:
+                    # No environment variable, use standard split
+                    external, internal = port_mapping.split(':', 1)
+                
+                # Handle environment variable substitution like ${DEV_REDIS_PORT:-6380}
+                if external.startswith('${') and external.endswith('}'):
                     # Extract default value from ${VAR:-default}
                     if ':-' in external:
-                        default_value = external.split(':-')[1].rstrip('}')
-                        port_mappings['external'] = int(default_value)
+                        # Format: ${VAR:-default}
+                        var_and_default = external[2:-1]  # Remove ${ and }
+                        if ':-' in var_and_default:
+                            var_name, default_value = var_and_default.split(':-', 1)
+                            try:
+                                port_mappings['external'] = int(default_value)
+                            except ValueError:
+                                raise ValueError(f"Invalid port default value in {service_name}: {default_value}")
+                        else:
+                            # No default value, skip this mapping
+                            continue
                     else:
-                        # No default, skip this mapping
+                        # Format: ${VAR} - no default, would be resolved by Docker
+                        # Skip this mapping as it's environment-dependent
                         continue
                 else:
-                    port_mappings['external'] = int(external)
-                port_mappings['internal'] = int(internal)
+                    # Direct port number
+                    try:
+                        port_mappings['external'] = int(external)
+                    except ValueError:
+                        raise ValueError(f"Invalid external port in {service_name}: {external}")
+                
+                # Parse internal port
+                try:
+                    port_mappings['internal'] = int(internal)
+                except ValueError:
+                    raise ValueError(f"Invalid internal port in {service_name}: {internal}")
         
         return port_mappings
     

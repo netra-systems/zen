@@ -617,6 +617,140 @@ async def cors_test() -> Dict[str, Any]:
         **cors_info
     }
 
+# Auth service health endpoint for Golden Path validation
+@app.get("/health/auth")
+@app.head("/health/auth")
+async def health_auth() -> Dict[str, Any]:
+    """
+    Auth service health endpoint for Golden Path validation.
+    
+    Validates JWT capabilities, session management, and OAuth status specifically
+    for the Golden Path user flow (login -> chat message flow).
+    """
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.oauth_manager import OAuthManager
+    
+    env = AuthConfig.get_environment()
+    health_response = {
+        "service": "auth-service",
+        "version": "1.0.0",
+        "environment": env,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "status": "healthy",
+        "capabilities": {
+            "jwt_validation": False,
+            "session_management": False,
+            "oauth_configured": False,
+            "database_connected": False
+        },
+        "golden_path_ready": False
+    }
+    
+    try:
+        # Check JWT capabilities (most critical for Golden Path)
+        try:
+            from auth_service.auth_core.services.auth_service import AuthService
+            auth_svc = AuthService()
+            
+            # Verify JWT creation and validation capabilities
+            if hasattr(auth_svc, 'create_access_token') and hasattr(auth_svc, 'verify_token'):
+                health_response["capabilities"]["jwt_validation"] = True
+            
+        except Exception as jwt_error:
+            logger.warning(f"JWT capability check failed: {jwt_error}")
+        
+        # Check session management (Redis-based or in-memory)
+        try:
+            if hasattr(auth_service, 'redis_client') and auth_service.redis_client:
+                health_response["capabilities"]["session_management"] = True
+            elif hasattr(auth_service, 'session_store'):
+                health_response["capabilities"]["session_management"] = True
+                
+        except Exception as session_error:
+            logger.warning(f"Session management check failed: {session_error}")
+        
+        # Check OAuth configuration for user login flow
+        try:
+            oauth_manager = OAuthManager()
+            available_providers = oauth_manager.get_available_providers()
+            if "google" in available_providers:
+                google_provider = oauth_manager.get_provider("google")
+                if google_provider and oauth_manager.is_provider_configured("google"):
+                    health_response["capabilities"]["oauth_configured"] = True
+                    
+        except Exception as oauth_error:
+            logger.warning(f"OAuth configuration check failed: {oauth_error}")
+        
+        # Check database connectivity for user persistence
+        try:
+            db_ready = await auth_db.is_ready() if hasattr(auth_db, 'is_ready') else False
+            if db_ready:
+                health_response["capabilities"]["database_connected"] = True
+                
+        except Exception as db_error:
+            logger.warning(f"Database connectivity check failed: {db_error}")
+        
+        # Determine overall Golden Path readiness
+        # Core requirements: JWT validation and OAuth configured
+        core_ready = (
+            health_response["capabilities"]["jwt_validation"] and
+            health_response["capabilities"]["oauth_configured"]
+        )
+        
+        # Optional but recommended: session management and database
+        full_ready = (
+            core_ready and
+            health_response["capabilities"]["session_management"] and
+            health_response["capabilities"]["database_connected"]
+        )
+        
+        if full_ready:
+            health_response["golden_path_ready"] = True
+            health_response["status"] = "healthy"
+            return health_response
+        elif core_ready:
+            health_response["golden_path_ready"] = True
+            health_response["status"] = "degraded"
+            health_response["warnings"] = [
+                "Session management or database connectivity limited - user sessions may not persist"
+            ]
+            return health_response
+        else:
+            # Critical capabilities missing
+            missing_capabilities = []
+            if not health_response["capabilities"]["jwt_validation"]:
+                missing_capabilities.append("JWT validation")
+            if not health_response["capabilities"]["oauth_configured"]:
+                missing_capabilities.append("OAuth configuration")
+            
+            health_response["status"] = "unhealthy"
+            health_response["golden_path_ready"] = False
+            health_response["error"] = f"Missing critical capabilities: {', '.join(missing_capabilities)}"
+            
+            # Return 503 in staging/production for missing critical capabilities
+            if env in ["staging", "production"]:
+                return JSONResponse(
+                    status_code=503,
+                    content=health_response
+                )
+            
+            return health_response
+            
+    except Exception as e:
+        logger.error(f"Auth health check failed: {e}")
+        health_response["status"] = "unhealthy"
+        health_response["golden_path_ready"] = False
+        health_response["error"] = f"Health check failed: {str(e)}"
+        
+        # Return 503 for any health check failure in staging/production
+        if env in ["staging", "production"]:
+            return JSONResponse(
+                status_code=503,
+                content=health_response
+            )
+        
+        return health_response
+
 # OAuth status endpoint for monitoring and validation
 @app.get("/oauth/status")
 @app.head("/oauth/status")

@@ -52,6 +52,34 @@ class DataHelperAgent(BaseAgent):
         self.tool_dispatcher = tool_dispatcher
         self.data_helper_tool = DataHelper(llm_manager)
     
+    @classmethod
+    def create_agent_with_context(cls, user_context: 'UserExecutionContext') -> 'DataHelperAgent':
+        """Create DataHelperAgent with proper UserExecutionContext pattern.
+        
+        This method provides the correct constructor signature for the factory pattern,
+        avoiding the constructor parameter mismatch with BaseAgent.create_agent_with_context.
+        
+        Args:
+            user_context: User execution context for isolation
+            
+        Returns:
+            DataHelperAgent instance configured for the user context
+        """
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+        
+        # Create dependencies (these will be injected later by the factory)
+        llm_manager = LLMManager()
+        tool_dispatcher = UnifiedToolDispatcher.create_for_user(user_context)
+        
+        # Create agent with correct constructor signature
+        agent = cls(llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)
+        
+        # Set user context for WebSocket integration
+        if hasattr(agent, 'set_user_context'):
+            agent.set_user_context(user_context)
+        
+        return agent
     
     async def _execute_with_user_context(self, context: 'UserExecutionContext', stream_updates: bool = False) -> 'UserExecutionContext':
         """Execute core data request generation logic with complete user isolation.

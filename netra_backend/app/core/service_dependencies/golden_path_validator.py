@@ -135,24 +135,29 @@ class GoldenPathValidator:
         service_type = requirement.service_type
         validation_function = requirement.validation_function
         
-        # Dispatch to specific validation function
-        if service_type == ServiceType.DATABASE_POSTGRES:
-            return await self._validate_postgres_requirements(app, requirement)
-        elif service_type == ServiceType.DATABASE_REDIS:
-            return await self._validate_redis_requirements(app, requirement)
-        elif service_type == ServiceType.AUTH_SERVICE:
-            return await self._validate_auth_requirements(app, requirement)
-        elif service_type == ServiceType.BACKEND_SERVICE:
-            return await self._validate_backend_requirements(app, requirement)
-        elif service_type == ServiceType.WEBSOCKET_SERVICE:
-            return await self._validate_websocket_requirements(app, requirement)
-        else:
-            return {
-                "requirement": requirement.requirement_name,
-                "success": False,
-                "message": f"No validation implemented for {service_type.value}",
-                "details": {}
-            }
+        # Use HTTP client for service-aware validation instead of direct database access
+        from .service_health_client import ServiceHealthClient
+        
+        async with ServiceHealthClient(self.environment) as health_client:
+            # Dispatch to HTTP-based validation for services
+            if service_type == ServiceType.AUTH_SERVICE:
+                return await health_client.validate_auth_service_health()
+            elif service_type == ServiceType.BACKEND_SERVICE:
+                return await health_client.validate_backend_service_health()
+            # Legacy database validation for compatibility during transition
+            elif service_type == ServiceType.DATABASE_POSTGRES:
+                return await self._validate_postgres_requirements(app, requirement)
+            elif service_type == ServiceType.DATABASE_REDIS:
+                return await self._validate_redis_requirements(app, requirement)
+            elif service_type == ServiceType.WEBSOCKET_SERVICE:
+                return await self._validate_websocket_requirements(app, requirement)
+            else:
+                return {
+                    "requirement": requirement.requirement_name,
+                    "success": False,
+                    "message": f"No validation implemented for {service_type.value}",
+                    "details": {}
+                }
     
     async def _validate_postgres_requirements(
         self,
@@ -160,99 +165,13 @@ class GoldenPathValidator:
         requirement: GoldenPathRequirement
     ) -> Dict[str, Any]:
         """Validate PostgreSQL business requirements."""
-        if requirement.validation_function == "validate_user_auth_tables":
-            return await self._validate_user_auth_tables(app)
-        else:
-            return {
-                "requirement": requirement.requirement_name,
-                "success": False,
-                "message": f"Unknown PostgreSQL validation: {requirement.validation_function}",
-                "details": {}
-            }
+        return {
+            "requirement": requirement.requirement_name,
+            "success": False,
+            "message": f"Unknown PostgreSQL validation: {requirement.validation_function}",
+            "details": {}
+        }
     
-    async def _validate_user_auth_tables(self, app: Any) -> Dict[str, Any]:
-        """Validate that user authentication tables are ready."""
-        try:
-            if not hasattr(app.state, 'db_session_factory') or app.state.db_session_factory is None:
-                return {
-                    "requirement": "user_authentication_ready",
-                    "success": False,
-                    "message": "Database session factory not available",
-                    "details": {"db_session_factory": False}
-                }
-            
-            async with app.state.db_session_factory() as session:
-                # Check for critical user-related tables
-                critical_tables = ['users', 'user_sessions']  # Add actual table names
-                table_results = {}
-                
-                for table_name in critical_tables:
-                    try:
-                        # Check if table exists and has basic structure
-                        result = await session.execute(text(
-                            f"SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '{table_name}'"
-                        ))
-                        table_exists = result.scalar() > 0
-                        table_results[table_name] = table_exists
-                    except Exception:
-                        table_results[table_name] = False
-                
-                # All critical tables must exist
-                all_tables_exist = all(table_results.values())
-                
-                if all_tables_exist:
-                    # Check for essential indexes on user tables (if possible)
-                    try:
-                        index_result = await session.execute(text(
-                            """
-                            SELECT COUNT(*) as index_count
-                            FROM pg_indexes 
-                            WHERE tablename IN ('users', 'user_sessions')
-                            """
-                        ))
-                        index_count = index_result.scalar() or 0
-                        
-                        return {
-                            "requirement": "user_authentication_ready",
-                            "success": True,
-                            "message": f"User auth tables ready with {index_count} indexes",
-                            "details": {
-                                "tables": table_results,
-                                "index_count": index_count,
-                                "all_tables_exist": all_tables_exist
-                            }
-                        }
-                    except Exception:
-                        # Indexes check failed, but tables exist
-                        return {
-                            "requirement": "user_authentication_ready",
-                            "success": True,
-                            "message": "User auth tables exist (index check skipped)",
-                            "details": {
-                                "tables": table_results,
-                                "index_check": "skipped",
-                                "all_tables_exist": all_tables_exist
-                            }
-                        }
-                else:
-                    missing_tables = [table for table, exists in table_results.items() if not exists]
-                    return {
-                        "requirement": "user_authentication_ready",
-                        "success": False,
-                        "message": f"Missing critical user tables: {missing_tables}",
-                        "details": {
-                            "tables": table_results,
-                            "missing_tables": missing_tables
-                        }
-                    }
-                    
-        except Exception as e:
-            return {
-                "requirement": "user_authentication_ready",
-                "success": False,
-                "message": f"Database validation failed: {str(e)}",
-                "details": {"error": str(e)}
-            }
     
     async def _validate_redis_requirements(
         self,
@@ -330,154 +249,11 @@ class GoldenPathValidator:
                 "details": {"error": str(e)}
             }
     
-    async def _validate_auth_requirements(
-        self,
-        app: Any,
-        requirement: GoldenPathRequirement
-    ) -> Dict[str, Any]:
-        """Validate Auth Service business requirements."""
-        if requirement.validation_function == "validate_jwt_capabilities":
-            return await self._validate_jwt_capabilities(app)
-        else:
-            return {
-                "requirement": requirement.requirement_name,
-                "success": False,
-                "message": f"Unknown Auth validation: {requirement.validation_function}",
-                "details": {}
-            }
+    # NOTE: Auth Service validation now handled via HTTP endpoint in ServiceHealthClient
+    # This eliminates service boundary violations and direct app state access
     
-    async def _validate_jwt_capabilities(self, app: Any) -> Dict[str, Any]:
-        """Validate JWT token creation and validation capabilities."""
-        try:
-            # Check for key manager
-            if not hasattr(app.state, 'key_manager') or app.state.key_manager is None:
-                return {
-                    "requirement": "jwt_validation_ready",
-                    "success": False,
-                    "message": "Key manager not available for JWT operations",
-                    "details": {"key_manager": False}
-                }
-            
-            key_manager = app.state.key_manager
-            capabilities = {}
-            
-            # Check for JWT creation capability
-            capabilities["create_access_token"] = hasattr(key_manager, 'create_access_token')
-            capabilities["verify_token"] = hasattr(key_manager, 'verify_token')
-            capabilities["create_refresh_token"] = hasattr(key_manager, 'create_refresh_token')
-            
-            # Test token creation if possible (without actually creating a real token)
-            jwt_ready = capabilities["create_access_token"] and capabilities["verify_token"]
-            
-            if jwt_ready:
-                return {
-                    "requirement": "jwt_validation_ready",
-                    "success": True,
-                    "message": "JWT creation and validation capabilities confirmed",
-                    "details": capabilities
-                }
-            else:
-                missing_capabilities = [cap for cap, available in capabilities.items() if not available]
-                return {
-                    "requirement": "jwt_validation_ready",
-                    "success": False,
-                    "message": f"Missing JWT capabilities: {missing_capabilities}",
-                    "details": capabilities
-                }
-                
-        except Exception as e:
-            return {
-                "requirement": "jwt_validation_ready",
-                "success": False,
-                "message": f"JWT validation failed: {str(e)}",
-                "details": {"error": str(e)}
-            }
-    
-    async def _validate_backend_requirements(
-        self,
-        app: Any,
-        requirement: GoldenPathRequirement
-    ) -> Dict[str, Any]:
-        """Validate Backend Service business requirements."""
-        if requirement.validation_function == "validate_agent_execution_chain":
-            return await self._validate_agent_execution_chain(app)
-        else:
-            return {
-                "requirement": requirement.requirement_name,
-                "success": False,
-                "message": f"Unknown Backend validation: {requirement.validation_function}",
-                "details": {}
-            }
-    
-    async def _validate_agent_execution_chain(self, app: Any) -> Dict[str, Any]:
-        """Validate that the complete agent execution chain is operational."""
-        try:
-            chain_components = {
-                "agent_supervisor": False,
-                "execution_engine": False,
-                "tool_system": False,
-                "llm_integration": False,
-                "websocket_integration": False
-            }
-            
-            # Check agent supervisor
-            if hasattr(app.state, 'agent_supervisor') and app.state.agent_supervisor:
-                chain_components["agent_supervisor"] = True
-                supervisor = app.state.agent_supervisor
-                
-                # Check execution engine
-                if hasattr(supervisor, 'engine') or hasattr(supervisor, 'execution_engine'):
-                    chain_components["execution_engine"] = True
-            
-            # Check tool system readiness
-            if (hasattr(app.state, 'tool_classes') and app.state.tool_classes) or \
-               (hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher):
-                chain_components["tool_system"] = True
-            
-            # Check LLM integration
-            if hasattr(app.state, 'llm_manager') and app.state.llm_manager:
-                chain_components["llm_integration"] = True
-            
-            # Check WebSocket integration for agent events
-            if hasattr(app.state, 'agent_websocket_bridge') and app.state.agent_websocket_bridge:
-                chain_components["websocket_integration"] = True
-            
-            # Calculate readiness score
-            components_ready = sum(chain_components.values())
-            total_components = len(chain_components)
-            readiness_score = components_ready / total_components
-            
-            # Agent execution requires most components to be ready
-            if readiness_score >= 0.8:  # 4/5 components
-                return {
-                    "requirement": "agent_execution_ready",
-                    "success": True,
-                    "message": f"Agent execution chain ready ({components_ready}/{total_components} components)",
-                    "details": {
-                        "components": chain_components,
-                        "readiness_score": readiness_score
-                    }
-                }
-            else:
-                missing_components = [comp for comp, ready in chain_components.items() if not ready]
-                return {
-                    "requirement": "agent_execution_ready",
-                    "success": False,
-                    "message": f"Agent execution chain incomplete - missing: {missing_components}",
-                    "details": {
-                        "components": chain_components,
-                        "readiness_score": readiness_score,
-                        "missing_components": missing_components
-                    }
-                }
-                
-        except Exception as e:
-            return {
-                "requirement": "agent_execution_ready",
-                "success": False,
-                "message": f"Agent execution validation failed: {str(e)}",
-                "details": {"error": str(e)}
-            }
+    # NOTE: Backend Service validation now handled via HTTP endpoint in ServiceHealthClient
+    # This eliminates service boundary violations and direct app state access
     
     async def _validate_websocket_requirements(
         self,

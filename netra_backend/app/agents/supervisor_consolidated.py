@@ -91,6 +91,14 @@ class SupervisorAgent(BaseAgent):
         
         self.agent_instance_factory = get_agent_instance_factory()
         self.agent_class_registry = get_agent_class_registry()
+        
+        # CRITICAL: Ensure agent class registry is initialized for golden path
+        if len(self.agent_class_registry) == 0:
+            logger.warning("Agent class registry is empty - initializing for golden path")
+            from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+            self.agent_class_registry = initialize_agent_class_registry()
+            logger.info(f"✅ Initialized agent class registry with {len(self.agent_class_registry)} agents")
+        
         self.flow_logger = get_supervisor_flow_logger()
         
         # ARCHITECTURE: Conditional factory pre-configuration
@@ -232,17 +240,17 @@ class SupervisorAgent(BaseAgent):
                     self.tool_dispatcher.set_websocket_manager(websocket_manager)
                     logger.info(f"✅ Enhanced tool dispatcher with WebSocket for user {context.user_id}")
                 
-                # Create session manager for database operations
-                logger.info(f"📂 Creating managed session for user {context.user_id}")
-                async with managed_session(context) as session_manager:
-                    logger.info(f"✅ Managed session created, starting agent orchestration")
-                    
-                    # Execute supervisor orchestration
-                    result = await self._orchestrate_agents(context, session_manager, stream_updates)
-                    
-                    logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
-                    logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
-                    return result
+                # Use database session from context
+                logger.info(f"📂 Using database session for user {context.user_id}")
+                session_manager = context.db_session
+                logger.info(f"✅ Database session ready, starting agent orchestration")
+                
+                # Execute supervisor orchestration
+                result = await self._orchestrate_agents(context, session_manager, stream_updates)
+                
+                logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
+                logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
+                return result
                     
             except Exception as e:
                 logger.error(f"SupervisorAgent.execute() failed for user {context.user_id}: {e}")
@@ -335,11 +343,18 @@ class SupervisorAgent(BaseAgent):
                 
             except Exception as e:
                 logger.error(f"Failed to create isolated {agent_name} instance: {e}")
+                logger.error(f"Full traceback for {agent_name} failure:", exc_info=True)
                 # Continue with other agents - non-critical agents can fail
                 continue
         
         if not agent_instances:
-            raise RuntimeError("Failed to create any isolated agent instances")
+            error_msg = f"Failed to create any isolated agent instances. Attempted agents: {agent_names}"
+            logger.error(f"❌ CRITICAL: {error_msg}")
+            logger.error(f"   Factory configured: {self.agent_instance_factory is not None}")
+            logger.error(f"   Class registry: {self.agent_class_registry is not None}")
+            logger.error(f"   LLM manager: {self._llm_manager is not None}")
+            logger.error(f"   WebSocket bridge: {self.websocket_bridge is not None}")
+            raise RuntimeError(error_msg)
         
         logger.info(f"Created {len(agent_instances)} isolated agent instances for user {context.user_id}")
         return agent_instances

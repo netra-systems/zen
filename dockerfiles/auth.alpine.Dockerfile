@@ -64,7 +64,7 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 # Health check
 HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=3 \
-    CMD curl -f http://localhost:8081/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8081}/health || exit 1
 
 EXPOSE 8081
 

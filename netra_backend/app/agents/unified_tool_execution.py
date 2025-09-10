@@ -49,17 +49,21 @@ logger = central_logger.get_logger(__name__)
 async def enhance_tool_dispatcher_with_notifications(
     tool_dispatcher,
     websocket_manager=None,
+    user_context=None,
     enable_notifications=True
 ):
     """
-    Enhance tool dispatcher with WebSocket notifications.
+    Enhance tool dispatcher with WebSocket notifications and per-user isolation.
+    
+    CRITICAL: This function now supports per-user WebSocket emitters for proper isolation.
     
     This function replaces the tool dispatcher's executor with a 
     UnifiedToolExecutionEngine that has WebSocket notification capabilities.
     
     Args:
         tool_dispatcher: The ToolDispatcher instance to enhance
-        websocket_manager: Optional WebSocket manager for notifications
+        websocket_manager: Optional WebSocket manager for notifications  
+        user_context: Optional UserExecutionContext for per-user isolation
         enable_notifications: Whether to enable notifications (default True)
     
     Returns:
@@ -76,9 +80,16 @@ async def enhance_tool_dispatcher_with_notifications(
     # Create WebSocket bridge if manager provided
     websocket_bridge = None
     if websocket_manager and enable_notifications:
-        websocket_bridge = AgentWebSocketBridge()
-        # CRITICAL FIX: Use the correct private member name
-        websocket_bridge._websocket_manager = websocket_manager
+        # CRITICAL FIX: Use factory method for per-user bridge creation
+        if user_context:
+            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+            websocket_bridge = create_agent_websocket_bridge(user_context)
+            logger.debug(f"Created user-isolated WebSocket bridge for user {user_context.user_id}")
+        else:
+            # Fallback to legacy bridge creation
+            websocket_bridge = AgentWebSocketBridge()
+            websocket_bridge._websocket_manager = websocket_manager
+            logger.debug("Created legacy WebSocket bridge (no user isolation)")
     
     # Replace executor with enhanced version
     enhanced_executor = UnifiedToolExecutionEngine(
@@ -90,13 +101,18 @@ async def enhance_tool_dispatcher_with_notifications(
     if websocket_manager:
         enhanced_executor.websocket_manager = websocket_manager
     
+    # CRITICAL: Store user context for per-user emitter creation
+    if user_context:
+        enhanced_executor.user_context = user_context
+        logger.debug(f"Enhanced tool executor with user context for user {user_context.user_id}")
+    
     # Replace the executor
     tool_dispatcher.executor = enhanced_executor
     
     # Mark as enhanced to prevent double enhancement
     tool_dispatcher._websocket_enhanced = True
     
-    logger.info("✅ Tool dispatcher enhanced with WebSocket notifications")
+    logger.info("✅ Tool dispatcher enhanced with WebSocket notifications and user isolation support")
     return tool_dispatcher
 
 
@@ -143,6 +159,9 @@ class UnifiedToolExecutionEngine:
             'security_violations': 0,
             'total_duration_ms': 0
         }
+        
+        # CRITICAL: Initialize per-user emitter management
+        self._user_emitters = {}
         
         # Process monitoring
         self._process = psutil.Process(os.getpid())
@@ -547,7 +566,7 @@ class UnifiedToolExecutionEngine:
         tool_name: str,
         tool_input: Any
     ) -> None:
-        """Send tool executing notification via AgentWebSocketBridge."""
+        """Send tool executing notification via AgentWebSocketBridge with user isolation support."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
             error_msg = f"Tool {tool_name} executing without context - USER WILL NOT SEE PROGRESS"
@@ -565,6 +584,21 @@ class UnifiedToolExecutionEngine:
                 validation_error="Missing execution context",
                 user_id="unknown"
             )
+        
+        # NEW: Try per-user emitter first if user context is available
+        if hasattr(self, 'user_context') and self.user_context:
+            try:
+                user_emitter = await self._ensure_user_emitter(self.user_context)
+                if user_emitter:
+                    await user_emitter.notify_tool_executing(
+                        getattr(context, 'agent_name', 'ToolDispatcher'),
+                        tool_name,
+                        {"summary": self._create_parameters_summary(tool_input)} if tool_input else None
+                    )
+                    logger.debug(f"Tool executing sent via user emitter for user {self.user_context.user_id}: {tool_name}")
+                    return
+            except Exception as e:
+                logger.debug(f"User emitter failed for tool_executing, falling back to bridge: {e}")
             
         if not self.websocket_bridge:
             error_msg = f"Tool {tool_name} executing for run_id {context.run_id} - EVENTS WILL BE LOST"
@@ -645,7 +679,7 @@ class UnifiedToolExecutionEngine:
         status: str,
         error_type: str = None
     ) -> None:
-        """Send tool completed notification via AgentWebSocketBridge."""
+        """Send tool completed notification via AgentWebSocketBridge with user isolation support."""
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
             error_msg = f"Tool {tool_name} completed without context - USER WILL NOT SEE RESULTS"
@@ -663,6 +697,35 @@ class UnifiedToolExecutionEngine:
                 validation_error="Missing execution context for tool completion",
                 user_id="unknown"
             )
+        
+        # NEW: Try per-user emitter first if user context is available
+        if hasattr(self, 'user_context') and self.user_context:
+            try:
+                user_emitter = await self._ensure_user_emitter(self.user_context)
+                if user_emitter:
+                    result_dict = {
+                        "status": status,
+                        "duration_ms": duration_ms,
+                        "tool_name": tool_name
+                    }
+                    
+                    if status == "success":
+                        result_dict["output"] = str(result)[:500] if result else None
+                    elif status in ["error", "timeout"]:
+                        result_dict["error"] = str(result)
+                        if error_type:
+                            result_dict["error_type"] = error_type
+                    
+                    await user_emitter.notify_tool_completed(
+                        getattr(context, 'agent_name', 'ToolDispatcher'),
+                        tool_name,
+                        result_dict,
+                        duration_ms
+                    )
+                    logger.debug(f"Tool completed sent via user emitter for user {self.user_context.user_id}: {tool_name}")
+                    return
+            except Exception as e:
+                logger.debug(f"User emitter failed for tool_completed, falling back to bridge: {e}")
             
         if not self.websocket_bridge:
             error_msg = f"Tool {tool_name} completed for run_id {context.run_id} - RESULTS WILL BE LOST"
@@ -1012,6 +1075,44 @@ class UnifiedToolExecutionEngine:
             logger.info(f"🧨 Emergency cleanup completed for user {user_id}: {cleanup_count} executions cleaned")
         
         return cleanup_count
+    
+    async def _ensure_user_emitter(self, user_context):
+        """Ensure UserWebSocketEmitter exists for the given user context.
+        
+        Args:
+            user_context: User execution context for emitter creation
+            
+        Returns:
+            UserWebSocketEmitter instance or None if creation fails
+        """
+        if not user_context:
+            return None
+            
+        if not hasattr(self, '_user_emitters'):
+            self._user_emitters = {}
+            
+        user_key = f"{user_context.user_id}_{user_context.thread_id}_{user_context.run_id}"
+        
+        if user_key not in self._user_emitters:
+            try:
+                # Create UserWebSocketEmitter for this specific user context
+                from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
+                
+                user_emitter = UserWebSocketEmitter(
+                    user_id=user_context.user_id,
+                    thread_id=user_context.thread_id,
+                    run_id=user_context.run_id,
+                    websocket_bridge=self.websocket_bridge
+                )
+                
+                self._user_emitters[user_key] = user_emitter
+                logger.debug(f"Created UserWebSocketEmitter in tool executor for user {user_context.user_id}")
+                
+            except Exception as e:
+                logger.error(f"Failed to create UserWebSocketEmitter in tool executor for user {user_context.user_id}: {e}")
+                return None
+        
+        return self._user_emitters[user_key]
     
     async def health_check(self) -> Dict[str, Any]:
         """Comprehensive health check that detects actual processing capability.

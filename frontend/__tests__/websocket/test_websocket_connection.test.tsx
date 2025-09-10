@@ -64,6 +64,7 @@ const MockWebSocketConnection: React.FC<{
   const [messageQueue, setMessageQueue] = React.useState<any[]>([]);
   const [receivedEvents, setReceivedEvents] = React.useState<any[]>([]);
   const wsRef = React.useRef<WebSocket | null>(null);
+  const isReconnectingRef = React.useRef(false);
 
   const connect = React.useCallback(() => {
     console.log('DEBUG: connect() called, wsRef.current:', wsRef.current);
@@ -96,6 +97,7 @@ const MockWebSocketConnection: React.FC<{
       flushSync(() => {
         setConnectionStatus('connected');
         setReconnectAttempts(0);
+        isReconnectingRef.current = false;
         
         // Process and clear message queue when connected
         if (messageQueue.length > 0) {
@@ -132,12 +134,20 @@ const MockWebSocketConnection: React.FC<{
       onDisconnect?.();
       
       // Auto-reconnect logic
-      if (enableRetry && reconnectAttempts < maxRetries && !event.wasClean) {
+      if (enableRetry && reconnectAttempts < maxRetries && !event.wasClean && !isReconnectingRef.current) {
+        isReconnectingRef.current = true;
         setTimeout(() => {
           flushSync(() => {
-            setReconnectAttempts(prev => prev + 1);
+            setReconnectAttempts(prev => {
+              const newAttempts = prev + 1;
+              if (newAttempts < maxRetries) {
+                isReconnectingRef.current = false;
+                // Schedule reconnect on next tick to avoid recursive calls
+                setTimeout(connect, 0);
+              }
+              return newAttempts;
+            });
           });
-          connect();
         }, 1000);
       }
     };
@@ -159,7 +169,7 @@ const MockWebSocketConnection: React.FC<{
       global.mockWebSocketInstances.push(ws);
       console.log('DEBUG: Added WebSocket to global.mockWebSocketInstances, length now:', global.mockWebSocketInstances.length);
     }
-  }, [url, authToken, onMessage, onConnect, onDisconnect, onError, enableRetry, maxRetries, reconnectAttempts]);
+  }, [url, authToken, onMessage, onConnect, onDisconnect, onError, enableRetry, maxRetries]);
 
   const disconnect = React.useCallback(() => {
     wsRef.current?.close(1000, 'Normal closure');
@@ -551,16 +561,17 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         simulateNetworkDelay: false,
         enableErrorSimulation: true,
         errorDelay: 10,
-        maxReconnectAttempts: 0 // Force immediate failures
+        maxReconnectAttempts: 2 // Match component's maxRetries setting
       };
       
       // Override with failing mock
       const FailingMockClass = class extends UnifiedWebSocketMock {
         constructor(url, protocols) {
           super(url, protocols, alwaysFailConfig);
-          // Force immediate failure
+          // Force immediate failure with both error and close events
           setTimeout(() => {
-            this.simulateConnectionFailure();
+            this.simulateError(new Error('Connection failed'));
+            this.simulateClose(1006, 'Connection failed', false);
           }, 50);
         }
       };
@@ -614,6 +625,17 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
           url="ws://localhost:8000/ws"
         />
       );
+
+      // CRITICAL: Ensure WebSocket is disconnected first
+      const disconnectButton = screen.getByTestId('disconnect-button');
+      await act(async () => {
+        await userEvent.click(disconnectButton);
+      });
+
+      // Wait for disconnection to complete
+      await waitFor(() => {
+        expect(screen.getByTestId('connection-status')).toHaveTextContent('disconnected');
+      });
 
       const sendButton = screen.getByTestId('send-message-button');
 

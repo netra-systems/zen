@@ -17,7 +17,10 @@ import random
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
+
+from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.real_services_test_fixtures import real_services_fixture
 
 from netra_backend.app.services.websocket.message_handler import (
     MessageHandlerService,
@@ -30,19 +33,18 @@ from netra_backend.app.services.websocket.message_queue import (
     MessagePriority,
     MessageStatus
 )
-from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
-@pytest.mark.integration
-@pytest.mark.race_conditions
-class TestMessageHandlerStartupRaceConditions:
+class TestMessageHandlerStartupRaceConditions(BaseIntegrationTest):
     """Tests to reproduce race conditions during message handler startup."""
     
-    @pytest.mark.asyncio
-    async def test_concurrent_handler_registration_race_condition(self):
+    @pytest.mark.integration
+    @pytest.mark.race_conditions  
+    @pytest.mark.real_services
+    async def test_concurrent_handler_registration_race_condition(self, real_services_fixture):
         """Reproduce race condition during concurrent handler registration.
         
         RACE CONDITION: Multiple threads trying to register handlers
