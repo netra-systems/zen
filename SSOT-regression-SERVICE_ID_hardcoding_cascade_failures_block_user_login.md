@@ -138,10 +138,64 @@
 - **Before SSOT Remediation:** Phase 1 tests ❌ FAIL (expose violations), Phase 2 tests ❌ FAIL (no SSOT)
 - **After SSOT Remediation:** Phase 1 tests ✅ PASS (violations fixed), Phase 2 tests ✅ PASS (SSOT working)
 
-### Step 3-6: SSOT Implementation and Validation (NEXT)
-- Plan SSOT remediation strategy
-- Execute SSOT remediation implementation
-- Enter test fix loop until all tests pass
+### Step 3: Plan SSOT Remediation Strategy ✅ COMPLETED
+
+#### 3.1 COMPREHENSIVE 4-PHASE REMEDIATION PLAN
+
+**CRITICAL PROBLEM MAPPED:**
+- 77+ locations with SERVICE_ID inconsistencies causing 60-second authentication cascade failures
+- $500K+ ARR Golden Path at risk from unreliable authentication
+- Mixed patterns: hardcoded "netra-backend" vs environment variables vs config defaults
+
+**RISK-BASED EXECUTION STRATEGY:**
+
+**Phase 1: Documentation Updates (VERY LOW RISK)**
+- Update 50+ documentation files and generated JSON patterns
+- Rollback Risk: None - purely documentation changes
+- Success Gate: Consistency achieved, no functional impact
+
+**Phase 2: Test File Migration (LOW RISK)**  
+- Migrate 15+ test files to use SSOT pattern consistently
+- Rollback Risk: Low - test failures don't affect production systems
+- Success Gate: All 8 SSOT validation tests pass
+
+**Phase 3: Backend Configuration (MEDIUM RISK)**
+- Update config schema defaults and auth client initialization
+- Rollback Risk: Medium - affects service startup sequences
+- Success Gate: Service startup successful, all config tests pass
+
+**Phase 4: Auth Service Critical Changes (CRITICAL RISK)**
+- Replace hardcoded validation logic in auth service core
+- Rollback Risk: CRITICAL - direct authentication system blocker
+- Success Gate: Authentication works, Golden Path fully restored
+
+#### 3.2 ATOMIC MIGRATION PATTERN
+```python
+# BEFORE (Inconsistent patterns)
+expected_service_id = "netra-backend"  # Hardcoded
+service_id = os.environ.get('SERVICE_ID', 'netra-backend')  # Environment
+service_id: str = Field(default="netra-backend")  # Config default
+
+# AFTER (Consistent SSOT pattern)
+from shared.constants.service_identifiers import SERVICE_ID
+expected_service_id = SERVICE_ID  # Single source of truth
+```
+
+#### 3.3 VALIDATION AND ROLLBACK STRATEGY
+- **Atomic Commits:** One commit per phase to isolate impact and enable individual rollback
+- **Validation Checkpoints:** After each change run SSOT compliance tests (5-10 min)
+- **Success Criteria:** All 77+ locations use SSOT, 8 tests pass, Golden Path working
+- **Rollback Procedures:** Each phase can be reverted independently with service restart if needed
+
+#### 3.4 RISK MITIGATION
+- Start with lowest-risk changes to build confidence
+- Comprehensive test validation after each phase
+- Manual Golden Path verification after critical changes
+- Zero service disruption requirement throughout migration
+
+### Step 4-6: SSOT Implementation and Validation (NEXT)
+- Execute 4-phase remediation plan
+- Enter test fix loop until all tests pass  
 - Create PR for review
 
 ## Notes
