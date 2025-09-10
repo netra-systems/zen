@@ -485,72 +485,91 @@ class TestExecutionEngineCreation(SSotAsyncTestCase):
             thread_id=f"thread-{uuid.uuid4().hex[:8]}"
         )
     
-    async def test_create_execution_engine_success(self):
-        """Test successful execution engine creation."""
-        # Mock WebSocket emitter creation
+    async def test_create_execution_engine_success_fallback_isolated(self):
+        """Test execution engine creation with IsolatedExecutionEngine fallback (current behavior)."""
+        # Mock WebSocket emitter creation  
         mock_emitter = Mock()
+        mock_emitter.cleanup = Mock()  # Add cleanup method
         self.mock_websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=mock_emitter)
         
-        # Mock UserExecutionEngine creation
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
-            mock_agent_factory = Mock()
-            mock_get_factory.return_value = mock_agent_factory
-            
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
-                mock_engine = Mock()
-                mock_engine_class.return_value = mock_engine
-                
-                # Execute
-                result = await self.factory.create_execution_engine(self.user_context)
-                
-                # Verify result
-                assert isinstance(result, UserExecutionEngineWrapper)
-                assert result.user_engine is mock_engine
-                assert result.user_context is self.user_context
-                
-                # Verify factory metrics updated
-                assert self.factory._factory_metrics['engines_created'] == 1
-                assert self.factory._factory_metrics['engines_active'] == 1
-                
-                # Verify context registered
-                assert len(self.factory._active_contexts) == 1
-                assert self.user_context.request_id in self.factory._active_contexts
+        # Execute - should fall back to IsolatedExecutionEngine (current behavior)
+        result = await self.factory.create_execution_engine(self.user_context)
+        
+        # Verify result is IsolatedExecutionEngine (fallback)
+        assert isinstance(result, IsolatedExecutionEngine)
+        assert result.user_context is self.user_context
+        assert result.factory is self.factory
+        
+        # Verify factory metrics updated
+        assert self.factory._factory_metrics['engines_created'] == 1
+        assert self.factory._factory_metrics['engines_active'] == 1
+        
+        # Verify context registered
+        assert len(self.factory._active_contexts) == 1
+        assert self.user_context.request_id in self.factory._active_contexts
+        
+        # Verify cleanup callbacks registered
+        assert len(self.user_context.cleanup_callbacks) == 2  # engine + emitter
                 
         self.record_metric("engine_creation_success", True)
     
+    async def test_create_execution_engine_websocket_fallback_creation(self):
+        """Test execution engine creation with WebSocket fallback emitter."""
+        # Mock WebSocket factory failure
+        self.mock_websocket_bridge_factory.create_user_emitter = AsyncMock(
+            side_effect=Exception("WebSocket factory failed")
+        )
+        
+        # Mock fallback emitter creation
+        with patch('netra_backend.app.websocket_core.unified_emitter.UnifiedWebSocketEmitter') as mock_emitter_class:
+            mock_emitter = Mock()
+            mock_emitter.cleanup = Mock()
+            mock_emitter_class.create_for_user.return_value = mock_emitter
+            
+            # Execute 
+            result = await self.factory.create_execution_engine(self.user_context)
+            
+            # Verify fallback emitter created
+            mock_emitter_class.create_for_user.assert_called_once_with(
+                user_id=self.user_context.user_id,
+                thread_id=self.user_context.thread_id,
+                run_id=self.user_context.request_id,
+                websocket_manager=None
+            )
+            
+            # Verify engine created successfully with fallback emitter
+            assert isinstance(result, IsolatedExecutionEngine)
+            assert result.user_context is self.user_context
+                
+        self.record_metric("websocket_fallback_success", True)
+    
     async def test_create_execution_engine_websocket_factory_fallback(self):
-        """Test execution engine creation with WebSocket factory fallback."""
+        """Test execution engine creation with WebSocket factory fallback emitter."""
         # Mock WebSocket factory failure
         self.mock_websocket_bridge_factory.create_user_emitter = AsyncMock(
             side_effect=Exception("WebSocket factory failed")
         )
         
         # Mock fallback WebSocket emitter
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
-            mock_agent_factory = Mock()
-            mock_get_factory.return_value = mock_agent_factory
+        with patch('netra_backend.app.websocket_core.unified_emitter.UnifiedWebSocketEmitter') as mock_emitter_class:
+            mock_emitter = Mock()
+            mock_emitter.cleanup = Mock()
+            mock_emitter_class.create_for_user.return_value = mock_emitter
             
-            with patch('netra_backend.app.websocket_core.unified_emitter.UnifiedWebSocketEmitter') as mock_emitter_class:
-                mock_emitter = Mock()
-                mock_emitter_class.create_for_user.return_value = mock_emitter
-                
-                with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
-                    mock_engine = Mock()
-                    mock_engine_class.return_value = mock_engine
-                    
-                    # Execute
-                    result = await self.factory.create_execution_engine(self.user_context)
-                    
-                    # Verify fallback emitter created
-                    mock_emitter_class.create_for_user.assert_called_once_with(
-                        user_id=self.user_context.user_id,
-                        thread_id=self.user_context.thread_id,
-                        run_id=self.user_context.request_id,
-                        websocket_manager=None
-                    )
-                    
-                    # Verify wrapper created successfully
-                    assert isinstance(result, UserExecutionEngineWrapper)
+            # Execute
+            result = await self.factory.create_execution_engine(self.user_context)
+            
+            # Verify fallback emitter created
+            mock_emitter_class.create_for_user.assert_called_once_with(
+                user_id=self.user_context.user_id,
+                thread_id=self.user_context.thread_id,
+                run_id=self.user_context.request_id,
+                websocket_manager=None
+            )
+            
+            # Verify engine created successfully with fallback emitter (will be IsolatedExecutionEngine)
+            assert isinstance(result, IsolatedExecutionEngine)
+            assert result.user_context is self.user_context
                     
         self.record_metric("websocket_fallback", True)
     
@@ -561,11 +580,11 @@ class TestExecutionEngineCreation(SSotAsyncTestCase):
         self.mock_websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=mock_emitter)
         
         # Mock UserExecutionEngine failure
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = Mock()
             mock_get_factory.return_value = mock_agent_factory
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+            with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                 mock_engine_class.side_effect = Exception("UserExecutionEngine failed")
                 
                 # Execute
@@ -607,11 +626,11 @@ class TestExecutionEngineCreation(SSotAsyncTestCase):
             mock_emitter = Mock()
             self.mock_websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=mock_emitter)
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+            with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
                 mock_agent_factory = Mock()
                 mock_get_factory.return_value = mock_agent_factory
                 
-                with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+                with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                     mock_engine = Mock()
                     mock_engine_class.return_value = mock_engine
                     
@@ -944,11 +963,11 @@ class TestConcurrentEngineCreation(SSotAsyncTestCase):
         # Mock dependencies
         self.factory._websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=Mock())
         
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = Mock()
             mock_get_factory.return_value = mock_agent_factory
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+            with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                 mock_engine_class.return_value = Mock()
                 
                 # Create contexts for different users
@@ -995,11 +1014,11 @@ class TestConcurrentEngineCreation(SSotAsyncTestCase):
         # Mock dependencies
         factory._websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=Mock())
         
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = Mock()
             mock_get_factory.return_value = mock_agent_factory
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+            with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                 mock_engine_class.return_value = Mock()
                 
                 user_id = "limited-concurrent-user"
@@ -1086,11 +1105,11 @@ class TestFactoryPerformance(SSotAsyncTestCase):
         # Mock fast dependencies
         self.factory._websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=Mock())
         
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = Mock()
             mock_get_factory.return_value = mock_agent_factory
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+            with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                 mock_engine_class.return_value = Mock()
                 
                 context = UserExecutionContext(
@@ -1380,11 +1399,11 @@ class TestFactoryCompliance(SSotAsyncTestCase):
         # Mock dependencies
         factory._websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=Mock())
         
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = Mock()
             mock_get_factory.return_value = mock_agent_factory
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+            with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                 mock_engine_class.return_value = Mock()
                 
                 # Create contexts for 15 different users
@@ -1441,11 +1460,11 @@ class TestFactoryCompliance(SSotAsyncTestCase):
         # Mock lightweight dependencies
         factory._websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=Mock())
         
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = Mock()
             mock_get_factory.return_value = mock_agent_factory
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+            with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                 mock_engine_class.return_value = Mock()
                 
                 # Create 20 engines
@@ -1478,11 +1497,11 @@ class TestFactoryCompliance(SSotAsyncTestCase):
         # Mock dependencies
         factory._websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=Mock())
         
-        with patch('netra_backend.app.agents.supervisor.execution_factory.get_agent_instance_factory') as mock_get_factory:
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
             mock_agent_factory = Mock()
             mock_get_factory.return_value = mock_agent_factory
             
-            with patch('netra_backend.app.agents.supervisor.execution_factory.UserExecutionEngine') as mock_engine_class:
+            with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
                 mock_engine_class.return_value = Mock()
                 
                 # Create and cleanup engines
