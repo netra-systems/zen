@@ -928,9 +928,9 @@ class UserExecutionEngine:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=self.AGENT_EXECUTION_TIMEOUT,
+            duration=self.AGENT_EXECUTION_TIMEOUT,
             error=f"User agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-            state=None,
+            data=None,
             metadata={
                 'timeout': True,
                 'user_isolated': True,
