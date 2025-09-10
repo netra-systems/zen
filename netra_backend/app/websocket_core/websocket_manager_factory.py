@@ -22,7 +22,7 @@ SECURITY CRITICAL: This implementation addresses the following vulnerabilities:
 
 Architecture Pattern: Factory + Isolation + Lifecycle Management
 - WebSocketManagerFactory: Creates isolated manager instances
-- IsolatedWebSocketManager: Per-connection manager with private state
+- UnifiedWebSocketManager: Single source of truth for WebSocket management
 - ConnectionLifecycleManager: Handles connection lifecycle and cleanup
 - UserExecutionContext: Enforces user isolation at all levels
 """
@@ -40,7 +40,7 @@ import logging
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+from netra_backend.app.websocket_core.protocols import WebSocketProtocol
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
@@ -599,7 +599,7 @@ class ConnectionLifecycleManager:
     - Security audit logging
     """
     
-    def __init__(self, user_context: UserExecutionContext, ws_manager: 'IsolatedWebSocketManager'):
+    def __init__(self, user_context: UserExecutionContext, ws_manager: 'UnifiedWebSocketManager'):
         """
         Initialize connection lifecycle manager.
         
@@ -777,7 +777,7 @@ class ConnectionLifecycleManager:
                 pass
 
 
-# IsolatedWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
+# UnifiedWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
 
 class WebSocketManagerFactory:
     """
@@ -788,7 +788,7 @@ class WebSocketManagerFactory:
     emergency fallback capabilities when needed.
     
     PROTOCOL COMPLIANCE: This manager implements ALL required methods from
-    WebSocketManagerProtocol, ensuring consistent interface across migrations.
+    WebSocketProtocol, ensuring consistent interface across migrations.
     
     This class provides the same interface as UnifiedWebSocketManager but with
     complete user isolation. Each instance manages connections for only one user
@@ -845,7 +845,7 @@ class WebSocketManagerFactory:
         self._last_error_time: Optional[datetime] = None
         
         logger.info(
-            f"IsolatedWebSocketManager created for user {user_context.user_id[:8]}... "
+            f"UnifiedWebSocketManager created for user {user_context.user_id[:8]}... "
             f"(manager_id: {id(self)})"
         )
     
@@ -1008,7 +1008,7 @@ class WebSocketManagerFactory:
         """
         Send a message to all connections for this user.
         
-        PROTOCOL COMPLIANCE: Implements WebSocketManagerProtocol.send_to_user()
+        PROTOCOL COMPLIANCE: Implements WebSocketProtocol.send_to_user()
         with user isolation validation.
         
         Args:
@@ -1367,7 +1367,7 @@ class WebSocketManagerFactory:
         """
         Get detailed connection health information for a user.
         
-        PROTOCOL COMPLIANCE: Required by WebSocketManagerProtocol.
+        PROTOCOL COMPLIANCE: Required by WebSocketProtocol.
         
         Args:
             user_id: User ID to check health for
@@ -1491,7 +1491,7 @@ class WebSocketManagerFactory:
         """
         Send message to a thread (compatibility method).
         
-        PROTOCOL COMPLIANCE: Required by WebSocketManagerProtocol.
+        PROTOCOL COMPLIANCE: Required by WebSocketProtocol.
         
         In the isolated manager context, we route thread messages to the user
         if the thread belongs to this manager's user context.
@@ -1559,7 +1559,7 @@ class WebSocketManagerFactory:
             max_managers_per_user: Maximum number of managers per user (default: 20, was 5)
             connection_timeout_seconds: Timeout for idle connections (default: 30 minutes)
         """
-        self._active_managers: Dict[str, IsolatedWebSocketManager] = {}
+        self._active_managers: Dict[str, UnifiedWebSocketManager] = {}
         self._user_manager_count: Dict[str, int] = {}
         self._manager_creation_time: Dict[str, datetime] = {}
         self._factory_lock = RLock()  # Use RLock for thread safety
@@ -1608,7 +1608,7 @@ class WebSocketManagerFactory:
         
         return isolation_key
     
-    async def create_manager(self, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+    async def create_manager(self, user_context: UserExecutionContext) -> UnifiedWebSocketManager:
         """
         Create an isolated WebSocket manager for a user context.
         
@@ -1697,7 +1697,7 @@ class WebSocketManagerFactory:
                     logger.info(f"✅ Emergency cleanup successful - proceeding with manager creation for user {user_id[:8]}...")
             
             # Create new isolated manager
-            manager = IsolatedWebSocketManager(user_context)
+            manager = UnifiedWebSocketManager(user_context)
             
             # Register manager
             self._active_managers[isolation_key] = manager
@@ -1719,7 +1719,7 @@ class WebSocketManagerFactory:
             
             return manager
     
-    def get_manager(self, isolation_key: str) -> Optional[IsolatedWebSocketManager]:
+    def get_manager(self, isolation_key: str) -> Optional[UnifiedWebSocketManager]:
         """
         Get an existing manager by isolation key.
         
@@ -2181,7 +2181,7 @@ class WebSocketManagerFactory:
     # SSOT INTERFACE STANDARDIZATION METHODS (Week 1 - Low Risk)
     # ============================================================================
     
-    def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
+    def create_isolated_manager(self, user_id: str, connection_id: str) -> UnifiedWebSocketManager:
         """
         Create an isolated WebSocket manager for a user with specified connection ID.
         
@@ -2234,7 +2234,7 @@ class WebSocketManagerFactory:
                         manager = asyncio.run(self.create_manager(user_context))
                 except RuntimeError:
                     # Fallback to direct instantiation for tests
-                    manager = IsolatedWebSocketManager(user_context)
+                    manager = UnifiedWebSocketManager(user_context)
                     
                     # Register the manager manually for consistency
                     isolation_key = self._generate_isolation_key(user_context)
@@ -2267,7 +2267,7 @@ class WebSocketManagerFactory:
                 details={"connection_id": connection_id, "error": str(e)}
             ) from e
     
-    def get_manager_by_user(self, user_id: str) -> Optional[IsolatedWebSocketManager]:
+    def get_manager_by_user(self, user_id: str) -> Optional[UnifiedWebSocketManager]:
         """
         Get an active WebSocket manager for a specific user.
         
@@ -2563,7 +2563,7 @@ def get_websocket_manager_factory() -> WebSocketManagerFactory:
         return _factory_instance
 
 
-async def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+async def create_websocket_manager(user_context: UserExecutionContext) -> UnifiedWebSocketManager:
     """
     Create an isolated WebSocket manager for a user context.
     
@@ -2989,7 +2989,7 @@ def validate_websocket_component_health(user_context: Optional[UserExecutionCont
         }
 
 
-def create_websocket_manager_sync(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+def create_websocket_manager_sync(user_context: UserExecutionContext) -> UnifiedWebSocketManager:
     """
     Synchronous wrapper for create_websocket_manager for testing purposes.
     
@@ -3050,7 +3050,7 @@ def create_websocket_manager_sync(user_context: UserExecutionContext) -> Isolate
 async def _create_emergency_fallback_manager(
     user_context: UserExecutionContext, 
     original_error: Exception
-) -> Optional['IsolatedWebSocketManager']:
+) -> Optional['UnifiedWebSocketManager']:
     """
     PHASE 2 FIX: Create emergency fallback WebSocket manager for service continuity.
     
@@ -3083,7 +3083,7 @@ async def _create_emergency_fallback_manager(
         }
         
         # Create emergency manager with minimal functionality
-        emergency_manager = EmergencyWebSocketManager(emergency_config)
+        emergency_manager = UnifiedWebSocketManager(emergency_config)
         
         logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_config['user_id'][:8]}...")
         return emergency_manager
@@ -3093,7 +3093,7 @@ async def _create_emergency_fallback_manager(
         return None
 
 
-async def _create_degraded_service_manager(user_context: UserExecutionContext) -> Optional['IsolatedWebSocketManager']:
+async def _create_degraded_service_manager(user_context: UserExecutionContext) -> Optional['UnifiedWebSocketManager']:
     """
     PHASE 2 FIX: Create degraded service WebSocket manager as last resort.
     
@@ -3121,7 +3121,7 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
         }
         
         # Create degraded manager
-        degraded_manager = DegradedWebSocketManager(degraded_config)
+        degraded_manager = UnifiedWebSocketManager(degraded_config)
         
         logger.warning("PHASE 2 FIX: Degraded service manager created - limited functionality available")
         return degraded_manager
@@ -3131,10 +3131,10 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
         return None
 
 
-# EmergencyWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
+# UnifiedWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
 
 
-# DegradedWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
+# UnifiedWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
 
 
 __all__ = [
@@ -3150,5 +3150,5 @@ __all__ = [
     "create_defensive_user_execution_context",
     "validate_websocket_component_health",  # Component health validation
     # Five Whys Root Cause Prevention
-    "WebSocketManagerProtocol",  # Re-exported from protocols module
+    "WebSocketProtocol",  # Re-exported from protocols module
 ]

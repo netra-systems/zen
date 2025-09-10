@@ -262,7 +262,7 @@ class RegistryCompat:
         return []
 
 
-class UnifiedWebSocketManager:
+class WebSocketManager:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
     
     🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
@@ -2267,3 +2267,7 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     
     logger.critical(error_message)
     raise RuntimeError(error_message)
+
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
