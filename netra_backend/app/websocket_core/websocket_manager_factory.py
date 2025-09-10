@@ -945,8 +945,8 @@ class WebSocketManagerFactory:
                 else:
                     logger.info(f"✅ Emergency cleanup successful - proceeding with manager creation for user {user_id[:8]}...")
             
-            # Create new isolated manager
-            manager = WebSocketManager(user_context)
+            # Create new isolated manager using SSOT factory method
+            manager = WebSocketManager.from_user_context(user_context)
             
             # Register manager
             self._active_managers[isolation_key] = manager
@@ -1482,8 +1482,8 @@ class WebSocketManagerFactory:
                         # No event loop running, can use asyncio.run directly
                         manager = asyncio.run(self.create_manager(user_context))
                 except RuntimeError:
-                    # Fallback to direct instantiation for tests
-                    manager = WebSocketManager(user_context)
+                    # Fallback to direct instantiation for tests using SSOT factory method
+                    manager = WebSocketManager.from_user_context(user_context)
                     
                     # Register the manager manually for consistency
                     isolation_key = self._generate_isolation_key(user_context)
