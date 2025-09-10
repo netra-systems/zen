@@ -74,7 +74,10 @@ await executor.execute_pipeline(pipeline, state, run_id, context)
 If you need direct access to the optimized service:
 
 ```python
-from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
+# SSOT CONSOLIDATION: Optimized features are now integrated into the main service
+from netra_backend.app.services.state_persistence import state_persistence_service
+# Enable optimizations
+state_persistence_service.configure(enable_optimizations=True)
 from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType, AgentPhase
 
 # Create persistence request
@@ -88,7 +91,7 @@ request = StatePersistenceRequest(
 )
 
 # Save state with optimization
-success, snapshot_id = await optimized_state_persistence.save_agent_state(request, db_session)
+success, snapshot_id = await state_persistence_service.save_agent_state(request, db_session)
 ```
 
 ### Dynamic Configuration
@@ -96,17 +99,20 @@ success, snapshot_id = await optimized_state_persistence.save_agent_state(reques
 You can configure the optimized service at runtime:
 
 ```python
-from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
+# SSOT CONSOLIDATION: Optimized features are now integrated into the main service
+from netra_backend.app.services.state_persistence import state_persistence_service
+# Enable optimizations
+state_persistence_service.configure(enable_optimizations=True)
 
 # Configure optimization settings
-optimized_state_persistence.configure(
+state_persistence_service.configure(
     enable_deduplication=True,
     enable_compression=True,
     cache_max_size=500
 )
 
 # Get cache statistics
-stats = optimized_state_persistence.get_cache_stats()
+stats = state_persistence_service.get_cache_stats()
 print(f"Cache size: {stats['cache_size']}")
 print(f"Deduplication enabled: {stats['deduplication_enabled']}")
 ```
@@ -147,9 +153,12 @@ If any error occurs during optimization:
 Get real-time cache statistics:
 
 ```python
-from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
+# SSOT CONSOLIDATION: Optimized features are now integrated into the main service
+from netra_backend.app.services.state_persistence import state_persistence_service
+# Enable optimizations
+state_persistence_service.configure(enable_optimizations=True)
 
-stats = optimized_state_persistence.get_cache_stats()
+stats = state_persistence_service.get_cache_stats()
 print(f"""
 Cache Statistics:
 - Size: {stats['cache_size']}/{stats['cache_max_size']}
@@ -164,7 +173,7 @@ Cache Statistics:
 For testing or troubleshooting:
 
 ```python
-optimized_state_persistence.clear_cache()
+state_persistence_service.clear_cache()
 ```
 
 ## Performance Benefits

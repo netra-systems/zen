@@ -39,7 +39,7 @@ import logging
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.execution_types import StronglyTypedUserExecutionContext
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, UnifiedWebSocketManager, WebSocketManagerMode
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import get_env
@@ -777,6 +777,7 @@ class ConnectionLifecycleManager:
                 pass
 
 
+# DEPRECATED: Use UnifiedWebSocketManager with ISOLATED mode instead
 class IsolatedWebSocketManager(WebSocketManagerProtocol):
     """
     User-isolated WebSocket manager with completely private state.
@@ -1559,7 +1560,7 @@ class WebSocketManagerFactory:
             max_managers_per_user: Maximum number of managers per user (default: 20, was 5)
             connection_timeout_seconds: Timeout for idle connections (default: 30 minutes)
         """
-        self._active_managers: Dict[str, IsolatedWebSocketManager] = {}
+        self._active_managers: Dict[str, Any] = {}  # Now stores UnifiedWebSocketManager instances
         self._user_manager_count: Dict[str, int] = {}
         self._manager_creation_time: Dict[str, datetime] = {}
         self._factory_lock = RLock()  # Use RLock for thread safety
@@ -1608,7 +1609,7 @@ class WebSocketManagerFactory:
         
         return isolation_key
     
-    async def create_manager(self, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+    async def create_manager(self, user_context: UserExecutionContext, mode: str = "isolated"):
         """
         Create an isolated WebSocket manager for a user context.
         
@@ -1696,8 +1697,9 @@ class WebSocketManagerFactory:
                 else:
                     logger.info(f"✅ Emergency cleanup successful - proceeding with manager creation for user {user_id[:8]}...")
             
-            # Create new isolated manager
-            manager = IsolatedWebSocketManager(user_context)
+            # Create new manager with specified mode
+            mode_enum = WebSocketManagerMode.ISOLATED if mode == "isolated" else WebSocketManagerMode.UNIFIED
+            manager = UnifiedWebSocketManager(mode=mode_enum, user_context=user_context)
             
             # Register manager
             self._active_managers[isolation_key] = manager
@@ -2234,7 +2236,7 @@ class WebSocketManagerFactory:
                         manager = asyncio.run(self.create_manager(user_context))
                 except RuntimeError:
                     # Fallback to direct instantiation for tests
-                    manager = IsolatedWebSocketManager(user_context)
+                    manager = UnifiedWebSocketManager(mode=WebSocketManagerMode.ISOLATED, user_context=user_context)
                     
                     # Register the manager manually for consistency
                     isolation_key = self._generate_isolation_key(user_context)
@@ -2632,7 +2634,7 @@ def get_websocket_manager_factory() -> WebSocketManagerFactory:
         return _factory_instance
 
 
-async def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+async def create_websocket_manager(user_context: UserExecutionContext, mode: str = "isolated"):
     """
     Create an isolated WebSocket manager for a user context.
     
@@ -2700,7 +2702,7 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
         for attempt in range(max_retries):
             try:
                 logger.debug(f"🔄 Creating WebSocket manager (attempt {attempt + 1}/{max_retries})")
-                manager = await factory.create_manager(user_context)
+                manager = await factory.create_manager(user_context, mode)
                 
                 # Validate created manager is functional
                 if not manager:
@@ -3151,8 +3153,8 @@ async def _create_emergency_fallback_manager(
             'created_at': datetime.now(timezone.utc).isoformat()
         }
         
-        # Create emergency manager with minimal functionality
-        emergency_manager = EmergencyWebSocketManager(emergency_config)
+        # Create emergency manager with minimal functionality using UnifiedWebSocketManager
+        emergency_manager = UnifiedWebSocketManager(mode=WebSocketManagerMode.EMERGENCY, config=emergency_config)
         
         logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_config['user_id'][:8]}...")
         return emergency_manager
@@ -3189,8 +3191,8 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
             'created_at': datetime.now(timezone.utc).isoformat()
         }
         
-        # Create degraded manager
-        degraded_manager = DegradedWebSocketManager(degraded_config)
+        # Create degraded manager using UnifiedWebSocketManager
+        degraded_manager = UnifiedWebSocketManager(mode=WebSocketManagerMode.DEGRADED, config=degraded_config)
         
         logger.warning("PHASE 2 FIX: Degraded service manager created - limited functionality available")
         return degraded_manager
@@ -3200,6 +3202,7 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
         return None
 
 
+# DEPRECATED: Use UnifiedWebSocketManager with EMERGENCY mode instead
 class EmergencyWebSocketManager:
     """
     PHASE 2 FIX: Emergency WebSocket manager for service continuity.
@@ -3283,6 +3286,7 @@ class EmergencyWebSocketManager:
         }
 
 
+# DEPRECATED: Use UnifiedWebSocketManager with DEGRADED mode instead  
 class DegradedWebSocketManager:
     """
     PHASE 2 FIX: Degraded WebSocket manager for absolute last resort.

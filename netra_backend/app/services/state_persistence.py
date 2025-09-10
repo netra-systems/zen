@@ -1,9 +1,18 @@
-"""Enhanced Agent State Persistence Service - 3-Tier Architecture
+"""SSOT Consolidated Agent State Persistence Service - 3-Tier Architecture
+
+SSOT CONSOLIDATION COMPLETE: This service consolidates ALL state persistence functionality.
+Previously separate StateCacheManager functionality has been integrated to ensure
+Single Source of Truth (SSOT) compliance.
 
 This service implements the optimal 3-tier state persistence architecture:
 1. Redis: PRIMARY storage for active states (high-performance, frequent updates)
 2. ClickHouse: Historical analytics and time-series data (completed runs)
 3. PostgreSQL: Metadata and critical recovery checkpoints only
+
+CONSOLIDATED FEATURES:
+- StatePersistenceService (3-tier architecture, database operations)
+- StateCacheManager (Redis caching, local fallback) - CONSOLIDATED
+- Backward compatibility maintained for existing imports
 
 Follows the 25-line function limit and maintains backward compatibility.
 """
@@ -32,7 +41,7 @@ from netra_backend.app.schemas.agent_state import (
     StatePersistenceRequest,
     StateRecoveryRequest,
 )
-from netra_backend.app.services.state_cache_manager import state_cache_manager
+# SSOT CONSOLIDATION: StateCacheManager functionality integrated into this service
 from netra_backend.app.services.state_recovery_manager import state_recovery_manager
 from netra_backend.app.services.state_serialization import (
     DateTimeEncoder,
@@ -78,7 +87,143 @@ class StatePersistenceService:
         
         # Auto-enable optimizations based on environment
         self._configure_optimizations()
+        
+        # SSOT CONSOLIDATION: Cache management (formerly StateCacheManager)
+        self._local_cache: Dict[str, Any] = {}
+        self._cache_versions: Dict[str, int] = {}
     
+    # =============================================================================
+    # SSOT CONSOLIDATION: StateCacheManager Methods (formerly separate service)
+    # =============================================================================
+    
+    def _serialize_state_data_for_cache(self, data: Any) -> str:
+        """Serialize state data to JSON, handling datetime objects."""
+        def json_serializer(obj):
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+        
+        return json.dumps(data, default=json_serializer, sort_keys=True)
+    
+    async def save_primary_state(self, request: Any) -> bool:
+        """Save primary state to cache and Redis (SSOT: formerly StateCacheManager method)."""
+        try:
+            if hasattr(request, 'run_id') and hasattr(request, 'state_data'):
+                run_id = request.run_id
+                
+                # Save to local cache
+                self._local_cache[run_id] = request.state_data
+                
+                # Update version tracking
+                current_version = self._cache_versions.get(run_id, 0)
+                self._cache_versions[run_id] = current_version + 1
+                
+                # Save to Redis if available
+                try:
+                    redis_client = await self.redis_manager.get_client()
+                    if redis_client:
+                        # Save serialized state
+                        serialized_data = self._serialize_state_data_for_cache(request.state_data)
+                        await redis_client.set(f"agent_state:{run_id}", serialized_data, ex=3600)
+                        
+                        # Save version
+                        await redis_client.set(f"agent_state_version:{run_id}", str(self._cache_versions[run_id]), ex=3600)
+                        
+                        # Update thread context if available
+                        if hasattr(request, 'thread_id') and hasattr(request, 'user_id'):
+                            thread_context = {
+                                "current_run_id": run_id,
+                                "user_id": request.user_id
+                            }
+                            await redis_client.set(
+                                f"thread_context:{request.thread_id}", 
+                                json.dumps(thread_context), 
+                                ex=3600
+                            )
+                except Exception as e:
+                    logger.warning(f"Redis save failed, using local cache only: {e}")
+                
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Failed to save primary state: {e}")
+            return False
+    
+    async def cache_state_in_redis(self, request: Any) -> bool:
+        """Cache state in Redis (SSOT: formerly StateCacheManager method)."""
+        return await self.save_primary_state(request)
+    
+    async def load_primary_state(self, run_id: str) -> Optional[Dict[str, Any]]:
+        """Load primary state from cache or Redis (SSOT: formerly StateCacheManager method)."""
+        # Try local cache first
+        if run_id in self._local_cache:
+            return self._local_cache[run_id]
+            
+        # Try Redis if available
+        try:
+            redis_client = await self.redis_manager.get_client()
+            if redis_client:
+                serialized_data = await redis_client.get(f"agent_state:{run_id}")
+                if serialized_data:
+                    data = json.loads(serialized_data)
+                    # Cache locally for faster access
+                    self._local_cache[run_id] = data
+                    return data
+        except Exception as e:
+            logger.warning(f"Redis load failed: {e}")
+            
+        return None
+        
+    async def delete_primary_state(self, run_id: str) -> bool:
+        """Delete primary state from cache and Redis (SSOT: formerly StateCacheManager method)."""
+        try:
+            # Remove from local cache
+            self._local_cache.pop(run_id, None)
+            self._cache_versions.pop(run_id, None)
+            
+            # Remove from Redis if available
+            try:
+                redis_client = await self.redis_manager.get_client()
+                if redis_client:
+                    await redis_client.delete(f"agent_state:{run_id}")
+                    await redis_client.delete(f"agent_state_version:{run_id}")
+            except Exception as e:
+                logger.warning(f"Redis delete failed: {e}")
+                
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete primary state: {e}")
+            return False
+    
+    async def load_from_redis_cache(self, run_id: str) -> Optional[Dict[str, Any]]:
+        """Load state from Redis cache (SSOT: formerly StateCacheManager method)."""
+        return await self.load_primary_state(run_id)
+    
+    async def cache_deserialized_state(self, run_id: str, state_data: Any) -> bool:
+        """Cache deserialized state (SSOT: formerly StateCacheManager method)."""
+        try:
+            self._local_cache[run_id] = state_data
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache deserialized state: {e}")
+            return False
+    
+    async def mark_state_completed(self, run_id: str) -> bool:
+        """Mark state as completed (SSOT: formerly StateCacheManager method)."""
+        if run_id in self._local_cache:
+            if isinstance(self._local_cache[run_id], dict):
+                self._local_cache[run_id]['_completed'] = True
+            return True
+        return False
+    
+    async def cache_legacy_state(self, run_id: str, state_data: Any) -> bool:
+        """Cache legacy state format (SSOT: formerly StateCacheManager method)."""
+        return await self.cache_deserialized_state(run_id, state_data)
+    
+    # =============================================================================
+    # End SSOT CONSOLIDATION: StateCacheManager Methods
+    # =============================================================================
+
     async def save_agent_state(self, *args, **kwargs) -> Tuple[bool, Optional[str]]:
         """Save agent state using optimal 3-tier architecture with optional optimizations.
         
@@ -121,7 +266,7 @@ class StatePersistenceService:
         """Execute new 3-tier save workflow with comprehensive error handling."""
         try:
             # Step 1: Save to Redis (PRIMARY) - must succeed
-            redis_success = await state_cache_manager.save_primary_state(request)
+            redis_success = await self.save_primary_state(request)
             if not redis_success:
                 logger.error(f"PRIMARY Redis save failed for run {request.run_id}")
                 return await self._fallback_to_legacy_save(request, db_session)
@@ -164,7 +309,7 @@ class StatePersistenceService:
     async def _cache_state_in_redis(self, request: StatePersistenceRequest) -> None:
         """Cache state data in Redis for fast retrieval."""
         try:
-            await state_cache_manager.cache_state_in_redis(request)
+            await self.cache_state_in_redis(request)
         except Exception as e:
             logger.warning(f"Failed to cache state in Redis for run {request.run_id}: {e}")
     
@@ -186,7 +331,7 @@ class StatePersistenceService:
         try:
             # Step 1: Try Redis (PRIMARY) - fastest for active states
             if not snapshot_id:  # Only for current state, not specific snapshots
-                state = await state_cache_manager.load_primary_state(run_id)
+                state = await self.load_primary_state(run_id)
                 if state:
                     logger.debug(f"Loaded state for {run_id} from Redis PRIMARY")
                     return state
@@ -208,7 +353,7 @@ class StatePersistenceService:
     async def _attempt_cache_load(self, run_id: str, snapshot_id: Optional[str]) -> Optional[DeepAgentState]:
         """Try loading state from Redis cache first."""
         if not snapshot_id:
-            return await state_cache_manager.load_from_redis_cache(run_id)
+            return await self.load_from_redis_cache(run_id)
         return None
 
     async def _attempt_database_load(self, run_id: str, snapshot_id: Optional[str], 
@@ -236,7 +381,7 @@ class StatePersistenceService:
         state_data = await self._deserialize_state_data(
             snapshot.state_data, snapshot.serialization_format
         )
-        await state_cache_manager.cache_deserialized_state(run_id, state_data)
+        await self.cache_deserialized_state(run_id, state_data)
         logger.info(f"Loaded state from snapshot {snapshot.id}")
         return DeepAgentState(**state_data)
     
@@ -648,7 +793,7 @@ class StatePersistenceService:
         if is_final:
             try:
                 # Mark state as completed in Redis (reduces TTL)
-                await state_cache_manager.mark_state_completed(request.run_id)
+                await self.mark_state_completed(request.run_id)
                 
                 # TODO: Schedule async job to migrate to ClickHouse
                 # For now, just log the intent
@@ -696,7 +841,7 @@ class StatePersistenceService:
         try:
             snapshot_id = await self._execute_state_save_transaction(request, db_session)
             # Also try to cache in Redis for future loads
-            await state_cache_manager.cache_legacy_state(request.run_id, request.state_data)
+            await self.cache_legacy_state(request.run_id, request.state_data)
             return True, snapshot_id
         except Exception as e:
             logger.error(f"Legacy save also failed for run {request.run_id}: {e}")
@@ -746,7 +891,7 @@ class StatePersistenceService:
                 )
                 
                 # Cache in Redis for future loads
-                await state_cache_manager.cache_legacy_state(run_id, state_data)
+                await self.cache_legacy_state(run_id, state_data)
                 
                 logger.info(f"Loaded state for {run_id} from legacy PostgreSQL snapshot {snapshot.id}")
                 return DeepAgentState(**state_data)
@@ -981,3 +1126,43 @@ class StatePersistenceService:
 
 # Global instance
 state_persistence_service = StatePersistenceService()
+
+# SSOT CONSOLIDATION: Backward compatibility alias for StateCacheManager
+# This ensures existing imports continue to work during migration
+state_cache_manager = state_persistence_service
+
+# Legacy compatibility class for explicit StateCacheManager imports
+class StateCacheManager:
+    """SSOT CONSOLIDATION: Legacy compatibility wrapper for StateCacheManager.
+    
+    All functionality has been consolidated into StatePersistenceService.
+    This class exists only for backward compatibility during migration.
+    """
+    
+    def __init__(self):
+        # Delegate all operations to the consolidated service
+        self._service = state_persistence_service
+    
+    async def save_primary_state(self, request):
+        return await self._service.save_primary_state(request)
+    
+    async def cache_state_in_redis(self, request):
+        return await self._service.cache_state_in_redis(request)
+    
+    async def load_primary_state(self, run_id):
+        return await self._service.load_primary_state(run_id)
+        
+    async def delete_primary_state(self, run_id):
+        return await self._service.delete_primary_state(run_id)
+    
+    async def load_from_redis_cache(self, run_id):
+        return await self._service.load_from_redis_cache(run_id)
+    
+    async def cache_deserialized_state(self, run_id, state_data):
+        return await self._service.cache_deserialized_state(run_id, state_data)
+    
+    async def mark_state_completed(self, run_id):
+        return await self._service.mark_state_completed(run_id)
+    
+    async def cache_legacy_state(self, run_id, state_data):
+        return await self._service.cache_legacy_state(run_id, state_data)
