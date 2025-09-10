@@ -31,7 +31,7 @@ from shared.isolated_environment import get_env
 
 @dataclass
 class ResourceExhaustionMetrics:
-    \"\"\"Resource exhaustion test metrics.\"\"\"
+    """Resource exhaustion test metrics."""
     test_name: str
     resource_type: str
     initial_usage: float
@@ -49,7 +49,7 @@ class ResourceExhaustionMetrics:
 
 @dataclass
 class SystemResourceSnapshot:
-    \"\"\"System resource usage snapshot.\"\"\"
+    """System resource usage snapshot."""
     timestamp: float
     cpu_percent: float
     memory_mb: float
@@ -61,10 +61,10 @@ class SystemResourceSnapshot:
 
 
 class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
-    \"\"\"Test resource exhaustion detection and handling mechanisms.\"\"\"
+    """Test resource exhaustion detection and handling mechanisms."""
     
     def _get_system_resource_snapshot(self) -> SystemResourceSnapshot:
-        \"\"\"Get current system resource usage snapshot.\"\"\"
+        """Get current system resource usage snapshot."""
         process = psutil.Process(os.getpid())
         
         # Get system-wide stats

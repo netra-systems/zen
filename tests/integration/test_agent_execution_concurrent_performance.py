@@ -116,7 +116,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
         agent_performance_results = []
         
         async def simulate_agent_execution(agent_id: int, execution_count: int) -> AgentPerformanceMetrics:
-            \"\"\"Simulate a single agent's execution lifecycle.\"\"\"
+            """Simulate a single agent's execution lifecycle."""
             import psutil
             import os
             
@@ -125,9 +125,9 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
             
             # Create authenticated user context for the agent
             user_context = await create_authenticated_user_context(
-                user_email=f\"agent_perf_{agent_id}@example.com\",
-                environment=\"test\",
-                permissions=[\"read\", \"write\", \"execute\"],
+                user_email=f"agent_perf_{agent_id}@example.com",
+                environment="test",
+                permissions=["read", "write", "execute"],
                 websocket_enabled=True
             )
             
@@ -140,7 +140,77 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
                 execution_start = time.time()
                 
                 try:
-                    # Simulate agent initialization and context setup\n                    agent_context = {\n                        \"agent_id\": agent_id,\n                        \"execution_id\": execution_id,\n                        \"user_context\": user_context,\n                        \"request_id\": str(uuid.uuid4()),\n                        \"start_time\": execution_start\n                    }\n                    \n                    # Store agent state in Redis (simulating real agent pattern)\n                    agent_state_key = f\"agent_state:{agent_id}:{execution_id}\"\n                    await redis.set(\n                        agent_state_key,\n                        json.dumps({\n                            \"agent_id\": agent_id,\n                            \"user_id\": str(user_context.user_id),\n                            \"status\": \"executing\",\n                            \"started_at\": execution_start\n                        }),\n                        ex=300  # 5 minute expiry\n                    )\n                    \n                    # Simulate agent work with varying complexity\n                    complexity = [\"simple\", \"medium\", \"complex\"][execution_id % 3]\n                    work_result = self._simulate_agent_work(complexity)\n                    \n                    # Simulate database interaction (agent storing results)\n                    await db.execute(\n                        \"SELECT $1 as agent_id, $2 as execution_id, $3 as result_summary\",\n                        agent_id, execution_id, work_result[\"result_summary\"]\n                    )\n                    \n                    # Update agent state to completed\n                    await redis.set(\n                        agent_state_key,\n                        json.dumps({\n                            \"agent_id\": agent_id,\n                            \"user_id\": str(user_context.user_id),\n                            \"status\": \"completed\",\n                            \"started_at\": execution_start,\n                            \"completed_at\": time.time(),\n                            \"result\": work_result\n                        }),\n                        ex=300\n                    )\n                    \n                    execution_time = time.time() - execution_start\n                    execution_times.append(execution_time)\n                    successful_executions += 1\n                    \n                    execution_details.append({\n                        \"execution_id\": execution_id,\n                        \"execution_time\": execution_time,\n                        \"complexity\": complexity,\n                        \"success\": True\n                    })\n                    \n                    # Cleanup agent state\n                    await redis.delete(agent_state_key)\n                    \n                except Exception as e:\n                    execution_time = time.time() - execution_start\n                    execution_times.append(execution_time)\n                    errors.append(f\"Agent {agent_id} execution {execution_id} failed: {str(e)}\")\n                    \n                    execution_details.append({\n                        \"execution_id\": execution_id,\n                        \"execution_time\": execution_time,\n                        \"error\": str(e),\n                        \"success\": False\n                    })\n            \n            final_memory = process.memory_info().rss / 1024 / 1024\n            memory_usage = final_memory - initial_memory\n            \n            # Calculate performance metrics\n            total_executions = len(execution_times)\n            failed_executions = total_executions - successful_executions\n            \n            metrics = AgentPerformanceMetrics(\n                agent_name=f\"Agent_{agent_id}\",\n                total_executions=total_executions,\n                successful_executions=successful_executions,\n                failed_executions=failed_executions,\n                average_execution_time=statistics.mean(execution_times) if execution_times else 0,\n                p95_execution_time=0,\n                p99_execution_time=0,\n                min_execution_time=min(execution_times) if execution_times else 0,\n                max_execution_time=max(execution_times) if execution_times else 0,\n                concurrent_executions_peak=1,  # Single agent, so peak is 1\n                throughput_executions_per_second=0,\n                memory_usage_mb=memory_usage,\n                errors=errors,\n                execution_details=execution_details\n            )\n            \n            # Calculate percentiles\n            if execution_times:\n                execution_times.sort()\n                p95_index = int(len(execution_times) * 0.95)\n                p99_index = int(len(execution_times) * 0.99)\n                \n                metrics.p95_execution_time = execution_times[p95_index]\n                metrics.p99_execution_time = execution_times[p99_index]\n                \n                # Calculate throughput\n                total_agent_time = sum(execution_times)\n                metrics.throughput_executions_per_second = successful_executions / total_agent_time if total_agent_time > 0 else 0\n            \n            return metrics\n        \n        # Execute concurrent agent simulations\n        print(f\"🤖 Starting {concurrent_agents} concurrent agent executions...\")\n        concurrent_start = time.time()\n        \n        agent_tasks = [\n            simulate_agent_execution(agent_id, executions_per_agent)\n            for agent_id in range(concurrent_agents)\n        ]\n        \n        agent_results = await asyncio.gather(*agent_tasks, return_exceptions=True)\n        \n        concurrent_duration = time.time() - concurrent_start\n        \n        # Filter successful agent results\n        successful_agent_metrics = [\n            result for result in agent_results\n            if isinstance(result, AgentPerformanceMetrics)\n        ]\n        \n        failed_agents = len(agent_results) - len(successful_agent_metrics)\n        \n        # Calculate overall metrics\n        total_executions = sum(m.total_executions for m in successful_agent_metrics)\n        total_successful = sum(m.successful_executions for m in successful_agent_metrics)\n        total_failed = sum(m.failed_executions for m in successful_agent_metrics)\n        \n        overall_success_rate = total_successful / total_executions if total_executions > 0 else 0\n        \n        # Aggregate execution times for overall percentiles\n        all_execution_times = []\n        for metrics in successful_agent_metrics:\n            for detail in metrics.execution_details:\n                if detail.get(\"success\", False):\n                    all_execution_times.append(detail[\"execution_time\"])\n        \n        overall_p95 = 0\n        overall_p99 = 0\n        if all_execution_times:\n            all_execution_times.sort()\n            p95_index = int(len(all_execution_times) * 0.95)\n            p99_index = int(len(all_execution_times) * 0.99)\n            overall_p95 = all_execution_times[p95_index]\n            overall_p99 = all_execution_times[p99_index]\n        \n        # Memory usage analysis\n        total_memory_usage = sum(m.memory_usage_mb for m in successful_agent_metrics)\n        average_memory_per_agent = total_memory_usage / len(successful_agent_metrics) if successful_agent_metrics else 0\n        \n        # Performance assertions\n        assert len(successful_agent_metrics) >= concurrent_agents * 0.90, f\"Too many failed agents: {failed_agents}/{concurrent_agents}\"\n        assert overall_success_rate >= 0.95, f\"Overall success rate {overall_success_rate:.3f} below 95% SLA\"\n        assert overall_p95 <= 5.0, f\"P95 execution time {overall_p95:.2f}s exceeds 5s SLA\"\n        assert average_memory_per_agent <= 50.0, f\"Average memory per agent {average_memory_per_agent:.1f}MB exceeds 50MB SLA\"\n        \n        print(f\"✅ Concurrent Agent Execution Performance Results:\")\n        print(f\"   Concurrent agents: {concurrent_agents}\")\n        print(f\"   Successful agents: {len(successful_agent_metrics)}\")\n        print(f\"   Failed agents: {failed_agents}\")\n        print(f\"   Total executions: {total_executions}\")\n        print(f\"   Successful executions: {total_successful}\")\n        print(f\"   Failed executions: {total_failed}\")\n        print(f\"   Overall success rate: {overall_success_rate:.3f}\")\n        print(f\"   Overall P95 execution time: {overall_p95:.2f}s\")\n        print(f\"   Overall P99 execution time: {overall_p99:.2f}s\")\n        print(f\"   Average memory per agent: {average_memory_per_agent:.1f}MB\")\n        print(f\"   Total memory usage: {total_memory_usage:.1f}MB\")\n        print(f\"   Test duration: {concurrent_duration:.2f}s\")\n    \n    @pytest.mark.integration\n    @pytest.mark.performance\n    @pytest.mark.real_services\n    async def test_agent_resource_contention_detection(self, real_services_fixture):\n        \"\"\"
+                    # Simulate agent initialization and context setup
+                    agent_context = {
+                        "agent_id": agent_id,
+                        "execution_id": execution_id,
+                        "user_context": user_context,
+                        "request_id": str(uuid.uuid4()),
+                        "start_time": execution_start
+                    }
+                    
+                    # Store agent state in Redis (simulating real agent pattern)
+                    agent_state_key = f"agent_state:{agent_id}:{execution_id}"
+                    await redis.set(
+                        agent_state_key,
+                        json.dumps({
+                            "agent_id": agent_id,
+                            "user_id": str(user_context.user_id),
+                            "status": "executing",
+                            "started_at": execution_start
+                        }),
+                        ex=300  # 5 minute expiry
+                    )
+                    
+                    # Simulate agent work with varying complexity
+                    complexity = ["simple", "medium", "complex"][execution_id % 3]
+                    work_result = self._simulate_agent_work(complexity)
+                    
+                    # Simulate database interaction (agent storing results)
+                    await db.execute(
+                        "SELECT $1 as agent_id, $2 as execution_id, $3 as result_summary",
+                        agent_id, execution_id, work_result["result_summary"]
+                    )
+                    
+                    # Update agent state to completed
+                    await redis.set(
+                        agent_state_key,
+                        json.dumps({
+                            "agent_id": agent_id,
+                            "user_id": str(user_context.user_id),
+                            "status": "completed",
+                            "started_at": execution_start,
+                            "completed_at": time.time(),
+                            "result": work_result
+                        }),
+                        ex=300
+                    )
+                    
+                    execution_time = time.time() - execution_start
+                    execution_times.append(execution_time)
+                    successful_executions += 1
+                    
+                    execution_details.append({
+                        "execution_id": execution_id,
+                        "execution_time": execution_time,
+                        "complexity": complexity,
+                        "success": True
+                    })
+                    
+                    # Cleanup agent state
+                    await redis.delete(agent_state_key)
+                    
+                except Exception as e:
+                    execution_time = time.time() - execution_start
+                    execution_times.append(execution_time)
+                    errors.append(f"Agent {agent_id} execution {execution_id} failed: {str(e)}")
+                    
+                    execution_details.append({
+                        "execution_id": execution_id,
+                        "execution_time": execution_time,
+                        "error": str(e),
+                        "success": False
+                    })\n            \n            final_memory = process.memory_info().rss / 1024 / 1024\n            memory_usage = final_memory - initial_memory\n            \n            # Calculate performance metrics\n            total_executions = len(execution_times)\n            failed_executions = total_executions - successful_executions\n            \n            metrics = AgentPerformanceMetrics(\n                agent_name=f\"Agent_{agent_id}\",\n                total_executions=total_executions,\n                successful_executions=successful_executions,\n                failed_executions=failed_executions,\n                average_execution_time=statistics.mean(execution_times) if execution_times else 0,\n                p95_execution_time=0,\n                p99_execution_time=0,\n                min_execution_time=min(execution_times) if execution_times else 0,\n                max_execution_time=max(execution_times) if execution_times else 0,\n                concurrent_executions_peak=1,  # Single agent, so peak is 1\n                throughput_executions_per_second=0,\n                memory_usage_mb=memory_usage,\n                errors=errors,\n                execution_details=execution_details\n            )\n            \n            # Calculate percentiles\n            if execution_times:\n                execution_times.sort()\n                p95_index = int(len(execution_times) * 0.95)\n                p99_index = int(len(execution_times) * 0.99)\n                \n                metrics.p95_execution_time = execution_times[p95_index]\n                metrics.p99_execution_time = execution_times[p99_index]\n                \n                # Calculate throughput\n                total_agent_time = sum(execution_times)\n                metrics.throughput_executions_per_second = successful_executions / total_agent_time if total_agent_time > 0 else 0\n            \n            return metrics\n        \n        # Execute concurrent agent simulations\n        print(f\"🤖 Starting {concurrent_agents} concurrent agent executions...\")\n        concurrent_start = time.time()\n        \n        agent_tasks = [\n            simulate_agent_execution(agent_id, executions_per_agent)\n            for agent_id in range(concurrent_agents)\n        ]\n        \n        agent_results = await asyncio.gather(*agent_tasks, return_exceptions=True)\n        \n        concurrent_duration = time.time() - concurrent_start\n        \n        # Filter successful agent results\n        successful_agent_metrics = [\n            result for result in agent_results\n            if isinstance(result, AgentPerformanceMetrics)\n        ]\n        \n        failed_agents = len(agent_results) - len(successful_agent_metrics)\n        \n        # Calculate overall metrics\n        total_executions = sum(m.total_executions for m in successful_agent_metrics)\n        total_successful = sum(m.successful_executions for m in successful_agent_metrics)\n        total_failed = sum(m.failed_executions for m in successful_agent_metrics)\n        \n        overall_success_rate = total_successful / total_executions if total_executions > 0 else 0\n        \n        # Aggregate execution times for overall percentiles\n        all_execution_times = []\n        for metrics in successful_agent_metrics:\n            for detail in metrics.execution_details:\n                if detail.get(\"success\", False):\n                    all_execution_times.append(detail[\"execution_time\"])\n        \n        overall_p95 = 0\n        overall_p99 = 0\n        if all_execution_times:\n            all_execution_times.sort()\n            p95_index = int(len(all_execution_times) * 0.95)\n            p99_index = int(len(all_execution_times) * 0.99)\n            overall_p95 = all_execution_times[p95_index]\n            overall_p99 = all_execution_times[p99_index]\n        \n        # Memory usage analysis\n        total_memory_usage = sum(m.memory_usage_mb for m in successful_agent_metrics)\n        average_memory_per_agent = total_memory_usage / len(successful_agent_metrics) if successful_agent_metrics else 0\n        \n        # Performance assertions\n        assert len(successful_agent_metrics) >= concurrent_agents * 0.90, f\"Too many failed agents: {failed_agents}/{concurrent_agents}\"\n        assert overall_success_rate >= 0.95, f\"Overall success rate {overall_success_rate:.3f} below 95% SLA\"\n        assert overall_p95 <= 5.0, f\"P95 execution time {overall_p95:.2f}s exceeds 5s SLA\"\n        assert average_memory_per_agent <= 50.0, f\"Average memory per agent {average_memory_per_agent:.1f}MB exceeds 50MB SLA\"\n        \n        print(f\"✅ Concurrent Agent Execution Performance Results:\")\n        print(f\"   Concurrent agents: {concurrent_agents}\")\n        print(f\"   Successful agents: {len(successful_agent_metrics)}\")\n        print(f\"   Failed agents: {failed_agents}\")\n        print(f\"   Total executions: {total_executions}\")\n        print(f\"   Successful executions: {total_successful}\")\n        print(f\"   Failed executions: {total_failed}\")\n        print(f\"   Overall success rate: {overall_success_rate:.3f}\")\n        print(f\"   Overall P95 execution time: {overall_p95:.2f}s\")\n        print(f\"   Overall P99 execution time: {overall_p99:.2f}s\")\n        print(f\"   Average memory per agent: {average_memory_per_agent:.1f}MB\")\n        print(f\"   Total memory usage: {total_memory_usage:.1f}MB\")\n        print(f\"   Test duration: {concurrent_duration:.2f}s\")\n    \n    @pytest.mark.integration\n    @pytest.mark.performance\n    @pytest.mark.real_services\n    async def test_agent_resource_contention_detection(self, real_services_fixture):\n        \"\"\"
         Test agent performance under resource contention scenarios.
         
         Performance SLA:
