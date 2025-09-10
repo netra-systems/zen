@@ -802,8 +802,11 @@ class TestAgentMethodExecutionPhase(SSotAsyncTestCase):
     
     async def test_agent_method_execution_phase_method_not_found(self):
         """Test error handling when agent method doesn't exist."""
-        mock_agent = Mock()
-        # Don't add the method to the mock
+        # Create a real object without the method instead of Mock
+        class RealAgentWithoutMethod:
+            pass
+        
+        mock_agent = RealAgentWithoutMethod()
         
         phase = AgentMethodExecutionPhase("missing_method", mock_agent, "nonexistent_method")
         context = ExecutionContext(request_id="test")

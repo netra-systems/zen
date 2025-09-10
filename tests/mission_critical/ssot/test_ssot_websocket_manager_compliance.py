@@ -256,7 +256,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'violations_found': len(all_violations),
             'canonical_managers_verified': len(canonical_managers),
             'compliance_status': 'PASS'
-        })
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
     
     def test_canonical_websocket_manager_imports(self):
         """
@@ -310,7 +312,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                             canonical_usage.append({
                                 'file': str(file_path.relative_to(project_root)),
                                 'import_statement': canonical_import
-                            })
+                            }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                     
                     # Check for forbidden imports (violations)
                     for forbidden_import in forbidden_imports:
@@ -325,7 +329,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                                 'file': str(file_path.relative_to(project_root)),
                                 'forbidden_import': forbidden_import,
                                 'violation_type': 'forbidden_websocket_import'
-                            })
+                            }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                 
                 except (UnicodeDecodeError, FileNotFoundError, PermissionError):
                     continue
@@ -344,7 +350,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                     'file': str(websocket_manager_file.relative_to(project_root)),
                     'forbidden_import': 'Missing WebSocketManager alias',
                     'violation_type': 'missing_canonical_alias'
-                })
+                }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
         
         # Assert no import violations
         if import_violations:
@@ -371,7 +379,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'canonical_imports': len(canonical_usage),
             'import_violations': len(import_violations),
             'compliance_status': 'PASS'
-        })
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
     
     def test_websocket_protocol_compliance(self):
         """
@@ -410,7 +420,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                 compliance_results.append({
                     'manager_name': manager_info['name'],
                     'validation_result': validation_result
-                })
+                }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                 
                 # Assert compliance
                 if not validation_result['compliant']:
@@ -457,7 +469,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'compliant_managers': compliant_managers,
             'compliance_rate': (compliant_managers / total_managers) * 100 if total_managers > 0 else 0,
             'compliance_status': 'PASS' if compliant_managers == total_managers else 'FAIL'
-        })
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
     
     @pytest.mark.asyncio
     async def test_websocket_manager_user_isolation(self):
@@ -617,7 +631,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'concurrent_operations': len(concurrent_results),
             'isolation_violations': 0,  # If we got here, no violations found
             'compliance_status': 'PASS'
-        })
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
     
     @pytest.mark.asyncio
     async def test_websocket_event_delivery_compliance(self):
@@ -725,7 +741,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                             'delivered': True,
                             'structured_correctly': has_event_type and has_required_data,
                             'message_content': latest_message
-                        })
+                        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                         
                         logger.info(f"✅ Event {event_type} delivered successfully")
                     else:
@@ -734,7 +752,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                             'delivered': False,
                             'structured_correctly': False,
                             'error': 'No message sent'
-                        })
+                        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                         
                         logger.error(f"❌ Event {event_type} failed to deliver")
                 
@@ -744,7 +764,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                         'delivered': False,
                         'structured_correctly': False,
                         'error': str(e)
-                    })
+                    }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                     
                     logger.error(f"❌ Event {event_type} failed with exception: {e}")
             
@@ -784,7 +806,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'successful_deliveries': successful_events,
             'delivery_success_rate': (successful_events / len(critical_events)) * 100,
             'compliance_status': 'PASS' if successful_events == len(critical_events) else 'FAIL'
-        })
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
     
     @pytest.mark.asyncio
     async def test_websocket_factory_pattern_compliance(self):
@@ -852,14 +876,18 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                         'manager_index': i,
                         'violation': 'class has _instance singleton variable',
                         'class_name': manager_class.__name__
-                    })
+                    }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                 
                 if hasattr(manager_class, '_instances') and manager_class._instances:
                     singleton_violations.append({
                         'manager_index': i,
                         'violation': 'class has _instances collection',
                         'class_name': manager_class.__name__
-                    })
+                    }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                 
                 # Check for shared state that could cause cross-contamination
                 if hasattr(manager, 'connections') and isinstance(manager.connections, dict):
@@ -872,7 +900,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                                     'manager_index': i,
                                     'violation': 'managers share connection dictionary reference',
                                     'class_name': manager_class.__name__
-                                })
+                                }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
             
             if singleton_violations:
                 violation_details = "\n".join([
@@ -968,7 +998,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'singleton_violations': len(singleton_violations) if 'singleton_violations' in locals() else 0,
             'concurrent_creation_success_rate': (len(successful_creations) / len(concurrent_results)) * 100 if 'concurrent_results' in locals() else 100,
             'compliance_status': 'PASS'
-        })
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
     
     @pytest.mark.asyncio
     async def test_websocket_ssot_comprehensive_validation(self):
@@ -1019,7 +1051,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                         'test': test_name,
                         'severity': 'CRITICAL',
                         'error': str(e)
-                    })
+                    }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                     logger.error(f"❌ {test_name} validation FAILED: {e}")
                     
                 except Exception as e:
@@ -1056,7 +1090,9 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                         'test': test_name,
                         'severity': 'CRITICAL',
                         'error': str(e)
-                    })
+                    }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
                     logger.error(f"❌ {test_name} validation FAILED: {e}")
                     
                 except Exception as e:
@@ -1124,4 +1160,6 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'critical_violations': len(validation_results['critical_violations']),
             'remediation_required': validation_results['remediation_required'],
             'overall_status': 'PASS' if validation_results['overall_compliance'] else 'FAIL'
-        })
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)
