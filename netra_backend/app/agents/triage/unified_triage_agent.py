@@ -356,7 +356,8 @@ class UnifiedTriageAgent(BaseAgent):
                     "validation_error",
                     validation_result
                 )
-                return self._create_fallback_result(request, validation_result["reason"])
+                fallback_result = self._create_fallback_result(request, validation_result["reason"])
+                return self._triage_result_to_dict(fallback_result)
             
             # Generate cache key for similar requests
             cache_key = self._generate_request_hash(request, exec_context)
