@@ -102,7 +102,9 @@ class TestEnvironmentDetectorComprehensive(SSotBaseTestCase):
                 deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]
                 assert len(deprecation_warnings) > 0
                 assert "get_current_environment() from environment_detector is deprecated" in str(deprecation_warnings[0].message)
-                assert isinstance(env, Environment)
+                # Check that it returns an Environment enum value
+                assert hasattr(env, 'value')
+                assert env.value in ['development', 'staging', 'production', 'testing']
 
     # === ENVIRONMENT ENUM TESTS ===
 

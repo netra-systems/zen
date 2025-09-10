@@ -446,3 +446,121 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
         }
         for key, value in metrics.items():
             self.record_metric(key, value)
+    
+    def test_websocket_ssot_comprehensive_validation(self):
+        """
+        COMPREHENSIVE: Run complete SSOT validation combining all critical checks.
+        
+        This master test orchestrates all SSOT validation requirements and provides
+        a comprehensive compliance report for WebSocket Manager SSOT integrity.
+        
+        Business Impact: Ensures complete protection of $500K+ ARR chat functionality.
+        """
+        logger.info("🎯 Running comprehensive WebSocket SSOT validation")
+        
+        validation_results = {
+            'overall_compliance': False,
+            'test_results': {},
+            'critical_violations': [],
+            'business_impact_score': 0,
+            'remediation_required': False
+        }
+        
+        try:
+            # Run all individual validation tests
+            individual_tests = [
+                ('duplicate_detection', self.test_no_duplicate_websocket_managers),
+                ('import_compliance', self.test_canonical_websocket_manager_imports), 
+                ('protocol_compliance', self.test_websocket_protocol_compliance),
+            ]
+            
+            for test_name, test_method in individual_tests:
+                try:
+                    logger.info(f"🧪 Running {test_name} validation...")
+                    test_method()
+                    validation_results['test_results'][test_name] = {
+                        'status': 'PASS',
+                        'business_impact': 'PROTECTED'
+                    }
+                    logger.info(f"✅ {test_name} validation PASSED")
+                    
+                except AssertionError as e:
+                    validation_results['test_results'][test_name] = {
+                        'status': 'FAIL', 
+                        'error': str(e),
+                        'business_impact': 'AT_RISK'
+                    }
+                    validation_results['critical_violations'].append({
+                        'test': test_name,
+                        'severity': 'CRITICAL',
+                        'error': str(e)
+                    })
+                    logger.error(f"❌ {test_name} validation FAILED: {e}")
+                    
+                except Exception as e:
+                    validation_results['test_results'][test_name] = {
+                        'status': 'ERROR',
+                        'error': str(e),
+                        'business_impact': 'UNKNOWN'
+                    }
+                    logger.error(f"🚨 {test_name} validation ERROR: {e}")
+            
+            # Calculate overall compliance
+            total_tests = len(validation_results['test_results'])
+            passing_tests = len([r for r in validation_results['test_results'].values() if r['status'] == 'PASS'])
+            
+            validation_results['overall_compliance'] = passing_tests == total_tests
+            validation_results['compliance_percentage'] = (passing_tests / total_tests) * 100 if total_tests > 0 else 0
+            
+            # Calculate business impact score (0-100)
+            protected_tests = len([r for r in validation_results['test_results'].values() if r.get('business_impact') == 'PROTECTED'])
+            validation_results['business_impact_score'] = (protected_tests / total_tests) * 100 if total_tests > 0 else 0
+            
+            # Determine if remediation is required
+            validation_results['remediation_required'] = len(validation_results['critical_violations']) > 0
+            
+            # Generate comprehensive report
+            if validation_results['overall_compliance']:
+                logger.info(
+                    f"🎉 COMPREHENSIVE SSOT VALIDATION SUCCESS!\n"
+                    f"✅ All {total_tests} WebSocket SSOT validation tests PASSED\n"
+                    f"✅ Business Impact Score: {validation_results['business_impact_score']:.1f}%\n"
+                    f"✅ Chat functionality ($500K+ ARR) is PROTECTED\n"
+                    f"✅ No remediation required"
+                )
+            else:
+                critical_violation_summary = "\n".join([
+                    f"  - {v['test']}: {v['error'][:100]}..." 
+                    for v in validation_results['critical_violations']
+                ])
+                
+                pytest.fail(
+                    f"🚨 COMPREHENSIVE SSOT VALIDATION FAILURE!\n"
+                    f"❌ {total_tests - passing_tests} out of {total_tests} critical tests FAILED\n"
+                    f"❌ Compliance: {validation_results['compliance_percentage']:.1f}%\n"
+                    f"❌ Business Impact Score: {validation_results['business_impact_score']:.1f}%\n"
+                    f"❌ Critical Violations:\n{critical_violation_summary}\n"
+                    f"🚨 IMMEDIATE REMEDIATION REQUIRED: WebSocket SSOT violations threaten $500K+ ARR chat functionality!"
+                )
+        
+        except Exception as e:
+            validation_results['test_results']['comprehensive_validation'] = {
+                'status': 'ERROR',
+                'error': str(e),
+                'business_impact': 'CRITICAL_FAILURE'
+            }
+            pytest.fail(f"❌ Comprehensive WebSocket SSOT validation failed: {e}")
+        
+        # Record comprehensive validation metrics
+        metrics = {
+            'test_name': 'websocket_ssot_comprehensive',
+            'total_validation_tests': len(validation_results['test_results']),
+            'passing_tests': passing_tests if 'passing_tests' in locals() else 0,
+            'compliance_percentage': validation_results['compliance_percentage'],
+            'business_impact_score': validation_results['business_impact_score'],
+            'critical_violations': len(validation_results['critical_violations']),
+            'remediation_required': validation_results['remediation_required'],
+            'overall_status': 'PASS' if validation_results['overall_compliance'] else 'FAIL'
+        }
+        for key, value in metrics.items():
+            self.record_metric(key, value)

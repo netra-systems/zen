@@ -389,12 +389,14 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         try:
             from netra_backend.app.agents.triage_sub_agent.agent import TriageAgent
             from netra_backend.app.llm.llm_manager import LLMManager
+            from netra_backend.app.core.tools.unified_tool_dispatcher import ToolDispatcher
             
             # Mock dependencies
             mock_llm_manager = MagicMock(spec=LLMManager)
+            mock_tool_dispatcher = MagicMock(spec=ToolDispatcher)
             
             # Test triage agent creation
-            triage_agent = TriageAgent(llm_manager=mock_llm_manager)
+            triage_agent = TriageAgent(llm_manager=mock_llm_manager, tool_dispatcher=mock_tool_dispatcher)
             
             triage_agent_time = time.time() - start_time
             self._record_timing('triage_agent_setup', triage_agent_time)
