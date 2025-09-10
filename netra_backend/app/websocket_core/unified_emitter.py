@@ -287,7 +287,12 @@ class UnifiedWebSocketEmitter:
         
         # SECURITY FIX 3: Guaranteed delivery with enhanced retries for auth events
         is_auth_event = event_type in self.AUTHENTICATION_CRITICAL_EVENTS
-        max_attempts = self.MAX_CRITICAL_RETRIES if is_auth_event else self.MAX_RETRIES
+        
+        # PERFORMANCE OPTIMIZATION: Use fast mode settings if enabled
+        if self.performance_mode and not is_auth_event:
+            max_attempts = self.FAST_MODE_MAX_RETRIES
+        else:
+            max_attempts = self.MAX_CRITICAL_RETRIES if is_auth_event else self.MAX_RETRIES
         
         # Emit with retries
         last_error = None
@@ -323,11 +328,17 @@ class UnifiedWebSocketEmitter:
                         if success:
                             return True
                     else:
-                        # Standard retry with exponential backoff
-                        delay = min(
-                            self.RETRY_BASE_DELAY * (2 ** attempt),
-                            self.RETRY_MAX_DELAY
-                        )
+                        # Standard retry with exponential backoff (or fast mode)
+                        if self.performance_mode:
+                            delay = min(
+                                self.FAST_MODE_BASE_DELAY * (2 ** attempt),
+                                self.FAST_MODE_MAX_DELAY
+                            )
+                        else:
+                            delay = min(
+                                self.RETRY_BASE_DELAY * (2 ** attempt),
+                                self.RETRY_MAX_DELAY
+                            )
                         
                         logger.warning(
                             f"Failed to emit {event_type} for user {self.user_id} "
@@ -1256,7 +1267,8 @@ class WebSocketEmitterFactory:
     def create_emitter(
         manager: 'UnifiedWebSocketManager',
         user_id: str,
-        context: Optional['UserExecutionContext'] = None
+        context: Optional['UserExecutionContext'] = None,
+        performance_mode: bool = False
     ) -> UnifiedWebSocketEmitter:
         """
         Create a new emitter instance.
@@ -1265,6 +1277,7 @@ class WebSocketEmitterFactory:
             manager: WebSocket manager
             user_id: Target user ID
             context: Optional execution context
+            performance_mode: Enable high-throughput mode
             
         Returns:
             New UnifiedWebSocketEmitter instance
@@ -1272,7 +1285,8 @@ class WebSocketEmitterFactory:
         return UnifiedWebSocketEmitter(
             manager=manager,
             user_id=user_id,
-            context=context
+            context=context,
+            performance_mode=performance_mode
         )
     
     @staticmethod
