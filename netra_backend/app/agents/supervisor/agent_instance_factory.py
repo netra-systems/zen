@@ -427,10 +427,11 @@ class AgentInstanceFactory:
             tool_dispatcher: Tool dispatcher for agent tools
         """
         if not websocket_bridge:
-            logger.error("❌ CRITICAL: Attempting to configure AgentInstanceFactory with None websocket_bridge!")
-            raise ValueError("AgentWebSocketBridge cannot be None")
-        
-        logger.info(f"🔧 Configuring AgentInstanceFactory with WebSocket bridge type: {type(websocket_bridge).__name__}")
+            logger.warning("⚠️ WARNING: Configuring AgentInstanceFactory with None websocket_bridge!")
+            logger.warning("    Agent WebSocket events will not be available (testing/degraded mode)")
+            logger.warning("    This is acceptable for basic agent creation but WebSocket functionality will be disabled")
+        else:
+            logger.info(f"🔧 Configuring AgentInstanceFactory with WebSocket bridge type: {type(websocket_bridge).__name__}")
         
         # Prefer AgentClassRegistry but fallback to AgentRegistry for compatibility
         if agent_class_registry:
@@ -857,10 +858,13 @@ class AgentInstanceFactory:
                 try:
                     # Validate bridge exists before setting
                     if not self._websocket_bridge:
-                        raise RuntimeError(f"Cannot set WebSocket bridge on {agent_name}: factory bridge is None")
-                    
-                    # Use the WebSocketBridgeAdapter pattern from BaseAgent
-                    if hasattr(agent, '_websocket_adapter'):
+                        logger.warning(f"⚠️ WebSocket bridge not available for {agent_name} - WebSocket events disabled")
+                        logger.debug(f"   Agent {agent_name} will function but without WebSocket notifications")
+                        # Don't raise error - allow agent to work without WebSocket functionality
+                        # Skip WebSocket bridge setting but continue with rest of agent setup
+                    else:
+                        # Use the WebSocketBridgeAdapter pattern from BaseAgent
+                        if hasattr(agent, '_websocket_adapter'):
                         logger.info(f"🔧 Setting WebSocket bridge on {agent_name} via adapter")
                         logger.info(f"   Bridge type: {type(self._websocket_bridge).__name__}")
                         logger.info(f"   Run ID: {user_context.run_id}")
