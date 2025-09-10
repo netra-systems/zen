@@ -1,49 +1,75 @@
-"""Redis manager for auth service.
+"""Auth Redis Manager - SSOT Compatibility Layer
 
-Uses SSOT AuthEnvironment for all configuration access.
+DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
 
-Provides Redis connection and management functionality specifically for
-authentication operations like session storage, token blacklisting, and
-cache management.
+This module provides backward compatibility during Redis SSOT migration.
+The primary SSOT Redis manager now includes all auth functionality.
 
 Business Value:
 - Enables fast session lookups for user authentication
 - Provides token blacklisting for secure logout
 - Caches user permissions and roles for performance
+
+SSOT Migration:
+- All functionality has been consolidated into netra_backend.app.redis_manager
+- This module provides compatibility wrappers during transition
+- Future imports should use redis_manager directly
 """
 
 from typing import Optional, Dict, Any, List
 import asyncio
-import redis.asyncio as redis
+import warnings
 from datetime import datetime, timedelta
 import json
 import logging
 
 logger = logging.getLogger(__name__)
 
+# Import SSOT Redis Manager
+try:
+    from netra_backend.app.redis_manager import redis_manager as ssot_redis_manager
+    SSOT_AVAILABLE = True
+except ImportError:
+    SSOT_AVAILABLE = False
+    logger.warning("SSOT Redis manager not available - falling back to standalone auth implementation")
+
+# Issue deprecation warning
+warnings.warn(
+    "auth_redis_manager is deprecated. Use netra_backend.app.redis_manager.redis_manager directly",
+    DeprecationWarning,
+    stacklevel=2
+)
+
 
 class AuthRedisManager:
-    """Redis manager specifically for authentication operations."""
+    """Compatibility wrapper for auth service Redis operations.
+    
+    DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
+    
+    This class provides backward compatibility during Redis SSOT migration.
+    All operations are redirected to the primary SSOT Redis manager.
+    """
     
     def __init__(self):
-        self.redis_client: Optional[redis.Redis] = None
-        self._connection_pool: Optional[redis.ConnectionPool] = None
-        self.connected = False
+        if SSOT_AVAILABLE:
+            self._redis = ssot_redis_manager
+        else:
+            # Fallback initialization if SSOT not available
+            self._initialize_fallback()
         
-        # Defer configuration loading until first use
-        self._initialized = False
-        self.host = None
-        self.port = None
-        self.db = 1  # Use separate DB for auth
-        self.password = None
-        self.ssl = False  # Default to no SSL unless explicitly configured
-        self._enabled = True  # Will be determined on first init
-        
-        # Auth-specific prefixes
+        # Auth-specific prefixes (maintained for compatibility)
         self.session_prefix = "auth:session:"
         self.token_blacklist_prefix = "auth:blacklist:"
         self.user_cache_prefix = "auth:user:"
         self.permission_prefix = "auth:perm:"
+    
+    def _initialize_fallback(self):
+        """Fallback initialization for isolated auth service."""
+        # Keep minimal fallback for auth service independence
+        self.redis_client = None
+        self._connection_pool = None
+        self.connected = False
+        self._enabled = False
     
     @property
     def enabled(self):
