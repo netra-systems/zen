@@ -25,7 +25,9 @@
       "Bash(git log:*)",
       "Bash(gh pr view:*)",
       "Bash(gh issue list:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(gh:*)"
     ],
     "deny": [],
     "ask": []
