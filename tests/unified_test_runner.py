@@ -3469,6 +3469,27 @@ def main():
         
         return exit_code
     finally:
+        # Clean up service orchestrator if it was used
+        if hasattr(runner, 'service_orchestrator') and runner.service_orchestrator:
+            try:
+                if not (hasattr(args, 'no_service_cleanup') and args.no_service_cleanup):
+                    print("[INFO] Cleaning up auto-started services...")
+                    import asyncio
+                    if asyncio.get_event_loop().is_running():
+                        # We're in an async context - need to use thread
+                        import concurrent.futures
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            executor.submit(
+                                lambda: asyncio.run(runner.service_orchestrator.teardown_after_tests())
+                            ).result(timeout=30)
+                    else:
+                        asyncio.run(runner.service_orchestrator.teardown_after_tests())
+                    print("[SUCCESS] Service cleanup completed")
+                else:
+                    print("[INFO] Service cleanup skipped (--no-service-cleanup)")
+            except Exception as e:
+                print(f"[WARNING] Service cleanup failed: {e}")
+        
         # Clean up Docker environment unless --docker-no-cleanup specified
         if not (hasattr(args, 'docker_no_cleanup') and args.docker_no_cleanup):
             runner._cleanup_docker_environment()

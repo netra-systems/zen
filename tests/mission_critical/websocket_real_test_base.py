@@ -81,14 +81,53 @@ logger = logging.getLogger(__name__)
 @dataclass
 class RealWebSocketTestConfig:
     """Configuration for real WebSocket tests."""
-    backend_url: str = "http://localhost:8000"
-    websocket_url: str = "ws://localhost:8000" 
+    backend_url: str = field(default_factory=lambda: _get_environment_backend_url())
+    websocket_url: str = field(default_factory=lambda: _get_environment_websocket_url())
     connection_timeout: float = 15.0
     event_timeout: float = 10.0
     max_retries: int = 5
-    concurrent_connections: int = 25
-    docker_startup_timeout: float = 60.0
-    health_check_retries: int = 10
+
+
+def _get_environment_backend_url() -> str:
+    """Get backend URL from environment or fallback to localhost."""
+    env = get_env()
+    
+    # Check for service orchestrator environment variables first
+    test_backend_url = env.get('TEST_BACKEND_URL', None, 'auto_detect')
+    if test_backend_url:
+        return test_backend_url
+    
+    # Check for E2E environment variables
+    e2e_backend_url = env.get('E2E_BACKEND_URL', None, 'auto_detect')
+    if e2e_backend_url:
+        return e2e_backend_url
+    
+    # Check for staging environment
+    backend_staging_url = env.get('BACKEND_STAGING_URL', None, 'auto_detect')
+    if backend_staging_url:
+        return backend_staging_url
+    
+    # Fallback to localhost (will likely fail if services not running)
+    return "http://localhost:8000"
+
+
+def _get_environment_websocket_url() -> str:
+    """Get WebSocket URL from environment or derive from backend URL."""
+    env = get_env()
+    
+    # Check for service orchestrator environment variables first
+    test_websocket_url = env.get('TEST_WEBSOCKET_URL', None, 'auto_detect')
+    if test_websocket_url:
+        return test_websocket_url
+    
+    # Check for E2E environment variables
+    e2e_websocket_url = env.get('E2E_WEBSOCKET_URL', None, 'auto_detect')
+    if e2e_websocket_url:
+        return e2e_websocket_url
+    
+    # Derive from backend URL
+    backend_url = _get_environment_backend_url()
+    return backend_url.replace("http://", "ws://").replace("https://", "wss://")
     
     # Required WebSocket events for agent testing
     required_agent_events: Set[str] = field(default_factory=lambda: {
