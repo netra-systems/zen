@@ -25,16 +25,16 @@ import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
+class TestWebSocketManagerSSotCompliance(SSotBaseTestCase, unittest.TestCase):
     """Test suite to validate SSOT compliance for WebSocket managers.
     
     These tests should FAIL initially, proving 7+ managers exist.
     After refactor, they should PASS with only UnifiedWebSocketManager.
     """
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.codebase_root = Path(__file__).parent.parent.parent.parent
         self.websocket_manager_classes = []
         self.discovered_violations = []
@@ -274,7 +274,7 @@ class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
             "Legacy adapters should be eliminated in favor of direct SSOT usage."
         )
 
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Clean up after test."""
         # Log discovered violations for debugging Step 4 refactor
         if self.discovered_violations:
@@ -284,7 +284,7 @@ class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
                 print(f"  - {class_name} in {module_path}")
             print(f"=== END VIOLATIONS ===\n")
         
-        super().tearDown()
+        super().teardown_method(method)
 
 
 if __name__ == "__main__":
