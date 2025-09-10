@@ -99,6 +99,14 @@ class ExecutionEngine:
             websocket_bridge: WebSocket bridge for event emission
             user_context: Optional UserExecutionContext for per-request isolation
         """
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         # CRITICAL FIX: Allow direct instantiation but require proper parameters for WebSocket integration
         if registry is None:
             raise ValueError("AgentRegistry is required for ExecutionEngine initialization")
