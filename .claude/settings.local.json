@@ -55,7 +55,8 @@
       "Read(//private/tmp/**)",
       "Bash(gcloud redis instances list:*)",
       "Bash(gcloud compute networks vpc-access connectors list:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(gcloud secrets list:*)"
     ],
     "deny": [],
     "ask": []
