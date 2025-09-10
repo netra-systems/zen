@@ -29,8 +29,8 @@ Architecture Pattern: Factory + Isolation + Lifecycle Management
 
 import asyncio
 import uuid
-from datetime import datetime, timedelta
-from typing import Dict, Optional, Set, Any, List
+from datetime import datetime, timedelta, timezone
+from typing import Dict, Optional, Set, Any, List, Tuple
 from dataclasses import dataclass, field
 import weakref
 from threading import RLock
@@ -65,6 +65,103 @@ class FactoryInitializationError(Exception):
         self.user_id = user_id
         self.error_code = error_code
         self.details = details or {}
+
+
+class WebSocketComponentError(Exception):
+    """Enhanced WebSocket component-specific error with detailed reporting to replace generic 1011 errors."""
+    
+    # Component-specific error codes to replace generic 1011
+    ERROR_CODES = {
+        "AUTH_FAILURE": 1002,
+        "FACTORY_FAILURE": 1003, 
+        "HANDLER_FAILURE": 1004,
+        "DATABASE_FAILURE": 1005,
+        "DEPENDENCY_FAILURE": 1006,
+        "REDIS_FAILURE": 1007,
+        "SUPERVISOR_FAILURE": 1008,
+        "BRIDGE_FAILURE": 1009,
+        "INTEGRATION_FAILURE": 1010,
+        "GENERIC_INTERNAL": 1011  # Only use as absolute last resort
+    }
+    
+    def __init__(self, 
+                 component: str, 
+                 message: str, 
+                 error_code: int = None,
+                 user_id: Optional[str] = None, 
+                 details: Optional[Dict[str, Any]] = None,
+                 root_cause: Optional[Exception] = None):
+        super().__init__(message)
+        self.component = component
+        self.user_id = user_id
+        self.error_code = error_code or self.ERROR_CODES.get("GENERIC_INTERNAL", 1011)
+        self.details = details or {}
+        self.root_cause = root_cause
+        self.timestamp = datetime.now(timezone.utc).isoformat()
+        
+    def to_websocket_response(self) -> Dict[str, Any]:
+        """Convert to WebSocket error response format."""
+        return {
+            "type": "error",
+            "error": {
+                "code": self.error_code,
+                "component": self.component,
+                "message": str(self),
+                "user_id": self.user_id,
+                "timestamp": self.timestamp,
+                "details": self.details,
+                "root_cause": str(self.root_cause) if self.root_cause else None
+            }
+        }
+        
+    def get_close_code_and_reason(self) -> Tuple[int, str]:
+        """Get appropriate WebSocket close code and reason."""
+        return self.error_code, f"{self.component}: {str(self)}"
+        
+    @classmethod
+    def auth_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create auth-specific error."""
+        return cls("Authentication", message, cls.ERROR_CODES["AUTH_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod 
+    def factory_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create factory-specific error."""
+        return cls("Factory", message, cls.ERROR_CODES["FACTORY_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod
+    def handler_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create handler-specific error.""" 
+        return cls("MessageHandler", message, cls.ERROR_CODES["HANDLER_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod
+    def database_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create database-specific error."""
+        return cls("Database", message, cls.ERROR_CODES["DATABASE_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod
+    def dependency_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create dependency-specific error."""
+        return cls("Dependencies", message, cls.ERROR_CODES["DEPENDENCY_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod
+    def redis_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create Redis-specific error."""
+        return cls("Redis", message, cls.ERROR_CODES["REDIS_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod
+    def supervisor_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create supervisor-specific error."""
+        return cls("AgentSupervisor", message, cls.ERROR_CODES["SUPERVISOR_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod
+    def bridge_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create bridge-specific error."""
+        return cls("WebSocketBridge", message, cls.ERROR_CODES["BRIDGE_FAILURE"], user_id, details, root_cause)
+        
+    @classmethod
+    def integration_failure(cls, message: str, user_id: Optional[str] = None, details: Optional[Dict[str, Any]] = None, root_cause: Optional[Exception] = None):
+        """Create integration-specific error."""
+        return cls("Integration", message, cls.ERROR_CODES["INTEGRATION_FAILURE"], user_id, details, root_cause)
 
 
 def create_defensive_user_execution_context(
@@ -2103,6 +2200,170 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
         ) from unexpected_error
 
 
+def validate_websocket_component_health(user_context: Optional[UserExecutionContext] = None) -> Dict[str, Any]:
+    """
+    SSOT-compliant component health validation with detailed error reporting.
+    
+    This function provides comprehensive validation of all WebSocket initialization
+    components and returns specific error information to replace generic 1011 errors.
+    
+    Returns:
+        Dict containing health status, failed components, and specific error details
+    """
+    health_result = {
+        "healthy": True,
+        "failed_components": [],
+        "component_details": {},
+        "error_suggestions": [],
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    try:
+        # Component 1: Environment and Configuration
+        try:
+            from shared.isolated_environment import get_env
+            env = get_env()
+            environment = env.get('ENVIRONMENT', 'development').lower()
+            health_result["component_details"]["environment"] = {
+                "status": "healthy",
+                "environment": environment,
+                "details": "Environment configuration accessible"
+            }
+        except Exception as e:
+            health_result["healthy"] = False
+            health_result["failed_components"].append("environment")
+            health_result["component_details"]["environment"] = {
+                "status": "failed",
+                "error": str(e),
+                "error_code": WebSocketComponentError.ERROR_CODES["DEPENDENCY_FAILURE"]
+            }
+            health_result["error_suggestions"].append("Check isolated_environment configuration")
+        
+        # Component 2: Database Connectivity
+        try:
+            from netra_backend.app.db.session import get_db_session_factory
+            db_factory = get_db_session_factory()
+            if db_factory is None:
+                raise Exception("Database session factory is None")
+            health_result["component_details"]["database"] = {
+                "status": "healthy",
+                "details": "Database session factory available"
+            }
+        except Exception as e:
+            health_result["healthy"] = False
+            health_result["failed_components"].append("database")
+            health_result["component_details"]["database"] = {
+                "status": "failed", 
+                "error": str(e),
+                "error_code": WebSocketComponentError.ERROR_CODES["DATABASE_FAILURE"]
+            }
+            health_result["error_suggestions"].append("Check database connection and session factory")
+        
+        # Component 3: User Context Validation
+        if user_context:
+            try:
+                if not hasattr(user_context, 'user_id') or not user_context.user_id:
+                    raise Exception("User context missing required user_id")
+                if not hasattr(user_context, 'websocket_client_id'):
+                    raise Exception("User context missing websocket_client_id")
+                health_result["component_details"]["user_context"] = {
+                    "status": "healthy",
+                    "user_id": user_context.user_id[:8] + "..." if user_context.user_id else None,
+                    "details": "User context validation passed"
+                }
+            except Exception as e:
+                health_result["healthy"] = False
+                health_result["failed_components"].append("user_context")
+                health_result["component_details"]["user_context"] = {
+                    "status": "failed",
+                    "error": str(e),
+                    "error_code": WebSocketComponentError.ERROR_CODES["AUTH_FAILURE"]
+                }
+                health_result["error_suggestions"].append("Validate user authentication and context creation")
+        
+        # Component 4: WebSocket Manager Factory
+        try:
+            factory = get_websocket_manager_factory()
+            if factory is None:
+                raise Exception("WebSocket manager factory is None")
+            health_result["component_details"]["factory"] = {
+                "status": "healthy",
+                "details": "WebSocket manager factory available"
+            }
+        except Exception as e:
+            health_result["healthy"] = False
+            health_result["failed_components"].append("factory")
+            health_result["component_details"]["factory"] = {
+                "status": "failed",
+                "error": str(e),
+                "error_code": WebSocketComponentError.ERROR_CODES["FACTORY_FAILURE"]
+            }
+            health_result["error_suggestions"].append("Check WebSocket manager factory initialization")
+        
+        # Component 5: Redis Connection (if available)
+        try:
+            # Try to access Redis manager from app state
+            import netra_backend.app.startup_module
+            if hasattr(netra_backend.app.startup_module, 'get_app_state'):
+                app_state = netra_backend.app.startup_module.get_app_state()
+                if app_state and hasattr(app_state, 'redis_manager'):
+                    redis_manager = app_state.redis_manager
+                    if redis_manager and hasattr(redis_manager, 'is_connected'):
+                        is_connected = redis_manager.is_connected()
+                        health_result["component_details"]["redis"] = {
+                            "status": "healthy" if is_connected else "degraded",
+                            "connected": is_connected,
+                            "details": "Redis manager accessible"
+                        }
+                    else:
+                        health_result["component_details"]["redis"] = {
+                            "status": "degraded",
+                            "details": "Redis manager exists but connection status unknown"
+                        }
+                else:
+                    health_result["component_details"]["redis"] = {
+                        "status": "degraded", 
+                        "details": "Redis manager not available in app state"
+                    }
+            else:
+                health_result["component_details"]["redis"] = {
+                    "status": "degraded",
+                    "details": "App state not accessible for Redis validation"
+                }
+        except Exception as e:
+            # Redis failure is not critical - allow degraded operation
+            health_result["component_details"]["redis"] = {
+                "status": "degraded",
+                "error": str(e),
+                "details": "Redis validation failed - operating in degraded mode"
+            }
+            health_result["error_suggestions"].append("Redis connection issues - basic functionality available")
+        
+        # Summary
+        if health_result["healthy"]:
+            health_result["summary"] = "All critical components healthy"
+        else:
+            health_result["summary"] = f"Failed components: {', '.join(health_result['failed_components'])}"
+            
+        return health_result
+        
+    except Exception as unexpected_error:
+        return {
+            "healthy": False,
+            "failed_components": ["validation_system"],
+            "component_details": {
+                "validation_system": {
+                    "status": "failed",
+                    "error": str(unexpected_error),
+                    "error_code": WebSocketComponentError.ERROR_CODES["GENERIC_INTERNAL"]
+                }
+            },
+            "error_suggestions": ["Component health validation system failure"],
+            "summary": f"Validation system error: {unexpected_error}",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+
 def create_websocket_manager_sync(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
     """
     Synchronous wrapper for create_websocket_manager for testing purposes.
@@ -2168,10 +2429,12 @@ __all__ = [
     "FactoryMetrics",
     "ManagerMetrics",
     "FactoryInitializationError",
+    "WebSocketComponentError",  # Enhanced component-specific error reporting
     "get_websocket_manager_factory",
     "create_websocket_manager",
     "create_websocket_manager_sync",
     "create_defensive_user_execution_context",
+    "validate_websocket_component_health",  # Component health validation
     # Five Whys Root Cause Prevention
     "WebSocketManagerProtocol"  # Re-exported from protocols module
 ]
