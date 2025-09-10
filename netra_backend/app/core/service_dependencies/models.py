@@ -291,7 +291,7 @@ GOLDEN_PATH_REQUIREMENTS = [
         validation_function="validate_jwt_capabilities",
         critical=True,
         description="JWT token creation and validation working",
-        business_impact="Users cannot authenticate and access chat functionality"
+        business_impact="JWT authentication failure prevents users from accessing chat functionality"
     ),
     GoldenPathRequirement(
         service_type=ServiceType.BACKEND_SERVICE,
