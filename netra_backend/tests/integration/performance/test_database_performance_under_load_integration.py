@@ -29,7 +29,7 @@ from test_framework.ssot.database import DatabaseTestHelper
 from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
-from netra_backend.app.db.connection_pool_manager import ConnectionPoolManager
+from netra_backend.app.database.postgresql_pool_manager import PostgreSQLPoolManager as ConnectionPoolManager
 from netra_backend.app.db.query_optimizer import QueryOptimizer
 from netra_backend.app.db.transaction_manager import TransactionManager
 from netra_backend.app.db.performance_monitor import DatabasePerformanceMonitor

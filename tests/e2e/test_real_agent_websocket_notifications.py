@@ -38,7 +38,7 @@ from test_framework.websocket_helpers import (
 
 # Import WebSocket client classes
 try:
-    from netra_backend.app.services.websocket_connection_manager import WebSocketConnectionManager
+    from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
     from netra_backend.app.services.websocket_notifier import WebSocketNotifier
     WEBSOCKET_SERVICES_AVAILABLE = True
 except ImportError:

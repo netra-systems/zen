@@ -23,7 +23,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List
 
 # Absolute imports per CLAUDE.md requirements
-from netra_backend.app.websocket.connection_manager import ConnectionManager, ConnectionInfo
+from netra_backend.app.websocket_core.connection_manager import ConnectionManager, ConnectionInfo
 from shared.types.core_types import (
     UserID, ThreadID, RequestID, WebSocketID,
     WebSocketEventType, WebSocketMessage, ConnectionState

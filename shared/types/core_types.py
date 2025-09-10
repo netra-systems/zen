@@ -72,6 +72,9 @@ MessageID = NewType('MessageID', str)
 DatabaseSessionID = NewType('DatabaseSessionID', str)
 """Strongly typed database session identifier."""
 
+OrganizationID = NewType('OrganizationID', str)
+"""Strongly typed organization identifier for multi-tenant support."""
+
 
 # =============================================================================
 # Authentication and Authorization Types
