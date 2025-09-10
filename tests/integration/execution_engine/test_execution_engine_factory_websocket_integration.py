@@ -707,9 +707,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 
                 # Test stable user (should work normally)
                 try:
-                    await engine_stable.send_agent_thinking(
-                        agent_context_stable,
-                        "Stable user thinking",
+                    await engine_stable.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context_stable.agent_name,
+                        reasoning="Stable user thinking",
                         step_number=1
                     )
                     stable_success = True
@@ -720,9 +720,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 # Test error user (should handle errors gracefully)
                 error_raised = False
                 try:
-                    await engine_error.send_agent_thinking(
-                        agent_context_error,
-                        "Error user thinking", 
+                    await engine_error.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context_error.agent_name,
+                        reasoning="Error user thinking", 
                         step_number=1
                     )
                 except Exception:
@@ -736,9 +736,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 
                 # Test that stable user can continue working after error user fails
                 try:
-                    await engine_stable.send_tool_executing(
-                        agent_context_stable,
-                        "stable_user_tool"
+                    await engine_stable.websocket_emitter.notify_tool_executing(
+                        agent_name=agent_context_stable.agent_name,
+                        tool_name="stable_user_tool"
                     )
                     post_error_success = True
                 except Exception as e:

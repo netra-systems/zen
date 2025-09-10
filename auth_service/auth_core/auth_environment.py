@@ -1130,12 +1130,29 @@ class AuthEnvironment:
         }
 
 
-# Singleton instance
-_auth_env = AuthEnvironment()
+# Singleton instance (but can be refreshed in test scenarios)
+_auth_env = None
 
 
-def get_auth_env() -> AuthEnvironment:
-    """Get the singleton AuthEnvironment instance."""
+def get_auth_env(refresh: bool = False) -> AuthEnvironment:
+    """Get the AuthEnvironment instance.
+    
+    Args:
+        refresh: If True, create a fresh instance (useful for tests)
+        
+    Returns:
+        AuthEnvironment instance
+    """
+    global _auth_env
+    
+    # Always refresh in test environments to support dynamic env var changes
+    from shared.isolated_environment import get_env
+    env_manager = get_env()
+    current_environment = env_manager.get("ENVIRONMENT", "development").lower()
+    
+    if refresh or _auth_env is None or current_environment in ["test", "testing"]:
+        _auth_env = AuthEnvironment()
+    
     return _auth_env
 
 

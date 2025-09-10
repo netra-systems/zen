@@ -26,7 +26,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional, List, Set, Tuple
 
 # Absolute imports per CLAUDE.md
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, E2EWebSocketAuthHelper, E2EAuthConfig,
@@ -39,22 +39,23 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestMultiUserSessionIsolationE2E(BaseE2ETest):
+class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
     """E2E tests for multi-user session isolation in staging environment."""
     
     @pytest.fixture(autouse=True)
     def setup_e2e_isolation_environment(self):
         """Setup E2E environment for multi-user isolation testing."""
-        self.env = get_env()
-        self.env.enable_isolation()
+        # Use SSOT environment access pattern 
+        # self._env is automatically available from SSotAsyncTestCase
+        self._env.enable_isolation()
         
         # Configure E2E isolation testing
-        self.env.set("ENVIRONMENT", "staging", "test_e2e_isolation")
-        self.env.set("TEST_ENV", "staging", "test_e2e_isolation")
-        self.env.set("ENABLE_STRICT_USER_ISOLATION", "true", "test_e2e_isolation")
+        self._env.set("ENVIRONMENT", "staging", "test_e2e_isolation")
+        self._env.set("TEST_ENV", "staging", "test_e2e_isolation")
+        self._env.set("ENABLE_STRICT_USER_ISOLATION", "true", "test_e2e_isolation")
         
         # Ensure OAuth simulation is available for E2E testing
-        staging_oauth_key = self.env.get("E2E_OAUTH_SIMULATION_KEY")
+        staging_oauth_key = self._env.get("E2E_OAUTH_SIMULATION_KEY")
         if not staging_oauth_key:
             pytest.skip("E2E_OAUTH_SIMULATION_KEY not configured for E2E multi-user isolation tests")
         
