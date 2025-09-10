@@ -62,7 +62,7 @@ logger = central_logger.get_logger(__name__)
 
 @pytest.mark.mission_critical
 @pytest.mark.ssot
-class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
+class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
     """
     CRITICAL: WebSocket Manager SSOT compliance testing.
     
@@ -448,6 +448,7 @@ class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
             'compliance_status': 'PASS' if compliant_managers == total_managers else 'FAIL'
         })
     
+    @pytest.mark.asyncio
     async def test_websocket_manager_user_isolation(self):
         """
         CRITICAL: Verify WebSocket manager maintains user isolation in concurrent scenarios.
@@ -606,7 +607,8 @@ class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
             'compliance_status': 'PASS'
         })
     
-    def test_websocket_event_delivery_compliance(self):
+    @pytest.mark.asyncio
+    async def test_websocket_event_delivery_compliance(self):
         """
         CRITICAL: Ensure all 5 critical WebSocket events are properly supported.
         
@@ -953,7 +955,8 @@ class TestWebSocketManagerSSotCompliance(SSotBaseTestCase):
             'compliance_status': 'PASS'
         })
     
-    def test_websocket_ssot_comprehensive_validation(self):
+    @pytest.mark.asyncio
+    async def test_websocket_ssot_comprehensive_validation(self):
         """
         COMPREHENSIVE: Run complete SSOT validation combining all critical checks.
         
