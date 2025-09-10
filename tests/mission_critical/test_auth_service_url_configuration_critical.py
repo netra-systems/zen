@@ -23,7 +23,7 @@ from contextlib import contextmanager
 from typing import Dict, Any, Optional
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from shared.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.auth_startup_validator import (
     AuthStartupValidator,
     AuthValidationError,
@@ -46,7 +46,7 @@ class TestAuthServiceUrlConfigurationCritical(SSotAsyncTestCase):
     def setup_method(self, method):
         """Set up test environment with isolated configuration."""
         super().setup_method(method)
-        self.test_env = IsolatedEnvironment(test_mode=True)
+        self.test_env = get_env()
         
         # Base environment config (minimal required for auth validator)
         self.base_config = {

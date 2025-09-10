@@ -26,8 +26,7 @@ PROCESS INSTRUCTIONS START:
 0) READ ISSUE: SNST: Use gh to read the ISSUE ${1 : latest open issue} in question.
 Carefully read all issue comments.
 
-1) STATUS UPDATE : SNST : AUDIT the ISSUE comments, current codebase and linked items: with FIVE WHYS approach and assess the current state.
-ISSUE-WORKLOG-UPDATE; ISSUE-WORKLOG-UPDATE-PUSH
+1) Spawn a sub agent to PLAN ONLY the update, align, or creation of: the required unit, integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused on: $1
 
 2) STATUS DECISION : SNST : (Pass context from 1): 
 IF the issue appears to already be resolved close the issue and repeat PROCESS loop, otherwise continue to the next step.

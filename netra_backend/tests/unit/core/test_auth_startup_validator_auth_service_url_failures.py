@@ -19,7 +19,7 @@ from unittest.mock import patch, MagicMock
 from typing import Dict, Optional
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from shared.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.auth_startup_validator import (
     AuthStartupValidator,
     AuthComponent,
@@ -41,7 +41,7 @@ class TestAuthStartupValidatorAuthServiceUrlFailures(SSotAsyncTestCase):
     def setup_method(self, method):
         """Set up test environment with isolated configuration."""
         super().setup_method(method)
-        self.test_env = IsolatedEnvironment(test_mode=True)
+        self.test_env = get_env()
 
     def create_validator_with_environment(self, env_vars: Dict[str, Optional[str]], environment: str = "staging"):
         """Create AuthStartupValidator with mocked environment."""
