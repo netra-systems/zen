@@ -250,6 +250,7 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
             return state_id
         
         async def transition_phase(state_id, phase, metadata=None, websocket_manager=None):
+            print(f"DEBUG: transition_phase called with state_id={state_id}, phase={phase}")
             if state_id in tracker._state_executions:
                 transition = {
                     "phase": phase,
@@ -258,6 +259,19 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                     "thread_id": threading.current_thread().ident
                 }
                 tracker._state_executions[state_id]["phases"].append(transition)
+                
+                # DEBUG: Print phase transitions
+                print(f"DEBUG: State tracker transition_phase called with phase={phase}, websocket_manager={websocket_manager is not None}")
+                
+                # Simulate WebSocket notifications for COMPLETED phase
+                if websocket_manager and phase == AgentExecutionPhase.COMPLETED:
+                    print(f"DEBUG: Calling notify_agent_completed for {state_id}")
+                    execution = tracker._state_executions[state_id]
+                    await websocket_manager.notify_agent_completed(
+                        run_id=execution["run_id"],
+                        agent_name=execution["agent_name"],
+                        result={"status": "completed", "success": True}
+                    )
         
         def complete_execution(state_id, success=True):
             if state_id in tracker._state_executions:
