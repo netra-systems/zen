@@ -202,9 +202,9 @@ class AgentMessageHandler(BaseMessageHandler):
                     else:
                         logger.warning(f"Could not find connection ID for websocket of user {user_id}")
             
-            # Get database session using async context manager pattern
+            # Get database session using async generator pattern
             # CRITICAL: Using v2 factory pattern for complete isolation
-            async with get_request_scoped_db_session() as db_session:
+            async for db_session in get_request_scoped_db_session():
                 try:
                     # Get UserExecutionContext for session continuity
                     # Use existing IDs from message context for conversation continuity
