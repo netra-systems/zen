@@ -15,12 +15,12 @@ Strategic Impact: Eliminates manager sprawl and provides consistent interfaces.
 BACKWARD COMPATIBILITY: UnifiedLifecycleManager is aliased to SystemLifecycle during migration.
 """
 
-from .unified_lifecycle_manager import UnifiedLifecycleManager
+from .unified_lifecycle_manager import SystemLifecycle
 from .unified_configuration_manager import UnifiedConfigurationManager
 from .unified_state_manager import UnifiedStateManager
 
-# PHASE 1: Add new business-focused name as alias for backward compatibility
-SystemLifecycle = UnifiedLifecycleManager
+# PHASE 2: Maintain backward compatibility during migration
+UnifiedLifecycleManager = SystemLifecycle
 
 __all__ = [
     "UnifiedLifecycleManager",  # Legacy name - maintained for backward compatibility

@@ -1166,7 +1166,7 @@ class LifecycleManagerFactory:
 # CONVENIENCE FUNCTIONS
 # ============================================================================
 
-def get_lifecycle_manager(user_id: Optional[str] = None) -> UnifiedLifecycleManager:
+def get_lifecycle_manager(user_id: Optional[str] = None) -> SystemLifecycle:
     """
     Get appropriate lifecycle manager instance.
     
@@ -1174,7 +1174,7 @@ def get_lifecycle_manager(user_id: Optional[str] = None) -> UnifiedLifecycleMana
         user_id: User ID for user-specific manager, None for global
     
     Returns:
-        UnifiedLifecycleManager instance
+        SystemLifecycle instance
     """
     if user_id:
         return LifecycleManagerFactory.get_user_manager(user_id)
@@ -1189,7 +1189,7 @@ async def setup_application_lifecycle(
     agent_registry=None,
     health_service=None,
     user_id: Optional[str] = None
-) -> UnifiedLifecycleManager:
+) -> SystemLifecycle:
     """
     Setup application lifecycle management.
     
@@ -1202,7 +1202,7 @@ async def setup_application_lifecycle(
         user_id: User ID for user-specific lifecycle management
     
     Returns:
-        UnifiedLifecycleManager instance
+        SystemLifecycle instance
     """
     lifecycle_manager = get_lifecycle_manager(user_id)
     

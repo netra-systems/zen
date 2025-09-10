@@ -635,7 +635,7 @@ class ExecutionEngine(IExecutionEngine):
         context: AgentExecutionContext,
         user_context: Optional['UserExecutionContext'] = None
     ) -> List[AgentExecutionResult]:
-        """Execute pipeline - sequential execution of steps.
+        """Execute pipeline - DEPRECATED: delegates to UserExecutionEngine for SSOT compliance.
         
         Args:
             steps: List of pipeline steps to execute
@@ -645,6 +645,41 @@ class ExecutionEngine(IExecutionEngine):
         Returns:
             List[AgentExecutionResult]: Results from each step
         """
+        warnings.warn(
+            "ConsolidatedExecutionEngine.execute_pipeline is deprecated. Use UserExecutionEngine directly.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # SSOT COMPLIANCE: Delegate to UserExecutionEngine for proper isolation
+        if user_context:
+            try:
+                # Create UserExecutionEngine instance for proper SSOT delegation
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+                from netra_backend.app.agents.supervisor.agent_instance_factory import (
+                    get_agent_instance_factory,
+                    create_user_websocket_emitter
+                )
+                
+                # Get infrastructure components
+                agent_factory = await get_agent_instance_factory()
+                websocket_emitter = await create_user_websocket_emitter(user_context)
+                
+                # Create UserExecutionEngine instance with proper isolation
+                user_engine = UserExecutionEngine(
+                    context=user_context,
+                    agent_factory=agent_factory,
+                    websocket_emitter=websocket_emitter
+                )
+                
+                # Delegate to UserExecutionEngine SSOT implementation
+                return await user_engine.execute_pipeline(steps, context, user_context)
+                
+            except Exception as e:
+                logger.warning(f"Failed to delegate to UserExecutionEngine: {e}. Using fallback implementation.")
+                # Fall back to legacy implementation if delegation fails
+        
+        # Legacy fallback implementation
         results = []
         
         for step in steps:
