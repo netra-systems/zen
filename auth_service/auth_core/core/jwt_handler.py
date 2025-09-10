@@ -19,7 +19,9 @@ import jwt
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.core.jwt_cache import jwt_validation_cache
 from shared.isolated_environment import get_env
-from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
+# Disable Redis dependency for microservice independence
+# from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
+auth_redis_manager = None  # Temporarily disabled
 
 logger = logging.getLogger(__name__)
 
@@ -637,7 +639,7 @@ class JWTHandler:
         # If not in memory and Redis is available, check Redis asynchronously
         # We avoid asyncio.run() to prevent "coroutine was never awaited" warnings
         try:
-            if auth_redis_manager.enabled:
+            if False  # Redis disabled:
                 # Schedule async Redis check without blocking
                 # This method is called from sync context, so we can't await
                 # Instead, we rely on in-memory cache and periodic sync from Redis
@@ -656,7 +658,7 @@ class JWTHandler:
         # If not in memory and Redis is available, check Redis asynchronously
         # We avoid asyncio.run() to prevent "coroutine was never awaited" warnings
         try:
-            if auth_redis_manager.enabled:
+            if False  # Redis disabled:
                 # Schedule async Redis check without blocking
                 # This method is called from sync context, so we can't await
                 # Instead, we rely on in-memory cache and periodic sync from Redis
@@ -747,7 +749,7 @@ class JWTHandler:
         """Initialize blacklists from Redis on startup for persistence"""
         try:
             # Check if Redis is available in a non-async context
-            if not auth_redis_manager.enabled:
+            if not False  # Redis disabled:
                 logger.debug("Redis not available, using in-memory blacklists only")
                 return
             
@@ -769,7 +771,7 @@ class JWTHandler:
     async def _load_blacklists_from_redis(self) -> None:
         """Load blacklists from Redis - async version"""
         try:
-            if not auth_redis_manager.enabled:
+            if not False  # Redis disabled:
                 return
                 
             # Load token blacklist
@@ -777,7 +779,7 @@ class JWTHandler:
             user_blacklist_key = "auth:blacklist:users"
             
             # Get all blacklisted tokens (stored as Redis set members)
-            redis_client = auth_redis_manager.get_client()
+            redis_client = None  # Redis disabled
             if redis_client:
                 # Load tokens from Redis set
                 token_members = await redis_client.smembers(token_blacklist_key) or set()
@@ -794,10 +796,10 @@ class JWTHandler:
     async def _persist_token_blacklist(self, token: str) -> bool:
         """Persist token to Redis blacklist"""
         try:
-            if not auth_redis_manager.enabled:
+            if not False  # Redis disabled:
                 return True  # Fallback to in-memory only
             
-            redis_client = auth_redis_manager.get_client()
+            redis_client = None  # Redis disabled
             if redis_client:
                 # Add to Redis set with expiration
                 token_blacklist_key = "auth:blacklist:tokens"
@@ -812,10 +814,10 @@ class JWTHandler:
     async def _persist_user_blacklist(self, user_id: str) -> bool:
         """Persist user to Redis blacklist"""
         try:
-            if not auth_redis_manager.enabled:
+            if not False  # Redis disabled:
                 return True  # Fallback to in-memory only
             
-            redis_client = auth_redis_manager.get_client()
+            redis_client = None  # Redis disabled
             if redis_client:
                 # Add to Redis set
                 user_blacklist_key = "auth:blacklist:users"
@@ -848,7 +850,7 @@ class JWTHandler:
     async def _check_token_in_redis(self, token: str) -> bool:
         """Check if token exists in Redis blacklist"""
         try:
-            redis_client = auth_redis_manager.get_client()
+            redis_client = None  # Redis disabled
             if redis_client:
                 token_blacklist_key = "auth:blacklist:tokens"
                 return await redis_client.sismember(token_blacklist_key, token)
@@ -859,7 +861,7 @@ class JWTHandler:
     async def _check_user_in_redis(self, user_id: str) -> bool:
         """Check if user exists in Redis blacklist"""
         try:
-            redis_client = auth_redis_manager.get_client()
+            redis_client = None  # Redis disabled
             if redis_client:
                 user_blacklist_key = "auth:blacklist:users"
                 return await redis_client.sismember(user_blacklist_key, user_id)

@@ -1757,9 +1757,12 @@ class AgentWebSocketBridge(MonitorableComponent):
         agent_name: Optional[str] = None
     ) -> bool:
         """
-        Core method for emitting agent events with context validation.
+        PHASE 2 REDIRECTION WRAPPER: Delegates to UnifiedWebSocketEmitter SSOT.
         
-        CRITICAL SECURITY: This method validates that events are only sent with proper user context,
+        This method now acts as a thin wrapper that maintains the exact same API
+        while delegating all functionality to the consolidated UnifiedWebSocketEmitter.
+        
+        CRITICAL SECURITY: All security validation now handled by SSOT emitter,
         preventing events from being misrouted to wrong users.
         
         Args:
@@ -1774,48 +1777,61 @@ class AgentWebSocketBridge(MonitorableComponent):
         Raises:
             ValueError: If run_id is invalid or context validation fails
             
-        Business Impact: Prevents WebSocket events from being misrouted to wrong users,
-                        ensuring data privacy and security.
+        Business Impact: Maintains backward compatibility while eliminating race conditions
+                        through single source of truth for event emission.
         """
         try:
-            # CRITICAL VALIDATION: Check run_id context
-            if not self._validate_event_context(run_id, event_type, agent_name):
-                return False
-            
+            # PHASE 2: Delegate to UnifiedWebSocketEmitter SSOT
             if not self._websocket_manager:
                 logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for {event_type} (run_id={run_id})")
                 return False
             
-            # Build standardized event
-            event_payload = {
-                "type": event_type,
-                "run_id": run_id,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                **data
-            }
-            
-            # Add agent_name if provided
-            if agent_name:
-                event_payload["agent_name"] = agent_name
-            
-            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
+            # Resolve user ID from run_id for emitter creation
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
                 logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
-            # EMIT TO USER CHAT
-            success = await self._websocket_manager.send_to_thread(thread_id, event_payload)
+            # Get or create UnifiedWebSocketEmitter for this user context
+            # This ensures we use the SSOT for all event emission
+            from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            
+            # Create context for the emitter
+            context = UserExecutionContext(
+                user_id=thread_id,  # Using thread_id as user identifier
+                run_id=run_id,
+                thread_id=thread_id,
+                request_id=getattr(data, 'request_id', None)
+            )
+            
+            # Create SSOT emitter
+            emitter = WebSocketEmitterFactory.create_scoped_emitter(
+                manager=self._websocket_manager,
+                context=context
+            )
+            
+            # Build standardized event data for SSOT emitter
+            event_data = {
+                **data,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            if agent_name:
+                event_data["agent_name"] = agent_name
+            
+            # SSOT EMISSION: Use consolidated emitter
+            success = await emitter.emit(event_type, event_data)
             
             if success:
-                logger.debug(f"✅ EMISSION SUCCESS: {event_type} → thread={thread_id} (run_id={run_id})")
+                logger.debug(f"✅ SSOT EMISSION SUCCESS: {event_type} → thread={thread_id} (run_id={run_id})")
             else:
-                logger.error(f"🚨 EMISSION FAILED: {event_type} send failed (run_id={run_id})")
+                logger.error(f"🚨 SSOT EMISSION FAILED: {event_type} send failed (run_id={run_id})")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: emit_agent_event failed (event_type={event_type}, run_id={run_id}): {e}")
+            logger.error(f"🚨 SSOT EMISSION EXCEPTION: emit_agent_event delegation failed (event_type={event_type}, run_id={run_id}): {e}")
             return False
     
     def _validate_event_context(self, run_id: Optional[str], event_type: str, agent_name: Optional[str] = None) -> bool:

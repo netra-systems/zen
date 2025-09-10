@@ -936,16 +936,57 @@ class BaseAgent(ABC):
     
     async def emit_thinking(self, thought: str, step_number: Optional[int] = None,
                            context: Optional[UserExecutionContext] = None) -> None:
-        """Emit agent thinking event via WebSocket bridge with optional token metrics."""
-        # Enhance thinking event with token usage if context available
-        enhanced_thought = thought
-        if context and "token_usage" in context.metadata:
-            token_data = context.metadata["token_usage"]
-            if token_data.get("operations"):
-                latest_op = token_data["operations"][-1]
-                enhanced_thought = f"{thought} [Tokens: {latest_op['input_tokens']+latest_op['output_tokens']}, Cost: ${latest_op['cost']:.4f}]"
-        
-        await self._websocket_adapter.emit_thinking(enhanced_thought, step_number)
+        """
+        PHASE 2 REDIRECTION: Emit agent thinking event via SSOT UnifiedWebSocketEmitter.
+        Enhanced with token metrics integration from base_agent.py features.
+        """
+        # PHASE 2: Use UnifiedWebSocketEmitter SSOT for token-enhanced thinking
+        try:
+            from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+            
+            # Get or create SSOT emitter with current context
+            if hasattr(self, '_execution_context') and self._execution_context:
+                emitter = WebSocketEmitterFactory.create_scoped_emitter(
+                    manager=self._websocket_adapter._websocket_manager,
+                    context=self._execution_context
+                )
+            else:
+                # Fallback to adapter if no execution context
+                enhanced_thought = thought
+                if context and "token_usage" in context.metadata:
+                    token_data = context.metadata["token_usage"]
+                    if token_data.get("operations"):
+                        latest_op = token_data["operations"][-1]
+                        enhanced_thought = f"{thought} [Tokens: {latest_op['input_tokens']+latest_op['output_tokens']}, Cost: ${latest_op['cost']:.4f}]"
+                
+                await self._websocket_adapter.emit_thinking(enhanced_thought, step_number)
+                return
+            
+            # SSOT ENHANCED THINKING: Token metrics automatically handled by emitter
+            if context and "token_usage" in context.metadata:
+                token_data = context.metadata["token_usage"]
+                if token_data.get("operations"):
+                    latest_op = token_data["operations"][-1]
+                    # Update emitter's token metrics
+                    emitter.update_token_metrics(
+                        latest_op['input_tokens'],
+                        latest_op['output_tokens'],
+                        latest_op['cost'],
+                        "agent_thinking"
+                    )
+            
+            # Use SSOT notify method which handles token enhancement internally
+            await emitter.notify_agent_thinking(
+                agent_name=getattr(self, 'agent_name', 'unknown'),
+                reasoning=thought,
+                step_number=step_number,
+                metadata={'context': context.metadata if context else {}}
+            )
+            
+        except Exception as e:
+            # Fallback to adapter on error
+            logger.error(f"SSOT emit_thinking failed, falling back to adapter: {e}")
+            await self._websocket_adapter.emit_thinking(thought, step_number)
     
     async def emit_tool_executing(self, tool_name: str, parameters: Optional[Dict] = None) -> None:
         """Emit tool executing event via WebSocket bridge."""
@@ -957,43 +998,78 @@ class BaseAgent(ABC):
     
     async def emit_agent_completed(self, result: Optional[Dict] = None,
                                   context: Optional[UserExecutionContext] = None) -> None:
-        """Emit agent completed event via WebSocket bridge with cost analysis."""
-        # Enhance result with cost analysis if context available
-        enhanced_result = result or {}
-        
-        if context:
-            # Add token usage summary
-            if "token_usage" in context.metadata:
+        """
+        PHASE 2 REDIRECTION: Emit agent completed event via SSOT UnifiedWebSocketEmitter.
+        Enhanced with cost analysis from base_agent.py features.
+        """
+        # PHASE 2: Use UnifiedWebSocketEmitter SSOT for cost-enhanced completion
+        try:
+            from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+            
+            # Get or create SSOT emitter with current context
+            if hasattr(self, '_execution_context') and self._execution_context:
+                emitter = WebSocketEmitterFactory.create_scoped_emitter(
+                    manager=self._websocket_adapter._websocket_manager,
+                    context=self._execution_context
+                )
+            else:
+                # Fallback to adapter with enhanced result
+                enhanced_result = result or {}
+                
+                if context:
+                    # Add token usage summary
+                    if "token_usage" in context.metadata:
+                        token_data = context.metadata["token_usage"]
+                        enhanced_result["cost_analysis"] = {
+                            "total_operations": len(token_data.get("operations", [])),
+                            "cumulative_cost": token_data.get("cumulative_cost", 0.0),
+                            "cumulative_tokens": token_data.get("cumulative_tokens", 0),
+                            "average_cost_per_operation": (
+                                token_data.get("cumulative_cost", 0.0) / 
+                                max(len(token_data.get("operations", [])), 1)
+                            )
+                        }
+                    
+                    # Add optimization suggestions if available
+                    if "cost_optimization_suggestions" in context.metadata:
+                        suggestions = context.metadata["cost_optimization_suggestions"]
+                        high_priority_suggestions = [s for s in suggestions if s.get("priority") == "high"]
+                        if high_priority_suggestions:
+                            enhanced_result["optimization_alerts"] = high_priority_suggestions
+                    
+                    # Add prompt optimization summary
+                    if "prompt_optimizations" in context.metadata:
+                        optimizations = context.metadata["prompt_optimizations"]
+                        total_saved = sum(opt.get("tokens_saved", 0) for opt in optimizations)
+                        total_cost_saved = sum(opt.get("cost_savings", 0) for opt in optimizations)
+                        enhanced_result["optimization_summary"] = {
+                            "optimizations_applied": len(optimizations),
+                            "total_tokens_saved": total_saved,
+                            "total_cost_saved": total_cost_saved
+                        }
+                
+                await self._websocket_adapter.emit_agent_completed(enhanced_result)
+                return
+            
+            # Use SSOT notify method which handles cost analysis internally
+            await emitter.notify_agent_completed(
+                agent_name=getattr(self, 'agent_name', 'unknown'),
+                result=result,
+                metadata={'context': context.metadata if context else {}},
+                execution_time_ms=getattr(context, 'execution_time_ms', None) if context else None
+            )
+            
+        except Exception as e:
+            # Fallback to adapter on error
+            logger.error(f"SSOT emit_agent_completed failed, falling back to adapter: {e}")
+            enhanced_result = result or {}
+            if context and "token_usage" in context.metadata:
                 token_data = context.metadata["token_usage"]
                 enhanced_result["cost_analysis"] = {
                     "total_operations": len(token_data.get("operations", [])),
-                    "cumulative_cost": token_data.get("cumulative_cost", 0.0),
-                    "cumulative_tokens": token_data.get("cumulative_tokens", 0),
-                    "average_cost_per_operation": (
-                        token_data.get("cumulative_cost", 0.0) / 
-                        max(len(token_data.get("operations", [])), 1)
-                    )
+                    "cumulative_cost": token_data.get("cumulative_cost", 0.0)
                 }
-            
-            # Add optimization suggestions if available
-            if "cost_optimization_suggestions" in context.metadata:
-                suggestions = context.metadata["cost_optimization_suggestions"]
-                high_priority_suggestions = [s for s in suggestions if s.get("priority") == "high"]
-                if high_priority_suggestions:
-                    enhanced_result["optimization_alerts"] = high_priority_suggestions
-            
-            # Add prompt optimization summary
-            if "prompt_optimizations" in context.metadata:
-                optimizations = context.metadata["prompt_optimizations"]
-                total_saved = sum(opt.get("tokens_saved", 0) for opt in optimizations)
-                total_cost_saved = sum(opt.get("cost_savings", 0) for opt in optimizations)
-                enhanced_result["optimization_summary"] = {
-                    "optimizations_applied": len(optimizations),
-                    "total_tokens_saved": total_saved,
-                    "total_cost_saved": total_cost_saved
-                }
-        
-        await self._websocket_adapter.emit_agent_completed(enhanced_result)
+            await self._websocket_adapter.emit_agent_completed(enhanced_result)
     
     async def emit_progress(self, content: str, is_complete: bool = False) -> None:
         """Emit progress update via WebSocket bridge."""

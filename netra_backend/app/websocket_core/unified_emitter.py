@@ -28,7 +28,7 @@ Critical Events (NEVER REMOVE):
 import asyncio
 import time
 from typing import Optional, Dict, Any, TYPE_CHECKING, List
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from netra_backend.app.logging_config import central_logger
 
@@ -112,10 +112,26 @@ class UnifiedWebSocketEmitter:
         self._event_buffer: List[Dict[str, Any]] = []
         self._buffer_lock = asyncio.Lock()
         
+        # Security validation state (from agent_websocket_bridge.py)
+        self._last_validated_run_id: Optional[str] = None
+        self._validation_cache: Dict[str, bool] = {}
+        
+        # Token metrics tracking (from base_agent.py)
+        self._token_metrics = {
+            'total_operations': 0,
+            'total_input_tokens': 0,
+            'total_output_tokens': 0,
+            'total_cost': 0.0
+        }
+        
+        # User tier tracking (from transparent_websocket_events.py)
+        self._user_tier: Optional[str] = getattr(context, 'user_tier', 'free') if context else 'free'
+        self._events_sent: List[Dict[str, Any]] = []
+        
         # Validate critical events are available
         self._validate_critical_events()
         
-        logger.info(f"UnifiedWebSocketEmitter created for user {user_id}")
+        logger.info(f"UnifiedWebSocketEmitter created for user {user_id} (tier: {self._user_tier})")
     
     def _validate_critical_events(self):
         """
@@ -219,6 +235,11 @@ class UnifiedWebSocketEmitter:
             event_type: One of the CRITICAL_EVENTS
             data: Event payload
         """
+        # PHASE 1 ENHANCEMENT: Security validation before emission
+        if not self._validate_event_context(getattr(self.context, 'run_id', None), event_type):
+            logger.error(f"Security validation failed for event {event_type} - blocking emission")
+            return False
+        
         # SECURITY FIX 2: Connection state validation before ALL authentication events
         if not self.manager.is_connection_active(self.user_id):
             logger.critical(f"CRITICAL EVENT LOST - Connection dead for user {self.user_id}, event: {event_type}")
@@ -238,6 +259,19 @@ class UnifiedWebSocketEmitter:
                 'run_id': getattr(self.context, 'run_id', None),
                 'thread_id': getattr(self.context, 'thread_id', None),
                 'request_id': getattr(self.context, 'request_id', None),
+            }
+        
+        # PHASE 1 ENHANCEMENT: Add user tier metadata
+        if self._user_tier:
+            data = {
+                **data,
+                'metadata': {
+                    **(data.get('metadata', {})),
+                    'user_tier': self._user_tier,
+                    'is_priority_queue': self._user_tier == 'enterprise'
+                },
+                'user_id': self.user_id,
+                'timestamp': datetime.now(timezone.utc).isoformat()
             }
         
         # Remove None values
@@ -530,7 +564,12 @@ class UnifiedWebSocketEmitter:
             'retry_count': self.metrics.retry_count,
             'last_event_time': self.metrics.last_event_time.isoformat() if self.metrics.last_event_time else None,
             'uptime_seconds': uptime,
-            'has_context': self.context is not None
+            'has_context': self.context is not None,
+            'user_tier': self._user_tier,
+            'is_priority_user': self.is_priority_user(),
+            'token_metrics': self.get_token_metrics(),
+            'validation_cache_size': len(self._validation_cache),
+            'events_sent_count': len(self._events_sent)
         }
     
     def get_context(self) -> Optional['UserExecutionContext']:
@@ -674,8 +713,177 @@ class UnifiedWebSocketEmitter:
         logger.info(
             f"Emitter cleanup for user {self.user_id} - "
             f"Total events: {self.metrics.total_events}, "
-            f"Errors: {self.metrics.error_count}"
+            f"Errors: {self.metrics.error_count}, "
+            f"Token operations: {self._token_metrics['total_operations']}, "
+            f"Total cost: ${self._token_metrics['total_cost']:.4f}"
         )
+    
+    # ===================== PHASE 1 TOKEN METRICS (from base_agent.py) =====================
+    
+    def update_token_metrics(self, input_tokens: int, output_tokens: int, cost: float, operation: str = "unknown"):
+        """
+        Update token usage metrics for this emitter's context.
+        
+        Args:
+            input_tokens: Number of input tokens used
+            output_tokens: Number of output tokens generated
+            cost: Cost of the operation
+            operation: Description of the operation
+        """
+        self._token_metrics['total_operations'] += 1
+        self._token_metrics['total_input_tokens'] += input_tokens
+        self._token_metrics['total_output_tokens'] += output_tokens
+        self._token_metrics['total_cost'] += cost
+        
+        logger.debug(f"Token metrics updated for user {self.user_id}: {operation} - "
+                    f"Tokens: {input_tokens}+{output_tokens}, Cost: ${cost:.4f}")
+    
+    def get_token_metrics(self) -> Dict[str, Any]:
+        """
+        Get current token usage metrics.
+        
+        Returns:
+            Dictionary with token usage statistics
+        """
+        return {
+            **self._token_metrics,
+            'average_tokens_per_operation': (
+                (self._token_metrics['total_input_tokens'] + self._token_metrics['total_output_tokens']) /
+                max(1, self._token_metrics['total_operations'])
+            ),
+            'average_cost_per_operation': (
+                self._token_metrics['total_cost'] / max(1, self._token_metrics['total_operations'])
+            )
+        }
+    
+    # ===================== PHASE 1 USER TIER HANDLING (from transparent_websocket_events.py) =====================
+    
+    def set_user_tier(self, user_tier: str):
+        """
+        Set or update the user tier for this emitter.
+        
+        Args:
+            user_tier: User tier (free, early, mid, enterprise)
+        """
+        old_tier = self._user_tier
+        self._user_tier = user_tier
+        logger.info(f"User tier updated for {self.user_id}: {old_tier} -> {user_tier}")
+    
+    def get_user_tier(self) -> str:
+        """
+        Get the current user tier.
+        
+        Returns:
+            Current user tier
+        """
+        return self._user_tier or 'free'
+    
+    def is_priority_user(self) -> bool:
+        """
+        Check if this user is in the priority queue.
+        
+        Returns:
+            True if user has enterprise tier
+        """
+        return self._user_tier == 'enterprise'
+    
+    def _validate_event_context(self, run_id: Optional[str], event_type: str, agent_name: Optional[str] = None) -> bool:
+        """
+        Validate WebSocket event context to ensure proper user isolation.
+        
+        CRITICAL SECURITY: This validation prevents events from being sent without proper context,
+        which could result in events being delivered to wrong users or global broadcast.
+        
+        Args:
+            run_id: Run identifier to validate
+            event_type: Type of event being emitted (for logging)
+            agent_name: Optional agent name (for logging)
+            
+        Returns:
+            bool: True if context is valid and event should be sent
+            
+        Security Impact: Prevents cross-user data leakage and ensures WebSocket events
+                        are only sent to the correct user context.
+        """
+        try:
+            # Check cache first for performance
+            cache_key = f"{run_id}:{event_type}"
+            if cache_key in self._validation_cache:
+                return self._validation_cache[cache_key]
+            
+            # CRITICAL CHECK: run_id cannot be None
+            if run_id is None:
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). This would cause event misrouting!")
+                logger.error(f"🚨 SECURITY RISK: Events with None run_id can be delivered to wrong users!")
+                self._validation_cache[cache_key] = False
+                return False
+            
+            # CRITICAL CHECK: run_id cannot be 'registry' (system context)
+            if run_id == 'registry':
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). System context cannot emit user events!")
+                logger.error(f"🚨 SECURITY RISK: Registry context events would be broadcast to all users!")
+                self._validation_cache[cache_key] = False
+                return False
+            
+            # VALIDATION CHECK: run_id should be a non-empty string
+            if not isinstance(run_id, str) or not run_id.strip():
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). run_id must be non-empty string!")
+                self._validation_cache[cache_key] = False
+                return False
+            
+            # VALIDATION CHECK: run_id should not contain suspicious patterns
+            if self._is_suspicious_run_id(run_id):
+                logger.warning(f"⚠️ CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
+                              f"(agent={agent_name or 'unknown'}). Event will be sent but flagged for monitoring.")
+                # Allow but log for monitoring - some legitimate run_ids might trigger this
+            
+            # Context validation passed
+            logger.debug(f"✅ CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
+            self._validation_cache[cache_key] = True
+            self._last_validated_run_id = run_id
+            return True
+            
+        except Exception as e:
+            logger.error(f"🚨 CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
+                        f"(run_id={run_id}, agent={agent_name or 'unknown'}): {e}")
+            self._validation_cache[cache_key] = False
+            return False
+    
+    def _is_suspicious_run_id(self, run_id: str) -> bool:
+        """
+        Check if a run_id contains suspicious patterns that might indicate invalid context.
+        
+        This helps detect potentially invalid run_ids that could cause security issues
+        or indicate bugs in run_id generation.
+        
+        Args:
+            run_id: The run_id to check
+            
+        Returns:
+            bool: True if the run_id contains suspicious patterns
+        """
+        suspicious_patterns = [
+            'undefined', 'null', 'none', '',  # Falsy values that became strings
+            'test_', 'mock_', 'fake_',        # Test/mock values in production
+            'admin', 'system', 'root',        # System-level contexts
+            '__', '{{', '}}', '${',           # Template/variable placeholders
+            'localhost', '127.0.0.1',        # Local development patterns
+            'debug', 'trace',                 # Debug contexts
+        ]
+        
+        run_id_lower = run_id.lower()
+        for pattern in suspicious_patterns:
+            if pattern in run_id_lower:
+                return True
+                
+        # Check for unusual characters that might indicate encoding issues
+        if any(ord(char) > 127 for char in run_id):  # Non-ASCII characters
+            return True
+            
+        return False
 
 
 class AuthenticationWebSocketEmitter(UnifiedWebSocketEmitter):

@@ -54,10 +54,29 @@ from netra_backend.app.redis_manager import redis_manager
 - Critical finding: Major work already complete, only import cleanup needed
 - Estimated effort reduced from 7 days to 1-2 days
 
-### Step 1: DISCOVER AND PLAN TEST (In Progress)
-- Need to identify existing tests protecting Redis functionality
-- Plan test coverage for import pattern migration
-- Ensure Golden Path functionality maintained
+### Step 1: ✅ DISCOVER AND PLAN TEST COMPLETE
+**Sub-agent Discovery Results:**
+- **1000+ test files** contain Redis references across codebase
+- **76+ files** have direct Redis manager imports requiring pattern updates
+- **5 critical Golden Path tests** must continue working during migration
+- **12 mission critical tests** protecting Redis SSOT functionality
+
+**Critical Tests Identified:**
+- `test_redis_ssot_consolidation.py` - Protects $500K+ ARR WebSocket 1011 error fixes
+- `test_gcp_redis_websocket_golden_path.py` - End-to-end staging validation
+- `test_websocket_1011_fixes.py` - WebSocket connection failure prevention
+- `test_redis_import_migration_integration.py` - Import migration validation
+- `test_redis_validation_ssot_critical.py` - Production SSOT compliance
+
+**Three-Phase Test Strategy:**
+- **20% New SSOT Tests:** Import pattern compliance validation
+- **60% Existing Test Updates:** Ensure current tests work with new patterns
+- **20% Test Execution:** Comprehensive validation strategy
+
+**Risk Assessment Revision:** 
+- **Scope increased:** 1000+ files affected vs initial estimate of minor cleanup
+- **Golden Path protection:** Mission critical tests identified and planned
+- **Success metrics:** All mission critical tests must pass throughout migration
 
 ### Steps 2-6: Pending
 - Execute test plan
@@ -70,28 +89,34 @@ from netra_backend.app.redis_manager import redis_manager
 
 ### Golden Path Status
 - **Core functionality:** ✅ Already working - SSOT consolidation complete
-- **Chat functionality:** ✅ Maintained - no connection pool conflicts
+- **Chat functionality:** ✅ Maintained - no connection pool conflicts  
 - **WebSocket errors:** ✅ Resolved - single Redis connection pool
 - **Auth integration:** ✅ Working - proper SSOT delegation
 
-### Remaining Risk
-- **Low:** Import pattern inconsistencies cause developer confusion
-- **Minor:** Deprecation warnings in logs
-- **Negligible:** No functional impact on Golden Path
+### Risk Assessment Revision (Post-Discovery)
+- **Scope Impact:** 1000+ files affected - MEDIUM complexity migration
+- **Golden Path Risk:** 5 critical tests must pass - mission critical protection required
+- **Revenue Risk:** $500K+ ARR chat functionality depends on Redis stability
+- **Testing Risk:** 76+ files with import patterns need validation
 
-## Success Metrics
-- **Import Patterns:** All Redis imports use SSOT pattern
-- **Deprecation Warnings:** Zero in logs
-- **Golden Path:** 99%+ chat functionality maintained
-- **Memory Usage:** Single Redis connection pool confirmed
+## Success Metrics (Updated)
+- **Import Patterns:** All Redis imports use SSOT pattern (1000+ files validated)
+- **Mission Critical Tests:** All 12 Redis SSOT tests pass
+- **Golden Path Protection:** 5 critical tests maintain 99%+ success rate
+- **WebSocket Stability:** Zero 1011 errors in staging environment
+- **Deprecation Warnings:** Zero in production logs
+- **Memory Usage:** Single Redis connection pool maintained
 
 ## Next Actions
-1. **SNST:** Spawn sub-agent for test discovery and planning
-2. Execute remaining SSOT Gardener process steps
-3. Focus on import pattern migration script
-4. Validate Golden Path functionality maintained
+1. ✅ **COMPLETED:** Test discovery and planning (Step 1)
+2. **CURRENT:** Execute test plan for 20% new SSOT tests (Step 2)
+3. **UPCOMING:** Plan comprehensive remediation strategy (Step 3)  
+4. **UPCOMING:** Execute import pattern migration across 1000+ files (Step 4)
+5. **CRITICAL:** Run test fix loop ensuring all mission critical tests pass (Step 5)
+6. **FINAL:** Create PR and closure (Step 6)
 
-## Notes
-- This is a **cleanup task**, not a critical blocking issue
-- Major architectural work already complete
-- Focus on developer experience improvement
+## Notes (Updated)
+- **Scope revision:** This is now a **MEDIUM complexity migration** affecting 1000+ files
+- Major architectural work complete, but import pattern migration is substantial
+- **Mission critical:** Must protect $500K+ ARR Golden Path chat functionality
+- Focus on systematic migration with comprehensive test protection
