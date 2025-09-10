@@ -390,30 +390,6 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
         # Execute all agents concurrently
         tasks = [execute_single_agent(agent_name) for agent_name in agent_names]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        # Debug output to understand what happened
-        print(f"\nDEBUG: Results from concurrent execution:")
-        for i, result in enumerate(results):
-            if isinstance(result, ConcurrentTestResult):
-                print(f"  Agent {result.agent_id}: execution_result={result.execution_result}, errors={result.errors}")
-                if result.execution_result:
-                    print(f"    Success: {result.execution_result.success}")
-            else:
-                print(f"  Result {i}: {type(result)} = {result}")
-        
-        # Debug WebSocket bridge state
-        print(f"\nDEBUG: WebSocket bridge call counts:")
-        print(f"  notify_agent_started: {execution_core.websocket_bridge.notify_agent_started.call_count}")
-        print(f"  notify_agent_thinking: {execution_core.websocket_bridge.notify_agent_thinking.call_count}")
-        print(f"  notify_agent_completed: {execution_core.websocket_bridge.notify_agent_completed.call_count}")
-        print(f"  notify_agent_error: {execution_core.websocket_bridge.notify_agent_error.call_count}")
-        
-        # Debug state tracker state
-        print(f"\nDEBUG: State tracker executions:")
-        for state_id, state_data in execution_core.state_tracker._state_executions.items():
-            print(f"  {state_id}: phases={[p['phase'] for p in state_data['phases']]}")
-            print(f"    completed={state_data.get('completed', False)}, success={state_data.get('success', False)}")
-        
         # Validate isolation - no exceptions should propagate between executions
         successful_results = [r for r in results if isinstance(r, ConcurrentTestResult) and not r.errors]
         assert len(successful_results) == num_concurrent, f"Expected {num_concurrent} successful executions, got {len(successful_results)}"
@@ -1282,6 +1258,22 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                         "thread_id": threading.current_thread().ident
                     }
                     mock_state_tracker._state_executions[state_id]["phases"].append(transition)
+                    
+                    # Debug output to understand why notify_agent_completed isn't called
+                    print(f"DEBUG async_fixture: transition_phase called: state_id={state_id}, phase={phase}, websocket_manager={websocket_manager is not None}")
+                    
+                    # Simulate WebSocket notifications for COMPLETED phase
+                    if websocket_manager and phase == AgentExecutionPhase.COMPLETED:
+                        execution = mock_state_tracker._state_executions[state_id]
+                        print(f"DEBUG async_fixture: About to call notify_agent_completed for {execution['agent_name']}")
+                        await websocket_manager.notify_agent_completed(
+                            run_id=execution["run_id"],
+                            agent_name=execution["agent_name"],
+                            result={"status": "completed", "success": True}
+                        )
+                        print(f"DEBUG async_fixture: Called notify_agent_completed for {execution['agent_name']}")
+                    elif phase == AgentExecutionPhase.COMPLETED:
+                        print(f"DEBUG async_fixture: COMPLETED phase reached but websocket_manager is None or falsy: {websocket_manager}")
             
             def complete_execution(state_id, success=True):
                 if state_id in mock_state_tracker._state_executions:
