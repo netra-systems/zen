@@ -62,10 +62,26 @@ Multiple WebSocket manager implementations violating SSOT, causing authenticatio
 - Factory consolidation tests (until consolidated)
 - SSOT violation reproduction tests (until fixed)
 
-### 🔄 STEP 1.2: PLAN NEW SSOT TESTS (NEXT)
-- Plan 20% new SSOT validation tests
-- Focus on ideal state AFTER SSOT refactor
-- Design failing tests to reproduce violations
+### ✅ STEP 1.2: PLAN NEW SSOT TESTS COMPLETE
+**Comprehensive test plan for 20% new SSOT validation tests:**
+
+**Strategy:** 60% failing tests (prove violations), 40% stability tests (prove preservation)
+
+**Phase 1 - Unit Tests (Proving Violations):**
+1. `test_ssot_websocket_manager_single_source_truth.py` - FAIL→PASS (prove only 1 manager)
+2. `test_websocket_manager_factory_consolidation_validation.py` - FAIL→PASS (unified factory)  
+3. `test_websocket_manager_interface_unification.py` - FAIL→PASS (consistent interfaces)
+
+**Phase 2 - Integration Tests (Regression Prevention):**
+4. `test_websocket_ssot_regression_prevention.py` - FAIL→PASS (prevent future violations)
+5. `test_websocket_manager_agent_integration_preservation.py` - PASS→PASS (preserve agent integration)
+6. `test_websocket_manager_auth_integration_preservation.py` - PASS→PASS (preserve auth integration)
+
+**Phase 3 - E2E Tests (Golden Path Protection):**
+7. `test_websocket_golden_path_preservation.py` - PASS→PASS (preserve login→AI response flow)
+8. `test_websocket_multi_user_isolation_preservation.py` - PASS→PASS (preserve user isolation)
+
+**Execution Strategy:** NO DOCKER required - unit tests use static analysis, integration uses mocks, E2E uses staging GCP
 
 ### ⏳ UPCOMING STEPS:
 - Step 2: Execute new SSOT test plan
