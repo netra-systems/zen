@@ -384,7 +384,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         
         print(f"  ✅ WebSocket events properly isolated between concurrent users")
     
-    def test_websocket_event_error_handling(self):
+    async def test_websocket_event_error_handling(self):
         """Test WebSocket event error handling and recovery"""
         print("\n🔍 Testing WebSocket event error handling...")
         

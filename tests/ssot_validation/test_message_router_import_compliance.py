@@ -17,6 +17,7 @@ GitHub Issue: #217 - MessageRouter SSOT violations blocking golden path
 
 import ast
 import re
+import unittest
 from typing import Dict, List, Set, Optional, Tuple, Any
 from pathlib import Path
 from collections import defaultdict
@@ -24,12 +25,17 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterImportCompliance(SSotBaseTestCase):
+class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
     """Test that all MessageRouter imports use canonical SSOT path."""
 
     def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        if hasattr(super(), 'setUp'):
+            super().setUp()
+        
+        # Initialize logger
+        import logging
+        self.logger = logging.getLogger(__name__)
         
         # Expected canonical import path after SSOT consolidation
         self.canonical_import_path = "netra_backend.app.websocket_core.handlers"

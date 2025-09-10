@@ -19,6 +19,7 @@ GitHub Issue: #217 - MessageRouter SSOT violations blocking golden path
 import ast
 import hashlib
 import json
+import unittest
 from typing import Dict, List, Set, Optional, Any, Tuple
 from pathlib import Path
 from dataclasses import dataclass
@@ -39,12 +40,17 @@ class RouterSignature:
     similarity_score: float = 0.0
 
 
-class TestMessageRouterDuplicateDetection(SSotBaseTestCase):
+class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
     """Test automated detection of MessageRouter duplicates and SSOT violations."""
 
     def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        if hasattr(super(), 'setUp'):
+            super().setUp()
+        
+        # Initialize logger
+        import logging
+        self.logger = logging.getLogger(__name__)
         
         # Canonical MessageRouter location
         self.canonical_path = "netra_backend/app/websocket_core/handlers.py"
