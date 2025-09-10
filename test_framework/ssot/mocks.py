@@ -962,6 +962,7 @@ class MockContext:
 # Export SSOT mock factory components
 __all__ = [
     'MockFactory',
+    'SSotMockFactory',  # Alias for MockFactory for test compatibility
     'MockRegistry',
     'DatabaseMockFactory', 
     'ServiceMockFactory',
@@ -969,3 +970,6 @@ __all__ = [
     'get_mock_factory',
     'cleanup_global_mocks'
 ]
+
+# Alias for backwards compatibility with tests expecting SSotMockFactory
+SSotMockFactory = MockFactory
