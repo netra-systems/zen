@@ -545,4 +545,166 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
         redis = real_services_fixture["redis"]
         
         # Simulate shared resource with locking
-        shared_resource_key = f"shared_resource:{int(time.time())}"\n        lock_key = f"{shared_resource_key}:lock"\n        \n        # Initialize shared resource\n        initial_value = {"counter": 0, "operations": [], "consistency_check": 0}\n        await redis.set(shared_resource_key, json.dumps(initial_value), ex=600)\n        \n        concurrent_workers = 30\n        operations_per_worker = 20\n        \n        lock_violations = []\n        consistency_errors = []\n        \n        async def locked_resource_operation(worker_id: int, operations: int) -> Dict[str, Any]:\n            """Perform operations on shared resource with distributed locking."""\n            worker_operations = 0\n            lock_acquisitions = 0\n            lock_timeouts = 0\n            errors = []\n            \n            for op_id in range(operations):\n                # Acquire distributed lock with timeout\n                lock_timeout = 5.0  # 5 second lock timeout\n                lock_value = f"worker_{worker_id}_op_{op_id}_{time.time()}"\n                \n                try:\n                    # Try to acquire lock with SET NX EX (atomic operation)\n                    lock_acquired = await redis.set(\n                        lock_key,\n                        lock_value,\n                        nx=True,  # Only set if not exists\n                        ex=int(lock_timeout)  # Expire after timeout\n                    )\n                    \n                    if lock_acquired:\n                        lock_acquisitions += 1\n                        \n                        try:\n                            # Critical section - modify shared resource\n                            current_data_str = await redis.get(shared_resource_key)\n                            if current_data_str:\n                                current_data = json.loads(current_data_str)\n                                \n                                # Simulate processing time (increases contention)\n                                await asyncio.sleep(0.01)\n                                \n                                # Modify shared resource\n                                current_data["counter"] += 1\n                                current_data["operations"].append({\n                                    "worker_id": worker_id,\n                                    "op_id": op_id,\n                                    "timestamp": time.time(),\n                                    "lock_value": lock_value\n                                })\n                                \n                                # Consistency check value (should equal counter)\n                                current_data["consistency_check"] = current_data["counter"]\n                                \n                                # Write back to shared resource\n                                await redis.set(shared_resource_key, json.dumps(current_data), ex=600)\n                                \n                                worker_operations += 1\n                            \n                        finally:\n                            # Release lock (only if we still own it)\n                            current_lock_value = await redis.get(lock_key)\n                            if current_lock_value == lock_value:\n                                await redis.delete(lock_key)\n                            else:\n                                # Lock was stolen or expired - potential violation\n                                lock_violations.append(\n                                    f"Worker {worker_id} lock violation: expected {lock_value}, got {current_lock_value}"\n                                )\n                    else:\n                        # Lock acquisition failed\n                        lock_timeouts += 1\n                        \n                        # Wait a bit before retrying\n                        await asyncio.sleep(0.001)\n                        \n                except Exception as e:\n                    errors.append(f"Worker {worker_id} operation {op_id} error: {str(e)}")\n            \n            return {\n                "worker_id": worker_id,\n                "operations_completed": worker_operations,\n                "lock_acquisitions": lock_acquisitions,\n                "lock_timeouts": lock_timeouts,\n                "errors": errors,\n                "success": len(errors) == 0\n            }\n        \n        # Execute concurrent workers with locking\n        print(f"🔐 Testing shared resource locking with {concurrent_workers} workers...")\n        locking_start = time.time()\n        \n        worker_tasks = [\n            locked_resource_operation(worker_id, operations_per_worker)\n            for worker_id in range(concurrent_workers)\n        ]\n        \n        worker_results = await asyncio.gather(*worker_tasks, return_exceptions=True)\n        \n        locking_duration = time.time() - locking_start\n        \n        # Analyze locking results\n        successful_workers = [r for r in worker_results if isinstance(r, dict) and r.get("success", False)]\n        total_operations = sum(r.get("operations_completed", 0) for r in worker_results if isinstance(r, dict))\n        total_lock_acquisitions = sum(r.get("lock_acquisitions", 0) for r in worker_results if isinstance(r, dict))\n        total_lock_timeouts = sum(r.get("lock_timeouts", 0) for r in worker_results if isinstance(r, dict))\n        \n        # Verify final shared resource state\n        final_data_str = await redis.get(shared_resource_key)\n        if final_data_str:\n            final_data = json.loads(final_data_str)\n            \n            final_counter = final_data.get("counter", 0)\n            final_consistency_check = final_data.get("consistency_check", 0)\n            final_operations_count = len(final_data.get("operations", []))\n            \n            # Consistency checks\n            counter_consistency = final_counter == final_consistency_check\n            operations_consistency = final_counter == final_operations_count\n            expected_total_operations = total_operations\n            \n            if not counter_consistency:\n                consistency_errors.append(f"Counter consistency violation: counter={final_counter}, check={final_consistency_check}")\n            \n            if not operations_consistency:\n                consistency_errors.append(f"Operations consistency violation: counter={final_counter}, ops_count={final_operations_count}")\n            \n            if final_counter != expected_total_operations:\n                consistency_errors.append(f"Total operations mismatch: expected={expected_total_operations}, actual={final_counter}")\n        else:\n            consistency_errors.append("Shared resource disappeared")\n            final_counter = 0\n        \n        # Thread safety and locking assertions\n        assert len(lock_violations) == 0, f"Lock violations detected: {lock_violations[:5]}"  # Show first 5\n        assert len(consistency_errors) == 0, f"Consistency errors: {consistency_errors}"        \n        \n        success_rate = len(successful_workers) / concurrent_workers\n        assert success_rate >= 0.90, f"Worker success rate {success_rate:.3f} below 90%"\n        \n        # Lock efficiency check (not too many timeouts)\n        total_attempted_operations = concurrent_workers * operations_per_worker\n        timeout_rate = total_lock_timeouts / total_attempted_operations\n        assert timeout_rate <= 0.3, f"Lock timeout rate {timeout_rate:.3f} too high"\n        \n        print(f"✅ Shared Resource Locking Test Results:")\n        print(f"   Concurrent workers: {concurrent_workers}")\n        print(f"   Successful workers: {len(successful_workers)}")\n        print(f"   Total operations completed: {total_operations}")\n        print(f"   Lock acquisitions: {total_lock_acquisitions}")\n        print(f"   Lock timeouts: {total_lock_timeouts}")\n        print(f"   Timeout rate: {timeout_rate:.3f}")\n        print(f"   Final counter value: {final_counter}")\n        print(f"   Lock violations: {len(lock_violations)}")\n        print(f"   Consistency errors: {len(consistency_errors)}")\n        print(f"   Test duration: {locking_duration:.2f}s")\n        \n        # Cleanup\n        await redis.delete(shared_resource_key, lock_key)"
+        shared_resource_key = f"shared_resource:{int(time.time())}"
+        lock_key = f"{shared_resource_key}:lock"
+        
+        # Initialize shared resource
+        initial_value = {"counter": 0, "operations": [], "consistency_check": 0}
+        await redis.set(shared_resource_key, json.dumps(initial_value), ex=600)
+        
+        concurrent_workers = 30
+        operations_per_worker = 20
+        
+        lock_violations = []
+        consistency_errors = []
+        
+        async def locked_resource_operation(worker_id: int, operations: int) -> Dict[str, Any]:
+            """Perform operations on shared resource with distributed locking."""
+            worker_operations = 0
+            lock_acquisitions = 0
+            lock_timeouts = 0
+            errors = []
+            
+            for op_id in range(operations):
+                # Acquire distributed lock with timeout
+                lock_timeout = 5.0  # 5 second lock timeout
+                lock_value = f"worker_{worker_id}_op_{op_id}_{time.time()}"
+                
+                try:
+                    # Try to acquire lock with SET NX EX (atomic operation)
+                    lock_acquired = await redis.set(
+                        lock_key,
+                        lock_value,
+                        nx=True,  # Only set if not exists
+                        ex=int(lock_timeout)  # Expire after timeout
+                    )
+                    
+                    if lock_acquired:
+                        lock_acquisitions += 1
+                        
+                        try:
+                            # Critical section - modify shared resource
+                            current_data_str = await redis.get(shared_resource_key)
+                            if current_data_str:
+                                current_data = json.loads(current_data_str)
+                                
+                                # Simulate processing time (increases contention)
+                                await asyncio.sleep(0.01)
+                                
+                                # Modify shared resource
+                                current_data["counter"] += 1
+                                current_data["operations"].append({
+                                    "worker_id": worker_id,
+                                    "op_id": op_id,
+                                    "timestamp": time.time(),
+                                    "lock_value": lock_value
+                                })
+                                
+                                # Consistency check value (should equal counter)
+                                current_data["consistency_check"] = current_data["counter"]
+                                
+                                # Write back to shared resource
+                                await redis.set(shared_resource_key, json.dumps(current_data), ex=600)
+                                
+                                worker_operations += 1
+                            
+                        finally:
+                            # Release lock (only if we still own it)
+                            current_lock_value = await redis.get(lock_key)
+                            if current_lock_value == lock_value:
+                                await redis.delete(lock_key)
+                            else:
+                                # Lock was stolen or expired - potential violation
+                                lock_violations.append(
+                                    f"Worker {worker_id} lock violation: expected {lock_value}, got {current_lock_value}"
+                                )
+                    else:
+                        # Lock acquisition failed
+                        lock_timeouts += 1
+                        
+                        # Wait a bit before retrying
+                        await asyncio.sleep(0.001)
+                        
+                except Exception as e:
+                    errors.append(f"Worker {worker_id} operation {op_id} error: {str(e)}")
+            
+            return {
+                "worker_id": worker_id,
+                "operations_completed": worker_operations,
+                "lock_acquisitions": lock_acquisitions,
+                "lock_timeouts": lock_timeouts,
+                "errors": errors,
+                "success": len(errors) == 0
+            }
+        
+        # Execute concurrent workers with locking
+        print(f"🔐 Testing shared resource locking with {concurrent_workers} workers...")
+        locking_start = time.time()
+        
+        worker_tasks = [
+            locked_resource_operation(worker_id, operations_per_worker)
+            for worker_id in range(concurrent_workers)
+        ]
+        
+        worker_results = await asyncio.gather(*worker_tasks, return_exceptions=True)
+        
+        locking_duration = time.time() - locking_start
+        
+        # Analyze locking results
+        successful_workers = [r for r in worker_results if isinstance(r, dict) and r.get("success", False)]
+        total_operations = sum(r.get("operations_completed", 0) for r in worker_results if isinstance(r, dict))
+        total_lock_acquisitions = sum(r.get("lock_acquisitions", 0) for r in worker_results if isinstance(r, dict))
+        total_lock_timeouts = sum(r.get("lock_timeouts", 0) for r in worker_results if isinstance(r, dict))
+        
+        # Verify final shared resource state
+        final_data_str = await redis.get(shared_resource_key)
+        if final_data_str:
+            final_data = json.loads(final_data_str)
+            
+            final_counter = final_data.get("counter", 0)
+            final_consistency_check = final_data.get("consistency_check", 0)
+            final_operations_count = len(final_data.get("operations", []))
+            
+            # Consistency checks
+            counter_consistency = final_counter == final_consistency_check
+            operations_consistency = final_counter == final_operations_count
+            expected_total_operations = total_operations
+            
+            if not counter_consistency:
+                consistency_errors.append(f"Counter consistency violation: counter={final_counter}, check={final_consistency_check}")
+            
+            if not operations_consistency:
+                consistency_errors.append(f"Operations consistency violation: counter={final_counter}, ops_count={final_operations_count}")
+            
+            if final_counter != expected_total_operations:
+                consistency_errors.append(f"Total operations mismatch: expected={expected_total_operations}, actual={final_counter}")
+        else:
+            consistency_errors.append("Shared resource disappeared")
+            final_counter = 0
+        
+        # Thread safety and locking assertions
+        assert len(lock_violations) == 0, f"Lock violations detected: {lock_violations[:5]}"  # Show first 5
+        assert len(consistency_errors) == 0, f"Consistency errors: {consistency_errors}"        
+        
+        success_rate = len(successful_workers) / concurrent_workers
+        assert success_rate >= 0.90, f"Worker success rate {success_rate:.3f} below 90%"
+        
+        # Lock efficiency check (not too many timeouts)
+        total_attempted_operations = concurrent_workers * operations_per_worker
+        timeout_rate = total_lock_timeouts / total_attempted_operations
+        assert timeout_rate <= 0.3, f"Lock timeout rate {timeout_rate:.3f} too high"
+        
+        print(f"✅ Shared Resource Locking Test Results:")
+        print(f"   Concurrent workers: {concurrent_workers}")
+        print(f"   Successful workers: {len(successful_workers)}")
+        print(f"   Total operations completed: {total_operations}")
+        print(f"   Lock acquisitions: {total_lock_acquisitions}")
+        print(f"   Lock timeouts: {total_lock_timeouts}")
+        print(f"   Timeout rate: {timeout_rate:.3f}")
+        print(f"   Final counter value: {final_counter}")
+        print(f"   Lock violations: {len(lock_violations)}")
+        print(f"   Consistency errors: {len(consistency_errors)}")
+        print(f"   Test duration: {locking_duration:.2f}s")
+        
+        # Cleanup
+        await redis.delete(shared_resource_key, lock_key)
