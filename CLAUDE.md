@@ -252,6 +252,18 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 
 ## 7. PROJECT TOOLING
 
+### 7.0. Claude Code Commands
+**AUTOMATION HUB:** All development commands available through Claude Code slash commands
+
+**Essential Commands:**
+- `/tdd feature module` - Complete TDD workflow with real services (NO MOCKS)
+- `/test-real [category]` - Run tests with real databases and LLM
+- `/debug-error "error" N` - Five Whys root cause analysis with N agents
+- `/deploy-gcp [env]` - Deploy to GCP with compliance checks
+- `/ultimate-test-deploy-loop` - MISSION CRITICAL: Run until all 1000+ tests pass
+
+**Command Reference:** See `docs/COMMAND_INDEX.md` for all 25 available commands
+
 ### 7.1. Docker
 **Central Management:** All operations through UnifiedDockerManager
 
