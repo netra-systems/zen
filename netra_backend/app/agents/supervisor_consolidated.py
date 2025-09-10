@@ -335,11 +335,18 @@ class SupervisorAgent(BaseAgent):
                 
             except Exception as e:
                 logger.error(f"Failed to create isolated {agent_name} instance: {e}")
+                logger.error(f"Full traceback for {agent_name} failure:", exc_info=True)
                 # Continue with other agents - non-critical agents can fail
                 continue
         
         if not agent_instances:
-            raise RuntimeError("Failed to create any isolated agent instances")
+            error_msg = f"Failed to create any isolated agent instances. Attempted agents: {agent_names}"
+            logger.error(f"❌ CRITICAL: {error_msg}")
+            logger.error(f"   Factory configured: {self.agent_instance_factory is not None}")
+            logger.error(f"   Class registry: {self.agent_class_registry is not None}")
+            logger.error(f"   LLM manager: {self._llm_manager is not None}")
+            logger.error(f"   WebSocket bridge: {self.websocket_bridge is not None}")
+            raise RuntimeError(error_msg)
         
         logger.info(f"Created {len(agent_instances)} isolated agent instances for user {context.user_id}")
         return agent_instances
