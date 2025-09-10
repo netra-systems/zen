@@ -195,6 +195,10 @@ class TestUnifiedWebSocketAuthBusinessLogic:
         malformed_token = "malformed.token"
         empty_token = ""
         
+        # When/Then: Empty token should fail validation (short-circuit)
+        result = await validate_websocket_token_business_logic(empty_token)
+        assert result is None
+        
         # When/Then: Valid token should pass validation via SSOT auth service
         with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_unified_auth_service') as mock_get_service:
             mock_auth_service = Mock()
@@ -206,11 +210,9 @@ class TestUnifiedWebSocketAuthBusinessLogic:
             mock_auth_result.validated_at = Mock()
             mock_auth_result.validated_at.timestamp.return_value = 1234567890
             
-            # Mock the async authenticate method
-            async def mock_authenticate(token, context):
-                return mock_auth_result
-            
-            mock_auth_service.authenticate = mock_authenticate
+            # Mock the async authenticate method with proper async return
+            from unittest.mock import AsyncMock
+            mock_auth_service.authenticate = AsyncMock(return_value=mock_auth_result)
             mock_get_service.return_value = mock_auth_service
             
             result = await validate_websocket_token_business_logic(valid_token)
@@ -225,23 +227,21 @@ class TestUnifiedWebSocketAuthBusinessLogic:
             mock_auth_result.success = False
             mock_auth_result.error = "Token has expired"
             
-            # Mock the async authenticate method
-            async def mock_authenticate_failed(token, context):
-                return mock_auth_result
-            
-            mock_auth_service.authenticate = mock_authenticate_failed
+            # Mock the async authenticate method with proper async return
+            mock_auth_service.authenticate = AsyncMock(return_value=mock_auth_result)
             mock_get_service.return_value = mock_auth_service
             
             result = await validate_websocket_token_business_logic(expired_token)
             assert result is None
         
-        # When/Then: Malformed token should fail validation  
-        result = await validate_websocket_token_business_logic(malformed_token)
-        # Should fail due to auth service errors
-        
-        # When/Then: Empty token should fail validation
-        result = await validate_websocket_token_business_logic(empty_token)
-        assert result is None
+        # When/Then: Malformed token should fail validation (auth service should handle gracefully)
+        with patch('netra_backend.app.websocket_core.unified_websocket_auth.get_unified_auth_service') as mock_get_service:
+            mock_auth_service = Mock()
+            mock_auth_service.authenticate = AsyncMock(side_effect=Exception("Invalid token format"))
+            mock_get_service.return_value = mock_auth_service
+            
+            result = await validate_websocket_token_business_logic(malformed_token)
+            assert result is None
     
     @pytest.mark.unit
     def test_websocket_connection_state_validation(self, mock_websocket):

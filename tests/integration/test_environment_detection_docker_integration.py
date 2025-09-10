@@ -266,6 +266,14 @@ class TestEnvironmentDetection:
             self.env.reset_to_original()
             self.env.enable_isolation()
             
+            # For cases that expect False, explicitly unset pytest-related variables
+            if not case["expected"]:
+                # Clear pytest-related environment variables in isolation
+                self.env.set("PYTEST_CURRENT_TEST", "", f"test_context_{case['name']}")
+                self.env.delete("PYTEST_CURRENT_TEST", f"test_context_{case['name']}")
+                self.env.set("TESTING", "false", f"test_context_{case['name']}")
+                self.env.set("TEST_MODE", "false", f"test_context_{case['name']}")
+            
             # Set test case variables
             for key, value in case["vars"].items():
                 self.env.set(key, value, f"test_context_{case['name']}")

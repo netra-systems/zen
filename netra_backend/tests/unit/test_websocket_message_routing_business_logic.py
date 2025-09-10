@@ -33,7 +33,7 @@ class TestWebSocketMessageRoutingBusinessLogic:
     @pytest.fixture
     def message_queue(self):
         """Create WebSocket message queue for testing."""
-        return WebSocketMessageQueue(max_size=1000)
+        return MessageQueue(max_size=1000)
     
     @pytest.fixture
     def connection_manager(self):
