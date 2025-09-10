@@ -39,7 +39,10 @@
       "Bash(gcloud config list:*)",
       "Bash(gcloud builds list:*)",
       "Bash(gcloud builds describe:*)",
-      "Read(//Users/rindhujajohnson/Netra/GitHub/**)"
+      "Read(//Users/rindhujajohnson/Netra/GitHub/**)",
+      "Bash(gcloud builds submit:*)",
+      "Bash(gcloud builds log:*)",
+      "Bash(gcloud run deploy:*)"
     ],
     "deny": [],
     "ask": []

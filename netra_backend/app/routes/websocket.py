@@ -1433,7 +1433,10 @@ async def websocket_endpoint(websocket: WebSocket):
                         logger.warning(f"⚠️ EMERGENCY RECOVERY: Using existing state machine {preliminary_connection_id} despite ID mismatch")
                     else:
                         logger.critical(f"❌ EMERGENCY RECOVERY FAILED: No state machine found for {preliminary_connection_id}")
-                        final_state_machine = state_registry.register_connection(preliminary_connection_id, user_id)
+                        # FIX: Get state_registry in proper scope
+                        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+                        state_registry_recovery = get_connection_state_registry()
+                        final_state_machine = state_registry_recovery.register_connection(preliminary_connection_id, user_id)
                 else:
                     # SUCCESS: Pass-through strategy worked correctly
                     logger.info(f"✅ PASS-THROUGH SUCCESS: connection_id '{connection_id}' == preliminary_connection_id '{preliminary_connection_id}'")
@@ -1452,7 +1455,10 @@ async def websocket_endpoint(websocket: WebSocket):
                     else:
                         # This should not happen but handle gracefully
                         logger.warning(f"⚠️ UNEXPECTED: No existing state machine found for {preliminary_connection_id} despite pass-through success")
-                        final_state_machine = state_registry.register_connection(connection_id, user_id)
+                        # FIX: Get state_registry in proper scope
+                        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+                        state_registry_recovery = get_connection_state_registry()
+                        final_state_machine = state_registry_recovery.register_connection(connection_id, user_id)
                         websocket.connection_id = connection_id
                 
                 # Transition to AUTHENTICATED state
