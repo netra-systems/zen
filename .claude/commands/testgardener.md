@@ -3,10 +3,10 @@ description: "Test Gardener"
 argument-hint: "[focus area, defaults to latest]"
 ---
 
- 
+
 Context
 1. You must keep going until all work is fully completed.
-2. Built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+2. Use github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
 You MUST follow @GITHUB_STYLE_GUIDE.md
 3. TEST UPDATES: ${1 : all}. This is your focus area.
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
