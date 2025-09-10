@@ -865,20 +865,20 @@ class AgentInstanceFactory:
                     else:
                         # Use the WebSocketBridgeAdapter pattern from BaseAgent
                         if hasattr(agent, '_websocket_adapter'):
-                        logger.info(f"🔧 Setting WebSocket bridge on {agent_name} via adapter")
-                        logger.info(f"   Bridge type: {type(self._websocket_bridge).__name__}")
-                        logger.info(f"   Run ID: {user_context.run_id}")
-                        
-                        agent._websocket_adapter.set_websocket_bridge(
-                            self._websocket_bridge, 
-                            user_context.run_id,  # REAL run_id from UserExecutionContext
-                            agent_name
-                        )
-                        logger.info(f"✅ WebSocket bridge set via adapter for {agent_name} (run_id: {user_context.run_id})")
-                    else:
-                        # Fallback for older agent implementations
-                        agent.set_websocket_bridge(self._websocket_bridge, user_context.run_id)
-                        logger.debug(f"✅ WebSocket bridge set directly for {agent_name} (run_id: {user_context.run_id})")
+                            logger.info(f"🔧 Setting WebSocket bridge on {agent_name} via adapter")
+                            logger.info(f"   Bridge type: {type(self._websocket_bridge).__name__}")
+                            logger.info(f"   Run ID: {user_context.run_id}")
+                            
+                            agent._websocket_adapter.set_websocket_bridge(
+                                self._websocket_bridge, 
+                                user_context.run_id,  # REAL run_id from UserExecutionContext
+                                agent_name
+                            )
+                            logger.info(f"✅ WebSocket bridge set via adapter for {agent_name} (run_id: {user_context.run_id})")
+                        else:
+                            # Fallback for older agent implementations
+                            agent.set_websocket_bridge(self._websocket_bridge, user_context.run_id)
+                            logger.debug(f"✅ WebSocket bridge set directly for {agent_name} (run_id: {user_context.run_id})")
                 except Exception as e:
                     logger.warning(f"Failed to set WebSocket bridge on agent {agent_name}: {e}")
             
