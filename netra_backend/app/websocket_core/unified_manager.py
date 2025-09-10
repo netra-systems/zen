@@ -812,18 +812,32 @@ class UnifiedWebSocketManager:
             'connections': connection_details
         }
     
-    async def connect_user(self, user_id: str, websocket: Any) -> Any:
-        """Legacy compatibility method for connecting a user."""
+    async def connect_user(self, user_id: str, websocket: Any, connection_id: str = None) -> Any:
+        """Legacy compatibility method for connecting a user.
+        
+        Args:
+            user_id: User identifier
+            websocket: WebSocket connection
+            connection_id: Optional preliminary connection ID to preserve state machine continuity
+        """
         from datetime import datetime
-        # Use UnifiedIDManager for consistent connection ID generation
-        id_manager = UnifiedIDManager()
-        connection_id = id_manager.generate_id(
-            IDType.WEBSOCKET,
-            prefix="conn",
-            context={"user_id": user_id, "component": "legacy_connection"}
-        )
+        
+        # CRITICAL FIX: Use provided connection_id to preserve state machine continuity
+        if connection_id:
+            # Pass-through connection ID strategy to prevent state machine recreation
+            final_connection_id = connection_id
+            logger.info(f"PASS-THROUGH FIX: Using provided connection_id {connection_id} to preserve state machine")
+        else:
+            # Fallback: Use UnifiedIDManager for new connection ID generation
+            id_manager = UnifiedIDManager()
+            final_connection_id = id_manager.generate_id(
+                IDType.WEBSOCKET,
+                prefix="conn",
+                context={"user_id": user_id, "component": "legacy_connection"}
+            )
+            logger.warning(f"PASS-THROUGH FIX: No connection_id provided, generated new: {final_connection_id}")
         connection = WebSocketConnection(
-            connection_id=connection_id,
+            connection_id=final_connection_id,
             user_id=user_id,
             websocket=websocket,
             connected_at=datetime.now()
@@ -833,14 +847,14 @@ class UnifiedWebSocketManager:
         # Return a ConnectionInfo-like object for compatibility
         conn_info = type('ConnectionInfo', (), {
             'user_id': user_id,
-            'connection_id': connection_id,
+            'connection_id': final_connection_id,
             'websocket': websocket
         })()
         
         # Store in connection registry for compatibility
-        self.connection_registry[connection_id] = conn_info
+        self.connection_registry[final_connection_id] = conn_info
         
-        return conn_info
+        return final_connection_id  # Return the connection_id directly for consistency
     
     async def disconnect_user(self, user_id: str, websocket: Any, code: int = 1000, reason: str = "Normal closure") -> None:
         """Legacy compatibility method for disconnecting a user."""

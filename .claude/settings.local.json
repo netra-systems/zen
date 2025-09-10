@@ -36,7 +36,10 @@
       "Bash(open:*)",
       "Bash(node:*)",
       "Bash(/dev/null)",
-      "Bash(gcloud config list:*)"
+      "Bash(gcloud config list:*)",
+      "Bash(gcloud builds list:*)",
+      "Bash(gcloud builds describe:*)",
+      "Read(//Users/rindhujajohnson/Netra/GitHub/**)"
     ],
     "deny": [],
     "ask": []

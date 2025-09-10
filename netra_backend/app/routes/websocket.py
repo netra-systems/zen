@@ -522,7 +522,8 @@ async def websocket_endpoint(websocket: WebSocket):
         await coordinator.register_connection(preliminary_connection_id)
         
         # SSOT WebSocket Authentication - eliminates all authentication chaos
-        auth_result = await authenticate_websocket_ssot(websocket)
+        # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
+        auth_result = await authenticate_websocket_ssot(websocket, preliminary_connection_id=preliminary_connection_id)
         
         # PHASE 4 FIX: Coordinate authentication state transition
         auth_success = await coordinate_authentication_state(
@@ -1383,51 +1384,74 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
             
             # CRITICAL SECURITY FIX: Register connection with isolated or legacy manager
+            # PASS-THROUGH CONNECTION ID FIX: Use preliminary_connection_id to preserve state machine
             if 'user_context' in locals():
-                # Factory pattern: Create WebSocketConnection and add to isolated manager
+                # Factory pattern: Create WebSocketConnection using preliminary_connection_id
                 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
                 connection = WebSocketConnection(
-                    connection_id=user_context.websocket_client_id,
+                    connection_id=preliminary_connection_id,  # CRITICAL FIX: Use preliminary ID
                     user_id=user_id,
                     websocket=websocket,
                     connected_at=datetime.utcnow()
                 )
                 await ws_manager.add_connection(connection)
-                connection_id = user_context.websocket_client_id
-                logger.info(f"Registered connection with isolated manager: {connection_id}")
+                connection_id = preliminary_connection_id  # CRITICAL FIX: Use preliminary ID
+                logger.info(f"PASS-THROUGH FIX: Registered connection with isolated manager using preliminary ID: {connection_id}")
             else:
-                # Legacy pattern: Use old connect_user method
-                connection_id = await ws_manager.connect_user(user_id, websocket)
-                logger.info(f"Registered connection with legacy manager: {connection_id}")
+                # Legacy pattern: Use old connect_user method with preliminary_connection_id
+                connection_id = await ws_manager.connect_user(user_id, websocket, preliminary_connection_id)
+                logger.info(f"PASS-THROUGH FIX: Registered connection with legacy manager using preliminary ID: {connection_id}")
                 
-            # PHASE 2 FIX 2 CONTINUATION: Update existing state machine after authentication
-            # Use consolidated approach to avoid duplicate registrations  
+            # PASS-THROUGH CONNECTION ID FIX: Update existing state machine after authentication
+            # With connection_id pass-through, IDs should always match - no migration needed  
             try:
                 # Get the existing state machine created during initialization
                 from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine
                 
-                # If we have a different connection_id from the WebSocket manager, update accordingly
+                # PASS-THROUGH VALIDATION: Ensure connection IDs match (they should with our fix)
                 if connection_id != preliminary_connection_id:
-                    # Need to migrate the state machine to the new connection_id
-                    logger.info(f"PHASE 2 FIX 2: Migrating state machine from {preliminary_connection_id} to {connection_id}")
+                    # CRITICAL ERROR: Pass-through strategy failed
+                    logger.critical(f"❌ PASS-THROUGH FAILED: connection_id '{connection_id}' != preliminary_connection_id '{preliminary_connection_id}'")
+                    logger.critical(f"❌ PASS-THROUGH FAILED: State machine continuity broken - this causes transition failures")
+                    logger.critical(f"❌ ROOT CAUSE: connection_id mismatch will cause state machine recreation and loss of ACCEPTED state")
                     
-                    # Unregister preliminary connection
-                    state_registry.unregister_connection(preliminary_connection_id)
+                    # Log detailed diagnostic info
+                    diagnostic_info = {
+                        "preliminary_connection_id": preliminary_connection_id,
+                        "final_connection_id": connection_id,
+                        "user_id": user_id[:8] + "...",
+                        "pass_through_strategy": "FAILED",
+                        "expected_behavior": "IDs should match to preserve state machine",
+                        "actual_behavior": "Different IDs will cause state machine recreation"
+                    }
+                    logger.critical(f"❌ PASS-THROUGH DIAGNOSTIC: {json.dumps(diagnostic_info, indent=2)}")
                     
-                    # Register with final connection_id and user_id
-                    final_state_machine = state_registry.register_connection(connection_id, user_id)
-                    
-                    # Update websocket connection_id
-                    websocket.connection_id = connection_id
+                    # Emergency recovery: Use the existing state machine with preliminary_connection_id
+                    final_state_machine = get_connection_state_machine(preliminary_connection_id)
+                    if final_state_machine:
+                        final_state_machine.user_id = user_id
+                        logger.warning(f"⚠️ EMERGENCY RECOVERY: Using existing state machine {preliminary_connection_id} despite ID mismatch")
+                    else:
+                        logger.critical(f"❌ EMERGENCY RECOVERY FAILED: No state machine found for {preliminary_connection_id}")
+                        final_state_machine = state_registry.register_connection(preliminary_connection_id, user_id)
                 else:
+                    # SUCCESS: Pass-through strategy worked correctly
+                    logger.info(f"✅ PASS-THROUGH SUCCESS: connection_id '{connection_id}' == preliminary_connection_id '{preliminary_connection_id}'")
+                    logger.info(f"✅ STATE MACHINE CONTINUITY: Preserved ACCEPTED state from initialization")
+                    
                     # Update existing state machine with authenticated user_id
                     final_state_machine = get_connection_state_machine(preliminary_connection_id)
                     if final_state_machine:
                         # Update user_id in the existing state machine
                         final_state_machine.user_id = user_id
-                        logger.info(f"PHASE 2 FIX 2: Updated existing state machine with user_id {user_id}")
+                        logger.info(f"✅ PASS-THROUGH SUCCESS: Updated existing state machine with user_id {user_id}")
+                        
+                        # Log state machine status for validation
+                        current_state = final_state_machine.get_current_state()
+                        logger.info(f"✅ STATE VALIDATION: Current state machine state: {current_state}")
                     else:
-                        # Fallback: create new state machine if needed
+                        # This should not happen but handle gracefully
+                        logger.warning(f"⚠️ UNEXPECTED: No existing state machine found for {preliminary_connection_id} despite pass-through success")
                         final_state_machine = state_registry.register_connection(connection_id, user_id)
                         websocket.connection_id = connection_id
                 

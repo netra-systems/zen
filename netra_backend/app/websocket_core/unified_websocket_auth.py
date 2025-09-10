@@ -301,7 +301,8 @@ class UnifiedWebSocketAuthenticator:
     async def authenticate_websocket_connection(
         self, 
         websocket: WebSocket, 
-        e2e_context: Optional[Dict[str, Any]] = None
+        e2e_context: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None
     ) -> WebSocketAuthResult:
         """
         Authenticate WebSocket connection using SSOT authentication service with E2E support.
@@ -403,9 +404,11 @@ class UnifiedWebSocketAuthenticator:
                 return cached_result
             
             # PHASE 1 FIX: Use SSOT authentication service with retry mechanism
+            # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
             auth_result, user_context = await self._authenticate_with_retry(
                 websocket, 
                 e2e_context=e2e_context,
+                preliminary_connection_id=preliminary_connection_id,
                 max_retries=3,  # Allow up to 3 retries for transient failures
                 retry_delays=[0.1, 0.2, 0.5]  # Progressive delays
             )
@@ -892,6 +895,7 @@ class UnifiedWebSocketAuthenticator:
         self, 
         websocket: WebSocket, 
         e2e_context: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None,
         max_retries: int = 3,
         retry_delays: List[float] = [0.1, 0.2, 0.5]
     ) -> Tuple[Any, Optional[UserExecutionContext]]:
@@ -918,9 +922,11 @@ class UnifiedWebSocketAuthenticator:
                 logger.debug(f"PHASE 1 FIX: Authentication attempt {attempt + 1}/{max_retries + 1}")
                 
                 # Use SSOT authentication service
+                # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
                 auth_result, user_context = await self._auth_service.authenticate_websocket(
                     websocket, 
-                    e2e_context=e2e_context
+                    e2e_context=e2e_context,
+                    preliminary_connection_id=preliminary_connection_id
                 )
                 
                 # If successful, return immediately
@@ -1075,7 +1081,8 @@ def get_websocket_authenticator() -> UnifiedWebSocketAuthenticator:
 
 async def authenticate_websocket_ssot(
     websocket: WebSocket, 
-    e2e_context: Optional[Dict[str, Any]] = None
+    e2e_context: Optional[Dict[str, Any]] = None,
+    preliminary_connection_id: Optional[str] = None
 ) -> WebSocketAuthResult:
     """
     SSOT WebSocket authentication with E2E bypass support.
@@ -1086,12 +1093,13 @@ async def authenticate_websocket_ssot(
     Args:
         websocket: WebSocket connection object
         e2e_context: Optional E2E testing context for bypass support
+        preliminary_connection_id: Optional preliminary connection ID to preserve state machine continuity
         
     Returns:
         WebSocketAuthResult with authentication outcome
     """
     authenticator = get_websocket_authenticator()
-    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context)
+    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context, preliminary_connection_id=preliminary_connection_id)
 
 
 # Standalone function for backward compatibility with tests
