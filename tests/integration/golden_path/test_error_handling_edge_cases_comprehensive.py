@@ -744,12 +744,14 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                 "agent_execution_timeout",
                 {"timeout_expected": True, "partial_results_acceptable": True}
             )
+            self.logger.info(f"🔍 Context db_session: {context.db_session}")
             
             # Step 1: Execute with timeout (should be cancelled gracefully)
             timeout_start = time.time()
             
             try:
                 # Set a reasonable timeout for the execution
+                self.logger.info("🚀 Starting supervisor.execute() call...")
                 timeout_result = await asyncio.wait_for(
                     supervisor.execute(context, stream_updates=False),
                     timeout=10.0  # 10 second timeout
@@ -759,6 +761,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                 # If we get here, the execution completed within timeout
                 assert timeout_result is not None, "Timeout execution should provide results"
                 self.logger.info(f"🕐 Execution completed within timeout: {timeout_time:.2f}s")
+                self.logger.info(f"🔍 Result: {timeout_result}")
                 
             except asyncio.TimeoutError:
                 timeout_time = time.time() - timeout_start
