@@ -68,7 +68,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
         yield
         
         # Cleanup
-        self.env.disable_isolation()
+        self._env.disable_isolation()
     
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -133,7 +133,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
             # Create OAuth authentication for enterprise user
             access_token = await self.auth_helper.get_staging_token_async(
                 email=user_config["email"],
-                bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+                bypass_key=self._env.get("E2E_OAUTH_SIMULATION_KEY")
             )
             
             assert access_token is not None, f"Enterprise user {user_config['role']} must authenticate successfully"
@@ -453,7 +453,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                 # Create OAuth authentication
                 access_token = await self.auth_helper.get_staging_token_async(
                     email=user_config["email"],
-                    bypass_key=self.env.get("E2E_OAUTH_SIMULATION_KEY")
+                    bypass_key=self._env.get("E2E_OAUTH_SIMULATION_KEY")
                 )
                 
                 assert access_token is not None, (
