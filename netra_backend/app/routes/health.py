@@ -379,6 +379,148 @@ async def _check_redis_connection() -> None:
         if redis_manager.enabled:
             await redis_manager.ping()
 
+@router.get("/backend")
+@router.head("/backend")
+async def health_backend(request: Request) -> Dict[str, Any]:
+    """
+    Backend service health endpoint for Golden Path validation.
+    
+    Validates agent execution capabilities, tool system, LLM integration,
+    and WebSocket functionality specifically for the Golden Path user flow.
+    """
+    from datetime import UTC, datetime
+    health_response = {
+        "service": "backend-service",
+        "version": "1.0.0",
+        "timestamp": datetime.now(UTC).isoformat(),
+        "status": "healthy",
+        "capabilities": {
+            "agent_execution": False,
+            "tool_system": False,
+            "llm_integration": False,
+            "websocket_integration": False,
+            "database_connectivity": False
+        },
+        "golden_path_ready": False
+    }
+    
+    try:
+        # Check agent execution capabilities (most critical for Golden Path)
+        try:
+            app_state = getattr(request.app, 'state', None)
+            if app_state and hasattr(app_state, 'agent_supervisor') and app_state.agent_supervisor:
+                supervisor = app_state.agent_supervisor
+                
+                # Check if execution engine is available
+                if hasattr(supervisor, 'engine') or hasattr(supervisor, 'execution_engine'):
+                    health_response["capabilities"]["agent_execution"] = True
+                    
+        except Exception as agent_error:
+            logger.warning(f"Agent execution check failed: {agent_error}")
+        
+        # Check tool system readiness
+        try:
+            if app_state:
+                if (hasattr(app_state, 'tool_classes') and app_state.tool_classes) or \
+                   (hasattr(app_state, 'tool_dispatcher') and app_state.tool_dispatcher):
+                    health_response["capabilities"]["tool_system"] = True
+                    
+        except Exception as tool_error:
+            logger.warning(f"Tool system check failed: {tool_error}")
+        
+        # Check LLM integration
+        try:
+            if app_state and hasattr(app_state, 'llm_manager') and app_state.llm_manager:
+                health_response["capabilities"]["llm_integration"] = True
+                
+        except Exception as llm_error:
+            logger.warning(f"LLM integration check failed: {llm_error}")
+        
+        # Check WebSocket integration for agent events
+        try:
+            if app_state and hasattr(app_state, 'agent_websocket_bridge') and app_state.agent_websocket_bridge:
+                health_response["capabilities"]["websocket_integration"] = True
+                
+        except Exception as ws_error:
+            logger.warning(f"WebSocket integration check failed: {ws_error}")
+        
+        # Check database connectivity
+        try:
+            # Use the health interface to check database status
+            basic_health = await health_interface.get_health_status(HealthLevel.BASIC)
+            postgres_healthy = basic_health.get("checks", {}).get("postgres", False)
+            if postgres_healthy:
+                health_response["capabilities"]["database_connectivity"] = True
+                
+        except Exception as db_error:
+            logger.warning(f"Database connectivity check failed: {db_error}")
+        
+        # Determine overall Golden Path readiness
+        # Core requirements: agent execution and tool system
+        core_ready = (
+            health_response["capabilities"]["agent_execution"] and
+            health_response["capabilities"]["tool_system"]
+        )
+        
+        # Full readiness includes LLM and WebSocket for complete chat experience
+        full_ready = (
+            core_ready and
+            health_response["capabilities"]["llm_integration"] and
+            health_response["capabilities"]["websocket_integration"]
+        )
+        
+        # Calculate readiness score
+        capabilities_ready = sum(health_response["capabilities"].values())
+        total_capabilities = len(health_response["capabilities"])
+        readiness_score = capabilities_ready / total_capabilities
+        
+        if full_ready:
+            health_response["golden_path_ready"] = True
+            health_response["status"] = "healthy"
+            health_response["readiness_score"] = readiness_score
+            return health_response
+        elif core_ready:
+            health_response["golden_path_ready"] = True
+            health_response["status"] = "degraded"
+            health_response["readiness_score"] = readiness_score
+            health_response["warnings"] = [
+                "LLM or WebSocket integration limited - agent responses may be incomplete"
+            ]
+            return health_response
+        else:
+            # Critical capabilities missing
+            missing_capabilities = []
+            if not health_response["capabilities"]["agent_execution"]:
+                missing_capabilities.append("Agent execution")
+            if not health_response["capabilities"]["tool_system"]:
+                missing_capabilities.append("Tool system")
+            
+            health_response["status"] = "unhealthy"
+            health_response["golden_path_ready"] = False
+            health_response["readiness_score"] = readiness_score
+            health_response["error"] = f"Missing critical capabilities: {', '.join(missing_capabilities)}"
+            
+            # Return 503 in staging/production for missing critical capabilities
+            config = unified_config_manager.get_config()
+            if config.environment in ["staging", "production"]:
+                return _create_error_response(503, health_response)
+            
+            return health_response
+            
+    except Exception as e:
+        logger.error(f"Backend health check failed: {e}")
+        health_response["status"] = "unhealthy"
+        health_response["golden_path_ready"] = False
+        health_response["error"] = f"Health check failed: {str(e)}"
+        
+        # Return 503 for any health check failure in staging/production
+        config = unified_config_manager.get_config()
+        if config.environment in ["staging", "production"]:
+            return _create_error_response(503, health_response)
+        
+        return health_response
+
+
 async def _check_database_connection(db: AsyncSession) -> None:
     """Check database connection using dependency injection."""
     await _check_postgres_connection(db)

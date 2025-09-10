@@ -198,6 +198,42 @@ class UnifiedTriageAgent(BaseAgent):
         
         # Initialize processing components
         self._init_processing_components()
+    
+    @classmethod
+    def create_agent_with_context(cls, user_context: 'UserExecutionContext') -> 'UnifiedTriageAgent':
+        """Create UnifiedTriageAgent with proper UserExecutionContext pattern.
+        
+        This method provides the correct constructor signature for the factory pattern,
+        avoiding the constructor parameter mismatch with BaseAgent.create_agent_with_context.
+        
+        Args:
+            user_context: User execution context for isolation
+            
+        Returns:
+            UnifiedTriageAgent instance configured for the user context
+            
+        Note:
+            This overrides the BaseAgent.create_agent_with_context method to use
+            the correct constructor signature for UnifiedTriageAgent.
+        """
+        from netra_backend.app.llm.llm_manager import LLMManager
+        
+        # Create LLM manager (this will be injected later by the factory)
+        llm_manager = LLMManager()
+        
+        # Create agent with correct constructor signature
+        agent = cls(
+            llm_manager=llm_manager,
+            tool_dispatcher=None,  # Will be injected by factory
+            context=user_context,
+            execution_priority=0  # Triage runs first
+        )
+        
+        # Set user context for WebSocket integration
+        if hasattr(agent, 'set_user_context'):
+            agent.set_user_context(user_context)
+        
+        return agent
         
     def _init_processing_components(self) -> None:
         """Initialize internal processing components"""
