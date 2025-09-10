@@ -24,7 +24,10 @@ from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecut
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 # CRITICAL FIX: Import modern AgentWebSocketBridge instead of deprecated WebSocketNotifier
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine, create_request_scoped_engine
+# SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+# SSOT MIGRATION: create_request_scoped_engine replaced by factory pattern
+from netra_backend.app.agents.supervisor.execution_engine_factory import get_execution_engine_factory
 from netra_backend.app.db.postgres_session import get_async_db
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.models.user_execution_context import UserExecutionContext
