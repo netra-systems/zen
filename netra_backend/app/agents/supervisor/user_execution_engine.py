@@ -145,9 +145,9 @@ class MinimalFallbackManager:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=execution_time,
+            duration=execution_time,
             error=f"Agent execution failed: {str(error)}",
-            state=state,
+            data=state,
             metadata={
                 'fallback_result': True,
                 'original_error': str(error),
@@ -1042,7 +1042,7 @@ class UserExecutionEngine:
                 success=False,
                 error=str(e),
                 duration=0.0,
-                state=None,
+                data=None,
                 metadata={
                     'user_id': execution_context.user_id,
                     'thread_id': execution_context.thread_id,
