@@ -31,7 +31,12 @@
       "Bash(pip show:*)",
       "Bash(pip install:*)",
       "Bash(curl:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(gcloud run revisions list:*)",
+      "Bash(open:*)",
+      "Bash(node:*)",
+      "Bash(/dev/null)",
+      "Bash(gcloud config list:*)"
     ],
     "deny": [],
     "ask": []

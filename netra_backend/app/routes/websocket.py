@@ -163,7 +163,7 @@ WEBSOCKET_CONFIG.enable_compression = False
 HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
 
 
-async def _initialize_connection_state(websocket: WebSocket, environment: str, selected_protocol: str) -> Tuple[str, Any]:
+async def _initialize_connection_state(websocket: WebSocket, environment: str, selected_protocol: str, state_registry) -> Tuple[str, Any]:
     """
     PHASE 2 FIX 2: Consolidated connection state machine initialization.
     
@@ -174,15 +174,14 @@ async def _initialize_connection_state(websocket: WebSocket, environment: str, s
         websocket: The WebSocket connection
         environment: Deployment environment (staging, testing, development, etc.)
         selected_protocol: The selected WebSocket subprotocol
+        state_registry: The connection state registry (passed from websocket_endpoint scope)
     
     Returns:
         Tuple of (preliminary_connection_id, state_machine)
     """
-    from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
     from shared.types.core_types import ensure_user_id
     
     try:
-        state_registry = get_connection_state_registry()
         
         # Generate environment-specific connection_id with consistent format
         timestamp = int(time.time() * 1000)
@@ -311,6 +310,17 @@ async def websocket_endpoint(websocket: WebSocket):
         # All authentication is now handled by the unified authentication service after WebSocket acceptance
         logger.info(f"🔒 SSOT COMPLIANCE: Skipping pre-connection auth validation in {environment} (handled by unified service)")
         
+        # CRITICAL FIX: Initialize state_registry in proper function scope to prevent NameError
+        # This fixes the "state_registry is not defined" scope bug causing 100% connection failures
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+        try:
+            state_registry = get_connection_state_registry()
+            logger.debug(f"✅ CRITICAL FIX: state_registry initialized successfully in websocket_endpoint scope")
+        except Exception as e:
+            logger.error(f"❌ CRITICAL ERROR: Failed to initialize state_registry: {e}")
+            await websocket.close(code=1011, reason="Connection state initialization failed")
+            return
+        
         # Prepare subprotocol handling
         subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
         selected_protocol = None
@@ -348,8 +358,9 @@ async def websocket_endpoint(websocket: WebSocket):
         
         # PHASE 2 FIX 2: Consolidated state machine initialization
         # Single point of state machine creation to prevent duplicate registrations
+        # CRITICAL FIX: Pass state_registry to prevent scope issues
         preliminary_connection_id, state_machine = await _initialize_connection_state(
-            websocket, environment, selected_protocol
+            websocket, environment, selected_protocol, state_registry
         )
         
         # PHASE 3 FIX 3: HandshakeCoordinator Integration for Race Condition Prevention
