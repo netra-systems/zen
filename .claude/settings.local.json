@@ -27,7 +27,8 @@
       "Bash(gh issue list:*)",
       "Bash(git pull:*)",
       "Bash(git push:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "Bash(pip show:*)"
     ],
     "deny": [],
     "ask": []
