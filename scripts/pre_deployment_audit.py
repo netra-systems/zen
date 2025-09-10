@@ -24,7 +24,7 @@ import os
 
 def show_deprecation_warning():
     """Show deprecation warning to users."""
-    print("⚠️  DEPRECATION WARNING")
+    print("WARNING: DEPRECATION WARNING")
     print("=" * 70)
     print("This pre-deployment audit script is deprecated.")
     print("Please migrate to UnifiedTestRunner SSOT:")
@@ -69,7 +69,7 @@ def main():
     unified_runner = project_root / "tests" / "unified_test_runner.py"
     
     if not unified_runner.exists():
-        print(f"❌ ERROR: UnifiedTestRunner not found at {unified_runner}")
+        print(f"ERROR: UnifiedTestRunner not found at {unified_runner}")
         print("Falling back to original audit script...")
         return execute_fallback_audit()
     
@@ -105,7 +105,7 @@ def main():
         # Add any unknown arguments
         cmd.extend(unknown_args)
         
-        print(f"🔄 Executing audit via UnifiedTestRunner:")
+        print(f"Executing audit via UnifiedTestRunner:")
         print(f"   {' '.join(cmd)}")
         print()
         
@@ -116,7 +116,7 @@ def main():
         sys.exit(result.returncode)
         
     except Exception as e:
-        print(f"❌ ERROR: Failed to execute UnifiedTestRunner audit: {e}")
+        print(f"ERROR: Failed to execute UnifiedTestRunner audit: {e}")
         print("Falling back to original audit script...")
         return execute_fallback_audit()
 
@@ -130,7 +130,7 @@ def execute_fallback_audit():
         # Import the backed up original implementation
         backup_file = Path(__file__).parent / "pre_deployment_audit.py.backup"
         if backup_file.exists():
-            print("🔄 Using backup audit implementation...")
+            print("Using backup audit implementation...")
             
             # Add project root to path
             sys.path.insert(0, str(project_root))
@@ -148,12 +148,12 @@ def execute_fallback_audit():
             
             module.main()
         else:
-            print("❌ CRITICAL: No backup available for audit script")
+            print("CRITICAL: No backup available for audit script")
             print("Please restore original pre_deployment_audit.py")
             sys.exit(1)
             
     except Exception as fallback_error:
-        print(f"❌ CRITICAL: Fallback audit failed: {fallback_error}")
+        print(f"CRITICAL: Fallback audit failed: {fallback_error}")
         print("Manual code review required before deployment.")
         sys.exit(1)
 

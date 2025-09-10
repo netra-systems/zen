@@ -644,7 +644,9 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     """Setup security and LLM services."""
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
-    app.state.llm_manager = LLMManager()
+    # SSOT FIX: Use factory pattern for LLM manager creation
+    from netra_backend.app.llm.llm_manager import create_llm_manager
+    app.state.llm_manager = create_llm_manager()
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()

@@ -25,9 +25,9 @@ async def test_redis_no_localhost_fallback_in_staging(isolated_test_env):
     env.set("REDIS_FALLBACK_ENABLED", "false", "test_redis_staging")
     
     # Import after setting env vars
-    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+    from netra_backend.app.redis_manager import redis_manager
     
-    manager = AuthRedisManager()
+    manager = redis_manager
     await manager.initialize()
     
     # Should be disabled without Redis URL in staging
@@ -45,9 +45,9 @@ async def test_redis_localhost_rejected_in_staging(isolated_test_env):
     env.set("REDIS_REQUIRED", "true", "test_redis_staging")
     env.set("REDIS_FALLBACK_ENABLED", "false", "test_redis_staging")
     
-    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+    from netra_backend.app.redis_manager import redis_manager
     
-    manager = AuthRedisManager()
+    manager = redis_manager
     
     # Should raise error about localhost not allowed
     with pytest.raises(ValueError) as exc_info:
@@ -66,9 +66,9 @@ async def test_redis_required_in_staging(isolated_test_env):
     env.set("REDIS_REQUIRED", "true", "test_redis_staging")
     env.set("REDIS_FALLBACK_ENABLED", "false", "test_redis_staging")
     
-    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+    from netra_backend.app.redis_manager import redis_manager
     
-    manager = AuthRedisManager()
+    manager = redis_manager
     
     # Should raise error when required but not configured
     with pytest.raises(ValueError) as exc_info:
@@ -86,9 +86,9 @@ async def test_redis_graceful_degradation_when_not_required(isolated_test_env):
     # No REDIS_URL
     env.set("REDIS_REQUIRED", "false", "test_redis_staging")
     
-    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+    from netra_backend.app.redis_manager import redis_manager
     
-    manager = AuthRedisManager()
+    manager = redis_manager
     await manager.initialize()
     
     # Should gracefully degrade
@@ -110,9 +110,9 @@ async def test_redis_localhost_allowed_in_development(isolated_test_env, real_au
     # No REDIS_URL - should fallback to localhost
     env.set("REDIS_URL", "redis://localhost:6381/3", "test_redis_staging")  # Use test Redis
     
-    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+    from netra_backend.app.redis_manager import redis_manager
     
-    manager = AuthRedisManager()
+    manager = redis_manager
     
     # REAL REDIS - Use actual test Redis connection
     await manager.initialize()
@@ -136,9 +136,9 @@ async def test_redis_connection_configuration(isolated_test_env, real_auth_redis
     env.set("REDIS_URL", "redis://localhost:6381/3", "test_redis_staging")  # Use test Redis
     env.set("REDIS_REQUIRED", "false", "test_redis_staging")
     
-    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+    from netra_backend.app.redis_manager import redis_manager
     
-    manager = AuthRedisManager()
+    manager = redis_manager
     
     # REAL REDIS - Test actual connection configuration
     await manager.initialize()
@@ -162,9 +162,9 @@ async def test_redis_connection_with_valid_staging_url(isolated_test_env, real_a
     env.set("REDIS_URL", "redis://localhost:6381/3", "test_redis_staging")  # Use test Redis
     env.set("REDIS_REQUIRED", "false", "test_redis_staging")
     
-    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+    from netra_backend.app.redis_manager import redis_manager
     
-    manager = AuthRedisManager()
+    manager = redis_manager
     
     # REAL REDIS - Test actual staging-like connection
     await manager.initialize()

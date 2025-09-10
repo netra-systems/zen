@@ -974,7 +974,9 @@ class StartupOrchestrator:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.security_service import SecurityService
         
-        self.app.state.llm_manager = LLMManager()
+        # SSOT FIX: Use factory pattern for LLM manager creation
+        from netra_backend.app.llm.llm_manager import create_llm_manager
+        self.app.state.llm_manager = create_llm_manager()
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
