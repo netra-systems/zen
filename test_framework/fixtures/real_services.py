@@ -230,30 +230,19 @@ async def real_redis_fixture():
     when libraries unavailable. Follows same pattern as database fixtures.
     
     Yields:
-        Dict: Redis client info with availability status (real or in-memory)
+        redis.Redis: Redis client directly for backward compatibility, None if unavailable
     """
     env = get_env()
     
     # Only run real Redis if explicitly requested
     if not env.get("USE_REAL_SERVICES", "false").lower() == "true":
         logger.info("Skipping real Redis - USE_REAL_SERVICES not set")
-        yield {
-            "client": None,
-            "redis_url": None,
-            "available": False,
-            "error": "USE_REAL_SERVICES not set"
-        }
+        pytest.skip("Redis not available: USE_REAL_SERVICES not set")
         return
     
     if redis is None:
-        logger.warning("Redis libraries not available - yielding unavailable Redis fixture")
-        yield {
-            "client": None,
-            "redis_url": None,
-            "available": False,
-            "error": "Redis libraries not available. Install: pip install redis fakeredis",
-            "guidance": "Install Redis libraries: pip install redis fakeredis"
-        }
+        logger.warning("Redis libraries not available - skipping Redis-dependent test")
+        pytest.skip("Redis libraries not available. Install: pip install redis fakeredis")
         return
     
     redis_client = None
@@ -280,12 +269,7 @@ async def real_redis_fixture():
         await redis_client.ping()
         logger.info(f"Connected to REAL Redis at {redis_host}:{redis_port}")
         
-        yield {
-            "client": redis_client,
-            "redis_url": real_redis_url,
-            "available": True,
-            "type": "real"
-        }
+        yield redis_client
         
     except Exception as redis_error:
         logger.info(f"Real Redis not available ({redis_error}), attempting in-memory Redis")
@@ -293,13 +277,7 @@ async def real_redis_fixture():
         # Fallback: In-memory Redis using fakeredis (CLAUDE.md compliant fallback)
         if fake_redis is None:
             logger.warning(f"Real Redis unavailable and fakeredis not installed: {redis_error}")
-            yield {
-                "client": None,
-                "redis_url": None,
-                "available": False,
-                "error": f"Real Redis unavailable and fakeredis not installed: {redis_error}",
-                "guidance": "Install fakeredis: pip install fakeredis"
-            }
+            pytest.skip(f"Redis unavailable: Real Redis failed ({redis_error}) and fakeredis not installed")
             return
         
         try:
@@ -313,22 +291,11 @@ async def real_redis_fixture():
             await redis_client.ping()
             logger.info("Using in-memory Redis (fakeredis) for integration testing")
             
-            yield {
-                "client": redis_client,
-                "redis_url": "redis://fake_redis",
-                "available": True,
-                "type": "fake"
-            }
+            yield redis_client
             
         except Exception as fallback_error:
             logger.error(f"Both real Redis and in-memory fallback failed")
-            yield {
-                "client": None,
-                "redis_url": None,
-                "available": False,
-                "error": f"Both real Redis and in-memory fallback failed:\nReal Redis: {redis_error}\nIn-memory Redis: {fallback_error}",
-                "guidance": "Install Redis libraries: pip install redis fakeredis"
-            }
+            pytest.skip(f"Redis unavailable: Real Redis failed ({redis_error}) and fakeredis failed ({fallback_error})")
     
     finally:
         # Cleanup Redis connection
@@ -341,24 +308,6 @@ async def real_redis_fixture():
 
 # Alias for backward compatibility with existing tests
 real_redis_connection = real_redis_fixture
-
-
-@pytest.fixture(scope="function")
-async def redis_client_compatibility(real_redis_fixture):
-    """Compatibility wrapper for existing tests expecting direct Redis client.
-    
-    This fixture provides backward compatibility for tests that expect
-    a direct Redis client instead of the new dictionary format.
-    
-    CRITICAL: Tests should check for None and skip gracefully when Redis unavailable.
-    """
-    redis_info = real_redis_fixture
-    
-    # Skip test if Redis is not available
-    if not redis_info["available"]:
-        pytest.skip(f"Redis not available: {redis_info.get('error', 'Unknown error')}")
-    
-    return redis_info["client"]
 
 
 @pytest.fixture(scope="function")
@@ -441,7 +390,8 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
         "database_url": postgres_info["database_url"],
         "environment": postgres_info["environment"],
         "services_available": services_available,
-        "database_available": postgres_info["available"]
+        "database_available": postgres_info["available"],
+        "redis_available": services_available["redis"]  # Add redis_available key
     }
 
 
