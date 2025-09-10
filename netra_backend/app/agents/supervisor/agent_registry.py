@@ -1584,8 +1584,78 @@ class AgentRegistry(UniversalAgentRegistry):
             'total_user_sessions': len(self._user_sessions),
             'global_state_eliminated': True,
             'websocket_isolation_per_user': True,
+            # SSOT COMPLIANCE STATUS
+            'ssot_compliance': self.get_ssot_compliance_status(),
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
+    
+    def get_ssot_compliance_status(self) -> Dict[str, Any]:
+        """Get comprehensive SSOT compliance status.
+        
+        Returns:
+            Dictionary with detailed SSOT compliance information
+        """
+        try:
+            status = {
+                'inheritance_chain_valid': isinstance(self, UniversalAgentRegistry),
+                'constructor_signature_aligned': hasattr(self, 'name') and self.name == "AgentRegistry",
+                'websocket_adapter_available': hasattr(self, 'websocket_manager'),
+                'parent_interface_accessible': hasattr(super(), 'set_websocket_bridge'),
+                'adapter_class_functional': True,
+                'violations': [],
+                'compliance_score': 0,
+                'status': 'unknown'
+            }
+            
+            # Test adapter functionality
+            try:
+                test_adapter = WebSocketManagerAdapter(None)
+                required_adapter_methods = ['notify_agent_started', 'notify_agent_thinking', 
+                                          'notify_tool_executing', 'notify_agent_completed']
+                for method in required_adapter_methods:
+                    if not hasattr(test_adapter, method):
+                        status['adapter_class_functional'] = False
+                        status['violations'].append(f"Adapter missing method: {method}")
+            except Exception as e:
+                status['adapter_class_functional'] = False
+                status['violations'].append(f"Adapter instantiation failed: {e}")
+            
+            # Validate interface methods
+            required_methods = ['set_websocket_bridge', 'register', 'get', 'has', 'list_keys']
+            missing_methods = []
+            for method_name in required_methods:
+                if not hasattr(self, method_name) or not callable(getattr(self, method_name)):
+                    missing_methods.append(method_name)
+            
+            if missing_methods:
+                status['violations'].append(f"Missing interface methods: {missing_methods}")
+            
+            # Calculate compliance score
+            checks = ['inheritance_chain_valid', 'constructor_signature_aligned', 
+                     'websocket_adapter_available', 'parent_interface_accessible', 
+                     'adapter_class_functional']
+            passed_checks = sum(1 for check in checks if status[check])
+            status['compliance_score'] = (passed_checks / len(checks)) * 100
+            
+            # Determine overall status
+            if status['compliance_score'] == 100 and not status['violations']:
+                status['status'] = 'fully_compliant'
+            elif status['compliance_score'] >= 80:
+                status['status'] = 'mostly_compliant'
+            elif status['compliance_score'] >= 50:
+                status['status'] = 'partially_compliant'
+            else:
+                status['status'] = 'non_compliant'
+            
+            return status
+            
+        except Exception as e:
+            return {
+                'status': 'error',
+                'error': str(e),
+                'compliance_score': 0,
+                'violations': [f"Compliance check failed: {e}"]
+            }
 
 
 # ===================== MODULE EXPORTS =====================

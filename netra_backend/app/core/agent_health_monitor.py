@@ -336,26 +336,40 @@ class UnifiedAgentHealthMonitor:
         
         return dead_executions
     
-    def _create_dead_agent_status(self, agent_name: str, dead_executions: List[Any]) -> AgentHealthStatus:
-        """Create health status for dead agent."""
+    def _create_dead_agent_status(self, agent_name: str, dead_executions: List[Any]) -> UnifiedAgentHealthStatus:
+        """Create unified health status for dead agent."""
         most_recent_death = max(dead_executions, key=lambda x: x.updated_at)
         
-        return AgentHealthStatus(
+        error_message = f'Agent died: {most_recent_death.error or "No heartbeat"}'
+        
+        status = UnifiedAgentHealthStatus(
             agent_name=agent_name,
             overall_health=0.0,  # Dead agent has 0 health
             circuit_breaker_state='open',  # Consider dead as open circuit
             recent_errors=len(dead_executions),
+            status='dead',
+            state=ServiceState.FAILED,
             total_operations=len(dead_executions),
             success_rate=0.0,  # Dead agent has 0% success
             average_response_time=0.0,
-            status='dead',
             last_error=AgentError(
+                error_id=str(uuid.uuid4()),
+                agent_name=agent_name,
+                operation='health_check',
                 error_type='AgentDeath',
-                message=f'Agent died: {most_recent_death.error or "No heartbeat"}',
+                message=error_message,
                 timestamp=most_recent_death.updated_at,
+                severity='CRITICAL',
                 context={'execution_id': most_recent_death.execution_id}
-            )
+            ),
+            last_check=datetime.now(timezone.utc)
         )
+        
+        # Add Five Whys analysis for agent death if enabled
+        if self.enable_five_whys:
+            status.five_whys_analysis = self._perform_five_whys_analysis(agent_name, error_message)
+        
+        return status
     
     async def detect_agent_death(
         self, 
@@ -480,21 +494,47 @@ class UnifiedAgentHealthMonitor:
 
     async def perform_health_check(
         self, agent_name: str, error_history: List[AgentError], reliability_wrapper
-    ) -> AgentHealthStatus:
-        """Perform comprehensive health check."""
-        self.last_health_check = time.time()
+    ) -> UnifiedAgentHealthStatus:
+        """Perform comprehensive unified health check."""
+        start_time = time.time()
+        self.last_health_check = start_time
+        
         health_status = self.get_comprehensive_health_status(agent_name, error_history, reliability_wrapper)
+        
+        # Update monitoring state
+        self._update_monitoring_state(agent_name, health_status)
+        
+        # Log unhealthy status
         self._log_unhealthy_status(health_status)
+        
+        # Record performance metrics
+        check_duration = (time.time() - start_time) * 1000  # ms
+        if check_duration > 50:  # Log if over 50ms target
+            logger.warning(f"Health check for {agent_name} took {check_duration:.1f}ms (target: <50ms)")
+        
         return health_status
 
-    def _log_unhealthy_status(self, health_status: AgentHealthStatus) -> None:
+    def _log_unhealthy_status(self, health_status: UnifiedAgentHealthStatus) -> None:
         """Log health status if degraded or unhealthy."""
         if health_status.status == "healthy":
             return
-        logger.warning(
+        
+        log_msg = (
             f"Agent {health_status.agent_name} health status: {health_status.status} "
-            f"(health={health_status.overall_health:.2f}, errors={health_status.recent_errors})"
+            f"(health={health_status.overall_health:.2f}, errors={health_status.recent_errors}, "
+            f"state={health_status.state.value})"
         )
+        
+        if health_status.status == "dead":
+            logger.critical(log_msg)
+        elif health_status.status == "unhealthy":
+            logger.error(log_msg)
+        else:
+            logger.warning(log_msg)
+        
+        # Include Five Whys analysis if available
+        if health_status.five_whys_analysis:
+            logger.info(f"Root cause analysis for {health_status.agent_name}: {health_status.five_whys_analysis.get('root_cause', 'Unknown')}")
 
     def should_perform_health_check(self) -> bool:
         """Check if health check should be performed."""

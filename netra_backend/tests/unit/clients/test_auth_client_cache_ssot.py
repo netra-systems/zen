@@ -200,10 +200,8 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert expected_breaker_name in auth_cb_manager._breakers
         assert auth_cb_manager._breakers[expected_breaker_name] is mock_breaker_instance
         
-        self.log_test_success(
-            "auth_circuit_breaker_call_with_breaker_delegation",
-            f"call_with_breaker properly delegates to UnifiedCircuitBreaker.call() with breaker name: {expected_breaker_name}"
-        )
+        # Success: call_with_breaker properly delegates to UnifiedCircuitBreaker.call()
+        print(f"✅ CALL_WITH_BREAKER DELEGATION VERIFIED: Proper delegation with breaker name: {expected_breaker_name}")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation

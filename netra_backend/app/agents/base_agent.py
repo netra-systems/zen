@@ -50,7 +50,8 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.core.unified_error_handler import agent_error_handler
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+# SSOT COMPLIANCE: Import from facade that redirects to SSOT
+from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.agents.utils import extract_thread_id
 from netra_backend.app.services.billing.token_counter import TokenCounter
