@@ -138,14 +138,25 @@ class TestExecutionStrategyHandlers(SSotAsyncTestCase):
         """Test SequentialStrategyHandler executes phases in order."""
         handler = SequentialStrategyHandler()
         
-        # Create mock phases
+        # Track execution order and parameters
+        execution_order = []
+        
+        # Create phases that track their execution
+        async def phase1_execute(context, results):
+            execution_order.append(("phase1", dict(results)))
+            return {"result": "phase1_result"}
+        
+        async def phase2_execute(context, results):
+            execution_order.append(("phase2", dict(results)))
+            return {"result": "phase2_result"}
+        
         phase1 = AsyncMock()
         phase1.name = "phase1"
-        phase1.execute.return_value = {"result": "phase1_result"}
+        phase1.execute = phase1_execute
         
         phase2 = AsyncMock() 
         phase2.name = "phase2"
-        phase2.execute.return_value = {"result": "phase2_result"}
+        phase2.execute = phase2_execute
         
         phases = [phase1, phase2]
         
@@ -158,21 +169,10 @@ class TestExecutionStrategyHandlers(SSotAsyncTestCase):
             "phase2": {"result": "phase2_result"}
         }
         
-        # Verify phases were called with correct parameters
-        assert phase1.execute.call_count == 1
-        assert phase2.execute.call_count == 1
-        
-        # Check the actual call arguments
-        phase1_call_args = phase1.execute.call_args
-        phase2_call_args = phase2.execute.call_args
-        
-        # Verify phase1 was called with empty results
-        assert phase1_call_args[0][0] == self.mock_context  # First arg is context
-        assert phase1_call_args[0][1] == {}  # Second arg should be empty results
-        
-        # Verify phase2 was called with phase1 results
-        assert phase2_call_args[0][0] == self.mock_context  # First arg is context
-        assert phase2_call_args[0][1] == {"phase1": {"result": "phase1_result"}}  # Second arg has phase1 results
+        # Verify execution order and parameters
+        assert len(execution_order) == 2
+        assert execution_order[0] == ("phase1", {})  # Phase1 called with empty results
+        assert execution_order[1] == ("phase2", {"phase1": {"result": "phase1_result"}})  # Phase2 called with phase1 results
         
         # Verify WebSocket notifications
         assert self.mock_context.websocket_manager.send_tool_executing.call_count == 2
@@ -547,7 +547,8 @@ class TestBaseExecutionEngine(SSotAsyncTestCase):
         mock_result = ExecutionResult(
             status=ExecutionStatus.COMPLETED,
             request_id="test_request",
-            data={"result": "reliable_success"}
+            data={"result": "reliable_success"},
+            execution_time_ms=150.5  # Provide execution time
         )
         self.mock_reliability_manager.execute_with_reliability.return_value = mock_result
         

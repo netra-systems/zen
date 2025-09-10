@@ -90,9 +90,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
     focusing on business value delivery through agent coordination.
     """
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Setup test environment with proper SSOT patterns."""
-        super().setUp()
+        super().setup_method(method)
         self.mock_factory = SSotMockFactory()
         self.websocket_utility = WebSocketTestUtility()
         self.db_utility = DatabaseTestUtility()
@@ -103,8 +103,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         self.test_run_id = str(uuid.uuid4())
         
         # Mock WebSocket for testing
-        self.mock_websocket = self.mock_factory.create_mock_websocket()
-        self.mock_emitter = self.mock_factory.create_mock_websocket_emitter()
+        self.mock_websocket = self.mock_factory.create_websocket_mock()
+        self.mock_emitter = self.mock_factory.create_websocket_manager_mock()
 
     async def asyncSetUp(self):
         """Async setup for database and service initialization."""
