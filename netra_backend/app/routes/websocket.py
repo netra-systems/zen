@@ -2655,3 +2655,159 @@ async def websocket_detailed_stats():
             }
         }
     }
+
+
+# ISSUE #135 SECONDARY FIX: Resource contention mitigation helper functions
+# Global state for connection tracking and rate limiting
+_active_client_connections = {}  # client_info -> list of connection references
+_connection_rate_limits = {}     # client_info -> {"count": int, "reset_time": float}
+_circuit_breaker_state = {
+    "state": "CLOSED",  # CLOSED, HALF_OPEN, OPEN
+    "failure_count": 0,
+    "failure_threshold": 5,
+    "reset_timeout": 30.0,
+    "last_failure_time": None
+}
+
+
+async def _check_websocket_service_circuit_breaker() -> str:
+    """
+    ISSUE #135 FIX: Check circuit breaker state for WebSocket service dependencies.
+    
+    Returns:
+        Circuit breaker state: 'CLOSED', 'HALF_OPEN', or 'OPEN'
+    """
+    current_time = time.time()
+    
+    # Check if circuit breaker should reset from OPEN to HALF_OPEN
+    if (_circuit_breaker_state["state"] == "OPEN" and 
+        _circuit_breaker_state["last_failure_time"] and
+        current_time - _circuit_breaker_state["last_failure_time"] > _circuit_breaker_state["reset_timeout"]):
+        
+        _circuit_breaker_state["state"] = "HALF_OPEN"
+        _circuit_breaker_state["failure_count"] = 0
+        logger.info("🔄 CIRCUIT BREAKER: Transitioning from OPEN to HALF_OPEN for testing")
+    
+    return _circuit_breaker_state["state"]
+
+
+async def _get_active_connections_for_client(client_info: str) -> int:
+    """
+    ISSUE #135 FIX: Get number of active connections for a client.
+    
+    Args:
+        client_info: Client identifier (host:port)
+        
+    Returns:
+        Number of active connections
+    """
+    if client_info not in _active_client_connections:
+        return 0
+    
+    # Clean up closed connections
+    active_connections = []
+    for conn_ref in _active_client_connections[client_info]:
+        try:
+            websocket = conn_ref()  # Call the weak reference
+            if websocket and hasattr(websocket, 'client_state'):
+                if websocket.client_state != WebSocketState.DISCONNECTED:
+                    active_connections.append(conn_ref)
+        except:
+            # Connection reference is invalid, skip it
+            pass
+    
+    _active_client_connections[client_info] = active_connections
+    return len(active_connections)
+
+
+async def _check_connection_rate_limit(client_info: str) -> Dict[str, Any]:
+    """
+    ISSUE #135 FIX: Check if client is within connection rate limits.
+    
+    Args:
+        client_info: Client identifier (host:port)
+        
+    Returns:
+        Dictionary with rate limit status
+    """
+    current_time = time.time()
+    
+    # Rate limit: 10 connections per minute
+    rate_limit_window = 60.0  # 60 seconds
+    max_connections_per_window = 10
+    
+    if client_info not in _connection_rate_limits:
+        _connection_rate_limits[client_info] = {
+            "count": 0,
+            "reset_time": current_time + rate_limit_window
+        }
+    
+    rate_limit = _connection_rate_limits[client_info]
+    
+    # Check if rate limit window has expired
+    if current_time >= rate_limit["reset_time"]:
+        # Reset the rate limit window
+        rate_limit["count"] = 0
+        rate_limit["reset_time"] = current_time + rate_limit_window
+    
+    # Check if client is within rate limit
+    if rate_limit["count"] >= max_connections_per_window:
+        return {
+            "allowed": False,
+            "retry_after": int(rate_limit["reset_time"] - current_time)
+        }
+    
+    # Increment connection count
+    rate_limit["count"] += 1
+    
+    return {
+        "allowed": True,
+        "retry_after": 0
+    }
+
+
+async def _register_client_connection(client_info: str, websocket: WebSocket) -> None:
+    """
+    ISSUE #135 FIX: Register a client connection for tracking.
+    
+    Args:
+        client_info: Client identifier (host:port)
+        websocket: WebSocket connection to track
+    """
+    import weakref
+    
+    if client_info not in _active_client_connections:
+        _active_client_connections[client_info] = []
+    
+    # Use weak reference to avoid memory leaks
+    conn_ref = weakref.ref(websocket)
+    _active_client_connections[client_info].append(conn_ref)
+    
+    logger.debug(f"📊 REGISTERED CONNECTION: {client_info} now has {len(_active_client_connections[client_info])} tracked connections")
+
+
+async def _record_service_failure() -> None:
+    """
+    ISSUE #135 FIX: Record a service failure for circuit breaker.
+    """
+    _circuit_breaker_state["failure_count"] += 1
+    _circuit_breaker_state["last_failure_time"] = time.time()
+    
+    # Trip circuit breaker if failure threshold reached
+    if _circuit_breaker_state["failure_count"] >= _circuit_breaker_state["failure_threshold"]:
+        if _circuit_breaker_state["state"] != "OPEN":
+            _circuit_breaker_state["state"] = "OPEN"
+            logger.warning(f"🚨 CIRCUIT BREAKER OPENED: {_circuit_breaker_state['failure_count']} consecutive failures")
+
+
+async def _record_service_success() -> None:
+    """
+    ISSUE #135 FIX: Record a service success for circuit breaker.
+    """
+    # Reset failure count on success
+    _circuit_breaker_state["failure_count"] = 0
+    
+    # Close circuit breaker if it was HALF_OPEN
+    if _circuit_breaker_state["state"] == "HALF_OPEN":
+        _circuit_breaker_state["state"] = "CLOSED"
+        logger.info("✅ CIRCUIT BREAKER CLOSED: Service restored after successful operation")
