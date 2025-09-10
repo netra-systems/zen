@@ -22,9 +22,9 @@ import json
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.supervisor.execution_engine import UserExecutionEngine
-from netra_backend.app.agents.supervisor.disaster_recovery_coordinator import DisasterRecoveryCoordinator
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager as DisasterRecoveryCoordinator
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.pipeline_step import PipelineStep
+from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
 class TestComprehensiveAgentResilienceDisasterRecovery(BaseIntegrationTest):
@@ -42,7 +42,7 @@ class TestComprehensiveAgentResilienceDisasterRecovery(BaseIntegrationTest):
             workspace_id="disaster_workspace_1420"
         )
         
-        disaster_coordinator = DisasterRecoveryCoordinator(user_context=user_context)
+        disaster_coordinator = DisasterRecoveryCoordinator()
         
         # System-wide failure scenario
         system_failure_scenario = {
@@ -130,7 +130,7 @@ class TestComprehensiveAgentResilienceDisasterRecovery(BaseIntegrationTest):
             workspace_id="failover_workspace_1421"
         )
         
-        disaster_coordinator = DisasterRecoveryCoordinator(user_context=user_context)
+        disaster_coordinator = DisasterRecoveryCoordinator()
         
         # Multi-region topology
         region_topology = {
@@ -212,7 +212,7 @@ class TestComprehensiveAgentResilienceDisasterRecovery(BaseIntegrationTest):
             workspace_id="corruption_workspace_1422"
         )
         
-        disaster_coordinator = DisasterRecoveryCoordinator(user_context=user_context)
+        disaster_coordinator = DisasterRecoveryCoordinator()
         
         # Data corruption scenario
         corruption_scenario = {
@@ -300,7 +300,7 @@ class TestComprehensiveAgentResilienceDisasterRecovery(BaseIntegrationTest):
             workspace_id="coldsite_workspace_1423"
         )
         
-        disaster_coordinator = DisasterRecoveryCoordinator(user_context=user_context)
+        disaster_coordinator = DisasterRecoveryCoordinator()
         
         # Complete disaster scenario
         complete_disaster = {
@@ -391,7 +391,7 @@ class TestComprehensiveAgentResilienceDisasterRecovery(BaseIntegrationTest):
             workspace_id="chaos_workspace_1424"
         )
         
-        disaster_coordinator = DisasterRecoveryCoordinator(user_context=user_context)
+        disaster_coordinator = DisasterRecoveryCoordinator()
         
         # Comprehensive chaos testing scenarios
         chaos_scenarios = [

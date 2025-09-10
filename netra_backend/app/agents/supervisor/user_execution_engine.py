@@ -297,14 +297,14 @@ class UserExecutionEngine:
             logger.error(f"Error getting available agents: {e}")
             return []
     
-    def get_available_tools(self) -> List[Any]:
+    async def get_available_tools(self) -> List[Any]:
         """Get available tools from tool dispatcher for integration testing.
         
         Returns:
             List of available tool objects from the tool dispatcher
         """
         try:
-            dispatcher = self.get_tool_dispatcher()
+            dispatcher = await self.get_tool_dispatcher()
             logger.debug(f"Tool dispatcher for user {self.context.user_id}: {type(dispatcher)}")
             
             if dispatcher and hasattr(dispatcher, 'get_available_tools'):
@@ -454,34 +454,57 @@ class UserExecutionEngine:
     
     @property
     def tool_dispatcher(self):
-        """Get tool dispatcher for this engine (property access for test compatibility)."""
+        """Get tool dispatcher for this engine (property access for test compatibility).
+        
+        NOTE: This property returns a coroutine for async contexts. 
+        For synchronous contexts, use the _tool_dispatcher attribute directly if available.
+        """
+        # For backwards compatibility, try to return the cached dispatcher
+        if hasattr(self, '_tool_dispatcher'):
+            return self._tool_dispatcher
+        # Otherwise return the coroutine for async contexts
         return self.get_tool_dispatcher()
     
-    def get_tool_dispatcher(self):
+    async def get_tool_dispatcher(self):
         """Get tool dispatcher for this engine with user context.
         
         Creates a user-scoped tool dispatcher with proper isolation and WebSocket event emission.
         This ensures tool_executing and tool_completed events are sent to the user.
         """
         if not hasattr(self, '_tool_dispatcher'):
-            self._tool_dispatcher = self._create_tool_dispatcher()
+            self._tool_dispatcher = await self._create_tool_dispatcher()
         return self._tool_dispatcher
     
-    def _create_tool_dispatcher(self):
+    async def _create_tool_dispatcher(self):
         """Create real tool dispatcher with WebSocket event emission."""
         try:
-            # Import the SSOT tool dispatcher factory
-            from netra_backend.app.agents.tool_dispatcher import create_request_scoped_tool_dispatcher
+            # Import the UnifiedToolDispatcher for async creation with AgentWebSocketBridge
+            from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
             
-            # Check if we have a WebSocket manager available
-            websocket_manager = getattr(self.websocket_emitter, 'manager', None) if self.websocket_emitter else None
+            # CRITICAL FIX: Get the AgentWebSocketBridge from the websocket_emitter
+            # The UnifiedToolDispatcher.create_for_user() method has built-in logic to handle AgentWebSocketBridge
+            websocket_bridge = getattr(self.websocket_emitter, 'websocket_bridge', None) if self.websocket_emitter else None
             
-            # Create request-scoped dispatcher with WebSocket events
-            dispatcher = create_request_scoped_tool_dispatcher(
-                user_context=self.context,
-                websocket_manager=websocket_manager,
-                tools=[]  # Tools will be registered as needed
-            )
+            if websocket_bridge:
+                logger.debug(f"Using AgentWebSocketBridge for tool dispatcher WebSocket events (user: {self.context.user_id})")
+                # Use the async create_for_user method that properly handles AgentWebSocketBridge
+                dispatcher = await UnifiedToolDispatcher.create_for_user(
+                    user_context=self.context,
+                    websocket_bridge=websocket_bridge,  # Pass AgentWebSocketBridge directly - has adapter logic
+                    tools=[],  # Tools will be registered as needed
+                    enable_admin_tools=False
+                )
+                logger.debug(f"✅ Created dispatcher with AgentWebSocketBridge adapter for user {self.context.user_id}")
+                    
+            else:
+                logger.warning(f"No WebSocket bridge available for user {self.context.user_id}, creating dispatcher without events")
+                # Create dispatcher without WebSocket events as fallback
+                dispatcher = await UnifiedToolDispatcher.create_for_user(
+                    user_context=self.context,
+                    websocket_bridge=None,
+                    tools=[],
+                    enable_admin_tools=False
+                )
             
             logger.info(f"✅ Created real tool dispatcher with WebSocket events for user {self.context.user_id}")
             return dispatcher
@@ -584,18 +607,9 @@ class UserExecutionEngine:
             # Use minimal adapters to maintain interface compatibility
             self.periodic_update_manager = MinimalPeriodicUpdateManager()
             
-            # CRITICAL FIX: Set tool dispatcher on registry before creating agent_core
-            # This ensures agents created by AgentExecutionCore have WebSocket-enabled tool dispatchers
-            if hasattr(registry, 'set_tool_dispatcher') or hasattr(registry, 'tool_dispatcher'):
-                tool_dispatcher = self.get_tool_dispatcher()
-                if hasattr(registry, 'set_tool_dispatcher'):
-                    registry.set_tool_dispatcher(tool_dispatcher)
-                    logger.info(f"✅ Set tool dispatcher on agent registry via set_tool_dispatcher method")
-                elif hasattr(registry, 'tool_dispatcher'):
-                    registry.tool_dispatcher = tool_dispatcher
-                    logger.info(f"✅ Set tool dispatcher on agent registry via direct assignment")
-            else:
-                logger.warning(f"⚠️ Agent registry doesn't support tool dispatcher - tool events may not work")
+            # NOTE: Tool dispatcher initialization is deferred to get_tool_dispatcher() 
+            # This avoids async initialization issues during component setup
+            # The tool dispatcher will be created when first requested, ensuring proper WebSocket integration
             
             self.agent_core = AgentExecutionCore(registry, websocket_bridge) 
             # Use minimal fallback manager with user context
@@ -830,7 +844,7 @@ class UserExecutionEngine:
             
             # CRITICAL FIX: Set tool dispatcher on the agent before execution
             if hasattr(agent, 'tool_dispatcher') or hasattr(agent, 'set_tool_dispatcher'):
-                tool_dispatcher = self.get_tool_dispatcher()
+                tool_dispatcher = await self.get_tool_dispatcher()
                 if hasattr(agent, 'set_tool_dispatcher'):
                     agent.set_tool_dispatcher(tool_dispatcher)
                     logger.info(f"✅ Set tool dispatcher on {context.agent_name} via set_tool_dispatcher method")
@@ -1042,7 +1056,7 @@ class UserExecutionEngine:
                 success=False,
                 error=str(e),
                 duration=0.0,
-                state=None,
+                data=None,
                 metadata={
                     'user_id': execution_context.user_id,
                     'thread_id': execution_context.thread_id,

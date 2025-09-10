@@ -9,7 +9,7 @@ import logging
 import time
 from typing import Any, Dict, Optional
 
-from auth_service.auth_core.redis_manager import auth_redis_manager
+from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 
 logger = logging.getLogger(__name__)
 

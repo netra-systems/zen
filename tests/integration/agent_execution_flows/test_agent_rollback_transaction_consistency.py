@@ -22,9 +22,9 @@ import json
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.supervisor.execution_engine import UserExecutionEngine
-from netra_backend.app.agents.supervisor.transaction_manager import TransactionManager
+from netra_backend.app.db.transaction_manager import TransactionManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.pipeline_step import PipelineStep
+from netra_backend.app.agents.supervisor.execution_context import PipelineStep
 
 
 class TestAgentRollbackTransactionConsistency(BaseIntegrationTest):
@@ -42,11 +42,8 @@ class TestAgentRollbackTransactionConsistency(BaseIntegrationTest):
             workspace_id="transaction_workspace_1415"
         )
         
-        transaction_manager = TransactionManager(user_context=user_context)
-        execution_engine = UserExecutionEngine(
-            user_context=user_context,
-            transaction_manager=transaction_manager
-        )
+        transaction_manager = TransactionManager()
+        execution_engine = UserExecutionEngine(user_context=user_context)
         
         # Transactional pipeline with multi-step data modifications
         transaction_pipeline = [
@@ -138,11 +135,8 @@ class TestAgentRollbackTransactionConsistency(BaseIntegrationTest):
             workspace_id="saga_workspace_1416"
         )
         
-        transaction_manager = TransactionManager(user_context=user_context)
-        execution_engine = UserExecutionEngine(
-            user_context=user_context,
-            transaction_manager=transaction_manager
-        )
+        transaction_manager = TransactionManager()
+        execution_engine = UserExecutionEngine(user_context=user_context)
         
         # Distributed saga transaction
         saga_steps = [
@@ -221,11 +215,8 @@ class TestAgentRollbackTransactionConsistency(BaseIntegrationTest):
             workspace_id="consistency_workspace_1417"
         )
         
-        transaction_manager = TransactionManager(user_context=user_context)
-        execution_engine = UserExecutionEngine(
-            user_context=user_context,
-            transaction_manager=transaction_manager
-        )
+        transaction_manager = TransactionManager()
+        execution_engine = UserExecutionEngine(user_context=user_context)
         
         # Concurrent agent operations with potential conflicts
         conflicting_operations = [
@@ -308,11 +299,8 @@ class TestAgentRollbackTransactionConsistency(BaseIntegrationTest):
             workspace_id="checkpoint_workspace_1418"
         )
         
-        transaction_manager = TransactionManager(user_context=user_context)
-        execution_engine = UserExecutionEngine(
-            user_context=user_context,
-            transaction_manager=transaction_manager
-        )
+        transaction_manager = TransactionManager()
+        execution_engine = UserExecutionEngine(user_context=user_context)
         
         # Long-running pipeline with checkpoints
         checkpoint_pipeline = [
@@ -409,11 +397,8 @@ class TestAgentRollbackTransactionConsistency(BaseIntegrationTest):
             workspace_id="cascade_workspace_1419"
         )
         
-        transaction_manager = TransactionManager(user_context=user_context)
-        execution_engine = UserExecutionEngine(
-            user_context=user_context,
-            transaction_manager=transaction_manager
-        )
+        transaction_manager = TransactionManager()
+        execution_engine = UserExecutionEngine(user_context=user_context)
         
         # Complex dependency pipeline for cascading rollback
         cascade_pipeline = [

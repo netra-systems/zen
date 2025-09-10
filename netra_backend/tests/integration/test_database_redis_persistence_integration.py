@@ -57,7 +57,7 @@ from netra_backend.app.db.models_postgres import Thread, Message, Run, Assistant
 from netra_backend.app.models.agent_execution import AgentExecution
 
 # Redis and cache management
-from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.redis_manager import redis_manager as RedisService
 from netra_backend.app.cache.session_cache import SessionCache
 from netra_backend.app.cache.result_cache import ResultCache
 

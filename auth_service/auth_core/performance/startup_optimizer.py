@@ -163,7 +163,7 @@ class AuthServiceStartupOptimizer:
         """Initialize Redis manager with connection testing"""
         start_time = time.time()
         try:
-            from auth_service.auth_core.redis_manager import auth_redis_manager
+            from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
             
             # Test Redis connection (non-blocking)
             if auth_redis_manager.enabled:

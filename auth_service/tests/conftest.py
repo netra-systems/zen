@@ -39,7 +39,7 @@ from test_framework.real_services import (
 from shared.isolated_environment import get_env
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.models import Base
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
 
 # Import auth service dependencies for real service setup
 from auth_service.auth_core.core.jwt_handler import JWTHandler

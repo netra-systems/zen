@@ -560,7 +560,7 @@ def cleanup_test_state():
 @pytest.fixture
 async def real_redis():
     """Real Redis connection for tests."""
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     manager = AuthRedisManager()
     try:
         await manager.initialize()
