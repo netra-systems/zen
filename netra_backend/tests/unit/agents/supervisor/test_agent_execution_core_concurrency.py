@@ -1259,13 +1259,20 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                     }
                     mock_state_tracker._state_executions[state_id]["phases"].append(transition)
                     
-                    # Simulate WebSocket notifications for COMPLETED phase
+                    # Simulate WebSocket notifications for COMPLETED and FAILED phases
                     if websocket_manager and phase == AgentExecutionPhase.COMPLETED:
                         execution = mock_state_tracker._state_executions[state_id]
                         await websocket_manager.notify_agent_completed(
                             run_id=execution["run_id"],
                             agent_name=execution["agent_name"],
                             result={"status": "completed", "success": True}
+                        )
+                    elif websocket_manager and phase == AgentExecutionPhase.FAILED:
+                        execution = mock_state_tracker._state_executions[state_id]
+                        await websocket_manager.notify_agent_error(
+                            run_id=execution["run_id"],
+                            agent_name=execution["agent_name"],
+                            error={"status": "failed", "error": "Agent execution failed"}
                         )
             
             def complete_execution(state_id, success=True):
