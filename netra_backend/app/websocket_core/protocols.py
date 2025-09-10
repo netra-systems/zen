@@ -587,7 +587,7 @@ def ensure_websocket_id_type(websocket_id: Union[str, WebSocketID, None]) -> Opt
     return ensure_websocket_id(websocket_id)
 
 
-def adapt_manager_for_legacy_code(manager: WebSocketManagerProtocol) -> 'LegacyWebSocketManagerAdapter':
+def adapt_manager_for_legacy_code(manager: WebSocketProtocol) -> 'LegacyWebSocketManagerAdapter':
     """
     Create a legacy adapter wrapper around a typed WebSocket manager.
     
@@ -611,7 +611,7 @@ class LegacyWebSocketManagerAdapter:
     the new strongly-typed WebSocket manager interface.
     """
     
-    def __init__(self, typed_manager: WebSocketManagerProtocol):
+    def __init__(self, typed_manager: WebSocketProtocol):
         """
         Initialize legacy adapter.
         

@@ -12,7 +12,8 @@ Business Value:
 
 # Unified implementations (SSOT)
 from netra_backend.app.websocket_core.unified_manager import (
-    UnifiedWebSocketManager,
+    WebSocketManager,
+    UnifiedWebSocketManager,  # Backward compatibility alias
     WebSocketConnection,
     # SECURITY FIX: get_websocket_manager removed - caused multi-user data leakage
 )
@@ -26,7 +27,6 @@ from netra_backend.app.websocket_core.unified_emitter import (
 # CRITICAL SECURITY MIGRATION: Import factory pattern components
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
-    IsolatedWebSocketManager,
     get_websocket_manager_factory,
     create_websocket_manager
 )
@@ -46,7 +46,7 @@ async def get_websocket_manager(user_context=None):
         user_context: Required UserExecutionContext for proper isolation
     
     Returns:
-        IsolatedWebSocketManager instance
+        WebSocketManager instance
         
     Raises:
         ValueError: If user_context is None (import-time initialization not allowed)
@@ -64,7 +64,6 @@ async def get_websocket_manager(user_context=None):
     return await create_websocket_manager(user_context)
 
 from netra_backend.app.websocket_core.migration_adapter import (
-    WebSocketManagerAdapter,
     get_legacy_websocket_manager,
     migrate_singleton_usage
 )
@@ -82,7 +81,7 @@ from netra_backend.app.websocket_core.context import (
 )
 
 # Backward compatibility aliases
-WebSocketManager = UnifiedWebSocketManager
+# WebSocketManager is now imported directly
 # SECURITY FIX: Removed singleton websocket_manager - use create_websocket_manager() instead
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
@@ -230,7 +229,8 @@ CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
 # Export main interface
 __all__ = [
     # Unified implementations
-    "UnifiedWebSocketManager",
+    "WebSocketManager",
+    "UnifiedWebSocketManager",  # Backward compatibility
     "UnifiedWebSocketEmitter",
     "WebSocketConnection",
     "WebSocketEmitterFactory",
@@ -238,13 +238,11 @@ __all__ = [
     
     # CRITICAL SECURITY MIGRATION: Factory pattern exports
     "WebSocketManagerFactory",
-    "IsolatedWebSocketManager",
     "get_websocket_manager_factory",
     "create_websocket_manager",
     "get_websocket_manager",  # Backward compatibility
     
     # Migration support
-    "WebSocketManagerAdapter", 
     "get_legacy_websocket_manager",
     "migrate_singleton_usage",
     
