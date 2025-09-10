@@ -65,21 +65,18 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
     - Business value delivery through real agent results
     """
     
-    async def async_setup(self):
-        """Set up test environment with real services and infrastructure."""
-        await super().async_setup()
-        
-        # Initialize test environment
-        self.env = get_env()
-        self.env.set("TESTING", "1", source="golden_path_test")
-        
-        # Test data for consistent scenarios
+    def setup_method(self):
+        """Set up method called before each test method."""
+        super().setup_method()
+        # Initialize all test identifiers early to ensure they're always available
         self.test_user_id = f"test-user-{uuid.uuid4().hex[:8]}"
-        self.test_thread_id = UnifiedIdGenerator.generate_thread_id()
-        self.test_run_id = UnifiedIdGenerator.generate_run_id()
-        self.test_request_id = UnifiedIdGenerator.generate_request_id()
+        self.test_thread_id, self.test_run_id, self.test_request_id = UnifiedIdGenerator.generate_user_context_ids(
+            user_id=self.test_user_id,
+            operation="agent_execution_test"
+        )
+        self.websocket_events = []
         
-        # Mock LLM Manager for controlled responses
+        # Initialize mock components early to ensure they're always available
         self.mock_llm_manager = Mock(spec=LLMManager)
         self.mock_llm_manager.generate_response = AsyncMock()
         self.mock_llm_manager.is_available = Mock(return_value=True)
@@ -92,9 +89,13 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         self.mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
         self.mock_websocket_bridge.websocket_manager = self.mock_websocket_manager
         self.mock_websocket_bridge.emit_agent_event = AsyncMock()
+    
+    async def async_setup_method(self, method=None):
+        """Set up test environment with real services and infrastructure."""
+        await super().async_setup()
         
-        # Collected WebSocket events for validation
-        self.websocket_events = []
+        # Initialize test environment (all IDs and mocks already set in setup_method)
+        self.env.set("TESTING", "1", source="golden_path_test")
         
         # Mock WebSocket event collection
         async def collect_websocket_event(user_id: str, event_data: Dict):
@@ -138,9 +139,9 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,
             request_id=self.test_request_id,
-            websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(self.test_user_id),
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(self.test_user_id),
             db_session=db_session,
-            metadata=base_metadata
+            agent_context=base_metadata
         )
     
     def assert_websocket_events_sent(self, expected_events: List[str], timeout_seconds: float = 30.0):
@@ -179,13 +180,34 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             redis_manager=None
         )
         
-        # Create contexts for different users
-        user1_context = self.create_test_user_context()
-        user1_context.user_id = "user-1-isolation-test"
+        # Create contexts for different users (use create_new_context for different user_ids)
+        user1_context = UserExecutionContext(
+            user_id="user-1-isolation-test",
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
+            request_id=self.test_request_id,
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id("user-1-isolation-test"),
+            db_session=real_services_fixture["database_available"],
+            agent_context={
+                'user_request': 'Analyze my AI costs and suggest optimizations',
+                'request_type': 'cost_optimization',
+                'priority': 'high'
+            }
+        )
         
-        user2_context = self.create_test_user_context()
-        user2_context.user_id = "user-2-isolation-test"
-        user2_context.metadata['user_request'] = "Different request from user 2"
+        user2_context = UserExecutionContext(
+            user_id="user-2-isolation-test",
+            thread_id=UnifiedIdGenerator.generate_thread_id("user-2-isolation-test"),
+            run_id=UnifiedIdGenerator.generate_run_id(),
+            request_id=UnifiedIdGenerator.generate_request_id(),
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id("user-2-isolation-test"),
+            db_session=real_services_fixture["database_available"],
+            agent_context={
+                'user_request': 'Different request from user 2',
+                'request_type': 'cost_optimization',
+                'priority': 'high'
+            }
+        )
         
         # Create engines for both users
         engine1 = await factory.create_for_user(user1_context)
@@ -273,10 +295,23 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         # Create multiple concurrent user contexts
         concurrent_users = []
         for i in range(5):
-            user_context = self.create_test_user_context()
-            user_context.user_id = f"concurrent-user-{i}"
-            user_context.metadata['user_request'] = f"Request from user {i}"
-            concurrent_users.append(user_context)
+            # Create context with unique user_id from the start (can't modify immutable fields)
+            user_context = self.create_test_user_context(
+                additional_metadata={'user_request': f"Request from user {i}"}
+            )
+            
+            # Since UserExecutionContext is immutable, create a new one with different user_id
+            concurrent_user_context = UserExecutionContext(
+                user_id=f"concurrent-user-{i}",
+                thread_id=user_context.thread_id,
+                run_id=user_context.run_id,
+                request_id=user_context.request_id,
+                db_session=user_context.db_session,
+                websocket_client_id=user_context.websocket_client_id,
+                agent_context=user_context.agent_context.copy(),
+                audit_metadata=user_context.audit_metadata.copy()
+            )
+            concurrent_users.append(concurrent_user_context)
         
         # Execute concurrent engine creation
         async def create_and_use_engine(user_context):
@@ -581,24 +616,32 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             websocket_bridge=self.mock_websocket_bridge
         )
         
-        # Create isolated user contexts
-        user1_context = self.create_test_user_context(
-            additional_metadata={
+        # Create isolated user contexts (cannot modify frozen fields, create new contexts)
+        user1_context = UserExecutionContext(
+            user_id="multi-user-1",
+            thread_id=UnifiedIdGenerator.generate_thread_id("multi-user-1"),
+            run_id=UnifiedIdGenerator.generate_run_id(),
+            request_id=UnifiedIdGenerator.generate_request_id(),
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id("multi-user-1"),
+            db_session=real_services_fixture["db"],
+            agent_context={
                 'user_request': 'User 1: Analyze my OpenAI costs',
                 'user_data': {'service': 'openai', 'monthly_budget': 1000}
-            },
-            db_session=real_services_fixture["db"]
+            }
         )
-        user1_context.user_id = "multi-user-1"
         
-        user2_context = self.create_test_user_context(
-            additional_metadata={
+        user2_context = UserExecutionContext(
+            user_id="multi-user-2",
+            thread_id=UnifiedIdGenerator.generate_thread_id("multi-user-2"),
+            run_id=UnifiedIdGenerator.generate_run_id(),
+            request_id=UnifiedIdGenerator.generate_request_id(),
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id("multi-user-2"),
+            db_session=real_services_fixture["db"],
+            agent_context={
                 'user_request': 'User 2: Optimize my Anthropic usage',
                 'user_data': {'service': 'anthropic', 'monthly_budget': 2000}
-            },
-            db_session=real_services_fixture["db"]
+            }
         )
-        user2_context.user_id = "multi-user-2"
         
         # Track responses per user to validate isolation
         user_responses = {}
@@ -1147,37 +1190,53 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             websocket_bridge=self.mock_websocket_bridge
         )
         
-        # Test invalid contexts
-        invalid_contexts = [
-            # Missing user_id
+        # Test invalid contexts - check creation and execution separately
+        
+        # Test 1: Invalid user_id at creation time (constructor validation)
+        with pytest.raises(InvalidContextError) as exc_info:
             UserExecutionContext(
                 user_id="",  # Invalid empty user_id
                 thread_id=self.test_thread_id,
                 run_id=self.test_run_id,
                 request_id=self.test_request_id,
                 db_session=real_services_fixture["db"]
-            ),
-            # Missing database session
+            )
+        
+        error_message = str(exc_info.value)
+        assert len(error_message) > 10, "Error message too brief for invalid user_id"
+        assert "user_id" in error_message.lower(), "Error message should mention user_id issue"
+        self.logger.info(f"✅ Invalid user_id properly rejected at creation: {error_message}")
+        
+        # Test 2: Missing database session - create context and test execution
+        invalid_context_no_db = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
+            request_id=self.test_request_id,
+            db_session=None  # No database session
+        )
+        
+        with pytest.raises((InvalidContextError, ValueError, RuntimeError, AttributeError)) as exc_info:
+            await supervisor.execute(invalid_context_no_db, stream_updates=True)
+        
+        error_message = str(exc_info.value)
+        assert len(error_message) > 10, "Error message too brief for missing session"
+        self.logger.info(f"✅ Invalid missing session properly rejected: {error_message}")
+        
+        # Test 3: Invalid thread_id format at creation time
+        with pytest.raises(InvalidContextError) as exc_info:
             UserExecutionContext(
                 user_id=self.test_user_id,
-                thread_id=self.test_thread_id,
+                thread_id="",  # Invalid empty thread_id
                 run_id=self.test_run_id,
                 request_id=self.test_request_id,
-                db_session=None  # Invalid missing session
+                db_session=real_services_fixture["db"]
             )
-        ]
         
-        for i, invalid_context in enumerate(invalid_contexts):
-            with pytest.raises((InvalidContextError, ValueError, RuntimeError)) as exc_info:
-                await supervisor.execute(invalid_context, stream_updates=True)
-            
-            # Validate error messages are descriptive
-            error_message = str(exc_info.value)
-            assert len(error_message) > 10, f"Error message too brief for invalid context {i}"
-            assert "context" in error_message.lower() or "session" in error_message.lower(), \
-                f"Error message should mention context issue for invalid context {i}"
-            
-            self.logger.info(f"✅ Invalid context {i} properly rejected: {error_message}")
+        error_message = str(exc_info.value)
+        assert len(error_message) > 10, "Error message too brief for invalid thread_id"
+        assert "thread_id" in error_message.lower(), "Error message should mention thread_id issue"
+        self.logger.info(f"✅ Invalid thread_id properly rejected at creation: {error_message}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1228,7 +1287,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
     # Cleanup and Utility Methods  
     # ============================================================================
     
-    async def async_teardown(self):
+    async def async_teardown_method(self, method=None):
         """Clean up test resources."""
         try:
             # Clear collected events

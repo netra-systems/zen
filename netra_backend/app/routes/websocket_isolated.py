@@ -345,7 +345,7 @@ async def isolated_websocket_health_check(websocket: WebSocket):
     except Exception as e:
         logger.error(f"Isolated WebSocket health check failed: {e}")
         if websocket.client_state == WebSocketState.CONNECTED:
-            await websocket.close(code=1011, reason="Health check failed")
+            await websocket.close(code=1000, reason="Health check failed - graceful close")
 
 
 @router.get("/ws/isolated/stats")

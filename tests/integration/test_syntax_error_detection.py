@@ -369,33 +369,29 @@ class TestSyntaxErrorDetection(SSotBaseTestCase):
         
         detection_results = []
         
+        # Use our SyntaxErrorDetector to find files with AST errors
+        # Most unterminated strings will cause AST parse failures
         for file_path in glob.glob(str(self.integration_tests_dir / "*.py")):
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
+                analysis_result = self.syntax_detector.analyze_file(file_path)
                 
-                lines = content.split('\n')
-                for line_num, line in enumerate(lines, 1):
-                    # Skip comments and empty lines
-                    stripped_line = line.strip()
-                    if not stripped_line or stripped_line.startswith('#'):
-                        continue
-                        
-                    for pattern, description in unterminated_patterns:
-                        if re.search(pattern, line):
-                            # Additional validation: check if this is actually an error
-                            # Valid cases: string continues on next line, docstrings, etc.
-                            next_line = lines[line_num] if line_num < len(lines) else ""
-                            if self._is_valid_string_continuation(line, next_line):
-                                continue
-                                
-                            detection_results.append({
-                                'file': file_path,
-                                'line': line_num,
-                                'content': line.strip(),
-                                'issue': description
-                            })
-                            logger.warning(f"Unterminated string detected: {file_path}:{line_num}")
+                # Check for AST errors that might indicate unterminated strings
+                if analysis_result.get('ast_error'):
+                    ast_error = analysis_result['ast_error']
+                    error_msg = ast_error.get('message', '').lower()
+                    
+                    # Look for syntax errors that typically indicate unterminated strings
+                    if any(indicator in error_msg for indicator in [
+                        'unterminated string', 'eol while scanning', 'eof while scanning',
+                        'invalid token', 'unexpected eof'
+                    ]):
+                        detection_results.append({
+                            'file': file_path,
+                            'line': ast_error.get('line', 0),
+                            'content': ast_error.get('text', '').strip() if ast_error.get('text') else '',
+                            'issue': f"AST Error: {ast_error.get('message', 'Unknown syntax error')}"
+                        })
+                        logger.warning(f"Potential unterminated string in AST: {file_path}:{ast_error.get('line', 0)}")
                             
             except Exception as e:
                 logger.error(f"Error scanning {file_path}: {e}")
@@ -403,7 +399,7 @@ class TestSyntaxErrorDetection(SSotBaseTestCase):
                     'file': file_path,
                     'line': 0,
                     'content': str(e),
-                    'issue': "File read error"
+                    'issue': "File analysis error"
                 })
         
         # Log results

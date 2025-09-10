@@ -23,6 +23,17 @@ import { AuthContext } from '@/auth/context';
 import { useAuth } from '@/auth/context';
 import { unifiedAuthService } from '@/lib/unified-auth-service';
 
+// Environment-aware heartbeat interval configuration
+const getEnvironmentHeartbeatInterval = (): number => {
+  const isStaging = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('staging') || 
+     process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
+     process.env.NODE_ENV === 'staging');
+  
+  // Staging needs longer heartbeat intervals due to GCP network latency
+  return isStaging ? 30000 : 15000; // 30s for staging, 15s for dev
+};
+
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const { token, initialized: authInitialized } = useAuth();
   const [status, setStatus] = useState<WebSocketStatus>('CLOSED');
@@ -223,7 +234,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           logger.debug('[WebSocketProvider] WebSocket reconnecting with fresh authentication');
           connectionStateRef.current = 'connecting';
         },
-        heartbeatInterval: 15000, // 15 second heartbeat for better responsiveness
+        heartbeatInterval: getEnvironmentHeartbeatInterval(), // Environment-aware heartbeat interval
         rateLimit: {
           messages: 60,
           window: 60000 // 60 messages per minute

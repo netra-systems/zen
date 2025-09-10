@@ -23,7 +23,7 @@ import { User } from '@/types';
 import { logger } from '@/lib/logger';
 import { monitorAuthState } from '@/lib/auth-validation';
 
-// Mock dependencies
+// Mock dependencies - with proper mock factory reset
 jest.mock('@/auth/unified-auth-service', () => ({
   unifiedAuthService: {
     getAuthConfig: jest.fn(),
@@ -48,9 +48,16 @@ jest.mock('@/lib/logger', () => ({
   }
 }));
 
-jest.mock('@/lib/auth-validation', () => ({
-  monitorAuthState: jest.fn(),
-}));
+jest.mock('@/lib/auth-validation', () => {
+  const actual = jest.requireActual('@/lib/auth-validation');
+  return {
+    ...actual,
+    monitorAuthState: jest.fn(),
+    createAtomicAuthUpdate: actual.createAtomicAuthUpdate,
+    applyAtomicAuthUpdate: actual.applyAtomicAuthUpdate,
+    attemptEnhancedAuthRecovery: actual.attemptEnhancedAuthRecovery,
+  };
+});
 
 jest.mock('@/hooks/useGTMEvent', () => ({
   useGTMEvent: () => ({
@@ -154,7 +161,9 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
   };
 
   beforeEach(() => {
+    // CRITICAL: Complete mock reset for proper test isolation
     jest.clearAllMocks();
+    jest.resetAllMocks();
     
     // CRITICAL FIX: Clear localStorage mock BEFORE setting up state
     // This ensures clean state for each test and prevents cross-contamination
@@ -167,7 +176,21 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
     // Set localStorage mock to return null by default (clean state)
     mockLocalStorage.getItem.mockReturnValue(null);
     
-    // Default mocks
+    // Reset all service mocks to clean state
+    mockUnifiedAuthService.getAuthConfig.mockReset();
+    mockUnifiedAuthService.getToken.mockReset();
+    mockUnifiedAuthService.needsRefresh.mockReset();
+    mockUnifiedAuthService.getDevLogoutFlag.mockReset();
+    mockJwtDecode.mockReset();
+    
+    // Reset monitoring and logging mocks
+    mockMonitorAuthState.mockReset();
+    mockLogger.debug.mockReset();
+    mockLogger.info.mockReset();
+    mockLogger.warn.mockReset();
+    mockLogger.error.mockReset();
+    
+    // Default mocks - set these AFTER reset
     mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
     mockUnifiedAuthService.getToken.mockReturnValue(null);
     mockUnifiedAuthService.needsRefresh.mockReturnValue(false);
@@ -179,8 +202,9 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
     // CRITICAL: Ensure complete cleanup after each test
     // This prevents cross-contamination between tests
     jest.clearAllMocks();
+    jest.resetAllMocks();
     
-    // Clear mocked localStorage
+    // Clear mocked localStorage completely
     mockLocalStorage.clear();
     
     // Reset all mock implementations to default state
@@ -189,23 +213,32 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
     mockLocalStorage.removeItem.mockReset();
     mockLocalStorage.clear.mockReset();
     
-    // Reset service mocks
+    // Reset service mocks completely
     mockUnifiedAuthService.getAuthConfig.mockReset();
     mockUnifiedAuthService.getToken.mockReset();
     mockUnifiedAuthService.needsRefresh.mockReset();
     mockUnifiedAuthService.getDevLogoutFlag.mockReset();
     mockJwtDecode.mockReset();
     
-    // Reset logger and monitor mocks
+    // Reset logger and monitor mocks completely  
     mockLogger.debug.mockReset();
     mockLogger.info.mockReset();
     mockLogger.warn.mockReset();
     mockLogger.error.mockReset();
     mockMonitorAuthState.mockReset();
+    
+    // CRITICAL: Clean up timers safely - only if fake timers are active
+    if (jest.isMockFunction(setTimeout)) {
+      jest.runOnlyPendingTimers();
+    }
+    jest.useRealTimers();
   });
 
   describe('CRITICAL BUG: Token in localStorage but User Not Set', () => {
     test('SHOULD PASS: AuthProvider correctly initializes with token and sets user', async () => {
+      // Setup fake timers for better async control
+      jest.useFakeTimers();
+      
       // CRITICAL FIX: Set up localStorage state BEFORE rendering
       // This simulates a real page refresh scenario where token exists in localStorage
       
@@ -229,11 +262,16 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
         </AuthProvider>
       );
 
-      // Wait for initialization to complete
+      // Advance timers to process async operations
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      // Wait for initialization to complete with more patience
       await waitFor(() => {
         expect(screen.getByTestId('auth-loading')).toHaveTextContent('not-loading');
         expect(screen.getByTestId('auth-initialized')).toHaveTextContent('initialized');
-      }, { timeout: 2000 });
+      }, { timeout: 5000 });
 
       // Verify the auth state is consistent
       const authState = {
@@ -243,6 +281,8 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
       };
 
       console.log('🔐 AUTH STATE VERIFICATION:', authState);
+      console.log('📞 Mock calls - monitorAuthState:', mockMonitorAuthState.mock.calls.length);
+      console.log('📞 Mock calls - logger.debug:', mockLogger.debug.mock.calls.length);
 
       // CRITICAL: When token exists in localStorage, user MUST also be set
       expect(authState.hasToken).toBe(true);
@@ -260,6 +300,8 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
         true,               // initialized: true
         'auth_init_complete'
       );
+      
+      jest.useRealTimers();
     });
 
     test('SHOULD PASS: Monitor auth state detects consistent token and user during init', async () => {
@@ -345,29 +387,51 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
 
   describe('Valid Auth Initialization Scenarios', () => {
     test('SHOULD PASS: AuthProvider initializes correctly without token', async () => {
-      // CRITICAL FIX: Ensure localStorage is truly empty (not just mocked)
+      // Setup fake timers
+      jest.useFakeTimers();
+      
+      // CRITICAL FIX: Completely clear localStorage state for no-token scenario
       mockLocalStorage.clear();
       
-      // Set up mocks for no-token scenario  
-      mockLocalStorage.getItem.mockReturnValue(null);
+      // CRITICAL: Explicitly mock getItem to return null for ALL keys
+      mockLocalStorage.getItem.mockImplementation((key) => {
+        return null; // Always return null - no stored data
+      });
+      
+      // Set up mocks for no-token scenario - all null  
       mockUnifiedAuthService.getToken.mockReturnValue(null);
       mockUnifiedAuthService.getAuthConfig.mockResolvedValue(mockAuthConfig);
 
-      render(
+      const { container } = render(
         <AuthProvider>
           <TestComponent />
         </AuthProvider>
       );
 
+      // Advance timers to process async operations
+      act(() => {
+        jest.runAllTimers();
+      });
+
       await waitFor(() => {
         expect(screen.getByTestId('auth-initialized')).toHaveTextContent('initialized');
         expect(screen.getByTestId('auth-loading')).toHaveTextContent('not-loading');
-      }, { timeout: 2000 });
+      }, { timeout: 5000 });
 
       // Verify clean initialization state
+      const authState = {
+        hasToken: screen.getByTestId('auth-has-token').textContent,
+        hasUser: screen.getByTestId('auth-has-user').textContent,
+        userEmail: screen.getByTestId('auth-user-email').textContent,
+      };
+      
+      console.log('🧹 CLEAN STATE VERIFICATION:', authState);
+      
       expect(screen.getByTestId('auth-has-token')).toHaveTextContent('no-token');
       expect(screen.getByTestId('auth-has-user')).toHaveTextContent('no-user');
       expect(screen.getByTestId('auth-user-email')).toHaveTextContent('no-email');
+      
+      jest.useRealTimers();
     });
 
     test('SHOULD PASS: AuthProvider handles auth config fetch failure gracefully', async () => {

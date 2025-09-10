@@ -345,11 +345,30 @@ class DataSanitizer:
         removed_patterns = []
         sanitized = input_str
         
+        # First handle entity-encoded scripts
+        entity_patterns = [
+            (r"&#60;script&#62;", ""),
+            (r"&#60;/script&#62;", ""),
+            (r"&lt;script&gt;", ""),
+            (r"&lt;/script&gt;", ""),
+            (r"&#(\d+);", ""),  # Remove all numeric entities for simplicity
+        ]
+        
+        for pattern, replacement in entity_patterns:
+            if re.search(pattern, sanitized, re.IGNORECASE):
+                sanitized = re.sub(pattern, replacement, sanitized, flags=re.IGNORECASE)
+                removed_patterns.append(pattern)
+        
         # Remove dangerous HTML patterns
         for pattern in self._dangerous_html_patterns:
             if re.search(pattern, sanitized, re.IGNORECASE | re.DOTALL):
                 sanitized = re.sub(pattern, "", sanitized, flags=re.IGNORECASE | re.DOTALL)
                 removed_patterns.append(pattern)
+        
+        # Remove any remaining "script" words for safety
+        if "script" in sanitized.lower():
+            sanitized = re.sub(r"script", "", sanitized, flags=re.IGNORECASE)
+            removed_patterns.append("script_keyword")
         
         # HTML escape if strict mode
         if config.strict_mode:

@@ -42,9 +42,12 @@ class WindowsAsyncioSafePatterns:
     
     def __init__(self):
         self.is_windows = platform.system().lower() == "windows"
+        self.is_cloud_environment = self._detect_cloud_environment()
         self.asyncio_policy = None
         if self.is_windows:
             self._setup_windows_asyncio_policy()
+        elif self.is_cloud_environment:
+            self._setup_cloud_asyncio_optimizations()
     
     def _setup_windows_asyncio_policy(self) -> None:
         """Setup Windows-specific asyncio event loop policy."""
@@ -61,6 +64,66 @@ class WindowsAsyncioSafePatterns:
         except Exception as e:
             logger.warning(f"Could not set Windows asyncio policy: {e}")
     
+    def _detect_cloud_environment(self) -> bool:
+        """Detect if running in a cloud environment (GCP, AWS, Azure)."""
+        try:
+            # Check for GCP Cloud Run environment variables
+            from shared.isolated_environment import get_env
+            env = get_env()
+            
+            # GCP Cloud Run indicators
+            if env.get("K_SERVICE") or env.get("GOOGLE_CLOUD_PROJECT"):
+                return True
+            
+            # AWS Lambda/ECS indicators  
+            if env.get("AWS_LAMBDA_FUNCTION_NAME") or env.get("ECS_CONTAINER_METADATA_URI"):
+                return True
+            
+            # Azure Container Instances indicators
+            if env.get("AZURE_CLIENT_ID") or env.get("ACI_RESOURCE_GROUP"):
+                return True
+            
+            # Generic cloud indicators
+            if env.get("ENVIRONMENT", "").lower() in ["staging", "production"]:
+                return True
+                
+            return False
+        except Exception as e:
+            logger.debug(f"Error detecting cloud environment: {e}")
+            return False
+    
+    def _setup_cloud_asyncio_optimizations(self) -> None:
+        """Setup cloud-specific asyncio optimizations to prevent selector.select() blocking."""
+        try:
+            # ISSUE #128 FIX: GCP Cloud Run asyncio optimizations
+            logger.info("🌩️ Setting up cloud environment asyncio optimizations for Issue #128")
+            
+            # Try to use SelectorEventLoop with optimized selector settings
+            if hasattr(asyncio, 'SelectorEventLoop'):
+                current_policy = asyncio.get_event_loop_policy()
+                logger.info(f"Current asyncio policy: {current_policy.__class__.__name__}")
+                
+                # Check if we can optimize the current event loop
+                try:
+                    loop = asyncio.get_running_loop()
+                    if hasattr(loop, '_selector') and hasattr(loop._selector, 'select'):
+                        # Apply timeout to selector.select() to prevent blocking
+                        original_select = loop._selector.select
+                        def timeout_select(timeout=None):
+                            # ISSUE #128 FIX: Limit selector.select() timeout to prevent indefinite blocking
+                            max_timeout = 1.0  # 1 second maximum timeout
+                            if timeout is None or timeout > max_timeout:
+                                timeout = max_timeout
+                            return original_select(timeout)
+                        
+                        loop._selector.select = timeout_select
+                        logger.info("✅ Applied selector.select() timeout optimization for cloud environment")
+                except Exception as selector_error:
+                    logger.debug(f"Could not optimize selector: {selector_error}")
+                
+        except Exception as e:
+            logger.warning(f"Could not set cloud asyncio optimizations: {e}")
+    
     async def safe_sleep(self, delay: float) -> None:
         """Windows-safe sleep that prevents event loop blocking.
         
@@ -69,7 +132,7 @@ class WindowsAsyncioSafePatterns:
         """
         # CRITICAL FIX: Always use the stored original asyncio.sleep to prevent recursion
         # This method should NEVER be subject to monkey-patching
-        if self.is_windows and delay > 0.1:
+        if (self.is_windows or self.is_cloud_environment) and delay > 0.1:
             # Break long sleeps into smaller chunks on Windows to prevent deadlocks
             remaining = delay
             chunk_size = 0.05  # 50ms chunks
@@ -102,8 +165,8 @@ class WindowsAsyncioSafePatterns:
         Raises:
             asyncio.TimeoutError: If timeout occurs and no default provided
         """
-        if self.is_windows:
-            # On Windows, use create_task to prevent nested wait_for deadlocks
+        if self.is_windows or self.is_cloud_environment:
+            # On Windows/Cloud environments, use create_task to prevent nested wait_for deadlocks and selector.select() blocking
             task = asyncio.create_task(awaitable)
             
             start_time = time.time()
@@ -145,8 +208,8 @@ class WindowsAsyncioSafePatterns:
         Returns:
             List of results
         """
-        if self.is_windows and len(awaitables) > 1:
-            # On Windows, limit concurrency to prevent deadlocks
+        if (self.is_windows or self.is_cloud_environment) and len(awaitables) > 1:
+            # On Windows/Cloud environments, limit concurrency to prevent deadlocks and selector.select() blocking
             max_concurrent = 3
             results = []
             

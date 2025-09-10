@@ -310,16 +310,33 @@ class WebSocketConfig(BaseModel):
     cloud_run_stabilization_delay_ms: int = 25  # Final stabilization delay
     cloud_run_progressive_backoff_ms: List[int] = Field(default=[25, 50, 75])  # Progressive delay attempts
     
+    # ISSUE #128 FIX: Progressive timeout strategy for different connection phases  
+    handshake_timeout_seconds: float = 15.0      # Timeout for WebSocket handshake completion
+    connect_timeout_seconds: float = 10.0        # Timeout for initial connection establishment
+    ping_timeout_seconds: float = 5.0            # Timeout for ping/pong messages
+    close_timeout_seconds: float = 10.0          # Timeout for graceful connection close
+    execution_timeout_seconds: float = 300.0     # Timeout for message execution
+    
+    # Progressive timeout phases for faster failure detection
+    progressive_timeout_phases: List[float] = Field(default=[3.0, 2.0, 1.5, 1.0, 0.8])  # As identified in Issue #128
+    
     @classmethod
     def get_cloud_run_optimized_config(cls) -> 'WebSocketConfig':
-        """Get Cloud Run optimized configuration for race condition prevention."""
+        """Get Cloud Run optimized configuration for race condition prevention and Issue #128 fixes."""
         return cls(
             heartbeat_interval_seconds=20,  # Reduced for Cloud Run
             accept_completion_timeout_seconds=10.0,  # Longer timeout for Cloud Run
             accept_validation_interval_ms=50,  # More frequent validation
             cloud_run_accept_delay_ms=75,  # Increased delay for Cloud Run
             cloud_run_stabilization_delay_ms=50,  # Increased stabilization
-            cloud_run_progressive_backoff_ms=[50, 100, 150, 200]  # More aggressive backoff
+            cloud_run_progressive_backoff_ms=[50, 100, 150, 200],  # More aggressive backoff
+            # ISSUE #128 FIX: Optimized progressive timeouts for staging GCP connectivity
+            handshake_timeout_seconds=15.0,  # Staging-optimized handshake timeout 
+            connect_timeout_seconds=10.0,    # Staging-optimized connection timeout
+            ping_timeout_seconds=5.0,        # Staging-optimized ping timeout
+            close_timeout_seconds=10.0,      # Staging-optimized close timeout
+            execution_timeout_seconds=360.0, # 6 minutes execution timeout (60% reduction)
+            progressive_timeout_phases=[3.0, 2.0, 1.5, 1.0, 0.8]  # Staging-specific progressive timeouts
         )
     
     @classmethod

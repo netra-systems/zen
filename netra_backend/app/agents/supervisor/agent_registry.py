@@ -277,11 +277,15 @@ class AgentRegistry(UniversalAgentRegistry):
         """Initialize agent registry with CanonicalToolDispatcher SSOT pattern.
         
         Args:
-            llm_manager: LLM manager for agent creation
+            llm_manager: LLM manager for agent creation (REQUIRED)
             tool_dispatcher_factory: Factory function to create CanonicalToolDispatcher per user
                                    Signature: async (user_context, websocket_bridge) -> CanonicalToolDispatcher
                                    If None, uses default factory
         """
+        # CRITICAL FIX: Validate required llm_manager parameter
+        if llm_manager is None:
+            raise ValueError("llm_manager is required for AgentRegistry initialization - cannot be None")
+        
         # Initialize UniversalAgentRegistry
         super().__init__()
         

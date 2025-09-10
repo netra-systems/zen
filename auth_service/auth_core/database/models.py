@@ -1,6 +1,10 @@
 """
 Auth Service Database Models
 SQLAlchemy models for auth service database persistence
+
+These models include Python-level default initialization to ensure
+compatibility with testing frameworks that expect defaults to be 
+available at object creation time.
 """
 import uuid
 from datetime import datetime, timezone
@@ -42,6 +46,22 @@ class AuthUser(Base):
     # Security tracking
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0)
     locked_until: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    def __init__(self, **kwargs):
+        """Initialize with proper defaults for testing compatibility."""
+        # Set Python-level defaults before calling super().__init__
+        if 'id' not in kwargs:
+            kwargs['id'] = str(uuid.uuid4())
+        if 'auth_provider' not in kwargs:
+            kwargs['auth_provider'] = "local"
+        if 'is_active' not in kwargs:
+            kwargs['is_active'] = True
+        if 'is_verified' not in kwargs:
+            kwargs['is_verified'] = False
+        if 'failed_login_attempts' not in kwargs:
+            kwargs['failed_login_attempts'] = 0
+        
+        super().__init__(**kwargs)
 
 class AuthSession(Base):
     """Active session tracking"""
@@ -64,6 +84,15 @@ class AuthSession(Base):
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     revoked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    def __init__(self, **kwargs):
+        """Initialize with proper defaults for testing compatibility."""
+        if 'id' not in kwargs:
+            kwargs['id'] = str(uuid.uuid4())
+        if 'is_active' not in kwargs:
+            kwargs['is_active'] = True
+        
+        super().__init__(**kwargs)
 
 class AuthAuditLog(Base):
     """Audit log for authentication events"""
@@ -84,6 +113,13 @@ class AuthAuditLog(Base):
     
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now(), index=True)
+    
+    def __init__(self, **kwargs):
+        """Initialize with proper defaults for testing compatibility."""
+        if 'id' not in kwargs:
+            kwargs['id'] = str(uuid.uuid4())
+        
+        super().__init__(**kwargs)
 
 class PasswordResetToken(Base):
     """Password reset token tracking"""
@@ -101,3 +137,12 @@ class PasswordResetToken(Base):
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
     used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    def __init__(self, **kwargs):
+        """Initialize with proper defaults for testing compatibility."""
+        if 'id' not in kwargs:
+            kwargs['id'] = str(uuid.uuid4())
+        if 'is_used' not in kwargs:
+            kwargs['is_used'] = False
+        
+        super().__init__(**kwargs)

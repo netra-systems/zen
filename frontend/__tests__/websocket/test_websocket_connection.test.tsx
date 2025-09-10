@@ -542,49 +542,68 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
     });
 
     test('should stop retrying after max attempts reached', async () => {
-      // FIXED: Use unified WebSocket mock with consistent failure
-      let connectionAttempts = 0;
+      // FIXED: Focus on component behavior rather than constructor counting
+      const originalWebSocket = global.WebSocket;
       
-      // Create custom config that always fails
+      // Create custom config that always fails connections
       const alwaysFailConfig = {
         autoConnect: true,
         simulateNetworkDelay: false,
         enableErrorSimulation: true,
-        errorDelay: 10
+        errorDelay: 10,
+        maxReconnectAttempts: 0 // Force immediate failures
       };
       
-      // Override the mock to track connection attempts
+      // Override with failing mock
       const FailingMockClass = class extends UnifiedWebSocketMock {
         constructor(url, protocols) {
-          connectionAttempts++;
           super(url, protocols, alwaysFailConfig);
+          // Force immediate failure
+          setTimeout(() => {
+            this.simulateConnectionFailure();
+          }, 50);
         }
       };
       
       global.WebSocket = FailingMockClass as any;
 
-      render(
-        <MockWebSocketConnection
-          url="ws://localhost:8000/ws"
-          enableRetry={true}
-          maxRetries={2}
-        />
-      );
+      try {
+        const { unmount } = render(
+          <MockWebSocketConnection
+            url="ws://localhost:8000/ws"
+            enableRetry={true}
+            maxRetries={2}
+          />
+        );
 
-      const connectButton = screen.getByTestId('connect-button');
-      await act(async () => {
-        await userEvent.click(connectButton);
-      });
+        const connectButton = screen.getByTestId('connect-button');
+        await act(async () => {
+          await userEvent.click(connectButton);
+        });
 
-      // Wait for retry attempts to complete
-      await waitFor(() => {
-        expect(screen.getByTestId('reconnect-attempts')).toHaveTextContent('2');
-      }, { timeout: 5000 });
+        // Wait for retry attempts to reach the maximum
+        await waitFor(() => {
+          expect(screen.getByTestId('reconnect-attempts')).toHaveTextContent('2');
+        }, { timeout: 5000 });
 
-      // Should not exceed max retries
-      expect(connectionAttempts).toBeLessThanOrEqual(3); // Initial + 2 retries
+        // Verify retry counter stops at maxRetries
+        const finalAttempts = parseInt(screen.getByTestId('reconnect-attempts').textContent || '0');
+        expect(finalAttempts).toBe(2); // Should stop at exactly maxRetries
 
-      console.log('✅ Max retry attempts test completed successfully');
+        // Wait a bit more to ensure no further retries
+        await act(async () => {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        });
+
+        // Retry count should not have increased
+        const stableAttempts = parseInt(screen.getByTestId('reconnect-attempts').textContent || '0');
+        expect(stableAttempts).toBe(2); // Should remain stable
+
+        unmount();
+        console.log('✅ Max retry attempts test completed successfully');
+      } finally {
+        global.WebSocket = originalWebSocket;
+      }
     });
   });
 

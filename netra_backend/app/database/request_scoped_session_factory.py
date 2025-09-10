@@ -49,6 +49,19 @@ SessionMetrics = DatabaseSessionMetrics
 
 logger = central_logger.get_logger(__name__)
 
+# Export list for module interface
+__all__ = [
+    'RequestScopedSessionFactory',
+    'RequestScopedSession', 
+    'ConnectionPoolMetrics',
+    'SessionMetrics',
+    'DatabaseSessionMetrics',
+    'SessionState',
+    'get_session_factory',
+    'get_isolated_session',
+    'get_factory_health',
+    'shutdown_session_factory'
+]
 
 # SessionState and SessionMetrics now imported from shared.metrics.session_metrics
 # This eliminates SSOT violation and ensures consistent metrics across the platform
@@ -731,3 +744,91 @@ async def shutdown_session_factory():
         await _session_factory.close()
         _session_factory = None
         logger.info("Session factory shutdown complete")
+
+
+class RequestScopedSession:
+    """Request-scoped database session wrapper.
+    
+    Business Value Justification (BVJ):
+    - Segment: Platform/Internal - Database Isolation
+    - Business Goal: Provide request-scoped database sessions  
+    - Value Impact: Ensures proper database session lifecycle management
+    - Strategic Impact: Core infrastructure for multi-user isolation
+    
+    This class provides a wrapper around AsyncSession that ensures proper
+    request-scoped lifecycle management and tracking.
+    """
+    
+    def __init__(self, session: AsyncSession, user_id: str, request_id: str, thread_id: Optional[str] = None):
+        """Initialize request-scoped session wrapper.
+        
+        Args:
+            session: The underlying AsyncSession
+            user_id: User identifier for isolation
+            request_id: Request identifier
+            thread_id: Thread identifier for WebSocket routing
+        """
+        self._session = session
+        self._user_id = user_id
+        self._request_id = request_id
+        self._thread_id = thread_id
+        self._created_at = datetime.now(timezone.utc)
+        self._is_closed = False
+    
+    @property
+    def session(self) -> AsyncSession:
+        """Get the underlying AsyncSession."""
+        if self._is_closed:
+            raise RuntimeError("Session has been closed")
+        return self._session
+    
+    @property 
+    def user_id(self) -> str:
+        """Get the user ID for this session."""
+        return self._user_id
+    
+    @property
+    def request_id(self) -> str:
+        """Get the request ID for this session."""
+        return self._request_id
+    
+    @property
+    def thread_id(self) -> Optional[str]:
+        """Get the thread ID for this session."""
+        return self._thread_id
+    
+    @property
+    def created_at(self) -> datetime:
+        """Get session creation timestamp."""
+        return self._created_at
+    
+    @property
+    def is_closed(self) -> bool:
+        """Check if session is closed."""
+        return self._is_closed
+    
+    async def close(self):
+        """Close the session."""
+        if not self._is_closed:
+            await self._session.close()
+            self._is_closed = True
+    
+    async def commit(self):
+        """Commit the transaction."""
+        if self._is_closed:
+            raise RuntimeError("Session has been closed")
+        await self._session.commit()
+    
+    async def rollback(self):
+        """Rollback the transaction."""
+        if self._is_closed:
+            raise RuntimeError("Session has been closed")
+        await self._session.rollback()
+    
+    async def __aenter__(self):
+        """Async context manager entry."""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.close()
