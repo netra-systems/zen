@@ -125,7 +125,7 @@ class AuthenticationTimingController:
         return self.race_conditions
 
 
-class TestWebSocketAuthenticationTimingE2E(BaseE2ETest):
+class TestWebSocketAuthenticationTimingE2E(SSotAsyncTestCase):
     """
     E2E tests for WebSocket authentication timing race conditions.
     
