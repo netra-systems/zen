@@ -1094,16 +1094,28 @@ CMD ["npm", "start"]
                 shell=self.use_shell
             )
             
-            # Extract service URL from output
+            # Extract service URL from output - with fallback to get_service_url
             url = None
             for line in result.stdout.split('\n'):
                 if "Service URL:" in line:
                     url = line.split("Service URL:")[1].strip()
                     break
+            
+            # P0 CRITICAL FIX: If URL parsing failed, retrieve URL using get_service_url
+            # This fixes "No URL available" errors preventing health checks
+            if not url:
+                print(f"   ⚠️ Service URL not found in deployment output, retrieving via gcloud...")
+                url = self.get_service_url(service.cloud_run_name)
+                if url:
+                    print(f"   ✅ Retrieved service URL successfully")
+                else:
+                    print(f"   ⚠️ Could not retrieve service URL - health checks may fail")
                     
             print(f"✅ {service.name} deployed successfully")
             if url:
                 print(f"   URL: {url}")
+            else:
+                print(f"   ⚠️ No URL available - service may not be accessible")
                 
             # Ensure traffic is routed to the latest revision (unless no-traffic flag is set)
             if not no_traffic:
