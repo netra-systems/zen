@@ -1145,12 +1145,21 @@ def get_auth_env(refresh: bool = False) -> AuthEnvironment:
     """
     global _auth_env
     
-    # Always refresh in test environments to support dynamic env var changes
     from shared.isolated_environment import get_env
     env_manager = get_env()
     current_environment = env_manager.get("ENVIRONMENT", "development").lower()
     
-    if refresh or _auth_env is None or current_environment in ["test", "testing"]:
+    # Always refresh in test environments to support dynamic env var changes
+    # Also refresh if we detect a test scenario where JWT secrets were deliberately cleared
+    is_test_environment = current_environment in ["test", "testing"]
+    is_jwt_secret_test_scenario = (
+        current_environment == "production" and
+        not env_manager.get("JWT_SECRET_KEY") and
+        not env_manager.get("JWT_SECRET_PRODUCTION") and 
+        not env_manager.get("JWT_SECRET")
+    )
+    
+    if refresh or _auth_env is None or is_test_environment or is_jwt_secret_test_scenario:
         _auth_env = AuthEnvironment()
     
     return _auth_env

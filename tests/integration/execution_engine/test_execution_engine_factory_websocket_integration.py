@@ -813,9 +813,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             # Use engines to generate some WebSocket activity
             for i, (engine, context) in enumerate(zip(engines, contexts)):
                 agent_context = self.create_test_agent_context(context)
-                await engine.send_agent_thinking(
-                    agent_context,
-                    f"Activity for cleanup test user {i}",
+                await engine.websocket_emitter.notify_agent_thinking(
+                    agent_name=agent_context.agent_name,
+                    reasoning=f"Activity for cleanup test user {i}",
                     step_number=1
                 )
             
@@ -829,9 +829,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             for i, (engine, context) in enumerate(zip(engines[1:], contexts[1:]), 1):
                 try:
                     agent_context = self.create_test_agent_context(context)
-                    await engine.send_agent_thinking(
-                        agent_context,
-                        f"Post-cleanup activity for user {i}",
+                    await engine.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context.agent_name,
+                        reasoning=f"Post-cleanup activity for user {i}",
                         step_number=2
                     )
                     post_cleanup_success = True

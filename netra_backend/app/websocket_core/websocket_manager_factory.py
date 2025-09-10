@@ -2181,7 +2181,7 @@ class WebSocketManagerFactory:
     # SSOT INTERFACE STANDARDIZATION METHODS (Week 1 - Low Risk)
     # ============================================================================
     
-    async def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
+    def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
         """
         Create an isolated WebSocket manager for a user with specified connection ID.
         
@@ -2212,7 +2212,7 @@ class WebSocketManagerFactory:
             )
             
             # Use existing create_manager method
-            manager = await self.create_manager(user_context)
+            manager = self.create_manager(user_context)
             
             logger.info(
                 f"🏭 SSOT INTERFACE: Created isolated manager via create_isolated_manager "
