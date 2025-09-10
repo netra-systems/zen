@@ -242,7 +242,7 @@ class TestToolDispatcherRealComponentIntegration(SSotBaseTestCase):
     async def test_integration_with_real_tool_registry(self):
         """Test dispatcher integration with real ToolRegistry component."""
         user_context = RealUserExecutionContext("registry-integration-user")
-        websocket_notifier = RealWebSocketNotifier()
+        websocket_notifier = RealWebSocketNotifier.create_for_user()
         websocket_notifier.create_user_session(user_context.user_id)
         
         # Create real business tools
@@ -288,7 +288,7 @@ class TestToolDispatcherRealComponentIntegration(SSotBaseTestCase):
     async def test_integration_with_real_execution_engine(self):
         """Test dispatcher integration with real UnifiedToolExecutionEngine."""
         user_context = RealUserExecutionContext("execution-integration-user")
-        websocket_notifier = RealWebSocketNotifier()
+        websocket_notifier = RealWebSocketNotifier.create_for_user()
         websocket_notifier.create_user_session(user_context.user_id)
         
         # Create realistic business scenario tools
@@ -355,7 +355,7 @@ class TestToolDispatcherRealComponentIntegration(SSotBaseTestCase):
     async def test_real_websocket_event_integration_flow(self):
         """Test complete WebSocket event integration flow with realistic business scenarios."""
         user_context = RealUserExecutionContext("websocket-integration-user")
-        websocket_notifier = RealWebSocketNotifier()
+        websocket_notifier = RealWebSocketNotifier.create_for_user()
         websocket_notifier.create_user_session(user_context.user_id)
         
         # Create business tools that generate rich events
@@ -415,7 +415,7 @@ class TestToolDispatcherRealComponentIntegration(SSotBaseTestCase):
             for i in range(1, 4)
         ]
         
-        websocket_notifier = RealWebSocketNotifier()
+        websocket_notifier = RealWebSocketNotifier.create_for_user()
         
         # Create user sessions and dispatchers
         dispatchers = []
@@ -488,7 +488,7 @@ class TestToolDispatcherRealComponentIntegration(SSotBaseTestCase):
     async def test_real_error_handling_integration_across_components(self):
         """Test error handling integration across real components."""
         user_context = RealUserExecutionContext("error-handling-user")
-        websocket_notifier = RealWebSocketNotifier()
+        websocket_notifier = RealWebSocketNotifier.create_for_user()
         websocket_notifier.create_user_session(user_context.user_id)
         
         # Create a tool that will fail in realistic ways

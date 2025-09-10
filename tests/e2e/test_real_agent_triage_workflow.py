@@ -405,7 +405,7 @@ class TestRealAgentTriageWorkflow(BaseE2ETest):
     async def _create_triage_websocket_notifier(self, user_id: str):
         """Create WebSocket notifier for triage event tracking."""
         if WEBSOCKET_SERVICES_AVAILABLE:
-            notifier = WebSocketNotifier()
+            notifier = WebSocketNotifier.create_for_user()
             
             # Hook into notifier for event capture
             original_send = notifier.send_to_user

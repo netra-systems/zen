@@ -346,7 +346,7 @@
             # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(user_id, mock_ws, connection_id)
 
             # Create notifier
-            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)
 
             # Send all event types
             # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(connection_id, request_id, "test_agent")

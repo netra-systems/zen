@@ -443,7 +443,7 @@ class WebSocketAgentLoadTester:
         )
         
         # Setup WebSocket notifier with load monitoring
-        websocket_notifier = WebSocketNotifier(user_context=user_context)
+        websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
         
         async def load_monitored_event_sender(event_type: str, event_data: dict):
             """Send WebSocket events with load performance monitoring."""
@@ -869,7 +869,7 @@ class TestWebSocketAgentEventLoad:
             )
             
             # Setup high-frequency WebSocket notifier
-            websocket_notifier = WebSocketNotifier(user_context=user_context)
+            websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
             
             events_sent = 0
             

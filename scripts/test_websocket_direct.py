@@ -133,11 +133,10 @@ async def test_basic_5_events():
     thread_id = "test-thread"
     
     await ws_manager.connect_user(user_id, mock_websocket, thread_id)
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = WebSocketNotifier.create_for_user(ws_manager)
     
     context = AgentExecutionContext(
-        run_id="test-run-123",
-        thread_id=thread_id,
+        run_id="test-run-123", thread_id=thread_id,
         user_id=user_id,
         agent_name="test_agent",
         retry_count=0,
@@ -234,11 +233,10 @@ async def test_hello_complete_flow():
     thread_id = "hello-thread"
     
     await ws_manager.connect_user(user_id, mock_websocket, thread_id)
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = WebSocketNotifier.create_for_user(ws_manager)
     
     context = AgentExecutionContext(
-        run_id="hello-run",
-        thread_id=thread_id,
+        run_id="hello-run", thread_id=thread_id,
         user_id=user_id,
         agent_name="greeting_agent",
         retry_count=0,

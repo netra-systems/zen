@@ -258,7 +258,7 @@ class ProgressStreamingAgent:
             self.websocket_manager = websocket_manager
             self.config.websocket_thread_id = thread_id
             if websocket_manager:
-                self.websocket_notifier = WebSocketNotifier(websocket_manager)
+                self.websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
                 self.logger.info(f"WebSocket manager configured for thread: {thread_id}")
     
     async def start_streaming(self, layers: List[str], run_id: str = None) -> bool:

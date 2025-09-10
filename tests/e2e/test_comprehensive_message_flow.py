@@ -1517,7 +1517,7 @@ queuedAt: Date.now()
                                     
 
                                     # Test WebSocket notifier integration
-                                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.websocket_manager)
+                                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(self.websocket_manager)
 
                                     # Test various notification methods based on message type
                                     # REMOVED_SYNTAX_ERROR: if "started" in test_case.message_type.value:

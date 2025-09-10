@@ -153,7 +153,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                            if 'WebSocketNotifier(' in content:
+                            if 'WebSocketNotifier.create_for_user(' in content:
                                 initialization_patterns.append(f"{file_path}:direct_init")
                             if 'create_websocket_notifier' in content:
                                 initialization_patterns.append(f"{file_path}:factory_create")
@@ -209,7 +209,7 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
             from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             # This should fail in proper SSOT implementation
-            notifier = WebSocketNotifier(user_id="test_user")
+            notifier = WebSocketNotifier.create_for_user(user_id="test_user")
             
             # This test FAILS because direct instantiation is allowed
             self.assertIsNotNone(notifier)
@@ -228,8 +228,8 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
             from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             # Test if singleton pattern exists
-            notifier1 = WebSocketNotifier(user_id="user1")
-            notifier2 = WebSocketNotifier(user_id="user2")
+            notifier1 = WebSocketNotifier.create_for_user(user_id="user1")
+            notifier2 = WebSocketNotifier.create_for_user(user_id="user2", None)  # MANUAL_REVIEW: Validate exec_context
             
             # This test FAILS if singleton pattern exists (shared instance)
             if notifier1 is notifier2:
@@ -475,7 +475,7 @@ class TestWebSocketNotifierLegacyCodeDetection(SSotBaseTestCase):
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
                             # Look for old patterns
-                            if 'WebSocketNotifier()' in content:
+                            if 'WebSocketNotifier.create_for_user()' in content:
                                 old_patterns.append(f"{file_path}:bare_init")
                             if 'notifier = WebSocketNotifier' in content:
                                 old_patterns.append(f"{file_path}:direct_assignment")

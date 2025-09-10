@@ -128,7 +128,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
             )
             
             # Set up WebSocket notifications to capture events
-            websocket_notifier = WebSocketNotifier(user_context=user_context)
+            websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
             await execution_engine.set_websocket_notifier(websocket_notifier)
             
             # Create registry with user isolation

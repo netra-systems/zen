@@ -73,13 +73,12 @@ class TestWebSocketEventDelivery:
         Users must see that agent began processing their problem.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
         agent_name = "triage"
         
         # Act
         result = await notifier.notify_agent_started(
-            context=mock_user_context,
-            agent_name=agent_name
+            context=mock_user_context, agent_name=agent_name
         )
         
         # Assert
@@ -107,14 +106,13 @@ class TestWebSocketEventDelivery:
         Shows AI is working on valuable solutions for users.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
         agent_name = "data_researcher"
         progress_message = "Analyzing user requirements and searching for relevant data"
         
         # Act
         result = await notifier.notify_agent_thinking(
-            context=mock_user_context,
-            agent_name=agent_name,
+            context=mock_user_context, agent_name=agent_name,
             progress=progress_message
         )
         
@@ -141,7 +139,7 @@ class TestWebSocketEventDelivery:
         Demonstrates problem-solving approach to users.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
         tool_name = "data_query"
         tool_args = {"query": "SELECT * FROM optimization_data", "limit": 100}
         
@@ -176,11 +174,10 @@ class TestWebSocketEventDelivery:
         Delivers actionable insights to users.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
         tool_name = "optimization_analyzer"
         tool_result = {
-            "analysis": "Found 3 optimization opportunities",
-            "savings": "$15,000/month",
+            "analysis": "Found 3 optimization opportunities", "savings": "$15,000/month",
             "recommendations": ["Reduce compute costs", "Optimize data storage", "Improve caching"]
         }
         
@@ -215,11 +212,10 @@ class TestWebSocketEventDelivery:
         Final step in delivering AI value through chat.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
         agent_name = "optimization_agent"
         agent_result = {
-            "summary": "Optimization analysis complete",
-            "potential_savings": "$15,000/month",
+            "summary": "Optimization analysis complete", "potential_savings": "$15,000/month",
             "action_items": 3,
             "confidence_score": 0.95
         }

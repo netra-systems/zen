@@ -878,12 +878,11 @@
 
     # REMOVED_SYNTAX_ERROR: try:
         # Create WebSocket notifier
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)
 
         # Create execution context
         # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
-        # REMOVED_SYNTAX_ERROR: run_id="minimal-req-123",
-        # REMOVED_SYNTAX_ERROR: thread_id=connection_id,
+        # REMOVED_SYNTAX_ERROR: run_id="minimal-req-123", # REMOVED_SYNTAX_ERROR: thread_id=connection_id,
         # REMOVED_SYNTAX_ERROR: user_id=user_id,
         # REMOVED_SYNTAX_ERROR: agent_name="test_agent",
         # REMOVED_SYNTAX_ERROR: retry_count=0,

@@ -83,12 +83,11 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)
 
         # Check all required methods exist
         # REMOVED_SYNTAX_ERROR: required_methods = [ )
-        # REMOVED_SYNTAX_ERROR: 'send_agent_started',
-        # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
+        # REMOVED_SYNTAX_ERROR: 'send_agent_started', # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
         # REMOVED_SYNTAX_ERROR: 'send_partial_result',
         # REMOVED_SYNTAX_ERROR: 'send_tool_executing',
         # REMOVED_SYNTAX_ERROR: 'send_tool_completed',

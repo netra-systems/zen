@@ -441,7 +441,7 @@ class TestWebSocketAgentEventsCore:
     ):
         """Test using real WebSocket manager."""
         ws_manager = UnifiedWebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = WebSocketNotifier.create_for_user(ws_manager)
         
         # Create mock WebSocket that captures events
         mock_ws = MockWebSocketForEventCapture(event_capture)
@@ -508,7 +508,7 @@ class TestWebSocketAgentEventsCore:
             mock_ws = MockWebSocketForEventCapture(event_capture)
             await ws_manager.connect_user(user_id, mock_ws)
             
-            notifier = WebSocketNotifier(ws_manager)
+            notifier = WebSocketNotifier.create_for_user(ws_manager)
             
             # Execute a simple agent workflow
             await notifier.send_agent_started(user_id, "triage_agent", "Starting triage workflow")

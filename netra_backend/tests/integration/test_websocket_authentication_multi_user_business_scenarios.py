@@ -153,7 +153,7 @@ class TestWebSocketAuthenticationMultiUserBusinessScenarios(SSotAsyncTestCase):
         
         # Initialize mock WebSocket manager for testing transport
         self.mock_websocket_manager = UnifiedWebSocketManager()
-        self.websocket_notifier = WebSocketNotifier(self.mock_websocket_manager)
+        self.websocket_notifier = WebSocketNotifier.create_for_user(self.mock_websocket_manager)
         
         # Track authenticated connections
         self.authenticated_connections: Dict[str, MockAuthenticatedWebSocketConnection] = {}

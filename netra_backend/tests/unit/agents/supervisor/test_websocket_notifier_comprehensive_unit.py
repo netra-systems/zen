@@ -53,7 +53,7 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
         """WebSocketNotifier instance with test mode enabled."""
         # Suppress deprecation warning for testing
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(mock_websocket_manager, test_mode=True)
         return notifier
 
     @pytest.fixture
@@ -71,7 +71,7 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
     def test_init_shows_deprecation_warning(self, mock_websocket_manager):
         """Test that initialization shows deprecation warning."""
         with patch('warnings.warn') as mock_warn:
-            WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            WebSocketNotifier.create_for_user(mock_websocket_manager, test_mode=True)
             
             # Verify deprecation warning was shown
             mock_warn.assert_called_once()
@@ -82,7 +82,7 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
     def test_init_configures_test_mode(self, mock_websocket_manager):
         """Test that test mode configuration works correctly."""
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(mock_websocket_manager, test_mode=True)
             
             # Verify test mode configuration
             assert notifier._test_mode is True
@@ -94,7 +94,7 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
     def test_init_configures_performance_settings(self, mock_websocket_manager):
         """Test that performance settings are configured correctly."""
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(mock_websocket_manager, test_mode=True)
             
             # Verify performance settings
             assert notifier.max_queue_size == 1000

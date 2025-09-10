@@ -2778,6 +2778,52 @@ class WebSocketNotifier:
     """Notifier that delegates WebSocket events to emitter."""
     
     def __init__(self, emitter, exec_context):
+        """Initialize WebSocketNotifier with emitter and execution context."""
+        self.emitter = emitter
+        self.exec_context = exec_context
+    
+    @classmethod
+    def create_for_user(cls, emitter, exec_context):
+        """
+        Factory method to create WebSocketNotifier with user context validation.
+        
+        Args:
+            emitter: WebSocket emitter instance
+            exec_context: User execution context with user_id
+            
+        Returns:
+            WebSocketNotifier: Validated instance for user
+            
+        Raises:
+            ValueError: If required parameters are missing or invalid
+        """
+        # Validate required parameters
+        if not emitter:
+            raise ValueError("WebSocketNotifier requires valid emitter")
+        if not exec_context:
+            raise ValueError("WebSocketNotifier requires valid execution context")
+        
+        # Validate user context
+        user_id = getattr(exec_context, 'user_id', None)
+        if not user_id:
+            raise ValueError("WebSocketNotifier requires user_id in execution context")
+        
+        # Create validated instance
+        instance = cls(emitter, exec_context)
+        
+        # Additional validation for user isolation
+        instance._validate_user_isolation()
+        
+        return instance
+    
+    def _validate_user_isolation(self):
+        """Validate this instance is properly isolated for user."""
+        # Ensure no shared state with other user instances
+        if hasattr(self, '_user_id'):
+            if self._user_id != getattr(self.exec_context, 'user_id', None):
+                raise ValueError("User isolation violation detected")
+        else:
+            self._user_id = getattr(self.exec_context, 'user_id', None)
         self.emitter = emitter
         self.exec_context = exec_context
         

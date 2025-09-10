@@ -328,7 +328,7 @@ class TestRealAgentSupervisorOrchestration(BaseE2ETest):
         user_id = user_id or self.test_user_id
         
         if WEBSOCKET_SERVICES_AVAILABLE:
-            notifier = WebSocketNotifier()
+            notifier = WebSocketNotifier.create_for_user()
             
             # Hook into notifier for event capture
             original_send = notifier.send_to_user

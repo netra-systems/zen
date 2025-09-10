@@ -299,7 +299,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
         
         if WEBSOCKET_SERVICES_AVAILABLE and not simulate_failures:
             # Use real WebSocketNotifier
-            notifier = WebSocketNotifier()
+            notifier = WebSocketNotifier.create_for_user()
             # Hook into notifier to capture events
             original_send = notifier.send_to_user
             

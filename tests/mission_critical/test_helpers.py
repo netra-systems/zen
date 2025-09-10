@@ -18,7 +18,7 @@ class SimpleWebSocketNotifier:
             thread_id="test_thread", 
             run_id="test_run"
         )
-        self.notifier = AgentWebSocketBridge.WebSocketNotifier(websocket_manager, user_context)
+        self.notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(websocket_manager, user_context)
     
     def _create_context(self, connection_id: str, request_id: str, agent_name: str = "test_agent") -> AgentExecutionContext:
         """Create a context object from simple parameters."""

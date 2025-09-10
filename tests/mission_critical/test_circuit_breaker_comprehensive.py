@@ -829,14 +829,13 @@ async def test_circuit_breaker_websocket_notifications():
     # Mock WebSocket manager
     websocket_manager = AsyncMock(spec=WebSocketManager)
     websocket_manager.websocket = TestWebSocketConnection()
-    websocket_notifier = WebSocketNotifier(websocket_manager)
+    websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
     # Create circuit breaker with WebSocket integration
     from netra_backend.app.utils.circuit_breaker import CircuitBreaker
     
     breaker = CircuitBreaker(
-        name="websocket_test_service",
-        failure_threshold=2,
+        name="websocket_test_service", failure_threshold=2,
         recovery_timeout=1.0,
         half_open_max_calls=1
     )
@@ -894,11 +893,10 @@ async def test_circuit_breaker_websocket_event_sequence():
             })
     
     websocket_manager.send_to_thread.side_effect = capture_websocket_event
-    websocket_notifier = WebSocketNotifier(websocket_manager)
+    websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
     breaker = CircuitBreaker(
-        name="event_sequence_service",
-        failure_threshold=2,
+        name="event_sequence_service", failure_threshold=2,
         recovery_timeout=0.5
     )
     
@@ -974,11 +972,10 @@ async def test_circuit_breaker_websocket_error_notifications():
                 error_notifications.append(message)
     
     websocket_manager.send_to_thread.side_effect = capture_error_notification
-    websocket_notifier = WebSocketNotifier(websocket_manager)
+    websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
     breaker = CircuitBreaker(
-        name="error_notification_service", 
-        failure_threshold=2,
+        name="error_notification_service", failure_threshold=2,
         recovery_timeout=1.0
     )
     
@@ -1029,14 +1026,13 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
             })
     
     websocket_manager.send_to_thread.side_effect = thread_safe_capture
-    websocket_notifier = WebSocketNotifier(websocket_manager)
+    websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
     
     # Create multiple circuit breakers for concurrent testing
     breakers = []
     for i in range(3):
         breaker = CircuitBreaker(
-            name=f"concurrent_service_{i}",
-            failure_threshold=2,
+            name=f"concurrent_service_{i}", failure_threshold=2,
             recovery_timeout=0.5
         )
         breakers.append(breaker)

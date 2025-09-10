@@ -157,7 +157,7 @@ class TestWebSocketConnectivityAuthenticated:
             
             try:
                 # Create WebSocket notifier for real event testing
-                notifier = WebSocketNotifier(ws_manager)
+                notifier = WebSocketNotifier.create_for_user(ws_manager)
                 
                 # Test authenticated WebSocket messaging for user1
                 logger.info("📡 Testing authenticated WebSocket messaging...")
@@ -166,8 +166,7 @@ class TestWebSocketConnectivityAuthenticated:
                 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
                 
                 context1 = AgentExecutionContext(
-                    run_id=f"websocket-test-{user1_data.user_id}",
-                    thread_id=user1_conn_id,
+                    run_id=f"websocket-test-{user1_data.user_id}", thread_id=user1_conn_id,
                     user_id=user1_data.user_id,
                     agent_name="connectivity_test_agent",
                     retry_count=0,
@@ -308,14 +307,13 @@ class TestWebSocketConnectivityAuthenticated:
             
             try:
                 # Create WebSocket notifier
-                notifier = WebSocketNotifier(ws_manager)
+                notifier = WebSocketNotifier.create_for_user(ws_manager)
                 
                 # Create execution context for message sequence testing
                 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
                 
                 context = AgentExecutionContext(
-                    run_id=f"sequence-test-{user_data.user_id}",
-                    thread_id=conn_id,
+                    run_id=f"sequence-test-{user_data.user_id}", thread_id=conn_id,
                     user_id=user_data.user_id,
                     agent_name="message_sequence_agent",
                     retry_count=0,

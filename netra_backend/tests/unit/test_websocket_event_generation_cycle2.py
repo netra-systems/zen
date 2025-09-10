@@ -36,7 +36,7 @@ class TestWebSocketEventGeneration:
     @pytest.fixture
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocket notifier with mocked manager."""
-        return WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        return WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
     
     @pytest.fixture
     def mock_execution_context(self):

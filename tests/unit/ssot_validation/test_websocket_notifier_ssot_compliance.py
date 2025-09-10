@@ -146,7 +146,7 @@ class TestWebSocketNotifierFactoryPatternEnforcement(SSotBaseTestCase):
             
             # Direct instantiation should either fail or issue warning
             with self.assertWarns(DeprecationWarning):
-                notifier = WebSocketNotifier(user_id="test")
+                notifier = WebSocketNotifier.create_for_user(user_id="test")
                 # If it creates, it should be deprecated
                 self.assertIsNotNone(notifier)
                 

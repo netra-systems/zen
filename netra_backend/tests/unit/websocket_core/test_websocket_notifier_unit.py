@@ -33,14 +33,13 @@ class TestWebSocketNotifierCore:
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier instance with warnings suppressed."""
         with patch('warnings.warn'):  # Suppress deprecation warning in tests
-            return WebSocketNotifier(mock_websocket_manager)
+            return WebSocketNotifier.create_for_user(mock_websocket_manager)
     
     @pytest.fixture
     def sample_context(self):
         """Create sample execution context."""
         return AgentExecutionContext(
-            agent_name="test_agent",
-            thread_id="test_thread_123",
+            agent_name="test_agent", thread_id="test_thread_123",
             user_id="test_user_456",
             run_id="run_789"
         )
@@ -164,14 +163,13 @@ class TestWebSocketNotifierErrorHandling:
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier instance."""
         with patch('warnings.warn'):
-            return WebSocketNotifier(mock_websocket_manager)
+            return WebSocketNotifier.create_for_user(mock_websocket_manager)
     
     @pytest.fixture
     def sample_context(self):
         """Create sample execution context."""
         return AgentExecutionContext(
-            agent_name="cost_optimizer",
-            thread_id="thread_123",
+            agent_name="cost_optimizer", thread_id="thread_123",
             user_id="user_456",
             run_id="run_789"
         )
@@ -268,14 +266,13 @@ class TestWebSocketNotifierMessageBuilding:
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier instance."""
         with patch('warnings.warn'):
-            return WebSocketNotifier(mock_websocket_manager)
+            return WebSocketNotifier.create_for_user(mock_websocket_manager)
     
     @pytest.fixture
     def sample_context(self):
         """Create sample execution context."""
         return AgentExecutionContext(
-            agent_name="data_analyzer",
-            thread_id="thread_abc",
+            agent_name="data_analyzer", thread_id="thread_abc",
             user_id="user_xyz",
             run_id="run_123"
         )
