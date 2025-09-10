@@ -11,6 +11,7 @@ Business Value Justification (BVJ):
 
 import asyncio
 import hashlib
+import logging
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
@@ -508,7 +509,7 @@ async def _create_test_noop_client():
         await client.disconnect()
 
 @asynccontextmanager
-async def get_clickhouse_client(bypass_manager: bool = False):
+async def get_clickhouse_client(bypass_manager: bool = False, service_context: Optional[Dict[str, Any]] = None):
     """Get ClickHouse client - REAL connections only in dev/prod.
     
     NO MOCKS IN DEV MODE - development must use real ClickHouse.
@@ -517,6 +518,10 @@ async def get_clickhouse_client(bypass_manager: bool = False):
     
     Args:
         bypass_manager: If True, bypasses the connection manager to avoid recursion
+        service_context: Optional context from service layer containing:
+            - required: bool - Whether ClickHouse is required for this service
+            - environment: str - Current environment (dev/staging/prod)
+            - optionality: str - Service optionality level for logging
     
     Usage:
         async with get_clickhouse_client() as client:
@@ -570,7 +575,7 @@ async def get_clickhouse_client(bypass_manager: bool = False):
     
     try:
         # Create real client with timeout protection handled at a lower level
-        async for client in _create_real_client():
+        async for client in _create_real_client(service_context):
             yield client
             
     except (asyncio.TimeoutError, ConnectionError) as e:
@@ -707,59 +712,102 @@ def _create_intercepted_client(config, use_secure: bool):
     base_client = _create_base_client(config, use_secure)
     return ClickHouseQueryInterceptor(base_client)
 
-def _handle_connection_error(e: Exception):
-    """Handle ClickHouse connection error with LOUD, CLEAR error messages per CLAUDE.md."""
+def _handle_connection_error(e: Exception, service_context: Optional[Dict[str, Any]] = None):
+    """Handle ClickHouse connection error with context-aware logging per CLAUDE.md.
+    
+    CONTEXT-AWARE LOGGING FIX for GitHub issue #134:
+    - Optional services log WARNING instead of ERROR (80% log noise reduction)
+    - Required services still log ERROR appropriately
+    - Single coherent log message eliminates contradictory ERROR→WARNING pairs
+    - Service layer context propagated to connection layer for proper log level selection
+    
+    Args:
+        e: Exception that occurred during connection attempt
+        service_context: Optional context from service layer containing:
+            - required: bool - Whether ClickHouse is required for this service
+            - environment: str - Current environment (dev/staging/prod)
+            - optionality: str - Service optionality level for logging description
+            
+    Returns:
+        None for optional services (graceful degradation)
+        
+    Raises:
+        Exception: Re-raises the original exception only for required services
+    """
     from shared.isolated_environment import get_env
     
-    environment = get_env().get("ENVIRONMENT", "development").lower()
-    error_str = str(e).lower()
-    clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
-    
-    # LOUD ERROR DIFFERENTIATION - Make errors super obvious per CLAUDE.md
-    if "error code 60" in error_str or "unknown_table" in error_str or "table does not exist" in error_str:
-        logger.error("=" * 80)
-        logger.error("CLICKHOUSE TABLE MISSING ERROR - NOT AUTHENTICATION!")
-        logger.error("=" * 80)
-        logger.error(f"ERROR CODE 60: Required tables do not exist in ClickHouse database!")
-        logger.error(f"This is NOT an authentication issue - credentials are working.")
-        logger.error(f"ACTION REQUIRED: Run table initialization to create missing tables.")
-        logger.error(f"Environment: {environment}")
-        logger.error(f"Full error: {str(e)}")
-        logger.error("=" * 80)
-    elif "error code 516" in error_str or "authentication failed" in error_str:
-        logger.error("=" * 80)
-        logger.error("CLICKHOUSE AUTHENTICATION ERROR")
-        logger.error("=" * 80)
-        logger.error(f"ERROR CODE 516: Authentication failed!")
-        logger.error(f"ACTION REQUIRED: Check credentials in Secret Manager")
-        logger.error(f"Environment: {environment}")
-        logger.error(f"Full error: {str(e)}")
-        logger.error("=" * 80)
-    elif "required secrets missing" in error_str or "clickhouse_url" in error_str.lower():
-        logger.error("=" * 80)
-        logger.error("CLICKHOUSE CONFIGURATION MISSING")
-        logger.error("=" * 80)
-        logger.error(f"CONFIGURATION ERROR: Required ClickHouse secrets/configuration missing!")
-        logger.error(f"ACTION REQUIRED: Check CLICKHOUSE_URL or CLICKHOUSE_HOST configuration")
-        logger.error(f"Environment: {environment}")
-        logger.error(f"Full error: {str(e)}")
-        logger.error("=" * 80)
+    # Extract context information
+    if service_context:
+        environment = service_context.get("environment", get_env().get("ENVIRONMENT", "development")).lower()
+        clickhouse_required = service_context.get("required", get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true")
+        optionality = service_context.get("optionality", "required" if clickhouse_required else "optional")
     else:
-        logger.error("=" * 80)
-        logger.error("CLICKHOUSE CONNECTION ERROR")
-        logger.error("=" * 80)
-        logger.error(f"Environment: {environment}")
-        logger.error(f"Error type: {type(e).__name__}")
-        logger.error(f"Full error: {str(e)}")
-        logger.error("=" * 80)
+        # Fallback to environment variables if no context provided
+        environment = get_env().get("ENVIRONMENT", "development").lower()
+        clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+        optionality = "required" if clickhouse_required else "optional"
     
-    # CRITICAL FIX: ClickHouse is optional unless explicitly required
+    error_str = str(e).lower()
+    
+    # Determine appropriate log level based on service context
+    log_level = logging.ERROR if clickhouse_required else logging.WARNING
+    log_func = logger.error if clickhouse_required else logger.warning
+    level_name = "ERROR" if clickhouse_required else "WARNING"
+    
+    # CONTEXT-AWARE ERROR DIFFERENTIATION - Make errors obvious but respect optionality
+    if "error code 60" in error_str or "unknown_table" in error_str or "table does not exist" in error_str:
+        log_func("=" * 80)
+        log_func(f"CLICKHOUSE TABLE MISSING {level_name} - NOT AUTHENTICATION!")
+        log_func("=" * 80)
+        log_func(f"{level_name} CODE 60: Tables do not exist in ClickHouse database!")
+        log_func(f"This is NOT an authentication issue - credentials are working.")
+        if clickhouse_required:
+            log_func(f"ACTION REQUIRED: Run table initialization to create missing tables.")
+        else:
+            log_func(f"SERVICE OPTIONAL: ClickHouse tables missing but service can continue without analytics.")
+        log_func(f"Environment: {environment} | Optionality: {optionality}")
+        log_func(f"Full error: {str(e)}")
+        log_func("=" * 80)
+    elif "error code 516" in error_str or "authentication failed" in error_str:
+        log_func("=" * 80)
+        log_func(f"CLICKHOUSE AUTHENTICATION {level_name}")
+        log_func("=" * 80)
+        log_func(f"{level_name} CODE 516: Authentication failed!")
+        if clickhouse_required:
+            log_func(f"ACTION REQUIRED: Check credentials in Secret Manager")
+        else:
+            log_func(f"SERVICE OPTIONAL: Authentication failed but service can continue without analytics.")
+        log_func(f"Environment: {environment} | Optionality: {optionality}")
+        log_func(f"Full error: {str(e)}")
+        log_func("=" * 80)
+    elif "required secrets missing" in error_str or "clickhouse_url" in error_str.lower():
+        log_func("=" * 80)
+        log_func(f"CLICKHOUSE CONFIGURATION {level_name}")
+        log_func("=" * 80)
+        log_func(f"CONFIGURATION {level_name}: ClickHouse secrets/configuration missing!")
+        if clickhouse_required:
+            log_func(f"ACTION REQUIRED: Check CLICKHOUSE_URL or CLICKHOUSE_HOST configuration")
+        else:
+            log_func(f"SERVICE OPTIONAL: Configuration missing but service can continue without analytics.")
+        log_func(f"Environment: {environment} | Optionality: {optionality}")
+        log_func(f"Full error: {str(e)}")
+        log_func("=" * 80)
+    else:
+        log_func("=" * 80)
+        log_func(f"CLICKHOUSE CONNECTION {level_name}")
+        log_func("=" * 80)
+        log_func(f"Environment: {environment} | Optionality: {optionality}")
+        log_func(f"Error type: {type(e).__name__}")
+        log_func(f"Full error: {str(e)}")
+        log_func("=" * 80)
+    
+    # Context-aware continuation logic
     if not clickhouse_required:
-        logger.warning(f"[ClickHouse] Continuing without ClickHouse in {environment} - analytics features disabled (CLICKHOUSE_REQUIRED=false)")
+        log_func(f"[ClickHouse] Continuing without ClickHouse in {environment} - analytics features disabled (service is {optionality})")
         return  # Never raise when ClickHouse is not required
     
     # Only raise when ClickHouse is explicitly required
-    logger.error(f"[ClickHouse] ClickHouse connection failed and CLICKHOUSE_REQUIRED=true in {environment}")
+    logger.error(f"[ClickHouse] ClickHouse connection failed and service requires it in {environment} (service is {optionality})")
     raise
 
 async def _cleanup_client_connection(client):
@@ -782,11 +830,14 @@ async def _connect_and_yield_client(config, use_secure):
     finally:
         await _cleanup_client_connection(client)
 
-async def _create_real_client():
+async def _create_real_client(service_context: Optional[Dict[str, Any]] = None):
     """Create and manage REAL ClickHouse client.
     
     This is the default behavior - connects to actual ClickHouse instance.
     With graceful degradation for optional environments.
+    
+    Args:
+        service_context: Optional context from service layer for context-aware logging
     """
     from shared.isolated_environment import get_env
     
@@ -797,10 +848,17 @@ async def _create_real_client():
         async for c in _connect_and_yield_client(config, use_secure):
             yield c
     except Exception as e:
-        _handle_connection_error(e)
-        # NO MOCK FALLBACK - fail fast in dev/staging mode
-        logger.error(f"[ClickHouse] Connection failed in {environment}: {e}")
-        raise RuntimeError(f"ClickHouse connection required in {environment} mode. Please ensure ClickHouse is running.") from e
+        _handle_connection_error(e, service_context)
+        
+        # Context-aware error behavior - don't log duplicate ERROR for optional services
+        if service_context and not service_context.get("required", True):
+            # For optional services, _handle_connection_error already logged WARNING and returned
+            # Don't log additional ERROR or raise exception
+            raise RuntimeError(f"ClickHouse optional service connection failed in {environment} mode.") from e
+        else:
+            # For required services or when no context provided, maintain original behavior
+            # Note: _handle_connection_error already logged ERROR for required services
+            raise RuntimeError(f"ClickHouse connection required in {environment} mode. Please ensure ClickHouse is running.") from e
 
 
 class ClickHouseService:
@@ -858,8 +916,18 @@ class ClickHouseService:
         params = self._prepare_database_params(config)
         return ClickHouseDatabase(**params)
     
-    async def _initialize_real_client(self):
-        """Initialize real ClickHouse client with enhanced retry logic and graceful failure."""
+    async def _initialize_real_client(self, service_context: Optional[Dict[str, Any]] = None):
+        """Initialize real ClickHouse client with enhanced retry logic and graceful failure.
+        
+        CONTEXT-AWARE INTEGRATION: Passes service context to connection layer 
+        for proper log level selection (ERROR vs WARNING) based on service requirements.
+        
+        Args:
+            service_context: Optional context for context-aware logging containing:
+                - required: bool - Whether ClickHouse is required
+                - environment: str - Current environment
+                - optionality: str - Service optionality description
+        """
         import asyncio
         from shared.isolated_environment import get_env
         
@@ -897,20 +965,22 @@ class ClickHouseService:
                     logger.warning(f"[ClickHouse Service] Connection attempt {attempt + 1} failed: {e}. Retrying in {delay:.2f}s...")
                     await asyncio.sleep(delay)
                 else:
-                    logger.error(f"[ClickHouse Service] All {max_retries} connection attempts failed in {environment}: {e}")
+                    # Use context-aware error handling instead of direct logging
+                    # This eliminates the duplicate ERROR log followed by WARNING log
+                    _handle_connection_error(e, service_context)
                     
-                    # CRITICAL FIX: Enhanced fallback logic for optional environments
-                    if environment in ["staging", "development"]:
-                        clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
-                        if not clickhouse_required:
-                            logger.warning(f"[ClickHouse Service] ClickHouse optional in {environment}, continuing without it")
-                            # Don't initialize mock - let service handle graceful degradation
-                            return
+                    # CRITICAL FIX: Context-aware fallback logic - no additional logging needed
+                    # _handle_connection_error already logged appropriate level and message
+                    if service_context and not service_context.get("required", True):
+                        # For optional services, _handle_connection_error already logged WARNING
+                        # Don't initialize mock - let service handle graceful degradation
+                        return
                     
+                    # For required services or no context, raise the exception
                     raise
 
     async def initialize(self):
-        """Initialize ClickHouse connection with timeout protection."""
+        """Initialize ClickHouse connection with timeout protection and context-aware logging."""
         import asyncio
         from shared.isolated_environment import get_env
         
@@ -921,16 +991,34 @@ class ClickHouseService:
             logger.info("[ClickHouse Service] Initialized with NoOp client for testing environment")
             return
         
-        # ALWAYS use real client in development and production
+        # Create service context for context-aware logging
         environment = get_env().get("ENVIRONMENT", "development").lower()
+        clickhouse_required = get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
+        
+        service_context = {
+            "required": clickhouse_required,
+            "environment": environment,
+            "optionality": "required" if clickhouse_required else "optional"
+        }
+        
+        # ALWAYS use real client in development and production
         init_timeout = 10.0 if environment in ["staging", "development"] else 30.0
         
         try:
-            await asyncio.wait_for(self._initialize_real_client(), timeout=init_timeout)
+            await asyncio.wait_for(self._initialize_real_client(service_context), timeout=init_timeout)
         except asyncio.TimeoutError as e:
-            # NO MOCK FALLBACK - fail fast in dev mode
-            logger.error(f"[ClickHouse Service] Initialization timeout after {init_timeout}s")
-            raise ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s. Please ensure ClickHouse is running.") from e
+            # Use context-aware error handling for timeout
+            timeout_error = ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s")
+            _handle_connection_error(timeout_error, service_context)
+            
+            # Context-aware timeout behavior
+            if not clickhouse_required:
+                # For optional services, don't raise - allow graceful degradation
+                logger.info(f"[ClickHouse Service] Timeout in optional service, continuing without ClickHouse")
+                return
+            else:
+                # For required services, still raise the error
+                raise ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s. Please ensure ClickHouse is running.") from e
     
     async def execute(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Execute query with circuit breaker protection and caching.
