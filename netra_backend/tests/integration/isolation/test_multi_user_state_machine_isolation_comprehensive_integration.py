@@ -15,6 +15,7 @@ Essential for Golden Path multi-user scenarios.
 import pytest
 import asyncio
 import json
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Set
 from enum import Enum
