@@ -143,10 +143,6 @@ markers =
     websocket_coordination: marks tests for WebSocket coordination in workflows
     workflow_validation: marks tests for workflow validation and compliance
     state_persistence: marks tests for state persistence functionality
-    session_management: marks tests for session management and user isolation
-    context_building: marks tests for execution context building and validation
-    flow_context: marks tests for flow context preparation and tracking
-    concurrency: marks tests for concurrency and concurrent execution
 
 [coverage:run]
 source = netra_backend.app
