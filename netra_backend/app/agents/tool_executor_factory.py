@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.core.tools.unified_tool_dispatcher import RequestScopedToolDispatcher
+from netra_backend.app.agents.request_scoped_tool_dispatcher import RequestScopedToolDispatcher
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
@@ -125,7 +125,7 @@ class ToolExecutorFactory:
                     user_context, ws_manager
                 )
                 # Create adapter for backward compatibility
-                from netra_backend.app.agents.request_scoped_tool_dispatcher import WebSocketBridgeAdapter
+                from netra_backend.app.core.tools.unified_tool_dispatcher import WebSocketBridgeAdapter
                 websocket_bridge = WebSocketBridgeAdapter(websocket_emitter, user_context)
                 logger.debug(f"🔌 Created WebSocket bridge adapter for {user_context.get_correlation_id()}")
             else:

@@ -934,6 +934,58 @@ class AgentRegistry(BaseAgentRegistry):
         
         logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async) - SSOT compliant adapter")
     
+    def set_websocket_bridge(self, bridge: 'AgentWebSocketBridge') -> None:
+        """Override parent method to maintain SSOT interface contract.
+        
+        This method implements the parent UniversalAgentRegistry interface while
+        maintaining compatibility with our WebSocketManager-based system.
+        
+        SSOT COMPLIANCE: This ensures Liskov Substitution Principle compliance
+        by implementing the exact interface signature expected by the parent.
+        
+        Args:
+            bridge: AgentWebSocketBridge instance
+            
+        Raises:
+            ValueError: If bridge is None
+        """
+        if bridge is None:
+            raise ValueError("WebSocket bridge cannot be None")
+        
+        # Call parent implementation to maintain SSOT compliance
+        super().set_websocket_bridge(bridge)
+        
+        # If this is our adapter, extract the WebSocketManager for internal use
+        if isinstance(bridge, WebSocketManagerAdapter):
+            self.websocket_manager = bridge._websocket_manager
+            logger.info("✅ WebSocket bridge set via adapter - SSOT interface compliance maintained")
+        else:
+            # For direct AgentWebSocketBridge instances, store and create backwards adapter if needed
+            logger.info("✅ WebSocket bridge set directly - SSOT interface compliance maintained")
+        
+        # Propagate to user sessions if they exist (safely handle no event loop)
+        try:
+            asyncio.create_task(self._propagate_bridge_to_sessions(bridge))
+        except RuntimeError:
+            # No event loop running, sessions will get bridge on next access
+            logger.debug("No event loop available - bridge will be propagated on next session access")
+    
+    async def _propagate_bridge_to_sessions(self, bridge: 'AgentWebSocketBridge') -> None:
+        """Propagate WebSocket bridge to existing user sessions."""
+        try:
+            if self._user_sessions:
+                logger.info(f"Propagating WebSocket bridge to {len(self._user_sessions)} user sessions")
+                
+                for user_id, user_session in self._user_sessions.items():
+                    try:
+                        # Set WebSocket bridge directly on user session
+                        user_session._websocket_bridge = bridge
+                        logger.debug(f"Updated WebSocket bridge for user {user_id}")
+                    except Exception as e:
+                        logger.error(f"Failed to update WebSocket bridge for user {user_id}: {e}")
+        except Exception as e:
+            logger.warning(f"Failed to propagate WebSocket bridge to sessions: {e}")
+    
     # Override get method to pass WebSocket bridge to factories
     def get(self, key: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:
         """Get singleton or create instance via factory with WebSocket bridge integration.

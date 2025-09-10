@@ -18,6 +18,8 @@ from auth_service.auth_core.models.auth_models import RefreshRequest
 from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
+# SSOT: Import SERVICE_ID constant for critical auth validation
+from shared.constants.service_identifiers import SERVICE_ID
 
 # Import MockAuthService for testing (conditional import for deployment safety)
 try:

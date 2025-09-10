@@ -30,6 +30,8 @@ from netra_backend.app.core.environment_constants import get_current_environment
 from netra_backend.app.core.tracing import TracingManager
 from enum import Enum
 from shared.isolated_environment import get_env
+# SSOT: Import SERVICE_ID constant
+from shared.constants.service_identifiers import SERVICE_ID
 
 logger = logging.getLogger(__name__)
 
@@ -411,7 +413,7 @@ class AuthServiceClient:
             if not self.service_id:
                 missing_parts.append("SERVICE_ID")
                 logger.error(
-                    "SERVICE_ID is not configured. Set SERVICE_ID=netra-backend in environment. "
+                    f"SERVICE_ID is not configured. Set SERVICE_ID={SERVICE_ID} in environment. "
                     "Auth service will reject requests without proper service ID."
                 )
             if not self.service_secret:

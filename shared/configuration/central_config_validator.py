@@ -1384,6 +1384,56 @@ def get_oauth_client_secret() -> str:
     return validator.get_oauth_client_secret()
 
 
+def validate_oauth_token_comprehensive(token: str) -> bool:
+    """
+    SSOT: Comprehensive OAuth token validation.
+    
+    Replaces duplicate OAuth token validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_token_comprehensive(token)
+
+
+def validate_oauth_credentials_endpoint(credentials: dict) -> dict:
+    """
+    SSOT: OAuth credential validation for routes.
+    
+    Replaces duplicate OAuth credential validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_credentials_endpoint(credentials)
+
+
+def validate_oauth_provider_configuration(provider: str) -> bool:
+    """
+    SSOT: OAuth provider configuration validation.
+    
+    Replaces duplicate OAuth provider validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_provider_configuration(provider)
+
+
+def simulate_oauth_end_to_end() -> dict:
+    """
+    SSOT: OAuth E2E simulation validation.
+    
+    Replaces duplicate OAuth E2E simulation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.simulate_oauth_end_to_end()
+
+
+def validate_oauth_configs_for_environment(environment: str) -> Dict[str, Any]:
+    """
+    SSOT: Validate OAuth configuration for a specific environment.
+    
+    Replaces duplicate OAuth config validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_configs_for_environment(environment)
+
+
 def check_config_before_deletion(config_key: str, service_name: Optional[str] = None) -> Dict[str, Any]:
     """
     Check if a configuration can be safely deleted.

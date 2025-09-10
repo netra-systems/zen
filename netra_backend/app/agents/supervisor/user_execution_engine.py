@@ -641,7 +641,7 @@ class UserExecutionEngine(IExecutionEngine):
         
         Args:
             context: Agent execution context (must match user context)
-            state: Deep agent state for execution
+            user_context: Optional user context for isolation (uses self.context if None)
             
         Returns:
             AgentExecutionResult: Results of agent execution
@@ -650,6 +650,22 @@ class UserExecutionEngine(IExecutionEngine):
             ValueError: If context doesn't match user or is invalid
             RuntimeError: If execution fails
         """
+        # Use the provided user_context or fall back to our instance context
+        effective_user_context = user_context or self.context
+        
+        # Create a DeepAgentState from the context
+        state = DeepAgentState(
+            user_request=context.metadata or {},
+            user_id=effective_user_context.user_id,
+            chat_thread_id=effective_user_context.thread_id,
+            run_id=effective_user_context.run_id,
+            agent_input={
+                'agent_name': context.agent_name,
+                'user_id': effective_user_context.user_id,
+                'thread_id': effective_user_context.thread_id,
+                'context': context.metadata or {}
+            }
+        )
         if not self._is_active:
             raise ValueError(f"UserExecutionEngine {self.engine_id} is no longer active")
         
@@ -1074,6 +1090,95 @@ class UserExecutionEngine(IExecutionEngine):
                     'error': str(e)
                 }
             )
+    
+    async def execute_pipeline(
+        self,
+        steps: List[PipelineStep],
+        context: AgentExecutionContext,
+        user_context: Optional['UserExecutionContext'] = None
+    ) -> List[AgentExecutionResult]:
+        """Execute a pipeline of agent steps with user isolation.
+        
+        Args:
+            steps: List of pipeline steps to execute
+            context: Base execution context for the pipeline
+            user_context: Optional user context for isolation
+            
+        Returns:
+            List[AgentExecutionResult]: Results from each pipeline step
+        """
+        effective_user_context = user_context or self.context
+        results = []
+        
+        logger.info(f"Starting pipeline execution with {len(steps)} steps for user {effective_user_context.user_id}")
+        
+        for i, step in enumerate(steps):
+            try:
+                # Create step-specific context
+                step_context = AgentExecutionContext(
+                    user_id=effective_user_context.user_id,
+                    thread_id=effective_user_context.thread_id,
+                    run_id=effective_user_context.run_id,
+                    request_id=effective_user_context.request_id,
+                    agent_name=step.agent_name,
+                    step=step,
+                    execution_timestamp=datetime.now(timezone.utc),
+                    pipeline_step_num=i + 1,
+                    metadata={
+                        **(context.metadata or {}),
+                        **(step.metadata or {}),
+                        'pipeline_step': i + 1,
+                        'total_steps': len(steps)
+                    }
+                )
+                
+                # Execute the step
+                result = await self.execute_agent(step_context, effective_user_context)
+                results.append(result)
+                
+                logger.debug(f"Pipeline step {i+1}/{len(steps)} completed for user {effective_user_context.user_id}: "
+                           f"{step.agent_name} - {'success' if result.success else 'failed'}")
+                
+                # Stop on failure unless continue_on_error is set
+                if not result.success and not step.metadata.get('continue_on_error', False):
+                    logger.warning(f"Pipeline execution stopped at step {i+1} due to failure: {result.error}")
+                    break
+                    
+            except Exception as e:
+                error_result = AgentExecutionResult(
+                    success=False,
+                    agent_name=step.agent_name,
+                    duration=0.0,
+                    error=str(e),
+                    data=None,
+                    metadata={
+                        'pipeline_step': i + 1,
+                        'total_steps': len(steps),
+                        'user_id': effective_user_context.user_id,
+                        'error_type': type(e).__name__
+                    }
+                )
+                results.append(error_result)
+                
+                logger.error(f"Pipeline step {i+1} failed for user {effective_user_context.user_id}: {e}")
+                
+                # Stop on exception unless continue_on_error is set
+                if not step.metadata.get('continue_on_error', False):
+                    break
+        
+        logger.info(f"Pipeline execution completed for user {effective_user_context.user_id}: "
+                   f"{len(results)} steps executed, "
+                   f"{sum(1 for r in results if r.success)} successful")
+        
+        return results
+    
+    async def get_execution_stats(self) -> Dict[str, Any]:
+        """Get execution performance and health statistics."""
+        return self.get_user_execution_stats()
+    
+    async def shutdown(self) -> None:
+        """Shutdown the execution engine and clean up resources."""
+        await self.cleanup()
     
     async def cleanup(self) -> None:
         """Clean up user engine resources.

@@ -173,7 +173,7 @@ class TestConfigurationManagementCriticalIntegration(BaseIntegrationTest):
         with timestamp suffixes that change every minute.
         
         Critical Scenario: SERVICE_ID with timestamp suffix caused auth failures every
-        60 seconds on 2025-09-07. Auth service expects stable "netra-backend" value.
+        60 seconds on 2025-09-07. Auth service expects stable SSOT SERVICE_ID value.
         """
         # GIVEN: Service configuration with unstable SERVICE_ID (bad pattern)
         with self.isolated_helper.create_isolated_context("auth_test") as context:

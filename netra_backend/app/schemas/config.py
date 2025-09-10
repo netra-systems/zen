@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Optional
 
 # Use backend-specific isolated environment
 from shared.isolated_environment import get_env
+# SSOT: Import SERVICE_ID constant
+from shared.constants.service_identifiers import SERVICE_ID
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -318,7 +320,7 @@ class AppConfig(BaseModel):
     auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
     auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
-    service_id: str = Field(default="netra-backend", description="Service ID for cross-service authentication")
+    service_id: str = Field(default=SERVICE_ID, description="Service ID for cross-service authentication (SSOT)")
     service_secret: Optional[str] = Field(
         default=None, 
         description="Shared secret for secure cross-service authentication. Must be at least 32 characters and different from JWT secret."
