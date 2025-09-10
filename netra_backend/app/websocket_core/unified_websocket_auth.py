@@ -1014,6 +1014,136 @@ async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[s
 WebSocketAuthenticator = UnifiedWebSocketAuthenticator
 UnifiedWebSocketAuth = UnifiedWebSocketAuthenticator
 
+def _validate_critical_environment_configuration() -> Dict[str, Any]:
+    """
+    ISSUE #135 TERTIARY FIX: Validate critical environment variables and auth context.
+    
+    Performs comprehensive validation of environment configuration to prevent
+    WebSocket initialization failures in Cloud Run environments.
+    
+    Returns:
+        Dictionary with validation results and errors
+    """
+    validation_result = {
+        "valid": True,
+        "errors": [],
+        "warnings": [],
+        "checks_performed": [],
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    try:
+        from shared.isolated_environment import get_env
+        env = get_env()
+        
+        if not env:
+            validation_result["valid"] = False
+            validation_result["errors"].append("Environment configuration accessor is None")
+            return validation_result
+        
+        # Check 1: Core environment variables
+        validation_result["checks_performed"].append("core_env_vars")
+        required_env_vars = ["ENVIRONMENT"]
+        for var in required_env_vars:
+            if not env.get(var):
+                validation_result["valid"] = False
+                validation_result["errors"].append(f"Required environment variable '{var}' is missing or empty")
+        
+        # Check 2: Authentication service configuration
+        validation_result["checks_performed"].append("auth_service_config")
+        auth_service_url = env.get("AUTH_SERVICE_URL")
+        if not auth_service_url:
+            validation_result["warnings"].append("AUTH_SERVICE_URL not configured - may cause auth failures")
+        elif len(auth_service_url) < 10:
+            validation_result["warnings"].append(f"AUTH_SERVICE_URL appears malformed: {auth_service_url[:50]}")
+        
+        # Check 3: Cloud Run specific configuration
+        validation_result["checks_performed"].append("cloud_run_config")
+        if env.get("K_SERVICE"):
+            # This is Cloud Run environment
+            google_project = env.get("GOOGLE_CLOUD_PROJECT", "")
+            if not google_project:
+                validation_result["warnings"].append("GOOGLE_CLOUD_PROJECT not set in Cloud Run environment")
+            
+            k_service = env.get("K_SERVICE", "")
+            if not k_service:
+                validation_result["warnings"].append("K_SERVICE not set despite Cloud Run detection")
+        
+        # Check 4: Database configuration (non-critical)
+        validation_result["checks_performed"].append("database_config") 
+        database_url = env.get("DATABASE_URL")
+        if not database_url:
+            validation_result["warnings"].append("DATABASE_URL not configured - may cause service failures")
+        
+        # Check 5: JWT/Authentication secrets
+        validation_result["checks_performed"].append("auth_secrets")
+        jwt_secret = env.get("JWT_SECRET")
+        service_secret = env.get("SERVICE_SECRET")
+        
+        if not jwt_secret and not service_secret:
+            validation_result["warnings"].append("No JWT_SECRET or SERVICE_SECRET configured - auth may fail")
+        
+        # Check 6: Redis configuration for production environments
+        current_env = env.get("ENVIRONMENT", "unknown").lower()
+        if current_env in ["staging", "production"]:
+            validation_result["checks_performed"].append("redis_config")
+            redis_url = env.get("REDIS_URL")
+            if not redis_url:
+                validation_result["warnings"].append(f"REDIS_URL not configured in {current_env} environment")
+        
+        # Log validation summary
+        if validation_result["valid"]:
+            logger.debug(f"🔍 ENV VALIDATION: {len(validation_result['checks_performed'])} checks passed")
+        else:
+            logger.error(f"🔍 ENV VALIDATION: {len(validation_result['errors'])} critical errors found")
+        
+        if validation_result["warnings"]:
+            logger.warning(f"🔍 ENV VALIDATION: {len(validation_result['warnings'])} warnings found")
+            
+    except Exception as e:
+        validation_result["valid"] = False
+        validation_result["errors"].append(f"Environment validation exception: {e}")
+        logger.error(f"Environment validation failed with exception: {e}")
+    
+    return validation_result
+
+
+def _validate_auth_service_health() -> Dict[str, Any]:
+    """
+    ISSUE #135 TERTIARY FIX: Validate authentication service health and connectivity.
+    
+    Returns:
+        Dictionary with auth service health status
+    """
+    health_result = {
+        "healthy": True,
+        "service_available": False,
+        "response_time_ms": None,
+        "error": None,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    try:
+        # Quick check if auth service is accessible
+        from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
+        auth_service = get_unified_auth_service()
+        
+        if not auth_service:
+            health_result["healthy"] = False
+            health_result["error"] = "Unified authentication service is None"
+            return health_result
+        
+        health_result["service_available"] = True
+        logger.debug("✅ AUTH SERVICE: Unified authentication service is available")
+        
+    except Exception as e:
+        health_result["healthy"] = False
+        health_result["error"] = f"Auth service check failed: {e}"
+        logger.warning(f"⚠️ AUTH SERVICE: Health check failed - {e}")
+    
+    return health_result
+
+
 # SSOT ENFORCEMENT: Export only SSOT-compliant interfaces
 __all__ = [
     "UnifiedWebSocketAuthenticator",

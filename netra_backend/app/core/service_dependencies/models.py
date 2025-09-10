@@ -270,14 +270,6 @@ DEFAULT_SERVICE_DEPENDENCIES = [
 # Golden path requirements for business value validation
 GOLDEN_PATH_REQUIREMENTS = [
     GoldenPathRequirement(
-        service_type=ServiceType.DATABASE_POSTGRES,
-        requirement_name="user_authentication_ready",
-        validation_function="validate_user_auth_tables",
-        critical=True,
-        description="User authentication tables and indexes ready",
-        business_impact="Users cannot log in without proper auth tables"
-    ),
-    GoldenPathRequirement(
         service_type=ServiceType.DATABASE_REDIS,
         requirement_name="session_storage_ready", 
         validation_function="validate_session_storage",

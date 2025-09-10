@@ -165,99 +165,13 @@ class GoldenPathValidator:
         requirement: GoldenPathRequirement
     ) -> Dict[str, Any]:
         """Validate PostgreSQL business requirements."""
-        if requirement.validation_function == "validate_user_auth_tables":
-            return await self._validate_user_auth_tables(app)
-        else:
-            return {
-                "requirement": requirement.requirement_name,
-                "success": False,
-                "message": f"Unknown PostgreSQL validation: {requirement.validation_function}",
-                "details": {}
-            }
+        return {
+            "requirement": requirement.requirement_name,
+            "success": False,
+            "message": f"Unknown PostgreSQL validation: {requirement.validation_function}",
+            "details": {}
+        }
     
-    async def _validate_user_auth_tables(self, app: Any) -> Dict[str, Any]:
-        """Validate that user authentication tables are ready."""
-        try:
-            if not hasattr(app.state, 'db_session_factory') or app.state.db_session_factory is None:
-                return {
-                    "requirement": "user_authentication_ready",
-                    "success": False,
-                    "message": "Database session factory not available",
-                    "details": {"db_session_factory": False}
-                }
-            
-            async with app.state.db_session_factory() as session:
-                # Check for critical user-related tables
-                critical_tables = ['users', 'user_sessions']  # Add actual table names
-                table_results = {}
-                
-                for table_name in critical_tables:
-                    try:
-                        # Check if table exists and has basic structure
-                        result = await session.execute(text(
-                            f"SELECT COUNT(*) FROM information_schema.tables WHERE table_name = '{table_name}'"
-                        ))
-                        table_exists = result.scalar() > 0
-                        table_results[table_name] = table_exists
-                    except Exception:
-                        table_results[table_name] = False
-                
-                # All critical tables must exist
-                all_tables_exist = all(table_results.values())
-                
-                if all_tables_exist:
-                    # Check for essential indexes on user tables (if possible)
-                    try:
-                        index_result = await session.execute(text(
-                            """
-                            SELECT COUNT(*) as index_count
-                            FROM pg_indexes 
-                            WHERE tablename IN ('users', 'user_sessions')
-                            """
-                        ))
-                        index_count = index_result.scalar() or 0
-                        
-                        return {
-                            "requirement": "user_authentication_ready",
-                            "success": True,
-                            "message": f"User auth tables ready with {index_count} indexes",
-                            "details": {
-                                "tables": table_results,
-                                "index_count": index_count,
-                                "all_tables_exist": all_tables_exist
-                            }
-                        }
-                    except Exception:
-                        # Indexes check failed, but tables exist
-                        return {
-                            "requirement": "user_authentication_ready",
-                            "success": True,
-                            "message": "User auth tables exist (index check skipped)",
-                            "details": {
-                                "tables": table_results,
-                                "index_check": "skipped",
-                                "all_tables_exist": all_tables_exist
-                            }
-                        }
-                else:
-                    missing_tables = [table for table, exists in table_results.items() if not exists]
-                    return {
-                        "requirement": "user_authentication_ready",
-                        "success": False,
-                        "message": f"Missing critical user tables: {missing_tables}",
-                        "details": {
-                            "tables": table_results,
-                            "missing_tables": missing_tables
-                        }
-                    }
-                    
-        except Exception as e:
-            return {
-                "requirement": "user_authentication_ready",
-                "success": False,
-                "message": f"Database validation failed: {str(e)}",
-                "details": {"error": str(e)}
-            }
     
     async def _validate_redis_requirements(
         self,

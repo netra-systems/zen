@@ -10,6 +10,8 @@ This document presents the complete "golden path" analysis of Netra Apex's user 
 
 **CRITICAL STATUS (2025-09-09)**: Recent comprehensive analysis has identified multiple **P0 CRITICAL** infrastructure issues that continue to block the golden path despite significant remediation efforts. These findings represent the "error behind the error" pattern where initial fixes revealed deeper systemic issues.
 
+**🎯 DEMO MODE CONFIGURATION (2025-09-09)**: For isolated demonstration environments, the system now defaults to **DEMO_MODE=1** which bypasses authentication requirements for WebSocket connections. This allows seamless demonstration of chat functionality in completely isolated networks without requiring OAuth/JWT setup.
+
 ## Table of Contents
 
 1. [Ideal State: Golden Path Flow](#ideal-state-golden-path-flow)
@@ -34,7 +36,9 @@ flowchart TD
     
     subgraph "Connection & Authentication"
         WS_CONNECT[WebSocket Connection Established]
+        DEMO_CHECK{Demo Mode Enabled?}
         JWT_AUTH[JWT Authentication]
+        DEMO_AUTH[Demo User Authentication Bypass]
         USER_CTX[UserExecutionContext Created]
         WS_READY[Connection Ready - Welcome Message Sent]
     end
