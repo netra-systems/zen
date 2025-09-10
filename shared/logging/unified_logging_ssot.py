@@ -698,6 +698,65 @@ class UnifiedLoggingSSOT:
         perf_context.update(kwargs)
         self.info(f"Performance: {operation} completed in {duration:.3f}s", **perf_context)
     
+
+    def log_api_call(self, method: str, url: str, status_code: int, duration: float, **kwargs):
+        """Log API call details with SSOT context."""
+        api_context = {
+            'api_method': method,
+            'api_url': url,
+            'api_status_code': status_code,
+            'api_duration_seconds': duration,
+            'api_call_metric': True
+        }
+        api_context.update(kwargs)
+        log_level = 'WARNING' if status_code >= 400 else 'INFO'
+        message = f'API Call: {method} {url} -> {status_code} ({duration:.3f}s)'
+        
+        if log_level == 'WARNING':
+            self.warning(message, **api_context)
+        else:
+            self.info(message, **api_context)
+    
+    def get_execution_time_decorator(self):
+        """Get execution time decorator for backward compatibility."""
+        def execution_time_decorator(operation_name: str):
+            """Decorator to log execution time."""
+            def decorator(func):
+                @wraps(func)
+                def sync_wrapper(*args, **kwargs):
+                    start_time = datetime.utcnow()
+                    try:
+                        result = func(*args, **kwargs)
+                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        self.log_performance(operation_name, duration)
+                        return result
+                    except Exception as e:
+                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        self.error(f'Operation {operation_name} failed after {duration:.3f}s: {e}')
+                        raise
+                
+                @wraps(func)
+                async def async_wrapper(*args, **kwargs):
+                    start_time = datetime.utcnow()
+                    try:
+                        result = await func(*args, **kwargs)
+                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        self.log_performance(operation_name, duration)
+                        return result
+                    except Exception as e:
+                        duration = (datetime.utcnow() - start_time).total_seconds()
+                        self.error(f'Operation {operation_name} failed after {duration:.3f}s: {e}')
+                        raise
+                
+                # Return appropriate wrapper based on function type
+                import asyncio
+                if asyncio.iscoroutinefunction(func):
+                    return async_wrapper
+                else:
+                    return sync_wrapper
+            return decorator
+        return execution_time_decorator
+
     async def shutdown(self):
         """Gracefully shutdown SSOT logging system."""
         await logger.complete()

@@ -87,7 +87,7 @@ class TestStatePersistenceSSotViolations(SSotBaseTestCase):
         assert not optimized_module_found, "Optimized persistence should not exist yet (SSOT violation)"
         
         # This documents the SSOT violation: we have references to non-existent module
-        self.fail("SSOT VIOLATION: References to non-existent optimized_state_persistence module break imports")
+        pytest.fail("SSOT VIOLATION: References to non-existent optimized_state_persistence module break imports")
         
     def test_reproduction_documentation_references_broken_imports(self):
         """
@@ -108,10 +108,10 @@ class TestStatePersistenceSSotViolations(SSotBaseTestCase):
             assert has_broken_references, "Documentation should reference non-existent module (proving SSOT violation)"
             
             # This is the SSOT violation - docs reference non-existent code
-            self.fail("SSOT VIOLATION: Documentation references non-existent state_persistence_optimized module")
+            pytest.fail("SSOT VIOLATION: Documentation references non-existent state_persistence_optimized module")
         else:
             # If documentation doesn't exist, that's also a problem for a feature being referenced
-            self.fail("DOCUMENTATION MISSING: No documentation for referenced optimized persistence feature")
+            pytest.fail("DOCUMENTATION MISSING: No documentation for referenced optimized persistence feature")
             
     def test_reproduction_scripts_break_on_import(self):
         """
@@ -136,10 +136,10 @@ class TestStatePersistenceSSotViolations(SSotBaseTestCase):
                 # This would fail if we tried to import/execute the script
                 exec(compile(script_content, str(demo_script), 'exec'))
                 
-            self.fail("SSOT VIOLATION: Demo script contains imports that break execution")
+            pytest.fail("SSOT VIOLATION: Demo script contains imports that break execution")
         else:
             # If the script doesn't exist, that's also a violation of documented functionality
-            self.fail("SCRIPT MISSING: Referenced demo_optimized_persistence.py does not exist")
+            pytest.fail("SCRIPT MISSING: Referenced demo_optimized_persistence.py does not exist")
 
     def test_golden_path_impact_assessment(self):
         """
@@ -158,7 +158,7 @@ class TestStatePersistenceSSotViolations(SSotBaseTestCase):
         }
         
         # This test documents the current broken state
-        self.fail(f"GOLDEN PATH IMPACT: SSOT violation affects business-critical functionality: {ssot_violation_impact}")
+        pytest.fail(f"GOLDEN PATH IMPACT: SSOT violation affects business-critical functionality: {ssot_violation_impact}")
 
 
 class TestStatePersistenceModuleStructure(SSotBaseTestCase):
@@ -199,8 +199,8 @@ class TestStatePersistenceModuleStructure(SSotBaseTestCase):
         total_services = len(existing_services) + len(referenced_services)
         
         if total_services > 1:
-            self.fail(f"SSOT VIOLATION: Found {total_services} persistence services - should be exactly 1. "
-                     f"Existing: {existing_services}, Referenced: {referenced_services}")
+            pytest.fail(f"SSOT VIOLATION: Found {total_services} persistence services - should be exactly 1. "
+                       f"Existing: {existing_services}, Referenced: {referenced_services}")
                      
     def test_consolidated_persistence_service_missing(self):
         """
@@ -230,5 +230,5 @@ class TestStatePersistenceModuleStructure(SSotBaseTestCase):
                 
         # SSOT violation: should have exactly 1 consolidated service
         if len(services_found) != 1:
-            self.fail(f"SSOT VIOLATION: Found {len(services_found)} persistence services, should be exactly 1 consolidated service. "
-                     f"Services: {services_found}")
+            pytest.fail(f"SSOT VIOLATION: Found {len(services_found)} persistence services, should be exactly 1 consolidated service. "
+                       f"Services: {services_found}")
