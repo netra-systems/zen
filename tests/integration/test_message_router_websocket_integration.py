@@ -20,7 +20,7 @@ import websockets
 import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
+from test_framework.ssot.real_websocket_test_client import RealWebSocketTestClient
 from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.types import MessageType, create_standard_message
 from netra_backend.app.websocket_core import create_websocket_manager
@@ -34,7 +34,7 @@ class TestMessageRouterWebSocketIntegration(SSotAsyncTestCase):
         await super().asyncSetUp()
         
         # Initialize real WebSocket components (no mocks in integration tests)
-        self.websocket_utility = WebSocketTestUtility()
+        self.websocket_client = RealWebSocketTestClient()
         self.websocket_manager = create_websocket_manager()
         self.message_router = MessageRouter()
         
@@ -45,7 +45,7 @@ class TestMessageRouterWebSocketIntegration(SSotAsyncTestCase):
         
     async def asyncTearDown(self):
         """Clean up WebSocket connections."""
-        await self.websocket_utility.cleanup()
+        await self.websocket_client.cleanup()
         await super().asyncTearDown()
         
     async def test_websocket_message_routing_with_real_connections(self):
@@ -59,7 +59,7 @@ class TestMessageRouterWebSocketIntegration(SSotAsyncTestCase):
         
         try:
             # Attempt to create WebSocket connection through router
-            websocket = await self.websocket_utility.create_test_connection(
+            websocket = await self.websocket_client.create_test_connection(
                 user_id=user_id,
                 connection_id=connection_id
             )
