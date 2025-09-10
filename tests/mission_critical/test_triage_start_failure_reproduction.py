@@ -42,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 # Mission Critical Imports - Real Services  
-from netra_backend.app.websocket_core.agent_handler import AgentHandler
+from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.dependencies import get_request_scoped_db_session
 from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
 from shared.id_generation import UnifiedIdGenerator
@@ -96,7 +96,7 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
             self.ws_manager = AsyncMock()
         
         # Real agent handler instance (this is where the failure occurs)
-        self.agent_handler = AgentHandler()
+        self.agent_handler = AgentMessageHandler()
         
         # Triage message that triggers agent start
         self.triage_message = {
