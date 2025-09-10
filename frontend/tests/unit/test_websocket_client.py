@@ -155,6 +155,15 @@ class WebSocketClient:
         if not self.connected or not self.websocket:
             # Queue message for when connected
             self.message_queue.append({"type": message_type, "data": data})
+            
+            # Notify error listeners about failed send attempt
+            error_reason = "not_connected" if not self.connected else "no_websocket"
+            for listener in self.error_listeners:
+                try:
+                    await listener("send_error", f"Cannot send message: {error_reason}")
+                except Exception:
+                    pass
+                    
             return False
             
         try:
