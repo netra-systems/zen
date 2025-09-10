@@ -26,10 +26,51 @@
 - **ISSUE CREATED:** GitHub #188
 - **PROGRESS TRACKER:** This file created
 
-### 1) DISCOVER AND PLAN TEST 🔄 NEXT
-- [ ] Find existing tests protecting E2E base class inheritance
-- [ ] Plan unit/integration tests for SSOT migration validation
-- [ ] Design failing tests to catch BaseE2ETest usage
+### 1) DISCOVER AND PLAN TEST 🔄 IN PROGRESS
+
+#### 1.1) DISCOVER EXISTING ✅ COMPLETE
+**FOUND:** Robust test infrastructure protecting E2E inheritance migration
+
+**Mission Critical Tests Found:**
+- `test_ssot_compliance_suite.py` - WebSocket manager, JWT, SSOT compliance
+- `test_mock_policy_violations.py` - IsolatedEnvironment vs os.environ validation
+- `test_inheritance_architecture_violations.py` - **CRITICAL** inheritance validation
+- `test_ssot_framework.py` - **validate_test_class()** function validates inheritance
+
+**Protection Coverage:**
+- ✅ SSOT compliance validation (comprehensive)
+- ✅ Inheritance pattern validation (strong)
+- ✅ Test class validation functions
+- ✅ Base class mapping for categories
+- ⚠️ E2E-specific functionality validation (partial)
+- ❌ Migration path validation (MISSING - need to create)
+
+**Key Risk:** 114 files to migrate, need migration path validation tests
+
+#### 1.2) PLAN TEST STRATEGY ✅ COMPLETE
+
+**STRATEGIC PLAN:** 3 new test suites targeting critical gaps (20% effort)
+
+**Test Suite 1: Migration Validation** (HIGH PRIORITY)
+- Location: `/tests/mission_critical/test_e2e_migration_validation.py`
+- Purpose: FAIL if BaseE2ETest still used, validate SSOT inheritance
+- Tests: 4 tests covering inheritance violations, SSOT compliance, environment isolation
+
+**Test Suite 2: Functionality Preservation** (MEDIUM PRIORITY)  
+- Location: `/tests/integration/test_e2e_functionality_preservation.py`
+- Purpose: Ensure BaseE2ETest capabilities preserved in SSOT migration
+- Tests: 4 tests covering port utilities, process management, health checking, setup/teardown
+
+**Test Suite 3: SSOT Compliance Enhancement** (ENHANCEMENT)
+- Location: `/tests/mission_critical/test_e2e_ssot_compliance.py` 
+- Purpose: Enhance existing SSOT testing for E2E-specific validation
+- Tests: 3 tests covering category mapping, test validation, pattern compliance
+
+**Execution Strategy:**
+- Mission Critical: Fast execution, no Docker
+- Integration: Real services, no Docker for inheritance validation
+- E2E Staging: GCP remote for functionality validation
+- All via unified_test_runner.py (SSOT execution)
 
 ### 2) EXECUTE TEST PLAN 
 - [ ] Create new SSOT compliance tests (20% of work)
