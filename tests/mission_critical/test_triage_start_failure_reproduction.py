@@ -146,14 +146,23 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
             mock_thread_service.return_value = AsyncMock()
             mock_message_handler.return_value = AsyncMock()
             
+            # Create a mock WebSocket message to trigger the problematic path
+            mock_message = MagicMock()
+            mock_message.type = 'start_agent'
+            mock_message.payload = {
+                'agent_type': 'triage',
+                'user_request': self.triage_message['content'],
+                'thread_id': self.thread_id,
+                'run_id': self.run_id
+            }
+            mock_message.thread_id = self.thread_id
+            
             # This should reproduce the EXACT failure from agent_handler.py line 125
             with pytest.raises(TypeError) as exc_info:
-                await self.agent_handler.start_agent(
-                    agent_type='triage',
-                    context=execution_context,
+                await self.agent_handler._handle_message_v3_clean(
+                    user_id=self.user_id,
                     websocket=self.mock_websocket,
-                    ws_manager=self.ws_manager,
-                    connection_id=self.connection_id
+                    message=mock_message
                 )
             
             # Validate this is the exact error that blocks triage agent start
