@@ -111,7 +111,9 @@ class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
             # Get source file
             source_file = inspect.getfile(engine_class)
             
-            engine_analysis[engine_class.__name__] = {
+            # Use module + class name to avoid key conflicts with same-named classes
+            key = f"{engine_class.__module__}.{engine_class.__name__}"
+            engine_analysis[key] = {
                 'methods': methods,
                 'source_file': source_file,
                 'base_classes': [base.__name__ for base in engine_class.__mro__[1:]],

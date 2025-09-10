@@ -148,8 +148,43 @@ python -m pytest tests/mission_critical/test_database_ssot_function_violations.p
 
 **Status:** All tests pass collection and reproduce SSOT violations as designed ✅
 
+## SSOT Remediation Strategy (Step 3)
+
+**Business Impact:** $500K+ ARR at risk - WebSocket connections failing due to database SSOT violations
+
+### 3-Phase Remediation Plan
+
+**Phase 1: CRITICAL - Restore WebSocket Functionality** (Priority 1)
+- **Analysis:** `get_db_session_factory` is test artifact, not production function  
+- **Action:** Update tests to use correct SSOT approach (`get_database_manager`)
+- **Target:** Fix missing function blocking golden path WebSocket connections
+- **Risk:** LOW (test-only changes)
+
+**Phase 2: HIGH - Consolidate Duplicate DatabaseManager Classes** (Priority 2)  
+- **Keep:** `/netra_backend/app/db/database_manager.py` as canonical SSOT
+- **Migrate:** Update `/netra_backend/app/database/__init__.py` to import from SSOT
+- **Preserve:** `AuthDatabaseManager` (different service boundary)
+- **Update:** 15+ files importing from duplicate locations
+
+**Phase 3: MEDIUM - Resolve Circular Import Dependencies** (Priority 3)
+- **Audit:** Map database-related import dependencies
+- **Restructure:** Move shared interfaces, implement lazy imports
+- **Validate:** Clean startup sequence without import failures
+
+### Safety Measures
+- Atomic changes (reversible at each step)
+- Maintain service boundaries (don't break auth isolation)
+- Test existing functionality before/after each phase
+- Preserve backward compatibility during transition
+
+### Success Metrics
+- Phase 1: All SSOT tests pass, no missing function errors
+- Phase 2: Single DatabaseManager implementation, imports work
+- Phase 3: Clean startup, no circular imports
+- Overall: Golden path functional, 458+ tests continue passing
+
 ## Next Actions
 
-1. **CURRENT STEP:** Plan SSOT remediation strategy
-2. Focus on fixing missing `get_db_session_factory` function first (blocks WebSocket)
-3. Plan consolidation of duplicate DatabaseManager classes
+1. **CURRENT STEP:** Execute remediation plan (Phase 1: Fix test expectations)
+2. Start with lowest risk changes (test updates)
+3. Progress through phases maintaining system stability
