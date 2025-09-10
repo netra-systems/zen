@@ -106,7 +106,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         except Exception as e:
             # If specific auth validation doesn't exist, check individual requirements
             for req in login_config_requirements:
-                env_value = get_env(req)
+                env_value = get_env().get(req)
                 if not env_value:
                     login_config_valid = False
                     login_validation_errors.append(f"Missing required login config: {req}")
@@ -117,8 +117,8 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         # Simulate login process validation
         try:
             # Mock OAuth validation for login
-            oauth_client_id = get_env('OAUTH_CLIENT_ID')
-            oauth_client_secret = get_env('OAUTH_CLIENT_SECRET')
+            oauth_client_id = get_env().get('OAUTH_CLIENT_ID')
+            oauth_client_secret = get_env().get('OAUTH_CLIENT_SECRET')
             
             if oauth_client_id and oauth_client_secret:
                 login_oauth_ready = True
@@ -127,7 +127,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
                 login_validation_errors.append("OAuth not configured for login")
             
             # Mock database connectivity for user authentication
-            database_url = get_env('DATABASE_URL')
+            database_url = get_env().get('DATABASE_URL')
             if database_url and 'postgresql://' in database_url:
                 login_db_ready = True
             else:
@@ -162,12 +162,12 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         
         # Validate minimum login configuration is present
         self.assertIsNotNone(
-            get_env('JWT_SECRET_KEY'),
+            get_env().get('JWT_SECRET_KEY'),
             "Golden Path login requires JWT_SECRET_KEY"
         )
         
         self.assertIsNotNone(
-            get_env('OAUTH_CLIENT_ID'),
+            get_env().get('OAUTH_CLIENT_ID'),
             "Golden Path login requires OAUTH_CLIENT_ID"
         )
 
@@ -200,7 +200,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
             else:
                 # Manual validation of WebSocket requirements
                 for req in websocket_config_requirements:
-                    env_value = get_env(req)
+                    env_value = get_env().get(req)
                     if not env_value:
                         websocket_config_valid = False
                         websocket_validation_errors.append(f"Missing WebSocket config: {req}")
@@ -211,9 +211,9 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         
         # Simulate WebSocket authentication validation
         try:
-            jwt_secret = get_env('JWT_SECRET_KEY')
-            allowed_origins = get_env('WEBSOCKET_ORIGIN_ALLOWED', '').split(',')
-            cors_origins = get_env('CORS_ALLOWED_ORIGINS', '').split(',')
+            jwt_secret = get_env().get('JWT_SECRET_KEY')
+            allowed_origins = get_env().get('WEBSOCKET_ORIGIN_ALLOWED', '').split(',')
+            cors_origins = get_env().get('CORS_ALLOWED_ORIGINS', '').split(',')
             
             # Mock JWT validation for WebSocket auth
             if jwt_secret and len(jwt_secret) >= 32:
@@ -257,12 +257,12 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         
         # Validate essential WebSocket configuration
         self.assertIsNotNone(
-            get_env('JWT_SECRET_KEY'),
+            get_env().get('JWT_SECRET_KEY'),
             "Golden Path WebSocket requires JWT_SECRET_KEY for auth"
         )
         
         self.assertIsNotNone(
-            get_env('WEBSOCKET_ORIGIN_ALLOWED'),
+            get_env().get('WEBSOCKET_ORIGIN_ALLOWED'),
             "Golden Path WebSocket requires WEBSOCKET_ORIGIN_ALLOWED"
         )
 
@@ -297,7 +297,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
             else:
                 # Manual validation of AI response requirements
                 for req in ai_response_config_requirements:
-                    env_value = get_env(req)
+                    env_value = get_env().get(req)
                     if not env_value:
                         ai_config_valid = False
                         ai_validation_errors.append(f"Missing AI response config: {req}")
@@ -309,7 +309,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         # Simulate AI response delivery requirements
         try:
             # Database for conversation persistence
-            database_url = get_env('DATABASE_URL')
+            database_url = get_env().get('DATABASE_URL')
             if database_url and 'postgresql://' in database_url:
                 ai_db_ready = True
             else:
@@ -317,7 +317,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
                 ai_validation_errors.append("Database not ready for AI responses")
             
             # Redis for session management
-            redis_url = get_env('REDIS_URL')
+            redis_url = get_env().get('REDIS_URL')
             if redis_url and 'redis://' in redis_url:
                 ai_cache_ready = True
             else:
@@ -325,7 +325,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
                 ai_validation_errors.append("Redis not ready for AI responses")
             
             # Environment for AI service routing
-            environment = get_env('ENVIRONMENT')
+            environment = get_env().get('ENVIRONMENT')
             if environment in ['staging', 'production']:
                 ai_env_ready = True
             else:
@@ -362,12 +362,12 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         
         # Validate essential AI response configuration
         self.assertIsNotNone(
-            get_env('DATABASE_URL'),
+            get_env().get('DATABASE_URL'),
             "Golden Path AI response requires DATABASE_URL"
         )
         
         self.assertIsNotNone(
-            get_env('REDIS_URL'),
+            get_env().get('REDIS_URL'),
             "Golden Path AI response requires REDIS_URL"
         )
 
@@ -386,9 +386,9 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         # Step 1: OAuth Login Configuration
         try:
             oauth_config = {
-                'OAUTH_CLIENT_ID': get_env('OAUTH_CLIENT_ID'),
-                'OAUTH_CLIENT_SECRET': get_env('OAUTH_CLIENT_SECRET'),
-                'JWT_SECRET_KEY': get_env('JWT_SECRET_KEY')
+                'OAUTH_CLIENT_ID': get_env().get('OAUTH_CLIENT_ID'),
+                'OAUTH_CLIENT_SECRET': get_env().get('OAUTH_CLIENT_SECRET'),
+                'JWT_SECRET_KEY': get_env().get('JWT_SECRET_KEY')
             }
             
             oauth_ready = all(oauth_config.values()) and len(oauth_config['JWT_SECRET_KEY']) >= 32
@@ -406,9 +406,9 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         # Step 2: WebSocket Connection Configuration
         try:
             websocket_config = {
-                'WEBSOCKET_ORIGIN_ALLOWED': get_env('WEBSOCKET_ORIGIN_ALLOWED'),
-                'CORS_ALLOWED_ORIGINS': get_env('CORS_ALLOWED_ORIGINS'),
-                'JWT_SECRET_KEY': get_env('JWT_SECRET_KEY')
+                'WEBSOCKET_ORIGIN_ALLOWED': get_env().get('WEBSOCKET_ORIGIN_ALLOWED'),
+                'CORS_ALLOWED_ORIGINS': get_env().get('CORS_ALLOWED_ORIGINS'),
+                'JWT_SECRET_KEY': get_env().get('JWT_SECRET_KEY')
             }
             
             websocket_ready = all(websocket_config.values())
@@ -426,9 +426,9 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
         # Step 3: AI Response Delivery Configuration
         try:
             ai_config = {
-                'DATABASE_URL': get_env('DATABASE_URL'),
-                'REDIS_URL': get_env('REDIS_URL'),
-                'ENVIRONMENT': get_env('ENVIRONMENT')
+                'DATABASE_URL': get_env().get('DATABASE_URL'),
+                'REDIS_URL': get_env().get('REDIS_URL'),
+                'ENVIRONMENT': get_env().get('ENVIRONMENT')
             }
             
             ai_ready = (
@@ -802,7 +802,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
             
             # Validate configuration requirements for this user flow
             for req in scenario['config_requirements']:
-                config_value = get_env(req)
+                config_value = get_env().get(req)
                 if not config_value:
                     scenario_result['config_valid'] = False
                     scenario_result['errors'].append(f"Missing config {req} for {scenario['name']}")
@@ -820,17 +820,17 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
                     else:
                         # Manual flow step validation
                         if step == 'oauth_redirect':
-                            step_ready = bool(get_env('OAUTH_CLIENT_ID') and get_env('OAUTH_CLIENT_SECRET'))
+                            step_ready = bool(get_env().get('OAUTH_CLIENT_ID') and get_env().get('OAUTH_CLIENT_SECRET'))
                         elif step == 'websocket_connect':
-                            step_ready = bool(get_env('WEBSOCKET_ORIGIN_ALLOWED') and get_env('JWT_SECRET_KEY'))
+                            step_ready = bool(get_env().get('WEBSOCKET_ORIGIN_ALLOWED') and get_env().get('JWT_SECRET_KEY'))
                         elif step in ['user_creation', 'user_lookup', 'conversation_save']:
-                            step_ready = bool(get_env('DATABASE_URL'))
+                            step_ready = bool(get_env().get('DATABASE_URL'))
                         elif step in ['session_establishment', 'session_validation', 'auth_refresh']:
-                            step_ready = bool(get_env('JWT_SECRET_KEY') and get_env('REDIS_URL'))
+                            step_ready = bool(get_env().get('JWT_SECRET_KEY') and get_env().get('REDIS_URL'))
                         elif step in ['session_check', 'timeout_detection']:
-                            step_ready = bool(get_env('SESSION_TIMEOUT') and get_env('REDIS_URL'))
+                            step_ready = bool(get_env().get('SESSION_TIMEOUT') and get_env().get('REDIS_URL'))
                         elif step in ['message_send', 'ai_response']:
-                            step_ready = bool(get_env('DATABASE_URL') and get_env('REDIS_URL'))
+                            step_ready = bool(get_env().get('DATABASE_URL') and get_env().get('REDIS_URL'))
                         else:
                             step_ready = True  # Unknown steps assumed ready
                     

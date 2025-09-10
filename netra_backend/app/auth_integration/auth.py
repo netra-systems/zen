@@ -22,7 +22,7 @@ ARCHITECTURE:
 
 See: CRITICAL_AUTH_ARCHITECTURE.md for full details
 """
-# Create auth-specific logger
+# Create auth-specific logger using SSOT unified logging
 import logging
 from datetime import timedelta
 from typing import Annotated, Dict, Optional, Any
@@ -41,7 +41,8 @@ from netra_backend.app.dependencies import get_request_scoped_db_session as get_
 # Note: Password hashing is handled by the auth service, not directly here
 
 
-logger = logging.getLogger('auth_integration.auth')
+from netra_backend.app.core.unified_logging import get_logger
+logger = get_logger('auth_integration.auth')
 
 security = HTTPBearer()
 optional_security = HTTPBearer(auto_error=False)

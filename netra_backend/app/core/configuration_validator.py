@@ -136,6 +136,7 @@ class ConfigurationValidator:
     - Case-insensitive environment variable lookup
     - Dependency validation between variables
     - Format validation with regex patterns
+    - OAuth validation delegation to SSOT
     """
     
     def __init__(self, environment: str = "development"):
@@ -168,8 +169,216 @@ class ConfigurationValidator:
             "environment": environment
         })
         
+        # Initialize SSOT OAuth validator
+        self._central_validator = None
+        
         # Register default rules
         self._register_default_rules()
+    
+    def _get_central_validator(self):
+        """Get central SSOT validator instance."""
+        if self._central_validator is None:
+            try:
+                from shared.configuration.central_config_validator import get_central_validator
+                self._central_validator = get_central_validator()
+            except ImportError as e:
+                self.logger.warning(f"Central SSOT validator not available: {e}")
+                self._central_validator = None
+        return self._central_validator
+    
+    # =============================================================================
+    # OAuth Validation Methods - FACADE PATTERN (Delegates to SSOT)
+    # =============================================================================
+    
+    def validate_oauth_configuration(self) -> bool:
+        """
+        Validate OAuth configuration using SSOT delegation.
+        
+        This method delegates OAuth validation to the central SSOT validator.
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT OAuth provider validation
+                return central_validator.validate_oauth_provider_configuration('google')
+            else:
+                # Fallback validation
+                env = get_env()
+                oauth_id = env.get(f"GOOGLE_OAUTH_CLIENT_ID_{self.environment.upper()}")
+                oauth_secret = env.get(f"GOOGLE_OAUTH_CLIENT_SECRET_{self.environment.upper()}")
+                return bool(oauth_id and oauth_secret)
+        except Exception as e:
+            self.logger.error(f"OAuth configuration validation failed: {e}")
+            return False
+    
+    def validate_oauth(self) -> Dict[str, Any]:
+        """
+        Validate OAuth credentials using SSOT delegation.
+        
+        Returns:
+            Dict with validation results
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Get OAuth credentials from SSOT
+                oauth_creds = central_validator.get_oauth_credentials()
+                
+                # Use SSOT credential validation
+                validation_result = central_validator.validate_oauth_credentials_endpoint(oauth_creds)
+                
+                return {
+                    'oauth_valid': validation_result['valid'],
+                    'errors': validation_result.get('errors', [])
+                }
+            else:
+                # Fallback validation
+                env = get_env()
+                oauth_id = env.get(f"GOOGLE_OAUTH_CLIENT_ID_{self.environment.upper()}")
+                oauth_secret = env.get(f"GOOGLE_OAUTH_CLIENT_SECRET_{self.environment.upper()}")
+                
+                if not oauth_id or not oauth_secret:
+                    return {'oauth_valid': False, 'errors': ['OAuth credentials missing']}
+                
+                return {'oauth_valid': True, 'errors': []}
+                
+        except Exception as e:
+            self.logger.error(f"OAuth validation failed: {e}")
+            return {'oauth_valid': False, 'errors': [str(e)]}
+    
+    def validate_oauth_credentials(self, credentials: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate OAuth credentials using SSOT delegation.
+        
+        Args:
+            credentials: OAuth credentials to validate
+            
+        Returns:
+            Dict with validation results
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT OAuth credential validation
+                return central_validator.validate_oauth_credentials_endpoint(credentials)
+            else:
+                # Fallback validation
+                errors = []
+                
+                client_id = credentials.get('client_id')
+                if not client_id:
+                    errors.append("OAuth client_id is required")
+                elif client_id in ["", "your-client-id", "REPLACE_WITH"]:
+                    errors.append("OAuth client_id contains placeholder value")
+                
+                client_secret = credentials.get('client_secret')
+                if not client_secret:
+                    errors.append("OAuth client_secret is required")
+                elif client_secret in ["", "your-client-secret", "REPLACE_WITH"]:
+                    errors.append("OAuth client_secret contains placeholder value")
+                elif len(client_secret) < 10:
+                    errors.append("OAuth client_secret too short (minimum 10 characters)")
+                
+                return {
+                    "valid": len(errors) == 0,
+                    "errors": errors
+                }
+                
+        except Exception as e:
+            self.logger.error(f"OAuth credential validation failed: {e}")
+            return {"valid": False, "errors": [str(e)]}
+    
+    def get_oauth_credentials(self) -> Dict[str, str]:
+        """
+        Get validated OAuth credentials using SSOT delegation.
+        
+        Returns:
+            Dict containing OAuth credentials
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT OAuth credential retrieval
+                return central_validator.get_oauth_credentials()
+            else:
+                # Fallback credential retrieval
+                env = get_env()
+                client_id = env.get(f"GOOGLE_OAUTH_CLIENT_ID_{self.environment.upper()}")
+                client_secret = env.get(f"GOOGLE_OAUTH_CLIENT_SECRET_{self.environment.upper()}")
+                
+                if not client_id or not client_secret:
+                    raise ValueError(f"OAuth credentials not configured for {self.environment} environment")
+                
+                return {
+                    "client_id": client_id,
+                    "client_secret": client_secret
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get OAuth credentials: {e}")
+            raise
+    
+    def validate_jwt(self) -> bool:
+        """
+        Validate JWT configuration using SSOT delegation.
+        
+        Returns:
+            bool: True if JWT configuration is valid
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT JWT validation
+                return central_validator.validate_jwt_configuration()
+            else:
+                # Fallback JWT validation
+                env = get_env()
+                jwt_secret = env.get("JWT_SECRET_KEY")
+                return bool(jwt_secret and len(jwt_secret) >= 32)
+        except Exception as e:
+            self.logger.error(f"JWT validation failed: {e}")
+            return False
+    
+    def validate_database(self) -> bool:
+        """
+        Validate database configuration using SSOT delegation.
+        
+        Returns:
+            bool: True if database configuration is valid
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT database validation
+                return central_validator.validate_database_configuration()
+            else:
+                # Fallback database validation
+                env = get_env()
+                db_url = env.get("DATABASE_URL")
+                db_host = env.get("POSTGRES_HOST") or env.get("DATABASE_HOST")
+                return bool(db_url or db_host)
+        except Exception as e:
+            self.logger.error(f"Database validation failed: {e}")
+            return False
+    
+    def get_environment(self) -> str:
+        """
+        Get current environment using SSOT delegation.
+        
+        Returns:
+            str: Current environment name
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT environment detection
+                return central_validator.get_current_environment()
+            else:
+                # Fallback environment detection
+                return self.environment
+        except Exception as e:
+            self.logger.error(f"Environment detection failed: {e}")
+            return self.environment
     
     def register_rule(self, rule: ValidationRule) -> None:
         """Register a validation rule."""

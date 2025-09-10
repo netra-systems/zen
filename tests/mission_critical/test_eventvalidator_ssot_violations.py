@@ -117,26 +117,26 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
             logger.error(f"❌ WebSocketEventValidator test failed: {e}")
             print(f"DEBUG: WebSocketEventValidator exception: {e}")
             
-        # Test Import 3: SSOT Framework AgentEventValidator
+        # Test Import 3: SSOT Framework AgentEventValidator (now consolidated into Unified)
         try:
-            from test_framework.ssot.agent_event_validators import AgentEventValidator
-            ssot_validator = AgentEventValidator()
+            from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator
+            ssot_validator = UnifiedEventValidator()
             ssot_validator.record_event(self.sample_valid_event)
             ssot_result = ssot_validator.perform_full_validation()
-            implementations_found.append("AgentEventValidator")
+            implementations_found.append("UnifiedEventValidator_SSOT")
             validation_results["ssot_framework"] = {
                 "is_valid": ssot_result.is_valid,
                 "error_message": ssot_result.error_message,
                 "business_value_score": ssot_result.business_value_score
             }
-            logger.info(f"✓ AgentEventValidator found and tested")
-            print(f"DEBUG: AgentEventValidator found - {ssot_result.is_valid}")
+            logger.info(f"✓ Unified AgentEventValidator found and tested")
+            print(f"DEBUG: Unified AgentEventValidator found - {ssot_result.is_valid}")
         except ImportError as e:
-            logger.error(f"❌ Cannot import AgentEventValidator: {e}")
-            print(f"DEBUG: AgentEventValidator import failed: {e}")
+            logger.error(f"❌ Cannot import Unified AgentEventValidator: {e}")
+            print(f"DEBUG: Unified AgentEventValidator import failed: {e}")
         except Exception as e:
-            logger.error(f"❌ AgentEventValidator test failed: {e}")
-            print(f"DEBUG: AgentEventValidator exception: {e}")
+            logger.error(f"❌ Unified AgentEventValidator test failed: {e}")
+            print(f"DEBUG: Unified AgentEventValidator exception: {e}")
             
         # Log findings
         logger.critical(f"🚨 SSOT VIOLATION ANALYSIS:")

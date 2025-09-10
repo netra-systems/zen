@@ -16,7 +16,6 @@ Key Features:
 5. Connection state validation and recovery
 """
 
-import logging
 import threading
 import time
 import uuid
@@ -25,7 +24,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 
-logger = logging.getLogger(__name__)
+from netra_backend.app.core.unified_logging import get_logger
+logger = get_logger(__name__)
 
 
 class ConnectionState(Enum):

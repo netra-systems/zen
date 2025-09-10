@@ -39,11 +39,12 @@ await redis_ops.blacklist_token(redis_manager, token_jti, expire_seconds=3600)
 """
 
 import json
-import logging
 import time
 from typing import Any, Dict, Optional, Union
 
-logger = logging.getLogger(__name__)
+from shared.logging.unified_logger_factory import get_logger
+
+logger = get_logger(__name__)
 
 
 class SSOTRedisOperationsManager:

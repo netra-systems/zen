@@ -24,6 +24,9 @@ class WorkflowOrchestrator:
     """Orchestrates supervisor workflow according to unified spec with adaptive logic."""
     
     def __init__(self, agent_registry, execution_engine, websocket_manager, user_context=None):
+        # PHASE 1: SSOT Validation - Only accept UserExecutionEngine instances
+        self._validate_execution_engine_ssot_compliance(execution_engine)
+        
         self.agent_registry = agent_registry
         self.execution_engine = execution_engine
         self.websocket_manager = websocket_manager
@@ -31,6 +34,73 @@ class WorkflowOrchestrator:
         self.user_context = user_context
         self._websocket_emitter = None  # Will be created when user_context is available
         # No longer define static workflow - it will be determined dynamically
+    
+    def _validate_execution_engine_ssot_compliance(self, execution_engine):
+        """Validate that execution engine complies with SSOT requirements.
+        
+        SSOT COMPLIANCE: WorkflowOrchestrator ONLY accepts UserExecutionEngine instances.
+        This prevents user isolation vulnerabilities from deprecated engines.
+        
+        Args:
+            execution_engine: Execution engine instance to validate
+            
+        Raises:
+            ValueError: If engine is not UserExecutionEngine or missing required interface
+        """
+        # Check engine type - only UserExecutionEngine allowed
+        engine_type_name = execution_engine.__class__.__name__
+        
+        # SSOT Compliance: Reject deprecated execution engines
+        deprecated_engines = ['ExecutionEngine', 'ExecutionEngineConsolidated', 'ConsolidatedExecutionEngine']
+        if engine_type_name in deprecated_engines:
+            raise ValueError(
+                f"SSOT Violation: WorkflowOrchestrator no longer accepts deprecated engine type '{engine_type_name}'. "
+                f"Please use the migration guide to upgrade to UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine.py. "
+                f"Deprecated engines ({', '.join(deprecated_engines)}) are not allowed due to user isolation requirements."
+            )
+        
+        # SSOT Compliance: Only UserExecutionEngine allowed
+        if engine_type_name != 'UserExecutionEngine':
+            raise ValueError(
+                f"SSOT Violation: Only UserExecutionEngine instances are allowed in WorkflowOrchestrator. "
+                f"Got '{engine_type_name}' instead. Please use UserExecutionEngine for proper user isolation "
+                f"and SSOT compliance. Import from: netra_backend.app.agents.supervisor.user_execution_engine"
+            )
+        
+        # Validate interface compliance - UserExecutionEngine must have required methods
+        required_methods = ['execute_agent']
+        missing_methods = []
+        for method in required_methods:
+            if not hasattr(execution_engine, method):
+                missing_methods.append(method)
+        
+        if missing_methods:
+            raise ValueError(
+                f"SSOT Violation: UserExecutionEngine instance is missing required interface methods: {missing_methods}. "
+                f"Please ensure the execution engine implements the complete UserExecutionEngine interface."
+            )
+        
+        # Log successful SSOT compliance validation
+        logger.info(
+            f"✅ SSOT UserExecutionEngine compliance validated successfully for WorkflowOrchestrator. "
+            f"Engine type: {engine_type_name}"
+        )
+    
+    def _validate_runtime_ssot_compliance(self):
+        """Runtime validation to prevent execution engine swapping after initialization.
+        
+        This prevents security issues where deprecated engines could be swapped in at runtime.
+        """
+        if not self.execution_engine:
+            raise ValueError("Runtime SSOT validation failed: execution_engine is None")
+            
+        engine_type_name = self.execution_engine.__class__.__name__
+        if engine_type_name != 'UserExecutionEngine':
+            raise ValueError(
+                f"Runtime SSOT validation failed: deprecated engine detected at runtime. "
+                f"Engine was swapped to '{engine_type_name}' which violates SSOT compliance. "
+                f"Only UserExecutionEngine is allowed."
+            )
     
     async def _get_user_emitter_from_context(self, context: ExecutionContext):
         """Get user-isolated WebSocket emitter from ExecutionContext using factory pattern."""
@@ -202,6 +272,9 @@ class WorkflowOrchestrator:
     async def _execute_workflow_step(self, context: ExecutionContext, 
                                     step: PipelineStep) -> ExecutionResult:
         """Execute single workflow step with monitoring."""
+        # PHASE 4: Runtime SSOT validation to prevent engine swapping
+        self._validate_runtime_ssot_compliance()
+        
         step_context = self._create_step_context(context, step)
         await self._send_step_started(step_context, step)
         

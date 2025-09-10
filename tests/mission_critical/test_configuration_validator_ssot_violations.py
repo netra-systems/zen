@@ -67,10 +67,11 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
 
     def test_oauth_validation_inconsistency_reproduction(self):
         """
-        Test OAuth validation inconsistencies across different ConfigurationValidator implementations.
+        Test OAuth validation consistency across different ConfigurationValidator implementations.
         
-        This test PASSES initially, showing that different validators handle OAuth differently,
-        creating SSOT violations that risk OAuth authentication failures.
+        POST-CONSOLIDATION: This test now verifies that all validators provide CONSISTENT results
+        after Phase 1 SSOT consolidation. All validators should delegate OAuth validation to the
+        central SSOT validator, eliminating inconsistencies.
         """
         # Test OAuth configuration with minimal valid setup
         oauth_config = {
@@ -134,23 +135,23 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                 config_oauth_valid = False
                 config_error = str(e)
         
-        # ASSERTION: Different validators should show inconsistent behavior (SSOT violation)
-        # This test PASSES when there are inconsistencies (before SSOT consolidation)
+        # ASSERTION: All validators should now show CONSISTENT behavior (SSOT consolidation success)
+        # This test PASSES when all validators are consistent (after SSOT consolidation)
         validators_consistent = (
             central_oauth_valid == backend_oauth_valid == 
             test_oauth_valid == config_oauth_valid
         )
         
-        # Log the inconsistency for debugging
-        logger.warning(f"OAuth Validation Results - Central: {central_oauth_valid}, "
-                      f"Backend: {backend_oauth_valid}, Test: {test_oauth_valid}, "
-                      f"Config: {config_oauth_valid}")
+        # Log the consistency status for debugging
+        logger.info(f"OAuth Validation Results (POST-CONSOLIDATION) - Central: {central_oauth_valid}, "
+                   f"Backend: {backend_oauth_valid}, Test: {test_oauth_valid}, "
+                   f"Config: {config_oauth_valid}")
         
-        # This test PASSES when validators are inconsistent (showing SSOT violation)
-        self.assertFalse(
+        # This test PASSES when validators are consistent (showing SSOT consolidation success)
+        self.assertTrue(
             validators_consistent,
-            "SSOT Violation: OAuth validation should be inconsistent across validators "
-            "before SSOT consolidation (this test should PASS initially)"
+            "SSOT Consolidation SUCCESS: OAuth validation should be consistent across all validators "
+            "after Phase 1 consolidation (all validators delegate to central SSOT)"
         )
 
     def test_environment_detection_duplication_reproduction(self):
@@ -181,7 +182,7 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                     elif hasattr(backend_validator, 'environment'):
                         backend_env = backend_validator.environment
                     else:
-                        backend_env = get_env('ENVIRONMENT', 'unknown')
+                        backend_env = get_env().get('ENVIRONMENT', 'unknown')
                 except Exception:
                     backend_env = "unknown"
                 
@@ -220,11 +221,11 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                 has_inconsistencies = True
                 logger.warning(f"Environment {env} detection inconsistency: {results}")
         
-        # This test PASSES when there are inconsistencies (SSOT violation)
-        self.assertTrue(
+        # POST-CONSOLIDATION: This test PASSES when environment detection is consistent
+        self.assertFalse(
             has_inconsistencies,
-            "SSOT Violation: Environment detection should show inconsistencies "
-            "across validators before SSOT consolidation"
+            "SSOT Consolidation SUCCESS: Environment detection should be consistent "
+            "across validators after Phase 1 consolidation"
         )
 
     def test_jwt_secret_validation_divergence_reproduction(self):
@@ -274,7 +275,7 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                 test_validator = TestFrameworkValidator()
                 try:
                     # Test framework may check for JWT_SECRET_KEY existence
-                    jwt_key = get_env('JWT_SECRET_KEY')
+                    jwt_key = get_env().get('JWT_SECRET_KEY')
                     scenario_results['test'] = jwt_key is not None and len(jwt_key) > 0
                 except Exception as e:
                     scenario_results['test'] = False
@@ -307,11 +308,11 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                 has_divergence = True
                 logger.warning(f"JWT validation divergence in {scenario}: {results}")
         
-        # This test PASSES when there are validation divergences (SSOT violation)
-        self.assertTrue(
+        # POST-CONSOLIDATION: This test PASSES when JWT validation is consistent
+        self.assertFalse(
             has_divergence,
-            "SSOT Violation: JWT validation should show divergence across validators "
-            "before SSOT consolidation"
+            "SSOT Consolidation SUCCESS: JWT validation should be consistent across validators "
+            "after Phase 1 consolidation"
         )
 
     def test_database_config_pattern_conflicts_reproduction(self):
@@ -401,11 +402,11 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                 has_conflicts = True
                 logger.warning(f"Database pattern conflicts in {scenario}: {conflicts}")
         
-        # This test PASSES when there are pattern conflicts (SSOT violation)
-        self.assertTrue(
+        # POST-CONSOLIDATION: This test PASSES when database patterns are consistent
+        self.assertFalse(
             has_conflicts,
-            "SSOT Violation: Database configuration patterns should show conflicts "
-            "across validators before SSOT consolidation"
+            "SSOT Consolidation SUCCESS: Database configuration patterns should be consistent "
+            "across validators after Phase 1 consolidation"
         )
 
     def test_golden_path_configuration_failures_reproduction(self):
@@ -489,11 +490,11 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
             has_failures = True
             logger.warning("Some validators fail Golden Path configuration completely")
         
-        # This test PASSES when Golden Path validation shows failures/inconsistencies
-        self.assertTrue(
+        # POST-CONSOLIDATION: This test PASSES when Golden Path validation is consistent
+        self.assertFalse(
             has_failures,
-            "SSOT Violation: Golden Path configuration should show failures or "
-            "inconsistencies across validators before SSOT consolidation"
+            "SSOT Consolidation SUCCESS: Golden Path configuration should be consistent and valid "
+            "across all validators after Phase 1 consolidation"
         )
 
 if __name__ == '__main__':
