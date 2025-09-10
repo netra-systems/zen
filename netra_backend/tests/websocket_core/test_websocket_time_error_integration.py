@@ -38,10 +38,9 @@ from netra_backend.app.websocket_core.graceful_degradation_manager import create
 from netra_backend.app.services.unified_authentication_service import get_unified_auth_service
 
 # Test Framework Imports  
-from netra_backend.tests.conftest_helpers import get_test_logger
-from netra_backend.tests.test_framework.ssot.e2e_auth_helper import E2EAuthTestHelper
+import logging
 
-logger = get_test_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TestWebSocketTimeErrorRealisticScenarios:

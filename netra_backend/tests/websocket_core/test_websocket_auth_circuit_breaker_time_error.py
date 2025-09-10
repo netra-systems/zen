@@ -31,10 +31,9 @@ from netra_backend.app.services.unified_authentication_service import AuthResult
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Test Framework Imports
-from netra_backend.tests.test_framework.ssot.e2e_auth_helper import E2EAuthTestHelper
-from netra_backend.tests.conftest_helpers import get_test_logger
+import logging
 
-logger = get_test_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TestWebSocketAuthCircuitBreakerTimeError:
