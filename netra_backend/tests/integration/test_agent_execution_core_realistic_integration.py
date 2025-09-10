@@ -490,7 +490,7 @@ class TestAgentExecutionCoreRealisticIntegration(SSotBaseTestCase):
                 'end_timestamp': time.time(),
                 'memory_usage_mb': 67.5,
                 'cpu_percent': 15.3,
-                'state_size': 2048,
+                'context_size': 2048,
                 'result_success': True,
                 'total_duration_seconds': 0.25,
                 'websocket_events_sent': 4

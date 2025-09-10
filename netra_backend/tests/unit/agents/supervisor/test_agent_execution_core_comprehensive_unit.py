@@ -445,7 +445,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
         assert combined_metrics["operations"] == 5
         assert combined_metrics["result_success"] is True
         assert combined_metrics["total_duration_seconds"] == 3.5
-        assert "state_size" in combined_metrics
+        assert "context_size" in combined_metrics
 
     def test_get_agent_or_error_success(self, execution_core):
         """Test successful agent retrieval from registry."""
