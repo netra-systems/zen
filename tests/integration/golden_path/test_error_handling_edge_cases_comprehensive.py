@@ -717,7 +717,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         self.mock_llm_manager.generate_response = AsyncMock(side_effect=slow_llm_response)
         
         # Patch LLM manager at a lower level - this will affect all agents that use LLM
-        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response', new_callable=AsyncMock) as mock_llm_generate:
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.ask_llm', new_callable=AsyncMock) as mock_llm_generate:
             # Set up the slow response for timeout simulation
             mock_llm_generate.side_effect = slow_llm_response
             
