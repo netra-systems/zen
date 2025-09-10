@@ -52,7 +52,10 @@
       "Bash(echo \"Exit code: $?\")",
       "Bash(export TEST_ENV=\"staging\")",
       "Bash(gcloud sql instances list:*)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(gcloud redis instances list:*)",
+      "Bash(gcloud compute networks vpc-access connectors list:*)",
+      "Bash(echo:*)"
     ],
     "deny": [],
     "ask": []
