@@ -657,52 +657,9 @@ class ExecutionEngine:
         await self._wait_for_retry(context.retry_count)
         return await self.execute_agent(context, user_context)
     
-    async def execute_pipeline(self, steps: List[PipelineStep],
-                              context: AgentExecutionContext,
-                              user_context: Optional['UserExecutionContext']) -> List[AgentExecutionResult]:
-        """Execute a pipeline of agents.
-        
-        DEPRECATED: This method delegates to UserExecutionEngine for SSOT compliance.
-        Use UserExecutionEngine directly for new code.
-        """
-        warnings.warn(
-            "ExecutionEngine.execute_pipeline is deprecated. Use UserExecutionEngine directly.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        # SSOT COMPLIANCE: Delegate to UserExecutionEngine instead of legacy implementation
-        if user_context:
-            try:
-                # Create UserExecutionEngine instance for proper SSOT delegation
-                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-                from netra_backend.app.agents.supervisor.agent_instance_factory import (
-                    get_agent_instance_factory,
-                    create_user_websocket_emitter
-                )
-                
-                # Get infrastructure components
-                agent_factory = await get_agent_instance_factory()
-                websocket_emitter = await create_user_websocket_emitter(user_context)
-                
-                # Create UserExecutionEngine instance with proper isolation
-                user_engine = UserExecutionEngine(
-                    context=user_context,
-                    agent_factory=agent_factory,
-                    websocket_emitter=websocket_emitter
-                )
-                
-                # Delegate to UserExecutionEngine SSOT implementation
-                return await user_engine.execute_pipeline(steps, context, user_context)
-                
-            except Exception as e:
-                logger.warning(f"Failed to delegate to UserExecutionEngine: {e}. Falling back to legacy implementation.")
-                # Fall back to legacy implementation if delegation fails
-                return await self._execute_pipeline_steps(steps, context, user_context)
-        else:
-            # No user context - use legacy implementation
-            logger.warning("No user context provided - using legacy pipeline execution")
-            return await self._execute_pipeline_steps(steps, context, user_context)
+    # SSOT COMPLIANCE: execute_pipeline method removed - use UserExecutionEngine directly
+    # This method has been removed to eliminate SSOT violations.
+    # Use UserExecutionEngine.execute_pipeline() for all pipeline execution.
     
     async def _execute_pipeline_steps(self, steps: List[PipelineStep],
                                      context: AgentExecutionContext,

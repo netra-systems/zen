@@ -1067,7 +1067,7 @@ class SystemLifecycle:
 # FACTORY PATTERN FOR USER ISOLATION
 # ============================================================================
 
-class LifecycleManagerFactory:
+class SystemLifecycleFactory:
     """Factory for creating user-isolated lifecycle managers."""
     
     _global_manager: Optional[SystemLifecycle] = None
@@ -1177,9 +1177,9 @@ def get_lifecycle_manager(user_id: Optional[str] = None) -> SystemLifecycle:
         SystemLifecycle instance
     """
     if user_id:
-        return LifecycleManagerFactory.get_user_manager(user_id)
+        return SystemLifecycleFactory.get_user_manager(user_id)
     else:
-        return LifecycleManagerFactory.get_global_manager()
+        return SystemLifecycleFactory.get_global_manager()
 
 
 async def setup_application_lifecycle(
@@ -1252,3 +1252,11 @@ async def setup_application_lifecycle(
     
     logger.info(f"Unified lifecycle management configured: user_id={user_id}")
     return lifecycle_manager
+
+
+# ============================================================================
+# BACKWARD COMPATIBILITY ALIASES  
+# ============================================================================
+
+# PHASE 3: Maintain factory backward compatibility during migration
+LifecycleManagerFactory = SystemLifecycleFactory

@@ -310,7 +310,17 @@ class TestCoreServiceCommunication:
     async def test_10_websocket_broadcasts_to_authenticated_users_only(self):
         """Test 10: WebSocket broadcasts messages only to authenticated users"""
         jwt_helper = JWTTestHelper()
-        manager = get_websocket_manager()
+        # Use factory pattern for secure user isolation in broadcasts
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        
+        # Create base context for test setup
+        base_context = UserExecutionContext(
+            user_id="test_broadcast",
+            run_id=f"test_run_{uuid.uuid4()}",
+            thread_id="test_thread"
+        )
+        manager = await create_websocket_manager(user_context=base_context)
         
         # Create authenticated users
         auth_users = []

@@ -38,7 +38,7 @@ from dataclasses import dataclass
 
 # Core service dependency components - SSOT imports
 from netra_backend.app.core.registry.universal_registry import ServiceRegistry
-from netra_backend.app.core.managers.unified_lifecycle_manager import UnifiedLifecycleManager as ServiceInitializer
+from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLifecycle as ServiceInitializer
 # Import what we actually need for the unit test - Mock objects will be used instead
 
 # Service-specific imports

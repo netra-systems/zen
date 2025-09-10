@@ -629,80 +629,9 @@ class ExecutionEngine(IExecutionEngine):
             context  # context_override
         )
     
-    async def execute_pipeline(
-        self,
-        steps: List['PipelineStep'],
-        context: AgentExecutionContext,
-        user_context: Optional['UserExecutionContext'] = None
-    ) -> List[AgentExecutionResult]:
-        """Execute pipeline - DEPRECATED: delegates to UserExecutionEngine for SSOT compliance.
-        
-        Args:
-            steps: List of pipeline steps to execute
-            context: Base execution context
-            user_context: Optional user context for isolation
-            
-        Returns:
-            List[AgentExecutionResult]: Results from each step
-        """
-        warnings.warn(
-            "ConsolidatedExecutionEngine.execute_pipeline is deprecated. Use UserExecutionEngine directly.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        # SSOT COMPLIANCE: Delegate to UserExecutionEngine for proper isolation
-        if user_context:
-            try:
-                # Create UserExecutionEngine instance for proper SSOT delegation
-                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-                from netra_backend.app.agents.supervisor.agent_instance_factory import (
-                    get_agent_instance_factory,
-                    create_user_websocket_emitter
-                )
-                
-                # Get infrastructure components
-                agent_factory = await get_agent_instance_factory()
-                websocket_emitter = await create_user_websocket_emitter(user_context)
-                
-                # Create UserExecutionEngine instance with proper isolation
-                user_engine = UserExecutionEngine(
-                    context=user_context,
-                    agent_factory=agent_factory,
-                    websocket_emitter=websocket_emitter
-                )
-                
-                # Delegate to UserExecutionEngine SSOT implementation
-                return await user_engine.execute_pipeline(steps, context, user_context)
-                
-            except Exception as e:
-                logger.warning(f"Failed to delegate to UserExecutionEngine: {e}. Using fallback implementation.")
-                # Fall back to legacy implementation if delegation fails
-        
-        # Legacy fallback implementation
-        results = []
-        
-        for step in steps:
-            # Create context for this step
-            step_context = AgentExecutionContext(
-                agent_name=step.agent_name,
-                run_id=context.run_id,
-                thread_id=context.thread_id,
-                user_id=context.user_id,
-                prompt=context.prompt,
-                user_input=context.user_input,
-                metadata={**(context.metadata or {}), **(step.metadata or {})}
-            )
-            
-            # Execute step
-            result = await self.execute_agent(step_context, user_context)
-            results.append(result)
-            
-            # Stop on failure unless continue_on_error is set
-            if not result.success and not step.metadata.get('continue_on_error', False):
-                break
-        
-        return results
+    # SSOT COMPLIANCE: execute_pipeline method removed to eliminate duplication
+    # This method has been removed to establish UserExecutionEngine as the SSOT.
+    # Use UserExecutionEngine.execute_pipeline() for all pipeline execution.
     
     async def get_execution_stats(self) -> Dict[str, Any]:
         """Get execution statistics - interface method delegates to get_metrics().

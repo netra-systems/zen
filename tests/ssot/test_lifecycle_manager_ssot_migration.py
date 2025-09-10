@@ -32,14 +32,19 @@ from dataclasses import dataclass
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 from netra_backend.app.core.managers.unified_lifecycle_manager import (
-    UnifiedLifecycleManager,
-    LifecycleManagerFactory,
+    SystemLifecycle,          # New business-focused name
+    SystemLifecycleFactory,   # New business-focused factory name
     LifecyclePhase,
     ComponentType,
     ComponentStatus,
     LifecycleMetrics,
     get_lifecycle_manager,
     setup_application_lifecycle
+)
+# Test backward compatibility through the package interface
+from netra_backend.app.core.managers import (
+    UnifiedLifecycleManager,  # Legacy name for backward compatibility testing
+    LifecycleManagerFactory,  # Legacy factory name for backward compatibility testing
 )
 from shared.isolated_environment import IsolatedEnvironment
 
