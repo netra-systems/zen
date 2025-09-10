@@ -207,6 +207,7 @@ class MockAgentOrchestrator:
         report_keywords = ["report", "summar", "analysis", "insights", "recommendations"]  # "summar" matches summary/summarize
         if any(keyword in request_lower for keyword in report_keywords) and AgentType.REPORT_GENERATION not in required_agents:
             required_agents.append(AgentType.DATA_ANALYSIS)  # Need analysis for meaningful reports
+            required_agents.append(AgentType.COST_OPTIMIZATION)  # Reports require optimization for actionable insights
             required_agents.append(AgentType.REPORT_GENERATION)
         
         return required_agents
