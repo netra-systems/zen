@@ -26,8 +26,8 @@ from test_framework.ssot.database import DatabaseTestHelper
 from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
-from netra_backend.app.services.auth.jwt_manager import JWTManager
-from netra_backend.app.services.auth.session_manager import SessionManager
+from netra_backend.app.auth_integration import auth
+from netra_backend.app.services.session_service import SessionService as SessionManager
 from netra_backend.app.services.auth.oauth_integration import OAuthIntegration
 
 

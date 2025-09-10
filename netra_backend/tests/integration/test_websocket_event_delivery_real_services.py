@@ -26,7 +26,7 @@ import json
 from typing import Dict, Any, List
 from datetime import datetime
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.ssot.real_services_test_fixtures import *
@@ -53,7 +53,7 @@ class TestWebSocketEventDeliveryRealServices:
         )
         
         # Create WebSocket notifier with real backend
-        notifier = WebSocketNotifier(
+        notifier = AgentWebSocketBridge(
             websocket_manager=websocket_manager,
             test_mode=False  # Enable real operations
         )
@@ -155,7 +155,7 @@ class TestWebSocketEventDeliveryRealServices:
             enable_isolation=True
         )
         
-        notifier = WebSocketNotifier(websocket_manager=websocket_manager)
+        notifier = AgentWebSocketBridge(websocket_manager=websocket_manager)
         
         # Create contexts for different users
         user1_context = AgentExecutionContext(
@@ -301,7 +301,7 @@ class TestWebSocketEventDeliveryRealServices:
             recovery_timeout=2.0
         )
         
-        notifier = WebSocketNotifier(
+        notifier = AgentWebSocketBridge(
             websocket_manager=websocket_manager,
             enable_delivery_guarantees=True
         )
@@ -425,7 +425,7 @@ class TestWebSocketEventDeliveryRealServices:
             batch_timeout=0.1
         )
         
-        notifier = WebSocketNotifier(
+        notifier = AgentWebSocketBridge(
             websocket_manager=websocket_manager,
             max_queue_size=1000  # Allow high throughput
         )

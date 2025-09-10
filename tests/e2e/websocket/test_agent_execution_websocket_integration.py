@@ -55,7 +55,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
@@ -301,7 +301,7 @@ class RealAgentExecutionWebSocketIntegrator:
         )
         
         # Setup WebSocket notifier with integration tracking
-        websocket_notifier = WebSocketNotifier(user_context=user_context)
+        websocket_notifier = AgentWebSocketBridge(user_context=user_context)
         
         async def integration_tracked_event_sender(event_type: str, event_data: dict):
             """Send WebSocket events with integration tracking."""

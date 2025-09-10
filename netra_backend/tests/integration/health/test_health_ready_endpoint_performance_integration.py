@@ -30,7 +30,7 @@ from unittest.mock import Mock, patch
 import httpx
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.real_services_test_fixtures import RealServicesTestFixtures
+from test_framework.ssot.real_services_test_fixtures import E2ETestFixture
 from netra_backend.app.websocket_core.gcp_initialization_validator import (
     gcp_websocket_readiness_check,
     create_gcp_websocket_validator

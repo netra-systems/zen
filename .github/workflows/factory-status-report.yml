@@ -18,10 +18,6 @@ on:
           - '24'
           - '48'
           - '168'
-  push:
-    branches:
-      - main
-      - master
 
 permissions:
   contents: read

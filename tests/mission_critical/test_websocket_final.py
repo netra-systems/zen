@@ -58,7 +58,7 @@
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import ( )
             # REMOVED_SYNTAX_ERROR: UnifiedToolExecutionEngine,
@@ -73,11 +73,11 @@
 
 
 # REMOVED_SYNTAX_ERROR: def test_1_websocket_notifier_required_methods():
-    # REMOVED_SYNTAX_ERROR: """CRITICAL: WebSocketNotifier has all required methods."""
-    # REMOVED_SYNTAX_ERROR: print("Test 1: WebSocketNotifier required methods...")
+    # REMOVED_SYNTAX_ERROR: """CRITICAL: AgentWebSocketBridge has all required methods."""
+    # REMOVED_SYNTAX_ERROR: print("Test 1: AgentWebSocketBridge required methods...")
 
     # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
-    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
 
     # REMOVED_SYNTAX_ERROR: required_methods = [ )
     # REMOVED_SYNTAX_ERROR: 'send_agent_started',
@@ -234,7 +234,7 @@
 
     # REMOVED_SYNTAX_ERROR: ws_manager.send_to_thread = AsyncMock(side_effect=capture_event)
 
-    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
 
     # Create test context
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

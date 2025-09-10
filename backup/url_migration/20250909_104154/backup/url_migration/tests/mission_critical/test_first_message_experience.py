@@ -42,7 +42,7 @@ from loguru import logger
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -957,7 +957,7 @@ class TestFirstMessageIntegration:
         
     @pytest.mark.asyncio
     async def test_websocket_notifier_integration(self):
-        """Test: WebSocketNotifier sends all required events."""
+        """Test: AgentWebSocketBridge sends all required events."""
         logger.info("=" * 80)
         logger.info("TEST: WebSocket Notifier Event Generation")
         logger.info("=" * 80)
@@ -972,7 +972,7 @@ class TestFirstMessageIntegration:
         mock_manager = MockWSManager()
         
         # Create notifier
-        notifier = WebSocketNotifier(
+        notifier = AgentWebSocketBridge(
             websocket_manager=mock_manager,
             user_id="test_user",
             thread_id="test_thread"

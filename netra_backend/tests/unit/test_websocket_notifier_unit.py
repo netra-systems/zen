@@ -11,7 +11,7 @@ This test suite validates the WebSocket Notifier functionality through focused
 unit testing, ensuring message formatting, event creation, and notification
 logic work correctly without external dependencies.
 
-⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
+⚠️ DEPRECATION NOTE: AgentWebSocketBridge is deprecated in favor of AgentWebSocketBridge.
 These tests validate the legacy functionality for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:
@@ -37,7 +37,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 # Core imports for WebSocket notifier testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
@@ -58,7 +58,7 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
         # Suppress deprecation warning for testing
         with patch('warnings.warn'):
             # Create WebSocket notifier instance
-            self.websocket_notifier = WebSocketNotifier(
+            self.websocket_notifier = AgentWebSocketBridge(
                 websocket_manager=self.mock_websocket_manager
             )
         

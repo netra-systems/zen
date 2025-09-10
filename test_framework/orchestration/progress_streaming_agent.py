@@ -54,7 +54,7 @@ from test_framework.progress_tracker import (
 try:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
     from netra_backend.app.schemas.websocket_models import WebSocketMessage
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
     WEBSOCKET_AVAILABLE = True
 except ImportError:
@@ -258,7 +258,7 @@ class ProgressStreamingAgent:
             self.websocket_manager = websocket_manager
             self.config.websocket_thread_id = thread_id
             if websocket_manager:
-                self.websocket_notifier = WebSocketNotifier(websocket_manager)
+                self.websocket_notifier = AgentWebSocketBridge(websocket_manager)
                 self.logger.info(f"WebSocket manager configured for thread: {thread_id}")
     
     async def start_streaming(self, layers: List[str], run_id: str = None) -> bool:

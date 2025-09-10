@@ -77,7 +77,7 @@ except ImportError as e:
 
 # WebSocket notifier - critical for event delivery
 try:
-    from netra_backend.app.websocket_core.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     WEBSOCKET_NOTIFIER_AVAILABLE = True
     WEBSOCKET_NOTIFIER_ERROR = None
 except ImportError as e:
@@ -321,7 +321,7 @@ class TestWebSocketContextMissionCriticalRegression:
         
         # Test notifier initialization with context
         try:
-            notifier = WebSocketNotifier(context)
+            notifier = AgentWebSocketBridge(context)
             assert notifier is not None, "WebSocket notifier creation failed"
             
             # Test that notifier can handle context type validation

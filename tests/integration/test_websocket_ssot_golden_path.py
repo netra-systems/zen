@@ -58,16 +58,14 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
     through consolidated SSOT WebSocket implementation.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up Golden Path test fixtures."""
-        super().setUp()
+        super().setup_method(method)
+        
+        # Initialize test identifiers
         self.test_user_id = f"golden_path_user_{uuid.uuid4().hex[:8]}"
         self.test_email = f"{self.test_user_id}@test.com"
         self.test_run_id = f"run_{uuid.uuid4().hex[:8]}"
-        
-    async def asyncSetUp(self):
-        """Async setup for Golden Path testing."""
-        await super().asyncSetUp()
         
         # Create test JWT token for authentication
         self.test_jwt_payload = {
@@ -112,8 +110,8 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         
         # Validate JWT token is properly formed
         decoded_payload = jwt.decode(self.test_jwt_token, self.jwt_secret, algorithms=["HS256"])
-        self.assertEqual(decoded_payload["sub"], self.test_user_id)
-        self.assertEqual(decoded_payload["email"], self.test_email)
+        assert decoded_payload["sub"] == self.test_user_id
+        assert decoded_payload["email"] == self.test_email
         
         # PHASE 2: WebSocket Connection (Golden Path Step 2)
         mock_websocket = AsyncMock()
@@ -188,22 +186,21 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         # PHASE 5: Validate Complete Journey (Golden Path Step 5)
         
         # Validate authentication success
-        self.assertTrue(mock_auth_result["success"])
-        self.assertEqual(mock_auth_result["user_id"], self.test_user_id)
+        assert mock_auth_result["success"]
+        assert mock_auth_result["user_id"] == self.test_user_id
         
         # Validate WebSocket connection
-        self.assertEqual(mock_websocket.state.name, "OPEN")
-        self.assertTrue(mock_auth_context["authenticated"])
-        self.assertTrue(mock_auth_context["handshake_complete"])
+        assert mock_websocket.state.name == "OPEN"
+        assert mock_auth_context["authenticated"]
+        assert mock_auth_context["handshake_complete"]
         
         # Validate user message structure
-        self.assertEqual(user_message["user_id"], self.test_user_id)
-        self.assertEqual(user_message["type"], "user_message")
-        self.assertIn("optimize", user_message["message"].lower())
+        assert user_message["user_id"] == self.test_user_id
+        assert user_message["type"] == "user_message"
+        assert "optimize" in user_message["message"].lower()
         
         # CRITICAL: Validate all 5 events were delivered
-        self.assertEqual(len(self.received_events), 5, 
-                        "All 5 critical events must be delivered for Golden Path")
+        assert len(self.received_events) == 5, "All 5 critical events must be delivered for Golden Path"
         
         # Validate each critical event type was received
         received_event_types = [event["event"]["type"] for event in self.received_events]
@@ -211,21 +208,20 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
                           "tool_completed", "agent_completed"]
         
         for required_event in required_events:
-            self.assertIn(required_event, received_event_types,
-                         f"Critical event {required_event} must be delivered")
+            assert required_event in received_event_types, f"Critical event {required_event} must be delivered"
             
         # Validate event sequence (events should be in correct order)
-        self.assertEqual(received_event_types[0], "agent_started")
-        self.assertEqual(received_event_types[1], "agent_thinking") 
-        self.assertEqual(received_event_types[2], "tool_executing")
-        self.assertEqual(received_event_types[3], "tool_completed")
-        self.assertEqual(received_event_types[4], "agent_completed")
+        assert received_event_types[0] == "agent_started"
+        assert received_event_types[1] == "agent_thinking"
+        assert received_event_types[2] == "tool_executing"
+        assert received_event_types[3] == "tool_completed"
+        assert received_event_types[4] == "agent_completed"
         
         # Validate final response contains value
         final_event = self.received_events[-1]["event"]
-        self.assertEqual(final_event["type"], "agent_completed")
-        self.assertIn("response", final_event)
-        self.assertIn("savings", final_event["response"].lower())
+        assert final_event["type"] == "agent_completed"
+        assert "response" in final_event
+        assert "savings" in final_event["response"].lower()
         
         logger.info("✅ Golden Path user journey validated successfully through SSOT WebSocket")
         
@@ -255,10 +251,10 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         }
         
         # Validate authentication components
-        self.assertTrue(auth_result["success"])
-        self.assertEqual(auth_result["user_id"], self.test_user_id)
-        self.assertIn("chat", auth_result["permissions"])
-        self.assertIn("agent_access", auth_result["permissions"])
+        assert auth_result["success"]
+        assert auth_result["user_id"] == self.test_user_id
+        assert "chat" in auth_result["permissions"]
+        assert "agent_access" in auth_result["permissions"]
         
         # Test authentication failure handling
         invalid_auth_request = {
@@ -274,9 +270,9 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         }
         
         # Validate failure handling
-        self.assertFalse(auth_failure_result["success"])
-        self.assertIn("error", auth_failure_result)
-        self.assertTrue(auth_failure_result["retry_allowed"])
+        assert not auth_failure_result["success"]
+        assert "error" in auth_failure_result
+        assert auth_failure_result["retry_allowed"]
         
     async def test_ssot_websocket_event_ordering_preservation(self):
         """
@@ -300,12 +296,10 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
             received_sequences.append(event["sequence"])
             
         # Validate ordering preservation
-        self.assertEqual(received_sequences, [1, 2, 3, 4, 5],
-                        "Event sequence must be preserved for optimal user experience")
+        assert received_sequences == [1, 2, 3, 4, 5], "Event sequence must be preserved for optimal user experience"
         
         # Validate no events were dropped
-        self.assertEqual(len(self.received_events), 5,
-                        "All events must be delivered without loss")
+        assert len(self.received_events) == 5, "All events must be delivered without loss"
                         
     async def test_ssot_websocket_user_isolation_validation(self):
         """
@@ -331,9 +325,9 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         }
         
         # Validate contexts are isolated
-        self.assertNotEqual(user_1_context["context_id"], user_2_context["context_id"])
-        self.assertTrue(user_1_context["isolated"])
-        self.assertTrue(user_2_context["isolated"])
+        assert user_1_context["context_id"] != user_2_context["context_id"]
+        assert user_1_context["isolated"]
+        assert user_2_context["isolated"]
         
         # Test events are delivered to correct user only
         user_1_events = []
@@ -350,12 +344,12 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         await route_event_to_user(user_2, {"type": "agent_started", "message": "User 2 agent started"})
         
         # Validate isolation
-        self.assertEqual(len(user_1_events), 1)
-        self.assertEqual(len(user_2_events), 1)
-        self.assertIn("User 1", user_1_events[0]["message"])
-        self.assertIn("User 2", user_2_events[0]["message"])
-        self.assertNotIn("User 2", str(user_1_events))
-        self.assertNotIn("User 1", str(user_2_events))
+        assert len(user_1_events) == 1
+        assert len(user_2_events) == 1
+        assert "User 1" in user_1_events[0]["message"]
+        assert "User 2" in user_2_events[0]["message"]
+        assert "User 2" not in str(user_1_events)
+        assert "User 1" not in str(user_2_events)
         
     async def test_ssot_websocket_error_recovery_patterns(self):
         """
@@ -383,8 +377,8 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
             
         # Validate all recoverable errors were handled
         for result in recovery_results:
-            self.assertTrue(result["recovered"])
-            self.assertTrue(result["service_restored"])
+            assert result["recovered"]
+            assert result["service_restored"]
             
         # Test non-recoverable error handling
         fatal_error = {
@@ -401,9 +395,9 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         }
         
         # Validate fatal error handling
-        self.assertFalse(fatal_recovery_result["recovered"])
-        self.assertTrue(fatal_recovery_result["user_notified"])
-        self.assertEqual(fatal_recovery_result["action_required"], "re-authenticate")
+        assert not fatal_recovery_result["recovered"]
+        assert fatal_recovery_result["user_notified"]
+        assert fatal_recovery_result["action_required"] == "re-authenticate"
 
 
 if __name__ == "__main__":

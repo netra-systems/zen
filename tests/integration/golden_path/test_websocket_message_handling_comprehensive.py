@@ -76,7 +76,7 @@ from shared.types import UserID, ThreadID, RunID, RequestID, StronglyTypedUserEx
 try:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     from netra_backend.app.services.user_execution_context import UserExecutionContextManager
     BACKEND_IMPORTS_AVAILABLE = True
 except ImportError:

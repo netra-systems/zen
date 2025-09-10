@@ -28,7 +28,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from uuid import uuid4
 from typing import Dict, Any, Optional
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics
@@ -67,7 +67,7 @@ class TestWebSocketNotifierBusinessLogic(SSotBaseTestCase):
         """Create WebSocketNotifier with mocked dependencies - suppress deprecation warning for testing."""
         with patch('warnings.warn'):  # Suppress deprecation warning during testing
             # Use test_mode=True to prevent background task hanging
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
         
         yield notifier
         
@@ -454,7 +454,7 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         
         with patch('warnings.warn'):  # Suppress deprecation warning
             manager = AsyncMock() 
-            notifier = WebSocketNotifier(manager, test_mode=True)
+            notifier = AgentWebSocketBridge(manager, test_mode=True)
         
         # Create high-value customer context
         vip_context = AgentExecutionContext(
@@ -483,7 +483,7 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         
         with patch('warnings.warn'):
             manager = AsyncMock()
-            notifier = WebSocketNotifier(manager, test_mode=True)
+            notifier = AgentWebSocketBridge(manager, test_mode=True)
         
         # Create free tier context
         free_context = AgentExecutionContext(

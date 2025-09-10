@@ -7,7 +7,7 @@ Business Value Justification:
 - Strategic Impact: Core chat UX functionality that builds user trust
 
 CRITICAL TEST PURPOSE:
-These unit tests validate the business logic of WebSocketNotifier (DEPRECATED)
+These unit tests validate the business logic of AgentWebSocketBridge (DEPRECATED)
 to ensure migration to AgentWebSocketBridge maintains functionality.
 
 Test Coverage:
@@ -24,7 +24,7 @@ import uuid
 from unittest.mock import AsyncMock, Mock, patch
 from collections import deque
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.mocks import MockFactory
@@ -42,7 +42,7 @@ class TestWebSocketNotifierBusiness:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            self.notifier = WebSocketNotifier(
+            self.notifier = AgentWebSocketBridge(
                 websocket_manager=self.mock_websocket_manager,
                 test_mode=True  # Disable background tasks for testing
             )

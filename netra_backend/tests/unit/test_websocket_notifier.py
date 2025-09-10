@@ -18,7 +18,7 @@ from shared.isolated_environment import get_env
 from shared.types import UserID, ThreadID, RequestID
 from test_framework.base_integration_test import BaseIntegrationTest
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
@@ -32,7 +32,7 @@ class TestWebSocketNotifier(BaseIntegrationTest):
         self.mock_websocket_manager = AsyncMock()
         
         # Initialize notifier in test mode to prevent hanging background tasks
-        self.notifier = WebSocketNotifier(
+        self.notifier = AgentWebSocketBridge(
             websocket_manager=self.mock_websocket_manager,
             test_mode=True
         )

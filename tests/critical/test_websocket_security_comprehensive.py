@@ -64,7 +64,7 @@ from netra_backend.app.websocket_core.unified_manager import (
 )
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.dependencies import get_request_scoped_supervisor
 from shared.isolated_environment import get_env

@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from test_framework.ssot.base_test_case import BaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.websocket import WebSocketTestUtility, WebSocketEventType
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
@@ -107,7 +107,7 @@ class TestWebSocketNotifierE2EAgentFlow(BaseTestCase):
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(real_websocket_manager)
+            notifier = AgentWebSocketBridge(real_websocket_manager)
             yield notifier
             await notifier.shutdown()
     

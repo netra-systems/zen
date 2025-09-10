@@ -44,7 +44,7 @@
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_manager import AgentManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.websocket_models import WebSocketMessage
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.logging_config import central_logger
@@ -139,7 +139,7 @@
     # REMOVED_SYNTAX_ERROR: ):
         # REMOVED_SYNTAX_ERROR: """Test that agent_stopped event is emitted when agent is cancelled."""
         # This event is MISSING - test should FAIL
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
         # Simulate agent cancellation
         # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(agent_context)
@@ -161,7 +161,7 @@
         # REMOVED_SYNTAX_ERROR: ):
             # REMOVED_SYNTAX_ERROR: """Test that agent_error event is emitted on agent failure."""
             # This event is MISSING - test should FAIL
-            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+            # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
             # Simulate agent error
             # REMOVED_SYNTAX_ERROR: error_details = { )
@@ -192,7 +192,7 @@
             # REMOVED_SYNTAX_ERROR: ):
                 # REMOVED_SYNTAX_ERROR: """Test that agent_log events are emitted for debugging."""
                 # This event is MISSING - test should FAIL
-                # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+                # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
                 # Send agent_log - this method now exists!
                 # REMOVED_SYNTAX_ERROR: await notifier.send_agent_log( )
@@ -215,7 +215,7 @@
                 # REMOVED_SYNTAX_ERROR: ):
                     # REMOVED_SYNTAX_ERROR: """Test that both tool_started and tool_executing events are sent."""
                     # Currently only tool_executing is sent, tool_started is MISSING
-                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+                    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
                     # Send tool_executing (this exists)
                     # REMOVED_SYNTAX_ERROR: await notifier.send_tool_executing(agent_context, "data_analyzer")
@@ -237,7 +237,7 @@
                     # REMOVED_SYNTAX_ERROR: ):
                         # REMOVED_SYNTAX_ERROR: """Test that stream_chunk events are sent for incremental content."""
                         # This event is MISSING - test should FAIL
-                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
                         # Simulate streaming content
                         # REMOVED_SYNTAX_ERROR: chunks = [ )
@@ -267,7 +267,7 @@
                             # REMOVED_SYNTAX_ERROR: ):
                                 # REMOVED_SYNTAX_ERROR: """Test that stream_complete event is sent after streaming finishes."""
                                 # This event is MISSING - test should FAIL
-                                # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+                                # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
                                 # Send stream_complete - this method now exists!
                                 # REMOVED_SYNTAX_ERROR: await notifier.send_stream_complete( )
@@ -290,7 +290,7 @@
                                 # REMOVED_SYNTAX_ERROR: ):
                                     # REMOVED_SYNTAX_ERROR: """Test that subagent_started and subagent_completed events are sent."""
                                     # These events are MISSING - test should FAIL
-                                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+                                    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
                                     # REMOVED_SYNTAX_ERROR: subagent_context = AgentExecutionContext( )
                                     # REMOVED_SYNTAX_ERROR: agent_name="data_sub_agent",
@@ -335,7 +335,7 @@
                                     # REMOVED_SYNTAX_ERROR: ):
                                         # REMOVED_SYNTAX_ERROR: """Test the complete event flow for agent execution."""
                                         # This test shows what SHOULD happen vs what ACTUALLY happens
-                                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+                                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
                                         # Expected event sequence (what frontend expects)
                                         # REMOVED_SYNTAX_ERROR: expected_events = [ )
@@ -399,7 +399,7 @@
                                                     # REMOVED_SYNTAX_ERROR: self, mock_websocket_manager, agent_context, event_capture
                                                     # REMOVED_SYNTAX_ERROR: ):
                                                         # REMOVED_SYNTAX_ERROR: """Test error handling event flow."""
-                                                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_websocket_manager)
+                                                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
 
                                                         # Start agent
                                                         # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(agent_context)

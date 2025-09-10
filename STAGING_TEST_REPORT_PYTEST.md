@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-10 14:57:44
+**Generated:** 2025-09-10 15:18:36
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 0.55 seconds
+- **Duration:** 0.09 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -20,7 +20,7 @@
 ```
 
 ==================================================
-0 passed, 0 failed in 0.55s
+0 passed, 0 failed in 0.09s
 ```
 
 ## Test Coverage Matrix

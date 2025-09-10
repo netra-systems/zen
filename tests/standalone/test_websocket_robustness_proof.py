@@ -42,7 +42,7 @@ from loguru import logger
 # Import the improved components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from shared.types.core_types import AgentExecutionContext
 from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
 from fastapi.websockets import WebSocketState
@@ -276,7 +276,7 @@ class TestWebSocketRobustnessProof:
                 connections[user_id] = (mock_ws, mode)
             
             # Send messages to all connections and count error handling
-            notifier = WebSocketNotifier(self.ws_manager)
+            notifier = AgentWebSocketBridge(self.ws_manager)
             
             for attempt in range(50):  # 50 attempts to trigger errors
                 for user_id, (mock_ws, mode) in connections.items():
@@ -342,7 +342,7 @@ class TestWebSocketRobustnessProof:
                 connections.append((user_id, thread_id, mock_ws))
             
             # Perform concurrent operations that test thread safety
-            notifier = WebSocketNotifier(self.ws_manager)
+            notifier = AgentWebSocketBridge(self.ws_manager)
             
             async def concurrent_operations(user_id: str, thread_id: str):
                 """Perform operations that could cause race conditions."""
@@ -569,7 +569,7 @@ class TestWebSocketRobustnessProof:
                 mock_ws = self.create_test_connection(user_id, thread_id, "none")
                 user_connections[user_id] = mock_ws
             
-            notifier = WebSocketNotifier(self.ws_manager)
+            notifier = AgentWebSocketBridge(self.ws_manager)
             
             # Send messages concurrently
             async def send_user_messages(user_id: str):

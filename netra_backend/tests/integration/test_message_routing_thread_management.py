@@ -69,7 +69,7 @@ from netra_backend.app.websocket_core.types import (
     create_server_message, create_error_message
 )
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory, IsolatedWebSocketManager, 
+    WebSocketManagerFactory, 
     create_websocket_manager, get_websocket_manager_factory
 )
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection

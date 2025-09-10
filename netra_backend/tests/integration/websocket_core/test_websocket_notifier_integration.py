@@ -16,7 +16,7 @@ import pytest
 import time
 from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.base_test_case import BaseTestCase
@@ -38,7 +38,7 @@ class TestWebSocketNotifierEventDelivery(BaseTestCase):
     async def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier with background processing enabled."""
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(mock_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_websocket_manager)
             # Ensure background processing is working
             assert notifier._queue_processor_task is None
             yield notifier
@@ -97,7 +97,7 @@ class TestWebSocketNotifierEventDelivery(BaseTestCase):
         mock_manager.send_to_thread = mock_send_to_thread
         
         with patch('warnings.warn'):
-            websocket_notifier = WebSocketNotifier(mock_manager)
+            websocket_notifier = AgentWebSocketBridge(mock_manager)
         
         try:
             # Act - Send critical event that will fail initially
@@ -195,7 +195,7 @@ class TestWebSocketNotifierBacklogHandling(BaseTestCase):
     async def websocket_notifier_with_backlog(self, failing_websocket_manager):
         """Create WebSocketNotifier that will experience backlog."""
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(failing_websocket_manager)
+            notifier = AgentWebSocketBridge(failing_websocket_manager)
             yield notifier
             await notifier.shutdown()
     
@@ -246,7 +246,7 @@ class TestWebSocketNotifierBacklogHandling(BaseTestCase):
         mock_manager.send_to_thread = mock_send_with_recovery
         
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(mock_manager)
+            notifier = AgentWebSocketBridge(mock_manager)
         
         try:
             # Act - Send mixed critical and non-critical events
@@ -318,7 +318,7 @@ class TestWebSocketNotifierErrorRecovery(BaseTestCase):
     async def websocket_notifier_emergency(self, emergency_mock_manager):
         """Create WebSocketNotifier for emergency testing."""
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(emergency_mock_manager)
+            notifier = AgentWebSocketBridge(emergency_mock_manager)
             yield notifier
             await notifier.shutdown()
     
@@ -391,7 +391,7 @@ class TestWebSocketNotifierErrorRecovery(BaseTestCase):
         """Test WebSocketNotifier shutdown handles cleanup properly."""
         # Create notifier and generate activity
         with patch('warnings.warn'):
-            notifier = WebSocketNotifier(emergency_mock_manager)
+            notifier = AgentWebSocketBridge(emergency_mock_manager)
         
         # Generate background activity
         await notifier.send_agent_started(sample_context)

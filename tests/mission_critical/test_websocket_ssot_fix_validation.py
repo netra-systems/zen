@@ -51,7 +51,7 @@
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
@@ -210,7 +210,7 @@
                                 # Removed problematic line: async def test_websocket_notifier_integration(self, manager, agent_context):
                                     # REMOVED_SYNTAX_ERROR: """CRITICAL: Verify WebSocketNotifier integration works."""
                                     # REMOVED_SYNTAX_ERROR: pass
-                                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(manager)
+                                    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(manager)
 
                                     # Test notifier initialization
                                     # REMOVED_SYNTAX_ERROR: assert notifier.websocket_manager is manager
@@ -228,7 +228,7 @@
                                         # REMOVED_SYNTAX_ERROR: conn_id = await manager.connect_user(agent_context.user_id, mock_websocket)
 
                                         # Create notifier
-                                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(manager)
+                                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(manager)
 
                                         # Test agent_started event
                                         # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(agent_context)

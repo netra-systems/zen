@@ -53,7 +53,7 @@ from netra_backend.app.websocket_core import (
     create_server_message,
     MessageType
 )
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 
 logger = logging.getLogger(__name__)
 
@@ -437,7 +437,7 @@ class TestWebSocketEventBufferRaceConditions(BaseIntegrationTest):
         mock_websocket.send_json = AsyncMock(side_effect=mock_send_json)
         
         # Create WebSocketNotifier
-        notifier = WebSocketNotifier(websocket_manager=None)
+        notifier = AgentWebSocketBridge(websocket_manager=None)
         
         # CRITICAL: Set up race condition scenario
         start_time = time.time()

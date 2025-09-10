@@ -11,7 +11,7 @@ This test suite validates WebSocket Notifier functionality through integration
 testing with realistic components and message flows, focusing on component
 interaction patterns without requiring running services.
 
-⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
+⚠️ DEPRECATION NOTE: AgentWebSocketBridge is deprecated in favor of AgentWebSocketBridge.
 These tests validate integration patterns for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:
@@ -41,7 +41,7 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
 # Core imports for WebSocket notifier integration testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
@@ -113,7 +113,7 @@ class TestWebSocketNotifierIntegration(SSotBaseTestCase):
         # Suppress deprecation warning for testing
         with patch('warnings.warn'):
             # Create WebSocket notifier with realistic manager
-            self.websocket_notifier = WebSocketNotifier(
+            self.websocket_notifier = AgentWebSocketBridge(
                 websocket_manager=self.realistic_websocket_manager
             )
         
@@ -283,7 +283,7 @@ class TestWebSocketNotifierIntegration(SSotBaseTestCase):
         failing_manager = RealisticWebSocketManager(simulate_failures=True)
         
         with patch('warnings.warn'):
-            failing_notifier = WebSocketNotifier(websocket_manager=failing_manager)
+            failing_notifier = AgentWebSocketBridge(websocket_manager=failing_manager)
         
         # Attempt to send notifications that will initially fail
         await failing_notifier.send_agent_started(self.startup_context)

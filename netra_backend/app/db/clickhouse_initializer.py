@@ -7,8 +7,16 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
-from clickhouse_driver import Client
-from clickhouse_driver.errors import ServerException, ErrorCodes
+try:
+    from clickhouse_driver import Client
+    from clickhouse_driver.errors import ServerException, ErrorCodes
+    CLICKHOUSE_DRIVER_AVAILABLE = True
+except ImportError:
+    # ClickHouse driver not available - provide stub
+    Client = None
+    ServerException = Exception
+    ErrorCodes = None
+    CLICKHOUSE_DRIVER_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 

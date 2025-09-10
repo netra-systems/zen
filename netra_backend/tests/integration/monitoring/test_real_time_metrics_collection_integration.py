@@ -29,7 +29,7 @@ from shared.isolated_environment import get_env
 
 from netra_backend.app.monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.monitoring.real_time_aggregator import RealTimeAggregator
-from netra_backend.app.monitoring.metric_storage import MetricStorage
+from netra_backend.app.services.monitoring.metrics_service import MetricsService
 from netra_backend.app.monitoring.alert_manager import AlertManager
 
 
@@ -57,7 +57,7 @@ class TestRealTimeMetricsCollectionIntegration(SSotBaseTestCase):
         # Initialize real metrics components
         self.metrics_collector = MetricsCollector()
         self.aggregator = RealTimeAggregator()
-        self.metric_storage = MetricStorage()
+        self.metrics_service = MetricsService()
         self.alert_manager = AlertManager()
     
     @pytest.mark.integration
@@ -373,7 +373,7 @@ class TestRealTimeMetricsCollectionIntegration(SSotBaseTestCase):
                         assert rt_metric.value < 1000, f"Health endpoint too slow: {rt_metric.value}ms"
             
             # Test metric storage and persistence
-            storage_result = await self.metric_storage.store_metrics(
+            storage_result = await self.metrics_service.store_metrics(
                 metrics=app_metrics,
                 storage_config={
                     "retention_days": 30,
@@ -388,7 +388,7 @@ class TestRealTimeMetricsCollectionIntegration(SSotBaseTestCase):
             
             # Verify metrics can be retrieved from storage
             if storage_result.metrics_stored > 0:
-                retrieved_metrics = await self.metric_storage.query_metrics(
+                retrieved_metrics = await self.metrics_service.query_metrics(
                     query_filters={
                         "metric_type": "http_requests",
                         "time_range": {
@@ -408,7 +408,7 @@ class TestRealTimeMetricsCollectionIntegration(SSotBaseTestCase):
             
         finally:
             await self.metrics_collector.stop_collection(app_collection_id)
-            await self.metric_storage.cleanup_test_data(self.test_prefix)
+            await self.metrics_service.cleanup_test_data(self.test_prefix)
     
     @pytest.mark.integration
     @pytest.mark.real_services

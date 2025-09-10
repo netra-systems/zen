@@ -60,7 +60,7 @@ from netra_backend.app.services.unified_authentication_service import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
@@ -153,7 +153,7 @@ class TestWebSocketAuthenticationMultiUserBusinessScenarios(SSotAsyncTestCase):
         
         # Initialize mock WebSocket manager for testing transport
         self.mock_websocket_manager = UnifiedWebSocketManager()
-        self.websocket_notifier = WebSocketNotifier(self.mock_websocket_manager)
+        self.websocket_notifier = AgentWebSocketBridge(self.mock_websocket_manager)
         
         # Track authenticated connections
         self.authenticated_connections: Dict[str, MockAuthenticatedWebSocketConnection] = {}

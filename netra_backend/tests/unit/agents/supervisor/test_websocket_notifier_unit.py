@@ -1,5 +1,5 @@
 """
-Unit Tests for WebSocketNotifier (DEPRECATED)
+Unit Tests for AgentWebSocketBridge (DEPRECATED)
 
 Tests the deprecated WebSocketNotifier for backward compatibility and
 to ensure proper deprecation warnings are issued.
@@ -18,13 +18,13 @@ from collections import deque
 from unittest.mock import Mock, AsyncMock, patch
 from uuid import uuid4
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
 class TestWebSocketNotifier:
-    """Unit tests for WebSocketNotifier (deprecated functionality)."""
+    """Unit tests for AgentWebSocketBridge (deprecated functionality)."""
 
     @pytest.fixture
     def mock_websocket_manager(self):
@@ -41,7 +41,7 @@ class TestWebSocketNotifier:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             # Use test_mode=True to prevent background task hanging
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
             
             # Verify deprecation warning was issued
             assert len(w) >= 1
@@ -69,7 +69,7 @@ class TestWebSocketNotifier:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
             
             # Verify warning was issued
             assert len(w) >= 1
@@ -323,7 +323,7 @@ class TestWebSocketNotifier:
         # Create notifier with None manager
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = WebSocketNotifier(None, test_mode=True)
+            notifier = AgentWebSocketBridge(None, test_mode=True)
         
         try:
             # All methods should handle None gracefully

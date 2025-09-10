@@ -52,7 +52,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.websocket_core.types import MessageType
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.event_monitor import EventType
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -195,7 +195,7 @@ class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
         )
         
         # Initialize real WebSocket notifier with mock transport (with test_mode enabled)
-        self.websocket_notifier = WebSocketNotifier(self.mock_websocket_manager, test_mode=True)
+        self.websocket_notifier = AgentWebSocketBridge(self.mock_websocket_manager, test_mode=True)
         
         # Event tracking for validation
         self.expected_critical_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
@@ -1501,7 +1501,7 @@ class TestWebSocketAgentEventsIntegrationComprehensive(SSotAsyncTestCase):
         error_connection.send = failing_send
         
         # Create notifier with error-prone manager
-        error_notifier = WebSocketNotifier(error_websocket_manager)
+        error_notifier = AgentWebSocketBridge(error_websocket_manager)
         
         # Send critical events through error-prone system
         critical_event_results = []

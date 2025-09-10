@@ -4,7 +4,7 @@ Comprehensive Unit Test Suite for WebSocketNotifier - 100% Coverage Target
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure Mission Critical Agent Events ($75K+ MRR protection) 
-- Value Impact: WebSocketNotifier sends the 5 CRITICAL events that deliver chat business value
+- Value Impact: AgentWebSocketBridge sends the 5 CRITICAL events that deliver chat business value
 - Strategic Impact: MISSION CRITICAL - Agent events provide real-time feedback preventing user abandonment
 
 This test suite ensures 100% coverage of WebSocketNotifier, focusing on the 5 mission-critical
@@ -45,7 +45,7 @@ from shared.isolated_environment import get_env
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import system under test
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.schemas.registry import AgentStatus
@@ -144,7 +144,7 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         # Suppress deprecation warning during testing
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            self.notifier = WebSocketNotifier(self.mock_manager)
+            self.notifier = AgentWebSocketBridge(self.mock_manager)
     
     def teardown_method(self, method):
         """Cleanup method for each test."""
@@ -173,7 +173,7 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         """Test WebSocketNotifier initialization with deprecation warning."""
         with warnings.catch_warnings(record=True) as warning_list:
             warnings.simplefilter("always")
-            notifier = WebSocketNotifier(self.mock_manager)
+            notifier = AgentWebSocketBridge(self.mock_manager)
             
             # Verify deprecation warning was issued
             self.assertEqual(len(warning_list), 1)
@@ -797,7 +797,7 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         # Create notifier with None manager
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier_with_none = WebSocketNotifier(None)
+            notifier_with_none = AgentWebSocketBridge(None)
         
         context = AgentExecutionContext("NoneAgent", "run_none", "thread_none", "user_none")
         
@@ -818,7 +818,7 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            failing_notifier = WebSocketNotifier(failing_manager)
+            failing_notifier = AgentWebSocketBridge(failing_manager)
         
         context = AgentExecutionContext("FailAgent", "run_fail", "thread_fail", "user_fail")
         

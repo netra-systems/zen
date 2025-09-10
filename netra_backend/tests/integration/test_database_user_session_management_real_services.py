@@ -24,7 +24,7 @@ from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.models.user_session import UserSession
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.real_services_test_fixtures import real_db_fixture
+from test_framework.ssot.real_services_test_fixtures import E2ETestFixture
 
 
 class TestDatabaseUserSessionManagementRealServices(BaseIntegrationTest):

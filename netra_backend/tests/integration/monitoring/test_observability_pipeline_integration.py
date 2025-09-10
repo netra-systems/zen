@@ -24,9 +24,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
-from netra_backend.app.monitoring.observability_pipeline import ObservabilityPipeline
+from netra_backend.app.monitoring.observability_pipeline import ObservabilityPipeline, LogAggregator
 from netra_backend.app.monitoring.trace_collector import TraceCollector
-from netra_backend.app.monitoring.log_aggregator import LogAggregator
 
 
 class TestObservabilityPipelineIntegration(SSotBaseTestCase):

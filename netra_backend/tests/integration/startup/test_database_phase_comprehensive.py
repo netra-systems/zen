@@ -37,6 +37,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.service_availability import check_service_availability, ServiceUnavailableError
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.database import get_db, get_system_db, get_database_url, get_engine, get_sessionmaker, DatabaseManager, database_manager
 from netra_backend.app.core.backend_environment import BackendEnvironment
@@ -45,13 +46,21 @@ from netra_backend.app.db.models_postgres import Thread, Message
 from netra_backend.app.db.models_user import User
 from netra_backend.app.services.database.health_checker import ConnectionHealthChecker
 
+# Check service availability at module level
+_service_status = check_service_availability(['postgresql'], timeout=2.0)
+_postgresql_available = _service_status['postgresql'] is True
+_postgresql_skip_reason = f"PostgreSQL unavailable: {_service_status['postgresql']}" if not _postgresql_available else None
 
+
+@pytest.mark.skipif(not _postgresql_available, reason=_postgresql_skip_reason)
 class TestDatabasePhaseComprehensive(BaseIntegrationTest):
     """
     Comprehensive integration tests for system startup DATABASE phase.
     
     CRITICAL: These tests ensure the foundation of chat data persistence.
     Without proper DATABASE phase, the system cannot store user interactions.
+    
+    Note: These tests require PostgreSQL service to be running.
     """
     
     def setup_method(self):

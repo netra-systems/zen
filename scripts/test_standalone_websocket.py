@@ -9,7 +9,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Imports
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 class MockWebSocket:
@@ -67,7 +67,7 @@ async def test_websocket_events():
     await ws_manager.connect_user(user_id, mock_websocket, thread_id)
     
     # Create WebSocket notifier
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = AgentWebSocketBridge(ws_manager)
     
     # Create execution context
     context = AgentExecutionContext(

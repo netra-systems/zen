@@ -29,7 +29,7 @@ from test_framework.environment_isolation import get_env
 
 # Production imports - using absolute paths only
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
@@ -274,7 +274,7 @@ async def test_websocket_core_event_flow():
         
         try:
             # Create WebSocket notifier
-            notifier = WebSocketNotifier(ws_manager)
+            notifier = AgentWebSocketBridge(ws_manager)
             
             # Create execution context
             context = AgentExecutionContext(
@@ -389,7 +389,7 @@ async def test_websocket_manager_real_connection_handling():
             connections.append((user_id, ws_conn, conn_id))
         
         # Test broadcast functionality
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         context = AgentExecutionContext(
             run_id="broadcast-test",
             thread_id="broadcast",

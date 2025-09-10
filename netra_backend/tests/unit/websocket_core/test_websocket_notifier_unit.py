@@ -14,7 +14,7 @@ without requiring actual WebSocket connections or external dependencies.
 import pytest
 from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
@@ -33,7 +33,7 @@ class TestWebSocketNotifierCore:
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier instance with warnings suppressed."""
         with patch('warnings.warn'):  # Suppress deprecation warning in tests
-            return WebSocketNotifier(mock_websocket_manager)
+            return AgentWebSocketBridge(mock_websocket_manager)
     
     @pytest.fixture
     def sample_context(self):
@@ -164,7 +164,7 @@ class TestWebSocketNotifierErrorHandling:
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier instance."""
         with patch('warnings.warn'):
-            return WebSocketNotifier(mock_websocket_manager)
+            return AgentWebSocketBridge(mock_websocket_manager)
     
     @pytest.fixture
     def sample_context(self):
@@ -268,7 +268,7 @@ class TestWebSocketNotifierMessageBuilding:
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocketNotifier instance."""
         with patch('warnings.warn'):
-            return WebSocketNotifier(mock_websocket_manager)
+            return AgentWebSocketBridge(mock_websocket_manager)
     
     @pytest.fixture
     def sample_context(self):

@@ -38,7 +38,7 @@
 
         # Production imports - using absolute paths only
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -878,7 +878,7 @@
 
     # REMOVED_SYNTAX_ERROR: try:
         # Create WebSocket notifier
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
 
         # Create execution context
         # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

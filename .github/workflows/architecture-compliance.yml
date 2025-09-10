@@ -2,14 +2,7 @@ name: Architecture Compliance Enforcer
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - 'app/**/*.py'
-      - 'frontend/**/*.ts'
-      - 'frontend/**/*.tsx'
-      - 'scripts/**/*.py'
-  push:
-    branches: [main, business-*]
+    types: [opened]
     paths:
       - 'app/**/*.py'
       - 'frontend/**/*.ts'

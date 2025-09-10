@@ -1,5 +1,5 @@
 """
-Integration Tests for WebSocketNotifier (DEPRECATED)
+Integration Tests for AgentWebSocketBridge (DEPRECATED)
 
 Tests WebSocketNotifier with real WebSocket connections and event validation.
 These tests ensure the deprecated component works properly during migration period.
@@ -13,7 +13,7 @@ import warnings
 from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from test_framework.ssot.websocket import create_test_websocket_manager
 
@@ -31,7 +31,7 @@ class TestWebSocketNotifierIntegration:
         """WebSocketNotifier with real WebSocket manager."""
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")  # Suppress deprecation warnings for tests
-            return WebSocketNotifier(test_websocket_manager)
+            return AgentWebSocketBridge(test_websocket_manager)
 
     @pytest.fixture
     def sample_context(self):
@@ -101,7 +101,7 @@ class TestWebSocketNotifierIntegration:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = WebSocketNotifier(failing_manager)
+            notifier = AgentWebSocketBridge(failing_manager)
         
         # Events should not raise exceptions despite WebSocket failures
         await notifier.send_agent_started(sample_context)
@@ -222,7 +222,7 @@ class TestWebSocketNotifierIntegration:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = WebSocketNotifier(failing_manager)
+            notifier = AgentWebSocketBridge(failing_manager)
         
         # Send critical event (agent_started)
         await notifier.send_agent_started(sample_context)
@@ -264,7 +264,7 @@ class TestWebSocketNotifierIntegration:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = WebSocketNotifier(unreliable_manager)
+            notifier = AgentWebSocketBridge(unreliable_manager)
         
         # Send multiple critical events
         await notifier.send_agent_started(sample_context)
@@ -363,7 +363,7 @@ class TestWebSocketNotifierIntegration:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = WebSocketNotifier(fallback_manager)
+            notifier = AgentWebSocketBridge(fallback_manager)
         
         # Send event with None thread_id to trigger broadcast
         await notifier.send_agent_failed(
@@ -476,7 +476,7 @@ class TestWebSocketNotifierIntegration:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = WebSocketNotifier(recovering_manager)
+            notifier = AgentWebSocketBridge(recovering_manager)
         
         # Send events during "outage"
         await notifier.send_agent_started(sample_context)

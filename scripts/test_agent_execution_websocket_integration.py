@@ -27,7 +27,7 @@ if project_root not in sys.path:
 
 # Core imports for agent execution
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
@@ -131,7 +131,7 @@ class SimpleTestAgent:
     def __init__(self, name: str, websocket_manager: WebSocketManager):
         self.name = name
         self.websocket_manager = websocket_manager
-        self.notifier = WebSocketNotifier(websocket_manager)
+        self.notifier = AgentWebSocketBridge(websocket_manager)
         
     async def execute(self, state: DeepAgentState, run_id: str) -> Dict[str, Any]:
         """Execute agent with proper WebSocket notifications."""

@@ -14,7 +14,7 @@ production-like infrastructure, ensuring users receive reliable real-time feedba
 🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
-⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
+⚠️ DEPRECATION NOTE: AgentWebSocketBridge is deprecated in favor of AgentWebSocketBridge.
 These E2E tests validate the complete notification flow for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:
@@ -44,7 +44,7 @@ from test_framework.ssot.websocket import WebSocketTestClient
 from shared.isolated_environment import get_env
 
 # Core imports for E2E WebSocket notification testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 

@@ -38,8 +38,8 @@ from test_framework.websocket_helpers import (
 
 # Import WebSocket client classes
 try:
-    from netra_backend.app.services.websocket_connection_manager import WebSocketConnectionManager
-    from netra_backend.app.services.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     WEBSOCKET_SERVICES_AVAILABLE = True
 except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False
@@ -299,7 +299,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
         
         if WEBSOCKET_SERVICES_AVAILABLE and not simulate_failures:
             # Use real WebSocketNotifier
-            notifier = WebSocketNotifier()
+            notifier = AgentWebSocketBridge()
             # Hook into notifier to capture events
             original_send = notifier.send_to_user
             

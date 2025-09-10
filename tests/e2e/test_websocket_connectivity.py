@@ -31,7 +31,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 # Production WebSocket imports - absolute paths only
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 
 
 class InMemoryWebSocketConnection:
@@ -157,7 +157,7 @@ class TestWebSocketConnectivityAuthenticated:
             
             try:
                 # Create WebSocket notifier for real event testing
-                notifier = WebSocketNotifier(ws_manager)
+                notifier = AgentWebSocketBridge(ws_manager)
                 
                 # Test authenticated WebSocket messaging for user1
                 logger.info("📡 Testing authenticated WebSocket messaging...")
@@ -308,7 +308,7 @@ class TestWebSocketConnectivityAuthenticated:
             
             try:
                 # Create WebSocket notifier
-                notifier = WebSocketNotifier(ws_manager)
+                notifier = AgentWebSocketBridge(ws_manager)
                 
                 # Create execution context for message sequence testing
                 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

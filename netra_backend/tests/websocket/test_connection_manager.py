@@ -279,7 +279,7 @@ class TestWebSocketAgentEventsReal:
     async def test_agent_event_flow_real_websocket(self):
         """Test complete agent event flow with real WebSocket connections."""
         from netra_backend.app.websocket_core import WebSocketManager
-        from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
         
         # Setup real WebSocket connection
@@ -306,7 +306,7 @@ class TestWebSocketAgentEventsReal:
         capture_task = asyncio.create_task(capture_agent_events())
         
         # Create notifier and send agent events
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         context = AgentExecutionContext(
             run_id="test-run-123",
             thread_id=conn_id,

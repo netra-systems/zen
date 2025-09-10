@@ -27,7 +27,7 @@ if project_root not in sys.path:
 
 # Import core modules
 from netra_backend.app.websocket_core.manager import WebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
@@ -121,7 +121,7 @@ async def test_websocket_agent_events():
     print(f"Connected user {user_id} to WebSocket manager")
     
     # Create WebSocket notifier
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = AgentWebSocketBridge(ws_manager)
     
     # Create execution context
     context = AgentExecutionContext(

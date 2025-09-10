@@ -27,7 +27,7 @@ from decimal import Decimal
 # Database exception imports removed - not used in this test file
 # from netra_backend.app.core.exceptions_database import DatabaseConnectionError  
 # from netra_backend.app.core.exceptions_file import DataValidationError
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.services.thread_service import _handle_database_error
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
@@ -102,7 +102,7 @@ class TestErrorHandlingBusinessContinuity:
         
         # Create WebSocketNotifier with correct SSOT constructor
         with patch('warnings.warn'):  # Suppress deprecation warning for test
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
         
         # Create a test execution context for the notification
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
