@@ -588,6 +588,46 @@ class ConfigurationValidator:
         except Exception as e:
             logger.error(f"Failed to get OAuth credentials: {e}")
             raise
+    
+    def validate_database_config(self) -> bool:
+        """
+        Validate database configuration using SSOT delegation.
+        
+        Returns:
+            bool: True if database configuration is valid
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT database validation
+                return central_validator.validate_database_configuration()
+            else:
+                # Fallback database validation for test environment
+                db_url = self.env.get("DATABASE_URL")
+                db_host = self.env.get("POSTGRES_HOST")
+                return bool(db_url or db_host)
+        except Exception as e:
+            logger.error(f"Database configuration validation failed: {e}")
+            return False
+    
+    def detect_environment(self) -> str:
+        """
+        Detect current environment using SSOT delegation.
+        
+        Returns:
+            str: Current environment name
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT environment detection
+                return central_validator.get_current_environment()
+            else:
+                # Fallback environment detection for test
+                return self.env.get("ENVIRONMENT", "test")
+        except Exception as e:
+            logger.error(f"Environment detection failed: {e}")
+            return "test"
 
 
 # =============================================================================

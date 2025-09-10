@@ -4,10 +4,19 @@ WebSocket Core - Unified SSOT Implementation
 MISSION CRITICAL: Enables chat value delivery through 5 critical events.
 Single source of truth for all WebSocket functionality.
 
+🚨 PHASE 1 SSOT REMEDIATION: Interface standardization complete.
+Deprecated patterns will trigger warnings. Use SSOT imports for new code.
+
 Business Value:
-- Consolidates 13+ files into 2 unified implementations
+- Consolidates 13+ files into 2 unified implementations  
 - Ensures 100% critical event delivery
 - Zero cross-user event leakage
+
+SSOT CANONICAL IMPORTS (Phase 1+):
+    from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+    
+DEPRECATED IMPORTS (Phase 1 warnings, Phase 3 removal):
+    from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 """
 
 # Unified implementations (SSOT)

@@ -800,6 +800,9 @@ class WebSocketManagerFactory:
         """
         Initialize the WebSocket manager factory.
         
+        🚨 PHASE 1 SSOT DEPRECATION WARNING: WebSocketManagerFactory is deprecated.
+        Use WebSocketManager.from_user_context(user_context) instead for SSOT compliance.
+        
         CRITICAL FIX: Temporarily increased limit from 5 to 20 managers per user as safety margin
         while thread ID consistency fix is deployed. This prevents resource exhaustion during
         the transition period when some managers may still have the old inconsistent IDs.
@@ -808,6 +811,28 @@ class WebSocketManagerFactory:
             max_managers_per_user: Maximum number of managers per user (default: 20, was 5)
             connection_timeout_seconds: Timeout for idle connections (default: 30 minutes)
         """
+        # PHASE 1 SSOT REMEDIATION: Add deprecation warning
+        import warnings
+        import inspect
+        
+        # Get caller information for better debugging
+        frame = inspect.currentframe()
+        caller_info = "unknown"
+        if frame and frame.f_back:
+            caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
+        
+        warnings.warn(
+            f"WebSocketManagerFactory is deprecated and will be removed in Phase 3. "
+            f"Use 'WebSocketManager.from_user_context(user_context)' instead for SSOT compliance. "
+            f"Called from: {caller_info}",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            f"SSOT MIGRATION REQUIRED: WebSocketManagerFactory usage detected at {caller_info}. "
+            f"Migrate to WebSocketManager.from_user_context() for Phase 2+ compatibility."
+        )
         self._active_managers: Dict[str, WebSocketManager] = {}
         self._user_manager_count: Dict[str, int] = {}
         self._manager_creation_time: Dict[str, datetime] = {}

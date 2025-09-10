@@ -169,6 +169,9 @@ class ConfigurationValidator:
             "environment": environment
         })
         
+        # Initialize SSOT OAuth validator
+        self._central_validator = None
+        
         # Register default rules
         self._register_default_rules()
     
