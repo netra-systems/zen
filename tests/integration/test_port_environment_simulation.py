@@ -26,9 +26,9 @@ class TestPortEnvironmentSimulation(BaseTestCase):
     These tests simulate the Cloud Run environment without requiring actual Docker deployment.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.project_root = Path(__file__).parent.parent.parent
         self.test_ports = [8080, 8090, 9000, 9090]  # Typical Cloud Run ports
     
@@ -42,7 +42,7 @@ class TestPortEnvironmentSimulation(BaseTestCase):
         backend_gcp_dockerfile = self.project_root / "deployment" / "docker" / "backend.gcp.Dockerfile"
         
         for test_port in self.test_ports:
-            with self.subTest(port=test_port):
+            # Test with different ports to simulate Cloud Run behavior
                 # Simulate Cloud Run setting PORT environment variable
                 with patch.dict(os.environ, {'PORT': str(test_port)}):
                     
@@ -75,7 +75,7 @@ class TestPortEnvironmentSimulation(BaseTestCase):
         backend_alpine_dockerfile = self.project_root / "dockerfiles" / "backend.alpine.Dockerfile"
         
         for test_port in self.test_ports:
-            with self.subTest(port=test_port):
+            # Test with different ports to simulate Cloud Run behavior
                 with patch.dict(os.environ, {'PORT': str(test_port)}):
                     
                     health_check_config = self._extract_health_check_from_dockerfile(backend_alpine_dockerfile)
@@ -149,7 +149,7 @@ class TestPortEnvironmentSimulation(BaseTestCase):
         ]
         
         for scenario in test_scenarios:
-            with self.subTest(scenario=scenario):
+            # Test each scenario
                 env_patch = {}
                 if list(scenario.keys())[0] is not None:
                     env_patch['PORT'] = list(scenario.values())[0]
