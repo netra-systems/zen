@@ -76,31 +76,25 @@ class TestConfigurationGoldenPath(SSotBaseTestCase):
     configuration across all environments and ensure golden path user flow reliability.
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with proper isolation."""
-        super().setUp()
-        self.env = get_env()
-        
-        # Enable isolation for clean test environment
-        self.env.enable_isolation()
+        super().setup_method(method)
         
         # Clear any cached configuration for test isolation
         if hasattr(config_manager, '_config_cache'):
             config_manager._config_cache = None
         
         # Set test environment
-        self.env.set('ENVIRONMENT', 'testing', 'test_setup')
-        self.env.set('TESTING', 'true', 'test_setup')
+        self.set_env_var('ENVIRONMENT', 'testing')
+        self.set_env_var('TESTING', 'true')
     
-    def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test environment."""
         # Clear configuration cache
         if hasattr(config_manager, '_config_cache'):
             config_manager._config_cache = None
             
-        # Reset environment
-        self.env.reset()
-        super().tearDown()
+        super().teardown_method(method)
     
     @contextmanager
     def temp_env_vars(self, **kwargs):

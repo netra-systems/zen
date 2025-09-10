@@ -2327,11 +2327,22 @@ class WebSocketManagerFactory:
         return total_connections
     
     # ============================================================================
-    # MISSING SSOT INTERFACE METHODS (Required by validation tests) 
+    # ADDITIONAL SSOT INTERFACE METHODS (Required by validation tests)
     # ============================================================================
     
     async def send_message(self, user_id: str, message: Dict[str, Any]) -> bool:
-        """Send message to user via their manager."""
+        """
+        Send a message to a specific user via their WebSocket manager.
+        
+        SSOT INTERFACE COMPLIANCE: Delegates to appropriate user manager.
+        
+        Args:
+            user_id: Target user identifier
+            message: Message to send
+            
+        Returns:
+            True if message sent successfully, False otherwise
+        """
         manager = self.get_manager_by_user(user_id)
         if manager and hasattr(manager, 'send_to_user'):
             try:
@@ -2339,10 +2350,21 @@ class WebSocketManagerFactory:
                 return True
             except Exception as e:
                 logger.error(f"Failed to send message to user {user_id}: {e}")
+                return False
         return False
     
     async def broadcast_message(self, message: Dict[str, Any]) -> int:
-        """Broadcast message to all users."""
+        """
+        Broadcast a message to all connected users.
+        
+        SSOT INTERFACE COMPLIANCE: Broadcasts via all active managers.
+        
+        Args:
+            message: Message to broadcast
+            
+        Returns:
+            Number of users who received the message
+        """
         sent_count = 0
         with self._factory_lock:
             for manager in self._active_managers.values():
@@ -2350,59 +2372,154 @@ class WebSocketManagerFactory:
                     if hasattr(manager, 'send_to_user') and hasattr(manager, 'user_context'):
                         await manager.send_to_user(manager.user_context.user_id, message)
                         sent_count += 1
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Failed to broadcast to manager: {e}")
         return sent_count
     
     def get_connection_count(self) -> int:
-        """Get connection count (alias for get_active_connections_count)."""
+        """
+        Get total connection count (alias for get_active_connections_count).
+        
+        SSOT INTERFACE COMPLIANCE: Provides expected method name.
+        
+        Returns:
+            Total number of active connections
+        """
         return self.get_active_connections_count()
     
     async def add_connection(self, user_id: str, websocket: Any) -> bool:
-        """Add connection for user."""
+        """
+        Add a WebSocket connection for a user.
+        
+        SSOT INTERFACE COMPLIANCE: Delegates to user's manager.
+        
+        Args:
+            user_id: User identifier
+            websocket: WebSocket connection object
+            
+        Returns:
+            True if connection added successfully, False otherwise
+        """
         try:
+            # Find or create manager for this user
             manager = self.get_manager_by_user(user_id)
             if not manager:
+                # Create manager if it doesn't exist
                 connection_id = f"conn_{uuid.uuid4().hex[:8]}"
                 manager = self.create_isolated_manager(user_id, connection_id)
-            return True
-        except Exception:
+            
+            # Create WebSocket connection object
+            connection = WebSocketConnection(
+                user_id=user_id,
+                connection_id=f"ws_{uuid.uuid4().hex[:8]}",
+                websocket=websocket
+            )
+            
+            if hasattr(manager, 'add_connection'):
+                await manager.add_connection(connection)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Failed to add connection for user {user_id}: {e}")
             return False
     
     async def remove_connection(self, user_id: str) -> bool:
-        """Remove user connection."""
+        """
+        Remove a user's WebSocket connection.
+        
+        SSOT INTERFACE COMPLIANCE: Delegates to user's manager.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            True if connection removed successfully, False otherwise
+        """
         manager = self.get_manager_by_user(user_id)
         if manager:
             try:
+                # Clean up the entire manager for this user
                 isolation_key = self._find_isolation_key_for_user(user_id)
                 if isolation_key:
                     return await self.cleanup_manager(isolation_key)
-            except Exception:
-                pass
+                return False
+            except Exception as e:
+                logger.error(f"Failed to remove connection for user {user_id}: {e}")
+                return False
         return False
     
     def is_user_connected(self, user_id: str) -> bool:
-        """Check if user is connected."""
+        """
+        Check if a user is currently connected.
+        
+        SSOT INTERFACE COMPLIANCE: Checks user's manager status.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            True if user is connected, False otherwise
+        """
+>>>>>>> main
         manager = self.get_manager_by_user(user_id)
         return manager is not None and getattr(manager, '_is_active', False)
     
     async def handle_connection(self, websocket: Any) -> str:
-        """Handle new connection."""
+        """
+        Handle a new WebSocket connection.
+        
+        SSOT INTERFACE COMPLIANCE: Creates manager for new connection.
+        
+        Args:
+            websocket: WebSocket connection object
+            
+        Returns:
+            Connection ID for the established connection
+        """
         try:
+            # Extract user_id from websocket (implementation dependent)
             user_id = getattr(websocket, 'user_id', f"user_{uuid.uuid4().hex[:8]}")
             connection_id = f"conn_{uuid.uuid4().hex[:8]}"
-            self.create_isolated_manager(user_id, connection_id)
+            
+            # Create or get manager for this user
+            manager = self.create_isolated_manager(user_id, connection_id)
+            
+            # Add the connection
+            await self.add_connection(user_id, websocket)
+            
             return connection_id
         except Exception as e:
-            logger.error(f"Failed to handle connection: {e}")
+            logger.error(f"Failed to handle new connection: {e}")
             raise
     
     async def handle_disconnection(self, user_id: str) -> bool:
-        """Handle disconnection."""
+        """
+        Handle a WebSocket disconnection.
+        
+        SSOT INTERFACE COMPLIANCE: Cleans up user's manager.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            True if disconnection handled successfully, False otherwise
+        """
         return await self.remove_connection(user_id)
     
     async def send_agent_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> bool:
-        """Send agent event to user."""
+        """
+        Send an agent event to a specific user.
+        
+        SSOT INTERFACE COMPLIANCE: Sends structured events via user's manager.
+        
+        Args:
+            user_id: Target user identifier
+            event_type: Type of agent event
+            data: Event data payload
+            
+        Returns:
+            True if event sent successfully, False otherwise
+        """
         event_message = {
             'type': 'agent_event',
             'event_type': event_type,
@@ -2412,7 +2529,19 @@ class WebSocketManagerFactory:
         return await self.send_message(user_id, event_message)
     
     def _find_isolation_key_for_user(self, user_id: str) -> Optional[str]:
+<<<<<<< HEAD
         """Find isolation key for user."""
+=======
+        """
+        Find the isolation key for a user's active manager.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            Isolation key if found, None otherwise
+        """
+>>>>>>> main
         with self._factory_lock:
             for key, manager in self._active_managers.items():
                 if hasattr(manager, 'user_context') and manager.user_context.user_id == user_id:
