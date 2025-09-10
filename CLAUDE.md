@@ -77,41 +77,31 @@
 
 -----
 
-## 1\. The Business Mandate: Value Capture and Growth
+## 1. BUSINESS MANDATE
 
-Netra Apex succeeds by creating and capturing value from a customer's AI spend.
+**CORE PRINCIPLE:** Netra Apex captures value from customer AI spend.
 
-**IMPORTANT: Core Business Principles:**
+**BUSINESS RULES:**
+- **Product-Market Fit:** Make Apex indispensable for AI infrastructure
+- **Customer Tiers:** Free → Early → Mid → Enterprise (conversion focus)
+- **MVP/YAGNI:** Every component needs immediate business justification
+- **AI Leverage:** Multi-agent workflows as force multipliers
+- **Complete Tasks:** Finish jobs fully, use sub-agents extensively
+- **Chat is 90% of Value:** Focus on substantive AI-powered interactions
 
-  * **Product-Market Fit:** Make Apex indispensable for customers managing AI infrastructure.
-  * **Value Capture:** Capture a significant percentage of the value Apex creates.
-  * **Customer Segments:** Free, Early, Mid, Enterprise. The goal of the Free tier is conversion to paid tiers.
-  * **Prioritization:** Business goals drive engineering priorities. Rigor enables business velocity.
-  * **Lean Development (MVP/YAGNI):** Adhere strictly to Minimum Viable Product (MVP) and "You Ain't Gonna Need It" (YAGNI) principles. Every component MUST justify its existence with immediate business value.
-  * **AI Leverage:** Use the AI Factory and specialized agent workflows as force multipliers to automate and augment processes, maximizing throughput and quality.
-  * **COMPLETE YOUR TASKS FULLY** You always "finish the job" even when it takes many hours of work, sub agents, many tools or tasks.
-  * **User Chat is King - SUBSTANTIVE VALUE** The user "Chat" means the COMPLETE value of AI-powered interactions. Because chat is currently the how we deliver 90% of our value. The current sub-focus is on the web UI/UX websocket based channel.
+### 1.1. Chat Business Value (90% of Platform)
+- **Real Solutions:** Agents solve actual problems with actionable results
+- **Responsive UX:** Quality measured by AI response substance
+- **Timely Updates:** Real-time progress with meaningful context
+- **Complete Flow:** End-to-end agent execution works
+- **IP Protection:** Shield implementation secrets from users
 
-### 1.1. **"Chat" Business Value** 
-  * **Real Solutions** Agents solving REAL problems, providing insights, and delivering actionable results. Technical send/receive of messages is one part of that whole.
-  * **Helpful** The Chat UI/UX/Backend interconnections must be responsive, useful and strong. Success is measured by the substance and quality of AI responses.
-  * **Timely** When a user is running an agent they must get timely updates AND receive meaningful, problem-solving results.  Some agents run slower or faster than others. Updates must be reasonable and contextually useful.
-  * **Complete Business Value** Users must get complete readable responses, the end to end flow of agents must work.
-  * **Data Driven** A large part of our value comes from the data driven.
-  * **Business IP** We must protect our IP so messages to the users must protect "secrets" of how the agents work.
-
-  The system must make sense for the default flows expected for business value. Business value > Abstract system purity.
-
-### 1.2. Revenue-Driven Development: Business Value Justification (BVJ)
-
-Every engineering task requires a Business Value Justification (BVJ) to align technical work with business outcomes. A BVJ must account for revenue and strategic value (e.g., Platform Stability, Development Velocity, Risk Reduction). Think like Elon Musk. Like Steve Jobs. Like Bill Gates.
-
-**BVJ Structure:**
-
-1.  **Segment:** (Free, Early, Mid, Enterprise, or Platform/Internal)
-2.  **Business Goal:** (e.g., Conversion, Expansion, Retention, Stability)
-3.  **Value Impact:** (How does this improve the customer's AI operations?)
-4.  **Strategic/Revenue Impact:** (The quantifiable or strategic benefit to Netra Apex.)
+### 1.2. Business Value Justification (BVJ)
+Every task needs:
+1. **Segment:** Free/Early/Mid/Enterprise/Platform
+2. **Goal:** Conversion/Expansion/Retention/Stability
+3. **Value Impact:** How this improves customer AI operations
+4. **Revenue Impact:** Quantifiable benefit to Netra
 
 -----
 
