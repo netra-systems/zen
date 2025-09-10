@@ -707,9 +707,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 
                 # Test stable user (should work normally)
                 try:
-                    await engine_stable.send_agent_thinking(
-                        agent_context_stable,
-                        "Stable user thinking",
+                    await engine_stable.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context_stable.agent_name,
+                        reasoning="Stable user thinking",
                         step_number=1
                     )
                     stable_success = True
@@ -720,9 +720,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 # Test error user (should handle errors gracefully)
                 error_raised = False
                 try:
-                    await engine_error.send_agent_thinking(
-                        agent_context_error,
-                        "Error user thinking", 
+                    await engine_error.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context_error.agent_name,
+                        reasoning="Error user thinking", 
                         step_number=1
                     )
                 except Exception:
@@ -736,9 +736,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 
                 # Test that stable user can continue working after error user fails
                 try:
-                    await engine_stable.send_tool_executing(
-                        agent_context_stable,
-                        "stable_user_tool"
+                    await engine_stable.websocket_emitter.notify_tool_executing(
+                        agent_name=agent_context_stable.agent_name,
+                        tool_name="stable_user_tool"
                     )
                     post_error_success = True
                 except Exception as e:
@@ -813,9 +813,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             # Use engines to generate some WebSocket activity
             for i, (engine, context) in enumerate(zip(engines, contexts)):
                 agent_context = self.create_test_agent_context(context)
-                await engine.send_agent_thinking(
-                    agent_context,
-                    f"Activity for cleanup test user {i}",
+                await engine.websocket_emitter.notify_agent_thinking(
+                    agent_name=agent_context.agent_name,
+                    reasoning=f"Activity for cleanup test user {i}",
                     step_number=1
                 )
             
@@ -829,9 +829,9 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             for i, (engine, context) in enumerate(zip(engines[1:], contexts[1:]), 1):
                 try:
                     agent_context = self.create_test_agent_context(context)
-                    await engine.send_agent_thinking(
-                        agent_context,
-                        f"Post-cleanup activity for user {i}",
+                    await engine.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context.agent_name,
+                        reasoning=f"Post-cleanup activity for user {i}",
                         step_number=2
                     )
                     post_cleanup_success = True
@@ -870,6 +870,10 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             
             # CRITICAL: Factory metrics must reflect cleanup
             post_cleanup_metrics = self.factory.get_factory_metrics()
+            
+            # DEBUG: Print metrics for debugging
+            print(f"DEBUG: Initial metrics: {initial_factory_metrics}")
+            print(f"DEBUG: Post cleanup metrics: {post_cleanup_metrics}")
             
             assert post_cleanup_metrics['total_engines_cleaned'] > initial_factory_metrics['total_engines_cleaned'], (
                 "SSOT VIOLATION: Factory metrics don't reflect engine cleanup. "
