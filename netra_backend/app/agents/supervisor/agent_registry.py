@@ -374,8 +374,8 @@ class AgentRegistry(BaseAgentRegistry):
     - Provides proper permission checking and WebSocket events
     - Eliminates all competing tool dispatcher implementations
     
-    This class extends the UniversalRegistry from universal_registry.py,
-    adding agent-specific functionality while maintaining SSOT compliance.
+    This class extends the specialized AgentRegistry (BaseAgentRegistry) from universal_registry.py,
+    adding enhanced functionality while maintaining SSOT compliance.
     """
     
     def __init__(self, llm_manager: Optional['LLMManager'] = None, tool_dispatcher_factory: Optional[callable] = None):
