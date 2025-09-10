@@ -291,10 +291,10 @@ class ModernSyntheticDataSubAgent(BaseAgent):
             approval_message=approval_message
         )
         
-        # Store in context metadata instead of global state
-        context.metadata['synthetic_data_result'] = safe_json_dumps(result)
-        context.metadata['approval_message'] = approval_message
-        context.metadata['requires_approval'] = True
+        # Store in context metadata using SSOT method instead of global state
+        self.store_metadata_result(context, 'synthetic_data_result', safe_json_dumps(result))
+        self.store_metadata_result(context, 'approval_message', approval_message)
+        self.store_metadata_result(context, 'requires_approval', True)
         
         # Send approval update
         if stream_updates:
@@ -323,8 +323,8 @@ class ModernSyntheticDataSubAgent(BaseAgent):
             thread_id=context.thread_id, user_id=context.user_id
         )
         
-        # Store result in context
-        context.metadata['synthetic_data_result'] = safe_json_dumps(result)
+        # Store result in context using SSOT method
+        self.store_metadata_result(context, 'synthetic_data_result', safe_json_dumps(result))
         
         if stream_updates:
             records_count = result.generation_status.records_generated
