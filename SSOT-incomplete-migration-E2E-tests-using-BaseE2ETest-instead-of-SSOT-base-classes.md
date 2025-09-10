@@ -1,0 +1,59 @@
+# SSOT-incomplete-migration - E2E tests using BaseE2ETest instead of SSOT base classes
+
+**GitHub Issue:** [#188](https://github.com/netra-systems/netra-apex/issues/188)
+**Status:** DISCOVERING
+**Created:** 2025-09-10
+
+## Issue Summary
+114 E2E test files are using non-SSOT `BaseE2ETest` instead of SSOT base classes (`SSotBaseTestCase`/`SSotAsyncTestCase`), blocking golden path chat functionality.
+
+## Critical Impact
+- **$500K+ ARR at risk** - Golden Path WebSocket tests using wrong base class
+- **Environment isolation broken** - Direct os.environ access bypasses IsolatedEnvironment SSOT
+- **Primary chat test completely broken** - Syntax errors in core test file
+- **Test reliability compromised** - 114 files with inconsistent inheritance
+
+## Key Files Affected
+- **PRIMARY CONCERN:** `/tests/e2e/test_primary_chat_websocket_flow.py` - COMPLETELY BROKEN
+- **GOLDEN PATH:** `/tests/e2e/test_golden_path_websocket_auth_staging.py` - Wrong base class
+- **ROOT CAUSE:** `/test_framework/base_e2e_test.py` - Competing SSOT implementation
+- **TOTAL:** 114 E2E test files using BaseE2ETest vs 103 using SSOT correctly
+
+## SSOT Gardener Process Status
+
+### 0) DISCOVER NEXT SSOT ISSUE ✅ COMPLETE
+- **AUDIT COMPLETE:** Critical violation identified
+- **ISSUE CREATED:** GitHub #188
+- **PROGRESS TRACKER:** This file created
+
+### 1) DISCOVER AND PLAN TEST 🔄 NEXT
+- [ ] Find existing tests protecting E2E base class inheritance
+- [ ] Plan unit/integration tests for SSOT migration validation
+- [ ] Design failing tests to catch BaseE2ETest usage
+
+### 2) EXECUTE TEST PLAN 
+- [ ] Create new SSOT compliance tests (20% of work)
+- [ ] Validate test coverage gaps
+
+### 3) PLAN REMEDIATION 
+- [ ] Plan migration strategy for 114 files
+- [ ] Plan BaseE2ETest deprecation
+- [ ] Plan primary chat test file fix
+
+### 4) EXECUTE REMEDIATION
+- [ ] Migrate files to SSOT base classes
+- [ ] Fix syntax errors in primary chat test
+- [ ] Remove/deprecate BaseE2ETest
+
+### 5) TEST FIX LOOP
+- [ ] Prove system stability maintained
+- [ ] Run all affected tests
+- [ ] Fix any breaking changes
+
+### 6) PR AND CLOSURE
+- [ ] Create PR when tests pass
+- [ ] Cross-link to close issue #188
+
+## Next Actions
+1. SPAWN SUB-AGENT: Discover existing tests protecting E2E inheritance patterns
+2. SPAWN SUB-AGENT: Plan test strategy for SSOT migration validation
