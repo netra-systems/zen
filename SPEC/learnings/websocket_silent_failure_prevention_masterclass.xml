@@ -800,4 +800,16 @@ async def test_complete_websocket_event_flow():
             </description>
         </recommendation>
     </final_recommendations>
+    
+    <cross_references>
+        <reference file="websocket_performance_blocking_fix_20250909.xml">
+            Related performance issue where blocking time.sleep() calls caused WebSocket initialization
+            to get stuck. Shows how performance issues can create silent-like failure symptoms 
+            where systems appear unresponsive without clear error messages.
+        </reference>
+        <reference file="websocket_agent_integration_critical.xml">
+            Core WebSocket agent integration patterns that prevent silent failures through
+            proper event emission and error handling strategies.
+        </reference>
+    </cross_references>
 </learning_document>

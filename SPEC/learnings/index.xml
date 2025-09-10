@@ -769,6 +769,41 @@
         </related-learnings>
     </learning>
     
+    <learning id="websocket-performance-blocking-fix-2025-09-09">
+        <title>WebSocket Performance Blocking Fix - time.sleep() to asyncio.sleep() Migration</title>
+        <category>WebSocket/Performance/BlockingFix</category>
+        <keywords>websocket, performance, blocking, time-sleep, asyncio-sleep, race-conditions, thread-blocking, initialization, speed, async-patterns</keywords>
+        <path>websocket_performance_blocking_fix_20250909.xml</path>
+        <critical-takeaway>
+            Blocking time.sleep() calls in WebSocket initialization path caused severe performance regression - up to 1.2 seconds of thread blocking.
+            Three blocking sleep calls were introduced on 2025-09-08 to fix race conditions but caused threads to get stuck during 
+            critical chat functionality setup. SOLUTION: Convert all time.sleep() to await asyncio.sleep() in async contexts while maintaining 
+            race condition protection. ServiceReadinessCheck framework supports both sync and async validators.
+        </critical-takeaway>
+        <severity>MISSION_CRITICAL</severity>
+        <business-impact>$500K+ ARR chat functionality performance - Direct user experience degradation</business-impact>
+        <prevention>
+            NEVER use time.sleep() in async contexts. Always use await asyncio.sleep() to prevent blocking the event loop.
+            Code review checklist must include async/sync context verification for all sleep operations.
+            Performance regression testing should catch WebSocket initialization timing issues.
+        </prevention>
+        <implementation-patterns>
+            <pattern>Async Sleep Pattern - await asyncio.sleep() instead of time.sleep() in async functions</pattern>
+            <pattern>Non-blocking Grace Periods - Maintain race condition protection without blocking threads</pattern>
+            <pattern>ServiceReadinessCheck Async Support - Framework properly handles both sync and async validators</pattern>
+        </implementation-patterns>
+        <performance-impact>
+            <before>Up to 1.2 seconds of blocking during WebSocket initialization</before>
+            <after>Non-blocking async sleep operations, thread remains responsive</after>
+        </performance-impact>
+        <related-learnings>
+            <learning-ref>websocket_agent_integration_critical.xml</learning-ref>
+            <learning-ref>websocket_silent_failure_prevention_masterclass.xml</learning-ref>
+            <learning-ref>websocket_state_management.xml</learning-ref>
+            <learning-ref>websocket_run_id_issue.xml</learning-ref>
+        </related-learnings>
+    </learning>
+    
     <learning id="agent-death-detection-critical-2025-01-09">
         <title>Agent Death Detection - Critical Production Bug Fix</title>
         <category>AgentLifecycle/DeathDetection/Monitoring</category>
@@ -1158,6 +1193,14 @@
             <critical-takeaway>asyncio.wait_for provides deterministic timeout behavior for WebSocket operations (websocket_timeout_retry_implementation.xml).</critical-takeaway>
             <critical-takeaway>Track send_timeouts, timeout_retries, and timeout_failures metrics for monitoring WebSocket health (websocket_timeout_retry_implementation.xml).</critical-takeaway>
             <critical-takeaway>Timeout implementation MUST maintain backward compatibility with existing WebSocket API (websocket_timeout_retry_implementation.xml).</critical-takeaway>
+        </category>
+        
+        <category name="WebSocket/Performance/BlockingFix" path="SPEC/learnings/websocket_performance_blocking_fix_20250909.xml" keywords="WebSocket, Performance, Blocking, time.sleep, asyncio.sleep, Race Conditions, Thread Blocking, Initialization, Speed, Async Patterns">
+            <critical-takeaway>NEVER use time.sleep() in async contexts - causes severe thread blocking and performance regression in WebSocket initialization (websocket_performance_blocking_fix_20250909.xml).</critical-takeaway>
+            <critical-takeaway>Convert blocking time.sleep() to await asyncio.sleep() in async functions to maintain race condition protection without blocking threads (websocket_performance_blocking_fix_20250909.xml).</critical-takeaway>
+            <critical-takeaway>ServiceReadinessCheck framework supports both sync and async validators via asyncio.iscoroutinefunction() detection (websocket_performance_blocking_fix_20250909.xml).</critical-takeaway>
+            <critical-takeaway>Performance regressions can be introduced by well-intentioned race condition fixes - always consider async/sync context (websocket_performance_blocking_fix_20250909.xml).</critical-takeaway>
+            <critical-takeaway>Up to 1.2 seconds of blocking during WebSocket initialization directly impacts $500K+ ARR chat functionality (websocket_performance_blocking_fix_20250909.xml).</critical-takeaway>
         </category>
         
         <category name="WebSocket/MessageHandlers" path="SPEC/learnings/websocket_agent_response_missing_handler.xml" keywords="WebSocket, agent_response, Message Handler, Frontend, Event Registry, Silent Failures, Chat UI, Message Types">
