@@ -42,14 +42,41 @@ WorkflowOrchestrator receives inconsistent execution engine implementations due 
 - [x] SSOT Audit Discovery
 - [x] GitHub Issue Created (#233)
 - [x] Problem Analysis Complete
+- [x] Test Discovery and Planning Complete
 
 ### 📋 NEXT STEPS
-- [ ] Discover and plan tests for SSOT compliance
-- [ ] Execute new SSOT test plan
+- [ ] Execute new SSOT test plan (20% new tests)
 - [ ] Plan SSOT remediation
 - [ ] Execute SSOT remediation
 - [ ] Test fix loop until all tests pass
 - [ ] Create PR and close issue
+
+## Test Discovery Results
+
+### Existing Test Coverage
+- **60+ existing tests** for WorkflowOrchestrator and related components
+- **Strong coverage** in unit, integration, and E2E categories
+- **Tests currently passing** but lack SSOT-specific validation
+
+### Critical Gaps Identified
+- **No validation** that WorkflowOrchestrator rejects deprecated execution engines
+- **Missing interface consistency tests** between legacy and SSOT engines
+- **No user isolation validation** for concurrent execution contexts
+- **No failing tests** to prove current SSOT violations exist
+
+### New Test Plan (11 new test files)
+- **P0 Failing Tests** (4 files): Prove SSOT violations exist
+- **Integration Tests** (4 files): UserExecutionEngine compatibility 
+- **E2E Tests** (3 files): Full orchestration workflows
+
+### Test Categories Breakdown
+- **20% new SSOT tests**: 11 files focusing on interface validation
+- **60% existing tests**: Current coverage with potential updates needed
+- **20% validation tests**: Ensure SSOT fixes work properly
+
+### Timeline
+- **3-day sprint**: Critical failing tests implementation
+- **18 days total**: Complete test implementation and validation
 
 ## Solution Strategy
 
