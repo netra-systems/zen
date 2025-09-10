@@ -49,10 +49,14 @@ class TestEventValidatorSsotCompliance(SSotBaseTestCase):
         This test searches the entire codebase for EventValidator class definitions
         and ensures only the SSOT implementation exists.
         """
+        # Initialize test environment
+        project_root = Path("/Users/anthony/Desktop/netra-apex")
+        expected_ssot_path = "netra_backend/app/websocket_core/event_validator.py"
+        
         event_validator_classes = []
         
         # Search all Python files for EventValidator class definitions
-        for python_file in self.project_root.rglob("*.py"):
+        for python_file in project_root.rglob("*.py"):
             if self._should_skip_file(python_file):
                 continue
                 
