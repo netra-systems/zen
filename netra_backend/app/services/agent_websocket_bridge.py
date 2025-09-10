@@ -2955,6 +2955,59 @@ class WebSocketNotifier:
             'success_rate': round(success_rate, 2)
         }
 
+    @classmethod
+    def create_websocket_notifier(
+        cls,
+        emitter,
+        user_context: 'UserExecutionContext',
+        validate_context: bool = True
+    ) -> 'WebSocketNotifier':
+        """
+        Factory method to create WebSocketNotifier with proper user context validation.
+        
+        This is the SSOT method for creating WebSocketNotifier instances during the
+        migration from deprecated implementations.
+        
+        Args:
+            emitter: WebSocket emitter instance (WebSocketEventEmitter or compatible)
+            user_context: User execution context for isolation
+            validate_context: Whether to validate user context (default: True)
+            
+        Returns:
+            WebSocketNotifier: Configured notifier instance
+            
+        Raises:
+            ValueError: If user_context is invalid and validate_context=True
+            
+        Example:
+            # Replace deprecated pattern:
+            # notifier = WebSocketNotifier(websocket_manager)
+            
+            # With SSOT pattern:
+            notifier = AgentWebSocketBridge.create_websocket_notifier(
+                emitter=emitter,
+                user_context=user_context
+            )
+        """
+        if validate_context and user_context is None:
+            raise ValueError(
+                "User context is required for WebSocketNotifier creation. "
+                "This ensures proper user isolation and prevents cross-user data leakage."
+            )
+        
+        if validate_context and not hasattr(user_context, 'user_id'):
+            raise ValueError(
+                f"Invalid user context: missing user_id attribute. "
+                f"Expected UserExecutionContext, got {type(user_context)}"
+            )
+        
+        logger.info(
+            f"Creating WebSocketNotifier with SSOT factory pattern "
+            f"for user {getattr(user_context, 'user_id', 'unknown')[:8] if user_context else 'none'}..."
+        )
+        
+        return cls.WebSocketNotifier(emitter, user_context)
+
 
 # SECURITY FIX: Replace singleton with factory pattern
 # Global instance removed to prevent multi-user data leakage

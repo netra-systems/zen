@@ -317,6 +317,46 @@ class WebSocketManager:
         
         logger.info("UnifiedWebSocketManager initialized with connection-level thread safety and enhanced error handling")
     
+    @classmethod
+    def from_user_context(cls, user_context: 'UserExecutionContext') -> 'WebSocketManager':
+        """
+        Factory method to create WebSocketManager from UserExecutionContext.
+        
+        PHASE 1 SSOT FIX: This factory method provides the standard interface
+        that WebSocketManagerFactory expects, bridging the constructor signature
+        mismatch between factory and manager.
+        
+        Args:
+            user_context: UserExecutionContext containing user isolation data
+            
+        Returns:
+            WebSocketManager instance with proper user context association
+            
+        Raises:
+            ValueError: If user_context is invalid or missing required fields
+        """
+        if not user_context:
+            raise ValueError("user_context is required for WebSocket manager creation")
+        
+        # Validate that user_context has required fields
+        if not hasattr(user_context, 'user_id') or not user_context.user_id:
+            raise ValueError("user_context must have valid user_id")
+        
+        # Create manager instance using standard constructor
+        manager = cls()
+        
+        # Associate user context with manager for isolation
+        manager._user_context = user_context
+        
+        # Initialize user-specific state based on context
+        manager._context_user_id = user_context.user_id
+        manager._context_thread_id = getattr(user_context, 'thread_id', None)
+        manager._context_run_id = getattr(user_context, 'run_id', None)
+        manager._context_websocket_client_id = getattr(user_context, 'websocket_client_id', None)
+        
+        logger.info(f"Created WebSocketManager from UserExecutionContext for user {user_context.user_id[:8]}...")
+        return manager
+    
     async def _get_user_connection_lock(self, user_id: str) -> asyncio.Lock:
         """Get or create user-specific connection lock for thread safety.
         

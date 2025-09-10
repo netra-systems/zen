@@ -757,9 +757,9 @@ async def validate_token(request: Request) -> Dict[str, Any]:
         # Validate service credentials if provided
         if service_id and service_secret:
             # Get expected service credentials from environment
-            # CRITICAL FIX: Use stable SERVICE_ID for cross-service authentication
-            # The backend should always use "netra-backend" as its SERVICE_ID
-            expected_service_id = "netra-backend"  # Stable ID for backend service
+            # CRITICAL FIX: Use SSOT SERVICE_ID for cross-service authentication
+            # The backend uses SSOT SERVICE_ID for consistent authentication
+            expected_service_id = SERVICE_ID  # SSOT constant prevents cascade failures
             expected_service_secret = env.get("SERVICE_SECRET", "")
             
             # Detailed validation with specific error messages
@@ -932,9 +932,9 @@ async def check_blacklist_endpoint(request: Request) -> Dict[str, Any]:
         
         if service_id and service_secret:
             # Get expected service credentials from environment
-            # CRITICAL FIX: Use stable SERVICE_ID for cross-service authentication
-            # The backend should always use "netra-backend" as its SERVICE_ID
-            expected_service_id = "netra-backend"  # Stable ID for backend service
+            # CRITICAL FIX: Use SSOT SERVICE_ID for cross-service authentication
+            # The backend uses SSOT SERVICE_ID for consistent authentication
+            expected_service_id = SERVICE_ID  # SSOT constant prevents cascade failures
             expected_service_secret = env.get("SERVICE_SECRET", "")
             
             # Detailed validation with specific error messages
