@@ -970,6 +970,8 @@ class AgentRegistry(UniversalAgentRegistry):
                                              enable_admin_tools: bool = False) -> 'UnifiedToolDispatcher':
         """Create properly isolated tool dispatcher for a specific user.
         
+        CRITICAL FIX: Now ensures WebSocket events are properly integrated with user emitters.
+        
         RECOMMENDED USAGE: Use this method to get tool dispatchers for agents.
         
         Args:
@@ -982,11 +984,31 @@ class AgentRegistry(UniversalAgentRegistry):
         """
         from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
         
-        return await UnifiedToolDispatcher.create_for_user(
+        # CRITICAL: If no websocket_bridge provided, try to get from user session
+        if not websocket_bridge and user_context.user_id in self._user_sessions:
+            user_session = self._user_sessions[user_context.user_id]
+            websocket_bridge = user_session._websocket_bridge
+            logger.debug(f"Using WebSocket bridge from user session for {user_context.user_id}")
+        
+        # Create dispatcher with proper isolation
+        dispatcher = await UnifiedToolDispatcher.create_for_user(
             user_context=user_context,
             websocket_bridge=websocket_bridge,
             enable_admin_tools=enable_admin_tools
         )
+        
+        # CRITICAL: Enhance the dispatcher with per-user WebSocket notifications
+        if websocket_bridge:
+            from netra_backend.app.agents.unified_tool_execution import enhance_tool_dispatcher_with_notifications
+            await enhance_tool_dispatcher_with_notifications(
+                dispatcher,
+                websocket_manager=getattr(websocket_bridge, '_websocket_manager', None),
+                user_context=user_context,  # CRITICAL: Pass user context for isolation
+                enable_notifications=True
+            )
+            logger.debug(f"Enhanced tool dispatcher with user-isolated WebSocket notifications for user {user_context.user_id}")
+        
+        return dispatcher
     
     def register_default_agents(self) -> None:
         """Register default sub-agents."""

@@ -370,6 +370,54 @@ async def websocket_endpoint(websocket: WebSocket):
         else:
             await windows_safe_sleep(0.015)  # Increased to 15ms for development environments
         
+        # ISSUE #135 SECONDARY FIX: Resource contention mitigation with connection pooling and request throttling
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+        
+        logger.info(f"🛡️ ISSUE #135 FIX: Applying resource contention mitigation for WebSocket connection")
+        
+        # Circuit breaker pattern for service dependency failures
+        circuit_breaker_state = await _check_websocket_service_circuit_breaker()
+        if circuit_breaker_state == "OPEN":
+            logger.warning(f"⚠️ CIRCUIT BREAKER OPEN: Service dependencies unavailable - graceful rejection")
+            await safe_websocket_close(
+                websocket, 
+                code=1013, 
+                reason="Service temporarily unavailable - retry in 30 seconds"
+            )
+            return
+        
+        # Connection pooling: Limit concurrent connections from same client
+        client_info = f"{getattr(websocket.client, 'host', 'unknown')}:{getattr(websocket.client, 'port', 'unknown')}" if websocket.client else "unknown_client"
+        connection_count = await _get_active_connections_for_client(client_info)
+        
+        # Environment-aware connection limits for Cloud Run
+        max_connections_per_client = 5 if environment in ["staging", "production"] else 10
+        
+        if connection_count >= max_connections_per_client:
+            logger.warning(f"🚫 CONNECTION LIMIT: Client {client_info} has {connection_count}/{max_connections_per_client} connections")
+            await safe_websocket_close(
+                websocket,
+                code=1008,
+                reason=f"Too many concurrent connections ({connection_count}/{max_connections_per_client})"
+            )
+            return
+        
+        # Request throttling: Check for rapid connection attempts 
+        throttle_result = await _check_connection_rate_limit(client_info)
+        if not throttle_result["allowed"]:
+            logger.warning(f"🚫 RATE LIMIT: Client {client_info} exceeded connection rate limit")
+            await safe_websocket_close(
+                websocket,
+                code=1008, 
+                reason=f"Rate limit exceeded - retry after {throttle_result['retry_after']}s"
+            )
+            return
+        
+        # Track this connection for pooling and throttling
+        await _register_client_connection(client_info, websocket)
+        
+        logger.info(f"✅ RESOURCE CHECKS PASSED: Client {client_info} - {connection_count + 1} active connections")
+        
         # 🚨 SSOT ENFORCEMENT: Use unified authentication service (SINGLE SOURCE OF TRUTH)
         # This replaces ALL previous authentication paths:
         # [ERROR] user_context_extractor.py - 4 duplicate JWT validation methods
