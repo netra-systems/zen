@@ -37,10 +37,35 @@ Multiple WebSocket manager implementations violating SSOT, causing authenticatio
 - GitHub issue confirmed (#186)
 - Local tracking document created
 
-### 🔄 STEP 1: DISCOVER AND PLAN TESTS (NEXT)
-- Find existing tests protecting WebSocket functionality
-- Plan new SSOT tests for refactor validation
-- Focus on 60% existing tests, 20% validation, 20% new tests
+### ✅ STEP 1.1: DISCOVER EXISTING TESTS COMPLETE
+**Comprehensive test discovery found extensive protection:**
+
+**Mission Critical Tests (Business Value Protection):**
+- `tests/mission_critical/test_websocket_agent_events_real.py` - All 5 WebSocket events with real services
+- `tests/mission_critical/test_websocket_bridge_integration.py` - Bridge pattern integration
+- `tests/mission_critical/test_websocket_integration_regression.py` - Regression protection
+
+**SSOT Consolidation Tests (Interface Consistency):**
+- `tests/unit/websocket_ssot/test_manager_interface_consistency.py` - Manager interface validation
+- `tests/unit/websocket_ssot/test_manager_factory_consolidation.py` - Factory consolidation
+- `tests/ssot/test_websocket_ssot_violations_reproduction.py` - SSOT violation reproduction
+
+**Critical Tests That MUST Continue Passing:**
+- All 5 WebSocket events delivered correctly
+- Complete E2E chat flows preserved
+- Multi-user isolation maintained
+- Authentication integration working
+- Performance benchmarks maintained
+
+**Tests Expected to Initially Fail (by design):**
+- Interface consistency tests (until unified)
+- Factory consolidation tests (until consolidated)
+- SSOT violation reproduction tests (until fixed)
+
+### 🔄 STEP 1.2: PLAN NEW SSOT TESTS (NEXT)
+- Plan 20% new SSOT validation tests
+- Focus on ideal state AFTER SSOT refactor
+- Design failing tests to reproduce violations
 
 ### ⏳ UPCOMING STEPS:
 - Step 2: Execute new SSOT test plan
