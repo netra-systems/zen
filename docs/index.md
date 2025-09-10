@@ -6,6 +6,7 @@
 
 - **[🎯 Golden Path Documentation Index](./GOLDEN_PATH_DOCUMENTATION_INDEX.md)** 🚀 - **MASTER HUB**: Complete index and cross-reference for all Golden Path documentation, implementation reports, and validation evidence ($120K+ MRR protection)
 - **[🚀 Golden Path User Flow Analysis](./GOLDEN_PATH_USER_FLOW_COMPLETE.md)** 🎯 - **MISSION CRITICAL**: Complete user journey analysis from connection to response delivery, identifies critical race conditions and WebSocket event requirements ($500K+ ARR dependency)
+- **[⚡ Claude Code Command Index](./COMMAND_INDEX.md)** 🛠️ - **ESSENTIAL**: Complete index of 25 Claude Code slash commands for development automation, testing, deployment, and debugging with Five Whys methodology
 - **[SSOT Index](../reports/ssot-compliance/SSOT_INDEX.md)** 🚨 - **ULTRA-CRITICAL**: Master index of all Single Source of Truth components ranked by criticality
 - **[User Context Architecture](../reports/archived/USER_CONTEXT_ARCHITECTURE.md)** ⭐ - **CRITICAL DOCUMENT**: Comprehensive guide to the Factory-based user isolation architecture with detailed diagrams including child context hierarchies
 - **[UVS Triage Architecture Transition](./UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** 🆕 - **NEW**: Unified Validation System with intelligent data sufficiency states and 2-agent model
@@ -48,6 +49,7 @@
 #### Testing Infrastructure
 - **[Test Creation Guide](../reports/testing/TEST_CREATION_GUIDE.md)** 🆕 - **AUTHORITATIVE**: Complete guide for creating tests with SSOT patterns
 - **[Test Architecture Visual Overview](../tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md)** - Complete test infrastructure guide
+- **[⚡ Claude Code Command Index](./COMMAND_INDEX.md)** 🛠️ - **TESTING COMMANDS**: 15+ testing commands including TDD, unit tests, integration tests, and mission critical validation
 - [Docker Orchestration](./docker_orchestration.md) - Docker management and Alpine containers
 - **[Docker Architecture Diagrams](./docker_architecture_diagrams.md)** 🐳 - **NEW**: Comprehensive Docker build, caching, and deployment diagrams
 - [Unified Test Runner](../tests/unified_test_runner.py) - Central test execution
