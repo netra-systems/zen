@@ -30,19 +30,27 @@ use tools to search through codebase and find the most important SSOT violations
 Git commit and push this file if safe to do so.
 0.3) Make or update github ISSUE.
 Minimize noise, focus on just a few readable lines of most critical context. Link to other docs for remaining context.
-OUTPUT the ISSUE ID here:
+Issue name style: SSOT-{context (one of: regression, incomplete-migration, recent-change, {custom})}-{brief human description}}
+OUTPUT the link here:
 
-1) DISCOVER AND PLAN TEST : SNST : (Pass context from 1 and 2):
 
-1.1) DISCOVER EXISTING: the identication (collection of existing tests)
+1) DISCOVER AND PLAN TEST : SNST : (Pass context from 0):
+
+1.1) DISCOVER EXISTING: fine collection of existing tests
 tests protecting against breaking changes made by SSOT refactor or similar
+After refactors: these tests must continue to pass, or now pass if failing prior, or updated as a test and pass.
 
 1.2) PLAN ONLY Plan for update, align, or creation of: the required unit,
 integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused
-on reproducing the SSOT violation in question (failing tests). following reports\testing\TEST_CREATION_GUIDE.md
+on ideal code state AFTER SSOT refactor, gaps in current test coverage, and
+to reproducing the SSOT violation in question (failing tests!). following reports\testing\TEST_CREATION_GUIDE.md
 and all of the latest testing best practices as per claude.md
+
+1.2.notes)
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
-3.1) UPDATE the comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
+~20% of work is validating SSOT fixes, 60% existing tests (with updates if needed), ~20% new tests
+
+3.1) UPDATE a comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
 
 4) EXECUTE THE TEST PLAN : SNST : with new spawned sub agent. audit and review the test. And run the fake test checks. 
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
