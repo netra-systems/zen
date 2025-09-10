@@ -78,32 +78,25 @@ class CacheEntry:
 
 
 class RedisCacheManager:
-    """SSOT Redis Cache Manager for distributed caching.
+    """Compatibility wrapper for existing cache manager usage.
     
-    This class provides comprehensive Redis-based caching capabilities,
-    designed for high-performance multi-user scenarios with proper
-    isolation and monitoring.
+    DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
     
-    Key Features:
-    - High-performance Redis-based caching with automatic serialization
-    - Configurable TTL (time-to-live) support
-    - Cache statistics and monitoring
-    - Namespace isolation for multi-tenant support
-    - Bulk operations for improved performance
-    - Error handling and resilience
+    This class provides backward compatibility during Redis SSOT migration.
+    All operations are redirected to the primary SSOT Redis manager.
     """
     
     def __init__(self, redis_client=None, namespace: str = "netra"):
-        """Initialize Redis cache manager.
+        """Initialize Redis cache manager wrapper.
         
         Args:
-            redis_client: Optional Redis client instance (uses default if None)
+            redis_client: Optional Redis client instance (ignored, uses SSOT)
             namespace: Cache namespace for key isolation
         """
-        self.redis_client = redis_client or redis_manager
+        self.redis_client = redis_manager  # Always use SSOT
         self.namespace = namespace
         self.stats = CacheStats(start_time=datetime.now(timezone.utc))
-        logger.info(f"RedisCacheManager initialized with namespace: {namespace}")
+        logger.info(f"RedisCacheManager compatibility wrapper initialized with namespace: {namespace}")
     
     def _build_key(self, key: str) -> str:
         """Build namespaced cache key.
