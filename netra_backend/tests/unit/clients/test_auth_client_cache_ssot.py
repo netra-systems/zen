@@ -246,13 +246,9 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
             # Validate config name matches requested name
             assert config.name == "auth_config_test"
             
-            self.log_test_success(
-                "auth_circuit_breaker_config_mapping",
-                f"AuthCircuitBreakerManager properly maps config with "
-                f"failure_threshold={config.failure_threshold}, "
-                f"recovery_timeout={config.recovery_timeout}, "
-                f"timeout_seconds={config.timeout_seconds}"
-            )
+            # Success: AuthCircuitBreakerManager properly maps config to UnifiedCircuitConfig
+            print(f"✅ CONFIG MAPPING VERIFIED: failure_threshold={config.failure_threshold}, "
+                  f"recovery_timeout={config.recovery_timeout}, timeout_seconds={config.timeout_seconds}")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -279,7 +275,5 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
             # Verify the call was attempted on the breaker
             mock_breaker.call.assert_called_once_with(failing_auth_function)
             
-            self.log_test_success(
-                "auth_circuit_breaker_error_handling_delegation",
-                "AuthCircuitBreakerManager properly delegates error handling to UnifiedCircuitBreaker"
-            )
+            # Success: AuthCircuitBreakerManager properly delegates error handling to UnifiedCircuitBreaker
+            print(f"✅ ERROR HANDLING DELEGATION VERIFIED: Exception propagation through UnifiedCircuitBreaker works correctly")
