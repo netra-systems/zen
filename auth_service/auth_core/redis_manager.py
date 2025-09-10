@@ -73,9 +73,8 @@ class AuthRedisManager:
     
     @property
     def enabled(self):
-        """Check if Redis is enabled (lazy initialization)."""
-        self._lazy_init()
-        return self._enabled
+        """Check if Redis is enabled (redirects to SSOT)."""
+        return SSOT_AVAILABLE and self._redis.is_connected
     
     def _lazy_init(self):
         """Lazy initialization of Redis configuration."""
@@ -115,34 +114,11 @@ class AuthRedisManager:
             self._initialized = True
     
     async def connect(self) -> bool:
-        """Connect to Redis server."""
-        self._lazy_init()  # Ensure configuration is loaded
-        
-        try:
-            self._connection_pool = redis.ConnectionPool(
-                host=self.host,
-                port=self.port,
-                db=self.db,
-                password=self.password,
-                ssl=self.ssl,
-                decode_responses=True,
-                max_connections=20,
-                retry_on_timeout=True,
-            )
-            
-            self.redis_client = redis.Redis(connection_pool=self._connection_pool)
-            
-            # Test connection
-            await self.redis_client.ping()
-            self.connected = True
-            
-            logger.info(f"Connected to Redis at {self.host}:{self.port}/{self.db}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to connect to Redis: {e}")
-            self.connected = False
-            return False
+        """Connect to Redis server (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            await self._redis.initialize()
+            return self._redis.is_connected
+        return False
     
     async def disconnect(self):
         """Disconnect from Redis."""
@@ -160,38 +136,19 @@ class AuthRedisManager:
         return self.redis_client
     
     async def ensure_connected(self) -> bool:
-        """Ensure Redis connection is active."""
-        if not self.enabled:
-            logger.debug("Redis is disabled for testing")
+        """Ensure Redis connection is active (redirects to SSOT)."""
+        if not SSOT_AVAILABLE:
             return False
-        
-        if not self.connected or not self.redis_client:
-            return await self.connect()
-        
-        try:
-            await self.redis_client.ping()
-            return True
-        except Exception as e:
-            logger.warning(f"Redis connection lost: {e}")
-            return await self.connect()
+        if not self._redis.is_connected:
+            await self._redis.initialize()
+        return self._redis.is_connected
     
-    # Session Management
+    # Session Management (redirected to SSOT)
     async def store_session(self, session_id: str, session_data: Dict[str, Any], ttl_seconds: int = 3600) -> bool:
-        """Store user session data."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            session_json = json.dumps(session_data, default=str)
-            
-            await self.redis_client.setex(key, ttl_seconds, session_json)
-            logger.debug(f"Stored session {session_id} with TTL {ttl_seconds}s")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to store session {session_id}: {e}")
-            return False
+        """Store user session data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.store_session(session_id, session_data, ttl_seconds)
+        return False
     
     async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve user session data."""
