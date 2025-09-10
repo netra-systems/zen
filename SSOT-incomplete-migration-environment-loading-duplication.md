@@ -116,12 +116,40 @@ python -m pytest tests/integration/golden_path/test_configuration_environment_co
 - **AFTER SSOT Refactor**: Tests will PASS when both services use unified SSOT loader
 - **Validation**: All files have valid syntax and can be imported successfully
 
+## Step 3 COMPLETE: SSOT Remediation Architecture Planned
+
+### Comprehensive Architecture Design:
+
+**CORE MODULE**: `/shared/environment_loading_ssot.py`
+- `StartupEnvironmentManager` - Central coordinator for environment loading
+- `EnvironmentDetector` - Unified environment detection (staging/prod/dev)
+- `EnvFileLoader` - Standardized .env file loading with precedence
+- `DevLauncherDetector` - Unified dev launcher detection
+- `ConfigurationValidator` - Environment variable validation
+
+**SERVICE INTEGRATION**:
+- **Backend**: 77 lines → 5 lines (90% reduction)
+- **Auth Service**: 23 lines → 3-5 lines + enhanced dev launcher detection
+- **Backward Compatible**: Zero breaking changes to existing deployments
+
+**MIGRATION STRATEGY**:
+1. Create SSOT module with unified logic
+2. Backend service migration (more complex first)
+3. Auth service migration (gains dev launcher capability)
+4. Cross-service validation
+
+**SUCCESS CRITERIA**:
+- ✅ All 3 test suites PASS after implementation
+- ✅ 15+ test cases validate unified behavior
+- ✅ 90% code reduction while preserving all functionality
+- ✅ Auth service gains missing dev launcher detection
+
 ## Process Progress
 - [x] Step 0: Discover Next SSOT Issue (SSOT AUDIT) - COMPLETE
 - [x] Step 1.1: Discover Existing Tests - COMPLETE
 - [x] Step 1.2: Plan New Tests - COMPLETE
 - [x] Step 2: Execute Test Plan - COMPLETE
-- [ ] Step 3: Plan Remediation
+- [x] Step 3: Plan Remediation - COMPLETE
 - [ ] Step 4: Execute Remediation
 - [ ] Step 5: Test Fix Loop
 - [ ] Step 6: PR and Closure
@@ -130,7 +158,7 @@ python -m pytest tests/integration/golden_path/test_configuration_environment_co
 1. ✅ Discover existing tests protecting startup/staging functionality - COMPLETE
 2. ✅ Plan new tests to validate SSOT refactor - COMPLETE
 3. ✅ Execute test plan (create and validate new tests) - COMPLETE
-4. Plan SSOT remediation architecture (design unified environment loading)
-5. Execute SSOT remediation implementation
+4. ✅ Plan SSOT remediation architecture (design unified environment loading) - COMPLETE
+5. Execute SSOT remediation implementation (create shared module + integrate services)
 6. Validate all tests pass
 7. Create PR for closure
