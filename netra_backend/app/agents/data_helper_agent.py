@@ -70,7 +70,7 @@ class DataHelperAgent(BaseAgent):
         
         # Create dependencies (these will be injected later by the factory)
         llm_manager = LLMManager()
-        tool_dispatcher = UnifiedToolDispatcher()  # Don't pass user_context to constructor
+        tool_dispatcher = UnifiedToolDispatcher.create_for_user(user_context)
         
         # Create agent with correct constructor signature
         agent = cls(llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)
