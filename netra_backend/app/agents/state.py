@@ -199,6 +199,11 @@ class DeepAgentState(BaseModel):
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
     context_tracking: Dict[str, Any] = Field(default_factory=dict)  # Added for E2E test compatibility
     
+    # PHASE 1 BACKWARDS COMPATIBILITY FIX: Add agent_context for UserExecutionContext compatibility
+    # This field provides backwards compatibility with execution code that expects agent_context
+    # from the UserExecutionContext migration. Should be removed in Phase 2 after proper migration.
+    agent_context: Dict[str, Any] = Field(default_factory=dict)
+    
     def __init__(self, **data):
         """Initialize DeepAgentState with deprecation warning."""
         # Issue comprehensive deprecation warning
