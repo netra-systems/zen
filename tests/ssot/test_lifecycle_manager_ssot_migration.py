@@ -252,18 +252,35 @@ class TestImportCompatibilityDuringMigration:
     """
     
     def test_current_import_path_works(self):
-        """Test that current import path works (pre-migration state)."""
+        """Test that migration-compatible import paths work."""
+        # Test new direct imports from module (post-migration)
         try:
-            from netra_backend.app.core.managers.unified_lifecycle_manager import UnifiedLifecycleManager
-            from netra_backend.app.core.managers.unified_lifecycle_manager import LifecycleManagerFactory
+            from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLifecycle
+            from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLifecycleFactory
             
             # Should be able to create instance
-            manager = UnifiedLifecycleManager()
-            assert manager is not None, "Current import path creates valid instance"
-            assert hasattr(manager, 'get_current_phase'), "Current import provides expected interface"
+            manager = SystemLifecycle()
+            assert manager is not None, "New import path creates valid instance"
+            assert hasattr(manager, 'get_current_phase'), "New import provides expected interface"
             
         except ImportError as e:
-            pytest.fail(f"Current import path failed: {e}")
+            pytest.fail(f"New import path failed: {e}")
+        
+        # Test backward compatibility imports from package
+        try:
+            from netra_backend.app.core.managers import UnifiedLifecycleManager
+            from netra_backend.app.core.managers import LifecycleManagerFactory
+            
+            # Should be able to create instance (with deprecation warning)
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")  # Ignore deprecation warnings in test
+                manager = UnifiedLifecycleManager()
+                assert manager is not None, "Backward compatibility import creates valid instance"
+                assert hasattr(manager, 'get_current_phase'), "Backward compatibility provides expected interface"
+            
+        except ImportError as e:
+            pytest.fail(f"Backward compatibility import path failed: {e}")
     
     def test_convenience_function_compatibility(self):
         """Test that convenience functions maintain compatibility."""
