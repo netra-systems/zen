@@ -30,7 +30,8 @@
       "Bash(gh:*)",
       "Bash(pip show:*)",
       "Bash(pip install:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
