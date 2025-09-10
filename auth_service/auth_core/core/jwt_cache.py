@@ -9,12 +9,13 @@ import logging
 import time
 from typing import Any, Dict, Optional
 
-from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
+# Temporarily disable Redis dependency for microservice independence
+# from auth_service.auth_core.redis_manager import auth_redis_manager
 
 logger = logging.getLogger(__name__)
 
 class JWTValidationCache:
-    """High-performance JWT validation cache with Redis persistence"""
+    """High-performance JWT validation cache with in-memory caching only"""
     
     def __init__(self):
         # Performance optimization: In-memory validation cache
@@ -22,9 +23,9 @@ class JWTValidationCache:
         self._cache_ttl = 300  # 5 minutes cache TTL
         self._max_cache_size = 10000
         
-        # Redis client for persistent caching
-        self.redis_manager = auth_redis_manager
-        self._cache_enabled = self.redis_manager.enabled
+        # Redis client disabled for microservice independence
+        self.redis_manager = None
+        self._cache_enabled = False  # Disable Redis temporarily
         
         # Performance metrics
         self._validation_stats = {

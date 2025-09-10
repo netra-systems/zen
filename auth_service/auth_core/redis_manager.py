@@ -172,6 +172,8 @@ class AuthRedisManager:
     
     def get_client(self) -> Optional[redis.Redis]:
         """Get the Redis client instance."""
+        if not self.connected:
+            return None
         self._lazy_init()  # Ensure configuration is loaded
         return self.redis_client
     
