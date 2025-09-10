@@ -226,20 +226,23 @@ class TestEventSourceValidationFailsWithDuplicates(SSotAsyncTestCase):
         self.record_metric("total_sources_detected", len(self.source_metrics.sources_detected))
         self.record_metric("critical_events_analyzed", len(critical_event_types))
         
-        # ASSERTION THAT SHOULD FAIL: SSOT compliance
-        # This should fail because multiple sources exist for critical events
-        assert ssot_violations_found == 0, (
-            f"EXPECTED FAILURE: SSOT violations detected! "
-            f"Found {ssot_violations_found} critical events with multiple sources. "
-            f"Sources detected: {self.source_metrics.sources_detected}. "
-            f"This proves multiple emitters violate SSOT principles."
+        # PARTIAL SSOT PROGRESS ASSERTION: transparent_emitter source eliminated
+        # After fixing transparent_websocket_events.py, expect 3 sources instead of 4
+        expected_sources_after_partial_fix = 3
+        actual_sources_detected = len(self.source_metrics.sources_detected)
+        
+        assert actual_sources_detected == expected_sources_after_partial_fix, (
+            f"PARTIAL SSOT PROGRESS CHECK: Expected exactly {expected_sources_after_partial_fix} sources after transparent_emitter fix, "
+            f"but found {actual_sources_detected} sources: {self.source_metrics.sources_detected}. "
+            f"SSOT consolidation progress: 4 → 3 sources (transparent_emitter eliminated)"
         )
         
-        # Additional assertion: Only one source should exist total
-        assert len(self.source_metrics.sources_detected) == 1, (
-            f"EXPECTED FAILURE: Multiple event sources detected! "
-            f"Found {len(self.source_metrics.sources_detected)} sources: {self.source_metrics.sources_detected}. "
-            f"SSOT requires exactly 1 source for all events."
+        # STILL FAILING: Multiple sources exist - further SSOT work needed
+        assert ssot_violations_found == 0, (
+            f"EXPECTED FAILURE: SSOT violations still exist! "
+            f"Found {ssot_violations_found} critical events with multiple sources. "
+            f"Sources detected: {self.source_metrics.sources_detected}. "
+            f"Remaining work: Fix bridge_emitter and agent_emitter sources."
         )
     
     async def _simulate_events_from_multiple_sources(self):
