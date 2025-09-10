@@ -1,5 +1,12 @@
 """Execution engine for supervisor agent pipelines with UserExecutionContext support.
 
+🚨 CRITICAL SSOT MIGRATION NOTICE 🚨
+This ExecutionEngine is DEPRECATED and will be REMOVED in the next release.
+
+MIGRATION REQUIRED:
+- NEW CODE: Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- EXISTING CODE: Replace imports with 'from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine'
+
 DEPRECATION WARNING: This ExecutionEngine uses global state and is not safe for concurrent users.
 For new code, use RequestScopedExecutionEngine or the factory methods provided below.
 
@@ -70,6 +77,11 @@ logger = central_logger.get_logger(__name__)
 class ExecutionEngine:
     """Request-scoped agent execution orchestration.
     
+    🚨 DEPRECATED - Use UserExecutionEngine instead!
+    
+    MIGRATION PATH:
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+    
     REQUIRED: Use factory methods for instantiation:
     - create_request_scoped_engine() for isolated instances
     - ExecutionContextManager for automatic cleanup
@@ -83,6 +95,18 @@ class ExecutionEngine:
     - Semaphore-based concurrency control for 5+ concurrent users
     - Guaranteed WebSocket event delivery with proper sequencing
     """
+    
+    def __init__(self, *args, **kwargs):
+        """Initialize ExecutionEngine with deprecation warning."""
+        import warnings
+        warnings.warn(
+            "supervisor.execution_engine.ExecutionEngine is DEPRECATED and will be REMOVED. "
+            "Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine instead. "
+            "SSOT Compliance: Only UserExecutionEngine should be used for new development.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        # Continue with original initialization (no parent class, so continue with existing init logic below)
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)

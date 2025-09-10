@@ -92,9 +92,9 @@ class UnifiedExecutionEngineFactory:
         logger.info("UnifiedExecutionEngineFactory defaults configured")
     
     @classmethod
-    def create_engine(
+    async def create_engine(
         cls,
-        config: Optional[EngineConfig] = None,
+        config: Optional[Dict] = None,
         registry: Optional['AgentRegistry'] = None,
         websocket_bridge: Optional['AgentWebSocketBridge'] = None,
         user_context: Optional['UserExecutionContext'] = None,
@@ -138,12 +138,10 @@ class UnifiedExecutionEngineFactory:
         if not user_context:
             raise ValueError("UserExecutionEngine requires user_context for proper isolation")
         
-        # Get the factory and create UserExecutionEngine synchronously
+        # Get the factory and create UserExecutionEngine asynchronously
         factory = get_execution_engine_factory()
-        engine = factory.create_execution_engine_sync(
-            user_context=user_context,
-            websocket_bridge=effective_websocket_bridge,
-            additional_config=kwargs
+        engine = await factory.create_execution_engine(
+            user_context=user_context
         )
         
         # Ensure interface compliance (ConsolidatedExecutionEngine should already implement it)

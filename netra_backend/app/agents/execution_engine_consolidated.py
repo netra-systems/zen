@@ -1,5 +1,12 @@
 """Unified Execution Engine - SSOT Implementation with Extension Pattern.
 
+🚨 CRITICAL SSOT MIGRATION NOTICE 🚨
+This execution_engine_consolidated.py is DEPRECATED and will be REMOVED in the next release.
+
+MIGRATION REQUIRED:
+- NEW CODE: Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- EXISTING CODE: Replace imports with 'from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine'
+
 This module consolidates all execution engine implementations into a single,
 extensible architecture supporting composition and request-scoped isolation.
 
