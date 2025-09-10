@@ -28,9 +28,16 @@ import pytest
 import json
 import time
 import uuid
+import sys
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import patch, Mock
+
+# Add project root to Python path for test_framework imports
+project_root = Path(__file__).parent.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 # SSOT Test Framework Imports
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -60,14 +67,14 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 
 # Authentication and Security Components
-from netra_backend.app.clients.auth_client_core import UnifiedAuthService
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.websocket_core.unified_websocket_auth import (
     authenticate_websocket_connection,
     extract_e2e_context_from_websocket,
     create_authenticated_user_context,
     validate_websocket_token_business_logic
 )
-from netra_backend.app.websocket_core.websocket_connection_manager import WebSocketConnectionManager
+from netra_backend.app.websocket_core.unified_manager import WebSocketManager as WebSocketConnectionManager
 from netra_backend.app.core.security_validator import SecurityValidator
 from netra_backend.app.middleware.authentication_middleware import AuthenticationMiddleware
 
