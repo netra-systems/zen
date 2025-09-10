@@ -329,31 +329,26 @@ async def websocket_endpoint(websocket: WebSocket):
         if "jwt-auth" in [p.strip() for p in subprotocols]:
             selected_protocol = "jwt-auth"
         
-        # ISSUE #128 FIX: Accept WebSocket connection with circuit breaker protection
+        # CRITICAL FIX: Accept WebSocket connection IMMEDIATELY and DIRECTLY
+        # The circuit breaker was causing race conditions in GCP Cloud Run
+        # WebSocket MUST be accepted before ANY other operations
         try:
-            circuit_breaker = get_websocket_circuit_breaker()
-            
             if selected_protocol:
-                await circuit_breaker.call_with_circuit_breaker(
-                    websocket.accept,
-                    subprotocol=selected_protocol,
-                    connection_type="websocket_accept_with_protocol"
-                )
-                logger.debug(f"WebSocket accepted with subprotocol: {selected_protocol}")
+                await websocket.accept(subprotocol=selected_protocol)
+                logger.debug(f"WebSocket accepted directly with subprotocol: {selected_protocol}")
             else:
-                await circuit_breaker.call_with_circuit_breaker(
-                    websocket.accept,
-                    connection_type="websocket_accept_no_protocol"
-                )
-                logger.debug("WebSocket accepted without subprotocol")
+                await websocket.accept()
+                logger.debug("WebSocket accepted directly without subprotocol")
+            
+            # CRITICAL: Give Cloud Run time to process the accept() before continuing
+            # This prevents the "Need to call 'accept' first" race condition
+            if environment in ["staging", "production"]:
+                await asyncio.sleep(0.1)  # 100ms for Cloud Run to stabilize
+                logger.debug("Applied Cloud Run post-accept stabilization delay")
                 
-        except CircuitBreakerOpenError as e:
-            logger.error(f"🔌 Circuit breaker OPEN - rejecting WebSocket connection: {e}")
-            await websocket.close(code=1013, reason="Service temporarily unavailable")
-            return
         except Exception as e:
-            logger.error(f"❌ WebSocket accept failed after circuit breaker retries: {e}")
-            await safe_websocket_close(websocket, code=1000, reason="Connection establishment failed - graceful retry")
+            logger.error(f"❌ WebSocket accept failed: {e}")
+            # Don't try to close - WebSocket isn't accepted yet
             return
         
         # PHASE 2 FIX 2: Consolidated state machine initialization
