@@ -35,7 +35,7 @@ GitHub Issue: https://github.com/netra-systems/netra-apex/issues/232
 import asyncio
 import threading
 import weakref
-from typing import Any, Dict, Optional, Set, List
+from typing import Any, Dict, Optional, Set, List, Union
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
