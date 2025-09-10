@@ -205,7 +205,7 @@ async def sign_service_request(request: RequestSignatureRequest) -> Dict[str, An
         timestamp = request.timestamp or datetime.now(timezone.utc).isoformat()
         
         # Create signature data
-        signature_data = self._create_signature_data(
+        signature_data = _create_signature_data(
             request.service_id,
             request.request_method,
             request.request_path,

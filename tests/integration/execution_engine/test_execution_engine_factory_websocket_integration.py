@@ -125,9 +125,15 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             
             return emitter
         
-        # Mock the UserWebSocketEmitter creation
-        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', side_effect=create_mock_emitter):
-            self.factory.set_tool_dispatcher_factory(Mock())
+        # Start persistent patch for UserWebSocketEmitter creation in the factory
+        self.websocket_emitter_patch = patch(
+            'netra_backend.app.agents.supervisor.execution_engine_factory.UserWebSocketEmitter', 
+            side_effect=create_mock_emitter
+        )
+        self.websocket_emitter_patch.start()
+        
+        # Configure factory with tool dispatcher
+        self.factory.set_tool_dispatcher_factory(Mock())
         
         # Record setup completion
         self.record_metric("websocket_integration_setup_complete", True)
@@ -143,6 +149,10 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
     async def async_teardown_method(self, method=None):
         """Teardown test with factory cleanup."""
         try:
+            # Stop the WebSocket emitter patch if it exists
+            if hasattr(self, 'websocket_emitter_patch'):
+                self.websocket_emitter_patch.stop()
+            
             if hasattr(self, 'factory') and self.factory:
                 await self.factory.shutdown()
         finally:
