@@ -62,10 +62,40 @@ python -m pytest netra_backend/tests/startup/test_comprehensive_startup.py -v
 python -m pytest tests/integration/golden_path/test_configuration_environment_comprehensive.py::TestIsolatedEnvironmentManagement -v
 ```
 
+## Step 1.2 COMPLETE: New Test Plan Created
+
+### 3 NEW TEST FILES PLANNED:
+
+1. **`/tests/integration/test_environment_loading_ssot_integration.py`**
+   - `test_backend_and_auth_use_same_environment_loader()` - Verifies unified SSOT loader usage
+   - `test_identical_staging_detection_logic()` - Ensures consistent staging detection
+   - `test_consistent_env_file_loading_sequence()` - Validates same .env file loading order
+   - `test_unified_dev_launcher_detection()` - Ensures consistent dev launcher detection
+   - `test_environment_variable_consistency_cross_service()` - Validates identical variable loading
+
+2. **`/tests/integration/test_cross_service_environment_consistency.py`** 
+   - `test_production_environment_variables_identical()` - Production mode consistency
+   - `test_development_environment_variables_identical()` - Development .env loading consistency
+   - `test_env_file_precedence_rules_consistent()` - Same precedence rules across services
+   - `test_sensitive_variable_handling_consistent()` - Consistent secrets handling
+   - `test_environment_bypass_logic_identical()` - Consistent bypass logic in prod/staging
+
+3. **`/tests/integration/test_staging_detection_environment_ssot.py`**
+   - `test_staging_detection_environment_variable_method()` - Consistent staging detection
+   - `test_production_detection_bypasses_env_loading()` - Identical .env bypass in production
+   - `test_gcp_cloud_run_environment_detection()` - Consistent GCP staging detection
+   - `test_dev_launcher_staging_override_consistency()` - Consistent dev launcher overrides
+   - `test_staging_gsm_vs_env_file_precedence()` - Consistent GSM vs .env precedence
+
+### Test Strategy:
+- **Will FAIL before SSOT refactor**: Different environment loading implementations across services
+- **Will PASS after SSOT refactor**: Unified `/shared/startup_environment_manager.py` ensures consistency
+- **Validates specific duplication issues**: Cross-service environment loading differences
+
 ## Process Progress
 - [x] Step 0: Discover Next SSOT Issue (SSOT AUDIT) - COMPLETE
 - [x] Step 1.1: Discover Existing Tests - COMPLETE
-- [ ] Step 1.2: Plan New Tests  
+- [x] Step 1.2: Plan New Tests - COMPLETE
 - [ ] Step 2: Execute Test Plan  
 - [ ] Step 3: Plan Remediation
 - [ ] Step 4: Execute Remediation
@@ -74,8 +104,8 @@ python -m pytest tests/integration/golden_path/test_configuration_environment_co
 
 ## Next Actions
 1. ✅ Discover existing tests protecting startup/staging functionality - COMPLETE
-2. Plan new tests to validate SSOT refactor - IN PROGRESS
-3. Execute test plan
+2. ✅ Plan new tests to validate SSOT refactor - COMPLETE
+3. Execute test plan (create and validate new tests)
 4. Plan and execute SSOT remediation
 5. Validate all tests pass
 6. Create PR for closure
