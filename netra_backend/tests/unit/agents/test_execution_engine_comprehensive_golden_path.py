@@ -34,8 +34,8 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
-# ExecutionEngine SSOT Class Under Test
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, 
     AgentExecutionResult,
