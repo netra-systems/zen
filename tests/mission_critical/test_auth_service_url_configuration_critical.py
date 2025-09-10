@@ -125,13 +125,13 @@ class TestAuthServiceUrlConfigurationCritical(SSotAsyncTestCase):
         
         with self.mock_environment(env_config, "staging"):
             # This should raise AuthValidationError
-            with self.assertRaises(AuthValidationError) as context:
+            with pytest.raises(AuthValidationError) as context:
                 await validate_auth_at_startup()
             
             # Verify the exception contains AUTH_SERVICE_URL error
-            error_message = str(context.exception)
-            self.assertIn("AUTH_SERVICE_URL not configured", error_message)
-            self.assertIn("auth_service_url", error_message)
+            error_message = str(context.value)
+            assert "AUTH_SERVICE_URL not configured" in error_message
+            assert "auth_service_url" in error_message
 
     async def test_staging_environment_requires_auth_service_url(self):
         """
@@ -147,15 +147,15 @@ class TestAuthServiceUrlConfigurationCritical(SSotAsyncTestCase):
             success, results = await validator.validate_all()
             
             # In staging, AUTH_SERVICE_URL is required
-            self.assertFalse(success, "Staging should require AUTH_SERVICE_URL")
+            assert not success, "Staging should require AUTH_SERVICE_URL"
             
             # Verify critical failure exists
             critical_failures = [r for r in results if not r.valid and r.is_critical]
             auth_url_failures = [r for r in critical_failures 
                                if r.component == AuthComponent.AUTH_SERVICE_URL]
             
-            self.assertGreater(len(auth_url_failures), 0, 
-                             "Should have AUTH_SERVICE_URL critical failure in staging")
+            assert len(auth_url_failures) > 0, \
+                "Should have AUTH_SERVICE_URL critical failure in staging"
 
     async def test_production_environment_requires_auth_service_url(self):
         """
