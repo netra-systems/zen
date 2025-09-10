@@ -20,7 +20,7 @@ import time
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
-from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
+from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -40,11 +40,8 @@ class TestEnhancedToolExecutionWorkflows(BaseIntegrationTest):
             workspace_id="enhanced_workspace_1305"
         )
         
-        enhanced_dispatcher = EnhancedToolDispatcher(
-            user_context=user_context,
-            optimization_enabled=True,
-            adaptive_execution=True,
-            performance_monitoring=True
+        enhanced_dispatcher = await UnifiedToolDispatcher.create_for_user(
+            user_context=user_context
         )
         
         # Define workflow that benefits from optimization
