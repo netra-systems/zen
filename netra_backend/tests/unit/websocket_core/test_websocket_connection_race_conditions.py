@@ -36,11 +36,9 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 
 # WebSocket Core Imports
-from netra_backend.app.websocket_core.utils import is_websocket_connected
-from netra_backend.app.routes.websocket import (
-    _safe_websocket_state_for_logging,
-    _get_rate_limit_for_environment,
-    _get_staging_optimized_timeouts
+from netra_backend.app.websocket_core.utils import (
+    is_websocket_connected,
+    _safe_websocket_state_for_logging
 )
 
 

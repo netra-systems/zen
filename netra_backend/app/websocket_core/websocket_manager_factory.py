@@ -2460,7 +2460,6 @@ class WebSocketManagerFactory:
         Returns:
             True if user is connected, False otherwise
         """
->>>>>>> main
         manager = self.get_manager_by_user(user_id)
         return manager is not None and getattr(manager, '_is_active', False)
     
@@ -2529,9 +2528,6 @@ class WebSocketManagerFactory:
         return await self.send_message(user_id, event_message)
     
     def _find_isolation_key_for_user(self, user_id: str) -> Optional[str]:
-<<<<<<< HEAD
-        """Find isolation key for user."""
-=======
         """
         Find the isolation key for a user's active manager.
         
@@ -2541,7 +2537,6 @@ class WebSocketManagerFactory:
         Returns:
             Isolation key if found, None otherwise
         """
->>>>>>> main
         with self._factory_lock:
             for key, manager in self._active_managers.items():
                 if hasattr(manager, 'user_context') and manager.user_context.user_id == user_id:
