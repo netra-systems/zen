@@ -80,9 +80,9 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
         """Get logger for this test class."""
         return logging.getLogger(self.__class__.__name__)
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.test_users = [
             ensure_user_id(f"test_user_{i}_{uuid.uuid4().hex[:8]}")
             for i in range(self.TEST_USER_COUNT)

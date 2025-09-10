@@ -194,18 +194,54 @@ class UnifiedAgentHealthMonitor:
 
     def get_comprehensive_health_status(
         self, agent_name: str, error_history: List[AgentError], reliability_wrapper
-    ) -> AgentHealthStatus:
-        """Get comprehensive health status of the agent."""
+    ) -> UnifiedAgentHealthStatus:
+        """Get comprehensive unified health status of the agent."""
+        # Check cache first for performance
+        cached_status, cache_time = self.health_check_cache.get(agent_name, (None, 0))
+        if cached_status and (time.time() - cache_time) < self.cache_ttl:
+            return cached_status
+        
+        # Check circuit breaker first
+        if self._should_skip_health_check(agent_name):
+            status = self._create_circuit_breaker_status(agent_name)
+            self.health_check_cache[agent_name] = (status, time.time())
+            return status
+        
         # Check for dead agents first
         dead_agents = self._detect_dead_agents(agent_name)
         if dead_agents:
-            return self._create_dead_agent_status(agent_name, dead_agents)
+            status = self._create_dead_agent_status(agent_name, dead_agents)
+            self.health_check_cache[agent_name] = (status, time.time())
+            return status
         
+        # Calculate comprehensive health metrics
         metrics = self._calculate_health_metrics(error_history)
         overall_health = self._calculate_overall_health(*metrics[:3])
-        status = self._determine_health_status(overall_health, metrics[0])
+        health_status = self._determine_health_status(overall_health, metrics[0])
         cb_state = self._get_circuit_breaker_state(reliability_wrapper)
-        return self._build_health_status(agent_name, overall_health, cb_state, metrics, status, error_history)
+        
+        # Build unified status
+        status = self._build_unified_health_status(
+            agent_name, overall_health, cb_state, metrics, health_status, error_history
+        )
+        
+        # Add enhanced capabilities if enabled
+        if self.enable_system_metrics:
+            status.system_metrics = self._collect_system_metrics()
+        
+        if self.enable_five_whys and status.status in ['unhealthy', 'dead']:
+            status.five_whys_analysis = self._perform_five_whys_analysis(
+                agent_name, status.last_error.message if status.last_error else "Health check failed"
+            )
+        
+        # Cache the result
+        self.health_check_cache[agent_name] = (status, time.time())
+        
+        # Trigger WebSocket events for status changes if enabled
+        if self.enable_websocket_events:
+            asyncio.create_task(self._emit_health_status_event(agent_name, status))
+        
+        return status
 
     def _calculate_health_metrics(self, error_history: List[AgentError]) -> tuple[int, int, float, float]:
         """Calculate health metrics for status evaluation."""
