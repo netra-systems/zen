@@ -91,6 +91,14 @@ class SupervisorAgent(BaseAgent):
         
         self.agent_instance_factory = get_agent_instance_factory()
         self.agent_class_registry = get_agent_class_registry()
+        
+        # CRITICAL: Ensure agent class registry is initialized for golden path
+        if len(self.agent_class_registry) == 0:
+            logger.warning("Agent class registry is empty - initializing for golden path")
+            from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+            self.agent_class_registry = initialize_agent_class_registry()
+            logger.info(f"✅ Initialized agent class registry with {len(self.agent_class_registry)} agents")
+        
         self.flow_logger = get_supervisor_flow_logger()
         
         # ARCHITECTURE: Conditional factory pre-configuration
