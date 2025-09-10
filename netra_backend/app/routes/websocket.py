@@ -2242,10 +2242,10 @@ async def get_websocket_service_discovery():
 
 async def authenticate_websocket_with_database(session_info: Dict[str, str]) -> str:
     """Authenticate WebSocket with database session for tests."""
-    from netra_backend.app.db.postgres_session import get_async_db
+    from netra_backend.app.db.database_manager import get_db_session
     from netra_backend.app.services.security_service import SecurityService
     
-    async with get_async_db() as session:
+    async with get_db_session() as session:
         security_service = SecurityService(session)
         user = await security_service.get_user_by_id(session_info["user_id"])
         if user and user.is_active:

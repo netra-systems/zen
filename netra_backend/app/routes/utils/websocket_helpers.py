@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 
 from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.core.configuration import unified_config_manager
-from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.db.database_manager import get_db_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.validators import (
     validate_token_payload,
@@ -161,7 +161,7 @@ async def authenticate_websocket_user(websocket: WebSocket, token: str, security
             user_id = validate_user_id_in_payload(payload)
             logger.info(f"[WS AUTH] User ID validated: {user_id}")
             
-            async with get_async_db() as db_session:
+            async with get_db_session() as db_session:
                 logger.info(f"[WS AUTH] Database session acquired, fetching user {user_id} (attempt {attempt + 1})")
                 result = await get_and_validate_user(security_service, db_session, user_id, payload)
                 logger.info(f"[WS AUTH] User validated successfully: {result}")
@@ -324,7 +324,7 @@ async def process_agent_message(user_id_str: str, data: str, agent_service):
         db_session = None
         try:
             # Try to get database session - this is what we retry on failure
-            async with get_async_db() as db_session:
+            async with get_db_session() as db_session:
                 # Ensure session is properly initialized
                 if not db_session:
                     raise ValueError("Failed to create database session")
