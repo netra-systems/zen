@@ -34,9 +34,17 @@
 - [x] GitHub issue created: #219
 - [x] Local tracking file created
 
-### Step 1: DISCOVER AND PLAN TEST (Next)
-- [ ] 1.1: Find existing tests protecting against breaking changes
-- [ ] 1.2: Plan new tests for SSOT refactor validation
+### Step 1: DISCOVER AND PLAN TEST ✅ COMPLETE  
+- [x] 1.1: Find existing tests protecting against breaking changes
+  - **FOUND:** 500+ related test files with extensive coverage
+  - **CRITICAL:** `/tests/mission_critical/test_websocket_agent_events_suite.py` must pass
+  - **EXISTING SSOT TEST:** `/tests/integration/factory_ssot/test_factory_ssot_tool_dispatcher_violations.py`
+  - **IMPORT UPDATES:** 36 files need UnifiedToolDispatcher import changes
+- [x] 1.2: Plan new tests for SSOT refactor validation
+  - **TEST STRATEGY:** 60% existing protection, 20% new SSOT tests, 20% stability verification
+  - **FAILING TESTS:** Design tests to reproduce SSOT violation (before fix)
+  - **SUCCESS TESTS:** Validate consolidated execution path (after fix)
+  - **BUSINESS VALUE:** All 5 WebSocket events must deliver (agent_started → agent_completed)
 
 ### Step 2: EXECUTE TEST PLAN (20% new SSOT tests)
 - [ ] Create failing tests that reproduce SSOT violation
