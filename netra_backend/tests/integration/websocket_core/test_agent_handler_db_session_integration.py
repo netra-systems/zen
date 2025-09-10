@@ -49,9 +49,9 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
     work correctly for agent operations.
     """
     
-    async def asyncSetUp(self):
+    async def async_setup_method(self, method=None):
         """Set up test environment with real database connections."""
-        await super().asyncSetUp()
+        await super().async_setup_method(method)
         self.env = IsolatedEnvironment()
         self.env.set('ENVIRONMENT', 'test')
         
@@ -304,7 +304,7 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
             else:
                 raise
 
-    async def asyncTearDown(self):
+    async def async_teardown_method(self, method=None):
         """Clean up test environment and database connections."""
         try:
             if self.db_manager:
@@ -312,7 +312,7 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
         except Exception:
             pass  # Ignore cleanup errors in tests
             
-        await super().asyncTearDown()
+        await super().async_teardown_method(method)
         
         # Log integration test completion
         print(f"\n=== Agent Handler DB Session Integration Tests Completed ===")
