@@ -315,7 +315,7 @@ class TestWebSocketStateConsistencyIntegration(BaseIntegrationTest):
         """
         CRITICAL TEST: Tests WebSocketNotifier state consistency during connection state transitions.
         
-        Simulates: WebSocketNotifier checking connection state while connections are transitioning
+        Simulates: AgentWebSocketBridge checking connection state while connections are transitioning
         Expected Result: TEST SHOULD FAIL with notifier state inconsistencies
         """
         # Create multiple WebSockets in different states
@@ -332,7 +332,7 @@ class TestWebSocketStateConsistencyIntegration(BaseIntegrationTest):
             test_websockets.append(ws)
         
         # Create WebSocketNotifier
-        websocket_notifier = WebSocketNotifier(websocket_manager=None)
+        websocket_notifier = AgentWebSocketBridge(websocket_manager=None)
         
         # Track notifier state checks
         notifier_state_tracker = WebSocketStateTracker()

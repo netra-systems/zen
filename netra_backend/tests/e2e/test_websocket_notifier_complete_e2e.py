@@ -14,7 +14,7 @@ production-like infrastructure, ensuring users receive reliable real-time feedba
 🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
-⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
+⚠️ DEPRECATION NOTE: AgentWebSocketBridge is deprecated in favor of AgentWebSocketBridge.
 These E2E tests validate the complete notification flow for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:

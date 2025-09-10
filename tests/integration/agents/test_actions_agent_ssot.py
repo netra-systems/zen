@@ -457,7 +457,7 @@ class TestActionsAgentSupervisorIntegration:
         agent_registry = AgentRegistry()
         
         # Setup WebSocket notifier chain
-        notifier = WebSocketNotifier(self.websocket_capture)
+        notifier = AgentWebSocketBridge(self.websocket_capture)
         agent_registry.set_websocket_manager(self.websocket_capture)
         
         # Get ActionsAgent

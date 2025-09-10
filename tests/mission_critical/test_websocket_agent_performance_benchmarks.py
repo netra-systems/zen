@@ -226,7 +226,7 @@ class RealAgentPerformanceTester:
         )
         
         # Setup WebSocket notifier with performance monitoring
-        websocket_notifier = WebSocketNotifier(user_context=user_context)
+        websocket_notifier = AgentWebSocketBridge(user_context=user_context)
         
         # Performance tracking
         event_timings = {}
@@ -678,7 +678,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
             )
             
             # Setup WebSocket notifier
-            websocket_notifier = WebSocketNotifier(user_context=user_context)
+            websocket_notifier = AgentWebSocketBridge(user_context=user_context)
             
             connection_events = []
             event_timings = []

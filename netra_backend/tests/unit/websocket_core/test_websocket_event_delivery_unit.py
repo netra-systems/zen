@@ -73,7 +73,7 @@ class TestWebSocketEventDelivery:
         Users must see that agent began processing their problem.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = AgentWebSocketBridge(mock_websocket_manager)
         agent_name = "triage"
         
         # Act
@@ -107,7 +107,7 @@ class TestWebSocketEventDelivery:
         Shows AI is working on valuable solutions for users.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = AgentWebSocketBridge(mock_websocket_manager)
         agent_name = "data_researcher"
         progress_message = "Analyzing user requirements and searching for relevant data"
         
@@ -141,7 +141,7 @@ class TestWebSocketEventDelivery:
         Demonstrates problem-solving approach to users.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = AgentWebSocketBridge(mock_websocket_manager)
         tool_name = "data_query"
         tool_args = {"query": "SELECT * FROM optimization_data", "limit": 100}
         
@@ -176,7 +176,7 @@ class TestWebSocketEventDelivery:
         Delivers actionable insights to users.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = AgentWebSocketBridge(mock_websocket_manager)
         tool_name = "optimization_analyzer"
         tool_result = {
             "analysis": "Found 3 optimization opportunities",
@@ -215,7 +215,7 @@ class TestWebSocketEventDelivery:
         Final step in delivering AI value through chat.
         """
         # Arrange
-        notifier = WebSocketNotifier(mock_websocket_manager)
+        notifier = AgentWebSocketBridge(mock_websocket_manager)
         agent_name = "optimization_agent"
         agent_result = {
             "summary": "Optimization analysis complete",

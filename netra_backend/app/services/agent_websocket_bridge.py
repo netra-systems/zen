@@ -2738,7 +2738,7 @@ class RequestScopedOrchestrator:
         )
         
         # Create WebSocket notifier that delegates to emitter
-        notifier = WebSocketNotifier(self.emitter, exec_context)
+        notifier = AgentWebSocketBridge(self.emitter, exec_context)
         
         # Store for cleanup
         self._active_contexts[run_id] = (exec_context, notifier)
@@ -2986,15 +2986,14 @@ class WebSocketNotifier:
             user_context: User execution context for isolation
             validate_context: Whether to validate user context (default: True)
             
-        Returns:
-            WebSocketNotifier: Configured notifier instance
+        Returns: AgentWebSocketBridge: Configured notifier instance
             
         Raises:
             ValueError: If user_context is invalid and validate_context=True
             
         Example:
             # Replace deprecated pattern:
-            # notifier = WebSocketNotifier(websocket_manager)
+            # notifier = AgentWebSocketBridge(websocket_manager)
             
             # With SSOT pattern:
             notifier = AgentWebSocketBridge.create_websocket_notifier(
@@ -3019,7 +3018,7 @@ class WebSocketNotifier:
             f"for user {getattr(user_context, 'user_id', 'unknown')[:8] if user_context else 'none'}..."
         )
         
-        return cls.WebSocketNotifier(emitter, user_context)
+        return cls.AgentWebSocketBridge(emitter, user_context)
 
 
 # SECURITY FIX: Replace singleton with factory pattern

@@ -51,7 +51,7 @@
         # REMOVED_SYNTAX_ERROR: mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
 
         # Create notifier
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_ws_manager)
 
         # Create test context
         # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
@@ -118,7 +118,7 @@
             # REMOVED_SYNTAX_ERROR: """Test that notifier handles missing WebSocket manager gracefully."""
             # REMOVED_SYNTAX_ERROR: pass
             # Create notifier without manager
-            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(None)
+            # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(None)
 
             # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
             # REMOVED_SYNTAX_ERROR: agent_name="TestAgent",

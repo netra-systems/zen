@@ -157,7 +157,7 @@ class TestWebSocketConnectivityAuthenticated:
             
             try:
                 # Create WebSocket notifier for real event testing
-                notifier = WebSocketNotifier(ws_manager)
+                notifier = AgentWebSocketBridge(ws_manager)
                 
                 # Test authenticated WebSocket messaging for user1
                 logger.info("📡 Testing authenticated WebSocket messaging...")
@@ -308,7 +308,7 @@ class TestWebSocketConnectivityAuthenticated:
             
             try:
                 # Create WebSocket notifier
-                notifier = WebSocketNotifier(ws_manager)
+                notifier = AgentWebSocketBridge(ws_manager)
                 
                 # Create execution context for message sequence testing
                 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

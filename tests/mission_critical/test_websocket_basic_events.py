@@ -97,7 +97,7 @@ class TestBasicWebSocketEvents:
     async def test_websocket_notifier_basic_events(self, real_services: RealServicesManager):
         """Test WebSocketNotifier can send basic agent events."""
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         validator = BasicEventValidator()
         
         connection_id = f"test-notifier-{uuid.uuid4().hex[:8]}"
@@ -132,7 +132,7 @@ class TestBasicWebSocketEvents:
     async def test_websocket_event_sequencing(self, real_services: RealServicesManager):
         """Test that WebSocket events are sent in proper sequence."""
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         validator = BasicEventValidator()
         
         connection_id = f"test-sequence-{uuid.uuid4().hex[:8]}"
@@ -169,7 +169,7 @@ class TestBasicWebSocketEvents:
     async def test_multiple_websocket_connections(self, real_services: RealServicesManager):
         """Test multiple WebSocket connections receive events independently."""
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         
         # Create two separate validators for two connections
         validator1 = BasicEventValidator()

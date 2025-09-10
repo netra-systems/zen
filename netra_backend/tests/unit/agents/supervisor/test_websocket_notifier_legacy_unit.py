@@ -71,7 +71,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(None, test_mode=True)
+            notifier = AgentWebSocketBridge(None, test_mode=True)
         
         try:
             # Verify initialization with None manager
@@ -89,7 +89,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(None, test_mode=True)
+            notifier = AgentWebSocketBridge(None, test_mode=True)
         
         try:
             # All operations should complete without error
@@ -126,7 +126,7 @@ class TestWebSocketNotifierLegacyUnit:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_manager, test_mode=True)
+            notifier = AgentWebSocketBridge(mock_manager, test_mode=True)
         
         # Send unicode message
         await notifier.send_agent_thinking(
@@ -157,7 +157,7 @@ class TestWebSocketNotifierLegacyUnit:
         
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_manager)
+            notifier = AgentWebSocketBridge(mock_manager)
         
         # Send large message
         large_thought = "This is a very large thought: " + "x" * 5000
@@ -175,7 +175,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Create multiple contexts with same thread ID
         thread_id = "shared-thread-123"
@@ -209,7 +209,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Test with None values
         assert notifier._determine_error_severity(None, None) == "medium"
@@ -232,7 +232,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Test with None/empty inputs
         suggestions = notifier._generate_default_recovery_suggestions(None, None)
@@ -253,7 +253,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Test with None agent name
         message = notifier._generate_user_friendly_error_message("timeout", "timeout", None)
@@ -275,7 +275,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Test with None tool name
         hints = notifier._get_tool_context_hints(None)
@@ -300,7 +300,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Set small queue size for testing
         notifier.max_queue_size = 5
@@ -323,7 +323,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Add old delivery confirmations
         old_timestamp = time.time() - 3600  # 1 hour ago
@@ -346,7 +346,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Set short backlog interval for testing
         notifier.backlog_notification_interval = 0.1
@@ -372,7 +372,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Generate multiple timestamps
         timestamps = []
@@ -396,7 +396,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         context = AgentExecutionContext(
             agent_name="state_test_agent",
@@ -436,7 +436,7 @@ class TestWebSocketNotifierLegacyUnit:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = WebSocketNotifier(mock_failing_websocket_manager)
+            notifier = AgentWebSocketBridge(mock_failing_websocket_manager)
         
         # Create many operations
         contexts = []

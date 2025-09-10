@@ -878,7 +878,7 @@
 
     # REMOVED_SYNTAX_ERROR: try:
         # Create WebSocket notifier
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
 
         # Create execution context
         # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

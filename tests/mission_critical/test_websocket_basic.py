@@ -83,7 +83,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
 
         # Check all required methods exist
         # REMOVED_SYNTAX_ERROR: required_methods = [ )

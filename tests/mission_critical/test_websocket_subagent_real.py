@@ -114,7 +114,7 @@ class TestRealWebSocketSubAgent:
         
         # Create WebSocket components
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         
         # Mock WebSocket that captures events
         class EventCapturingWebSocket:

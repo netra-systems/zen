@@ -121,7 +121,7 @@ async def test_websocket_agent_events():
     print(f"Connected user {user_id} to WebSocket manager")
     
     # Create WebSocket notifier
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = AgentWebSocketBridge(ws_manager)
     
     # Create execution context
     context = AgentExecutionContext(

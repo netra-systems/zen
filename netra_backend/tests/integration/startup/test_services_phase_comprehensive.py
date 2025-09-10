@@ -279,7 +279,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
             
             assert websocket_bridge is not None, "WebSocket bridge should be created successfully"
             assert hasattr(websocket_bridge, 'state'), "Bridge should have state management"
-            assert hasattr(websocket_bridge, 'initialize_integration'), "Bridge should have initialization method"
+            assert hasattr(websocket_bridge, 'ensure_integration'), "Bridge should have integration method"
             
             self.created_objects.append(websocket_bridge)
             

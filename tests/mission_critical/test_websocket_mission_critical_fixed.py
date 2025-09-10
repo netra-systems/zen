@@ -176,7 +176,7 @@
     # Removed problematic line: async def test_websocket_notifier_all_required_methods(self):
         # REMOVED_SYNTAX_ERROR: """MISSION CRITICAL: Test that WebSocketNotifier has ALL required methods."""
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
 
         # Verify all methods exist
         # REMOVED_SYNTAX_ERROR: required_methods = [ )
@@ -319,7 +319,7 @@
 
     # Removed problematic line: @pytest.mark.asyncio
     # Removed problematic line: async def test_websocket_notifier_sends_all_critical_events(self):
-        # REMOVED_SYNTAX_ERROR: """MISSION CRITICAL: WebSocketNotifier MUST send all required event types."""
+        # REMOVED_SYNTAX_ERROR: """MISSION CRITICAL: AgentWebSocketBridge MUST send all required event types."""
         # REMOVED_SYNTAX_ERROR: pass
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
         # REMOVED_SYNTAX_ERROR: validator = MissionCriticalEventValidator()
@@ -335,7 +335,7 @@
 
     # REMOVED_SYNTAX_ERROR: ws_manager.send_to_thread = AsyncMock(side_effect=capture_events)
 
-    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
 
     # Create test context
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

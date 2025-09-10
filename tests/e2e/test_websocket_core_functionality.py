@@ -274,7 +274,7 @@ async def test_websocket_core_event_flow():
         
         try:
             # Create WebSocket notifier
-            notifier = WebSocketNotifier(ws_manager)
+            notifier = AgentWebSocketBridge(ws_manager)
             
             # Create execution context
             context = AgentExecutionContext(
@@ -389,7 +389,7 @@ async def test_websocket_manager_real_connection_handling():
             connections.append((user_id, ws_conn, conn_id))
         
         # Test broadcast functionality
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         context = AgentExecutionContext(
             run_id="broadcast-test",
             thread_id="broadcast",

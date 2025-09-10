@@ -39,7 +39,7 @@ class TestWebSocketNotifier(SSotAsyncTestCase):
         self.mock_websocket_manager.send_to_thread.return_value = True
         
         # Create WebSocketNotifier in test mode (disables background tasks)
-        self.notifier = WebSocketNotifier(
+        self.notifier = AgentWebSocketBridge(
             websocket_manager=self.mock_websocket_manager,
             test_mode=True  # Prevents background queue processor from hanging tests
         )
@@ -310,7 +310,7 @@ class TestWebSocketNotifier(SSotAsyncTestCase):
         """
         # Capture deprecation warning during initialization
         with pytest.warns(DeprecationWarning, match="WebSocketNotifier is deprecated"):
-            deprecated_notifier = WebSocketNotifier(
+            deprecated_notifier = AgentWebSocketBridge(
                 websocket_manager=self.mock_websocket_manager,
                 test_mode=True
             )

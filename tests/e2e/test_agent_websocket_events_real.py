@@ -273,7 +273,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         assert len(connection_ids) >= 1, "User should have at least 1 connection"
         
         # Test WebSocket notifier with REAL connection
-        notifier = WebSocketNotifier(websocket_manager)
+        notifier = AgentWebSocketBridge(websocket_manager)
         
         # Create execution context for REAL agent events
         context = AgentExecutionContext(
@@ -340,7 +340,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         
         # Create REAL WebSocket manager and notifier
         websocket_manager = UnifiedWebSocketManager()
-        notifier = WebSocketNotifier(websocket_manager)
+        notifier = AgentWebSocketBridge(websocket_manager)
         
         # Connect user to manager
         conn_id = f"mission_critical_{user_data.user_id}"
@@ -494,7 +494,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         
         # Create REAL WebSocket manager and connect all users
         websocket_manager = UnifiedWebSocketManager()
-        notifier = WebSocketNotifier(websocket_manager)
+        notifier = AgentWebSocketBridge(websocket_manager)
         
         # Connect all users to manager
         for i, user in enumerate(users):

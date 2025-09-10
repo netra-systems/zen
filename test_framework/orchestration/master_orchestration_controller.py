@@ -293,7 +293,7 @@ class MasterOrchestrationController:
             self.config.websocket_thread_id = thread_id
             
             if websocket_manager:
-                self.websocket_notifier = WebSocketNotifier(websocket_manager)
+                self.websocket_notifier = AgentWebSocketBridge(websocket_manager)
                 self.logger.info(f"WebSocket manager configured for thread: {thread_id}")
                 
                 # Configure progress streamer if available

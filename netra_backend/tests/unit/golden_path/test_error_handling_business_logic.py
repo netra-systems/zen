@@ -102,7 +102,7 @@ class TestErrorHandlingBusinessContinuity:
         
         # Create WebSocketNotifier with correct SSOT constructor
         with patch('warnings.warn'):  # Suppress deprecation warning for test
-            notifier = WebSocketNotifier(mock_websocket_manager, test_mode=True)
+            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
         
         # Create a test execution context for the notification
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

@@ -32,7 +32,7 @@ class TestWebSocketNotifier(BaseIntegrationTest):
         self.mock_websocket_manager = AsyncMock()
         
         # Initialize notifier in test mode to prevent hanging background tasks
-        self.notifier = WebSocketNotifier(
+        self.notifier = AgentWebSocketBridge(
             websocket_manager=self.mock_websocket_manager,
             test_mode=True
         )

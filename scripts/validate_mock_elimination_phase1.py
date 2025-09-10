@@ -260,7 +260,7 @@ class MockEliminationValidator:
             await ws_manager.connect_user(conn_id, ws_client._websocket, conn_id)
             
             # Create notifier
-            notifier = WebSocketNotifier(ws_manager)
+            notifier = AgentWebSocketBridge(ws_manager)
             context = AgentExecutionContext(
                 run_id="validation-run-123",
                 thread_id=conn_id,

@@ -1413,7 +1413,7 @@ Priority: CRITICAL
     # REMOVED_SYNTAX_ERROR: self.execution_engine = ExecutionEngine()
 
     # Set up WebSocket integration
-    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(self.ws_manager)
     # REMOVED_SYNTAX_ERROR: self.agent_registry.set_websocket_manager(self.ws_manager)
     # REMOVED_SYNTAX_ERROR: self.execution_engine.set_notifier(notifier)
 

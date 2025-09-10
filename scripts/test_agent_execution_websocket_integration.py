@@ -131,7 +131,7 @@ class SimpleTestAgent:
     def __init__(self, name: str, websocket_manager: WebSocketManager):
         self.name = name
         self.websocket_manager = websocket_manager
-        self.notifier = WebSocketNotifier(websocket_manager)
+        self.notifier = AgentWebSocketBridge(websocket_manager)
         
     async def execute(self, state: DeepAgentState, run_id: str) -> Dict[str, Any]:
         """Execute agent with proper WebSocket notifications."""

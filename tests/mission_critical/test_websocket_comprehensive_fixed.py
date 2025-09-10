@@ -166,7 +166,7 @@
     # Removed problematic line: async def test_websocket_notifier_has_all_required_methods(self):
         # REMOVED_SYNTAX_ERROR: """Test WebSocketNotifier has ALL 5 required methods."""
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(self.ws_manager)
 
         # Check all required methods exist
         # REMOVED_SYNTAX_ERROR: required_methods = [ )
@@ -255,7 +255,7 @@
             # REMOVED_SYNTAX_ERROR: """Test complete WebSocket event flow with all 5 required events."""
             # REMOVED_SYNTAX_ERROR: pass
             # Create WebSocket notifier
-            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+            # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(self.ws_manager)
 
             # Create execution context
             # REMOVED_SYNTAX_ERROR: thread_id = "test-thread-001"
@@ -311,7 +311,7 @@
                 # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
                 # Removed problematic line: async def test_concurrent_websocket_events(self):
                     # REMOVED_SYNTAX_ERROR: """Test WebSocket events work with multiple concurrent users."""
-                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+                    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(self.ws_manager)
 
                     # REMOVED_SYNTAX_ERROR: user_count = 3
 
@@ -357,7 +357,7 @@
             # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
             # Removed problematic line: async def test_websocket_error_handling(self):
                 # REMOVED_SYNTAX_ERROR: """Test WebSocket events work properly during error conditions."""
-                # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+                # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(self.ws_manager)
 
                 # REMOVED_SYNTAX_ERROR: thread_id = "error-test-thread"
                 # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

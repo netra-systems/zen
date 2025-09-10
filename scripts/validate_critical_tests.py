@@ -21,7 +21,7 @@ def validate_websocket_integration():
         
         # Test WebSocketNotifier has required methods
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         
         required_methods = [
             'send_agent_started',

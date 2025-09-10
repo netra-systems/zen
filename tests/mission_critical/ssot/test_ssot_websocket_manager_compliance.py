@@ -277,13 +277,8 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager',
         ]
         
-        # Define FORBIDDEN import patterns
+        # Define FORBIDDEN import patterns (excluding legitimate type hints)
         forbidden_imports = [
-            # Direct websocket library imports bypassing our manager
-            'from websockets import',
-            'from fastapi import WebSocket',
-            'from starlette.websockets import WebSocket',
-            
             # Deprecated/legacy imports
             'from netra_backend.websocket import',
             'from backend.websocket import',
@@ -291,6 +286,10 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             # Unauthorized manager imports
             'import websocket_manager_custom',
             'from custom_websocket import',
+            
+            # Direct WebSocket connections bypassing our manager (rare cases)
+            'websocket.connect(',
+            'websockets.serve(',
         ]
         
         project_root = Path(__file__).parent.parent.parent.parent

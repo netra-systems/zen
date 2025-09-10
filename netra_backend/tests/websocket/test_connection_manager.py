@@ -306,7 +306,7 @@ class TestWebSocketAgentEventsReal:
         capture_task = asyncio.create_task(capture_agent_events())
         
         # Create notifier and send agent events
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = AgentWebSocketBridge(ws_manager)
         context = AgentExecutionContext(
             run_id="test-run-123",
             thread_id=conn_id,

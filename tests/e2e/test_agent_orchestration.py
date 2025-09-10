@@ -165,10 +165,10 @@ class RealAgentOrchestrationTester:
         self.websocket_manager = await create_websocket_manager(user_context=user_context)
         
         # Initialize dependent components
-        from netra_backend.app.websocket_core.websocket_notifier import WebSocketNotifier
+        from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         from tests.e2e.helpers.websocket_helpers import RealWebSocketTestHelper
         
-        self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
+        self.websocket_notifier = AgentWebSocketBridge(self.websocket_manager)
         self.websocket_helper = RealWebSocketTestHelper(self.websocket_manager)
     
     async def create_orchestration_context(self, name: str, user_id: str) -> Dict[str, Any]:

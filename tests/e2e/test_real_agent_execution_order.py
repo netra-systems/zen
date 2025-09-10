@@ -44,7 +44,7 @@ except ImportError:
 
 # WebSocket services
 try:
-    from netra_backend.app.services.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     WEBSOCKET_SERVICES_AVAILABLE = True
 except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False

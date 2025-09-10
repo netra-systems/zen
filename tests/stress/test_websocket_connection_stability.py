@@ -292,7 +292,7 @@ class TestWebSocketConnectionStability:
         
         # Send messages to all connections
         logger.info("Sending messages to all connections...")
-        notifier = WebSocketNotifier(self.ws_manager)
+        notifier = AgentWebSocketBridge(self.ws_manager)
         
         send_tasks = []
         for thread_id in range(10):
@@ -525,7 +525,7 @@ class TestWebSocketConnectionStability:
             connections.append((conn_id, mock_ws, thread_id))
         
         # Flood with messages
-        notifier = WebSocketNotifier(self.ws_manager)
+        notifier = AgentWebSocketBridge(self.ws_manager)
         
         flood_start = time.time()
         send_tasks = []

@@ -7,7 +7,7 @@ Business Value Justification:
 - Strategic Impact: Core chat UX functionality that builds user trust
 
 CRITICAL TEST PURPOSE:
-These unit tests validate the business logic of WebSocketNotifier (DEPRECATED)
+These unit tests validate the business logic of AgentWebSocketBridge (DEPRECATED)
 to ensure migration to AgentWebSocketBridge maintains functionality.
 
 Test Coverage:
@@ -42,7 +42,7 @@ class TestWebSocketNotifierBusiness:
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            self.notifier = WebSocketNotifier(
+            self.notifier = AgentWebSocketBridge(
                 websocket_manager=self.mock_websocket_manager,
                 test_mode=True  # Disable background tasks for testing
             )

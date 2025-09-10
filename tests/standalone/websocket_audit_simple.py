@@ -83,7 +83,7 @@ async def test_error_handling():
     
     ws_manager.user_connections[user_id] = {conn_id}
     
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = AgentWebSocketBridge(ws_manager)
     
     # Send messages that will sometimes fail
     success_count = 0
@@ -237,7 +237,7 @@ async def test_concurrent_users():
         ws_manager.user_connections[user_id] = {conn_id}
         user_connections[user_id] = mock_ws
     
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = AgentWebSocketBridge(ws_manager)
     
     # Send messages concurrently
     async def send_user_messages(user_id: str):
