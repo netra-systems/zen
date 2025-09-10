@@ -101,8 +101,8 @@ class TestReportingSubAgentSSOTJSON(unittest.TestCase):
         
         # After remediation, should import SSOT serializer
         # This will fail NOW but pass after remediation
-        self.assertIn('UnifiedJSONSerializer', method_source,
-                     "Missing SSOT import: Should use UnifiedJSONSerializer.safe_loads()")
+        self.assertIn('UnifiedJSONHandler', method_source,
+                     "Missing SSOT import: Should use UnifiedJSONHandler.loads()")
     
     @patch('netra_backend.app.agents.reporting_sub_agent.json.dumps')  
     def test_cache_report_result_should_use_ssot_serializer(self, mock_json_dumps):
@@ -147,44 +147,44 @@ class TestReportingSubAgentSSOTJSON(unittest.TestCase):
         
         # After remediation, should use SSOT serializer  
         # This will fail NOW but pass after remediation
-        self.assertIn('UnifiedJSONSerializer', method_source,
-                     "Missing SSOT import: Should use UnifiedJSONSerializer.safe_dumps()")
+        self.assertIn('UnifiedJSONHandler', method_source,
+                     "Missing SSOT import: Should use UnifiedJSONHandler.dumps()")
     
-    def test_unified_json_serializer_available(self):
-        """Test that UnifiedJSONSerializer is available from SSOT module."""
+    def test_unified_json_handler_available(self):
+        """Test that UnifiedJSONHandler is available from SSOT module."""
         try:
-            from netra_backend.app.core.serialization.unified_json_handler import UnifiedJSONSerializer
+            from netra_backend.app.core.serialization.unified_json_handler import UnifiedJSONHandler
             
             # Test basic functionality
-            serializer = UnifiedJSONSerializer()
+            handler = UnifiedJSONHandler()
             
-            # Test safe_dumps method exists
-            self.assertTrue(hasattr(serializer, 'safe_dumps'), 
-                          "UnifiedJSONSerializer missing safe_dumps method")
+            # Test dumps method exists
+            self.assertTrue(hasattr(handler, 'dumps'), 
+                          "UnifiedJSONHandler missing dumps method")
             
-            # Test safe_loads method exists  
-            self.assertTrue(hasattr(serializer, 'safe_loads'),
-                          "UnifiedJSONSerializer missing safe_loads method")
+            # Test loads method exists  
+            self.assertTrue(hasattr(handler, 'loads'),
+                          "UnifiedJSONHandler missing loads method")
             
         except ImportError as e:
-            self.fail(f"Cannot import UnifiedJSONSerializer from SSOT module: {e}")
+            self.fail(f"Cannot import UnifiedJSONHandler from SSOT module: {e}")
     
-    def test_ssot_json_serializer_functionality(self):
-        """Test SSOT UnifiedJSONSerializer basic functionality."""
-        from netra_backend.app.core.serialization.unified_json_handler import UnifiedJSONSerializer
+    def test_ssot_json_handler_functionality(self):
+        """Test SSOT UnifiedJSONHandler basic functionality."""
+        from netra_backend.app.core.serialization.unified_json_handler import UnifiedJSONHandler
         
-        serializer = UnifiedJSONSerializer()
+        handler = UnifiedJSONHandler()
         
         # Test data
         test_data = {"report": "test report", "status": "success", "count": 42}
         
-        # Test safe_dumps
-        json_string = serializer.safe_dumps(test_data)
+        # Test dumps
+        json_string = handler.dumps(test_data)
         self.assertIsInstance(json_string, str)
         self.assertIn("test report", json_string)
         
-        # Test safe_loads
-        parsed_data = serializer.safe_loads(json_string)
+        # Test loads
+        parsed_data = handler.loads(json_string)
         self.assertEqual(parsed_data, test_data)
     
     def test_reporting_agent_llm_response_parsing_uses_ssot(self):
