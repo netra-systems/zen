@@ -90,6 +90,14 @@ class RequestScopedExecutionEngine:
             TypeError: If user_context is not a UserExecutionContext
             ValueError: If any required parameters are invalid
         """
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         # Validate user context immediately
         self.user_context = validate_user_context(user_context)
         

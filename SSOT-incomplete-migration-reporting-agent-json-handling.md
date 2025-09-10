@@ -78,15 +78,23 @@ This violation directly affects user experience when:
 
 **SSOT Infrastructure Validated:** ✅ Ready for migration
 
-### Phase 3: REMEDIATION PLANNING 🔄 IN PROGRESS
-- [ ] Plan migration to UnifiedJSONHandler
-- [ ] Plan cache helper integration  
-- [ ] Document breaking change impact
+### Phase 3: REMEDIATION PLANNING ✅ COMPLETE
+- [x] Plan migration to UnifiedJSONHandler
+- [x] Plan cache helper integration assessment
+- [x] Document breaking change impact
 
-### Phase 4: REMEDIATION EXECUTION 🔄 PENDING
+#### Remediation Plan Summary
+**Scope:** 4 specific line changes + imports (25 minutes total)
+- **Lines 708-709:** `_get_cached_report()` - replace `json.loads()` with `self._json_handler.loads()`
+- **Lines 721, 738:** `_cache_report_result()` - replace `json.dumps()` with `self._json_handler.dumps()`
+- **Risk Level:** LOW - minimal surface area, identical API, backward compatible
+- **Cache Integration:** No conflict - CacheHelpers uses different SSOT scope
+- **Validation:** All 22 tests expected to pass after remediation
+
+### Phase 4: REMEDIATION EXECUTION 🔄 IN PROGRESS  
 - [ ] Replace custom JSON parsing with SSOT
-- [ ] Integrate proper cache management
-- [ ] Update imports and dependencies
+- [ ] Update imports for UnifiedJSONHandler
+- [ ] Remove redundant direct JSON usage
 
 ### Phase 5: VALIDATION 🔄 PENDING
 - [ ] All existing tests pass
