@@ -151,81 +151,35 @@ class AuthRedisManager:
         return False
     
     async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
-        """Retrieve user session data."""
-        if not await self.ensure_connected():
-            return None
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            session_json = await self.redis_client.get(key)
-            
-            if session_json:
-                return json.loads(session_json)
-            return None
-            
-        except Exception as e:
-            logger.error(f"Failed to get session {session_id}: {e}")
-            return None
+        """Retrieve user session data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.get_session(session_id)
+        return None
     
     async def delete_session(self, session_id: str) -> bool:
-        """Delete user session."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            result = await self.redis_client.delete(key)
-            logger.debug(f"Deleted session {session_id}")
-            return result > 0
-            
-        except Exception as e:
-            logger.error(f"Failed to delete session {session_id}: {e}")
-            return False
+        """Delete user session (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.delete_session(session_id)
+        return False
     
     async def extend_session(self, session_id: str, ttl_seconds: int = 3600) -> bool:
-        """Extend session TTL."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            result = await self.redis_client.expire(key, ttl_seconds)
-            logger.debug(f"Extended session {session_id} TTL to {ttl_seconds}s")
-            return result
-            
-        except Exception as e:
-            logger.error(f"Failed to extend session {session_id}: {e}")
-            return False
+        """Extend session TTL (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.extend_session(session_id, ttl_seconds)
+        return False
     
-    # Token Blacklisting
+    # Token Blacklisting (redirected to SSOT)
     async def blacklist_token(self, token: str, ttl_seconds: int = 86400) -> bool:
-        """Add token to blacklist."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.token_blacklist_prefix}{token}"
-            await self.redis_client.setex(key, ttl_seconds, "blacklisted")
-            logger.debug(f"Blacklisted token with TTL {ttl_seconds}s")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to blacklist token: {e}")
-            return False
+        """Add token to blacklist (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.blacklist_token(token, ttl_seconds)
+        return False
     
     async def is_token_blacklisted(self, token: str) -> bool:
-        """Check if token is blacklisted."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.token_blacklist_prefix}{token}"
-            result = await self.redis_client.exists(key)
-            return result > 0
-            
-        except Exception as e:
-            logger.error(f"Failed to check token blacklist: {e}")
-            return False
+        """Check if token is blacklisted (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.is_token_blacklisted(token)
+        return False
     
     # User Caching
     async def cache_user_data(self, user_id: str, user_data: Dict[str, Any], ttl_seconds: int = 1800) -> bool:
