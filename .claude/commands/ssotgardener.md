@@ -19,39 +19,42 @@ Context
 5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
 6. FIRST DO NO HARM. Your mandate is to SAFELY refresh to SSOT methods.
 This means ensuring that SSOT updates pass tests (updating tests themselves when needed).
+7. IND = {issue name}.md 
+8. GCIFS = Git commit and push the IND updates if safe to do so.
+9. IND; GCIFS = Save to IND and then Action GCIFS
 
 PROCESS INSTRUCTIONS START:
 
 0) Discover Next SSOT Issue (SSOT AUDIT) : SNST: 
 0.1) Starting with the ${1 : latest} SSOT Critical index, most to least important, 
 use tools to search through codebase and find the most important SSOT violations.
-0.2) Save findings to a .md file, including line numbers.
-Git commit and push this file if safe to do so.
-0.3) Make or update github ISSUE.
+0.2) Make or update github ISSUE.
 Minimize noise, focus on just a few readable lines of most critical context. Link to other docs for remaining context.
 Issue name style: SSOT-{context (one of: regression, incomplete-migration, recent-change, {custom})}-{brief human description}}
-Create a local md file with the same name ending in .md to record your work in progress
-OUTPUT the issue name, .md progress tracker name {issue name}.md, and github link here:
-IND = {issue name}.md
+Create a local md file (IND = {issue name}.md) with the same name ending in .md to record your work in progress
+OUTPUT the issue name, .md progress tracker name {issue name}.md, and github link.
+Action: IND; GCIFS
 
 1) DISCOVER AND PLAN TEST : SNST : (Pass context from 0):
 
 1.1) DISCOVER EXISTING: find collection of existing tests
 tests protecting against breaking changes made by SSOT refactor or similar
 After refactors: these tests must continue to pass, or now pass if failing prior, or updated as a test and pass.
-Save to local.md file
+IND; GCIFS
 
 1.2) PLAN ONLY Plan for update, align, or creation of: the required unit,
 integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused
 on ideal code state AFTER SSOT refactor, gaps in current test coverage, and
 to reproducing the SSOT violation in question (failing tests!). following reports\testing\TEST_CREATION_GUIDE.md
 and all of the latest testing best practices as per claude.md
+Save to IND
 
 1.2.notes)
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
 ~20% of work is validating SSOT fixes, 60% existing tests (with updates if needed), ~20% new tests
 
-3.1) UPDATE a comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
+1.3) UPDATE a comment on the ISSUE with the human readable noise-free IND updates
+
 
 4) EXECUTE THE TEST PLAN : SNST : with new spawned sub agent. audit and review the test. And run the fake test checks. 
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
