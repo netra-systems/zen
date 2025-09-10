@@ -14,6 +14,7 @@ Migration Guide:
 """
 
 import asyncio
+import hashlib
 import time
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
@@ -773,7 +774,6 @@ class ExecutionEngine:
     
     def _get_cache_key(self, context: AgentExecutionContext) -> str:
         """Generate cache key for response caching - Phase 3 optimization."""
-        import hashlib
         key_data = f"{context.agent_name}:{context.prompt or ''}:{context.user_input or ''}"
         return hashlib.md5(key_data.encode()).hexdigest()
     
