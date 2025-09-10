@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-09 17:14:14
+**Generated:** 2025-09-09 17:17:29
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 6
-- **Passed:** 6 (100.0%)
-- **Failed:** 0 (0.0%)
+- **Total Tests:** 5
+- **Passed:** 2 (40.0%)
+- **Failed:** 3 (60.0%)
 - **Skipped:** 0
-- **Duration:** 1.60 seconds
-- **Pass Rate:** 100.0%
+- **Duration:** 3.35 seconds
+- **Pass Rate:** 40.0%
 
 ## Test Results by Priority
 
@@ -19,32 +19,71 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_basic_functionality | PASS passed | 0.173s | test_4_agent_orchestration_staging.py |
-| test_agent_discovery_and_listing | PASS passed | 0.187s | test_4_agent_orchestration_staging.py |
-| test_orchestration_workflow_states | PASS passed | 0.000s | test_4_agent_orchestration_staging.py |
-| test_agent_communication_patterns | PASS passed | 0.000s | test_4_agent_orchestration_staging.py |
-| test_orchestration_error_scenarios | PASS passed | 0.000s | test_4_agent_orchestration_staging.py |
-| test_multi_agent_coordination_metrics | PASS passed | 0.000s | test_4_agent_orchestration_staging.py |
+| test_health_check | PASS passed | 0.297s | test_1_websocket_events_staging.py |
+| test_websocket_connection | FAIL failed | 0.351s | test_1_websocket_events_staging.py |
+| test_api_endpoints_for_agents | PASS passed | 0.396s | test_1_websocket_events_staging.py |
+| test_websocket_event_flow_real | FAIL failed | 0.344s | test_1_websocket_events_staging.py |
+| test_concurrent_websocket_real | FAIL failed | 0.324s | test_1_websocket_events_staging.py |
+
+## Failed Tests Details
+
+### FAILED: test_websocket_connection
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py
+- **Duration:** 0.351s
+- **Error:** tests/e2e/staging_test_base.py:308: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py:92: in test_websocket_connection
+    ???
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/tasks.py:507: in wait_for
+    return await fut
+           ^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/con...
+
+### FAILED: test_websocket_event_flow_real
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py
+- **Duration:** 0.344s
+- **Error:** tests/e2e/staging_test_base.py:308: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py:248: in test_websocket_event_flow_real
+    ???
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/tasks.py:507: in wait_for
+    return await fut
+           ^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/async...
+
+### FAILED: test_concurrent_websocket_real
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py
+- **Duration:** 0.324s
+- **Error:** tests/e2e/staging_test_base.py:308: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py:376: in test_concurrent_websocket_real
+    ???
+/Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py:365: in test_connection
+    ???
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio...
 
 ## Pytest Output Format
 
 ```
-test_4_agent_orchestration_staging.py::test_basic_functionality PASSED
-test_4_agent_orchestration_staging.py::test_agent_discovery_and_listing PASSED
-test_4_agent_orchestration_staging.py::test_orchestration_workflow_states PASSED
-test_4_agent_orchestration_staging.py::test_agent_communication_patterns PASSED
-test_4_agent_orchestration_staging.py::test_orchestration_error_scenarios PASSED
-test_4_agent_orchestration_staging.py::test_multi_agent_coordination_metrics PASSED
+test_1_websocket_events_staging.py::test_health_check PASSED
+test_1_websocket_events_staging.py::test_websocket_connection FAILED
+test_1_websocket_events_staging.py::test_api_endpoints_for_agents PASSED
+test_1_websocket_events_staging.py::test_websocket_event_flow_real FAILED
+test_1_websocket_events_staging.py::test_concurrent_websocket_real FAILED
 
 ==================================================
-6 passed, 0 failed in 1.60s
+2 passed, 3 failed in 3.35s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| Agent | 3 | 3 | 0 | 100.0% |
+| WebSocket | 3 | 0 | 3 | 0.0% |
+| Agent | 1 | 1 | 0 | 100.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
