@@ -378,19 +378,25 @@ class WebSocketManager:
         if not hasattr(user_context, 'user_id') or not user_context.user_id:
             raise ValueError("user_context must have valid user_id")
         
-        # Create manager instance using standard constructor
+        # Get the SSOT singleton instance
         manager = cls()
         
-        # Associate user context with manager for isolation
-        manager._user_context = user_context
+        # Store user context in user-specific isolation container (not as instance attributes)
+        if not hasattr(manager, '_user_contexts'):
+            manager._user_contexts = {}
         
-        # Initialize user-specific state based on context
-        manager._context_user_id = user_context.user_id
-        manager._context_thread_id = getattr(user_context, 'thread_id', None)
-        manager._context_run_id = getattr(user_context, 'run_id', None)
-        manager._context_websocket_client_id = getattr(user_context, 'websocket_client_id', None)
+        # Associate user context with isolation key for this user
+        user_id = user_context.user_id
+        manager._user_contexts[user_id] = {
+            'user_context': user_context,
+            'user_id': user_id,
+            'thread_id': getattr(user_context, 'thread_id', None),
+            'run_id': getattr(user_context, 'run_id', None),
+            'websocket_client_id': getattr(user_context, 'websocket_client_id', None),
+            'created_at': datetime.utcnow()
+        }
         
-        logger.info(f"Created WebSocketManager from UserExecutionContext for user {user_context.user_id[:8]}...")
+        logger.info(f"Associated UserExecutionContext for user {user_id[:8]}... with SSOT WebSocketManager singleton")
         return manager
     
     async def _get_user_connection_lock(self, user_id: str) -> asyncio.Lock:

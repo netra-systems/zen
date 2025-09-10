@@ -1,0 +1,22 @@
+============================================================
+WebSocketNotifier Import Migration Report
+============================================================
+✅ Successfully migrated: 8 files
+⏭️  Skipped (excluded): 1 files
+❌ Failed: 0 files
+
+Migrated Files:
+  ✅ ./tests/mission_critical/test_websocket_id_event_delivery.py
+  ✅ ./tests/e2e/test_real_agent_execution_order.py
+  ✅ ./tests/e2e/test_real_agent_websocket_notifications.py
+  ✅ ./tests/regression/test_websocket_context_import_regression_mission_critical.py
+  ✅ ./tests/e2e/test_real_agent_triage_workflow.py
+  ✅ ./tests/e2e/test_real_agent_supervisor_orchestration.py
+  ✅ ./tests/e2e/test_real_agent_factory_patterns.py
+  ✅ ./tests/e2e/test_agent_orchestration.py
+
+Skipped Files:
+  ⏭️  ./tests/unit/ssot_validation/test_websocket_notifier_ssot_violations.py
+
+Canonical Import Used:
+  from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier

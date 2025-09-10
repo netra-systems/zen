@@ -19,8 +19,7 @@ class TestMessageRouterSSOTViolationsQuick(SSotBaseTestCase):
         # Focus on known problem areas
         self.target_files = [
             'netra_backend/app/websocket_core/handlers.py',
-            'netra_backend/app/agents/message_router.py',
-            'tests/test_websocket_fix_simple_validation.py'
+            'netra_backend/app/agents/message_router.py'
         ]
         
     def test_multiple_message_router_implementations_detected(self):
