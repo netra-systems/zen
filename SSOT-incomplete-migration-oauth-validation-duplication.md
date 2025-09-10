@@ -32,22 +32,26 @@ Critical SSOT violations in OAuth configuration validation are blocking golden p
 
 ## REMEDIATION PLAN
 
-### Phase 1: SSOT Enhancement
-- [ ] Enhance central OAuth validator with all required functionality
-- [ ] Add environment-specific credential validation
-- [ ] Add redirect URI validation consistency
-- [ ] Add OAuth client configuration validation
+### 7-Step Safety-First Migration Sequence:
 
-### Phase 2: Service Migration  
-- [ ] Update cross-service validator to use central OAuth validation
-- [ ] Update backend configuration validator to use central OAuth validation
-- [ ] Update test framework to use central OAuth validation
-- [ ] Update validation scripts to use central OAuth validation
+### Phase 1: Foundation (Low Risk)
+- [x] **Step 1: Standalone Scripts** → Consolidate `/scripts/validate_oauth_configuration.py` 
+- [x] **Step 2: Monitoring Components** → Consolidate `configuration_drift_monitor.py` OAuth validation
+- [x] **Step 3: Test Framework** → Consolidate test OAuth validation utilities
 
-### Phase 3: Cleanup
-- [ ] Remove duplicate OAuth validation implementations
-- [ ] Clean up unused OAuth validation code
-- [ ] Update import statements across codebase
+### Phase 2: Service Integration (Medium Risk) 
+- [ ] **Step 4: Cross-Service Validator** → Migrate `/shared/configuration/cross_service_validator.py`
+- [ ] **Step 5: Backend Validators** → Migrate `/netra_backend/app/core/configuration_validator.py`
+- [ ] **Step 6: Auth Integration** → Migrate `/netra_backend/app/auth_integration/validators.py`
+
+### Phase 3: Critical Path (High Risk)
+- [ ] **Step 7: Auth Routes** → Migrate `/netra_backend/app/routes/auth_routes/oauth_validation.py`
+
+### SSOT Enhancement Strategy:
+- [x] **Central Validator Analysis** → Strong foundation exists (lines 289-361, 980-1204)
+- [x] **Required Additions Identified** → 4 new methods planned for full functionality coverage
+- [x] **Rollback Procedures** → Atomic rollback capability planned for each step
+- [x] **Quality Gate Integration** → SSOT tests will validate each migration step
 
 ## TEST STRATEGY
 
@@ -109,8 +113,8 @@ Critical SSOT violations in OAuth configuration validation are blocking golden p
 - [x] **OAuth Migration Validation:** `test_oauth_ssot_migration.py` - PASSES (SSOT works)
 - [x] **OAuth Security Comprehensive:** `test_oauth_security_comprehensive.py` - PASSES (security maintained)
 
-### Next Steps: SSOT REMEDIATION
-- [ ] Plan SSOT remediation strategy
+### Next Steps: SSOT REMEDIATION EXECUTION
+- [x] **Plan SSOT remediation strategy** → Comprehensive 7-step migration plan created ✅
 - [ ] Execute SSOT OAuth validation consolidation
 - [ ] Plan SSOT remediation implementation
 - [ ] Execute SSOT remediation
