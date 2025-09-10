@@ -1374,7 +1374,7 @@ class TestUserExecutionEngineComprehensive:
             )
             
             # Mock agent-specific execution results that demonstrate business value
-            with patch.object(user_execution_engine, '_execute_with_error_handling') as mock_execute, \
+            with patch.object(user_execution_engine, 'agent_core') as mock_core, \
                  patch.object(user_execution_engine, 'execution_tracker') as mock_tracker:
                 
                 execution_id = str(uuid.uuid4())
@@ -1460,7 +1460,7 @@ class TestUserExecutionEngineComprehensive:
                         }
                     )
                 
-                mock_execute.return_value = business_result
+                mock_core.execute_agent.return_value = business_result
                 
                 # Execute agent
                 result = await user_execution_engine.execute_agent(context, state)
