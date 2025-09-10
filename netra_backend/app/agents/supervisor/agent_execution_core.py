@@ -351,13 +351,8 @@ class AgentExecutionCore:
                         websocket_manager=self.websocket_bridge
                     )
                     
-                    # CRITICAL FIX: Send agent_completed event for user closure
-                    if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_completed(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            result={"status": "completed", "success": True, "data": result.data if hasattr(result, 'data') else None}
-                        )
+                    # NOTE: agent_completed event is automatically sent by state tracker during COMPLETED phase transition
+                    # No need to manually call notify_agent_completed here
                     
                     self.state_tracker.complete_execution(state_exec_id, success=True)
                 else:
@@ -396,16 +391,8 @@ class AgentExecutionCore:
                 # Finish the span
                 trace_context.finish_span(span)
                 
-                # CRITICAL: Send agent_completed event for business value and user closure
-                # Business Value: Users must know when agent has finished working on their problem
-                # This is MISSION CRITICAL per CLAUDE.md Section 6 - WebSocket Agent Events
-                if self.websocket_bridge and result.success:
-                    await self.websocket_bridge.notify_agent_completed(
-                        run_id=context.run_id,
-                        agent_name=context.agent_name,
-                        result=result.data if hasattr(result, 'data') else {"success": True},
-                        execution_time_ms=int((result.duration * 1000) if result.duration else 0)
-                    )
+                # NOTE: agent_completed event is already sent in success/error paths above (lines 356, 390)
+                # No need to send it again here to avoid duplicate notifications
                 
                 return result
             
