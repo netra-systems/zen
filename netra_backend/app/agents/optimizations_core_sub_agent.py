@@ -205,8 +205,8 @@ class OptimizationsCoreSubAgent(BaseAgent):
         """Process LLM response and update context metadata."""
         optimizations_result = self._extract_and_validate_result(llm_response_str, context.run_id)
         
-        # Store result in context metadata for other agents to access
-        context.metadata['optimizations_result'] = self._create_optimizations_result(optimizations_result)
+        # Store result in context metadata using SSOT method for other agents to access
+        self.store_metadata_result(context, 'optimizations_result', self._create_optimizations_result(optimizations_result))
         
         return optimizations_result
     
