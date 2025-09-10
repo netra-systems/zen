@@ -38,9 +38,21 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 import pytest
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from test_framework.unified import (
-    TestResult, TestExecutionState, CategoryType, TestConfiguration
-)
+# from test_framework.unified import (
+#     TestResult, TestExecutionState, CategoryType, TestConfiguration
+# )
+# Note: Commenting out unified imports for now to avoid import errors
+
+# Temporary CategoryType enum
+from enum import Enum
+
+class CategoryType(Enum):
+    """Test category types."""
+    UNIT = "unit"
+    INTEGRATION = "integration"
+    E2E = "e2e"
+    SMOKE = "smoke"
+    CRITICAL = "critical"
 
 
 logger = logging.getLogger(__name__)
