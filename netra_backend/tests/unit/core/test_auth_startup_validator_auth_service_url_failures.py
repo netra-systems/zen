@@ -77,13 +77,13 @@ class TestAuthStartupValidatorAuthServiceUrlFailures(SSotAsyncTestCase):
         await validator._validate_auth_service_url()
         
         # Verify result was added to validation_results
-        self.assertEqual(len(validator.validation_results), 1)
+        assert len(validator.validation_results) == 1
         
         result = validator.validation_results[0]
-        self.assertEqual(result.component, AuthComponent.AUTH_SERVICE_URL)
-        self.assertFalse(result.valid)
-        self.assertEqual(result.error, "AUTH_SERVICE_URL not configured")
-        self.assertTrue(result.is_critical)
+        assert result.component == AuthComponent.AUTH_SERVICE_URL
+        assert not result.valid
+        assert result.error == "AUTH_SERVICE_URL not configured"
+        assert result.is_critical
 
     async def test_validate_auth_service_url_empty_string(self):
         """
