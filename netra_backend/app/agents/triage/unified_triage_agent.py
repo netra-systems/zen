@@ -624,8 +624,13 @@ Focus on:
             if len(sorted_intents) > 1:
                 intent.secondary_intents = [name for name, _ in sorted_intents[1:3]]
             
-            # Determine if action is required
-            action_keywords = ['please', 'need', 'want', 'require', 'must', 'should', 'help', 'how to']
+            # Determine if action is required - expanded keyword list
+            action_keywords = [
+                'please', 'need', 'want', 'require', 'must', 'should', 'help', 'how to',
+                'can you', 'could you', 'would you', 'implement', 'configure', 'setup',
+                'fix', 'resolve', 'solve', 'deploy', 'install', 'create', 'build',
+                'optimize', 'improve', 'reduce', 'increase', 'then', 'and'
+            ]
             intent.action_required = any(keyword in text_lower for keyword in action_keywords)
         
         return intent
