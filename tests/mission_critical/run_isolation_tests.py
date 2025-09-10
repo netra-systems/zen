@@ -24,9 +24,9 @@ import os
 
 def show_deprecation_warning():
     """Show deprecation warning to users."""
-    print("⚠️  DEPRECATION WARNING")
+    print("WARNING: DEPRECATION WARNING")
     print("=" * 80)
-    print("🔒 MISSION CRITICAL: Data Layer Isolation Security Tests")
+    print("MISSION CRITICAL: Data Layer Isolation Security Tests")
     print("=" * 80)
     print("This mission critical test runner is deprecated.")
     print("Please migrate to UnifiedTestRunner SSOT:")
@@ -70,7 +70,7 @@ def main():
     unified_runner = project_root / "tests" / "unified_test_runner.py"
     
     if not unified_runner.exists():
-        print(f"❌ ERROR: UnifiedTestRunner not found at {unified_runner}")
+        print(f"ERROR: UnifiedTestRunner not found at {unified_runner}")
         print("Falling back to original isolation test runner...")
         return execute_fallback_isolation_tests()
     
@@ -105,10 +105,10 @@ def main():
         # Add any unknown arguments
         cmd.extend(unknown_args)
         
-        print(f"🔄 Executing isolation tests via UnifiedTestRunner:")
+        print(f"Executing isolation tests via UnifiedTestRunner:")
         print(f"   {' '.join(cmd)}")
         print()
-        print("⚠️  WARNING: These tests are EXPECTED TO FAIL initially!")
+        print("WARNING: These tests are EXPECTED TO FAIL initially!")
         print("   They are designed to expose critical security vulnerabilities:")
         print("   1. ClickHouse cache contamination between users")
         print("   2. Redis key collision between users")
@@ -123,7 +123,7 @@ def main():
         sys.exit(result.returncode)
         
     except Exception as e:
-        print(f"❌ ERROR: Failed to execute UnifiedTestRunner isolation tests: {e}")
+        print(f"ERROR: Failed to execute UnifiedTestRunner isolation tests: {e}")
         print("Falling back to original isolation test runner...")
         return execute_fallback_isolation_tests()
 
@@ -137,7 +137,7 @@ def execute_fallback_isolation_tests():
         # Import the backed up original implementation
         backup_file = Path(__file__).parent / "run_isolation_tests.py.backup"
         if backup_file.exists():
-            print("🔄 Using backup isolation test runner...")
+            print("Using backup isolation test runner...")
             
             # Add project root to path
             sys.path.insert(0, str(project_root))
@@ -155,12 +155,12 @@ def execute_fallback_isolation_tests():
             
             module.main()
         else:
-            print("❌ CRITICAL: No backup available for isolation test runner")
+            print("CRITICAL: No backup available for isolation test runner")
             print("Please restore original run_isolation_tests.py")
             sys.exit(1)
             
     except Exception as fallback_error:
-        print(f"❌ CRITICAL: Fallback isolation tests failed: {fallback_error}")
+        print(f"CRITICAL: Fallback isolation tests failed: {fallback_error}")
         print("Manual isolation testing required.")
         sys.exit(1)
 

@@ -23,7 +23,7 @@ import os
 
 def show_deprecation_warning():
     """Show deprecation warning to users."""
-    print("⚠️  DEPRECATION WARNING")
+    print("WARNING: DEPRECATION WARNING")
     print("=" * 50)
     print("This CI/CD failure analysis script is deprecated.")
     print("Please migrate to UnifiedTestRunner SSOT:")
@@ -81,7 +81,7 @@ def main():
         if args.create_archive:
             cmd.append("--create-archive")
         
-        print(f"🔄 Executing: {' '.join(cmd)}")
+        print(f"Executing: {' '.join(cmd)}")
         
         # Execute unified test runner with same arguments
         result = subprocess.run(cmd, env=env, cwd=project_root)
@@ -90,7 +90,7 @@ def main():
         sys.exit(result.returncode)
         
     except Exception as e:
-        print(f"❌ ERROR: Failed to execute UnifiedTestRunner: {e}")
+        print(f"ERROR: Failed to execute UnifiedTestRunner: {e}")
         print("Falling back to direct execution...")
         
         # Import and execute original functionality as fallback
@@ -111,11 +111,11 @@ def main():
                 # Execute main from backup
                 module.main()
             else:
-                print("❌ CRITICAL: No backup available and UnifiedTestRunner failed")
+                print("CRITICAL: No backup available and UnifiedTestRunner failed")
                 sys.exit(1)
                 
         except Exception as fallback_error:
-            print(f"❌ CRITICAL: Both UnifiedTestRunner and fallback failed: {fallback_error}")
+            print(f"CRITICAL: Both UnifiedTestRunner and fallback failed: {fallback_error}")
             sys.exit(1)
 
 
