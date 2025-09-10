@@ -33,10 +33,12 @@ warnings.warn(
 # Get SSOT logger instance for compatibility
 _ssot_instance = get_ssot_logger()
 
+# Import the original UnifiedLogger for backward compatibility
+from netra_backend.app.core.unified_logging import UnifiedLogger
+
 # Backward compatibility aliases
 central_logger = _ssot_instance
 CentralLogger = type(_ssot_instance)
-UnifiedLogger = type(_ssot_instance)
 
 # Backward compatibility functions
 def get_central_logger():
