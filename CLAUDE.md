@@ -416,9 +416,6 @@ Even Auth can be more permissive for now (log issue in git for items temporarily
 IT MUST allow allow the golden path through!!! (and keep logging errors for future work)
 
 **Cross-Reference Learnings:**
-
------
-
 ## 4\. Knowledge Management: The Living Source of Truth
 
 The `SPEC/*.xml` files are the **living source of truth** for system architecture and learnings.
@@ -432,7 +429,6 @@ The `SPEC/*.xml` files are the **living source of truth** for system architectur
 This index is the SSOT for all platform-specific constants, paths, and identifiers to prevent LLM errors.
 
   * **Index File:** `SPEC/generated/string_literals.json`
-  * **Query Tool:** `scripts/query_string_literals.py`
   * **📚 Complete Documentation:** [`docs/string_literals_index.md`](docs/string_literals_index.md)
 
 **🚨 CRITICAL PROTECTION: mission-critical environment variables + domain configurations cause CASCADE FAILURES if modified incorrectly!**
