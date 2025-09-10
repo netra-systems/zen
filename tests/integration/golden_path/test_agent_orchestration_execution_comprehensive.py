@@ -70,8 +70,8 @@ from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolE
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 # Database and configuration imports
-from netra_backend.app.db.models_auth import User
-from netra_backend.app.db.models_corpus import Thread, Message, Run
+from netra_backend.app.db.models_user import User
+from netra_backend.app.db.models_agent import Thread, Message, Run
 from netra_backend.app.core.configuration.base import get_config
 from shared.isolated_environment import get_env
 
