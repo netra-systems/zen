@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-09 16:59:35
+**Generated:** 2025-09-09 17:01:29
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -19,13 +19,13 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_websocket_connection_real | FAIL failed | 0.774s | test_priority1_critical.py |
+| test_001_websocket_connection_real | FAIL failed | 0.783s | test_priority1_critical.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_001_websocket_connection_real
 - **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_priority1_critical.py
-- **Duration:** 0.774s
+- **Duration:** 0.783s
 - **Error:** /Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_priority1_critical.py:89: in test_001_websocket_connection_real
     ???
 /opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/tasks.py:507: in wait_for
