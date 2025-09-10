@@ -29,6 +29,12 @@ class InjectionType(Enum):
     HTML_INJECTION = "html_injection"
     JAVASCRIPT_INJECTION = "javascript_injection"
     NO_INJECTION = "no_injection"
+    
+    # Test compatibility aliases
+    SQL = "sql_injection"
+    XSS = "xss_injection"
+    COMMAND = "command_injection"
+    LDAP = "ldap_injection"
 
 
 @dataclass
@@ -39,6 +45,18 @@ class InjectionDetectionResult:
     risk_level: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
     sanitized_input: Optional[str]
     warnings: List[str]
+    metadata: Dict[str, Any]
+
+
+@dataclass
+class SpecificInjectionResult:
+    """Result for specific injection type detection."""
+    is_injection: bool
+    injection_type: InjectionType
+    confidence_score: float
+    matched_patterns: List[str]
+    original_input: str
+    sanitized_input: Optional[str]
     metadata: Dict[str, Any]
 
 
@@ -204,6 +222,138 @@ class InjectionDetector:
         
         return result
 
+    def detect_sql_injection(self, input_data: str) -> SpecificInjectionResult:
+        """
+        Detect SQL injection specifically.
+        
+        Args:
+            input_data: Data to check for SQL injection
+            
+        Returns:
+            Specific injection detection result
+        """
+        matched_patterns = []
+        
+        # Check against SQL injection patterns
+        for pattern in self._sql_patterns:
+            if re.search(pattern, input_data, re.IGNORECASE):
+                matched_patterns.append(pattern)
+        
+        is_injection = len(matched_patterns) > 0
+        confidence_score = min(len(matched_patterns) * 0.3, 1.0) if is_injection else 0.0
+        
+        return SpecificInjectionResult(
+            is_injection=is_injection,
+            injection_type=InjectionType.SQL,
+            confidence_score=confidence_score,
+            matched_patterns=matched_patterns,
+            original_input=input_data,
+            sanitized_input=self._sanitize_input(input_data) if is_injection else None,
+            metadata={"pattern_count": len(matched_patterns), "input_length": len(input_data)}
+        )
+    
+    def detect_xss_attempt(self, input_data: str) -> SpecificInjectionResult:
+        """
+        Detect XSS attempts specifically.
+        
+        Args:
+            input_data: Data to check for XSS
+            
+        Returns:
+            Specific injection detection result
+        """
+        matched_patterns = []
+        
+        # Check against XSS patterns
+        for pattern in self._xss_patterns:
+            if re.search(pattern, input_data, re.IGNORECASE):
+                matched_patterns.append(pattern)
+        
+        is_injection = len(matched_patterns) > 0
+        confidence_score = min(len(matched_patterns) * 0.25, 1.0) if is_injection else 0.0
+        
+        return SpecificInjectionResult(
+            is_injection=is_injection,
+            injection_type=InjectionType.XSS,
+            confidence_score=confidence_score,
+            matched_patterns=matched_patterns,
+            original_input=input_data,
+            sanitized_input=self._sanitize_input(input_data) if is_injection else None,
+            metadata={"pattern_count": len(matched_patterns), "input_length": len(input_data)}
+        )
+    
+    def detect_command_injection(self, input_data: str) -> SpecificInjectionResult:
+        """
+        Detect command injection specifically.
+        
+        Args:
+            input_data: Data to check for command injection
+            
+        Returns:
+            Specific injection detection result
+        """
+        matched_patterns = []
+        
+        # Check against command injection patterns
+        for pattern in self._command_patterns:
+            if re.search(pattern, input_data, re.IGNORECASE):
+                matched_patterns.append(pattern)
+        
+        is_injection = len(matched_patterns) > 0
+        confidence_score = min(len(matched_patterns) * 0.4, 1.0) if is_injection else 0.0
+        
+        return SpecificInjectionResult(
+            is_injection=is_injection,
+            injection_type=InjectionType.COMMAND,
+            confidence_score=confidence_score,
+            matched_patterns=matched_patterns,
+            original_input=input_data,
+            sanitized_input=self._sanitize_input(input_data) if is_injection else None,
+            metadata={"pattern_count": len(matched_patterns), "input_length": len(input_data)}
+        )
+    
+    def detect_ldap_injection(self, input_data: str) -> SpecificInjectionResult:
+        """
+        Detect LDAP injection specifically.
+        
+        Args:
+            input_data: Data to check for LDAP injection
+            
+        Returns:
+            Specific injection detection result
+        """
+        # LDAP injection patterns
+        ldap_patterns = [
+            r"\*\)",  # Wildcard with closing parenthesis
+            r"\|\(",   # OR with opening parenthesis 
+            r"&\(",   # AND with opening parenthesis
+            r"\)\(",  # Closing and opening parenthesis
+            r"\*\|",  # Wildcard with OR
+            r"\*&",   # Wildcard with AND
+            r"\)\|",  # Closing paren with OR
+            r"\)&",   # Closing paren with AND
+        ]
+        
+        matched_patterns = []
+        
+        # Check against LDAP injection patterns
+        for pattern in ldap_patterns:
+            if re.search(pattern, input_data, re.IGNORECASE):
+                matched_patterns.append(pattern)
+        
+        is_injection = len(matched_patterns) > 0
+        confidence_score = min(len(matched_patterns) * 0.35, 1.0) if is_injection else 0.0
+        
+        return SpecificInjectionResult(
+            is_injection=is_injection,
+            injection_type=InjectionType.LDAP,
+            confidence_score=confidence_score,
+            matched_patterns=matched_patterns,
+            original_input=input_data,
+            sanitized_input=self._sanitize_input(input_data) if is_injection else None,
+            metadata={"pattern_count": len(matched_patterns), "input_length": len(input_data)}
+        )
+
 
 # SSOT Factory Function
 def create_injection_detector() -> InjectionDetector:
@@ -220,6 +370,7 @@ def create_injection_detector() -> InjectionDetector:
 __all__ = [
     "InjectionDetector",
     "InjectionDetectionResult",
+    "SpecificInjectionResult",
     "InjectionType", 
     "create_injection_detector"
 ]
