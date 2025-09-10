@@ -46,13 +46,12 @@ class TestAuthenticationSSot(SSotBaseTestCase):
     - Session management chaos
     """
     
-    @classmethod
-    def setUpClass(cls):
-        """Set up test class with auth patterns to detect."""
-        super().setUpClass()
+    def setup_method(self, method=None):
+        """Set up test with auth patterns to detect."""
+        super().setup_method(method)
         
         # Define the canonical auth service paths
-        cls.auth_service_paths = {
+        self.auth_service_paths = {
             "auth_service/auth_core/core/jwt_handler.py",
             "auth_service/auth_core/core/token_validator.py", 
             "auth_service/auth_core/core/session_manager.py",
@@ -61,13 +60,13 @@ class TestAuthenticationSSot(SSotBaseTestCase):
         }
         
         # Define backend integration (ONLY allowed auth integration)
-        cls.allowed_backend_auth_integration = {
+        self.allowed_backend_auth_integration = {
             "netra_backend/app/auth_integration/auth.py",
             "netra_backend/app/clients/auth_client_core.py"
         }
         
         # Forbidden JWT patterns outside auth service
-        cls.forbidden_jwt_patterns = [
+        self.forbidden_jwt_patterns = [
             r'jwt\.decode\s*\(',
             r'PyJWT\.decode\s*\(',
             r'_try_local_jwt_validation',
