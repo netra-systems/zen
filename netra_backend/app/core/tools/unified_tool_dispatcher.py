@@ -271,6 +271,169 @@ class UnifiedToolDispatcher:
                 await dispatcher.cleanup()
     
     @classmethod
+    def _wrap_factory_dispatcher(cls, tool_dispatcher, user_context, websocket_bridge):
+        """Wrap RequestScopedToolDispatcher to look like UnifiedToolDispatcher.
+        
+        This provides interface compatibility during Phase 1 of SSOT consolidation.
+        """
+        # Create a wrapper that implements the UnifiedToolDispatcher interface
+        class FactoryDispatcherWrapper:
+            """Wrapper to make RequestScopedToolDispatcher look like UnifiedToolDispatcher."""
+            
+            def __init__(self, dispatcher, user_context, websocket_bridge):
+                self._dispatcher = dispatcher
+                self.user_context = user_context
+                self._websocket_bridge = websocket_bridge
+                self.dispatcher_id = f"factory_wrapper_{user_context.user_id}_{user_context.run_id}_{int(time.time()*1000)}"
+                self.created_at = datetime.now(timezone.utc)
+                self._is_active = True
+                self.strategy = DispatchStrategy.DEFAULT
+                
+                # Provide compatibility properties
+                self.websocket_manager = getattr(dispatcher, 'websocket_emitter', None)
+                self._metrics = {
+                    'tools_executed': 0,
+                    'successful_executions': 0,
+                    'failed_executions': 0,
+                    'created_at': self.created_at,
+                    'user_id': user_context.user_id,
+                    'dispatcher_id': self.dispatcher_id
+                }
+                
+                logger.info(f"🎭 Created FactoryDispatcherWrapper {self.dispatcher_id} for SSOT compatibility")
+            
+            @property
+            def tools(self):
+                """Get tools from wrapped dispatcher."""
+                if hasattr(self._dispatcher, 'get_available_tools'):
+                    tool_names = self._dispatcher.get_available_tools()
+                    return {name: name for name in tool_names}  # Simple mapping
+                return {}
+            
+            @property
+            def has_websocket_support(self):
+                """Check if WebSocket support is available."""
+                return hasattr(self._dispatcher, 'websocket_emitter') and self._dispatcher.websocket_emitter is not None
+            
+            @property
+            def websocket_bridge(self):
+                """Compatibility property for tests expecting websocket_bridge."""
+                return self._websocket_bridge
+            
+            def has_tool(self, tool_name: str) -> bool:
+                """Check if a tool is available."""
+                if hasattr(self._dispatcher, 'has_tool'):
+                    return self._dispatcher.has_tool(tool_name)
+                if hasattr(self._dispatcher, 'get_available_tools'):
+                    return tool_name in self._dispatcher.get_available_tools()
+                return False
+            
+            def register_tool(self, tool) -> None:
+                """Register a tool with the wrapped dispatcher."""
+                if hasattr(self._dispatcher, 'register_tool'):
+                    self._dispatcher.register_tool(tool)
+                    logger.debug(f"Registered tool {getattr(tool, 'name', 'unknown')} via factory wrapper")
+                else:
+                    logger.warning(f"Cannot register tool - wrapped dispatcher doesn't support tool registration")
+            
+            def get_available_tools(self) -> List[str]:
+                """Get available tool names."""
+                if hasattr(self._dispatcher, 'get_available_tools'):
+                    return self._dispatcher.get_available_tools()
+                return []
+            
+            async def execute_tool(self, tool_name: str, parameters: Dict[str, Any] = None, **kwargs):
+                """Execute a tool through the wrapped dispatcher."""
+                self._metrics['tools_executed'] += 1
+                
+                try:
+                    # Use the factory dispatcher's execution method
+                    if hasattr(self._dispatcher, 'dispatch'):
+                        result = await self._dispatcher.dispatch(tool_name, **(parameters or {}))
+                    elif hasattr(self._dispatcher, 'execute_tool'):
+                        result = await self._dispatcher.execute_tool(tool_name, parameters or {})
+                    else:
+                        raise RuntimeError("Wrapped dispatcher has no execute_tool or dispatch method")
+                    
+                    self._metrics['successful_executions'] += 1
+                    return result
+                    
+                except Exception as e:
+                    self._metrics['failed_executions'] += 1
+                    logger.error(f"Tool execution failed in factory wrapper: {e}")
+                    raise
+            
+            async def dispatch_tool(self, tool_name: str, parameters: Dict[str, Any], **kwargs):
+                """Legacy compatibility method - redirects to execute_tool."""
+                return await self.execute_tool(tool_name, parameters)
+            
+            async def dispatch(self, tool_name: str, **kwargs):
+                """Legacy compatibility method - redirects to execute_tool."""
+                return await self.execute_tool(tool_name, kwargs)
+            
+            def get_metrics(self) -> Dict[str, Any]:
+                """Get wrapper metrics."""
+                return self._metrics.copy()
+            
+            async def cleanup(self):
+                """Clean up the wrapped dispatcher."""
+                if hasattr(self._dispatcher, 'cleanup'):
+                    await self._dispatcher.cleanup()
+                self._is_active = False
+                logger.info(f"🎭 Cleaned up FactoryDispatcherWrapper {self.dispatcher_id}")
+        
+        return FactoryDispatcherWrapper(tool_dispatcher, user_context, websocket_bridge)
+    
+    @classmethod
+    async def _create_original_implementation(
+        cls,
+        user_context: 'UserExecutionContext',
+        websocket_bridge: Optional[Any] = None,
+        tools: Optional[List['BaseTool']] = None,
+        enable_admin_tools: bool = False
+    ) -> 'UnifiedToolDispatcher':
+        """Fallback to original implementation if factory redirect fails.
+        
+        This preserves the original UnifiedToolDispatcher behavior for safety.
+        """
+        logger.warning(
+            f"⏪ FALLBACK: Using original UnifiedToolDispatcher implementation for user {user_context.user_id}"
+        )
+        
+        # Determine strategy based on admin tools
+        strategy = DispatchStrategy.ADMIN if enable_admin_tools else DispatchStrategy.DEFAULT
+        
+        # Convert websocket_bridge to websocket_manager if needed
+        websocket_manager = None
+        if websocket_bridge:
+            # If it's already a WebSocketManager, use it directly
+            if hasattr(websocket_bridge, 'send_event'):
+                websocket_manager = websocket_bridge
+            # If it's an AgentWebSocketBridge, create proper adapter
+            elif hasattr(websocket_bridge, 'notify_tool_executing'):
+                websocket_manager = cls._create_websocket_bridge_adapter(websocket_bridge, user_context)
+                logger.info(f"Created WebSocket bridge adapter for AgentWebSocketBridge (user: {user_context.user_id})")
+            # Otherwise wrap it
+            else:
+                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                websocket_manager = UnifiedWebSocketManager()
+                logger.warning(f"Created fallback WebSocketManager - no bridge connection for user {user_context.user_id}")
+        
+        # Create instance using internal factory
+        instance = cls._create_from_factory(
+            user_context=user_context,
+            websocket_manager=websocket_manager,
+            strategy=strategy,
+            tools=tools,
+            websocket_bridge=websocket_bridge  # Pass original bridge for compatibility
+        )
+        
+        # Store the original bridge for compatibility
+        instance._websocket_bridge = websocket_bridge
+        
+        return instance
+    
+    @classmethod
     def _create_from_factory(
         cls,
         user_context: 'UserExecutionContext',

@@ -259,15 +259,35 @@ class UnifiedAgentHealthMonitor:
         except Exception:
             return "unknown"
 
-    def _build_health_status(
+    def _build_unified_health_status(
         self, agent_name: str, overall_health: float, cb_state: str, 
         metrics: tuple[int, int, float, float], status: str, error_history: List[AgentError]
-    ) -> AgentHealthStatus:
-        """Build AgentHealthStatus object from calculated values."""
-        health_attrs = self._create_health_status_attributes(
-            agent_name, overall_health, cb_state, metrics, status, error_history
+    ) -> UnifiedAgentHealthStatus:
+        """Build UnifiedAgentHealthStatus object from calculated values."""
+        recent_errors, total_operations, success_rate, avg_response_time = metrics
+        
+        # Get existing status for state tracking
+        existing_status = self.health_status.get(agent_name)
+        
+        return UnifiedAgentHealthStatus(
+            agent_name=agent_name,
+            overall_health=overall_health,
+            circuit_breaker_state=cb_state,
+            recent_errors=recent_errors,
+            status=status,
+            state=existing_status.state if existing_status else ServiceState.MONITORING,
+            grace_period_remaining=existing_status.grace_period_remaining if existing_status else 0.0,
+            total_operations=total_operations,
+            success_rate=success_rate,
+            average_response_time=avg_response_time,
+            last_error=error_history[-1] if error_history else None,
+            last_check=datetime.now(timezone.utc),
+            consecutive_failures=existing_status.consecutive_failures if existing_status else 0,
+            startup_time=existing_status.startup_time if existing_status else None,
+            ready_confirmed=existing_status.ready_confirmed if existing_status else True,
+            process_verified=existing_status.process_verified if existing_status else False,
+            ports_verified=existing_status.ports_verified if existing_status else set()
         )
-        return AgentHealthStatus(**health_attrs)
 
     def _create_health_status_attributes(
         self, agent_name: str, overall_health: float, cb_state: str,

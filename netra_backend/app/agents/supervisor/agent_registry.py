@@ -415,9 +415,61 @@ class AgentRegistry(UniversalAgentRegistry):
         # New code should use create_tool_dispatcher_for_user() for proper SSOT compliance  
         self._legacy_dispatcher = None
         
+        # SSOT COMPLIANCE VALIDATION
+        self._validate_ssot_compliance()
+        
         logger.info("🔄 Enhanced AgentRegistry initialized with CanonicalToolDispatcher SSOT pattern")
         logger.info("✅ All agents will receive properly isolated tool dispatchers per user context")
         logger.info("🚨 User isolation and memory leak prevention enabled")
+        logger.info("🎯 SSOT compliance validated - UniversalAgentRegistry interface properly implemented")
+    
+    def _validate_ssot_compliance(self) -> None:
+        """Validate SSOT compliance with UniversalAgentRegistry interface.
+        
+        This method ensures that AgentRegistry properly implements the 
+        UniversalAgentRegistry interface and maintains Liskov Substitution Principle.
+        
+        Raises:
+            RuntimeError: If SSOT compliance validation fails
+        """
+        try:
+            # 1. Validate inheritance chain
+            if not isinstance(self, UniversalAgentRegistry):
+                raise RuntimeError("AgentRegistry must inherit from UniversalAgentRegistry for SSOT compliance")
+            
+            # 2. Validate constructor parameters were properly set
+            if not hasattr(self, 'name') or self.name != "AgentRegistry":
+                raise RuntimeError("Registry name not properly set during SSOT initialization")
+            
+            # 3. Validate WebSocket adapter capability
+            if not hasattr(self, 'websocket_manager'):
+                logger.warning("websocket_manager attribute not initialized - WebSocket functionality may be limited")
+            
+            # 4. Validate required interface methods exist
+            required_methods = ['set_websocket_bridge', 'register', 'get', 'has', 'list_keys']
+            for method_name in required_methods:
+                if not hasattr(self, method_name):
+                    raise RuntimeError(f"Missing required interface method: {method_name}")
+                if not callable(getattr(self, method_name)):
+                    raise RuntimeError(f"Interface method {method_name} is not callable")
+            
+            # 5. Validate adapter can be created (test with None manager)
+            try:
+                test_adapter = WebSocketManagerAdapter(None)
+                if not hasattr(test_adapter, 'notify_agent_started'):
+                    raise RuntimeError("WebSocketManagerAdapter missing required notification methods")
+            except Exception as e:
+                raise RuntimeError(f"WebSocketManagerAdapter validation failed: {e}")
+            
+            # 6. Validate parent class methods are accessible
+            if not hasattr(super(), 'set_websocket_bridge'):
+                raise RuntimeError("Parent UniversalAgentRegistry missing set_websocket_bridge method")
+            
+            logger.debug("✅ SSOT compliance validation passed")
+            
+        except Exception as e:
+            logger.error(f"❌ SSOT compliance validation failed: {e}")
+            raise RuntimeError(f"AgentRegistry SSOT compliance validation failed: {e}")
     
     def set_tool_dispatcher_factory(self, factory):
         """Set the tool dispatcher factory for agent creation.
