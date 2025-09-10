@@ -371,17 +371,11 @@ class AgentExecutionCore:
                     )
                     self.state_tracker.complete_execution(state_exec_id, success=False)
                     
-                    # CRITICAL: Send error notification for agent failures including death detection
-                    # Business Value: Users must be notified when agent fails or dies silently
-                    # This is MISSION CRITICAL per CLAUDE.md Section 6 - WebSocket Agent Events
+                    # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
+                    # Removing manual call to prevent duplicate notifications
+                    
+                    # CRITICAL FIX: Send agent_completed event for error cases
                     if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_error(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            error=result.error or "Agent execution failed"
-                        )
-                        
-                        # CRITICAL FIX: Also send agent_completed event for error cases
                         await self.websocket_bridge.notify_agent_completed(
                             run_id=context.run_id,
                             agent_name=context.agent_name,
