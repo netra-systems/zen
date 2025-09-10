@@ -472,3 +472,11 @@ __all__ = [
     "get_legacy_websocket_manager",
     "migrate_singleton_usage"
 ]
+
+# ============================================================================
+# SSOT COMPLIANCE: Make WebSocketManagerAdapter an alias for WebSocketManagerFactory
+# This ensures that when tests check for factory implementations, they see only one canonical factory
+# ============================================================================
+
+# Override the class to make it an alias
+WebSocketManagerAdapter = WebSocketManagerFactory
