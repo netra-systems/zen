@@ -29,7 +29,7 @@ import json
 import logging
 import time
 import uuid
-from typing import Dict, Optional, Any, Tuple
+from typing import Dict, Optional, Any, Tuple, List
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -301,10 +301,18 @@ class UnifiedWebSocketAuthenticator:
     async def authenticate_websocket_connection(
         self, 
         websocket: WebSocket, 
-        e2e_context: Optional[Dict[str, Any]] = None
+        e2e_context: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None
     ) -> WebSocketAuthResult:
         """
         Authenticate WebSocket connection using SSOT authentication service with E2E support.
+        
+        PHASE 1 FIX: Enhanced authentication with race condition protection and retry logic.
+        This implementation addresses WebSocket 1011 auth failures in GCP Cloud Run by:
+        - Adding retry mechanism for transient auth failures
+        - Implementing handshake timing validation
+        - Providing circuit breaker protection
+        - Adding concurrent connection caching
         
         This method completely replaces:
         - websocket_core/auth.py authentication logic
@@ -319,6 +327,12 @@ class UnifiedWebSocketAuthenticator:
             WebSocketAuthResult with authentication outcome
         """
         self._websocket_auth_attempts += 1
+        
+        # PHASE 1 FIX: Validate WebSocket handshake completion before authentication
+        handshake_valid = await self._validate_websocket_handshake_timing(websocket)
+        if not handshake_valid:
+            logger.warning("PHASE 1 FIX: WebSocket handshake not properly completed, applying timing fix")
+            await self._apply_handshake_timing_fix(websocket)
         
         # Track WebSocket connection state - CRITICAL FIX: Use safe string key to prevent JSON serialization errors
         connection_state = getattr(websocket, 'client_state', 'unknown')
@@ -389,10 +403,14 @@ class UnifiedWebSocketAuthenticator:
                 self._websocket_auth_successes += 1
                 return cached_result
             
-            # Use SSOT authentication service for WebSocket authentication with E2E context
-            auth_result, user_context = await self._auth_service.authenticate_websocket(
+            # PHASE 1 FIX: Use SSOT authentication service with retry mechanism
+            # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
+            auth_result, user_context = await self._authenticate_with_retry(
                 websocket, 
-                e2e_context=e2e_context
+                e2e_context=e2e_context,
+                preliminary_connection_id=preliminary_connection_id,
+                max_retries=3,  # Allow up to 3 retries for transient failures
+                retry_delays=[0.1, 0.2, 0.5]  # Progressive delays
             )
             
             if not auth_result.success:
@@ -781,6 +799,243 @@ class UnifiedWebSocketAuthenticator:
         
         return error_code_mapping.get(error_code, 1011)  # Default to server error
     
+    async def _validate_websocket_handshake_timing(self, websocket: WebSocket) -> bool:
+        """
+        PHASE 1 FIX: Validate WebSocket handshake completion timing.
+        
+        This method checks if the WebSocket handshake has properly completed
+        before attempting authentication, preventing race conditions in Cloud Run.
+        
+        Args:
+            websocket: WebSocket connection object
+            
+        Returns:
+            True if handshake is properly completed, False otherwise
+        """
+        try:
+            from shared.isolated_environment import get_env
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            # Check basic connection state
+            if not hasattr(websocket, 'client_state'):
+                logger.warning("PHASE 1 FIX: WebSocket missing client_state - handshake validation failed")
+                return False
+            
+            from fastapi.websockets import WebSocketState
+            client_state = getattr(websocket, 'client_state', None)
+            
+            # Verify WebSocket is in CONNECTED state
+            if client_state != WebSocketState.CONNECTED:
+                logger.warning(f"PHASE 1 FIX: WebSocket not in CONNECTED state: {_safe_websocket_state_for_logging(client_state)}")
+                return False
+            
+            # PHASE 1 FIX: Additional validation for Cloud Run environments
+            if environment in ["staging", "production"]:
+                # Check that WebSocket client information is available
+                if not websocket.client:
+                    logger.warning("PHASE 1 FIX: WebSocket client information not available in Cloud Run")
+                    return False
+                
+                # Verify headers are accessible (indicates complete handshake)
+                if not websocket.headers:
+                    logger.warning("PHASE 1 FIX: WebSocket headers not available - incomplete handshake")
+                    return False
+            
+            logger.debug("PHASE 1 FIX: WebSocket handshake validation passed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"PHASE 1 FIX: Error validating WebSocket handshake: {e}")
+            return False
+    
+    async def _apply_handshake_timing_fix(self, websocket: WebSocket):
+        """
+        PHASE 1 FIX: Apply timing fixes for WebSocket handshake completion.
+        
+        This method addresses race conditions in Cloud Run environments where
+        authentication occurs before the WebSocket handshake is fully stable.
+        
+        Args:
+            websocket: WebSocket connection object
+        """
+        try:
+            from shared.isolated_environment import get_env
+            env = get_env()
+            environment = env.get("ENVIRONMENT", "development").lower()
+            
+            # PHASE 1 FIX: Import Windows-safe asyncio patterns
+            from netra_backend.app.core.windows_asyncio_safe import (
+                windows_safe_sleep,
+                windows_safe_progressive_delay
+            )
+            
+            if environment in ["staging", "production"]:
+                # Cloud Run environments need longer stabilization
+                logger.info("PHASE 1 FIX: Applying Cloud Run handshake stabilization")
+                await windows_safe_sleep(0.1)  # 100ms for Cloud Run stability
+                
+                # Progressive validation with retries
+                for attempt in range(3):
+                    from fastapi.websockets import WebSocketState
+                    if hasattr(websocket, 'client_state') and websocket.client_state == WebSocketState.CONNECTED:
+                        logger.info(f"PHASE 1 FIX: WebSocket stabilized after {attempt + 1} attempts")
+                        break
+                    await windows_safe_progressive_delay(attempt, 0.05, 0.15)
+                
+            else:
+                # Development/testing environments
+                logger.debug("PHASE 1 FIX: Applying development handshake stabilization")
+                await windows_safe_sleep(0.05)  # 50ms for development
+                
+        except Exception as e:
+            logger.error(f"PHASE 1 FIX: Error applying handshake timing fix: {e}")
+    
+    async def _authenticate_with_retry(
+        self, 
+        websocket: WebSocket, 
+        e2e_context: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None,
+        max_retries: int = 3,
+        retry_delays: List[float] = [0.1, 0.2, 0.5]
+    ) -> Tuple[Any, Optional[UserExecutionContext]]:
+        """
+        PHASE 1 FIX: Authenticate WebSocket with retry mechanism for race condition protection.
+        
+        This method implements retry logic to handle transient authentication failures
+        that occur due to race conditions in Cloud Run environments.
+        
+        Args:
+            websocket: WebSocket connection object
+            e2e_context: Optional E2E testing context
+            max_retries: Maximum number of retry attempts
+            retry_delays: Delay in seconds between retries
+            
+        Returns:
+            Tuple of (auth_result, user_context)
+        """
+        last_error = None
+        retry_count = 0
+        
+        for attempt in range(max_retries + 1):  # +1 for initial attempt
+            try:
+                logger.debug(f"PHASE 1 FIX: Authentication attempt {attempt + 1}/{max_retries + 1}")
+                
+                # Use SSOT authentication service
+                # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
+                auth_result, user_context = await self._auth_service.authenticate_websocket(
+                    websocket, 
+                    e2e_context=e2e_context,
+                    preliminary_connection_id=preliminary_connection_id
+                )
+                
+                # If successful, return immediately
+                if auth_result.success:
+                    if attempt > 0:
+                        logger.info(f"PHASE 1 FIX: Authentication succeeded on retry attempt {attempt + 1}")
+                    return auth_result, user_context
+                
+                # If not successful, check if retry is appropriate
+                if attempt < max_retries and self._should_retry_auth_failure(auth_result):
+                    retry_count += 1
+                    delay = retry_delays[min(attempt, len(retry_delays) - 1)]
+                    
+                    logger.warning(f"PHASE 1 FIX: Authentication failed (attempt {attempt + 1}), retrying in {delay}s: {auth_result.error}")
+                    
+                    # Import Windows-safe sleep
+                    from netra_backend.app.core.windows_asyncio_safe import windows_safe_sleep
+                    await windows_safe_sleep(delay)
+                    
+                    # Re-validate handshake before retry
+                    handshake_valid = await self._validate_websocket_handshake_timing(websocket)
+                    if not handshake_valid:
+                        await self._apply_handshake_timing_fix(websocket)
+                    
+                    last_error = auth_result
+                    continue
+                else:
+                    # Final failure or non-retryable error
+                    logger.error(f"PHASE 1 FIX: Authentication failed after {attempt + 1} attempts: {auth_result.error}")
+                    return auth_result, user_context
+                    
+            except Exception as e:
+                logger.error(f"PHASE 1 FIX: Exception during authentication attempt {attempt + 1}: {e}")
+                
+                # Check if we should retry for exceptions
+                if attempt < max_retries and self._should_retry_auth_exception(e):
+                    retry_count += 1
+                    delay = retry_delays[min(attempt, len(retry_delays) - 1)]
+                    logger.warning(f"PHASE 1 FIX: Retrying after exception in {delay}s")
+                    
+                    from netra_backend.app.core.windows_asyncio_safe import windows_safe_sleep
+                    await windows_safe_sleep(delay)
+                    
+                    last_error = e
+                    continue
+                else:
+                    # Create failure result for non-retryable exceptions
+                    from netra_backend.app.services.unified_authentication_service import AuthResult
+                    auth_result = AuthResult(
+                        success=False,
+                        error=f"Authentication exception after {attempt + 1} attempts: {str(e)}",
+                        error_code="AUTH_RETRY_EXHAUSTED"
+                    )
+                    return auth_result, None
+        
+        # Should not reach here, but handle gracefully
+        logger.error("PHASE 1 FIX: Authentication retry logic reached unexpected state")
+        from netra_backend.app.services.unified_authentication_service import AuthResult
+        auth_result = AuthResult(
+            success=False,
+            error="Authentication retry logic error",
+            error_code="AUTH_RETRY_ERROR"
+        )
+        return auth_result, None
+    
+    def _should_retry_auth_failure(self, auth_result: Any) -> bool:
+        """
+        PHASE 1 FIX: Determine if authentication failure should be retried.
+        
+        Args:
+            auth_result: Failed authentication result
+            
+        Returns:
+            True if failure is retryable, False otherwise
+        """
+        if not auth_result or not hasattr(auth_result, 'error_code'):
+            return False
+        
+        # Retry these transient error codes
+        retryable_errors = {
+            "WEBSOCKET_AUTH_ERROR",
+            "AUTH_SERVICE_ERROR", 
+            "VALIDATION_TIMEOUT",
+            "CONNECTION_UNSTABLE",
+            "HANDSHAKE_INCOMPLETE",
+            "TEMPORARY_UNAVAILABLE"
+        }
+        
+        return auth_result.error_code in retryable_errors
+    
+    def _should_retry_auth_exception(self, exception: Exception) -> bool:
+        """
+        PHASE 1 FIX: Determine if authentication exception should be retried.
+        
+        Args:
+            exception: Exception that occurred during authentication
+            
+        Returns:
+            True if exception is retryable, False otherwise
+        """
+        # Retry for certain types of exceptions that might be transient
+        retryable_exception_types = (
+            ConnectionError,
+            TimeoutError,
+            asyncio.TimeoutError,
+        )
+        
+        return isinstance(exception, retryable_exception_types)
+    
     def get_websocket_auth_stats(self) -> Dict[str, Any]:
         """Get WebSocket authentication statistics for monitoring."""
         success_rate = (self._websocket_auth_successes / max(1, self._websocket_auth_attempts)) * 100
@@ -826,7 +1081,8 @@ def get_websocket_authenticator() -> UnifiedWebSocketAuthenticator:
 
 async def authenticate_websocket_ssot(
     websocket: WebSocket, 
-    e2e_context: Optional[Dict[str, Any]] = None
+    e2e_context: Optional[Dict[str, Any]] = None,
+    preliminary_connection_id: Optional[str] = None
 ) -> WebSocketAuthResult:
     """
     SSOT WebSocket authentication with E2E bypass support.
@@ -837,12 +1093,13 @@ async def authenticate_websocket_ssot(
     Args:
         websocket: WebSocket connection object
         e2e_context: Optional E2E testing context for bypass support
+        preliminary_connection_id: Optional preliminary connection ID to preserve state machine continuity
         
     Returns:
         WebSocketAuthResult with authentication outcome
     """
     authenticator = get_websocket_authenticator()
-    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context)
+    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context, preliminary_connection_id=preliminary_connection_id)
 
 
 # Standalone function for backward compatibility with tests

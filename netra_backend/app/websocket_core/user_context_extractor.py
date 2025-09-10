@@ -412,8 +412,15 @@ class UserContextExtractor:
             # Generate request ID using SSOT (unique per connection)
             request_id = UnifiedIdGenerator.generate_base_id("ws_req", True, 8)
             
-            # Generate WebSocket client ID using SSOT (unique per WebSocket connection)
-            websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id, connection_timestamp)
+            # PASS-THROUGH FIX: Generate WebSocket client ID using preliminary_connection_id if provided
+            if preliminary_connection_id:
+                # Use provided preliminary connection ID to preserve state machine continuity
+                websocket_client_id = preliminary_connection_id
+                logger.info(f"PASS-THROUGH FIX: Using preliminary_connection_id {preliminary_connection_id} for context creation")
+            else:
+                # Generate WebSocket client ID using SSOT (unique per WebSocket connection)
+                websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id, connection_timestamp)
+                logger.debug(f"Generated new websocket_client_id: {websocket_client_id}")
             
             # Create UserExecutionContext
             user_context = UserExecutionContext(
@@ -449,6 +456,7 @@ class UserContextExtractor:
         Args:
             websocket: WebSocket connection object
             additional_metadata: Additional context metadata
+            preliminary_connection_id: Optional preliminary connection ID to preserve state machine continuity
             
         Returns:
             Tuple of (UserExecutionContext, auth_info_dict)
@@ -599,7 +607,8 @@ def get_user_context_extractor() -> UserContextExtractor:
 
 async def extract_websocket_user_context(
     websocket: WebSocket,
-    additional_metadata: Optional[Dict[str, Any]] = None
+    additional_metadata: Optional[Dict[str, Any]] = None,
+    preliminary_connection_id: Optional[str] = None
 ) -> Tuple[UserExecutionContext, Dict[str, Any]]:
     """
     Convenience function to extract user context from WebSocket.
@@ -610,6 +619,7 @@ async def extract_websocket_user_context(
     Args:
         websocket: WebSocket connection object
         additional_metadata: Additional context metadata
+        preliminary_connection_id: Optional preliminary connection ID to preserve state machine continuity
         
     Returns:
         Tuple of (UserExecutionContext, auth_info_dict)
@@ -618,7 +628,7 @@ async def extract_websocket_user_context(
         HTTPException: If authentication fails
     """
     extractor = get_user_context_extractor()
-    return await extractor.extract_user_context_from_websocket(websocket, additional_metadata)
+    return await extractor.extract_user_context_from_websocket(websocket, additional_metadata, preliminary_connection_id)
 
 
 class WebSocketUserContextExtractor(UserContextExtractor):
