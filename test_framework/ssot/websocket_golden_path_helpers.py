@@ -44,7 +44,7 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig
-from test_framework.ssot.agent_event_validators import (
+from netra_backend.app.websocket_core.event_validator import (
     AgentEventValidator, 
     AgentEventValidationResult,
     WebSocketEventMessage,
@@ -495,7 +495,7 @@ class WebSocketGoldenPathHelper:
                 validation_result = self.event_validator.perform_full_validation()
             else:
                 # Fallback validation if validator not initialized
-                from test_framework.ssot.agent_event_validators import validate_agent_events
+                from netra_backend.app.websocket_core.event_validator import validate_agent_events
                 validation_result = validate_agent_events(
                     [event.to_dict() for event in captured_events],
                     user_context=user_context,

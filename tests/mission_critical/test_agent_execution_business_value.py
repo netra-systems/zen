@@ -40,7 +40,7 @@ from typing import Any, Dict, List, Optional
 
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
-from test_framework.ssot.agent_event_validators import (
+from netra_backend.app.websocket_core.event_validator import (
     AgentEventValidator,
     assert_critical_events_received,
     get_critical_event_types,

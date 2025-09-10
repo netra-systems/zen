@@ -61,7 +61,7 @@ except ImportError as e:
 
 try:
     # SSOT Framework implementation (legacy)
-    from test_framework.ssot.agent_event_validators import (
+    from netra_backend.app.websocket_core.event_validator import (
         AgentEventValidator as SsotFrameworkEventValidator,
         AgentEventValidationResult as SsotFrameworkValidationResult,
         CriticalAgentEventType as SsotFrameworkCriticalAgentEventType

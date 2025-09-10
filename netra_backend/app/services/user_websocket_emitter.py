@@ -20,7 +20,7 @@ from typing import Dict, Any, Optional, List
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
-from netra_backend.app.services.websocket_error_validator import get_websocket_validator, EventCriticality
+from netra_backend.app.websocket_core.event_validator import get_websocket_validator, EventCriticality
 
 logger = central_logger.get_logger(__name__)
 
