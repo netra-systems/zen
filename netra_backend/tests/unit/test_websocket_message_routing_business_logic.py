@@ -21,7 +21,7 @@ from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
-from netra_backend.app.websocket_core.message_queue import WebSocketMessageQueue
+from netra_backend.app.websocket_core.message_queue import MessageQueue
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 from netra_backend.app.websocket_core.batch_message_handler import BatchMessageHandler
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
@@ -33,7 +33,14 @@ class TestWebSocketMessageRoutingBusinessLogic:
     @pytest.fixture
     def message_queue(self):
         """Create WebSocket message queue for testing."""
-        return WebSocketMessageQueue(max_size=1000)
+        from shared.types.core_types import ConnectionID, UserID
+        test_connection_id = ConnectionID(str(uuid.uuid4()))
+        test_user_id = UserID(str(uuid.uuid4()))
+        return MessageQueue(
+            connection_id=test_connection_id,
+            user_id=test_user_id,
+            max_size=1000
+        )
     
     @pytest.fixture
     def connection_manager(self):

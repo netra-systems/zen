@@ -814,6 +814,134 @@ async def authenticate_websocket_ssot(
     return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context)
 
 
+# Standalone function for backward compatibility with tests
+async def authenticate_websocket_connection(
+    websocket: WebSocket, 
+    e2e_context: Optional[Dict[str, Any]] = None
+) -> WebSocketAuthResult:
+    """
+    Standalone WebSocket authentication function for backward compatibility.
+    
+    This function provides backward compatibility for tests that expect a
+    standalone authenticate_websocket_connection function while delegating
+    to the SSOT UnifiedWebSocketAuthenticator.
+    
+    Args:
+        websocket: WebSocket connection object
+        e2e_context: Optional E2E testing context for bypass support
+        
+    Returns:
+        WebSocketAuthResult with authentication outcome
+    """
+    authenticator = get_websocket_authenticator()
+    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context)
+
+
+# Backward compatibility functions for tests
+def create_authenticated_user_context(
+    auth_result: Any,
+    websocket: WebSocket,
+    thread_id: Optional[str] = None,
+    **kwargs
+) -> UserExecutionContext:
+    """
+    Backward compatibility function for creating authenticated user contexts.
+    
+    This function provides test compatibility while delegating to SSOT UserExecutionContext
+    creation patterns used throughout the system.
+    
+    Args:
+        auth_result: Authentication result with user data
+        websocket: WebSocket connection object  
+        thread_id: Optional thread ID for context
+        **kwargs: Additional context parameters
+        
+    Returns:
+        UserExecutionContext instance
+    """
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+    
+    # Generate IDs using SSOT ID manager
+    id_manager = UnifiedIDManager()
+    
+    # Generate thread_id first since run_id requires it
+    resolved_thread_id = thread_id or id_manager.generate_thread_id()
+    
+    # Build agent_context with email and other auth data (not direct constructor params)
+    agent_context = kwargs.get('agent_context', {})
+    agent_context.update({
+        'email': getattr(auth_result, 'email', 'test@example.com'),
+        'permissions': getattr(auth_result, 'permissions', [])
+    })
+    
+    # Add subscription tier to agent context if available
+    if hasattr(auth_result, 'subscription_tier'):
+        agent_context['subscription_tier'] = auth_result.subscription_tier
+    
+    # Import IDType for proper enum usage
+    from netra_backend.app.core.unified_id_manager import IDType
+    
+    # Create user context with SSOT pattern matching UserExecutionContext signature
+    user_context = UserExecutionContext(
+        user_id=getattr(auth_result, 'user_id', str(uuid.uuid4())),
+        thread_id=resolved_thread_id,
+        run_id=id_manager.generate_run_id(resolved_thread_id),
+        websocket_client_id=id_manager.generate_id(IDType.WEBSOCKET, prefix="ws", context={"test": True}),
+        request_id=id_manager.generate_id(IDType.REQUEST, prefix="req", context={"test": True}),
+        agent_context=agent_context,
+        **{k: v for k, v in kwargs.items() if k not in ['agent_context', 'email', 'permissions']}
+    )
+        
+    return user_context
+
+
+async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[str, Any]]:
+    """
+    Backward compatibility function for token validation business logic.
+    
+    This function provides test compatibility while delegating to SSOT authentication
+    service for actual token validation.
+    
+    Args:
+        token: JWT token to validate
+        
+    Returns:
+        Dictionary with user data if valid, None if invalid
+    """
+    try:
+        if not token or not token.strip():
+            return None
+            
+        # Use SSOT authentication service for validation
+        auth_service = get_unified_auth_service()
+        
+        # Create minimal authentication context for token validation
+        context = AuthenticationContext(
+            method=AuthenticationMethod.JWT,
+            source="websocket_business_logic_test",
+            metadata={"token": token}
+        )
+        
+        # Validate token using SSOT service
+        auth_result = await auth_service.authenticate(token, context)
+        
+        if not auth_result.success:
+            logger.debug(f"Token validation failed: {auth_result.error}")
+            return None
+            
+        # Return user data in expected format for tests
+        return {
+            'sub': auth_result.user_id,
+            'email': auth_result.email,
+            'exp': auth_result.validated_at.timestamp() + 3600 if auth_result.validated_at else 9999999999,
+            'permissions': auth_result.permissions or []
+        }
+        
+    except Exception as e:
+        logger.error(f"Token validation error: {e}")
+        return None
+
+
 # Legacy aliases for backward compatibility
 WebSocketAuthenticator = UnifiedWebSocketAuthenticator
 UnifiedWebSocketAuth = UnifiedWebSocketAuthenticator
@@ -825,5 +953,8 @@ __all__ = [
     "UnifiedWebSocketAuth",  # Legacy alias
     "WebSocketAuthResult", 
     "get_websocket_authenticator",
-    "authenticate_websocket_ssot"
+    "authenticate_websocket_ssot",
+    "authenticate_websocket_connection",  # Backward compatibility
+    "create_authenticated_user_context",  # Backward compatibility
+    "validate_websocket_token_business_logic"  # Backward compatibility
 ]

@@ -318,8 +318,11 @@ class IsolatedEnvironment:
         # CRITICAL FIX: Only check for pytest if we're actually running pytest
         # Don't trigger test mode just because pytest is imported as a dependency
         if 'pytest' in sys.modules and hasattr(sys.modules['pytest'], 'main'):
-            # Only consider it a test if pytest is actively running
-            if hasattr(sys, '_pytest_running') or os.environ.get('PYTEST_CURRENT_TEST'):
+            # Only consider it a test if pytest is actively running a test
+            if os.environ.get('PYTEST_CURRENT_TEST'):
+                return True
+            # Additional check: if pytest is actively executing (not just imported)
+            if hasattr(sys, '_pytest_running') and sys._pytest_running:
                 return True
         
         # Check for test environment variables using internal access to avoid recursion
@@ -329,11 +332,17 @@ class IsolatedEnvironment:
             'TEST_MODE'
         ]
         
-        # CRITICAL: Always use os.environ for test detection to avoid chicken-and-egg during initialization
-        # During initialization, _isolation_enabled might be True but _isolated_vars is empty
-        # We must use direct os.environ access here, not isolated vars or self.get()
+        # CRITICAL: When isolation is enabled, we need to check isolated vars first
+        # This ensures test context detection respects isolation boundaries for testing scenarios
         for indicator in test_indicators:
-            value = os.environ.get(indicator, '')
+            # In isolation mode, check isolated vars first, then fall back to os.environ
+            if self._isolation_enabled and indicator in self._isolated_vars:
+                value = self._isolated_vars[indicator]
+                if value == "__UNSET__":
+                    continue  # Variable was explicitly unset in isolation
+            else:
+                # Use os.environ for non-isolated vars or when isolation is disabled
+                value = os.environ.get(indicator, '')
             
             # PYTEST_CURRENT_TEST contains test identifier, not boolean value
             if indicator == 'PYTEST_CURRENT_TEST':
@@ -345,8 +354,17 @@ class IsolatedEnvironment:
                 if value.lower() in ['true', '1', 'yes', 'on']:
                     return True
         
-        # Check if ENVIRONMENT is set to testing (direct access, not via self.get())
-        env_value = os.environ.get('ENVIRONMENT', '').lower()
+        # Check if ENVIRONMENT is set to testing
+        # In isolation mode, check isolated vars first
+        if self._isolation_enabled and 'ENVIRONMENT' in self._isolated_vars:
+            env_value = self._isolated_vars['ENVIRONMENT']
+            if env_value != "__UNSET__":
+                env_value = env_value.lower()
+            else:
+                env_value = ''
+        else:
+            env_value = os.environ.get('ENVIRONMENT', '').lower()
+            
         if env_value in ['test', 'testing']:
             return True
         

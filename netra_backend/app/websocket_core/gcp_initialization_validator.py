@@ -136,7 +136,7 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['redis'] = ServiceReadinessCheck(
             name='redis',
             validator=self._validate_redis_readiness,
-            timeout_seconds=30.0 if self.is_gcp_environment else 10.0,  # BALANCED: 30.0s for staging stability while preventing health check timeouts
+            timeout_seconds=3.0 if self.is_gcp_environment else 10.0,  # FIXED: 3.0s for staging health checks, prevents /health/ready timeout
             retry_count=4,  # Balanced retry count for reliability vs speed
             retry_delay=1.5 if self.is_gcp_environment else 1.0,
             is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,  # CRITICAL FIX: Non-critical in staging to break circular dependency
