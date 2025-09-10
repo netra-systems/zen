@@ -44,10 +44,14 @@ except ImportError:
     UNIFIED_TOOL_DISPATCHER_AVAILABLE = False
 
 try:
-    from netra_backend.app.services.user_execution_context import UserExecutionContext
+    from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext
     USER_EXECUTION_CONTEXT_AVAILABLE = True
 except ImportError:
-    USER_EXECUTION_CONTEXT_AVAILABLE = False
+    try:
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        USER_EXECUTION_CONTEXT_AVAILABLE = True
+    except ImportError:
+        USER_EXECUTION_CONTEXT_AVAILABLE = False
 
 
 class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
