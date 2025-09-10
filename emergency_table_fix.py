@@ -7,7 +7,7 @@ import sys
 # Add the app directory to Python path to use existing database utilities
 sys.path.insert(0, '/app')
 
-from netra_backend.app.core.database_manager import DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 
 async def fix_staging_tables():
     """Create missing tables directly using existing database manager."""

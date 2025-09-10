@@ -165,7 +165,7 @@ def clear_test_databases():
         db_url = env.get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/netra_test")
         if "test" in db_url.lower():  # Safety check - only clear test databases
             try:
-                from netra_backend.app.services.database.database_manager import DatabaseManager
+                from netra_backend.app.db.database_manager import DatabaseManager
                 if DatabaseManager.validate_base_url():
                     print("Database cleared via DatabaseManager")
             except Exception as e:
