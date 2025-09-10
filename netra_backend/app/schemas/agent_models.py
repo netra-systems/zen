@@ -138,6 +138,11 @@ class DeepAgentState(BaseModel):
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     quality_metrics: Dict[str, Any] = Field(default_factory=dict)
     
+    # PHASE 1 BACKWARDS COMPATIBILITY FIX: Add agent_context for UserExecutionContext compatibility
+    # This field provides backwards compatibility with execution code that expects agent_context
+    # from the UserExecutionContext migration. Should be removed in Phase 2 after proper migration.
+    agent_context: Dict[str, Any] = Field(default_factory=dict)
+    
     @field_validator('metadata', mode='before')
     @classmethod
     def validate_metadata(cls, v: Union[Dict, AgentMetadata]) -> AgentMetadata:
