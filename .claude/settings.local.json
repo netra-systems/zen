@@ -56,7 +56,8 @@
       "Bash(gcloud redis instances list:*)",
       "Bash(gcloud compute networks vpc-access connectors list:*)",
       "Bash(echo:*)",
-      "Bash(gcloud secrets list:*)"
+      "Bash(gcloud secrets list:*)",
+      "Bash(gcloud secrets versions access:*)"
     ],
     "deny": [],
     "ask": []

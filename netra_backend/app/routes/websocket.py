@@ -185,20 +185,25 @@ async def _initialize_connection_state(websocket: WebSocket, environment: str, s
     
     try:
         
-        # Generate environment-specific connection_id with consistent format
-        timestamp = int(time.time() * 1000)
-        websocket_id = id(websocket)
+        # ISSUE #174 FIX: Use SSOT Connection ID Manager to generate unified connection identity
+        # This eliminates dual ID systems and provides single connection identity throughout lifecycle
+        from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager
         
+        # Create unified connection identity using SSOT manager
+        connection_manager = get_connection_id_manager()
+        connection_identity = connection_manager.create_connection_identity(environment)
+        preliminary_connection_id = connection_identity.connection_id
+        
+        # Set temporary user based on environment (for state machine initialization)
         if environment == "testing":
-            preliminary_connection_id = f"e2e_{timestamp}_{websocket_id}"
             temp_user_id = ensure_user_id("staging-e2e-user-test")
         elif environment in ["staging", "production"]:
-            preliminary_connection_id = f"ws_{timestamp}_{websocket_id}"
             temp_user_id = ensure_user_id("staging-connection-init")
         else:
             # Development and other environments
-            preliminary_connection_id = f"ws_dev_{timestamp}_{websocket_id}"
             temp_user_id = ensure_user_id("dev-connection-init")
+        
+        logger.debug(f"✅ ISSUE #174 FIX: Created unified connection identity {preliminary_connection_id} using SSOT manager")
         
         # Register connection with state registry
         state_machine = state_registry.register_connection(preliminary_connection_id, temp_user_id)
@@ -257,6 +262,17 @@ async def websocket_endpoint(websocket: WebSocket):
     user_id: Optional[str] = None
     authenticated = False
     
+    # ISSUE #172 FIX: Initialize state_registry at function scope to prevent NameError in nested blocks
+    # This ensures state_registry is available throughout the entire websocket_endpoint function
+    from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+    try:
+        state_registry = get_connection_state_registry()
+        logger.debug(f"✅ ISSUE #172 FIX: state_registry initialized at function scope")
+    except Exception as e:
+        logger.error(f"❌ CRITICAL ERROR: Failed to initialize state_registry at function scope: {e}")
+        await websocket.close(code=1011, reason="Connection state initialization failed")
+        return
+    
     try:
         # CRITICAL SECURITY FIX: Check environment early for security decisions
         from shared.isolated_environment import get_env
@@ -312,16 +328,7 @@ async def websocket_endpoint(websocket: WebSocket):
         # All authentication is now handled by the unified authentication service after WebSocket acceptance
         logger.info(f"🔒 SSOT COMPLIANCE: Skipping pre-connection auth validation in {environment} (handled by unified service)")
         
-        # CRITICAL FIX: Initialize state_registry in proper function scope to prevent NameError
-        # This fixes the "state_registry is not defined" scope bug causing 100% connection failures
-        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
-        try:
-            state_registry = get_connection_state_registry()
-            logger.debug(f"✅ CRITICAL FIX: state_registry initialized successfully in websocket_endpoint scope")
-        except Exception as e:
-            logger.error(f"❌ CRITICAL ERROR: Failed to initialize state_registry: {e}")
-            await websocket.close(code=1011, reason="Connection state initialization failed")
-            return
+        # ISSUE #172 FIX: state_registry already initialized at function scope - no need to re-initialize
         
         # Prepare subprotocol handling
         subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
@@ -596,6 +603,22 @@ async def websocket_endpoint(websocket: WebSocket):
         auth_info = auth_result.auth_result.to_dict()
         
         logger.info(f"[OK] SSOT AUTHENTICATION SUCCESS: user={user_context.user_id[:8]}..., client_id={user_context.websocket_client_id}")
+        
+        # ISSUE #174 FIX: Update connection identity in SSOT manager with authenticated user information
+        # This binds the user to the connection identity and maintains single connection ID throughout lifecycle
+        from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager
+        connection_manager = get_connection_id_manager()
+        auth_registered = connection_manager.register_authenticated_connection(
+            preliminary_connection_id,
+            user_context.user_id,
+            user_context.websocket_client_id,
+            getattr(user_context, 'thread_id', None)
+        )
+        
+        if auth_registered:
+            logger.debug(f"✅ ISSUE #174 FIX: Connection {preliminary_connection_id} authenticated and registered in SSOT manager")
+        else:
+            logger.error(f"❌ ISSUE #174 ERROR: Failed to register authenticated connection {preliminary_connection_id} in SSOT manager")
         
         # CRITICAL FIX: Create isolated WebSocket manager with enhanced error handling
         # This prevents FactoryInitializationError from causing 1011 WebSocket errors
@@ -1405,14 +1428,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 # Get the existing state machine created during initialization
                 from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine, get_connection_state_registry
                 
-                # CRITICAL SCOPE FIX: Re-initialize state_registry to prevent NameError at lines 1433, 1452
-                # This fixes the scope bug where state_registry is out of scope in nested exception handlers
-                try:
-                    state_registry = get_connection_state_registry()
-                    logger.debug(f"✅ SCOPE FIX: state_registry re-initialized successfully in try block scope")
-                except Exception as registry_init_error:
-                    logger.error(f"❌ SCOPE FIX FAILED: Could not re-initialize state_registry: {registry_init_error}")
-                    state_registry = None  # Defensive handling for graceful degradation
+                # ISSUE #172 FIX: state_registry available at function scope - no re-initialization needed
                 
                 # PASS-THROUGH VALIDATION: Ensure connection IDs match (they should with our fix)
                 if connection_id != preliminary_connection_id:
@@ -1439,13 +1455,9 @@ async def websocket_endpoint(websocket: WebSocket):
                         logger.warning(f"⚠️ EMERGENCY RECOVERY: Using existing state machine {preliminary_connection_id} despite ID mismatch")
                     else:
                         logger.critical(f"❌ EMERGENCY RECOVERY FAILED: No state machine found for {preliminary_connection_id}")
-                        # CRITICAL SCOPE FIX: Defensive handling for state_registry scope issue
-                        if state_registry:
-                            final_state_machine = state_registry.register_connection(preliminary_connection_id, user_id)
-                            logger.debug(f"✅ SCOPE FIX: Successfully used state_registry at line 1442")
-                        else:
-                            logger.error(f"❌ SCOPE FIX FAILED: state_registry is None, cannot register connection {preliminary_connection_id}")
-                            final_state_machine = None  # Graceful degradation
+                        # ISSUE #172 FIX: state_registry guaranteed available at function scope
+                        final_state_machine = state_registry.register_connection(preliminary_connection_id, user_id)
+                        logger.debug(f"✅ ISSUE #172 FIX: Successfully used state_registry with guaranteed scope")
                 else:
                     # SUCCESS: Pass-through strategy worked correctly
                     logger.info(f"✅ PASS-THROUGH SUCCESS: connection_id '{connection_id}' == preliminary_connection_id '{preliminary_connection_id}'")
@@ -1464,14 +1476,10 @@ async def websocket_endpoint(websocket: WebSocket):
                     else:
                         # This should not happen but handle gracefully
                         logger.warning(f"⚠️ UNEXPECTED: No existing state machine found for {preliminary_connection_id} despite pass-through success")
-                        # CRITICAL SCOPE FIX: Defensive handling for state_registry scope issue
-                        if state_registry:
-                            final_state_machine = state_registry.register_connection(connection_id, user_id)
-                            websocket.connection_id = connection_id
-                            logger.debug(f"✅ SCOPE FIX: Successfully used state_registry at line 1461")
-                        else:
-                            logger.error(f"❌ SCOPE FIX FAILED: state_registry is None, cannot register connection {connection_id}")
-                            final_state_machine = None  # Graceful degradation
+                        # ISSUE #172 FIX: state_registry guaranteed available at function scope
+                        final_state_machine = state_registry.register_connection(connection_id, user_id)
+                        websocket.connection_id = connection_id
+                        logger.debug(f"✅ ISSUE #172 FIX: Successfully used state_registry with guaranteed scope")
                 
                 # Transition to AUTHENTICATED state
                 if final_state_machine:
@@ -1756,6 +1764,27 @@ async def websocket_endpoint(websocket: WebSocket):
             
     except WebSocketDisconnect as e:
         logger.debug(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
+        
+        # ISSUE #174 FIX: Cleanup connection from SSOT Connection ID Manager
+        try:
+            from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager, ConnectionState
+            connection_manager = get_connection_id_manager()
+            
+            # Update connection state to disconnecting
+            if connection_id:
+                connection_manager.update_connection_state(
+                    connection_id, 
+                    ConnectionState.DISCONNECTING,
+                    {"disconnect_reason": e.reason, "disconnect_code": e.code}
+                )
+            
+            # Remove connection from SSOT registry
+            if connection_id and connection_manager.remove_connection(connection_id):
+                logger.debug(f"✅ ISSUE #174 CLEANUP: Connection {connection_id} removed from SSOT manager on disconnect")
+            else:
+                logger.warning(f"⚠️ ISSUE #174 CLEANUP: Could not remove connection {connection_id} from SSOT manager")
+        except Exception as cleanup_error:
+            logger.error(f"❌ ISSUE #174 ERROR: Failed to cleanup connection in SSOT manager: {cleanup_error}")
     
     except Exception as e:
         # ENHANCED EXCEPTION HANDLING: Component-specific error diagnosis and recovery
@@ -1764,6 +1793,27 @@ async def websocket_endpoint(websocket: WebSocket):
         )
         
         logger.error(f"WebSocket error: {e}", exc_info=True)
+        
+        # ISSUE #174 FIX: Cleanup connection from SSOT Connection ID Manager on error
+        try:
+            from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager, ConnectionState
+            connection_manager = get_connection_id_manager()
+            
+            # Update connection state to error
+            if connection_id:
+                connection_manager.update_connection_state(
+                    connection_id,
+                    ConnectionState.ERROR,
+                    {"error_message": str(e), "error_type": type(e).__name__}
+                )
+            
+            # Remove connection from SSOT registry
+            if connection_id and connection_manager.remove_connection(connection_id):
+                logger.debug(f"✅ ISSUE #174 CLEANUP: Connection {connection_id} removed from SSOT manager on error")
+            else:
+                logger.warning(f"⚠️ ISSUE #174 CLEANUP: Could not remove connection {connection_id} from SSOT manager")
+        except Exception as cleanup_error:
+            logger.error(f"❌ ISSUE #174 ERROR: Failed to cleanup connection in SSOT manager: {cleanup_error}")
         
         # Diagnose the error type and create specific error code
         logger.info("🔍 ERROR DIAGNOSIS: Analyzing exception for component-specific reporting...")
