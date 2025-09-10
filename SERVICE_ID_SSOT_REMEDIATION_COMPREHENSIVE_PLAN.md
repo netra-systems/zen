@@ -115,7 +115,10 @@ service_id = SERVICE_ID  # Or config fallback to SERVICE_ID
 ```
 
 ### 2.3 Backward Compatibility Strategy
-- **Environment Override:** Maintain `SERVICE_ID` environment variable support for staging/prod
+- **SSOT Pattern:** Replace `SERVICE_ID` environment variable with SSOT constant import:
+```python
+from shared.constants.service_identifiers import SERVICE_ID
+```
 - **Gradual Migration:** Start with lowest-risk changes to build confidence  
 - **Validation Points:** Run SSOT tests after each atomic change
 - **Rollback Ready:** Each change can be reverted independently
