@@ -154,10 +154,9 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
                     await db_session.rollback()
                     raise AssertionError(f"Database operation failed: {db_error}")
             
-            self.record_test_result(
+            self.record_metric(
                 "real_session_async_with_success",
-                "PASSED", 
-                "Real session with async with pattern works correctly"
+                "PASSED - Real session with async with pattern works correctly"
             )
             
         except Exception as e:
@@ -205,10 +204,9 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
                 # Ensure supervisor was never called due to session pattern failure
                 mock_supervisor.assert_not_called()
                 
-                self.record_test_result(
+                self.record_metric(
                     "websocket_supervisor_session_failure",
-                    "REPRODUCED",
-                    "WebSocket supervisor creation blocked by session pattern failure"
+                    "REPRODUCED - WebSocket supervisor creation blocked by session pattern failure"
                 )
                 
         except Exception as e:
@@ -255,10 +253,9 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
             assert session_created, "Session should have been created"
             assert session_closed, "Session should have been closed"
             
-            self.record_test_result(
+            self.record_metric(
                 "real_session_lifecycle_validation",
-                "PASSED",
-                "Real session lifecycle properly managed with async with pattern"
+                "PASSED - Real session lifecycle properly managed with async with pattern"
             )
             
         except Exception as e:
@@ -296,10 +293,9 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
             assert hasattr(session_context, '__aenter__')
             assert hasattr(session_context, '__aexit__')
             
-            self.record_test_result(
+            self.record_metric(
                 "session_factory_configuration",
-                "VALIDATED",
-                "Session factory correctly configured for integration testing"
+                "VALIDATED - Session factory correctly configured for integration testing"
             )
             
         except Exception as e:
@@ -320,8 +316,9 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
         
         # Log integration test completion
         print(f"\n=== Agent Handler DB Session Integration Tests Completed ===")
-        for result in getattr(self, '_test_results', []):
-            print(f"  {result}")
+        metrics = self.get_all_metrics()
+        for metric_name, metric_value in metrics.items():
+            print(f"  {metric_name}: {metric_value}")
         print("=" * 70)
 
 
