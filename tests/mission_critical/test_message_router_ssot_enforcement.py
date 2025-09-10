@@ -19,18 +19,21 @@ import inspect
 import os
 import ast
 import importlib.util
+import unittest
 from typing import Dict, List, Set, Optional, Any
 from pathlib import Path
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterSSOTEnforcement(SSotBaseTestCase):
+class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
     """Test that enforces Single Source of Truth for MessageRouter implementations."""
 
     def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        # Initialize SSotBaseTestCase (no super().setUp() needed)
+        if hasattr(super(), 'setUp'):
+            super().setUp()
         
         # Expected SSOT location after remediation
         self.canonical_path = "/netra_backend/app/websocket_core/handlers.py"
@@ -39,6 +42,10 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase):
         # Track multiple implementations
         self.discovered_routers: Dict[str, Dict[str, Any]] = {}
         self.violation_count = 0
+        
+        # Initialize logger
+        import logging
+        self.logger = logging.getLogger(__name__)
 
     def test_single_message_router_implementation_exists(self):
         """Test that only ONE MessageRouter implementation exists in the codebase.
