@@ -566,6 +566,7 @@ class FactoryMetrics:
 
 
 @dataclass
+# INTERNAL: Used by factory, not a public manager class
 class ManagerMetrics:
     """Metrics for individual WebSocket manager instances."""
     connections_managed: int = 0
@@ -587,6 +588,7 @@ class ManagerMetrics:
         }
 
 
+# INTERNAL: Used by factory, not a public manager class
 class ConnectionLifecycleManager:
     """
     Manages the lifecycle of WebSocket connections with automatic cleanup.
