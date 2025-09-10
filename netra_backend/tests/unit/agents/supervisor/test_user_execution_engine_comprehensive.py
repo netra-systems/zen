@@ -1395,6 +1395,8 @@ class TestUserExecutionEngineComprehensive:
                             "analysis_scope": "infrastructure_optimization"
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 elif agent_name == "data_analysis_agent":
                     business_result = AgentExecutionResult(
                         success=True,
@@ -1410,6 +1412,8 @@ class TestUserExecutionEngineComprehensive:
                             }
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 elif agent_name == "optimization_agent":
                     business_result = AgentExecutionResult(
                         success=True,
@@ -1438,6 +1442,8 @@ class TestUserExecutionEngineComprehensive:
                             "annual_savings_potential": 332400
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 elif agent_name == "report_generation_agent":
                     business_result = AgentExecutionResult(
                         success=True,
@@ -1459,8 +1465,13 @@ class TestUserExecutionEngineComprehensive:
                             "report_generated": True
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 
-                mock_core.execute_agent.return_value = business_result
+                # Make the mock return awaitable since agent_core.execute_agent is async
+                async def mock_execute_agent(*args, **kwargs):
+                    return business_result
+                mock_core.execute_agent.side_effect = mock_execute_agent
                 
                 # Execute agent
                 result = await user_execution_engine.execute_agent(context, state)

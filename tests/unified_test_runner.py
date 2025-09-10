@@ -155,6 +155,16 @@ from test_framework.cypress_runner import CypressTestRunner, CypressExecutionOpt
 from test_framework.ssot.orchestration import orchestration_config
 from test_framework.ssot.orchestration_enums import E2ETestCategory, ProgressOutputMode, OrchestrationMode
 
+# Service Orchestration integration (GitHub Issue #136)
+from test_framework.ssot.test_service_orchestrator import (
+    TestServiceOrchestrator, 
+    TestServiceConfig,
+    setup_mission_critical_services,
+    get_test_endpoints,
+    is_docker_environment,
+    should_skip_docker_tests
+)
+
 # Test Orchestrator integration - using SSOT config
 if orchestration_config.orchestrator_available:
     from test_framework.orchestration.test_orchestrator_agent import (
@@ -383,6 +393,75 @@ class UnifiedTestRunner:
             categories_to_run = self._determine_categories_to_run(args)
             e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
             running_e2e = bool(set(categories_to_run) & e2e_categories)
+            
+            # Service Orchestration (GitHub Issue #136) - Auto-start services if requested
+            service_info = None
+            if hasattr(args, 'auto_services') and args.auto_services:
+                try:
+                    print("[INFO] Auto-services enabled - setting up test services...")
+                    
+                    # Determine test category for service requirements
+                    test_category = getattr(args, 'service_category', None)
+                    if not test_category and categories_to_run:
+                        # Infer category from what's being run
+                        if 'mission_critical' in categories_to_run:
+                            test_category = 'mission_critical'
+                        elif 'integration' in categories_to_run:
+                            test_category = 'integration'
+                        elif 'websocket' in categories_to_run:
+                            test_category = 'websocket'
+                        else:
+                            test_category = categories_to_run[0] if categories_to_run else 'default'
+                    
+                    # Create service orchestrator
+                    service_config = TestServiceConfig(
+                        auto_start_services=True,
+                        wait_for_health=True,
+                        health_check_timeout=getattr(args, 'service_timeout', 60),
+                        fallback_to_staging=not getattr(args, 'prefer_staging', False)
+                    )
+                    
+                    orchestrator = TestServiceOrchestrator(service_config)
+                    
+                    # Setup services (this may start Docker containers)
+                    import asyncio
+                    if asyncio.get_event_loop().is_running():
+                        # We're in an async context - need to use thread
+                        import concurrent.futures
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(
+                                lambda: asyncio.run(orchestrator.setup_for_tests(test_category))
+                            )
+                            service_info = future.result(timeout=getattr(args, 'service_timeout', 60))
+                    else:
+                        # Safe to run async directly
+                        service_info = asyncio.run(orchestrator.setup_for_tests(test_category))
+                    
+                    # Store orchestrator for cleanup
+                    self.service_orchestrator = orchestrator
+                    
+                    # Display service status
+                    endpoints = service_info.get('endpoints', {})
+                    if endpoints:
+                        print("[SUCCESS] Test services ready!")
+                        for key, url in endpoints.items():
+                            print(f"   {key}: {url}")
+                        
+                        # Set environment variables for tests to use
+                        env = get_env()
+                        if 'backend_url' in endpoints:
+                            env.set('TEST_BACKEND_URL', endpoints['backend_url'], 'service_orchestrator')
+                        if 'websocket_url' in endpoints:
+                            env.set('TEST_WEBSOCKET_URL', endpoints['websocket_url'], 'service_orchestrator')
+                        if 'auth_url' in endpoints:
+                            env.set('TEST_AUTH_URL', endpoints['auth_url'], 'service_orchestrator')
+                    else:
+                        print("[WARNING] No service endpoints configured - tests may use fallback URLs")
+                        
+                except Exception as e:
+                    print(f"[ERROR] Service orchestration failed: {e}")
+                    print("[WARNING] Continuing with tests - they may fail if services not available")
+                    service_info = None
             
             # CRITICAL: Setup E2E Docker environment if running E2E tests
             if running_e2e and args.env != 'staging':
@@ -3075,6 +3154,39 @@ def main():
         "--rebuild-all",
         action="store_true",
         help="Rebuild all services, not just backend (default is backend only)"
+    )
+    
+    # Service Orchestration arguments (GitHub Issue #136)
+    service_group = parser.add_argument_group('Service Orchestration')
+    
+    service_group.add_argument(
+        "--auto-services",
+        action="store_true",
+        help="Automatically start required Docker services for tests (resolves localhost:8000 timeouts)"
+    )
+    
+    service_group.add_argument(
+        "--prefer-staging",
+        action="store_true", 
+        help="Prefer staging endpoints over local services when both available"
+    )
+    
+    service_group.add_argument(
+        "--service-timeout",
+        type=int,
+        default=60,
+        help="Timeout in seconds for service startup and health checks (default: 60)"
+    )
+    
+    service_group.add_argument(
+        "--no-service-cleanup",
+        action="store_true",
+        help="Don't cleanup services started by auto-services (useful for debugging)"
+    )
+    
+    service_group.add_argument(
+        "--service-category",
+        help="Override service requirements for specific test category (mission_critical, integration, etc.)"
     )
     
     # Add orchestrator arguments if available
