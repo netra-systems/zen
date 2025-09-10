@@ -1042,7 +1042,7 @@ class UserExecutionEngine:
                 success=False,
                 error=str(e),
                 duration=0.0,
-                state=None,
+                data=None,
                 metadata={
                     'user_id': execution_context.user_id,
                     'thread_id': execution_context.thread_id,

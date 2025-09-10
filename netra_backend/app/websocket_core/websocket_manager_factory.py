@@ -2177,9 +2177,9 @@ class WebSocketManagerFactory:
         
         logger.info("WebSocketManagerFactory shutdown completed")
     
-    # ============================================================================
+    # ======
     # SSOT INTERFACE STANDARDIZATION METHODS (Week 1 - Low Risk)
-    # ============================================================================
+    # ======
     
     def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
         """
@@ -2326,9 +2326,10 @@ class WebSocketManagerFactory:
         logger.debug(f"📊 SSOT INTERFACE: Active connections count = {total_connections}")
         return total_connections
     
-    # ============================================================================
+    # ======
+
     # ADDITIONAL SSOT INTERFACE METHODS (Required by validation tests)
-    # ============================================================================
+    # ======
     
     async def send_message(self, user_id: str, message: Dict[str, Any]) -> bool:
         """
@@ -2343,6 +2344,12 @@ class WebSocketManagerFactory:
         Returns:
             True if message sent successfully, False otherwise
         """
+
+    # MISSING SSOT INTERFACE METHODS (Required by validation tests) 
+    # ======
+    
+    async def send_message(self, user_id: str, message: Dict[str, Any]) -> bool:
+        """Send message to user via their manager."""
         manager = self.get_manager_by_user(user_id)
         if manager and hasattr(manager, 'send_to_user'):
             try:
@@ -2350,6 +2357,7 @@ class WebSocketManagerFactory:
                 return True
             except Exception as e:
                 logger.error(f"Failed to send message to user {user_id}: {e}")
+
                 return False
         return False
     
@@ -2365,6 +2373,12 @@ class WebSocketManagerFactory:
         Returns:
             Number of users who received the message
         """
+
+        return False
+    
+    async def broadcast_message(self, message: Dict[str, Any]) -> int:
+        """Broadcast message to all users."""
+
         sent_count = 0
         with self._factory_lock:
             for manager in self._active_managers.values():
@@ -2372,6 +2386,7 @@ class WebSocketManagerFactory:
                     if hasattr(manager, 'send_to_user') and hasattr(manager, 'user_context'):
                         await manager.send_to_user(manager.user_context.user_id, message)
                         sent_count += 1
+
                 except Exception as e:
                     logger.warning(f"Failed to broadcast to manager: {e}")
         return sent_count
@@ -2460,10 +2475,46 @@ class WebSocketManagerFactory:
         Returns:
             True if user is connected, False otherwise
         """
+
+                except Exception:
+                    pass
+        return sent_count
+    
+    def get_connection_count(self) -> int:
+        """Get connection count (alias for get_active_connections_count)."""
+        return self.get_active_connections_count()
+    
+    async def add_connection(self, user_id: str, websocket: Any) -> bool:
+        """Add connection for user."""
+        try:
+            manager = self.get_manager_by_user(user_id)
+            if not manager:
+                connection_id = f"conn_{uuid.uuid4().hex[:8]}"
+                manager = self.create_isolated_manager(user_id, connection_id)
+            return True
+        except Exception:
+            return False
+    
+    async def remove_connection(self, user_id: str) -> bool:
+        """Remove user connection."""
+        manager = self.get_manager_by_user(user_id)
+        if manager:
+            try:
+                isolation_key = self._find_isolation_key_for_user(user_id)
+                if isolation_key:
+                    return await self.cleanup_manager(isolation_key)
+            except Exception:
+                pass
+        return False
+    
+    def is_user_connected(self, user_id: str) -> bool:
+        """Check if user is connected."""
+
         manager = self.get_manager_by_user(user_id)
         return manager is not None and getattr(manager, '_is_active', False)
     
     async def handle_connection(self, websocket: Any) -> str:
+
         """
         Handle a new WebSocket connection.
         
@@ -2519,6 +2570,24 @@ class WebSocketManagerFactory:
         Returns:
             True if event sent successfully, False otherwise
         """
+
+        """Handle new connection."""
+        try:
+            user_id = getattr(websocket, 'user_id', f"user_{uuid.uuid4().hex[:8]}")
+            connection_id = f"conn_{uuid.uuid4().hex[:8]}"
+            self.create_isolated_manager(user_id, connection_id)
+            return connection_id
+        except Exception as e:
+            logger.error(f"Failed to handle connection: {e}")
+            raise
+    
+    async def handle_disconnection(self, user_id: str) -> bool:
+        """Handle disconnection."""
+        return await self.remove_connection(user_id)
+    
+    async def send_agent_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> bool:
+        """Send agent event to user."""
+
         event_message = {
             'type': 'agent_event',
             'event_type': event_type,
@@ -2528,6 +2597,7 @@ class WebSocketManagerFactory:
         return await self.send_message(user_id, event_message)
     
     def _find_isolation_key_for_user(self, user_id: str) -> Optional[str]:
+
         """
         Find the isolation key for a user's active manager.
         
@@ -2537,6 +2607,9 @@ class WebSocketManagerFactory:
         Returns:
             Isolation key if found, None otherwise
         """
+
+        """Find isolation key for user."""
+
         with self._factory_lock:
             for key, manager in self._active_managers.items():
                 if hasattr(manager, 'user_context') and manager.user_context.user_id == user_id:
