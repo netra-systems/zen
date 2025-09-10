@@ -44,6 +44,7 @@ from netra_backend.app.core.agent_execution_tracker import (
     ExecutionState
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
 
 logger = central_logger.get_logger(__name__)
 
@@ -354,7 +355,7 @@ class WebSocketExtension(ExecutionExtension):
 # UNIFIED EXECUTION ENGINE
 # ============================================================================
 
-class ExecutionEngine:
+class ExecutionEngine(IExecutionEngine):
     """Unified execution engine with composition pattern.
     
     This is the SSOT for all agent execution, consolidating functionality
@@ -364,6 +365,8 @@ class ExecutionEngine:
     - WebSocket event integration
     - Performance optimization
     - Fallback mechanisms
+    
+    Implements IExecutionEngine interface for SSOT compliance.
     """
     
     def __init__(
