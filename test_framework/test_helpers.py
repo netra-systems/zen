@@ -273,7 +273,7 @@ def create_test_database(db_name: str = "netra_test"):
         # Check if we're in test mode
         if env.get("ENVIRONMENT") == "test":
             # Use database manager for proper database creation
-            from netra_backend.app.services.database.database_manager import DatabaseManager
+            from netra_backend.app.db.database_manager import DatabaseManager
             if DatabaseManager.is_local_development():
                 print(f"Test database setup handled by DatabaseManager for: {db_name}")
             else:
