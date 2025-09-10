@@ -145,9 +145,9 @@ class MinimalFallbackManager:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=execution_time,
+            duration=execution_time,
             error=f"Agent execution failed: {str(error)}",
-            state=state,
+            data=state,
             metadata={
                 'fallback_result': True,
                 'original_error': str(error),
@@ -906,14 +906,14 @@ class UserExecutionEngine:
                 result={
                     "agent_name": context.agent_name,
                     "success": result.success,
-                    "duration_ms": result.execution_time * 1000 if result.execution_time else 0,
+                    "duration_ms": result.duration * 1000 if result.duration else 0,
                     "status": "completed" if result.success else "failed",
                     "user_isolated": True,
                     "user_id": self.context.user_id,
                     "engine_id": self.engine_id,
                     "error": result.error if not result.success and result.error else None
                 },
-                execution_time_ms=result.execution_time * 1000 if result.execution_time else 0
+                execution_time_ms=result.duration * 1000 if result.duration else 0
             )
             
             if not success:
@@ -928,9 +928,9 @@ class UserExecutionEngine:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=self.AGENT_EXECUTION_TIMEOUT,
+            duration=self.AGENT_EXECUTION_TIMEOUT,
             error=f"User agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-            state=None,
+            data=None,
             metadata={
                 'timeout': True,
                 'user_isolated': True,

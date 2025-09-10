@@ -51,33 +51,61 @@ logger = central_logger.get_logger(__name__)
 
 class WebSocketManagerAdapter:
     """
-    Adapter that provides the old singleton interface while using factory pattern internally.
+    DEPRECATED: Migration adapter that delegates to WebSocketManagerFactory.
     
-    This class maintains backward compatibility by:
-    1. Exposing the same interface as UnifiedWebSocketManager
-    2. Creating default UserExecutionContext for legacy calls
-    3. Managing isolated manager instances internally
-    4. Providing migration warnings and monitoring
+    This class is now just an alias for backward compatibility.
+    All functionality delegates to the canonical WebSocketManagerFactory.
     
-    SECURITY IMPROVEMENT: Even legacy usage is now secure because each adapter
-    instance creates isolated managers per user context.
+    DEPRECATION WARNING: This class will be removed in future versions.
+    Use WebSocketManagerFactory directly instead.
+    
+    SSOT COMPLIANCE: This ensures only one canonical factory exists.
     """
     
     def __init__(self):
-        """Initialize the migration adapter."""
+        """Initialize the migration adapter (DEPRECATED)."""
+        warnings.warn(
+            "WebSocketManagerAdapter is deprecated. Use WebSocketManagerFactory directly.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self._factory = get_websocket_manager_factory()
-        self._legacy_managers: Dict[str, IsolatedWebSocketManager] = {}
-        self._legacy_contexts: Dict[str, UserExecutionContext] = {}
-        self._legacy_lock = threading.RLock()
-        self._usage_warnings_shown: Set[str] = set()
         self._legacy_stats = {
             "singleton_calls": 0,
             "contexts_created": 0,
             "managers_created": 0,
-            "warnings_issued": 0
+            "warnings_issued": 1  # First warning already issued
         }
         
-        logger.info("WebSocketManagerAdapter initialized for singleton migration")
+        logger.warning("WebSocketManagerAdapter is DEPRECATED. Use WebSocketManagerFactory instead.")
+    
+    # ============================================================================
+    # DELEGATION METHODS (SSOT COMPLIANCE - Alias for WebSocketManagerFactory)
+    # ============================================================================
+    
+    def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
+        """Delegate to main factory (DEPRECATED)."""
+        warnings.warn("Use WebSocketManagerFactory.create_isolated_manager instead", DeprecationWarning)
+        return self._factory.create_isolated_manager(user_id, connection_id)
+    
+    def get_manager_by_user(self, user_id: str) -> Optional[IsolatedWebSocketManager]:
+        """Delegate to main factory (DEPRECATED)."""
+        warnings.warn("Use WebSocketManagerFactory.get_manager_by_user instead", DeprecationWarning)
+        return self._factory.get_manager_by_user(user_id)
+    
+    def get_active_connections_count(self) -> int:
+        """Delegate to main factory (DEPRECATED)."""
+        warnings.warn("Use WebSocketManagerFactory.get_active_connections_count instead", DeprecationWarning)
+        return self._factory.get_active_connections_count()
+    
+    def get_manager(self) -> IsolatedWebSocketManager:
+        """Create a default manager for legacy usage (DEPRECATED)."""
+        warnings.warn("get_manager() is deprecated. Use create_isolated_manager() instead", DeprecationWarning)
+        # Create a default manager for legacy usage
+        import uuid
+        user_id = f"legacy_user_{uuid.uuid4().hex[:8]}"
+        connection_id = f"legacy_conn_{uuid.uuid4().hex[:8]}"
+        return self._factory.create_isolated_manager(user_id, connection_id)
     
     def _show_migration_warning(self, method_name: str, caller_info: str = "") -> None:
         """Show migration warning once per call site."""
