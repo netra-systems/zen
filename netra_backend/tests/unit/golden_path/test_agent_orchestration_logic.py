@@ -194,8 +194,8 @@ class MockAgentOrchestrator:
         # Business logic: Always need data collection as foundation
         required_agents.append(AgentType.DATA_COLLECTION)
         
-        # Check for cost optimization keywords
-        cost_keywords = ["optimize", "reduce costs", "save money", "cost analysis", "efficiency"]
+        # Check for cost optimization keywords (using stem-based pattern matching)
+        cost_keywords = ["optim", "cost", "save money", "efficiency"]  # "optim" matches optimize/optimization, "cost" matches costs/reduce costs
         if any(keyword in request_lower for keyword in cost_keywords):
             required_agents.extend([
                 AgentType.DATA_ANALYSIS,
@@ -203,8 +203,8 @@ class MockAgentOrchestrator:
                 AgentType.REPORT_GENERATION
             ])
         
-        # Check for reporting keywords
-        report_keywords = ["report", "summary", "analysis", "insights", "recommendations"]
+        # Check for reporting keywords (expanded for better matching)
+        report_keywords = ["report", "summar", "analysis", "insights", "recommendations"]  # "summar" matches summary/summarize
         if any(keyword in request_lower for keyword in report_keywords) and AgentType.REPORT_GENERATION not in required_agents:
             required_agents.append(AgentType.DATA_ANALYSIS)  # Need analysis for meaningful reports
             required_agents.append(AgentType.REPORT_GENERATION)
