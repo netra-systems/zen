@@ -29,6 +29,11 @@ NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
 IT's OKAY TO DISABLE features not in GOLDEN PATH
 DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
 
+The #1 priority right now is that the users can login and complete getting a message back.
+The secondary items are database flows or other features.
+Even Auth can be more permissive for now (log issue in git for items temporarily bypassed)
+IT MUST allow allow the golden path through!!! (and keep logging errors for future work)
+
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
@@ -402,6 +407,12 @@ CHEATING ON TESTS = ABOMINATION
 CHEATING ON TESTS = ABOMINATION
 YOU MUST ULTRA THINK DEEPLY
 
+
+The #1 priority right now is that the users can login and complete getting a message back.
+The secondary items are database flows or other features.
+Even Auth can be more permissive for now (log issue in git for items temporarily bypassed)
+IT MUST allow allow the golden path through!!! (and keep logging errors for future work)
+
 **Cross-Reference Learnings:**
 
 -----
@@ -412,7 +423,6 @@ The `SPEC/*.xml` files are the **living source of truth** for system architectur
 
   * **Navigation:** Read [`LLM_MASTER_INDEX.md`](reports/LLM_MASTER_INDEX.md) before searching for files or functionality.
   * **Iterative Discovery:** Specs must evolve. If analysis reveals a better solution, propose a spec improvement.
-  * **Update Timing:** Review specs before work and update them immediately after validation.
   * **Learnings vs. Reports:** Learnings in `SPEC/*.xml` are permanent knowledge. Reports (`*.md`) are ephemeral work logs.
 
 ### 4.1. String Literals Index: Preventing Hallucination
@@ -422,9 +432,8 @@ This index is the SSOT for all platform-specific constants, paths, and identifie
   * **Index File:** `SPEC/generated/string_literals.json`
   * **Query Tool:** `scripts/query_string_literals.py`
   * **📚 Complete Documentation:** [`docs/string_literals_index.md`](docs/string_literals_index.md)
-  * **📖 Usage Guide:** [`docs/STRING_LITERALS_USAGE_GUIDE.md`](docs/STRING_LITERALS_USAGE_GUIDE.md)
 
-**🚨 CRITICAL PROTECTION: 11 mission-critical environment variables + 12 domain configurations cause CASCADE FAILURES if modified incorrectly!**
+**🚨 CRITICAL PROTECTION: mission-critical environment variables + domain configurations cause CASCADE FAILURES if modified incorrectly!**
 
 **Usage Requirements:**
 
@@ -668,5 +677,10 @@ KEEP CORE SYSTEM AS IS
 NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
 DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK!
 GOlDEN PATH = MUST WORK
+
+The #1 priority right now is the GOLDEN PATH that the users can login and complete getting a message back.
+The secondary items are database flows or other features.
+Even Auth can be more permissive for now (log issue in git for items temporarily bypassed)
+IT MUST allow allow the golden path through!!! (and keep logging errors for future work)
 
 **Final Reminder:** ULTRA THINK DEEPLY. CHEATING ON TESTS = ABOMINATION. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. YOU MUST ALWAYS SELF-REFLECT ON YOUR WORK AND SAVE IT IN UNIFIED REFLECTION JOURNAL. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**
