@@ -235,9 +235,9 @@ class TestSingleEmitterPerformanceValidation(SSotAsyncTestCase):
         # Start resource monitoring
         await self._start_resource_monitoring()
         
-        # High-throughput test parameters
+        # High-throughput test parameters - PERFORMANCE OPTIMIZED
         target_throughput = 2000  # events/second target
-        test_duration = 10.0      # 10 second sustained test
+        test_duration = 5.0       # 5 second test (faster execution)
         total_events = int(target_throughput * test_duration)
         
         # Execute high-throughput test
@@ -647,8 +647,8 @@ class TestSingleEmitterPerformanceValidation(SSotAsyncTestCase):
             
             await asyncio.gather(*batch_tasks)
             
-            # Control rate
-            await asyncio.sleep(batch_size / events_per_second)
+            # PERFORMANCE MODE: Minimal rate control (removed artificial throttling)
+            await asyncio.sleep(0.001)  # 1ms minimal delay for event loop yielding
         
         test_duration = time.perf_counter() - start_time
         

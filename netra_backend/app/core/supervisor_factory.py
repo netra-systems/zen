@@ -213,8 +213,9 @@ def validate_supervisor_components(
     if not llm_client:
         try:
             from netra_backend.app.llm.client_unified import ResilientLLMClient
-            from netra_backend.app.llm.llm_manager import LLMManager
-            llm_manager = LLMManager()  # Create a new instance for this supervisor
+            from netra_backend.app.llm.llm_manager import create_llm_manager
+            # SSOT FIX: Use factory pattern (no user context for validation)
+            llm_manager = create_llm_manager(None)  # Create validation instance
             llm_client = ResilientLLMClient(llm_manager)
         except Exception as e:
             missing_components.append(f"llm_client: {e}")
@@ -273,10 +274,16 @@ async def create_streaming_supervisor(
             try:
                 # Get required components for supervisor creation
                 
-                # Create LLM client
+                # Create LLM client - SSOT FIX: Use factory pattern with user isolation
                 from netra_backend.app.llm.client_unified import ResilientLLMClient
-                from netra_backend.app.llm.llm_manager import LLMManager
-                llm_manager = LLMManager()
+                from netra_backend.app.llm.llm_manager import create_llm_manager
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                user_context = UserExecutionContext(
+                    user_id=user_id,
+                    thread_id=thread_id,
+                    run_id=run_id
+                )
+                llm_manager = create_llm_manager(user_context)
                 llm_client = ResilientLLMClient(llm_manager)
                 
                 # Create WebSocket bridge using factory pattern
