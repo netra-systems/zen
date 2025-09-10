@@ -17,6 +17,17 @@ from pydantic import BaseModel, Field
 
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.logging_config import central_logger
+
+# Phase 2: Enhanced WebSocket Monitoring Integration 
+try:
+    from netra_backend.app.monitoring.websocket_monitoring_integration import (
+        monitoring_router as websocket_monitoring_router
+    )
+    WEBSOCKET_MONITORING_AVAILABLE = True
+    central_logger.get_logger(__name__).info("✅ WebSocket monitoring integration imported successfully")
+except ImportError as e:
+    WEBSOCKET_MONITORING_AVAILABLE = False
+    central_logger.get_logger(__name__).warning(f"⚠️ WebSocket monitoring not available: {e}")
 from netra_backend.app.services.database.connection_monitor import (
     connection_metrics,
     get_connection_status,
@@ -620,3 +631,49 @@ async def get_dashboard_config(
     except Exception as e:
         logger.error(f"Error getting dashboard config: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get dashboard config: {str(e)}")
+
+# =============================================================================
+# PHASE 2: ENHANCED WEBSOCKET MONITORING INTEGRATION
+# =============================================================================
+
+# Include WebSocket monitoring endpoints when available
+if WEBSOCKET_MONITORING_AVAILABLE:
+    router.include_router(websocket_monitoring_router, prefix="/websocket", tags=["websocket-monitoring"])
+    logger.info("✅ Phase 2: WebSocket monitoring endpoints included in main monitoring router")
+
+@router.get("/websocket/status")
+async def get_websocket_monitoring_status(
+    current_user: Dict[str, Any] = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """Get WebSocket monitoring integration status."""
+    try:
+        logger.info(f"WebSocket monitoring status requested by user: {current_user.get('user_id', 'unknown')}")
+        
+        status = {
+            "timestamp": datetime.now().isoformat(),
+            "websocket_monitoring_available": WEBSOCKET_MONITORING_AVAILABLE,
+            "integration_phase": "Phase 2: Enhanced Monitoring Deployment"
+        }
+        
+        if WEBSOCKET_MONITORING_AVAILABLE:
+            status.update({
+                "endpoints_available": [
+                    "/monitoring/websocket/health",
+                    "/monitoring/websocket/metrics/users", 
+                    "/monitoring/websocket/alerts",
+                    "/monitoring/websocket/dashboard",
+                    "/monitoring/websocket/emergency/health-check"
+                ],
+                "status": "active"
+            })
+        else:
+            status.update({
+                "status": "unavailable",
+                "message": "WebSocket monitoring endpoints not available - check import dependencies"
+            })
+            
+        return status
+        
+    except Exception as e:
+        logger.error(f"Error getting WebSocket monitoring status: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get WebSocket monitoring status: {str(e)}")

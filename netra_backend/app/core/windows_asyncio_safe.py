@@ -149,14 +149,14 @@ class WindowsAsyncioSafePatterns:
     async def safe_wait_for(
         self, 
         awaitable: Awaitable[T], 
-        timeout: float, 
+        timeout: Optional[float], 
         default: Optional[T] = None
     ) -> T:
         """Windows-safe wait_for that prevents nested deadlocks.
         
         Args:
             awaitable: The awaitable to wait for
-            timeout: Timeout in seconds
+            timeout: Timeout in seconds (None means no timeout)
             default: Default value to return on timeout (if None, raises TimeoutError)
             
         Returns:
@@ -174,7 +174,7 @@ class WindowsAsyncioSafePatterns:
             
             while not task.done():
                 elapsed = time.time() - start_time
-                if elapsed >= timeout:
+                if timeout is not None and elapsed >= timeout:
                     task.cancel()
                     try:
                         await task
@@ -192,7 +192,11 @@ class WindowsAsyncioSafePatterns:
         else:
             # Non-Windows platforms can use standard wait_for
             try:
-                return await _ORIGINAL_ASYNCIO_WAIT_FOR(awaitable, timeout=timeout)
+                if timeout is None:
+                    # No timeout, just wait indefinitely
+                    return await awaitable
+                else:
+                    return await _ORIGINAL_ASYNCIO_WAIT_FOR(awaitable, timeout=timeout)
             except asyncio.TimeoutError:
                 if default is not None:
                     return default
@@ -343,7 +347,7 @@ def windows_asyncio_safe(func: Callable) -> Callable:
         
         async def isolated_windows_safe_wait_for(
             awaitable: Awaitable[T], 
-            timeout: float, 
+            timeout: Optional[float], 
             default: Optional[T] = None
         ) -> T:
             """Isolated Windows-safe wait_for that bypasses any monkey-patching."""
