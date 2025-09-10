@@ -47,7 +47,7 @@ try:
     from netra_backend.app.db.database_manager import DatabaseManager
     from netra_backend.app.db.postgres import PostgreSQLService
     from netra_backend.app.db.models_metrics import ErrorLog, ErrorMetrics
-    from netra_backend.app.services.redis_service import RedisService
+    from netra_backend.app.redis_manager import redis_manager as RedisService
     from netra_backend.app.core.configuration import get_configuration
 except ImportError as e:
     # Graceful degradation for missing imports during test discovery

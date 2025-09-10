@@ -262,7 +262,7 @@ class RegistryCompat:
         return []
 
 
-class UnifiedWebSocketManager:
+class WebSocketManager:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
     
     🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
@@ -2223,7 +2223,7 @@ class UnifiedWebSocketManager:
 # 🚨 SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
 # Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
-def get_websocket_manager() -> UnifiedWebSocketManager:
+def get_websocket_manager() -> WebSocketManager:
     """
     🚨 CRITICAL SECURITY ERROR: This function has been REMOVED.
     
@@ -2267,3 +2267,7 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     
     logger.critical(error_message)
     raise RuntimeError(error_message)
+
+
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager

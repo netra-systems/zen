@@ -34,16 +34,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 # SSOT Test Framework imports
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
-from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
-from test_framework.ssot.database_test_utility import DatabaseTestUtility
+from test_framework.ssot.websocket import WebSocketTestUtility
+from test_framework.ssot.database import DatabaseTestUtility
 from test_framework.real_services_test_fixtures import (
     real_services_fixture,
-    real_db_fixture,
     real_redis_fixture
 )
 from test_framework.isolated_environment_fixtures import (
     isolated_env,
-    test_config
+    test_env
 )
 
 # Agent orchestration imports
@@ -62,12 +61,12 @@ from netra_backend.app.agents.supervisor.execution_context import (
 # Agent types for sub-agent testing
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.agents.triage_agent import TriageAgent  
-from netra_backend.app.agents.apex_optimizer_agent import ApexOptimizerAgent
-from netra_backend.app.agents.reporting_agent import ReportingAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 
 # WebSocket and tool integration
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
+from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 # Database and configuration imports
@@ -215,7 +214,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         report_agent = await factory.create_agent("reporting", user_context)
         
         # Mock tool execution for agents
-        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         mock_tool_dispatcher.execute_tool.return_value = {"status": "success", "result": "mock_result"}
         
         # Setup agents with mocked dependencies
@@ -280,7 +279,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         agent = await factory.create_agent("data_helper", user_context)
         
         # Mock tool dispatcher with realistic tool execution
-        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         mock_tool_dispatcher.execute_tool.return_value = {
             "status": "success",
             "tool_name": "cost_analyzer", 
@@ -463,7 +462,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 raise Exception("Simulated tool execution failure")
             return {"status": "success", "result": "recovery_successful"}
         
-        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         mock_tool_dispatcher.execute_tool.side_effect = mock_tool_execution
         agent.tool_dispatcher = mock_tool_dispatcher
         agent.websocket_emitter = self.mock_emitter
@@ -508,7 +507,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             await asyncio.sleep(0.1)  # Simulate processing time
             return {"status": "success", "result": "optimization_complete"}
         
-        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         mock_tool_dispatcher.execute_tool.side_effect = slow_tool_execution
         agent.tool_dispatcher = mock_tool_dispatcher
         agent.websocket_emitter = self.mock_emitter
@@ -587,13 +586,13 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             return {"status": "success", "report": report}
         
         # Setup agents with coordinated tools
-        data_agent.tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        data_agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         data_agent.tool_dispatcher.execute_tool.side_effect = data_tool_execution
         
-        optimizer_agent.tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher) 
+        optimizer_agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine) 
         optimizer_agent.tool_dispatcher.execute_tool.side_effect = optimizer_tool_execution
         
-        report_agent.tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        report_agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         report_agent.tool_dispatcher.execute_tool.side_effect = report_tool_execution
         
         # Execute coordinated workflow
@@ -778,7 +777,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             agent = await factory.create_agent("triage", user_context)
             
             # Mock tool dispatcher
-            mock_tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+            mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
             mock_tool_dispatcher.execute_tool.return_value = {"status": "success"}
             agent.tool_dispatcher = mock_tool_dispatcher
             agent.websocket_emitter = self.mock_emitter
@@ -915,7 +914,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             
             # Mock agent execution
             agent = await get_agent_instance_factory().create_agent("data_helper", context)
-            agent.tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+            agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
             agent.tool_dispatcher.execute_tool.return_value = {"status": "success"}
             
             result = await agent.execute(
@@ -1044,7 +1043,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 }
             }
         
-        agent.tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         agent.tool_dispatcher.execute_tool.side_effect = metrics_tool_execution
         agent.websocket_emitter = self.mock_emitter
         
@@ -1215,7 +1214,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                     "configuration_applied": profile_name
                 }
             
-            agent.tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+            agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
             agent.tool_dispatcher.execute_tool.side_effect = configured_tool_execution
             agent.websocket_emitter = self.mock_emitter
             
@@ -1300,7 +1299,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             
             return {"status": "error", "message": f"Unknown tool: {tool_name}"}
         
-        agent.tool_dispatcher = AsyncMock(spec=EnhancedToolDispatcher)
+        agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
         agent.tool_dispatcher.execute_tool.side_effect = external_service_tool_execution
         agent.websocket_emitter = self.mock_emitter
         

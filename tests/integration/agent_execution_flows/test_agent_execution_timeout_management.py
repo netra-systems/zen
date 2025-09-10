@@ -24,7 +24,7 @@ from netra_backend.app.agents.execution_timeout_manager import (
     get_timeout_manager,
     TimeoutConfig,
     CircuitBreakerOpenError,
-    ExecutionTimeoutManager
+    AgentExecutionTimeoutManager
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -44,7 +44,7 @@ class TestAgentExecutionTimeoutManagement(BaseIntegrationTest):
             circuit_breaker_failure_threshold=3
         )
         
-        timeout_manager = ExecutionTimeoutManager(config=timeout_config)
+        timeout_manager = AgentExecutionTimeoutManager(config=timeout_config)
         
         user_context = UserExecutionContext(
             user_id="test_user_300",
@@ -97,7 +97,7 @@ class TestAgentExecutionTimeoutManagement(BaseIntegrationTest):
             circuit_breaker_recovery_timeout=2
         )
         
-        timeout_manager = ExecutionTimeoutManager(config=timeout_config)
+        timeout_manager = AgentExecutionTimeoutManager(config=timeout_config)
         
         user_context = UserExecutionContext(
             user_id="test_user_301",
@@ -172,7 +172,7 @@ class TestAgentExecutionTimeoutManagement(BaseIntegrationTest):
             timeout_adjustment_factor=1.5
         )
         
-        timeout_manager = ExecutionTimeoutManager(config=timeout_config)
+        timeout_manager = AgentExecutionTimeoutManager(config=timeout_config)
         
         user_context = UserExecutionContext(
             user_id="test_user_302",
@@ -233,7 +233,7 @@ class TestAgentExecutionTimeoutManagement(BaseIntegrationTest):
             cleanup_timeout_seconds=0.5
         )
         
-        timeout_manager = ExecutionTimeoutManager(config=timeout_config)
+        timeout_manager = AgentExecutionTimeoutManager(config=timeout_config)
         
         user_context = UserExecutionContext(
             user_id="test_user_303",
@@ -295,7 +295,7 @@ class TestAgentExecutionTimeoutManagement(BaseIntegrationTest):
             allow_partial_results=True
         )
         
-        timeout_manager = ExecutionTimeoutManager(config=timeout_config)
+        timeout_manager = AgentExecutionTimeoutManager(config=timeout_config)
         
         user_context = UserExecutionContext(
             user_id="test_user_304",

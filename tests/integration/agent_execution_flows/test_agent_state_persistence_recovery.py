@@ -24,7 +24,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
-from netra_backend.app.core.state_persistence_optimized import StatePersistenceManager
+from netra_backend.app.services.state_persistence import StatePersistenceService
 
 
 class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
@@ -42,12 +42,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             workspace_id="persistent_workspace_1000"
         )
         
-        persistence_manager = StatePersistenceManager(
-            redis_client=real_services_fixture.get("redis", MagicMock()),
-            postgres_client=real_services_fixture.get("postgres", MagicMock()),
-            clickhouse_client=real_services_fixture.get("clickhouse", MagicMock()),
-            tier_strategy="3tier"  # Redis -> PostgreSQL -> ClickHouse
-        )
+        persistence_manager = StatePersistenceService()
         
         state_tracker = AgentStateTracker(
             user_context=user_context,
@@ -196,11 +191,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             workspace_id="continuity_workspace_1001"
         )
         
-        persistence_manager = StatePersistenceManager(
-            redis_client=real_services_fixture.get("redis", MagicMock()),
-            postgres_client=real_services_fixture.get("postgres", MagicMock()),
-            cross_session_enabled=True
-        )
+        persistence_manager = StatePersistenceService()
         
         state_tracker_session_1 = AgentStateTracker(
             user_context=session_1_context,
@@ -329,12 +320,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             workspace_id="integrity_workspace_1002"
         )
         
-        persistence_manager = StatePersistenceManager(
-            redis_client=real_services_fixture.get("redis", MagicMock()),
-            postgres_client=real_services_fixture.get("postgres", MagicMock()),
-            integrity_checking=True,
-            auto_repair=True
-        )
+        persistence_manager = StatePersistenceService()
         
         state_tracker = AgentStateTracker(
             user_context=user_context,
@@ -454,13 +440,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             "retention_policy": "30_days"
         }
         
-        persistence_manager = StatePersistenceManager(
-            redis_client=real_services_fixture.get("redis", MagicMock()),
-            postgres_client=real_services_fixture.get("postgres", MagicMock()), 
-            clickhouse_client=real_services_fixture.get("clickhouse", MagicMock()),
-            backup_config=backup_config,
-            disaster_recovery_enabled=True
-        )
+        persistence_manager = StatePersistenceService()
         
         state_tracker = AgentStateTracker(
             user_context=user_context,

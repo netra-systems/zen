@@ -45,7 +45,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.models import AuthUser as User, AuthSession as Session, AuthAuditLog as AuditLog, Base
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.business_logic.user_business_logic import (

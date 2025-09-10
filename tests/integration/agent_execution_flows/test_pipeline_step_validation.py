@@ -20,11 +20,8 @@ from uuid import uuid4
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
-from netra_backend.app.agents.supervisor.execution_context import (
-    PipelineStep,
-    PipelineValidationError,
-    DependencyValidationError
-)
+from netra_backend.app.agents.supervisor.execution_context import PipelineStep
+from netra_backend.app.core.exceptions_base import ValidationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -84,7 +81,7 @@ class TestPipelineStepValidation(BaseIntegrationTest):
         assert len(validation_result.errors) == 0
         
         # Invalid pipeline should fail
-        with pytest.raises(DependencyValidationError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             await pipeline_executor.validate_pipeline(invalid_pipeline)
         
         assert "missing_step" in str(exc_info.value)
@@ -123,7 +120,7 @@ class TestPipelineStepValidation(BaseIntegrationTest):
         ]
         
         # Act & Assert - Should detect circular dependency
-        with pytest.raises(PipelineValidationError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             await pipeline_executor.validate_pipeline(circular_pipeline)
         
         error_message = str(exc_info.value).lower()
@@ -176,7 +173,7 @@ class TestPipelineStepValidation(BaseIntegrationTest):
         ]
         
         # Act & Assert - Incompatible should fail
-        with pytest.raises(PipelineValidationError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             await pipeline_executor.validate_pipeline(incompatible_pipeline)
         
         assert "incompatible" in str(exc_info.value).lower() or "mismatch" in str(exc_info.value).lower()
@@ -248,7 +245,7 @@ class TestPipelineStepValidation(BaseIntegrationTest):
         ]
         
         # Act & Assert - Resource heavy should fail
-        with pytest.raises(PipelineValidationError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             await pipeline_executor.validate_pipeline(resource_heavy_pipeline)
         
         assert "resource" in str(exc_info.value).lower() or "memory" in str(exc_info.value).lower()
@@ -376,7 +373,7 @@ class TestPipelineStepValidation(BaseIntegrationTest):
         assert validation_result.is_valid is True
         
         # Invalid should fail
-        with pytest.raises(PipelineValidationError) as exc_info:
+        with pytest.raises(ValidationError) as exc_info:
             await pipeline_executor.validate_pipeline(invalid_conditional_pipeline)
         
         assert "condition" in str(exc_info.value).lower() or "decision" in str(exc_info.value).lower()

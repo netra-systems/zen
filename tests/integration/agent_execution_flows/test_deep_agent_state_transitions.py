@@ -23,10 +23,8 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.execution_context import (
-    AgentExecutionContext,
-    ExecutionStatus
-)
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.agents.base.execution_context import ExecutionStatus
 
 
 class AgentStateType(Enum):

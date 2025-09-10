@@ -40,16 +40,18 @@ import threading
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
-    IsolatedWebSocketManager,
     get_websocket_manager_factory
 )
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, WebSocketManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketManagerAdapter:
+# DEPRECATED WebSocketManagerAdapter removed for SSOT compliance - use WebSocketManagerFactory directly
+
+# Keep the migration functions for backward compatibility
+class _LegacyWebSocketManagerAdapter:
     """
     DEPRECATED: Migration adapter that delegates to WebSocketManagerFactory.
     
@@ -83,12 +85,12 @@ class WebSocketManagerAdapter:
     # DELEGATION METHODS (SSOT COMPLIANCE - Alias for WebSocketManagerFactory)
     # ============================================================================
     
-    def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
+    def create_isolated_manager(self, user_id: str, connection_id: str) -> WebSocketManager:
         """Delegate to main factory (DEPRECATED)."""
         warnings.warn("Use WebSocketManagerFactory.create_isolated_manager instead", DeprecationWarning)
         return self._factory.create_isolated_manager(user_id, connection_id)
     
-    def get_manager_by_user(self, user_id: str) -> Optional[IsolatedWebSocketManager]:
+    def get_manager_by_user(self, user_id: str) -> Optional[WebSocketManager]:
         """Delegate to main factory (DEPRECATED)."""
         warnings.warn("Use WebSocketManagerFactory.get_manager_by_user instead", DeprecationWarning)
         return self._factory.get_manager_by_user(user_id)
@@ -98,7 +100,7 @@ class WebSocketManagerAdapter:
         warnings.warn("Use WebSocketManagerFactory.get_active_connections_count instead", DeprecationWarning)
         return self._factory.get_active_connections_count()
     
-    def get_manager(self) -> IsolatedWebSocketManager:
+    def get_manager(self) -> WebSocketManager:
         """Create a default manager for legacy usage (DEPRECATED)."""
         warnings.warn("get_manager() is deprecated. Use create_isolated_manager() instead", DeprecationWarning)
         # Create a default manager for legacy usage
@@ -161,7 +163,7 @@ class WebSocketManagerAdapter:
         self._legacy_stats["contexts_created"] += 1
         return context
     
-    def _get_or_create_manager(self, context_key: str, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+    def _get_or_create_manager(self, context_key: str, user_context: UserExecutionContext) -> WebSocketManager:
         """
         Get or create an isolated manager for a context key.
         
@@ -418,11 +420,11 @@ class WebSocketManagerAdapter:
 
 
 # Global adapter instance (singleton for backward compatibility)
-_adapter_instance: Optional[WebSocketManagerAdapter] = None
+_adapter_instance: Optional[_LegacyWebSocketManagerAdapter] = None
 _adapter_lock = threading.RLock()
 
 
-def get_legacy_websocket_manager() -> WebSocketManagerAdapter:
+def get_legacy_websocket_manager() -> _LegacyWebSocketManagerAdapter:
     """
     Get the legacy WebSocket manager adapter.
     
@@ -435,11 +437,11 @@ def get_legacy_websocket_manager() -> WebSocketManagerAdapter:
     global _adapter_instance
     with _adapter_lock:
         if _adapter_instance is None:
-            _adapter_instance = WebSocketManagerAdapter()
+            _adapter_instance = _LegacyWebSocketManagerAdapter()
         return _adapter_instance
 
 
-def migrate_singleton_usage(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
+def migrate_singleton_usage(user_context: UserExecutionContext) -> WebSocketManager:
     """
     Helper function to migrate from singleton to factory pattern.
     
@@ -468,15 +470,9 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> IsolatedWebSo
 
 
 __all__ = [
-    "WebSocketManagerAdapter",
     "get_legacy_websocket_manager",
     "migrate_singleton_usage"
 ]
 
-# ============================================================================
-# SSOT COMPLIANCE: Make WebSocketManagerAdapter an alias for WebSocketManagerFactory
-# This ensures that when tests check for factory implementations, they see only one canonical factory
-# ============================================================================
-
-# Override the class to make it an alias
-WebSocketManagerAdapter = WebSocketManagerFactory
+# DEPRECATED: WebSocketManagerAdapter removed for SSOT compliance
+# Use WebSocketManagerFactory directly from websocket_manager_factory module

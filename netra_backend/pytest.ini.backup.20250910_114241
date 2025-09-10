@@ -1,0 +1,170 @@
+[pytest]
+asyncio_mode = auto
+asyncio_default_fixture_loop_scope = function
+addopts = --tb=short -s --strict-markers --timeout=30
+filterwarnings =
+    ignore::RuntimeWarning:unittest.case
+console_output_style = count
+log_cli = true
+log_cli_level = WARNING
+log_cli_format = %(message)s
+# Windows compatibility: capture=sys works better than capture=no with our plugins
+# Disabled test_framework.pytest_bad_test_plugin temporarily to avoid capture conflicts
+# Note: plugins configuration option is deprecated in pytest.ini, use pytest_plugins in conftest.py instead
+markers =
+    smoke: marks tests as smoke tests (quick validation tests)
+    stress: marks tests as stress tests (high load/scale tests)
+    high_load: marks tests as high-load performance tests with 100+ concurrent users and resource-intensive operations
+    slow: marks tests as slow tests (long-running tests)
+    performance: marks tests as performance tests (performance benchmarks)
+    critical: marks tests as critical tests (essential system reliability tests)
+    critical_type_safety: marks tests as critical type safety validation tests
+    user_context_violations: marks tests that validate user context type safety violations
+    real_llm: marks tests that require real LLM API calls (uses actual API keys)
+    real_database: marks tests that require real database connections (PostgreSQL)
+    real_redis: marks tests that require real Redis connection
+    real_clickhouse: marks tests that require real ClickHouse connection
+    real_services: marks tests that require any real external services
+    lightweight_services: marks tests that use lightweight service fixtures without Docker
+    real_data: marks tests that require real data generation and processing
+    real_quality: marks tests that require real quality validation services
+    mock_only: marks tests that use only mocks and no external dependencies
+    unit: marks tests as unit tests (isolated component testing)
+    integration: marks tests as integration tests (component interaction)
+    e2e: marks tests as end-to-end tests (full system flow)
+    real_e2e: marks tests as real end-to-end tests requiring actual services
+    flaky: marks tests as flaky (tests that may fail intermittently)
+    first_time_user: marks tests for first time user flow
+    first_time_user_validation: marks tests for first time user validation
+    resilience: marks tests as resilience and recovery validation tests
+    redis: marks tests that depend on Redis service
+    staging: marks tests specific to staging environment
+    dev: marks tests specific to development environment
+    env: marks tests with environment compatibility (test, dev, staging, prod)
+    env_requires: marks tests with environment-specific requirements
+    env_safe: marks tests as safe for specific environments
+    test: marks tests for test environment only
+    prod: marks tests compatible with production environment
+    env_test: marks tests for test environment compatibility
+    agents: marks tests in the agents category
+    database: marks tests in the database category
+    L0: marks tests as L0 (Fully Mocked/Simulated) on Mock-Real Spectrum
+    L1: marks tests as L1 (Real SUT with Mocked Dependencies) on Mock-Real Spectrum  
+    L2: marks tests as L2 (Real SUT with Real Internal Dependencies) on Mock-Real Spectrum
+    l2_integration: marks tests as L2 integration tests
+    L3: marks tests as L3 (Real SUT with Real Local Services) on Mock-Real Spectrum
+    l3: marks tests as L3 (Real SUT with Real Local Services) on Mock-Real Spectrum
+    l3_realism: marks tests as L3 realism (Real local services with minimal mocking)
+    L4: marks tests as L4 (Real SUT with Real Shared Environment) on Mock-Real Spectrum
+    l4: marks tests as L4 (Real SUT with Real Shared Environment) on Mock-Real Spectrum
+    l4_staging: marks tests as L4 staging tests (staging environment required)
+    L5: marks tests as L5 (Real Production) on Mock-Real Spectrum
+    fast: marks tests as fast tests (quick execution tests)
+    fast_test: marks tests optimized for performance (iteration 61-70)
+    monitoring: marks tests for monitoring and observability systems
+    observability: marks tests for observability and monitoring validation
+    agent: marks tests for agent functionality and performance
+    websocket: marks tests for WebSocket functionality
+    websocket_events: marks tests for WebSocket event handling and dispatch
+    real_websocket: marks tests for real WebSocket connection validation
+    websocket_reliability: marks tests for WebSocket reliability and resilience
+    websocket_validation: marks tests for WebSocket message validation
+    websocket_performance: marks tests for WebSocket performance and load testing
+    websocket_race_conditions: marks tests for WebSocket race condition validation and reproduction
+    api: marks tests for API endpoints and routes
+    cache: marks tests for caching functionality
+    security: marks tests for security validation
+    recovery: marks tests for error recovery and resilience
+    agent_state: marks tests for agent state management
+    workflow: marks tests for workflow functionality
+    cycle_51: marks tests for cycle 51 validation
+    cycle_52: marks tests for cycle 52 validation
+    cycle_53: marks tests for cycle 53 validation
+    cycle_54: marks tests for cycle 54 validation
+    cycle_55: marks tests for cycle 55 validation
+    config: marks tests for configuration validation
+    benchmark: marks tests as benchmark tests (performance measurement tests)
+    critical_path: marks tests as critical path tests (core business functionality)
+    health: marks tests for health monitoring and endpoint validation
+    environment: marks tests for environment configuration and validation
+    models: marks tests for data models and schemas
+    realtime: marks tests for real-time features like WebSocket communication
+    mission_critical: marks tests as mission critical for system operations
+    business_value: marks tests for business value validation and delivery
+    orchestration: marks tests for agent orchestration and coordination
+    multi_user: marks tests for multi-user scenarios and isolation
+    user_isolation: marks tests for user isolation and multi-user context boundary validation
+    concurrent_isolation: marks tests for concurrent execution isolation and thread safety
+    enterprise: marks tests for enterprise tier functionality
+    shared_components: marks tests for shared configuration components
+    cross_service: marks tests for cross-service functionality
+    comprehensive: marks tests as comprehensive test coverage
+    user_context: marks tests for UserExecutionContext functionality
+    resource_management: marks tests for resource management and cleanup
+    context_hierarchy: marks tests for context hierarchy and child context creation patterns
+    auth_validation: marks tests for authentication and authorization validation
+    auth_required: marks tests that require authentication service to be running
+    authentication: marks tests for authentication functionality and compliance
+    startup_init: marks tests for system startup INIT phase validation
+    startup_dependencies: marks tests for system startup DEPENDENCIES phase validation
+    startup_database: marks tests for system startup DATABASE phase validation
+    startup_cache: marks tests for system startup CACHE phase validation
+    backend: marks tests for backend service integration and functionality
+    interservice: marks tests for cross-service communication and integration
+    startup_services: marks tests for system startup SERVICES phase validation
+    medium: marks tests as medium complexity/duration tests
+    migration: marks tests for database migration functionality and validation
+    ssot_validation: marks tests for SSOT pattern validation and migration
+    id_system: marks tests for ID system functionality and validation
+    business_requirements: marks tests for business requirements validation
+    id_system_validation: marks tests for ID system validation and compliance
+    service_integration: marks tests for service integration validation
+    id_contamination: marks tests for ID contamination prevention validation
+    race_conditions: marks tests for race condition reproduction and validation
+    golden_path: marks tests for Golden Path user flow validation
+    factory_patterns: marks tests for factory pattern implementation and validation
+    toolregistry: marks tests for tool registry functionality, lifecycle management, and BaseModel filtering
+    ssl_configuration: marks tests for SSL configuration validation
+    issue_135: marks tests for Issue #135 basic triage response validation
+    protocol_parsing: marks tests for WebSocket protocol parsing functionality
+    protocol_negotiation: marks tests for WebSocket protocol negotiation
+    websocket_auth_protocol: marks tests for WebSocket authentication protocol
+    websocket_unified_auth: marks tests for WebSocket unified authentication
+    bug_reproduction: marks tests designed to reproduce specific bugs
+    business_critical: marks tests as business critical for platform operation
+    isolation_critical: marks tests critical for user isolation functionality
+    websocket_critical: marks tests critical for WebSocket functionality
+    error_handling: marks tests for error handling and recovery scenarios
+    pipeline_execution: marks tests for pipeline execution functionality
+    user_engine_delegation: marks tests for user-specific engine delegation
+    isolation_status: marks tests for isolation status and validation
+    workflow_logic: marks tests for workflow logic and orchestration
+    workflow_execution: marks tests for workflow execution functionality
+    websocket_coordination: marks tests for WebSocket coordination in workflows
+    workflow_validation: marks tests for workflow validation and compliance
+    state_persistence: marks tests for state persistence functionality
+
+[coverage:run]
+source = netra_backend.app
+
+[coverage:report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__(self):
+    def __str__(self):
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run:
+    if __name__ == .__main__.:
+
+    # Don't complain about abstract methods, they aren't run:
+    @abstractmethod
+
+ignore_errors = True

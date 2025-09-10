@@ -1,55 +1,87 @@
-"""Redis manager for auth service.
+"""Auth Redis Manager - SSOT Compatibility Layer
 
-Uses SSOT AuthEnvironment for all configuration access.
+DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
 
-Provides Redis connection and management functionality specifically for
-authentication operations like session storage, token blacklisting, and
-cache management.
+This module provides backward compatibility during Redis SSOT migration.
+The primary SSOT Redis manager now includes all auth functionality.
 
 Business Value:
 - Enables fast session lookups for user authentication
 - Provides token blacklisting for secure logout
 - Caches user permissions and roles for performance
+
+SSOT Migration:
+- All functionality has been consolidated into netra_backend.app.redis_manager
+- This module provides compatibility wrappers during transition
+- Future imports should use redis_manager directly
 """
 
 from typing import Optional, Dict, Any, List
 import asyncio
-import redis.asyncio as redis
+import warnings
 from datetime import datetime, timedelta
 import json
 import logging
 
+try:
+    import redis.asyncio as redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    redis = None
+    REDIS_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
+
+# Import SSOT Redis Manager
+try:
+    from netra_backend.app.redis_manager import redis_manager as ssot_redis_manager
+    SSOT_AVAILABLE = True
+except ImportError:
+    SSOT_AVAILABLE = False
+    logger.warning("SSOT Redis manager not available - falling back to standalone auth implementation")
+
+# Issue deprecation warning
+warnings.warn(
+    "auth_redis_manager is deprecated. Use netra_backend.app.redis_manager.redis_manager directly",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class AuthRedisManager:
-    """Redis manager specifically for authentication operations."""
+    """Compatibility wrapper for auth service Redis operations.
+    
+    DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
+    
+    This class provides backward compatibility during Redis SSOT migration.
+    All operations are redirected to the primary SSOT Redis manager.
+    """
     
     def __init__(self):
-        self.redis_client: Optional[redis.Redis] = None
-        self._connection_pool: Optional[redis.ConnectionPool] = None
-        self.connected = False
+        if SSOT_AVAILABLE:
+            self._redis = ssot_redis_manager
+        else:
+            # Fallback initialization if SSOT not available
+            self._initialize_fallback()
         
-        # Defer configuration loading until first use
-        self._initialized = False
-        self.host = None
-        self.port = None
-        self.db = 1  # Use separate DB for auth
-        self.password = None
-        self.ssl = False  # Default to no SSL unless explicitly configured
-        self._enabled = True  # Will be determined on first init
-        
-        # Auth-specific prefixes
+        # Auth-specific prefixes (maintained for compatibility)
         self.session_prefix = "auth:session:"
         self.token_blacklist_prefix = "auth:blacklist:"
         self.user_cache_prefix = "auth:user:"
         self.permission_prefix = "auth:perm:"
     
+    def _initialize_fallback(self):
+        """Fallback initialization for isolated auth service."""
+        # Keep minimal fallback for auth service independence
+        self.redis_client = None
+        self._connection_pool = None
+        self.connected = False
+        self._enabled = False
+    
     @property
     def enabled(self):
-        """Check if Redis is enabled (lazy initialization)."""
-        self._lazy_init()
-        return self._enabled
+        """Check if Redis is enabled (redirects to SSOT)."""
+        return SSOT_AVAILABLE and self._redis.is_connected
     
     def _lazy_init(self):
         """Lazy initialization of Redis configuration."""
@@ -89,34 +121,11 @@ class AuthRedisManager:
             self._initialized = True
     
     async def connect(self) -> bool:
-        """Connect to Redis server."""
-        self._lazy_init()  # Ensure configuration is loaded
-        
-        try:
-            self._connection_pool = redis.ConnectionPool(
-                host=self.host,
-                port=self.port,
-                db=self.db,
-                password=self.password,
-                ssl=self.ssl,
-                decode_responses=True,
-                max_connections=20,
-                retry_on_timeout=True,
-            )
-            
-            self.redis_client = redis.Redis(connection_pool=self._connection_pool)
-            
-            # Test connection
-            await self.redis_client.ping()
-            self.connected = True
-            
-            logger.info(f"Connected to Redis at {self.host}:{self.port}/{self.db}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to connect to Redis: {e}")
-            self.connected = False
-            return False
+        """Connect to Redis server (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            await self._redis.initialize()
+            return self._redis.is_connected
+        return False
     
     async def disconnect(self):
         """Disconnect from Redis."""
@@ -134,232 +143,115 @@ class AuthRedisManager:
         return self.redis_client
     
     async def ensure_connected(self) -> bool:
-        """Ensure Redis connection is active."""
-        if not self.enabled:
-            logger.debug("Redis is disabled for testing")
+        """Ensure Redis connection is active (redirects to SSOT)."""
+        if not SSOT_AVAILABLE:
             return False
-        
-        if not self.connected or not self.redis_client:
-            return await self.connect()
-        
-        try:
-            await self.redis_client.ping()
-            return True
-        except Exception as e:
-            logger.warning(f"Redis connection lost: {e}")
-            return await self.connect()
+        if not self._redis.is_connected:
+            await self._redis.initialize()
+        return self._redis.is_connected
     
-    # Session Management
+    # Session Management (redirected to SSOT)
     async def store_session(self, session_id: str, session_data: Dict[str, Any], ttl_seconds: int = 3600) -> bool:
-        """Store user session data."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            session_json = json.dumps(session_data, default=str)
-            
-            await self.redis_client.setex(key, ttl_seconds, session_json)
-            logger.debug(f"Stored session {session_id} with TTL {ttl_seconds}s")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to store session {session_id}: {e}")
-            return False
+        """Store user session data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.store_session(session_id, session_data, ttl_seconds)
+        return False
     
     async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
-        """Retrieve user session data."""
-        if not await self.ensure_connected():
-            return None
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            session_json = await self.redis_client.get(key)
-            
-            if session_json:
-                return json.loads(session_json)
-            return None
-            
-        except Exception as e:
-            logger.error(f"Failed to get session {session_id}: {e}")
-            return None
+        """Retrieve user session data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.get_session(session_id)
+        return None
     
     async def delete_session(self, session_id: str) -> bool:
-        """Delete user session."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            result = await self.redis_client.delete(key)
-            logger.debug(f"Deleted session {session_id}")
-            return result > 0
-            
-        except Exception as e:
-            logger.error(f"Failed to delete session {session_id}: {e}")
-            return False
+        """Delete user session (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.delete_session(session_id)
+        return False
     
     async def extend_session(self, session_id: str, ttl_seconds: int = 3600) -> bool:
-        """Extend session TTL."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.session_prefix}{session_id}"
-            result = await self.redis_client.expire(key, ttl_seconds)
-            logger.debug(f"Extended session {session_id} TTL to {ttl_seconds}s")
-            return result
-            
-        except Exception as e:
-            logger.error(f"Failed to extend session {session_id}: {e}")
-            return False
+        """Extend session TTL (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.extend_session(session_id, ttl_seconds)
+        return False
     
-    # Token Blacklisting
+    # Token Blacklisting (redirected to SSOT)
     async def blacklist_token(self, token: str, ttl_seconds: int = 86400) -> bool:
-        """Add token to blacklist."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.token_blacklist_prefix}{token}"
-            await self.redis_client.setex(key, ttl_seconds, "blacklisted")
-            logger.debug(f"Blacklisted token with TTL {ttl_seconds}s")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to blacklist token: {e}")
-            return False
+        """Add token to blacklist (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.blacklist_token(token, ttl_seconds)
+        return False
     
     async def is_token_blacklisted(self, token: str) -> bool:
-        """Check if token is blacklisted."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.token_blacklist_prefix}{token}"
-            result = await self.redis_client.exists(key)
-            return result > 0
-            
-        except Exception as e:
-            logger.error(f"Failed to check token blacklist: {e}")
-            return False
+        """Check if token is blacklisted (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.is_token_blacklisted(token)
+        return False
     
-    # User Caching
+    # User Caching (redirected to SSOT)
     async def cache_user_data(self, user_id: str, user_data: Dict[str, Any], ttl_seconds: int = 1800) -> bool:
-        """Cache user data for fast lookup."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.user_cache_prefix}{user_id}"
-            user_json = json.dumps(user_data, default=str)
-            
-            await self.redis_client.setex(key, ttl_seconds, user_json)
-            logger.debug(f"Cached user data for {user_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to cache user data for {user_id}: {e}")
-            return False
+        """Cache user data for fast lookup (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.cache_user_data(user_id, user_data, ttl_seconds)
+        return False
     
     async def get_cached_user_data(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """Get cached user data."""
-        if not await self.ensure_connected():
-            return None
-        
-        try:
-            key = f"{self.user_cache_prefix}{user_id}"
-            user_json = await self.redis_client.get(key)
-            
-            if user_json:
-                return json.loads(user_json)
-            return None
-            
-        except Exception as e:
-            logger.error(f"Failed to get cached user data for {user_id}: {e}")
-            return None
+        """Get cached user data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.get_cached_user_data(user_id)
+        return None
     
     async def invalidate_user_cache(self, user_id: str) -> bool:
-        """Invalidate cached user data."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.user_cache_prefix}{user_id}"
-            result = await self.redis_client.delete(key)
-            logger.debug(f"Invalidated user cache for {user_id}")
-            return result > 0
-            
-        except Exception as e:
-            logger.error(f"Failed to invalidate user cache for {user_id}: {e}")
-            return False
+        """Invalidate cached user data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.invalidate_user_cache(user_id)
+        return False
     
-    # Permission Caching
+    # Permission Caching (redirected to SSOT)
     async def cache_user_permissions(self, user_id: str, permissions: List[str], ttl_seconds: int = 1800) -> bool:
-        """Cache user permissions."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.permission_prefix}{user_id}"
-            permissions_json = json.dumps(permissions)
-            
-            await self.redis_client.setex(key, ttl_seconds, permissions_json)
-            logger.debug(f"Cached permissions for user {user_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to cache permissions for {user_id}: {e}")
-            return False
+        """Cache user permissions (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.cache_user_permissions(user_id, permissions, ttl_seconds)
+        return False
     
     async def get_cached_permissions(self, user_id: str) -> Optional[List[str]]:
-        """Get cached user permissions."""
-        if not await self.ensure_connected():
-            return None
-        
-        try:
-            key = f"{self.permission_prefix}{user_id}"
-            permissions_json = await self.redis_client.get(key)
-            
-            if permissions_json:
-                return json.loads(permissions_json)
-            return None
-            
-        except Exception as e:
-            logger.error(f"Failed to get cached permissions for {user_id}: {e}")
-            return None
+        """Get cached user permissions (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.get_cached_permissions(user_id)
+        return None
     
-    # Health Check
+    # Health Check (redirected to SSOT)
     async def health_check(self) -> Dict[str, Any]:
-        """Check Redis health and return status."""
+        """Check Redis health and return status (redirects to SSOT)."""
         try:
+            if not SSOT_AVAILABLE:
+                return {"status": "unhealthy", "error": "SSOT Redis manager not available"}
+            
             if not await self.ensure_connected():
                 return {"status": "unhealthy", "error": "Cannot connect to Redis"}
             
-            # Test basic operations
-            test_key = "auth:health:test"
-            await self.redis_client.set(test_key, "test", ex=5)
-            test_value = await self.redis_client.get(test_key)
-            await self.redis_client.delete(test_key)
+            # Test basic auth operations using SSOT
+            test_session_id = f"health_check_{int(datetime.utcnow().timestamp())}"
+            test_session_data = {"test": "data", "timestamp": datetime.utcnow().isoformat()}
             
-            if test_value != "test":
-                return {"status": "unhealthy", "error": "Basic operations failed"}
+            # Test session operations
+            store_success = await self.store_session(test_session_id, test_session_data, 5)
+            if not store_success:
+                return {"status": "unhealthy", "error": "Failed to store test session"}
             
-            # Get connection info
-            info = await self.redis_client.info()
+            retrieved_data = await self.get_session(test_session_id)
+            if retrieved_data != test_session_data:
+                return {"status": "unhealthy", "error": "Session data mismatch"}
+            
+            delete_success = await self.delete_session(test_session_id)
+            if not delete_success:
+                return {"status": "unhealthy", "error": "Failed to delete test session"}
             
             return {
                 "status": "healthy",
                 "connection": {
-                    "host": self.host,
-                    "port": self.port,
-                    "db": self.db,
-                },
-                "server_info": {
-                    "version": info.get("redis_version"),
-                    "uptime_seconds": info.get("uptime_in_seconds"),
-                    "connected_clients": info.get("connected_clients"),
-                    "used_memory_human": info.get("used_memory_human"),
+                    "ssot_available": SSOT_AVAILABLE,
+                    "ssot_connected": self._redis.is_connected if SSOT_AVAILABLE else False,
                 },
                 "timestamp": datetime.utcnow().isoformat(),
             }

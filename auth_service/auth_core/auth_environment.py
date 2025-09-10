@@ -1159,11 +1159,13 @@ def get_auth_env(refresh: bool = False) -> AuthEnvironment:
     # Always refresh in test environments to support dynamic env var changes
     # Also refresh if we detect a test scenario where JWT secrets were deliberately cleared
     is_test_environment = current_environment in ["test", "testing"]
-    # COMPATIBILITY: Support legacy tests that only clear JWT_SECRET_KEY
+    # SSOT: Comprehensive JWT secret detection for test scenarios
+    # Checks multiple JWT secret variants to ensure proper test isolation
     is_jwt_secret_test_scenario = (
         current_environment == "production" and
-        not env_manager.get("JWT_SECRET_KEY")
-        # NOTE: Legacy test compatibility - only check JWT_SECRET_KEY for fresh instance detection
+        not env_manager.get("JWT_SECRET_KEY") and
+        not env_manager.get("JWT_SECRET_PRODUCTION") and 
+        not env_manager.get("JWT_SECRET")
     )
     
     if refresh or _auth_env is None or is_test_environment or is_jwt_secret_test_scenario:

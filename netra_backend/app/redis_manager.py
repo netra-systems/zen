@@ -20,7 +20,7 @@ Key Features:
 import asyncio
 import logging
 import time
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 from contextlib import asynccontextmanager
 
 try:
@@ -657,6 +657,200 @@ class RedisManager:
         """
         await self._circuit_breaker.reset()
         logger.info("Redis circuit breaker reset to closed state")
+    
+    # ============================================================================
+    # SSOT CONSOLIDATION: Cache Management Methods
+    # (Merged from netra_backend.app.cache.redis_cache_manager)
+    # ============================================================================
+    
+    async def mget(self, keys: List[str]) -> List[Optional[str]]:
+        """Get multiple values from Redis."""
+        if not self._circuit_breaker.can_execute():
+            logger.debug("Redis circuit breaker is open - mget operation blocked")
+            return [None] * len(keys)
+        
+        client = await self.get_client()
+        if not client:
+            return [None] * len(keys)
+        try:
+            result = await client.mget(keys)
+            self._circuit_breaker.record_success()
+            return result
+        except Exception as e:
+            logger.error(f"Redis mget error: {e}")
+            self._circuit_breaker.record_failure(str(type(e).__name__))
+            self._connected = False
+            self._consecutive_failures += 1
+            return [None] * len(keys)
+
+    async def mset(self, mapping: Dict[str, str]) -> bool:
+        """Set multiple key-value pairs."""
+        if not self._circuit_breaker.can_execute():
+            logger.debug("Redis circuit breaker is open - mset operation blocked")
+            return False
+        
+        client = await self.get_client()
+        if not client:
+            return False
+        try:
+            await client.mset(mapping)
+            self._circuit_breaker.record_success()
+            return True
+        except Exception as e:
+            logger.error(f"Redis mset error: {e}")
+            self._circuit_breaker.record_failure(str(type(e).__name__))
+            self._connected = False
+            self._consecutive_failures += 1
+            return False
+
+    async def setex(self, key: str, time: int, value: str) -> bool:
+        """Set key with expiration."""
+        return await self.set(key, value, ex=time)
+
+    async def scan_keys(self, pattern: str) -> List[str]:
+        """Scan for keys matching pattern."""
+        if not self._circuit_breaker.can_execute():
+            logger.debug("Redis circuit breaker is open - scan_keys operation blocked")
+            return []
+        
+        client = await self.get_client()
+        if not client:
+            return []
+        try:
+            keys = []
+            async for key in client.scan_iter(match=pattern):
+                keys.append(key)
+            self._circuit_breaker.record_success()
+            return keys
+        except Exception as e:
+            logger.error(f"Redis scan_keys error: {e}")
+            self._circuit_breaker.record_failure(str(type(e).__name__))
+            self._connected = False
+            self._consecutive_failures += 1
+            return []
+
+    async def memory_usage(self, key: str) -> Optional[int]:
+        """Get memory usage of a key."""
+        if not self._circuit_breaker.can_execute():
+            logger.debug("Redis circuit breaker is open - memory_usage operation blocked")
+            return None
+        
+        client = await self.get_client()
+        if not client:
+            return None
+        try:
+            result = await client.memory_usage(key)
+            self._circuit_breaker.record_success()
+            return result
+        except Exception as e:
+            logger.debug(f"Redis memory_usage error (command may not be available): {e}")
+            self._circuit_breaker.record_failure(str(type(e).__name__))
+            return None
+
+    async def ttl(self, key: str) -> int:
+        """Get time to live for a key."""
+        if not self._circuit_breaker.can_execute():
+            logger.debug("Redis circuit breaker is open - ttl operation blocked")
+            return -2
+        
+        client = await self.get_client()
+        if not client:
+            return -2
+        try:
+            result = await client.ttl(key)
+            self._circuit_breaker.record_success()
+            return result
+        except Exception as e:
+            logger.error(f"Redis ttl error: {e}")
+            self._circuit_breaker.record_failure(str(type(e).__name__))
+            self._connected = False
+            self._consecutive_failures += 1
+            return -2
+
+    # Cache Statistics Support
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics."""
+        return {
+            "connected": self._connected,
+            "consecutive_failures": self._consecutive_failures,
+            "circuit_breaker_state": self._circuit_breaker.get_status()
+        }
+    
+    # ============================================================================
+    # SSOT CONSOLIDATION: Auth Service Compatibility Methods
+    # (Merged from auth_service.auth_core.redis_manager)
+    # ============================================================================
+    
+    async def store_session(self, session_id: str, session_data: Dict[str, Any], ttl_seconds: int = 3600) -> bool:
+        """Store session data (auth service compatibility)."""
+        import json
+        session_json = json.dumps(session_data, default=str)
+        return await self.set(f"auth:session:{session_id}", session_json, ex=ttl_seconds)
+
+    async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Get session data (auth service compatibility)."""
+        import json
+        session_json = await self.get(f"auth:session:{session_id}")
+        if session_json:
+            try:
+                return json.loads(session_json)
+            except json.JSONDecodeError:
+                return None
+        return None
+
+    async def delete_session(self, session_id: str) -> bool:
+        """Delete session (auth service compatibility)."""
+        return await self.delete(f"auth:session:{session_id}")
+
+    async def blacklist_token(self, token: str, ttl_seconds: int = 86400) -> bool:
+        """Blacklist token (auth service compatibility)."""
+        return await self.set(f"auth:blacklist:{token}", "blacklisted", ex=ttl_seconds)
+
+    async def is_token_blacklisted(self, token: str) -> bool:
+        """Check if token is blacklisted (auth service compatibility)."""
+        return await self.exists(f"auth:blacklist:{token}")
+    
+    async def extend_session(self, session_id: str, ttl_seconds: int = 3600) -> bool:
+        """Extend session TTL (auth service compatibility)."""
+        return await self.expire(f"auth:session:{session_id}", ttl_seconds)
+    
+    async def cache_user_data(self, user_id: str, user_data: Dict[str, Any], ttl_seconds: int = 1800) -> bool:
+        """Cache user data for fast lookup (auth service compatibility)."""
+        import json
+        user_json = json.dumps(user_data, default=str)
+        return await self.set(f"auth:user:{user_id}", user_json, ex=ttl_seconds)
+    
+    async def get_cached_user_data(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get cached user data (auth service compatibility)."""
+        import json
+        user_json = await self.get(f"auth:user:{user_id}")
+        if user_json:
+            try:
+                return json.loads(user_json)
+            except json.JSONDecodeError:
+                return None
+        return None
+    
+    async def invalidate_user_cache(self, user_id: str) -> bool:
+        """Invalidate cached user data (auth service compatibility)."""
+        return await self.delete(f"auth:user:{user_id}")
+    
+    async def cache_user_permissions(self, user_id: str, permissions: List[str], ttl_seconds: int = 1800) -> bool:
+        """Cache user permissions (auth service compatibility)."""
+        import json
+        permissions_json = json.dumps(permissions)
+        return await self.set(f"auth:perm:{user_id}", permissions_json, ex=ttl_seconds)
+    
+    async def get_cached_permissions(self, user_id: str) -> Optional[List[str]]:
+        """Get cached user permissions (auth service compatibility)."""
+        import json
+        permissions_json = await self.get(f"auth:perm:{user_id}")
+        if permissions_json:
+            try:
+                return json.loads(permissions_json)
+            except json.JSONDecodeError:
+                return None
+        return None
 
 
 class MockPipeline:
@@ -692,6 +886,9 @@ class MockPipeline:
 
 # Global instance
 redis_manager = RedisManager()
+
+# Auth service compatibility alias
+auth_redis_manager = redis_manager
 
 
 async def get_redis() -> RedisManager:

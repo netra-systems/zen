@@ -27,7 +27,7 @@ from shared.isolated_environment import get_env
 # Import database factory classes to test SSOT violations
 from netra_backend.app.factories.data_access_factory import DataAccessFactory
 from netra_backend.app.database.request_scoped_session_factory import RequestScopedSessionFactory
-from netra_backend.app.factories.redis_factory import RedisFactory
+from netra_backend.app.redis_manager import redis_manager  # RedisFactory consolidated to SSOT
 from netra_backend.app.factories.clickhouse_factory import ClickHouseFactory
 
 

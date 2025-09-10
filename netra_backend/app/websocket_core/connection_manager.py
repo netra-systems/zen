@@ -17,22 +17,9 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketConnectionManager(UnifiedWebSocketManager):
-    """
-    SSOT alias for WebSocket connection management.
-    
-    This class serves as the primary interface for WebSocket connection management,
-    providing backward compatibility for tests that expect WebSocketConnectionManager
-    while delegating to the unified implementation.
-    
-    Following CLAUDE.md principle: Search First, Create Second - this aliases
-    existing functionality rather than duplicating it.
-    """
-    
-    def __init__(self, *args, **kwargs):
-        """Initialize WebSocket connection manager."""
-        super().__init__(*args, **kwargs)
-        logger.debug("WebSocketConnectionManager initialized (SSOT alias)")
+# SSOT COMPLIANCE: Use direct alias instead of class inheritance
+# This eliminates the duplicate class definition while maintaining backward compatibility
+WebSocketConnectionManager = UnifiedWebSocketManager
 
 
 # SSOT alias for backward compatibility
