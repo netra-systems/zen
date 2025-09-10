@@ -276,9 +276,42 @@ class WebSocketManager:
     - Per-user connection locks prevent race conditions during concurrent operations
     - Thread-safe connection management with user-specific isolation
     - Connection state validation prevents silent failures
+    
+    SSOT SINGLETON: This class enforces the Single Source of Truth pattern.
+    Only one instance can exist at any time to prevent SSOT violations.
     """
     
+    _instance = None
+    _initialization_lock = asyncio.Lock()
+    
+    def __new__(cls):
+        """
+        SSOT ENFORCEMENT: Ensure only one WebSocketManager instance exists.
+        
+        This prevents SSOT violations by enforcing singleton pattern.
+        Multiple instantiation attempts will return the same instance.
+        """
+        if cls._instance is None:
+            logger.info("Creating new WebSocketManager SSOT instance")
+            cls._instance = super(WebSocketManager, cls).__new__(cls)
+            cls._instance._initialized = False
+        else:
+            logger.debug("Returning existing WebSocketManager SSOT instance")
+        return cls._instance
+    
     def __init__(self):
+        """
+        Initialize WebSocketManager singleton instance.
+        
+        SSOT PROTECTION: Only initializes once, even if called multiple times.
+        This ensures singleton state consistency.
+        """
+        # Prevent re-initialization of singleton instance
+        if hasattr(self, '_initialized') and self._initialized:
+            logger.debug("WebSocketManager already initialized, skipping re-initialization")
+            return
+            
+        logger.info("Initializing WebSocketManager SSOT singleton")
         self._connections: Dict[str, WebSocketConnection] = {}
         self._user_connections: Dict[str, Set[str]] = {}
         self._lock = asyncio.Lock()
@@ -315,7 +348,10 @@ class WebSocketManager:
         self._last_health_check = datetime.utcnow()
         self._health_check_failures = 0
         
-        logger.info("UnifiedWebSocketManager initialized with connection-level thread safety and enhanced error handling")
+        # Mark as initialized to prevent re-initialization
+        self._initialized = True
+        
+        logger.info("WebSocketManager SSOT singleton initialized with connection-level thread safety and enhanced error handling")
     
     @classmethod
     def from_user_context(cls, user_context: 'UserExecutionContext') -> 'WebSocketManager':
