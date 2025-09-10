@@ -179,9 +179,40 @@
 - [ ] Memory usage reduced from eliminating duplicate connection pools
 - [ ] Chat functionality delivers reliable user AI interactions
 
-### 📋 Step 2: Execute Test Plan - PENDING
-- [ ] Create new SSOT tests (20% of effort)
-- [ ] Validate with existing test framework
+### ✅ Step 2: Execute Test Plan - COMPLETED  
+- [x] **Created 3 critical Redis SSOT tests** (20% of test strategy)
+- [x] **Validated with existing test framework** and unified test runner
+- [x] **Tests designed to FAIL** until SSOT consolidation is complete (by design)
+
+#### New Redis SSOT Tests Created
+1. **`tests/unit/redis_ssot/test_redis_manager_consolidation_unit.py`**
+   - Validates 4→1 Redis manager consolidation works correctly
+   - Tests single manager handles all operations, connection pool sharing, configuration consistency
+   - Memory usage validation vs multiple managers
+
+2. **`tests/integration/redis_ssot/test_redis_import_migration_integration.py`**  
+   - Validates all 76 files importing Redis managers use single SSOT
+   - Scans for import violations, detects duplicate instantiations
+   - **DESIGNED TO FAIL** until consolidation complete
+
+3. **`tests/integration/redis_ssot/test_websocket_redis_ssot_integration.py`**
+   - **CRITICAL for Golden Path** - prevents 1011 WebSocket errors  
+   - Tests agent state persistence, WebSocket events with SSOT Redis operations
+   - Connection stability, race condition prevention, user session isolation
+
+#### Test Execution Commands
+```bash
+# Run all Redis SSOT tests
+python tests/unified_test_runner.py --pattern "*redis_ssot*"
+
+# Run with real Redis services  
+python tests/unified_test_runner.py --real-services --pattern "*redis_ssot*"
+
+# Individual test execution
+python -m pytest tests/unit/redis_ssot/test_redis_manager_consolidation_unit.py -v
+python -m pytest tests/integration/redis_ssot/test_redis_import_migration_integration.py -v
+python -m pytest tests/integration/redis_ssot/test_websocket_redis_ssot_integration.py -v
+```
 
 ### 📋 Step 3: Plan SSOT Remediation - PENDING
 - [ ] Plan consolidation strategy for 4→1 Redis manager
