@@ -166,10 +166,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
             mock_thread_service.assert_not_called() 
             mock_message_handler.assert_not_called()
             
-            self.record_test_result(
+            self.record_metric(
                 "triage_start_exact_failure",
-                "REPRODUCED",
-                f"Triage agent start failure reproduced: {error_message}"
+                f"REPRODUCED - Triage agent start failure reproduced: {error_message}"
             )
 
     @pytest.mark.asyncio
@@ -217,10 +216,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
         assert "'async for' requires an object with __aiter__ method" in error_message
         assert "_AsyncGeneratorContextManager" in error_message
         
-        self.record_test_result(
+        self.record_metric(
             "session_pattern_isolation",
-            "REPRODUCED", 
-            "Isolated exact session pattern causing triage start failure"
+            "REPRODUCED - Isolated exact session pattern causing triage start failure"
         )
 
     @pytest.mark.asyncio
@@ -272,10 +270,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
                     assert supervisor is not None
                     mock_supervisor.assert_called_once()
                     
-                self.record_test_result(
+                self.record_metric(
                     "triage_start_fix_validation",
-                    "FIXED",
-                    "Async with pattern successfully enables triage agent start"
+                    "FIXED - Async with pattern successfully enables triage agent start"
                 )
                 
             except Exception as e:
@@ -326,10 +323,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
             assert golden_path_flow['step_5_ai_response'] == 'BLOCKED'
             assert golden_path_flow['step_6_user_value'] == 'LOST'
             
-            self.record_test_result(
+            self.record_metric(
                 "golden_path_user_flow_impact",
-                "BUSINESS_IMPACT_CONFIRMED",
-                "Session pattern failure blocks complete Golden Path user flow"
+                "BUSINESS_IMPACT_CONFIRMED - Session pattern failure blocks complete Golden Path user flow"
             )
             
         except Exception as e:
@@ -384,10 +380,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
             assert '$500K+' in business_impact['revenue_at_risk']
             assert business_impact['customer_satisfaction'] == 'DEGRADED'
             
-            self.record_test_result(
+            self.record_metric(
                 "revenue_impact_validation",
-                "BUSINESS_CRITICAL",
-                f"Technical failure blocks {business_impact['revenue_at_risk']} chat functionality"
+                f"BUSINESS_CRITICAL - Technical failure blocks {business_impact['revenue_at_risk']} chat functionality"
             )
             
         except Exception as e:
@@ -404,8 +399,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
         print(f"Required Fix: Change line 125 in agent_handler.py from 'async for' to 'async with'")
         print(f"Golden Path Impact: Complete user journey blocked at triage agent start")
         
-        for result in getattr(self, '_test_results', []):
-            print(f"  ✓ {result}")
+        metrics = self.get_all_metrics()
+        for metric_name, metric_value in metrics.items():
+            print(f"  ✓ {metric_name}: {metric_value}")
         print("=" * 80)
 
 
