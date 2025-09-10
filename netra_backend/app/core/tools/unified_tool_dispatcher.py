@@ -473,6 +473,11 @@ class UnifiedToolDispatcher:
         """Register a tool with the dispatcher."""
         self._ensure_active()
         
+        # ENHANCED VALIDATION: Consolidated from competing implementations
+        if not tool:
+            logger.error(f"Cannot register None tool in dispatcher {self.dispatcher_id}")
+            raise ValueError("Tool cannot be None")
+        
         # CRITICAL FIX: Check if tool has name attribute before accessing it
         if hasattr(tool, 'name') and tool.name:
             tool_name = tool.name
@@ -481,10 +486,21 @@ class UnifiedToolDispatcher:
             tool_name = getattr(tool, '__class__', type(tool)).__name__.lower()
             logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using fallback: {tool_name}")
         
+        # ENHANCED: Check for duplicate tool registration
+        if self.has_tool(tool_name):
+            logger.warning(f"⚠️ Tool {tool_name} already registered, skipping duplicate registration")
+            return
+        
         # Use the UniversalRegistry's register method with proper error handling
         try:
             self.registry.register(tool_name, tool)
             logger.debug(f"Registered tool {tool_name} in dispatcher {self.dispatcher_id}")
+            
+            # Track registration in metrics
+            if not hasattr(self._metrics, 'tools_registered'):
+                self._metrics['tools_registered'] = 0
+            self._metrics['tools_registered'] += 1
+            
         except ValueError as e:
             # CRITICAL FIX: Handle BaseModel validation failures gracefully
             if "BaseModel" in str(e) or "validation failed" in str(e).lower():
@@ -494,6 +510,9 @@ class UnifiedToolDispatcher:
             else:
                 # Re-raise other validation errors
                 raise
+        except Exception as e:
+            logger.error(f"🚨 Unexpected error registering tool {tool_name}: {e}")
+            raise
     
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
@@ -704,6 +723,7 @@ class UnifiedToolDispatcher:
             
             await self.websocket_manager.send_event("tool_completed", event_data)
             self._metrics['websocket_events_sent'] += 1
+            self.__class__._update_global_metrics('websocket_event')
         except Exception as e:
             logger.warning(f"Failed to emit tool_completed event: {e}")
     

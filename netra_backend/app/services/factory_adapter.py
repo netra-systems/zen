@@ -31,7 +31,7 @@ from netra_backend.app.logging_config import central_logger
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory, UserExecutionContext, IsolatedExecutionEngine
     from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 

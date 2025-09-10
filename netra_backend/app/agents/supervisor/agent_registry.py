@@ -45,6 +45,107 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+class WebSocketManagerAdapter:
+    """Adapter to convert WebSocketManager to AgentWebSocketBridge interface.
+    
+    This adapter enables seamless compatibility between the WebSocketManager
+    interface expected by AgentRegistry and the AgentWebSocketBridge interface
+    expected by UniversalAgentRegistry, maintaining SSOT compliance.
+    """
+    
+    def __init__(self, websocket_manager: 'WebSocketManager', user_context: Optional['UserExecutionContext'] = None):
+        """Initialize the adapter with a WebSocketManager instance.
+        
+        Args:
+            websocket_manager: WebSocketManager instance to adapt
+            user_context: User execution context for proper isolation
+        """
+        self._websocket_manager = websocket_manager
+        self._user_context = user_context
+        
+    def __getattr__(self, name: str):
+        """Delegate unknown attributes to the underlying WebSocketManager.
+        
+        This provides transparent access to WebSocketManager methods while
+        maintaining the AgentWebSocketBridge interface contract.
+        """
+        # First check if the method exists in the underlying manager
+        if hasattr(self._websocket_manager, name):
+            return getattr(self._websocket_manager, name)
+        
+        # If not found, raise AttributeError with helpful message
+        raise AttributeError(
+            f"WebSocketManagerAdapter has no attribute '{name}'. "
+            f"Underlying WebSocketManager type: {type(self._websocket_manager).__name__}"
+        )
+        
+    async def notify_agent_started(self, run_id: str, agent_name: str, metadata: Dict[str, Any]) -> None:
+        """Adapter method for agent started notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_started'):
+            await self._websocket_manager.notify_agent_started(run_id, agent_name, metadata)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_started - skipping for {agent_name}")
+    
+    async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str, 
+                                   step_number: Optional[int] = None, **kwargs) -> None:
+        """Adapter method for agent thinking notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_thinking'):
+            await self._websocket_manager.notify_agent_thinking(run_id, agent_name, reasoning, step_number, **kwargs)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_thinking - skipping for {agent_name}")
+    
+    async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, 
+                                   parameters: Dict[str, Any]) -> None:
+        """Adapter method for tool executing notifications."""
+        if hasattr(self._websocket_manager, 'notify_tool_executing'):
+            await self._websocket_manager.notify_tool_executing(run_id, agent_name, tool_name, parameters)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_tool_executing - skipping for {tool_name}")
+    
+    async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, 
+                                   result: Any, execution_time_ms: float) -> None:
+        """Adapter method for tool completed notifications."""
+        if hasattr(self._websocket_manager, 'notify_tool_completed'):
+            await self._websocket_manager.notify_tool_completed(run_id, agent_name, tool_name, result, execution_time_ms)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_tool_completed - skipping for {tool_name}")
+    
+    async def notify_agent_completed(self, run_id: str, agent_name: str, result: Dict[str, Any], 
+                                    execution_time_ms: float) -> None:
+        """Adapter method for agent completed notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_completed'):
+            await self._websocket_manager.notify_agent_completed(run_id, agent_name, result, execution_time_ms)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_completed - skipping for {agent_name}")
+    
+    async def notify_agent_error(self, run_id: str, agent_name: str, error: str, 
+                                error_context: Optional[Dict[str, Any]] = None) -> None:
+        """Adapter method for agent error notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_error'):
+            await self._websocket_manager.notify_agent_error(run_id, agent_name, error, error_context)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_error - skipping for {agent_name}")
+    
+    async def notify_agent_death(self, run_id: str, agent_name: str, cause: str, 
+                                death_context: Dict[str, Any]) -> None:
+        """Adapter method for agent death notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_death'):
+            await self._websocket_manager.notify_agent_death(run_id, agent_name, cause, death_context)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_death - skipping for {agent_name}")
+    
+    async def get_metrics(self) -> Dict[str, Any]:
+        """Get metrics from the underlying WebSocketManager."""
+        if hasattr(self._websocket_manager, 'get_metrics'):
+            return await self._websocket_manager.get_metrics()
+        else:
+            return {
+                'adapter_type': 'WebSocketManagerAdapter',
+                'underlying_manager': type(self._websocket_manager).__name__,
+                'metrics_supported': False
+            }
+
+
 class UserAgentSession:
     """Complete user isolation for agent execution.
     
