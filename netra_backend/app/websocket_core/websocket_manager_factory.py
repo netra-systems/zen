@@ -3131,134 +3131,10 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
         return None
 
 
-class EmergencyWebSocketManager:
-    """
-    PHASE 2 FIX: Emergency WebSocket manager for service continuity.
-    
-    Provides minimal WebSocket functionality when normal factory creation fails.
-    This ensures users can maintain WebSocket connections during service issues.
-    """
-    
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        self.user_id = config['user_id']
-        self.websocket_client_id = config['websocket_client_id']
-        self.thread_id = config['thread_id'] 
-        self.run_id = config['run_id']
-        self.emergency_mode = True
-        self.created_at = datetime.now(timezone.utc)
-        
-        # Minimal state tracking
-        self._connections = {}
-        self._message_queue = []
-        self._is_healthy = True
-        
-        logger.info(f"PHASE 2 FIX: EmergencyWebSocketManager initialized for {self.user_id[:8]}...")
-    
-    async def send_message(self, websocket, message: Dict[str, Any]) -> bool:
-        """Send message with emergency error handling."""
-        try:
-            # Add emergency mode indicator to messages
-            emergency_message = {
-                **message,
-                'emergency_mode': True,
-                'manager_type': 'emergency_fallback',
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-            if hasattr(websocket, 'send_json'):
-                await websocket.send_json(emergency_message)
-                return True
-            else:
-                logger.warning("PHASE 2 FIX: WebSocket send_json not available in emergency mode")
-                return False
-                
-        except Exception as e:
-            logger.error(f"PHASE 2 FIX: Emergency manager send failed: {e}")
-            return False
-    
-    async def handle_message(self, websocket, message: Dict[str, Any]) -> bool:
-        """Handle incoming messages in emergency mode."""
-        try:
-            # Queue messages for later processing when services recover
-            self._message_queue.append({
-                'message': message,
-                'timestamp': datetime.now(timezone.utc).isoformat(),
-                'websocket_id': id(websocket)
-            })
-            
-            # Send acknowledgment that message was received
-            ack_message = {
-                'type': 'emergency_ack',
-                'message': 'Message received in emergency mode - will process when services recover',
-                'emergency_mode': True,
-                'queue_position': len(self._message_queue)
-            }
-            
-            return await self.send_message(websocket, ack_message)
-            
-        except Exception as e:
-            logger.error(f"PHASE 2 FIX: Emergency message handling failed: {e}")
-            return False
-    
-    def get_health_status(self) -> Dict[str, Any]:
-        """Get emergency manager health status."""
-        return {
-            'healthy': self._is_healthy,
-            'manager_type': 'emergency_fallback',
-            'emergency_mode': True,
-            'connections': len(self._connections),
-            'queued_messages': len(self._message_queue),
-            'created_at': self.created_at.isoformat(),
-            'uptime_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
-        }
+# EmergencyWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
 
 
-class DegradedWebSocketManager:
-    """
-    PHASE 2 FIX: Degraded WebSocket manager for absolute last resort.
-    
-    Provides the most minimal WebSocket functionality possible to maintain
-    basic connectivity when all other systems have failed.
-    """
-    
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        self.degraded_mode = True
-        self.created_at = datetime.now(timezone.utc)
-        
-        logger.warning(f"PHASE 2 FIX: DegradedWebSocketManager initialized - minimal functionality only")
-    
-    async def send_message(self, websocket, message: Dict[str, Any]) -> bool:
-        """Send message with degraded functionality."""
-        try:
-            degraded_message = {
-                'type': 'degraded_service',
-                'message': 'Service operating in degraded mode - limited functionality available',
-                'original_message_type': message.get('type', 'unknown'),
-                'degraded_mode': True,
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
-            
-            if hasattr(websocket, 'send_json'):
-                await websocket.send_json(degraded_message)
-                return True
-            return False
-            
-        except Exception as e:
-            logger.error(f"PHASE 2 FIX: Degraded manager send failed: {e}")
-            return False
-    
-    def get_health_status(self) -> Dict[str, Any]:
-        """Get degraded manager health status."""
-        return {
-            'healthy': False,
-            'manager_type': 'degraded_service',
-            'degraded_mode': True,
-            'functionality_level': 'minimal',
-            'created_at': self.created_at.isoformat(),
-            'message': 'Operating in degraded mode - please retry connection'
-        }
+# DegradedWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
 
 
 __all__ = [
@@ -3276,7 +3152,4 @@ __all__ = [
     "validate_websocket_component_health",  # Component health validation
     # Five Whys Root Cause Prevention
     "WebSocketManagerProtocol",  # Re-exported from protocols module
-    # Phase 2 Emergency Fallback Components
-    "EmergencyWebSocketManager",
-    "DegradedWebSocketManager"
 ]
