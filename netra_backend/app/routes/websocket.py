@@ -80,6 +80,8 @@ from netra_backend.app.websocket_core.circuit_breaker import (
     websocket_connect_with_circuit_breaker,
     CircuitBreakerOpenError
 )
+# Environment constants for Cloud Run race condition fixes
+from netra_backend.app.core.environment_constants import get_current_environment
 
 logger = central_logger.get_logger(__name__)
 
@@ -343,8 +345,8 @@ async def websocket_endpoint(websocket: WebSocket):
             # CRITICAL: Give Cloud Run time to process the accept() before continuing
             # This prevents the "Need to call 'accept' first" race condition
             if environment in ["staging", "production"]:
-                await asyncio.sleep(0.1)  # 100ms for Cloud Run to stabilize
-                logger.debug("Applied Cloud Run post-accept stabilization delay")
+                await asyncio.sleep(0.2)  # 200ms for Cloud Run to stabilize (increased from 100ms)
+                logger.debug("Applied Cloud Run post-accept stabilization delay (200ms)")
                 
         except Exception as e:
             logger.error(f"❌ WebSocket accept failed: {e}")
@@ -1993,8 +1995,14 @@ async def _handle_websocket_messages(
             logger.warning(f"Connection {connection_id} state machine not ready for messages: {state_machine.current_state}")
             
             # Wait briefly for state machine to reach operational state
-            max_wait_attempts = 10
-            wait_delay = 0.1  # 100ms
+            # Increase attempts and delay for Cloud Run environments
+            environment = get_current_environment()
+            if environment in ["staging", "production"]:
+                max_wait_attempts = 20  # Increased from 10 for Cloud Run
+                wait_delay = 0.15  # 150ms (increased from 100ms for Cloud Run)
+            else:
+                max_wait_attempts = 10
+                wait_delay = 0.1  # 100ms
             
             for attempt in range(max_wait_attempts):
                 if state_machine.can_process_messages():
@@ -2024,6 +2032,15 @@ async def _handle_websocket_messages(
                 if not is_websocket_connected_and_ready(websocket):
                     logger.debug(f"WebSocket connection {connection_id} became unavailable before receive, exiting loop")
                     break
+                
+                # Enhanced Cloud Run validation: Double-check WebSocket state
+                environment = get_current_environment()
+                if environment in ["staging", "production"] and websocket.application_state != WebSocketState.CONNECTED:
+                    logger.warning(f"Cloud Run WebSocket state verification failed for {connection_id}: {websocket.application_state}")
+                    await asyncio.sleep(0.05)  # Brief delay to allow state stabilization
+                    if websocket.application_state != WebSocketState.CONNECTED:
+                        logger.error(f"Cloud Run WebSocket connection {connection_id} not in CONNECTED state, breaking loop")
+                        break
                 
                 # CRITICAL FIX: Use Windows-safe wait_for to prevent deadlocks
                 # Receive message with timeout
@@ -2110,24 +2127,39 @@ async def _handle_websocket_messages(
                 # CRITICAL FIX: Check if the error is related to WebSocket connection state
                 error_message = str(e)
                 
-                # Case 1: WebSocket not accepted yet (race condition in handshake)
-                if "Need to call 'accept' first" in error_message:
+                # Case 1: WebSocket not accepted yet (race condition in handshake) 
+                # CRITICAL: Check for 'accept' first since it's the more specific condition
+                if 'accept' in error_message.lower() and ('first' in error_message.lower() or 'call' in error_message.lower()):
                     logger.error(f"🚨 WEBSOCKET NOT ACCEPTED ERROR for {connection_id}: {error_message}")
                     logger.error(f"DIAGNOSTIC: This indicates websocket.accept() was never called or failed")
                     logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
                     logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
                     logger.error("ROOT_CAUSE: Race condition - message handler started before accept() completed")
+                    logger.error("ACTUAL_ERROR_MESSAGE: " + repr(error_message))  # Show exact message
                     # Break immediately - this is unrecoverable
                     break
                 
-                # Case 2: WebSocket disconnected (connection lost)
-                elif "WebSocket is not connected" in error_message:
+                # Case 2: WebSocket disconnected (connection lost) - but NOT accept related
+                elif "WebSocket is not connected" in error_message and "accept" not in error_message.lower():
                     logger.error(f"🔌 WEBSOCKET DISCONNECTED ERROR for {connection_id}: {error_message}")
                     logger.error(f"DIAGNOSTIC: WebSocket was connected but is now disconnected")
                     logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
                     logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
                     logger.error("ROOT_CAUSE: Connection dropped - client disconnect, network issue, or server close")
+                    logger.error("ACTUAL_ERROR_MESSAGE: " + repr(error_message))  # Show exact message
                     # Break immediately - connection is gone
+                    break
+                
+                # Case 3: Mixed error message (contains both "not connected" and "accept")
+                elif "WebSocket is not connected" in error_message and "accept" in error_message.lower():
+                    logger.error(f"⚠️ WEBSOCKET MIXED ERROR for {connection_id}: {error_message}")
+                    logger.error(f"DIAGNOSTIC: Complex error - WebSocket not connected AND needs accept()")
+                    logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
+                    logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
+                    logger.error("ROOT_CAUSE: Likely race condition - accept() failed or never called")
+                    logger.error("ACTUAL_ERROR_MESSAGE: " + repr(error_message))
+                    logger.error("INTERPRETATION: This should be treated as Case 1 (accept failure)")
+                    # Break immediately - this is unrecoverable like Case 1
                     break
                 else:
                     logger.error(f"Message handling error for {connection_id}: {e}", exc_info=True)
