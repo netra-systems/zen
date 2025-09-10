@@ -393,21 +393,7 @@ class UnifiedTriageAgent(BaseAgent):
             })
             
             # Return result
-            return {
-                "success": True,
-                "category": triage_result.category,
-                "sub_category": triage_result.sub_category,
-                "priority": triage_result.priority.value,
-                "complexity": triage_result.complexity.value,
-                "confidence_score": triage_result.confidence_score,
-                "data_sufficiency": triage_result.data_sufficiency,
-                "intent": triage_result.user_intent.__dict__,
-                "entities": triage_result.extracted_entities.__dict__,
-                "tools": triage_result.tool_recommendation.__dict__,
-                "next_steps": triage_result.next_steps,
-                "next_agents": next_agents,
-                "metadata": triage_result.metadata
-            }
+            return self._triage_result_to_dict(triage_result, next_agents)
             
         except Exception as e:
             logger.error(f"Triage execution failed: {e}", exc_info=True)
@@ -744,7 +730,7 @@ Focus on:
             priority=priority,
             complexity=Complexity.MEDIUM,
             confidence_score=0.3,  # Low confidence for fallback
-            data_sufficiency="unknown",
+            data_sufficiency="insufficient",
             extracted_entities=entities,
             user_intent=intent,
             tool_recommendation=tools,
@@ -758,6 +744,39 @@ Focus on:
         )
         
         return result
+    
+    def _triage_result_to_dict(
+        self, 
+        triage_result: TriageResult, 
+        next_agents: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """Convert TriageResult to dict format for consistent return type
+        
+        Args:
+            triage_result: TriageResult object to convert
+            next_agents: Optional list of next agents to include
+            
+        Returns:
+            Dict representation of triage result
+        """
+        if next_agents is None:
+            next_agents = self._determine_next_agents(triage_result)
+            
+        return {
+            "success": True,
+            "category": triage_result.category,
+            "sub_category": triage_result.sub_category,
+            "priority": triage_result.priority.value,
+            "complexity": triage_result.complexity.value,
+            "confidence_score": triage_result.confidence_score,
+            "data_sufficiency": triage_result.data_sufficiency,
+            "intent": triage_result.user_intent.__dict__,
+            "entities": triage_result.extracted_entities.__dict__,
+            "tools": triage_result.tool_recommendation.__dict__,
+            "next_steps": triage_result.next_steps,
+            "next_agents": next_agents,
+            "metadata": triage_result.metadata
+        }
     
     def _create_error_result(self, error: str) -> Dict[str, Any]:
         """Create error result for failed triage
