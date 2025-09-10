@@ -51,20 +51,28 @@ Critical SSOT violations in OAuth configuration validation are blocking golden p
 
 ## TEST STRATEGY
 
-### Existing Tests to Validate:
-- [ ] Mission critical OAuth tests
-- [ ] Authentication flow tests
-- [ ] Environment-specific OAuth tests
+### Existing Tests Discovered:
+- [x] **COMPREHENSIVE COVERAGE:** `test_oauth_race_condition_fixes.py` - 726 lines of SSOT OAuth tests ✅
+- [x] **Unit Tests:** `test_oauth_configuration_isolation.py` - Environment-specific OAuth validation
+- [x] **Integration Tests:** `test_config_ssot_oauth_jwt_cascade_failure_prevention.py` - JWT/OAuth SSOT
+- [x] **Auth Service:** `test_oauth_integration_business_logic.py` - OAuth business flows
+
+### Impact Assessment:
+- [x] **HIGH IMPACT:** 4+ test files will need import updates for SSOT consolidation
+- [x] **MEDIUM IMPACT:** Environment variable references need updates
+- [x] **LOW IMPACT:** OAuth functionality tests should continue working
 
 ### New Tests Required:
-- [ ] SSOT OAuth validation test suite
-- [ ] Cross-environment OAuth consistency tests  
-- [ ] OAuth redirect URI validation tests
+- [ ] OAuth duplication prevention tests (regression protection)
+- [ ] OAuth validation SSOT migration validation tests
+- [ ] OAuth security comprehensive validation tests
+- [ ] OAuth provider configuration validation tests
 
 ### Test Execution Plan:
-- [ ] Unit tests for central OAuth validator
-- [ ] Integration tests for OAuth service interactions
-- [ ] E2E tests for complete authentication flow
+- [x] **Unit Tests:** No Docker required - immediate execution ✅
+- [x] **Integration Tests:** No Docker required - isolated environment testing ✅  
+- [x] **E2E Staging:** Remote GCP staging testing ✅
+- [ ] **Migration Tests:** OAuth functionality preservation validation
 
 ## SAFETY MEASURES
 
@@ -81,16 +89,17 @@ Critical SSOT violations in OAuth configuration validation are blocking golden p
 
 ## PROGRESS TRACKING
 
-### Current Status: DISCOVERY COMPLETE ✅
+### Current Status: TEST DISCOVERY COMPLETE ✅
 - [x] SSOT audit completed
 - [x] GitHub issue created (#213)
 - [x] Impact analysis completed
 - [x] Remediation plan defined
+- [x] Existing OAuth test discovery completed
+- [x] New SSOT test planning completed
 
-### Next Steps: TEST DISCOVERY
-- [ ] Find existing OAuth validation tests
-- [ ] Plan new SSOT OAuth tests
-- [ ] Execute test creation for SSOT validation
+### Next Steps: TEST EXECUTION
+- [ ] Execute new SSOT OAuth test creation
+- [ ] Execute SSOT remediation implementation
 - [ ] Plan SSOT remediation implementation
 - [ ] Execute SSOT remediation
 - [ ] Test fix loop until all tests pass
