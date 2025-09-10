@@ -1385,15 +1385,11 @@ class TestUserExecutionEngineComprehensive:
                 # Create business value results for each agent
                 if agent_name == "supervisor_agent":
                     business_result = AgentExecutionResult(
-                        user_id=test_user_context.user_id,
-                        thread_id=test_user_context.thread_id,
-                        run_id=test_user_context.run_id,
                         success=True,
-                        result_data={
-                            "agent_name": agent_name,
-                            "execution_time": 1.2
-                        },
-                        execution_metadata={
+                        agent_name=agent_name,
+                        user_context=test_user_context,
+                        duration=1.2,
+                        metadata={
                             "orchestration_plan": ["data_analysis", "optimization", "report_generation"],
                             "estimated_savings_potential": "20-30%",
                             "analysis_scope": "infrastructure_optimization"
@@ -1401,15 +1397,11 @@ class TestUserExecutionEngineComprehensive:
                     )
                 elif agent_name == "data_analysis_agent":
                     business_result = AgentExecutionResult(
-                        user_id=test_user_context.user_id,
-                        thread_id=test_user_context.thread_id,
-                        run_id=test_user_context.run_id,
                         success=True,
-                        result_data={
-                            "agent_name": agent_name,
-                            "execution_time": 3.5
-                        },
-                        execution_metadata={
+                        agent_name=agent_name,
+                        user_context=test_user_context,
+                        duration=3.5,
+                        metadata={
                             "current_monthly_spend": 75000,
                             "top_cost_drivers": ["gpt-4_api_calls", "vector_storage", "compute_instances"],
                             "utilization_analysis": {
@@ -1420,15 +1412,11 @@ class TestUserExecutionEngineComprehensive:
                     )
                 elif agent_name == "optimization_agent":
                     business_result = AgentExecutionResult(
-                        user_id=test_user_context.user_id,
-                        thread_id=test_user_context.thread_id,
-                        run_id=test_user_context.run_id,
                         success=True,
-                        result_data={
-                            "agent_name": agent_name,
-                            "execution_time": 2.8
-                        },
-                        execution_metadata={
+                        agent_name=agent_name,
+                        user_context=test_user_context,
+                        duration=2.8,
+                        metadata={
                             "optimization_recommendations": [
                                 {
                                     "recommendation": "Switch to reserved GPU instances",
@@ -1452,15 +1440,11 @@ class TestUserExecutionEngineComprehensive:
                     )
                 elif agent_name == "report_generation_agent":
                     business_result = AgentExecutionResult(
-                        user_id=test_user_context.user_id,
-                        thread_id=test_user_context.thread_id,
-                        run_id=test_user_context.run_id,
                         success=True,
-                        result_data={
-                            "agent_name": agent_name,
-                            "execution_time": 1.8
-                        },
-                        execution_metadata={
+                        agent_name=agent_name,
+                        user_context=test_user_context,
+                        duration=1.8,
+                        metadata={
                             "executive_summary": "Identified $332K annual savings opportunity",
                             "action_items": [
                                 "Implement reserved instance strategy (2 weeks)",
