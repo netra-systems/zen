@@ -44,7 +44,6 @@ class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
         # After SSOT consolidation, we should have exactly one comprehensive service
         primary_persistence_modules = [
             "netra_backend.app.services.state_persistence",
-            "netra_backend.app.services.state_persistence_optimized",
         ]
         
         existing_modules = []
@@ -96,7 +95,6 @@ class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
         # Check for potential duplicate implementations
         persistence_related_modules = [
             "netra_backend.app.services.state_persistence",
-            "netra_backend.app.services.state_persistence_optimized", 
             "netra_backend.app.services.state_cache_manager",
         ]
         
@@ -136,13 +134,7 @@ class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
             main_service = state_persistence_service
             main_module = "state_persistence"
         except ImportError:
-            try:
-                # Try optimized if that became the consolidated version
-                from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
-                main_service = optimized_state_persistence
-                main_module = "state_persistence_optimized"
-            except ImportError:
-                self.fail("SSOT VIOLATION: No consolidated persistence service found")
+            self.fail("SSOT VIOLATION: No consolidated persistence service found")
                 
         # Check that optimization features are available in the consolidated service
         optimization_indicators = [
