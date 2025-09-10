@@ -68,7 +68,7 @@ class TestAlpinePortConfiguration(BaseTestCase):
                 )
         
         if failures:
-            self.fail(f"Alpine Dockerfile port configuration failures:\n" + "\n".join(failures))
+            pytest.fail(f"Alpine Dockerfile port configuration failures:\n" + "\n".join(failures))
     
     def test_alpine_dockerfile_health_check_port_configuration(self):
         """
@@ -90,9 +90,7 @@ class TestAlpinePortConfiguration(BaseTestCase):
                 healthcheck_cmd = healthcheck_match.group(1)
                 
                 # Should NOT contain hardcoded port
-                self.assertNotIn(
-                    "localhost:8000",
-                    healthcheck_cmd,
+                assert "localhost:8000" not in healthcheck_cmd, (
                     f"{dockerfile_path.name}: Health check uses hardcoded port 8000. "
                     f"Should use localhost:${{PORT:-8000}} for Cloud Run compatibility."
                 )
@@ -113,14 +111,10 @@ class TestAlpinePortConfiguration(BaseTestCase):
             gcp_backend = gcp_configs['backend']
             
             # GCP should use dynamic port, Alpine currently doesn't
-            self.assertTrue(
-                gcp_backend['uses_dynamic_port'],
-                "GCP Dockerfile should use dynamic PORT variable"
-            )
+            assert gcp_backend['uses_dynamic_port'], "GCP Dockerfile should use dynamic PORT variable"
             
             # This should FAIL until fixed
-            self.assertTrue(
-                alpine_backend['uses_dynamic_port'],
+            assert alpine_backend['uses_dynamic_port'], (
                 f"Alpine Dockerfile should use dynamic PORT variable like GCP version. "
                 f"Currently: Alpine={alpine_backend['port_config']}, GCP={gcp_backend['port_config']}"
             )
@@ -145,9 +139,8 @@ class TestAlpinePortConfiguration(BaseTestCase):
                 bind_config = cmd_match.group(1)
                 
                 # Should use ${PORT} or similar dynamic configuration
-                self.assertRegex(
-                    bind_config,
-                    r'\$\{PORT.*\}',
+                import re
+                assert re.search(r'\$\{PORT.*\}', bind_config), (
                     f"{dockerfile_path.name}: gunicorn bind should use ${{PORT}} environment variable "
                     f"for Cloud Run compatibility. Current: {bind_config}"
                 )
