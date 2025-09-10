@@ -61,7 +61,7 @@ class ServiceConfig:
     cpu: str = "1"
     min_instances: int = 0
     max_instances: int = 10
-    timeout: int = 1800  # Increased to 30 minutes for staging deployments
+    timeout: int = 600   # Reduced to 10 minutes with better resource allocation (Issue #128)
 
 
 class GCPDeployer:
@@ -83,9 +83,10 @@ class GCPDeployer:
         self.use_shell = sys.platform == "win32"
         
         # Service configurations (Alpine-optimized if flag is set)
+        # ISSUE #128 FIX: Increased resources for staging WebSocket reliability
         backend_dockerfile = "dockerfiles/backend.staging.alpine.Dockerfile" if self.use_alpine else "deployment/docker/backend.gcp.Dockerfile"
-        backend_memory = "2Gi" if self.use_alpine else "4Gi"
-        backend_cpu = "2" if self.use_alpine else "2"
+        backend_memory = "4Gi"  # Increased from 2Gi for better WebSocket connection handling
+        backend_cpu = "4"       # Increased from 2 for faster asyncio.selector.select() processing
         
         self.services = [
             ServiceConfig(
@@ -112,14 +113,19 @@ class GCPDeployer:
                     "CLICKHOUSE_USER": "default",
                     "CLICKHOUSE_DB": "default",
                     "CLICKHOUSE_SECURE": "true",
-                    # CRITICAL FIX: WebSocket timeout configuration for GCP staging
-                    "WEBSOCKET_CONNECTION_TIMEOUT": "900",  # 15 minutes for GCP load balancer
-                    "WEBSOCKET_HEARTBEAT_INTERVAL": "25",   # Send heartbeat every 25s
-                    "WEBSOCKET_HEARTBEAT_TIMEOUT": "75",    # Wait 75s for heartbeat response  
-                    "WEBSOCKET_CLEANUP_INTERVAL": "180",    # Cleanup every 3 minutes
+                    # CRITICAL FIX: WebSocket timeout configuration for GCP staging - OPTIMIZED FOR ISSUE #128
+                    "WEBSOCKET_CONNECTION_TIMEOUT": "360",  # 6 minutes (60% reduction from 15min)
+                    "WEBSOCKET_HEARTBEAT_INTERVAL": "15",   # Send heartbeat every 15s (faster detection)
+                    "WEBSOCKET_HEARTBEAT_TIMEOUT": "45",    # Wait 45s for heartbeat response (faster failure detection)
+                    "WEBSOCKET_CLEANUP_INTERVAL": "120",    # Cleanup every 2 minutes (more frequent cleanup)
                     # CRITICAL FIX: Bypass startup validation for OAuth domain mismatch (staging only)
                     "BYPASS_STARTUP_VALIDATION": "true",    # OAuth domain mismatch is non-critical in staging
-                    "WEBSOCKET_STALE_TIMEOUT": "900",       # 15 minutes before marking connection stale
+                    "WEBSOCKET_STALE_TIMEOUT": "360",       # 6 minutes before marking connection stale (consistent with connection timeout)
+                    # NEW: Additional timeout optimizations for Issue #128 WebSocket connectivity
+                    "WEBSOCKET_CONNECT_TIMEOUT": "10",      # 10s max for initial connection establishment
+                    "WEBSOCKET_HANDSHAKE_TIMEOUT": "15",    # 15s max for WebSocket handshake completion  
+                    "WEBSOCKET_PING_TIMEOUT": "5",          # 5s timeout for ping/pong messages
+                    "WEBSOCKET_CLOSE_TIMEOUT": "10",        # 10s timeout for graceful connection close
                 }
             ),
             ServiceConfig(

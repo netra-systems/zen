@@ -85,33 +85,46 @@ class ErrorHandlingIntegrationTest(BaseIntegrationTest):
     - Business continuity verification
     """
     
-    async def async_setup(self):
-        """Set up test environment for error handling scenarios."""
-        await super().async_setup()
-        
-        # Initialize test environment
-        self.env = get_env()
-        self.env.set("TESTING", "1", source="error_handling_test")
-        self.env.set("ENABLE_CIRCUIT_BREAKERS", "true", source="error_handling_test")
-        self.env.set("ERROR_INJECTION_MODE", "true", source="error_handling_test")
-        
-        # Test identifiers for tracing
+    def setup_method(self):
+        """Set up method called before each test method."""
+        super().setup_method()
+        # Initialize all test identifiers early to ensure they're always available
         self.test_user_id = f"error-test-{uuid.uuid4().hex[:8]}"
-        self.test_thread_id = UnifiedIdGenerator.generate_thread_id()
-        self.test_run_id = UnifiedIdGenerator.generate_run_id()
-        self.test_request_id = UnifiedIdGenerator.generate_request_id()
-        
-        # Error tracking for validation
+        self.test_thread_id, self.test_run_id, self.test_request_id = UnifiedIdGenerator.generate_user_context_ids(
+            user_id=self.test_user_id, 
+            operation="error_handling_test"
+        )
         self.injected_errors = []
         self.recovery_events = []
         self.degradation_modes = []
-        
-        # Performance tracking
         self.performance_metrics = {
             'error_recovery_times': [],
             'degraded_performance_ratios': [],
             'business_continuity_scores': []
         }
+        
+        # Initialize mock components early to ensure they're always available
+        self.mock_llm_manager = Mock(spec=LLMManager)
+        self.mock_llm_manager.generate_response = AsyncMock()
+        self.mock_llm_manager.is_available = Mock(return_value=True)
+        
+        # Mock WebSocket infrastructure for event validation
+        self.mock_websocket_manager = Mock(spec=WebSocketManager)
+        self.mock_websocket_manager.send_to_user = AsyncMock()
+        self.mock_websocket_manager.is_connected = Mock(return_value=True)
+        
+        self.mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
+        self.mock_websocket_bridge.websocket_manager = self.mock_websocket_manager
+        self.mock_websocket_bridge.emit_agent_event = AsyncMock()
+    
+    async def async_setup_method(self, method=None):
+        """Set up test environment for error handling scenarios."""
+        await super().async_setup()
+        
+        # Initialize test environment (all IDs already set in setup_method)
+        self.env.set("TESTING", "1", source="error_handling_test")
+        self.env.set("ENABLE_CIRCUIT_BREAKERS", "true", source="error_handling_test")
+        self.env.set("ERROR_INJECTION_MODE", "true", source="error_handling_test")
     
     async def inject_service_failure(self, service_name: str, failure_type: str, duration: float = 5.0):
         """
@@ -197,8 +210,8 @@ class ErrorHandlingIntegrationTest(BaseIntegrationTest):
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,
             request_id=f"{self.test_request_id}-{scenario_name[:8]}",
-            websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id(self.test_user_id),
-            metadata=base_metadata
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(self.test_user_id),
+            agent_context=base_metadata
         )
 
 
@@ -227,17 +240,10 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         if not real_services_fixture["redis_available"]:
             pytest.skip("Redis required for cache failure testing")
         
-        # Setup components
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.generate_response = AsyncMock()
-        mock_llm_manager.is_available = Mock(return_value=True)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
-        
+        # Setup components - use global mocks
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         # Create test context
@@ -248,7 +254,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         context.db_session = real_services_fixture["db"]
         
         # Mock successful LLM responses
-        mock_llm_manager.generate_response.side_effect = [
+        self.mock_llm_manager.generate_response.side_effect = [
             {"status": "cache_miss", "fallback_to_db": True, "source": "database"},
             {"summary": "Analysis completed using database fallback", "performance": "degraded"}
         ]
@@ -307,19 +313,14 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for connection pool testing")
         
-        # Setup infrastructure
-        mock_llm_manager = Mock(spec=LLMManager) 
-        mock_llm_manager.generate_response = AsyncMock(return_value={
+        # Setup infrastructure - use global mocks
+        self.mock_llm_manager.generate_response = AsyncMock(return_value={
             "status": "queued", "message": "Request queued due to high load"
         })
-        mock_llm_manager.is_available = Mock(return_value=True)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         context = self.create_error_test_context(
@@ -401,17 +402,10 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Business Value: Users with existing sessions can continue working even if auth service is down.
         Critical Path: Auth failure → Use cached tokens → Limited functionality → Restore when auth recovers.
         """
-        # Setup components
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.generate_response = AsyncMock()
-        mock_llm_manager.is_available = Mock(return_value=True)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge) 
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
-        
+        # Setup components - use global mocks
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         context = self.create_error_test_context(
@@ -420,7 +414,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         )
         
         # Mock LLM responses for auth failure scenario
-        mock_llm_manager.generate_response.side_effect = [
+        self.mock_llm_manager.generate_response.side_effect = [
             {"auth_status": "cached", "functionality": "limited", "message": "Using cached authentication"},
             {"summary": "Limited analysis provided using cached credentials", "auth_degraded": True}
         ]
@@ -479,9 +473,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Critical Path: WebSocket failure → Agent continues → Results delivered → WebSocket reconnects.
         """
         # Setup components with WebSocket tracking
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.generate_response = AsyncMock()
-        mock_llm_manager.is_available = Mock(return_value=True)
+        # Use global mock_llm_manager
         
         # Create failing WebSocket bridge that recovers
         failing_websocket_bridge = Mock(spec=AgentWebSocketBridge)
@@ -499,7 +491,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         failing_websocket_bridge.emit_agent_event = AsyncMock(side_effect=failing_websocket_emit)
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
+            llm_manager=self.mock_llm_manager,
             websocket_bridge=failing_websocket_bridge
         )
         
@@ -509,7 +501,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         )
         
         # Mock LLM responses
-        mock_llm_manager.generate_response.side_effect = [
+        self.mock_llm_manager.generate_response.side_effect = [
             {"status": "websocket_failed", "continue_execution": True},
             {"status": "websocket_recovered", "summary": "Agent completed despite WebSocket issues"}
         ]
@@ -552,9 +544,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Critical Path: Large message → Size check → Truncate/summarize → Send manageable chunks.
         """
         # Setup components
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.generate_response = AsyncMock()
-        mock_llm_manager.is_available = Mock(return_value=True)
+        # Use global mock_llm_manager
         
         # Create WebSocket bridge that tracks message sizes
         size_limit_websocket_bridge = Mock(spec=AgentWebSocketBridge)
@@ -581,7 +571,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         size_limit_websocket_bridge.emit_agent_event = AsyncMock(side_effect=size_limit_websocket_emit)
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
+            llm_manager=self.mock_llm_manager,
             websocket_bridge=size_limit_websocket_bridge
         )
         
@@ -593,7 +583,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         # Create large response that would exceed WebSocket limits
         large_analysis_content = "DETAILED_ANALYSIS_" + "x" * 50000  # 50KB+ of content
         
-        mock_llm_manager.generate_response.side_effect = [
+        self.mock_llm_manager.generate_response.side_effect = [
             {
                 "analysis_type": "comprehensive_large",
                 "large_content": large_analysis_content,
@@ -646,8 +636,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Critical Path: Long execution → Timeout → Cancel gracefully → Return partial results.
         """
         # Setup components with timeout simulation
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.is_available = Mock(return_value=True)
+        # Use global mock_llm_manager
         
         # Create slow LLM responses to simulate timeout scenarios
         slow_response_count = 0
@@ -663,14 +652,11 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                 # Subsequent responses are quick (post-timeout)
                 return {"status": "timeout_recovery", "summary": "Partial results delivered due to timeout"}
         
-        mock_llm_manager.generate_response = AsyncMock(side_effect=slow_llm_response)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
+        self.mock_llm_manager.generate_response = AsyncMock(side_effect=slow_llm_response)
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         context = self.create_error_test_context(
@@ -710,7 +696,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         recovery_start = time.time()
         
         # Reset LLM manager for quick response
-        mock_llm_manager.generate_response = AsyncMock(return_value={
+        self.mock_llm_manager.generate_response = AsyncMock(return_value={
             "status": "post_timeout_recovery",
             "summary": "Quick response after timeout recovery",
             "performance": "normal"
@@ -760,9 +746,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             pytest.skip("Database required for concurrent user testing")
         
         # Setup components
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.generate_response = AsyncMock()
-        mock_llm_manager.is_available = Mock(return_value=True)
+        # Use global mock_llm_manager
         
         mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
         mock_websocket_bridge.emit_agent_event = AsyncMock()
@@ -801,7 +785,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                     "summary": "Analysis completed"
                 }
         
-        mock_llm_manager.generate_response.side_effect = backpressure_llm_response
+        self.mock_llm_manager.generate_response.side_effect = backpressure_llm_response
         
         # Create multiple concurrent user contexts
         concurrent_contexts = []
@@ -817,7 +801,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         supervisors = []
         for _ in range(8):
             supervisor = SupervisorAgent(
-                llm_manager=mock_llm_manager,
+                llm_manager=self.mock_llm_manager,
                 websocket_bridge=mock_websocket_bridge
             )
             supervisors.append(supervisor)
@@ -890,8 +874,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Critical Path: Network interruption → Use cached data → Retry connections → Resume when network recovers.
         """
         # Setup components with network simulation
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.is_available = Mock(return_value=True)
+        # Use global mock_llm_manager
         
         # Simulate network interruptions
         network_attempts = 0
@@ -915,14 +898,11 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                     "summary": "Analysis completed despite network interruptions"
                 }
         
-        mock_llm_manager.generate_response = AsyncMock(side_effect=network_interrupted_llm_response)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
+        self.mock_llm_manager.generate_response = AsyncMock(side_effect=network_interrupted_llm_response)
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         context = self.create_error_test_context(
@@ -973,16 +953,11 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Critical Path: Malicious input → Detect → Sanitize → Safe processing → Secure response.
         """
         # Setup components
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.generate_response = AsyncMock()
-        mock_llm_manager.is_available = Mock(return_value=True)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
+        # Use global mock_llm_manager
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         # Test malicious payloads
@@ -1023,7 +998,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             )
             
             # Mock LLM response for security handling
-            mock_llm_manager.generate_response.side_effect = [
+            self.mock_llm_manager.generate_response.side_effect = [
                 {
                     "security_scan": "completed",
                     "payload_sanitized": True,
@@ -1099,8 +1074,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Critical Path: Overload detected → Circuit breaker opens → Fail fast → Circuit breaker resets when load decreases.
         """
         # Setup components with circuit breaker simulation
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.is_available = Mock(return_value=True)
+        # Use global mock_llm_manager
         
         # Simulate circuit breaker state
         circuit_breaker_state = {'open': False, 'failure_count': 0, 'last_failure_time': 0}
@@ -1144,14 +1118,11 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                 "circuit_breaker": "closed"
             }
         
-        mock_llm_manager.generate_response = AsyncMock(side_effect=circuit_breaker_llm_response)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
+        self.mock_llm_manager.generate_response = AsyncMock(side_effect=circuit_breaker_llm_response)
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         context = self.create_error_test_context(
@@ -1234,16 +1205,11 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         import os
         
         # Setup components
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.generate_response = AsyncMock()
-        mock_llm_manager.is_available = Mock(return_value=True)
-        
-        mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)
-        mock_websocket_bridge.emit_agent_event = AsyncMock()
+        # Use global mock_llm_manager
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
-            websocket_bridge=mock_websocket_bridge
+            llm_manager=self.mock_llm_manager,
+            websocket_bridge=self.mock_websocket_bridge
         )
         
         # Get initial memory baseline
@@ -1275,7 +1241,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             self.logger.info(f"📊 Peak memory usage: {peak_memory:.1f} MB (+{peak_memory - initial_memory:.1f} MB)")
             
             # Mock LLM response that simulates memory cleanup
-            mock_llm_manager.generate_response.side_effect = [
+            self.mock_llm_manager.generate_response.side_effect = [
                 {
                     "status": "memory_pressure_detected",
                     "cleanup_triggered": True,
@@ -1341,14 +1307,13 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Critical Path: Multiple failures → Detect all → Apply multiple mitigations → Deliver degraded but valuable service.
         """
         # Setup components
-        mock_llm_manager = Mock(spec=LLMManager)
-        mock_llm_manager.is_available = Mock(return_value=True)
+        # Use global mock_llm_manager
         
         mock_websocket_bridge = Mock(spec=AgentWebSocketBridge)  
         mock_websocket_bridge.emit_agent_event = AsyncMock()
         
         supervisor = SupervisorAgent(
-            llm_manager=mock_llm_manager,
+            llm_manager=self.mock_llm_manager,
             websocket_bridge=mock_websocket_bridge
         )
         
@@ -1413,7 +1378,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                     "failures_handled": active_failures
                 }
         
-        mock_llm_manager.generate_response.side_effect = catastrophic_llm_response
+        self.mock_llm_manager.generate_response.side_effect = catastrophic_llm_response
         
         # Step 2: Execute under catastrophic conditions
         catastrophic_start = time.time()
@@ -1426,7 +1391,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         
         # Step 4: Execute recovery test
         recovery_start = time.time()
-        mock_llm_manager.generate_response.side_effect = [
+        self.mock_llm_manager.generate_response.side_effect = [
             {
                 "status": "recovery_in_progress",
                 "restored_services": ["redis", "websocket", "network"],
@@ -1473,7 +1438,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
     # Test Summary and Performance Metrics
     # ============================================================================
     
-    async def async_teardown(self):
+    async def async_teardown_method(self, method=None):
         """Generate comprehensive error handling test report."""
         try:
             # Calculate performance metrics
