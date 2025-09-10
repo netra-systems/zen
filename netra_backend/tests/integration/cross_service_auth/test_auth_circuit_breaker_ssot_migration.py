@@ -107,11 +107,9 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         assert config.recovery_timeout > 0, "Recovery timeout must be positive"
         assert config.timeout_seconds > 0, "Timeout seconds must be positive"
         
-        # Log success (this should only happen AFTER migration)
-        self.log_test_success(
-            "auth_circuit_breaker_ssot_compliance",
-            "AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker with no duplicate logic"
-        )
+        # If we reach here, the SSOT migration has been completed successfully
+        # This indicates AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker
+        print(f"✅ SSOT COMPLIANCE VERIFIED: AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker")
 
     @pytest.mark.integration
     @pytest.mark.ssot_migration
@@ -157,10 +155,8 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         
         # The circuit behavior depends on the specific configuration
         # Main point is that delegation preserves the circuit breaker pattern
-        self.log_test_success(
-            "auth_circuit_breaker_delegation_functionality",
-            f"Delegation preserves circuit breaker functionality with {failures} failures handled"
-        )
+        # Verify delegation preserves circuit breaker functionality
+        print(f"✅ DELEGATION VERIFIED: Circuit breaker functionality preserved with {failures} failures handled")
 
     @pytest.mark.integration 
     @pytest.mark.ssot_migration
@@ -189,10 +185,8 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         assert breaker2.state == UnifiedCircuitBreakerState.CLOSED
         assert breaker2.failure_count == 0
         
-        self.log_test_success(
-            "auth_circuit_breaker_reset_delegation",
-            "reset_all() properly delegates to UnifiedCircuitBreaker instances"
-        )
+        # Verify reset delegation works correctly
+        print(f"✅ RESET DELEGATION VERIFIED: reset_all() properly delegates to UnifiedCircuitBreaker instances")
 
     @pytest.mark.integration
     @pytest.mark.ssot_migration
@@ -223,7 +217,5 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         created_breaker = auth_cb_manager._breakers[breaker_name]
         assert isinstance(created_breaker, UnifiedCircuitBreaker)
         
-        self.log_test_success(
-            "auth_circuit_breaker_call_with_breaker_delegation",
-            "call_with_breaker properly creates and delegates to UnifiedCircuitBreaker"
-        )
+        # Verify call_with_breaker delegation works correctly
+        print(f"✅ CALL_WITH_BREAKER DELEGATION VERIFIED: Proper creation and delegation to UnifiedCircuitBreaker")

@@ -75,12 +75,9 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         # Verify returned breaker is the mock instance
         assert breaker is mock_breaker_instance
         
-        self.log_test_success(
-            "auth_circuit_breaker_delegation_creation",
-            f"AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker with config: "
-            f"failure_threshold={config_arg.failure_threshold}, "
-            f"recovery_timeout={config_arg.recovery_timeout}"
-        )
+        # Success: AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker
+        print(f"✅ DELEGATION CREATION VERIFIED: AuthCircuitBreakerManager delegates to UnifiedCircuitBreaker "
+              f"with failure_threshold={config_arg.failure_threshold}, recovery_timeout={config_arg.recovery_timeout}")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -115,10 +112,8 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert mock_unified_cb_class.call_count == 2, "Should create second breaker for different name"
         assert breaker4 is mock_breaker_instance  # Mock returns same instance, but would be different in real scenario
         
-        self.log_test_success(
-            "auth_circuit_breaker_caching",
-            "AuthCircuitBreakerManager properly caches breaker instances"
-        )
+        # Success: AuthCircuitBreakerManager properly caches breaker instances
+        print(f"✅ CACHING VERIFIED: AuthCircuitBreakerManager properly caches breaker instances")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -158,10 +153,8 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert mock_breaker2.failure_count == 0
         assert mock_breaker2.success_count == 0
         
-        self.log_test_success(
-            "auth_circuit_breaker_reset_all_delegation",
-            "reset_all() properly resets all UnifiedCircuitBreaker instances to CLOSED state"
-        )
+        # Success: reset_all() properly resets all UnifiedCircuitBreaker instances
+        print(f"✅ RESET_ALL DELEGATION VERIFIED: All UnifiedCircuitBreaker instances reset to CLOSED state")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation

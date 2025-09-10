@@ -26,18 +26,16 @@ from typing import Dict, List, Set, Tuple, Optional
 from pathlib import Path
 
 import pytest
-from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.configuration.central_config_validator import CentralConfigurationValidator
 
 logger = logging.getLogger(__name__)
 
 
-class TestOAuthDuplicationPrevention(SSotBaseTestCase):
+class TestOAuthDuplicationPrevention:
     """Test suite to prevent OAuth validation duplication - Issue #213."""
     
     def setup_method(self):
         """Set up test environment."""
-        super().setup_method()
         self.project_root = Path(__file__).parents[3]  # /Users/anthony/Desktop/netra-apex
         self.known_duplicate_patterns = [
             "def get_oauth_client_id",

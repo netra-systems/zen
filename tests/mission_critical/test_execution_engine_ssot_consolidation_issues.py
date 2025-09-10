@@ -94,12 +94,12 @@ class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
         - Multiple factory patterns 
         - Inconsistent interfaces
         """
-        # Collect all execution engine classes
+        # Collect all AGENT execution engine classes (exclude tool execution engines)
         execution_engines = [
             SupervisorExecutionEngine,
             ConsolidatedExecutionEngine,
-            CoreExecutionEngine,
-            ToolRegistryExecutionEngine
+            # CoreExecutionEngine removed - now same as SupervisorExecutionEngine after import fix
+            # ToolRegistryExecutionEngine removed - this is for tool execution, not agent execution
         ]
         
         # Analyze class hierarchies and methods

@@ -46,7 +46,12 @@ WebSocket connections fail completely due to missing `get_db_session_factory` fu
   - [x] Tests validate GitHub Issue #204 exact error reproduction
   - [x] Test execution verified - properly detect SSOT violations
 
-- [ ] **Step 3: Plan Remediation**
+- [x] **Step 3: Plan Remediation** - COMPLETED
+  - [x] Created comprehensive 3-phase remediation strategy
+  - [x] Prioritized business impact: WebSocket → Duplicates → Circular imports
+  - [x] Planned minimal changes to restore golden path functionality
+  - [x] Identified safety measures and validation steps
+
 - [ ] **Step 4: Execute Remediation**  
 - [ ] **Step 5: Test Fix Loop**
 - [ ] **Step 6: PR and Closure**

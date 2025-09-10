@@ -24,7 +24,7 @@ import logging
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch, MagicMock
 
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+# Base test case not needed for simple pytest
 from shared.configuration.central_config_validator import (
     CentralConfigurationValidator, 
     Environment,
@@ -36,12 +36,11 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestOAuthSSOTMigration(SSotBaseTestCase):
+class TestOAuthSSOTMigration:
     """Test suite to validate OAuth SSOT migration safety - Issue #213."""
     
     def setup_method(self):
         """Set up test environment with OAuth credentials."""
-        super().setup_method()
         clear_central_validator_cache()
         
         # Set up test OAuth credentials
@@ -60,7 +59,6 @@ class TestOAuthSSOTMigration(SSotBaseTestCase):
     def teardown_method(self):
         """Clean up test environment."""
         clear_central_validator_cache()
-        super().teardown_method()
     
     def test_oauth_functionality_preserved_post_migration(self):
         """

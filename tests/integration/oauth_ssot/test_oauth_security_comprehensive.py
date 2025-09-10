@@ -26,7 +26,7 @@ from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+# Base test case not needed for simple pytest
 from shared.configuration.central_config_validator import (
     CentralConfigurationValidator,
     Environment,
@@ -38,12 +38,11 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestOAuthSecurityComprehensive(SSotBaseTestCase):
+class TestOAuthSecurityComprehensive:
     """Test suite for OAuth security validation using SSOT - Issue #213."""
     
     def setup_method(self):
         """Set up secure test environment."""
-        super().setup_method()
         clear_central_validator_cache()
         
         # Set up test OAuth credentials with security validation
@@ -64,7 +63,6 @@ class TestOAuthSecurityComprehensive(SSotBaseTestCase):
     def teardown_method(self):
         """Clean up secure test environment."""
         clear_central_validator_cache()
-        super().teardown_method()
     
     def test_oauth_security_comprehensive_ssot(self):
         """

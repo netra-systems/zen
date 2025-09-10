@@ -60,38 +60,44 @@ class TestThreadStateManagerCoordination(BaseIntegrationTest):
             'last_activity': asyncio.get_event_loop().time()
         }
         
-        # Create thread state through manager
-        created_state = await state_manager.create_thread_state(
-            thread_id=test_thread_id,
-            user_id=test_user_id,
-            initial_context=thread_state_data['context']
+        # Set thread state data through manager (using key-value API)
+        state_manager.set_thread_state(str(test_thread_id), 'thread_id', test_thread_id)
+        state_manager.set_thread_state(str(test_thread_id), 'user_id', test_user_id)
+        state_manager.set_thread_state(str(test_thread_id), 'status', thread_state_data['status'])
+        state_manager.set_thread_state(str(test_thread_id), 'context', thread_state_data['context'])
+        state_manager.set_thread_state(str(test_thread_id), 'last_activity', thread_state_data['last_activity'])
+        
+        # Retrieve and validate thread state data
+        retrieved_thread_id = state_manager.get_thread_state(str(test_thread_id), 'thread_id')
+        retrieved_user_id = state_manager.get_thread_state(str(test_thread_id), 'user_id')
+        retrieved_status = state_manager.get_thread_state(str(test_thread_id), 'status')
+        
+        # Type validation - ThreadID and UserID are NewType(str), so check underlying type
+        assert isinstance(retrieved_thread_id, str), (
+            f"thread_id must be string-based ThreadID, got {type(retrieved_thread_id)}"
         )
+        assert isinstance(retrieved_user_id, str), (
+            f"user_id must be string-based UserID, got {type(retrieved_user_id)}"
+        )
+        # Validate that the ThreadID and UserID values are correct
+        assert str(retrieved_thread_id) == str(test_thread_id), "ThreadID values must match"
+        assert str(retrieved_user_id) == str(test_user_id), "UserID values must match"
         
-        # Validate created state has consistent type structure
-        assert hasattr(created_state, 'thread_id'), "ThreadState must have thread_id field"
-        assert hasattr(created_state, 'user_id'), "ThreadState must have user_id field"
-        assert hasattr(created_state, 'status'), "ThreadState must have status field"
+        # Verify data consistency  
+        assert retrieved_thread_id == test_thread_id, "Retrieved thread_id must match stored"
+        assert retrieved_user_id == test_user_id, "Retrieved user_id must match stored"
+        assert retrieved_status == thread_state_data['status'], "Retrieved status must match stored"
         
-        # Type validation - must use strongly typed IDs
-        if hasattr(created_state, 'thread_id'):
-            assert isinstance(created_state.thread_id, ThreadID), (
-                f"thread_id must be strongly typed ThreadID, got {type(created_state.thread_id)}"
-            )
+        # Verify context data
+        retrieved_context = state_manager.get_thread_state(str(test_thread_id), 'context')
+        assert retrieved_context == thread_state_data['context'], "Retrieved context must match stored"
         
-        if hasattr(created_state, 'user_id'):
-            assert isinstance(created_state.user_id, UserID), (
-                f"user_id must be strongly typed UserID, got {type(created_state.user_id)}"
-            )
-        
-        # Retrieve state and verify consistency
-        retrieved_state = await state_manager.get_thread_state(test_thread_id)
-        
-        assert retrieved_state is not None, "Thread state must be retrievable after creation"
-        assert retrieved_state.thread_id == test_thread_id, "Retrieved thread_id must match created"
-        assert retrieved_state.user_id == test_user_id, "Retrieved user_id must match created"
-        
-        # Cleanup
-        await state_manager.delete_thread_state(test_thread_id)
+        # Cleanup - clear all thread state keys
+        state_manager.set_thread_state(str(test_thread_id), 'thread_id', None)
+        state_manager.set_thread_state(str(test_thread_id), 'user_id', None)
+        state_manager.set_thread_state(str(test_thread_id), 'status', None)
+        state_manager.set_thread_state(str(test_thread_id), 'context', None)
+        state_manager.set_thread_state(str(test_thread_id), 'last_activity', None)
 
 
     @pytest.mark.integration
