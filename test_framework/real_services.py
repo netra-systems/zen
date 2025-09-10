@@ -135,8 +135,7 @@ class ServiceEndpoints:
 # DATABASE MANAGER
 # =============================================================================
 
-class DatabaseManager:
-    """Real PostgreSQL database manager for testing."""
+# DatabaseManager imported from SSOT location at top of file
     
     def __init__(self, config: ServiceEndpoints):
         self.config = config

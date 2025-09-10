@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
-from netra_backend.app.core.tools.unified_tool_dispatcher import RequestScopedToolDispatcher
+from netra_backend.app.agents.request_scoped_tool_dispatcher import RequestScopedToolDispatcher
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
