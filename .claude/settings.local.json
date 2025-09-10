@@ -18,7 +18,11 @@
       "Bash(git commit:*)",
       "Bash(gcloud config get-value:*)",
       "Bash(mkdir:*)",
-      "Bash(gh label:*)"
+      "Bash(gh label:*)",
+      "Bash(git fetch:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []
