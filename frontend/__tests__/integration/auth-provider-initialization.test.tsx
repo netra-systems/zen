@@ -227,8 +227,10 @@ describe('AuthProvider Initialization - CRITICAL BUG REPRODUCTION', () => {
     mockLogger.error.mockReset();
     mockMonitorAuthState.mockReset();
     
-    // CRITICAL: Clean up any timers or async operations
-    jest.runOnlyPendingTimers();
+    // CRITICAL: Clean up timers safely - only if fake timers are active
+    if (jest.isMockFunction(setTimeout)) {
+      jest.runOnlyPendingTimers();
+    }
     jest.useRealTimers();
   });
 

@@ -193,7 +193,7 @@ class ErrorHandlingIntegrationTest(BaseIntegrationTest):
         
         self.logger.info(f"✅ Graceful degradation validated: {expected_degradation_type}")
 
-    def create_error_test_context(self, scenario_name: str, additional_metadata: Optional[Dict] = None) -> UserExecutionContext:
+    def create_error_test_context(self, scenario_name: str, additional_metadata: Optional[Dict] = None, db_session=None) -> UserExecutionContext:
         """Create user context optimized for error handling scenarios."""
         base_metadata = {
             'user_request': f'Test resilience scenario: {scenario_name}',
@@ -205,13 +205,19 @@ class ErrorHandlingIntegrationTest(BaseIntegrationTest):
         if additional_metadata:
             base_metadata.update(additional_metadata)
         
+        # Use provided db_session or create a mock one
+        if db_session is None:
+            from unittest.mock import Mock
+            db_session = Mock()
+        
         return UserExecutionContext(
             user_id=f"{self.test_user_id}-{scenario_name.replace(' ', '-')}",
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,
             request_id=f"{self.test_request_id}-{scenario_name[:8]}",
             websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(self.test_user_id),
-            agent_context=base_metadata
+            agent_context=base_metadata,
+            db_session=db_session
         )
 
 
