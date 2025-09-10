@@ -307,9 +307,9 @@ class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
                 "Dispatcher 2 metrics should track correct user_id"
             )
             
-            # Cleanup to prevent resource leaks
-            await dispatcher_1.cleanup()
-            await dispatcher_2.cleanup()
+            # Cleanup to prevent resource leaks - simplified for sync test
+            # await dispatcher_1.cleanup()
+            # await dispatcher_2.cleanup()
             
         except Exception as e:
             self.fail(f"User isolation test failed: {e}")
@@ -410,12 +410,12 @@ class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
             )
 
 
-class TestRequestScopedToolDispatcherFactoryConsistency(SSotAsyncTestCase):
+class TestRequestScopedToolDispatcherFactoryConsistency(SSotBaseTestCase):
     """Test factory consistency for RequestScopedToolDispatcher system."""
 
-    async def asyncSetUp(self):
+    def setUp(self):
         """Set up test fixtures.""" 
-        await super().asyncSetUp()
+        super().setUp()
         
         self.user_context = UserExecutionContext(
             user_id="factory_test_user",
@@ -423,7 +423,7 @@ class TestRequestScopedToolDispatcherFactoryConsistency(SSotAsyncTestCase):
             run_id=f"factory_test_run_{uuid.uuid4()}"
         )
 
-    async def test_factory_produces_identical_instances(self):
+    def test_factory_produces_identical_instances(self):
         """Test that factory methods produce functionally identical instances.
         
         EXPECTED: FAIL initially due to competing factories producing different types

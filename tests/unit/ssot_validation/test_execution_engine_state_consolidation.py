@@ -66,7 +66,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                 
         # After consolidation, should have only one primary execution engine
         if len(execution_engines) > 1:
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found {len(execution_engines)} execution engine implementations. "
                 f"Should be consolidated to single AgentExecutionTracker-based engine. "
                 f"Found: {', '.join(execution_engines)}"
@@ -120,7 +120,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                 continue
                 
         if state_violations:
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found {len(state_violations)} execution engines with separate state storage. "
                 f"All state should be managed by AgentExecutionTracker. "
                 f"Violations: {', '.join(state_violations)}"
@@ -189,7 +189,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                 continue
                 
         if direct_state_violations:
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found {len(direct_state_violations)} execution engines with direct state management. "
                 f"Should delegate all state operations to AgentExecutionTracker. "
                 f"Violations: {direct_state_violations}"
@@ -240,7 +240,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                 factory_violations.append(f"Factory has own state storage: {pattern}")
                 
         if factory_violations:
-            self.fail(
+            pytest.fail(
                 f"Factory pattern SSOT violations: {', '.join(factory_violations)}"
             )
 
@@ -316,7 +316,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                 ]
                 
         if state_duplication_issues:
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found execution state duplication across {len(state_duplication_issues)} module pairs. "
                 f"All state should be in AgentExecutionTracker only. "
                 f"Duplications: {'; '.join(state_duplication_issues)}"
@@ -379,7 +379,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                 continue
                 
         if delegation_issues:
-            self.fail(
+            pytest.fail(
                 f"Execution engine delegation issues: {', '.join(delegation_issues)}"
             )
 
@@ -450,7 +450,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
             consistency_issues.append(f"Consistency test setup failed: {e}")
             
         if consistency_issues:
-            self.fail(
+            pytest.fail(
                 f"State consistency issues across engines: {', '.join(consistency_issues)}"
             )
 
@@ -516,7 +516,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                         circular_dependency_issues.append(f"{module} <-> {dep}")
                         
         if circular_dependency_issues:
-            self.fail(
+            pytest.fail(
                 f"Circular dependency issues in state management: {', '.join(circular_dependency_issues)}"
             )
 

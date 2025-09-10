@@ -44,7 +44,7 @@ class TestSingletonEnforcement(SSotBaseTestCase):
                 tracker = AgentExecutionTracker()
                 
                 # If we can create it directly, that's a SSOT violation
-                self.fail(
+                pytest.fail(
                     "SSOT VIOLATION: Direct AgentExecutionTracker() instantiation is allowed. "
                     "Should only be accessible through get_execution_tracker() factory method "
                     "to ensure singleton behavior and user isolation."
@@ -55,10 +55,10 @@ class TestSingletonEnforcement(SSotBaseTestCase):
                 if "factory" in str(e).lower() or "singleton" in str(e).lower():
                     pass  # Good - factory enforcement working
                 else:
-                    self.fail(f"AgentExecutionTracker blocked instantiation but with wrong error: {e}")
+                    pytest.fail(f"AgentExecutionTracker blocked instantiation but with wrong error: {e}")
                     
         except ImportError:
-            self.fail("AgentExecutionTracker not available for singleton testing")
+            pytest.fail("AgentExecutionTracker not available for singleton testing")
 
     def test_factory_method_should_work(self):
         """
@@ -79,7 +79,7 @@ class TestSingletonEnforcement(SSotBaseTestCase):
             assert tracker is tracker2, "Factory method should return same singleton instance"
             
         except ImportError:
-            self.fail(
+            pytest.fail(
                 "get_execution_tracker factory method not available. "
                 "This should be the only way to access AgentExecutionTracker."
             )
@@ -126,7 +126,7 @@ class TestSingletonEnforcement(SSotBaseTestCase):
                     assert exec1 not in user2_executions, "User2 should not see User1's execution"
                     
         except ImportError:
-            self.fail("Factory method with user context not available")
+            pytest.fail("Factory method with user context not available")
 
     def test_singleton_behavior_across_threads(self):
         """
@@ -166,12 +166,12 @@ class TestSingletonEnforcement(SSotBaseTestCase):
             
         # Check results
         if errors:
-            self.fail(f"Thread safety errors: {errors}")
+            pytest.fail(f"Thread safety errors: {errors}")
             
         # All threads should get the same singleton instance
         unique_instances = set(tracker_instances)
         if len(unique_instances) != 1:
-            self.fail(
+            pytest.fail(
                 f"Singleton violation: {len(unique_instances)} different instances created across threads. "
                 f"Should be exactly 1 singleton instance."
             )
@@ -207,7 +207,7 @@ class TestSingletonEnforcement(SSotBaseTestCase):
                 try:
                     user2_view = tracker2.get_execution(exec1)
                     if user2_view is not None:
-                        self.fail(
+                        pytest.fail(
                             "ISOLATION VIOLATION: User2 can access User1's execution. "
                             "Singleton pattern must enforce user isolation."
                         )
@@ -245,13 +245,13 @@ class TestSingletonEnforcement(SSotBaseTestCase):
             has_privacy_enforcement = any(indicator in source for indicator in privacy_indicators)
             
             if not has_privacy_enforcement:
-                self.fail(
+                pytest.fail(
                     "SSOT VIOLATION: AgentExecutionTracker constructor does not enforce privacy. "
                     "Should prevent direct instantiation to ensure singleton pattern."
                 )
                 
         except ImportError:
-            self.fail("AgentExecutionTracker not available for constructor privacy testing")
+            pytest.fail("AgentExecutionTracker not available for constructor privacy testing")
 
     def test_factory_method_parameter_validation(self):
         """
@@ -299,7 +299,7 @@ class TestSingletonEnforcement(SSotBaseTestCase):
             pass
             
         if validation_issues:
-            self.fail(f"Factory parameter validation issues: {', '.join(validation_issues)}")
+            pytest.fail(f"Factory parameter validation issues: {', '.join(validation_issues)}")
 
     @pytest.mark.asyncio
     async def test_async_singleton_consistency(self):
@@ -331,12 +331,12 @@ class TestSingletonEnforcement(SSotBaseTestCase):
         
         # Check results
         if errors:
-            self.fail(f"Async singleton errors: {errors}")
+            pytest.fail(f"Async singleton errors: {errors}")
             
         # All async tasks should get the same singleton instance
         unique_instances = set(tracker_instances)
         if len(unique_instances) != 1:
-            self.fail(
+            pytest.fail(
                 f"Async singleton violation: {len(unique_instances)} different instances created. "
                 f"Should be exactly 1 singleton instance."
             )
@@ -369,7 +369,7 @@ class TestSingletonEnforcement(SSotBaseTestCase):
         
         # Second call should be faster (cached)
         if second_call_time > first_call_time * 2:
-            self.fail(
+            pytest.fail(
                 f"Factory caching inefficient: second call ({second_call_time:.6f}s) "
                 f"slower than expected vs first call ({first_call_time:.6f}s)"
             )
@@ -408,7 +408,7 @@ class TestSingletonEnforcement(SSotBaseTestCase):
                 if hasattr(tracker, 'get_user_executions'):
                     remaining_executions = tracker.get_user_executions('cleanup_test')
                     if remaining_executions:
-                        self.fail("User data not properly cleaned up after cleanup_user_data call")
+                        pytest.fail("User data not properly cleaned up after cleanup_user_data call")
                         
     def _get_tracker_memory_usage(self, tracker) -> int:
         """Helper to estimate tracker memory usage."""

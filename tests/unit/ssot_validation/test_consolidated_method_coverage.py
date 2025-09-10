@@ -36,7 +36,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for method validation")
+            pytest.fail("AgentExecutionTracker not available for method validation")
             
         # Required state management methods from AgentStateTracker
         required_state_methods = [
@@ -76,7 +76,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
                     missing_methods.append(f"{method_name} (not callable)")
                     
         if missing_methods:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker missing {len(missing_methods)} state management methods: "
                 f"{', '.join(missing_methods)}. These should be consolidated from AgentStateTracker."
             )
@@ -91,7 +91,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for method validation")
+            pytest.fail("AgentExecutionTracker not available for method validation")
             
         # Required timeout management methods from AgentExecutionTimeoutManager
         required_timeout_methods = [
@@ -131,7 +131,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
                     missing_methods.append(f"{method_name} (not callable)")
                     
         if missing_methods:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker missing {len(missing_methods)} timeout management methods: "
                 f"{', '.join(missing_methods)}. These should be consolidated from AgentExecutionTimeoutManager."
             )
@@ -146,7 +146,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for method validation")
+            pytest.fail("AgentExecutionTracker not available for method validation")
             
         # Enhanced execution tracking methods (should be available after consolidation)
         enhanced_execution_methods = [
@@ -189,7 +189,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
                     missing_methods.append(f"{method_name} (not callable)")
                     
         if missing_methods:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker missing {len(missing_methods)} enhanced execution methods: "
                 f"{', '.join(missing_methods)}. These should be available after consolidation."
             )
@@ -204,7 +204,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for signature validation")
+            pytest.fail("AgentExecutionTracker not available for signature validation")
             
         tracker = AgentExecutionTracker()
         signature_issues = []
@@ -252,7 +252,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
                             )
                             
         if signature_issues:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker has {len(signature_issues)} method signature issues: "
                 f"{', '.join(signature_issues)}"
             )
@@ -267,7 +267,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for deprecation validation")
+            pytest.fail("AgentExecutionTracker not available for deprecation validation")
             
         # Methods that should be deprecated/removed after consolidation
         deprecated_methods = [
@@ -295,7 +295,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
                 found_deprecated.append(method_name)
                 
         if found_deprecated:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker contains {len(found_deprecated)} deprecated methods: "
                 f"{', '.join(found_deprecated)}. These should be removed after consolidation."
             )
@@ -310,7 +310,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for documentation validation")
+            pytest.fail("AgentExecutionTracker not available for documentation validation")
             
         tracker = AgentExecutionTracker()
         undocumented_methods = []
@@ -336,7 +336,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         ]
         
         if undocumented_methods and len(undocumented_methods) > 5:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker has {len(undocumented_methods)} undocumented public methods: "
                 f"{', '.join(undocumented_methods[:10])}{'...' if len(undocumented_methods) > 10 else ''}. "
                 f"Methods should have proper docstrings after consolidation."
@@ -352,7 +352,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for structure validation")
+            pytest.fail("AgentExecutionTracker not available for structure validation")
             
         # Check class inheritance and structure
         tracker_class = AgentExecutionTracker
@@ -389,7 +389,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
             structure_issues.append("Insufficient execution tracking methods")
             
         if structure_issues:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker has {len(structure_issues)} structural issues: "
                 f"{', '.join(structure_issues)}"
             )
@@ -405,7 +405,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
         try:
             from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
         except ImportError:
-            self.fail("AgentExecutionTracker not available for integration testing")
+            pytest.fail("AgentExecutionTracker not available for integration testing")
             
         tracker = AgentExecutionTracker()
         integration_issues = []
@@ -444,7 +444,7 @@ class TestConsolidatedMethodCoverage(SSotBaseTestCase):
             integration_issues.append(f"Basic execution creation failed: {e}")
             
         if integration_issues:
-            self.fail(
+            pytest.fail(
                 f"AgentExecutionTracker has {len(integration_issues)} method integration issues: "
                 f"{', '.join(integration_issues)}"
             )

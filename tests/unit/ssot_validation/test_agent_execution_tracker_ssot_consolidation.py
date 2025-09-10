@@ -182,7 +182,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
                 continue
                 
         if violations:
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found {len(violations)} manual execution ID generation violations. "
                 f"All execution IDs should be generated through UnifiedIDManager. "
                 f"Violations: {', '.join(violations)}"
@@ -254,7 +254,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
             ])
             
         if violations:
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found {len(violations)} duplicate timeout implementations. "
                 f"All timeout logic should be consolidated in AgentExecutionTracker. "
                 f"Violations: {', '.join(violations)}"
@@ -288,13 +288,13 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
                     missing_methods.append(method)
                     
             if missing_methods:
-                self.fail(
+                pytest.fail(
                     f"AgentExecutionTracker missing state management methods: {missing_methods}. "
                     f"These should be consolidated from AgentStateTracker."
                 )
                 
         except ImportError:
-            self.fail("AgentExecutionTracker not available for validation")
+            pytest.fail("AgentExecutionTracker not available for validation")
 
     def test_agent_execution_tracker_has_all_timeout_methods(self):
         """
@@ -323,13 +323,13 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
                     missing_methods.append(method)
                     
             if missing_methods:
-                self.fail(
+                pytest.fail(
                     f"AgentExecutionTracker missing timeout management methods: {missing_methods}. "
                     f"These should be consolidated from AgentExecutionTimeoutManager."
                 )
                 
         except ImportError:
-            self.fail("AgentExecutionTracker not available for validation")
+            pytest.fail("AgentExecutionTracker not available for validation")
 
     def test_unified_id_manager_integration(self):
         """
@@ -364,17 +364,17 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
             has_direct_uuid = any(pattern in source for pattern in direct_uuid_patterns)
             
             if not has_unified_id:
-                self.fail(
+                pytest.fail(
                     "AgentExecutionTracker does not integrate with UnifiedIDManager for ID generation"
                 )
                 
             if has_direct_uuid:
-                self.fail(
+                pytest.fail(
                     "AgentExecutionTracker still uses direct UUID generation instead of UnifiedIDManager"
                 )
                 
         except ImportError:
-            self.fail("AgentExecutionTracker not available for validation")
+            pytest.fail("AgentExecutionTracker not available for validation")
 
     def test_execution_engine_factory_uses_ssot(self):
         """
@@ -393,7 +393,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
             
             # Should use AgentExecutionTracker
             if 'AgentExecutionTracker' not in source:
-                self.fail(
+                pytest.fail(
                     "UserExecutionEngineFactory does not use AgentExecutionTracker. "
                     "Factory should be updated to use consolidated tracker."
                 )
@@ -406,7 +406,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
             
             for deprecated in deprecated_trackers:
                 if deprecated in source:
-                    self.fail(
+                    pytest.fail(
                         f"UserExecutionEngineFactory still uses deprecated {deprecated}. "
                         f"Should only use consolidated AgentExecutionTracker."
                     )
@@ -445,17 +445,17 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
                     assert execution.get('timeout_seconds') == 30
                     assert execution.get('state') == 'PENDING'
                 else:
-                    self.fail("AgentExecutionTracker missing get_execution_with_full_context method")
+                    pytest.fail("AgentExecutionTracker missing get_execution_with_full_context method")
             else:
-                self.fail(
+                pytest.fail(
                     "AgentExecutionTracker missing create_execution_with_full_context method. "
                     "This should be available after consolidation."
                 )
                 
         except ImportError:
-            self.fail("AgentExecutionTracker not available for integration testing")
+            pytest.fail("AgentExecutionTracker not available for integration testing")
         except Exception as e:
-            self.fail(f"Consolidated execution creation failed: {str(e)}")
+            pytest.fail(f"Consolidated execution creation failed: {str(e)}")
 
 
 if __name__ == "__main__":
