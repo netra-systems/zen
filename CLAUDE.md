@@ -233,90 +233,41 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 ### 5.4. Import Rules
 **ABSOLUTE IMPORTS ONLY** - No relative imports (`.` or `..`) anywhere
 
------
+## 6. WEBSOCKET AGENT EVENTS (CRITICAL)
 
-CHEATING ON TESTS = ABOMINATION
-ULTRA THINK DEEPLY
-SOLVE FOR THE GREATER GOOD OF THE OVERALL SYSTEM
-IGNORE DOCKER ISSUES FOR NOW (just log them). ONLY GCP STAGING MATTERS FOR HOSTING.
+**PURPOSE:** Enable substantive chat interactions - deliver AI value to users.
 
-## 6\. MISSION CRITICAL: WebSocket Agent Events (Infrastructure for Chat Value)
+### 6.1. Required Events
+1. **agent_started** - User sees agent began processing
+2. **agent_thinking** - Real-time reasoning visibility  
+3. **tool_executing** - Tool usage transparency
+4. **tool_completed** - Tool results display
+5. **agent_completed** - User knows response is ready
 
-**CRITICAL: WebSocket events enable substantive chat interactions - they serve the business goal of delivering AI value to users.**
-
-### 6.1. Required WebSocket Events for Substantive Chat Value
-
-The following events MUST be sent during agent execution to enable meaningful AI interactions:
-
-1. **agent_started** - User must see agent began processing their problem
-2. **agent_thinking** - Real-time reasoning visibility (shows AI is working on valuable solutions)
-3. **tool_executing** - Tool usage transparency (demonstrates problem-solving approach)
-4. **tool_completed** - Tool results display (delivers actionable insights)
-5. **agent_completed** - User must know when valuable response is ready
-
-### 6.2. WebSocket Integration Requirements
-
-**CRITICAL: When modifying ANY of these components, you MUST:**
+### 6.2. Integration Requirements
 - Run `python tests/mission_critical/test_websocket_agent_events_suite.py`
-- Verify ALL event types are sent
-- Test with real WebSocket connections
-- Never remove or bypass WebSocket notifications
+- Verify ALL events sent with real WebSocket connections
+- Never bypass WebSocket notifications
+- See @websocket_agent_integration_critical.xml, @GOLDEN_AGENT_INDEX.md
 
-**Key Integration Points:**
-- `AgentRegistry.set_websocket_manager()` MUST enhance tool dispatcher
-- `ExecutionEngine` MUST have AgentWebSocketBridge initialized
-- `EnhancedToolExecutionEngine` MUST wrap tool execution
-- See @websocket_agent_integration_critical.xml
-
-**For Complete Agent Implementation Patterns:**
-- See @GOLDEN_AGENT_INDEX.md - The definitive guide to agent implementation
-- See @AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md - Comprehensive clarification of agent architecture
-- See @agent_execution_order_fix_20250904.xml - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
-
------
-CHEATING ON TESTS = ABOMINATION
-
-## 7\. Project Tooling
+## 7. PROJECT TOOLING
 
 ### 7.1. Docker
+**Central Management:** All operations through UnifiedDockerManager
 
-**CRITICAL: All Docker operations go through the central UnifiedDockerManager.** **See @docker_orchestration.md for complete architecture and usage.**
-
-#### Automatic Docker Management is integrated with testing
+**Testing Integration:**
 ```bash
 python tests/unified_test_runner.py --real-services
 ```
 
-#### Alpine Container Support
-**Usage Examples:**
+**Alpine Options:**
+- Default: Alpine containers with rebuild
+- `--no-alpine`: Regular containers  
+- `--no-rebuild`: Use cached images
+- `--rebuild-all`: Rebuild all services
 
+**Service Refresh:**
 ```bash
-# Default behavior - Alpine containers with rebuild
-python tests/unified_test_runner.py --real-services
-# Automatically uses: use_alpine=True, rebuild_images=True
-
-# Disable Alpine (use regular containers)
-python tests/unified_test_runner.py --real-services --no-alpine
-
-# Disable image rebuilding (use cached images)
-python tests/unified_test_runner.py --real-services --no-rebuild
-
-# Rebuild all services (not just backend)
-python tests/unified_test_runner.py --real-services --rebuild-all
-```
-
-**Alpine Compose Files:**
-- `docker-compose.alpine-test.yml` - Test environment with named volumes (stable storage)
-- `docker-compose.alpine.yml` - Development environment
-- Alpine Dockerfiles: `docker/backend.alpine.Dockerfile`, `docker/auth.alpine.Dockerfile`, `docker/frontend.alpine.Dockerfile`
-
-**⚠️ tmpfs Storage Removed**
-Docker tmpfs storage has been completely removed from the codebase as it causes system crashes due to RAM exhaustion. Never re-introduce tmpfs mounts - they will crash the system.
-
-
-#### Development Service Refresh
-```bash
-# Refresh backend and auth with latest changes
 python scripts/refresh_dev_services.py refresh --services backend auth
 ```
 
