@@ -906,14 +906,14 @@ class UserExecutionEngine:
                 result={
                     "agent_name": context.agent_name,
                     "success": result.success,
-                    "duration_ms": result.execution_time * 1000 if result.execution_time else 0,
+                    "duration_ms": result.duration * 1000 if result.duration else 0,
                     "status": "completed" if result.success else "failed",
                     "user_isolated": True,
                     "user_id": self.context.user_id,
                     "engine_id": self.engine_id,
                     "error": result.error if not result.success and result.error else None
                 },
-                execution_time_ms=result.execution_time * 1000 if result.execution_time else 0
+                execution_time_ms=result.duration * 1000 if result.duration else 0
             )
             
             if not success:

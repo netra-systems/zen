@@ -68,7 +68,7 @@ class TestUserExecutionEngineWebSocketIntegration(SSotAsyncTestCase):
         mock_emitter = AsyncMock(spec=UnifiedWebSocketEmitter)
         emitted_events = []
         
-        async def track_event(event_type, *args, **kwargs):
+        def track_event(event_type, *args, **kwargs):
             emitted_events.append({
                 'type': event_type,
                 'args': args, 
@@ -124,8 +124,8 @@ class TestUserExecutionEngineWebSocketIntegration(SSotAsyncTestCase):
         result = AgentExecutionResult(
             success=True,
             agent_name="triage_agent",
-            execution_time=1.5,
-            state=None
+            duration=1.5,
+            data=None
         )
         await engine._send_user_agent_completed(context, result)
         assert len(emitted_events) == 3, "Should emit agent_completed event"
@@ -414,7 +414,7 @@ class TestUserExecutionEngineWebSocketIntegration(SSotAsyncTestCase):
                         success=True,
                         agent_name="triage_agent",
                         execution_time=0.5,
-                        state=None
+                        data=None
                     )
                     await engine._send_user_agent_completed(context, result)
                 success_count += 1
@@ -515,8 +515,8 @@ class TestUserExecutionEngineWebSocketIntegration(SSotAsyncTestCase):
         result = AgentExecutionResult(
             success=True,
             agent_name="data_analyzer", 
-            execution_time=2.5,
-            state=None
+            duration=2.5,
+            data=None
         )
         await engine._send_user_agent_completed(context, result)
         
