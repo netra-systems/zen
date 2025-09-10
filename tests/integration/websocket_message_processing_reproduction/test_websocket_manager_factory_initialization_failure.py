@@ -41,7 +41,6 @@ from netra_backend.app.dependencies import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation import UnifiedIdGenerator
-from test_framework.ssot.e2e_auth_helper import AuthHelper
 
 
 class TestWebSocketManagerFactoryInitializationFailure:

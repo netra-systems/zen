@@ -125,17 +125,17 @@ class TestWebSocket1011ErrorReproduction:
     @pytest.fixture
     def test_user_id(self):
         """Generate consistent test user ID."""
-        return UnifiedIdGenerator.generate_user_id()
+        return UnifiedIdGenerator.generate_base_id("user")
     
     @pytest.fixture
     def test_thread_id(self):
         """Generate consistent test thread ID."""
-        return UnifiedIdGenerator.generate_thread_id()
+        return UnifiedIdGenerator.generate_base_id("thread")
     
     @pytest.fixture
     def test_run_id(self):
         """Generate consistent test run ID."""
-        return UnifiedIdGenerator.generate_run_id()
+        return UnifiedIdGenerator.generate_base_id("run")
     
     @pytest.fixture
     def mock_websocket_1011(self, test_user_id):
@@ -426,7 +426,7 @@ class TestWebSocket1011ErrorReproduction:
                 concurrent_message = WebSocketMessage(
                     type=MessageType.START_AGENT,
                     user_id=f"{test_user_id}_concurrent_{i}",
-                    thread_id=UnifiedIdGenerator.generate_thread_id(),
+                    thread_id=UnifiedIdGenerator.generate_base_id("thread"),
                     payload={
                         "user_request": f"Concurrent request {i}",
                         "agent_type": "concurrent_test"

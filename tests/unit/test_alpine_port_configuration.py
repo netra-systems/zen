@@ -139,7 +139,6 @@ class TestAlpinePortConfiguration(BaseTestCase):
                 bind_config = cmd_match.group(1)
                 
                 # Should use ${PORT} or similar dynamic configuration
-                import re
                 assert re.search(r'\$\{PORT.*\}', bind_config), (
                     f"{dockerfile_path.name}: gunicorn bind should use ${{PORT}} environment variable "
                     f"for Cloud Run compatibility. Current: {bind_config}"
