@@ -187,71 +187,27 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 3. **System-Wide Fix:** Plan all module impacts, deep implications analysis
 4. **Verification:** QA review, regression testing until 100% pass 
 
-### 3.6. MANDATORY COMPLEX REFACTORING PROCESS:
+### 3.6. Complex Refactoring Process
+**For inheritance, multiple classes, or SSOT consolidation:**
+1. **MRO Analysis:** Generate comprehensive report before refactoring
+2. **Dependency Impact:** Trace consumers, document usage, identify breaking changes
+3. **Agent Decomposition:** Spawn agents for 5+ file refactors, one inheritance chain per agent
+4. **Validation:** MRO paths preserved, no method shadowing, all consumers updated
 
-**CRITICAL: For any refactoring involving inheritance, multiple classes, or SSOT consolidation:**
-CHEATING ON TESTS = ABOMINATION
+**GOLDEN PATH PRIORITY:** Users login → get AI responses. Auth can be permissive temporarily.
+## 4. KNOWLEDGE MANAGEMENT
 
-**See Also:** 
-- @GOLDEN_AGENT_INDEX.md for comprehensive agent implementation patterns and migration guidance.
-- @AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md for clarification on agent components and relationships.
+**SPEC/*.xml:** Living source of truth for architecture and learnings.
+- **Navigation:** Read @LLM_MASTER_INDEX.md first
+- **Evolution:** Propose spec improvements when needed
+- **Types:** SPEC/*.xml = permanent knowledge, *.md = ephemeral logs
 
-1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring
-
-2.  **Dependency Impact Analysis:**
-    - Trace all consumers of classes being refactored
-    - Document which methods/attributes each consumer uses
-    - Identify breaking changes and required adaptations
-    - Cross-reference with @ssot_consolidation_20250825.xml
-
-3.  **Agent-Based Decomposition:** For complex refactors spanning 5+ files:
-    - Spawn specialized refactoring agents with focused scope
-    - Each agent handles ONE inheritance chain or module
-    - Provide agents with MRO report and interface contracts only
-    - See examples in @unified_agent_testing_implementation.xml
-
-4.  **Validation Checklist:**
-    - [ ] All MRO paths documented and preserved or intentionally modified
-    - [ ] No unintended method shadowing introduced
-    - [ ] All consumers updated to new interfaces
-    - [ ] Integration tests pass for all inheritance scenarios
-    - [ ] Performance regression tests pass (inheritance lookup overhead)
-
-CHEATING ON TESTS = ABOMINATION
-YOU MUST ULTRA THINK DEEPLY
-
-
-The #1 priority right now is that the users can login and complete getting a message back.
-The secondary items are database flows or other features.
-Even Auth can be more permissive for now (log issue in git for items temporarily bypassed)
-IT MUST allow allow the golden path through!!! (and keep logging errors for future work)
-
-**Cross-Reference Learnings:**
-## 4\. Knowledge Management: The Living Source of Truth
-
-The `SPEC/*.xml` files are the **living source of truth** for system architecture and learnings.
-
-  * **Navigation:** Read @LLM_MASTER_INDEX.md before searching for files or functionality.
-  * **Iterative Discovery:** Specs must evolve. If analysis reveals a better solution, propose a spec improvement.
-  * **Learnings vs. Reports:** Learnings in `SPEC/*.xml` are permanent knowledge. Reports (`*.md`) are ephemeral work logs.
-
-### 4.1. String Literals Index: Preventing Hallucination
-
-This index is the SSOT for all platform-specific constants, paths, and identifiers to prevent LLM errors.
-
-  * **Index File:** `SPEC/generated/string_literals.json`
-  * **📚 Complete Documentation:** @string_literals_index.md
-
-**🚨 CRITICAL PROTECTION: mission-critical environment variables + domain configurations cause CASCADE FAILURES if modified incorrectly!**
-
-**Usage Requirements:**
-
-1.  **ALWAYS Validate** literals before use: `python scripts/query_string_literals.py validate "your_string"`
-2.  **NEVER Guess** config keys or paths; query the index first with search: `python scripts/query_string_literals.py search "keyword"`
-3.  **CHECK Environment Health:** `python scripts/query_string_literals.py check-env staging` (or production)
-5.  **UPDATE Index** after adding new constants: `python scripts/scan_string_literals.py`
-
-**Cross-Reference with Step 6 in Execution Checklist below ⬇️**
+### 4.1. String Literals Index
+**CRITICAL:** Prevents config hallucination and cascade failures.
+- **Validate:** `python scripts/query_string_literals.py validate "string"`
+- **Search:** `python scripts/query_string_literals.py search "keyword"`
+- **Health Check:** `python scripts/query_string_literals.py check-env staging`
+- **Update:** `python scripts/scan_string_literals.py`
 
 ## 5\. Architecture and Conventions
 

@@ -716,24 +716,10 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         
         self.mock_llm_manager.generate_response = AsyncMock(side_effect=slow_llm_response)
         
-        # Create a mock agent that will use the slow LLM manager
-        mock_orchestration_agent = Mock()
-        mock_orchestration_agent.execute = AsyncMock(side_effect=slow_llm_response)
-        
-        # Add logging to track calls
-        def mock_get_agent(agent_name):
-            self.logger.info(f"🔍 Mock registry.get called for agent: {agent_name}")
-            return mock_orchestration_agent
-        
-        # Mock the agent registry to return our slow mock agent
-        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_factory_getter:
-            mock_factory = Mock()
-            mock_registry = Mock()
-            mock_registry.get = Mock(side_effect=mock_get_agent)
-            mock_factory.registry = mock_registry
-            mock_factory._agent_registry = mock_registry  # Also set the internal registry
-            mock_factory.configure = Mock()
-            mock_factory_getter.return_value = mock_factory
+        # Patch LLM manager at a lower level - this will affect all agents that use LLM
+        with patch('netra_backend.app.llm.llm_manager.LLMManager.generate_response', new_callable=AsyncMock) as mock_llm_generate:
+            # Set up the slow response for timeout simulation
+            mock_llm_generate.side_effect = slow_llm_response
             
             supervisor = SupervisorAgent(
                 llm_manager=self.mock_llm_manager,
@@ -779,12 +765,13 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             # Step 3: Test quick recovery after timeout
             recovery_start = time.time()
             
-            # Reset the mock agent for quick response
-            mock_orchestration_agent.execute = AsyncMock(return_value={
+            # Reset the LLM mock for quick response
+            mock_llm_generate.side_effect = None
+            mock_llm_generate.return_value = {
                 "status": "post_timeout_recovery",
                 "summary": "Quick response after timeout recovery",
                 "performance": "normal"
-            })
+            }
             
             recovery_result = await asyncio.wait_for(
                 supervisor.execute(context, stream_updates=False),
