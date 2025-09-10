@@ -41,9 +41,26 @@ Incomplete singleton-to-factory pattern migration in ExecutionEngine causing cri
 - [x] Impact assessment: CRITICAL - blocks Golden Path
 - [x] Files mapped and analyzed
 
-### 🔄 Step 1: DISCOVER AND PLAN TESTS (IN PROGRESS)
-- [ ] 1.1: Discover existing tests protecting against breaking changes
+### ✅ Step 1: DISCOVER AND PLAN TESTS  
+- [x] 1.1: Discover existing tests protecting against breaking changes
 - [ ] 1.2: Plan new SSOT-focused tests (20% of effort)
+
+#### 1.1 Test Discovery Results
+**GOLD STANDARD TEST:** `/tests/mission_critical/golden_path/test_agent_state_isolation_never_fail.py`
+- Legal/compliance-grade user isolation (15 concurrent users)
+- **Status:** Likely failing - MUST pass after SSOT fix
+- **Priority:** Highest - legal compliance requirement
+
+**REPRODUCTION TESTS (Should start passing):**
+- `/tests/integration/test_execution_engine_factory_delegation.py` - Broken factory handoff
+- Factory SSOT violation tests - Currently detecting over-engineering
+
+**PROTECTION TESTS (Must keep passing):**
+- User execution context isolation tests (~60% currently passing)
+- Multi-user WebSocket event isolation tests  
+- Concurrent agent state management tests
+
+**Coverage Assessment:** Strong user isolation foundation, weak factory pattern protection
 
 ### ⏳ Remaining Steps
 - [ ] Step 2: Execute new test creation
