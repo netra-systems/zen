@@ -12,6 +12,7 @@ Following CLAUDE.md SSOT principles by creating proper aliases rather than dupli
 """
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.types import ConnectionInfo
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -26,4 +27,4 @@ WebSocketConnectionManager = UnifiedWebSocketManager
 ConnectionManager = WebSocketConnectionManager
 
 # Export for backward compatibility
-__all__ = ['WebSocketConnectionManager', 'ConnectionManager']
+__all__ = ['WebSocketConnectionManager', 'ConnectionManager', 'ConnectionInfo']
