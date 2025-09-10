@@ -539,3 +539,253 @@ class UnifiedAgentHealthMonitor:
     def should_perform_health_check(self) -> bool:
         """Check if health check should be performed."""
         return (time.time() - self.last_health_check) >= self.health_check_interval
+    
+    # ============================================================================
+    # ENHANCED CAPABILITIES - Five Whys Analysis
+    # ============================================================================
+    
+    def _perform_five_whys_analysis(self, agent_name: str, error_message: str) -> Dict[str, str]:
+        """Perform Five Whys root cause analysis for agent failures."""
+        if not self.enable_five_whys:
+            return {}
+        
+        # Agent-specific analysis patterns
+        analysis_patterns = {
+            'agent_death': {
+                'why_1': f'Agent {agent_name} stopped responding: {error_message}',
+                'why_2': 'Agent execution may have encountered unrecoverable error or resource exhaustion',
+                'why_3': 'System resources (memory, CPU, connections) may be insufficient or misconfigured',
+                'why_4': 'Agent initialization, dependency resolution, or environment setup issues',
+                'why_5': 'Infrastructure capacity, configuration management, or deployment problems',
+                'root_cause': 'Agent runtime environment requires capacity planning and configuration review'
+            },
+            'timeout': {
+                'why_1': f'Agent {agent_name} timed out: {error_message}',
+                'why_2': 'Agent operation exceeded configured timeout threshold',
+                'why_3': 'Downstream dependencies may be slow or overloaded',
+                'why_4': 'Resource contention or insufficient computational capacity',
+                'why_5': 'System architecture needs optimization for expected workload',
+                'root_cause': 'Performance tuning and capacity scaling required for agent operations'
+            },
+            'memory': {
+                'why_1': f'Agent {agent_name} memory issues: {error_message}',
+                'why_2': 'Agent memory consumption exceeded available resources',
+                'why_3': 'Memory leaks, inefficient algorithms, or large data processing',
+                'why_4': 'Inadequate memory allocation or garbage collection issues',
+                'why_5': 'System memory management and allocation policies need review',
+                'root_cause': 'Memory optimization and resource management improvements needed'
+            }
+        }
+        
+        # Determine analysis type based on error content
+        error_lower = error_message.lower()
+        if 'died' in error_lower or 'death' in error_lower or 'heartbeat' in error_lower:
+            pattern_key = 'agent_death'
+        elif 'timeout' in error_lower or 'timed out' in error_lower:
+            pattern_key = 'timeout'
+        elif 'memory' in error_lower or 'oom' in error_lower:
+            pattern_key = 'memory'
+        else:
+            pattern_key = 'agent_death'  # Default fallback
+        
+        return analysis_patterns.get(pattern_key, {
+            'why_1': f'Agent {agent_name} health check failed: {error_message}',
+            'why_2': 'Agent is not responding or not available',
+            'why_3': 'Service may be down or configuration issues',
+            'why_4': 'Dependencies or infrastructure problems',
+            'why_5': 'System architecture or resource limitations',
+            'root_cause': 'Agent requires investigation and maintenance'
+        })
+    
+    def _collect_system_metrics(self) -> Dict[str, Any]:
+        """Collect system metrics if enabled and available."""
+        if not self.enable_system_metrics:
+            return {}
+        
+        metrics = {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'platform': platform.system(),
+            'monitoring_enabled': self.monitoring_enabled,
+            'active_agents': len(self.health_status)
+        }
+        
+        # Add psutil metrics if available
+        if psutil:
+            try:
+                metrics.update({
+                    'cpu_percent': psutil.cpu_percent(interval=0.1),
+                    'memory_percent': psutil.virtual_memory().percent,
+                    'disk_percent': psutil.disk_usage('/').percent if platform.system() != 'Windows' else psutil.disk_usage('C:').percent
+                })
+            except Exception as e:
+                metrics['system_metrics_error'] = str(e)
+        
+        return metrics
+    
+    def _should_skip_health_check(self, agent_name: str) -> bool:
+        """Determine if health check should be skipped due to circuit breaker."""
+        failure_info = self.failure_history.get(agent_name, {})
+        failures = failure_info.get('failures', 0)
+        last_failure = failure_info.get('last_failure')
+        
+        # Circuit breaker: skip if too many failures and within timeout window
+        if failures >= self.max_consecutive_failures:
+            if last_failure and (time.time() - last_failure) < self.circuit_breaker_timeout:
+                return True
+            else:
+                # Reset circuit breaker after timeout
+                self.failure_history[agent_name] = {'failures': 0, 'last_failure': None}
+        
+        return False
+    
+    def _create_circuit_breaker_status(self, agent_name: str) -> UnifiedAgentHealthStatus:
+        """Create status for agent skipped due to circuit breaker."""
+        return UnifiedAgentHealthStatus(
+            agent_name=agent_name,
+            overall_health=0.0,
+            circuit_breaker_state='open',
+            recent_errors=self.failure_history[agent_name]['failures'],
+            status='unhealthy',
+            state=ServiceState.FAILED,
+            last_check=datetime.now(timezone.utc)
+        )
+    
+    def _update_monitoring_state(self, agent_name: str, status: UnifiedAgentHealthStatus) -> None:
+        """Update internal monitoring state."""
+        with self._lock:
+            self.health_status[agent_name] = status
+            
+            # Update failure tracking
+            if status.status in ['unhealthy', 'dead']:
+                if agent_name not in self.failure_history:
+                    self.failure_history[agent_name] = {'failures': 0, 'last_failure': None}
+                self.failure_history[agent_name]['failures'] += 1
+                self.failure_history[agent_name]['last_failure'] = time.time()
+            else:
+                # Reset failure count on success
+                self.failure_history[agent_name] = {'failures': 0, 'last_failure': None}
+    
+    async def _emit_health_status_event(self, agent_name: str, status: UnifiedAgentHealthStatus) -> None:
+        """Emit WebSocket events for health status changes."""
+        if not self.websocket_bridge or not self.enable_websocket_events:
+            return
+        
+        try:
+            # Check if status changed significantly
+            previous_status = self.health_status.get(agent_name)
+            if previous_status and previous_status.status == status.status:
+                return  # No significant change
+            
+            # Map status to appropriate WebSocket events
+            if status.status == 'dead':
+                await self.websocket_bridge.send_agent_failed(
+                    agent_id=agent_name,
+                    error=f"Agent health monitor detected agent death: {status.last_error.message if status.last_error else 'No heartbeat'}"
+                )
+            elif status.status == 'unhealthy':
+                await self.websocket_bridge.send_agent_degraded(
+                    agent_id=agent_name,
+                    reason=f"Health degraded: {status.recent_errors} recent errors, {status.overall_health:.1%} health"
+                )
+            elif status.status == 'healthy' and previous_status and previous_status.status != 'healthy':
+                await self.websocket_bridge.send_agent_recovered(
+                    agent_id=agent_name,
+                    health_score=status.overall_health
+                )
+                
+        except Exception as e:
+            logger.debug(f"Failed to emit health status event for {agent_name}: {e}")
+    
+    # ============================================================================
+    # ENHANCED CAPABILITIES - Grace Period and Service Management
+    # ============================================================================
+    
+    def register_service(
+        self,
+        name: str,
+        health_check: Callable[[], bool],
+        recovery_action: Optional[Callable[[], None]] = None,
+        max_failures: int = 5,
+        grace_period_seconds: int = 30
+    ):
+        """Register a service for health monitoring with grace period support."""
+        # Service-specific grace periods
+        if name.lower() == "frontend":
+            grace_period_seconds = 90  # Frontend: 90 second grace period
+        elif name.lower() == "backend":
+            grace_period_seconds = 30  # Backend: 30 second grace period
+        
+        with self._lock:
+            self.services[name] = {
+                'health_check': health_check,
+                'recovery_action': recovery_action,
+                'max_failures': max_failures
+            }
+            
+            self.health_status[name] = UnifiedAgentHealthStatus(
+                agent_name=name,
+                overall_health=1.0,
+                circuit_breaker_state='closed',
+                recent_errors=0,
+                status='healthy',
+                state=ServiceState.STARTING,
+                startup_time=datetime.now(timezone.utc),
+                grace_period_remaining=grace_period_seconds,
+                ready_confirmed=False
+            )
+            
+        logger.info(f"Registered health monitoring for {name} (grace period: {grace_period_seconds}s)")
+    
+    def mark_service_ready(self, name: str, process_pid: Optional[int] = None, 
+                          ports: Optional[Set[int]] = None) -> bool:
+        """Mark a service as ready after successful readiness check."""
+        with self._lock:
+            if name in self.health_status:
+                status = self.health_status[name]
+                status.ready_confirmed = True
+                status.state = ServiceState.READY
+                status.last_check = datetime.now(timezone.utc)
+                
+                if ports:
+                    status.ports_verified = ports
+                
+                logger.info(f"Service {name} marked as ready")
+                if ports:
+                    logger.info(f"  → Verified ports: {sorted(ports)}")
+                if process_pid:
+                    logger.info(f"  → Process PID: {process_pid}")
+                    
+                return True
+            return False
+    
+    # ============================================================================
+    # BACKWARD COMPATIBILITY METHODS
+    # ============================================================================
+    
+    def get_legacy_health_status(
+        self, agent_name: str, error_history: List[AgentError], reliability_wrapper
+    ) -> AgentHealthStatus:
+        """Get health status in legacy format for backward compatibility."""
+        unified_status = self.get_comprehensive_health_status(agent_name, error_history, reliability_wrapper)
+        return unified_status.to_agent_health_status()
+    
+    def reset_health_metrics(self, reliability_wrapper) -> None:
+        """Reset health metrics and error history - backward compatibility."""
+        self.operation_times.clear()
+        self.health_check_cache.clear()
+        
+        # Reset failure history
+        self.failure_history.clear()
+        
+        try:
+            reliability_wrapper.circuit_breaker.reset()
+        except Exception as e:
+            logger.warning(f"Failed to reset circuit breaker: {e}")
+
+
+# ============================================================================
+# BACKWARD COMPATIBILITY ALIAS AND FACTORY
+# ============================================================================
+
+# Backward compatibility alias
+AgentHealthMonitor = UnifiedAgentHealthMonitor
