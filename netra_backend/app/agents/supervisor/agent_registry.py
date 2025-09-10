@@ -841,13 +841,10 @@ class AgentRegistry(UniversalAgentRegistry):
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
             return
         
-        # FIXED: Direct assignment and proper bridge creation
+        # FIXED: Store manager for user sessions
         self.websocket_manager = manager
         
-        # Use the standard bridge factory to create proper interface
-        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-        
-        # Create a default user context for registry-level bridge
+        # SSOT COMPLIANCE: Create adapter for bridge interface compatibility
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system_async",
@@ -856,13 +853,13 @@ class AgentRegistry(UniversalAgentRegistry):
             run_id=f"websocket_run_async_{uuid.uuid4().hex[:8]}"
         )
         
-        # Create and set the standardized AgentWebSocketBridge
+        # Create adapter for SSOT compliance
         try:
-            bridge = create_agent_websocket_bridge(default_context)
-            super().set_websocket_bridge(bridge)  # Use correct parent interface
-            logger.debug(f"Registry WebSocket bridge created using factory pattern (async): {getattr(self, 'websocket_manager', 'NOT SET')}")
+            adapter = WebSocketManagerAdapter(manager, default_context)
+            super().set_websocket_bridge(adapter)  # Use adapter with parent interface
+            logger.debug(f"Registry WebSocket adapter created for async context - SSOT compliance")
         except Exception as e:
-            logger.warning(f"Failed to create registry WebSocket bridge (async): {e}")
+            logger.warning(f"Failed to create registry WebSocket adapter (async): {e}")
         
         # Propagate to all existing user sessions using factory pattern
         if self._user_sessions:
@@ -883,7 +880,7 @@ class AgentRegistry(UniversalAgentRegistry):
                 except Exception as e:
                     logger.error(f"Failed to update WebSocket manager for user {user_id}: {e}")
         
-        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async) - using AgentWebSocketBridge interface")
+        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async) - SSOT compliant adapter")
     
     # Override get method to pass WebSocket bridge to factories
     def get(self, key: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:

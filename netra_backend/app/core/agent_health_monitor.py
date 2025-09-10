@@ -99,15 +99,93 @@ class UnifiedAgentHealthStatus:
 
 
 class UnifiedAgentHealthMonitor:
-    """Monitor for agent health and performance metrics."""
+    """SSOT Unified Agent Health Monitor consolidating all health monitoring capabilities.
     
-    def __init__(self, max_operation_history: int = 100):
+    Consolidates:
+    1. Agent reliability monitoring (death detection, health metrics)
+    2. Development environment health monitoring (grace periods, startup states)
+    3. Enhanced system health checks (Five Whys analysis, circuit breakers)
+    
+    Features:
+    - Unified health status interface with backward compatibility
+    - WebSocket integration for health events
+    - Performance-optimized health checking (<50ms overhead)
+    - Circuit breaker patterns for known-dead agents
+    - Five Whys root cause analysis for failures
+    - Grace period management for startup scenarios
+    - System metrics collection and monitoring
+    - Feature flag support for gradual rollout
+    """
+    
+    def __init__(self, 
+                 max_operation_history: int = 100,
+                 check_interval: int = 30,
+                 enable_websocket_events: bool = True,
+                 enable_system_metrics: bool = True,
+                 enable_five_whys: bool = True):
+        # Core monitoring
         self.operation_times: List[float] = []
         self.max_operation_history = max_operation_history
         self.last_health_check = 0
-        self.health_check_interval = 60
+        self.health_check_interval = check_interval
         self.execution_tracker = get_execution_tracker()
-
+        
+        # Feature flags
+        self.feature_flags = self._load_feature_flags()
+        self.enable_websocket_events = enable_websocket_events and self.feature_flags.get('ENABLE_UNIFIED_HEALTH_MONITORING', True)
+        self.enable_system_metrics = enable_system_metrics
+        self.enable_five_whys = enable_five_whys
+        
+        # Enhanced monitoring state
+        self.services: Dict[str, Dict] = {}
+        self.health_status: Dict[str, UnifiedAgentHealthStatus] = {}
+        self.failure_history: Dict[str, Dict] = {}
+        self.circuit_breakers: Dict[str, bool] = {}
+        self.component_checkers: Dict[str, Callable] = {}
+        
+        # Grace period and startup management
+        self.monitoring_enabled = True  # Start enabled, can be disabled during startup
+        self.startup_complete = True
+        self._lock = threading.Lock()
+        self.is_windows = platform.system() == "win32"
+        
+        # WebSocket integration
+        self.websocket_bridge: Optional[AgentWebSocketBridge] = None
+        if self.enable_websocket_events and AgentWebSocketBridge:
+            try:
+                self.websocket_bridge = AgentWebSocketBridge()
+                logger.info("WebSocket integration enabled for health monitoring")
+            except Exception as e:
+                logger.warning(f"Failed to initialize WebSocket bridge: {e}")
+        
+        # Performance settings
+        self.death_detection_threshold = 10.0  # seconds - standardized across all implementations
+        self.health_check_cache: Dict[str, Tuple[UnifiedAgentHealthStatus, float]] = {}
+        self.cache_ttl = 5.0  # 5-second cache TTL
+        
+        # Circuit breaker settings
+        self.max_consecutive_failures = 5
+        self.circuit_breaker_timeout = 300  # 5 minutes
+        
+        logger.info(f"UnifiedAgentHealthMonitor initialized (interval: {check_interval}s, WebSocket: {self.enable_websocket_events})")
+    
+    def _load_feature_flags(self) -> Dict[str, bool]:
+        """Load feature flags from environment."""
+        flags = {}
+        if IsolatedEnvironment:
+            env = IsolatedEnvironment()
+            flags['ENABLE_UNIFIED_HEALTH_MONITORING'] = env.get('ENABLE_UNIFIED_HEALTH_MONITORING', 'true').lower() == 'true'
+            flags['ENABLE_HEALTH_WEBSOCKET_EVENTS'] = env.get('ENABLE_HEALTH_WEBSOCKET_EVENTS', 'true').lower() == 'true'
+            flags['ENABLE_FIVE_WHYS_ANALYSIS'] = env.get('ENABLE_FIVE_WHYS_ANALYSIS', 'true').lower() == 'true'
+        else:
+            # Default values when environment is not available
+            flags = {
+                'ENABLE_UNIFIED_HEALTH_MONITORING': True,
+                'ENABLE_HEALTH_WEBSOCKET_EVENTS': True,
+                'ENABLE_FIVE_WHYS_ANALYSIS': True
+            }
+        return flags
+    
     def record_successful_operation(self, operation_name: str, execution_time: float) -> None:
         """Record a successful operation for monitoring."""
         self.operation_times.append(execution_time)

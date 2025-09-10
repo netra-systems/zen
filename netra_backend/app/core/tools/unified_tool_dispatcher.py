@@ -141,6 +141,9 @@ class UnifiedToolDispatcher:
     ) -> 'UnifiedToolDispatcher':
         """Create isolated dispatcher for specific user context.
         
+        DEPRECATED: This method redirects to ToolExecutorFactory for SSOT compliance.
+        Use ToolExecutorFactory.create_request_scoped_dispatcher() directly instead.
+        
         SECURITY CRITICAL: This is the recommended way to create dispatcher instances.
         
         Args:
@@ -157,14 +160,27 @@ class UnifiedToolDispatcher:
             SecurityViolationError: If security constraints are violated
             PermissionError: If admin tools requested without admin permission
         """
-        # Validate user context
+        import warnings
+        from netra_backend.app.agents.tool_executor_factory import get_tool_executor_factory
+        
+        # Issue deprecation warning for SSOT compliance tracking
+        warnings.warn(
+            "UnifiedToolDispatcher.create_for_user() is deprecated. "
+            "Use ToolExecutorFactory.create_request_scoped_dispatcher() directly for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            f"🔄 REDIRECT: UnifiedToolDispatcher.create_for_user() -> ToolExecutorFactory.create_request_scoped_dispatcher() "
+            f"for user {user_context.user_id} (SSOT consolidation Phase 1)"
+        )
+        
+        # Validate user context (maintain same validation as original)
         if not user_context or not user_context.user_id:
             raise AuthenticationError("Valid UserExecutionContext required for dispatcher creation")
         
-        # Determine strategy based on admin tools
-        strategy = DispatchStrategy.ADMIN if enable_admin_tools else DispatchStrategy.DEFAULT
-        
-        # Convert websocket_bridge to websocket_manager if needed
+        # Convert websocket_bridge to websocket_manager for factory compatibility
         websocket_manager = None
         if websocket_bridge:
             # If it's already a WebSocketManager, use it directly
@@ -180,19 +196,49 @@ class UnifiedToolDispatcher:
                 websocket_manager = UnifiedWebSocketManager()
                 logger.warning(f"Created fallback WebSocketManager - no bridge connection for user {user_context.user_id}")
         
-        # Create instance using internal factory
-        instance = cls._create_from_factory(
-            user_context=user_context,
-            websocket_manager=websocket_manager,
-            strategy=strategy,
-            tools=tools,
-            websocket_bridge=websocket_bridge  # Pass original bridge for compatibility
-        )
-        
-        # Store the original bridge for compatibility
-        instance._websocket_bridge = websocket_bridge
-        
-        return instance
+        try:
+            # Get global ToolExecutorFactory instance
+            factory = get_tool_executor_factory()
+            
+            # Set websocket manager if available
+            if websocket_manager:
+                factory.set_websocket_manager(websocket_manager)
+            
+            # Redirect to ToolExecutorFactory for SSOT compliance
+            tool_dispatcher = await factory.create_request_scoped_dispatcher(
+                user_context=user_context,
+                tools=tools,  # Pass tools directly - factory handles the list
+                websocket_manager=websocket_manager
+            )
+            
+            logger.info(
+                f"✅ REDIRECT SUCCESS: Created dispatcher via ToolExecutorFactory for user {user_context.user_id} "
+                f"(admin_tools: {enable_admin_tools})"
+            )
+            
+            # TODO: Handle enable_admin_tools parameter properly in future phase
+            if enable_admin_tools:
+                logger.warning(
+                    f"⚠️ Admin tools requested but not yet supported in factory redirect. "
+                    f"This will be implemented in Phase 2 of SSOT consolidation."
+                )
+            
+            # Wrap RequestScopedToolDispatcher to look like UnifiedToolDispatcher
+            return cls._wrap_factory_dispatcher(tool_dispatcher, user_context, websocket_bridge)
+            
+        except Exception as e:
+            logger.error(
+                f"🚨 REDIRECT FAILED: ToolExecutorFactory creation failed for user {user_context.user_id}: {e}. "
+                f"Falling back to original implementation."
+            )
+            
+            # Fallback to original implementation if factory fails
+            return await cls._create_original_implementation(
+                user_context=user_context,
+                websocket_bridge=websocket_bridge,
+                tools=tools,
+                enable_admin_tools=enable_admin_tools
+            )
     
     @classmethod
     @asynccontextmanager
