@@ -1158,13 +1158,23 @@ class AgentWebSocketBridge(MonitorableComponent):
                 logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
-            # EMIT TO USER CHAT
-            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            # PHASE 3 FIX: Enhanced event delivery with retry mechanism
+            success = await self._emit_with_retry(
+                event_type="agent_started",
+                thread_id=thread_id, 
+                notification=notification,
+                run_id=run_id,
+                agent_name=agent_name,
+                max_retries=3
+            )
             
             if success:
                 logger.info(f"✅ EMISSION SUCCESS: agent_started → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+                # PHASE 3 FIX: Track successful event delivery
+                await self._track_event_delivery("agent_started", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: agent_started send failed (run_id={run_id}, agent={agent_name})")
+                await self._track_event_delivery("agent_started", run_id, False)
             
             return success
             
@@ -1227,13 +1237,22 @@ class AgentWebSocketBridge(MonitorableComponent):
                 logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
-            # EMIT TO USER CHAT
-            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            # PHASE 3 FIX: Enhanced event delivery with retry mechanism
+            success = await self._emit_with_retry(
+                event_type="agent_thinking",
+                thread_id=thread_id, 
+                notification=notification,
+                run_id=run_id,
+                agent_name=agent_name,
+                max_retries=2  # Lower retries for frequent thinking events
+            )
             
             if success:
                 logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+                await self._track_event_delivery("agent_thinking", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
+                await self._track_event_delivery("agent_thinking", run_id, False)
             
             return success
             
@@ -1289,13 +1308,22 @@ class AgentWebSocketBridge(MonitorableComponent):
                 logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
-            # EMIT TO USER CHAT
-            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            # PHASE 3 FIX: Enhanced event delivery with retry mechanism
+            success = await self._emit_with_retry(
+                event_type="tool_executing",
+                thread_id=thread_id, 
+                notification=notification,
+                run_id=run_id,
+                agent_name=agent_name,
+                max_retries=3
+            )
             
             if success:
                 logger.debug(f"✅ EMISSION SUCCESS: tool_executing → thread={thread_id} (run_id={run_id}, tool={tool_name})")
+                await self._track_event_delivery("tool_executing", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name})")
+                await self._track_event_delivery("tool_executing", run_id, False)
             
             return success
             
@@ -1354,13 +1382,22 @@ class AgentWebSocketBridge(MonitorableComponent):
                 logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
-            # EMIT TO USER CHAT
-            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            # PHASE 3 FIX: Enhanced event delivery with retry mechanism
+            success = await self._emit_with_retry(
+                event_type="tool_completed",
+                thread_id=thread_id, 
+                notification=notification,
+                run_id=run_id,
+                agent_name=agent_name,
+                max_retries=3
+            )
             
             if success:
                 logger.debug(f"✅ EMISSION SUCCESS: tool_completed → thread={thread_id} (run_id={run_id}, tool={tool_name})")
+                await self._track_event_delivery("tool_completed", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name})")
+                await self._track_event_delivery("tool_completed", run_id, False)
             
             return success
             
@@ -1421,13 +1458,25 @@ class AgentWebSocketBridge(MonitorableComponent):
                 logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
-            # EMIT TO USER CHAT
-            success = await self._websocket_manager.send_to_thread(thread_id, notification)
+            # PHASE 3 FIX: Enhanced event delivery with retry mechanism - CRITICAL EVENT
+            success = await self._emit_with_retry(
+                event_type="agent_completed",
+                thread_id=thread_id, 
+                notification=notification,
+                run_id=run_id,
+                agent_name=agent_name,
+                max_retries=5,  # Extra retries for critical completion event
+                critical_event=True
+            )
             
             if success:
                 logger.info(f"✅ EMISSION SUCCESS: agent_completed → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+                await self._track_event_delivery("agent_completed", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name})")
+                await self._track_event_delivery("agent_completed", run_id, False)
+                # PHASE 3 FIX: Alert for critical event failure
+                await self._alert_critical_event_failure("agent_completed", run_id, agent_name)
             
             return success
             
@@ -2713,6 +2762,182 @@ class WebSocketNotifier:
             )
         else:
             logger.warning(f"Emitter does not support notify_agent_thinking: {type(self.emitter)}")
+
+
+    async def _emit_with_retry(
+        self,
+        event_type: str,
+        thread_id: str,
+        notification: Dict[str, Any],
+        run_id: str,
+        agent_name: str,
+        max_retries: int = 3,
+        critical_event: bool = False
+    ) -> bool:
+        """
+        PHASE 3 FIX: Emit WebSocket event with retry mechanism.
+        
+        This method implements robust event delivery with exponential backoff
+        to ensure critical agent events are delivered even under adverse conditions.
+        
+        Args:
+            event_type: Type of event being emitted
+            thread_id: Target thread for event delivery
+            notification: Event notification payload
+            run_id: Run identifier for tracking
+            agent_name: Agent name for logging
+            max_retries: Maximum number of retry attempts
+            critical_event: Whether this is a critical event requiring special handling
+            
+        Returns:
+            bool: True if event delivered successfully, False otherwise
+        """
+        last_error = None
+        base_delay = 0.1 if critical_event else 0.05
+        
+        for attempt in range(max_retries + 1):  # +1 for initial attempt
+            try:
+                # Validate WebSocket manager is still available
+                if not self._websocket_manager:
+                    logger.error(f"PHASE 3 FIX: WebSocket manager unavailable during {event_type} retry {attempt + 1}")
+                    return False
+                
+                # Attempt event delivery
+                success = await self._websocket_manager.send_to_thread(thread_id, notification)
+                
+                if success:
+                    if attempt > 0:
+                        logger.info(f"PHASE 3 FIX: {event_type} delivered on retry attempt {attempt + 1} (run_id={run_id})")
+                    return True
+                
+                # If not successful and we have retries left
+                if attempt < max_retries:
+                    delay = base_delay * (2 ** attempt)  # Exponential backoff
+                    if critical_event:
+                        delay *= 2  # Longer delays for critical events
+                    
+                    logger.warning(f"PHASE 3 FIX: {event_type} delivery failed, retrying in {delay}s (attempt {attempt + 1}/{max_retries + 1}, run_id={run_id})")
+                    await asyncio.sleep(delay)
+                    continue
+                else:
+                    logger.error(f"PHASE 3 FIX: {event_type} delivery failed after {max_retries + 1} attempts (run_id={run_id})")
+                    return False
+                    
+            except Exception as e:
+                last_error = e
+                logger.error(f"PHASE 3 FIX: Exception during {event_type} delivery attempt {attempt + 1}: {e}")
+                
+                if attempt < max_retries:
+                    delay = base_delay * (2 ** attempt)
+                    await asyncio.sleep(delay)
+                    continue
+                else:
+                    logger.error(f"PHASE 3 FIX: {event_type} delivery failed with exception after {max_retries + 1} attempts: {e}")
+                    return False
+        
+        return False
+    
+    async def _track_event_delivery(self, event_type: str, run_id: str, success: bool):
+        """
+        PHASE 3 FIX: Track event delivery success/failure for monitoring.
+        
+        Args:
+            event_type: Type of event that was delivered/failed
+            run_id: Run identifier for correlation
+            success: Whether delivery was successful
+        """
+        try:
+            # Initialize event tracking if not exists
+            if not hasattr(self, '_event_delivery_stats'):
+                self._event_delivery_stats = {
+                    'total_events': 0,
+                    'successful_events': 0,
+                    'failed_events': 0,
+                    'events_by_type': {},
+                    'last_tracked': datetime.now(timezone.utc)
+                }
+            
+            stats = self._event_delivery_stats
+            stats['total_events'] += 1
+            stats['last_tracked'] = datetime.now(timezone.utc)
+            
+            if success:
+                stats['successful_events'] += 1
+            else:
+                stats['failed_events'] += 1
+            
+            # Track by event type
+            if event_type not in stats['events_by_type']:
+                stats['events_by_type'][event_type] = {'success': 0, 'failed': 0}
+            
+            if success:
+                stats['events_by_type'][event_type]['success'] += 1
+            else:
+                stats['events_by_type'][event_type]['failed'] += 1
+            
+            # Calculate success rate for monitoring
+            success_rate = (stats['successful_events'] / stats['total_events']) * 100 if stats['total_events'] > 0 else 0
+            
+            # Log poor performance
+            if stats['total_events'] % 10 == 0 and success_rate < 90:
+                logger.warning(f"PHASE 3 MONITORING: Event delivery success rate: {success_rate:.1f}% ({stats['successful_events']}/{stats['total_events']})")
+                
+        except Exception as e:
+            logger.error(f"PHASE 3 FIX: Failed to track event delivery: {e}")
+    
+    async def _alert_critical_event_failure(self, event_type: str, run_id: str, agent_name: str):
+        """
+        PHASE 3 FIX: Alert when critical events fail to deliver.
+        
+        Args:
+            event_type: Type of critical event that failed
+            run_id: Run identifier for tracking
+            agent_name: Agent name for context
+        """
+        try:
+            alert_message = {
+                'alert_type': 'critical_event_failure',
+                'event_type': event_type,
+                'run_id': run_id,
+                'agent_name': agent_name,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'severity': 'high',
+                'message': f'Critical WebSocket event {event_type} failed to deliver for {agent_name} (run_id: {run_id})'
+            }
+            
+            # Log critical alert
+            logger.critical(f"🚨 CRITICAL EVENT FAILURE: {alert_message}")
+            
+            # TODO: In production, send to monitoring system
+            # await monitoring_system.send_alert(alert_message)
+            
+        except Exception as e:
+            logger.error(f"PHASE 3 FIX: Failed to send critical event alert: {e}")
+    
+    def get_event_delivery_stats(self) -> Dict[str, Any]:
+        """
+        PHASE 3 FIX: Get event delivery statistics for monitoring.
+        
+        Returns:
+            Dict containing event delivery statistics
+        """
+        if not hasattr(self, '_event_delivery_stats'):
+            return {
+                'total_events': 0,
+                'successful_events': 0,
+                'failed_events': 0,
+                'success_rate': 0.0,
+                'events_by_type': {},
+                'last_tracked': None
+            }
+        
+        stats = self._event_delivery_stats
+        success_rate = (stats['successful_events'] / stats['total_events']) * 100 if stats['total_events'] > 0 else 0
+        
+        return {
+            **stats,
+            'success_rate': round(success_rate, 2)
+        }
 
 
 # SECURITY FIX: Replace singleton with factory pattern

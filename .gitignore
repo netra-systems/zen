@@ -144,3 +144,6 @@ nul
 google-cloud-cli-darwin-arm.tar.gz
 /frontend/cypress/screenshots
 /redis-local
+
+# Health check reports
+staging_health_check_*.json

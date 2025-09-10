@@ -427,7 +427,8 @@ class UnifiedAuthenticationService:
     async def authenticate_websocket(
         self, 
         websocket: WebSocket, 
-        e2e_context: Optional[Dict[str, Any]] = None
+        e2e_context: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None
     ) -> Tuple[AuthResult, Optional[UserExecutionContext]]:
         """
         Authenticate WebSocket connection using SSOT authentication with E2E support.
@@ -440,6 +441,7 @@ class UnifiedAuthenticationService:
         Args:
             websocket: WebSocket connection object
             e2e_context: Optional E2E testing context for bypass support
+            preliminary_connection_id: Optional preliminary connection ID to preserve state machine continuity
             
         Returns:
             Tuple of (AuthResult, UserExecutionContext if successful)
@@ -502,7 +504,8 @@ class UnifiedAuthenticationService:
                 return auth_result, None
             
             # Create UserExecutionContext for successful authentication
-            user_context = self._create_user_execution_context(auth_result, websocket)
+            # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
+            user_context = self._create_user_execution_context(auth_result, websocket, preliminary_connection_id)
             
             logger.info(f"UNIFIED AUTH: WebSocket authentication successful for user {auth_result.user_id[:8]}...")
             return auth_result, user_context
@@ -537,56 +540,41 @@ class UnifiedAuthenticationService:
     
     def _extract_websocket_token(self, websocket: WebSocket) -> Optional[str]:
         """
-        Extract JWT token from WebSocket headers or subprotocols.
+        ISSUE #171 FIX: Extract JWT token using unified protocol handler.
         
-        Supports two standard methods:
-        1. Authorization header: "Bearer <token>"
-        2. Sec-WebSocket-Protocol: "jwt.<base64url_encoded_token>"
+        This replaces the previous method with the UnifiedJWTProtocolHandler
+        to ensure consistent JWT extraction across frontend and backend formats:
+        - Frontend: 'jwt.${token}' via Sec-WebSocket-Protocol header
+        - Backend: 'Bearer ${token}' in Authorization header
+        - Unified: Handles both formats with proper base64url decoding
         """
         try:
-            # Method 1: Authorization header (most common)
-            auth_header = websocket.headers.get("authorization", "")
-            if auth_header.startswith("Bearer "):
-                token = auth_header[7:].strip()
-                logger.debug("UNIFIED AUTH: JWT token found in Authorization header")
-                return token
+            # ISSUE #171 FIX: Use unified JWT protocol handler
+            from netra_backend.app.websocket_core.unified_jwt_protocol_handler import UnifiedJWTProtocolHandler
             
-            # Method 2: WebSocket subprotocol
-            subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
-            for protocol in subprotocols:
-                protocol = protocol.strip()
-                if protocol.startswith("jwt."):
-                    try:
-                        import base64
-                        # Extract and decode base64url token
-                        encoded_token = protocol[4:]  # Remove "jwt." prefix
-                        # Add padding if needed
-                        missing_padding = len(encoded_token) % 4
-                        if missing_padding:
-                            encoded_token += '=' * (4 - missing_padding)
-                        
-                        token_bytes = base64.urlsafe_b64decode(encoded_token)
-                        token = token_bytes.decode('utf-8')
-                        logger.debug("UNIFIED AUTH: JWT token found in Sec-WebSocket-Protocol")
-                        return token
-                    except Exception as e:
-                        logger.warning(f"UNIFIED AUTH: Failed to decode token from subprotocol: {e}")
-                        continue
+            # Extract JWT using unified handler (supports both formats)
+            jwt_token = UnifiedJWTProtocolHandler.extract_jwt_from_websocket(websocket)
             
-            # Method 3: Query parameter (fallback for testing)
+            if jwt_token:
+                # Normalize token for validation
+                normalized_token = UnifiedJWTProtocolHandler.normalize_jwt_for_validation(jwt_token)
+                logger.debug("ISSUE #171 FIX: JWT token extracted and normalized by unified protocol handler")
+                return normalized_token
+            
+            # FALLBACK: Query parameter (for testing compatibility)
             if hasattr(websocket, 'query_params'):
                 token = websocket.query_params.get("token")
                 if token:
-                    logger.debug("UNIFIED AUTH: JWT token found in query parameters")
+                    logger.debug("UNIFIED AUTH: JWT token found in query parameters (fallback)")
                     return token
             
             return None
             
         except Exception as e:
-            logger.error(f"UNIFIED AUTH: Error extracting WebSocket token: {e}")
+            logger.error(f"ISSUE #171 ERROR: Failed to extract JWT token using unified protocol handler: {e}")
             return None
     
-    def _create_user_execution_context(self, auth_result: AuthResult, websocket: WebSocket) -> UserExecutionContext:
+    def _create_user_execution_context(self, auth_result: AuthResult, websocket: WebSocket, preliminary_connection_id: Optional[str] = None) -> UserExecutionContext:
         """
         CRITICAL FIX: Create UserExecutionContext with enhanced validation and defensive measures.
         
@@ -609,10 +597,23 @@ class UnifiedAuthenticationService:
             # CRITICAL FIX: Use defensive UserExecutionContext creation
             from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
             
-            # Generate WebSocket client ID using consistent format
-            connection_timestamp = int(datetime.now(timezone.utc).timestamp())
-            unique_id = str(uuid.uuid4())[:8]
-            websocket_client_id = f"ws_{user_id[:8]}_{connection_timestamp}_{unique_id}"
+            # PASS-THROUGH FIX: Use preliminary connection ID if provided
+            if preliminary_connection_id:
+                # Use provided preliminary connection ID to preserve state machine continuity
+                websocket_client_id = preliminary_connection_id
+                logger.info(f"PASS-THROUGH FIX: Using preliminary_connection_id {preliminary_connection_id} for UserExecutionContext creation")
+            else:
+                # Generate WebSocket client ID using consistent format (fallback)
+                connection_timestamp = int(datetime.now(timezone.utc).timestamp())
+                unique_id = str(uuid.uuid4())[:8]
+                websocket_client_id = f"ws_{user_id[:8]}_{connection_timestamp}_{unique_id}"
+                logger.debug(f"Generated new websocket_client_id: {websocket_client_id}")
+            
+            # CRITICAL FIX: Ensure connection_timestamp is available for metadata
+            if preliminary_connection_id:
+                # For preliminary connection ID, use current timestamp for metadata
+                connection_timestamp = int(datetime.now(timezone.utc).timestamp())
+            # If not using preliminary ID, connection_timestamp was set above
             
             logger.debug(f"UNIFIED AUTH: Creating defensive UserExecutionContext for user {user_id[:8]}... with client_id {websocket_client_id}")
             

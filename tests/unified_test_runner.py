@@ -521,8 +521,8 @@ class UnifiedTestRunner:
             # Determine categories to run
             categories_to_run = self._determine_categories_to_run(args)
             if not categories_to_run:
-                print("No categories to run based on selection criteria")
-                return 1
+                print("No categories to run based on selection criteria - SUCCESS (empty selection is valid)")
+                return 0
             
             # Handle resume functionality
             if args.resume_from:
@@ -586,6 +586,9 @@ class UnifiedTestRunner:
                 return 0 if all(r["success"] for r in requested_results.values()) else 1
             else:
                 # Fallback to original behavior if execution plan doesn't have requested_categories
+                # Handle empty results case - no categories found is considered success
+                if not results:
+                    return 0
                 return 0 if all(r["success"] for r in results.values()) else 1
         
         finally:

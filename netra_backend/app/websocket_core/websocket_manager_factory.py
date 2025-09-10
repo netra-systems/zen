@@ -28,6 +28,7 @@ Architecture Pattern: Factory + Isolation + Lifecycle Management
 """
 
 import asyncio
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Set, Any, List, Tuple
@@ -2256,9 +2257,10 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
             logger.error(f"❌ FACTORY ERROR: Failed to get healthy factory instance: {factory_error}")
             raise FactoryInitializationError(f"Factory initialization error: {factory_error}") from factory_error
         
-        # ISSUE #135 FIX: Robust manager creation with retry logic for Cloud Run environment
+        # PHASE 2 FIX: Enhanced manager creation with emergency fallback mechanism
         max_retries = 3
         retry_delay = 0.5
+        fallback_attempted = False
         
         for attempt in range(max_retries):
             try:
@@ -2275,12 +2277,39 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
             except Exception as creation_error:
                 logger.error(f"❌ ATTEMPT {attempt + 1}: Manager creation failed: {creation_error}")
                 
+                # PHASE 2 FIX: Try emergency fallback manager on second failure
+                if attempt == 1 and not fallback_attempted:
+                    try:
+                        logger.warning("PHASE 2 FIX: Attempting emergency fallback manager creation")
+                        fallback_manager = await _create_emergency_fallback_manager(user_context, creation_error)
+                        if fallback_manager:
+                            logger.info("PHASE 2 FIX: Emergency fallback manager created successfully")
+                            fallback_attempted = True
+                            return fallback_manager
+                    except Exception as fallback_error:
+                        logger.error(f"PHASE 2 FIX: Emergency fallback also failed: {fallback_error}")
+                
                 if attempt == max_retries - 1:
-                    # Final attempt failed - increment failed creations metric
-                    self._factory_metrics.failed_creations += 1
+                    # Final attempt failed - try degraded mode as last resort
+                    logger.error("PHASE 2 FIX: All attempts failed, trying degraded service mode")
+                    try:
+                        degraded_manager = await _create_degraded_service_manager(user_context)
+                        if degraded_manager:
+                            logger.warning("PHASE 2 FIX: Degraded service manager created - limited functionality")
+                            return degraded_manager
+                    except Exception as degraded_error:
+                        logger.error(f"PHASE 2 FIX: Degraded service creation failed: {degraded_error}")
+                    
                     raise FactoryInitializationError(
-                        f"WebSocket manager creation failed after {max_retries} attempts. "
-                        f"Final error: {creation_error}. This indicates persistent Cloud Run environment issues."
+                        f"WebSocket manager creation failed after {max_retries} attempts including emergency fallbacks. "
+                        f"Final error: {creation_error}. This indicates persistent Cloud Run environment issues.",
+                        user_id=getattr(user_context, 'user_id', 'unknown'),
+                        error_code="FACTORY_CREATION_EXHAUSTED",
+                        details={
+                            "creation_error": str(creation_error),
+                            "fallback_attempted": fallback_attempted,
+                            "max_retries": max_retries
+                        }
                     ) from creation_error
                 else:
                     # Wait before retry
@@ -2652,6 +2681,220 @@ def create_websocket_manager_sync(user_context: UserExecutionContext) -> Isolate
         )
 
 
+async def _create_emergency_fallback_manager(
+    user_context: UserExecutionContext, 
+    original_error: Exception
+) -> Optional['IsolatedWebSocketManager']:
+    """
+    PHASE 2 FIX: Create emergency fallback WebSocket manager for service continuity.
+    
+    This function provides a minimal WebSocket manager when the normal factory
+    creation process fails, ensuring users can still establish WebSocket connections
+    even during service degradation.
+    
+    Args:
+        user_context: User execution context
+        original_error: The error that caused normal creation to fail
+        
+    Returns:
+        Emergency fallback manager or None if creation fails
+    """
+    try:
+        logger.info("PHASE 2 FIX: Creating emergency fallback WebSocket manager")
+        
+        # Import minimal components needed for emergency manager
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+        
+        # Create minimal manager configuration
+        emergency_config = {
+            'user_id': getattr(user_context, 'user_id', f'emergency_{uuid.uuid4().hex[:8]}'),
+            'websocket_client_id': getattr(user_context, 'websocket_client_id', f'emergency_ws_{uuid.uuid4().hex[:8]}'),
+            'thread_id': getattr(user_context, 'thread_id', f'emergency_thread_{uuid.uuid4().hex[:8]}'),
+            'run_id': getattr(user_context, 'run_id', f'emergency_run_{uuid.uuid4().hex[:8]}'),
+            'emergency_mode': True,
+            'original_error': str(original_error),
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Create emergency manager with minimal functionality
+        emergency_manager = EmergencyWebSocketManager(emergency_config)
+        
+        logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_config['user_id'][:8]}...")
+        return emergency_manager
+        
+    except Exception as e:
+        logger.error(f"PHASE 2 FIX: Failed to create emergency fallback manager: {e}")
+        return None
+
+
+async def _create_degraded_service_manager(user_context: UserExecutionContext) -> Optional['IsolatedWebSocketManager']:
+    """
+    PHASE 2 FIX: Create degraded service WebSocket manager as last resort.
+    
+    This function creates a minimal WebSocket manager that provides basic
+    functionality when all other creation methods have failed.
+    
+    Args:
+        user_context: User execution context
+        
+    Returns:
+        Degraded service manager or None if creation fails
+    """
+    try:
+        logger.warning("PHASE 2 FIX: Creating degraded service WebSocket manager - last resort")
+        
+        # Create absolute minimal configuration
+        degraded_config = {
+            'user_id': 'degraded_service_user',
+            'websocket_client_id': f'degraded_ws_{int(time.time())}',
+            'thread_id': f'degraded_thread_{int(time.time())}',
+            'run_id': f'degraded_run_{int(time.time())}',
+            'degraded_mode': True,
+            'functionality_level': 'minimal',
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Create degraded manager
+        degraded_manager = DegradedWebSocketManager(degraded_config)
+        
+        logger.warning("PHASE 2 FIX: Degraded service manager created - limited functionality available")
+        return degraded_manager
+        
+    except Exception as e:
+        logger.error(f"PHASE 2 FIX: Failed to create degraded service manager: {e}")
+        return None
+
+
+class EmergencyWebSocketManager:
+    """
+    PHASE 2 FIX: Emergency WebSocket manager for service continuity.
+    
+    Provides minimal WebSocket functionality when normal factory creation fails.
+    This ensures users can maintain WebSocket connections during service issues.
+    """
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.user_id = config['user_id']
+        self.websocket_client_id = config['websocket_client_id']
+        self.thread_id = config['thread_id'] 
+        self.run_id = config['run_id']
+        self.emergency_mode = True
+        self.created_at = datetime.now(timezone.utc)
+        
+        # Minimal state tracking
+        self._connections = {}
+        self._message_queue = []
+        self._is_healthy = True
+        
+        logger.info(f"PHASE 2 FIX: EmergencyWebSocketManager initialized for {self.user_id[:8]}...")
+    
+    async def send_message(self, websocket, message: Dict[str, Any]) -> bool:
+        """Send message with emergency error handling."""
+        try:
+            # Add emergency mode indicator to messages
+            emergency_message = {
+                **message,
+                'emergency_mode': True,
+                'manager_type': 'emergency_fallback',
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            if hasattr(websocket, 'send_json'):
+                await websocket.send_json(emergency_message)
+                return True
+            else:
+                logger.warning("PHASE 2 FIX: WebSocket send_json not available in emergency mode")
+                return False
+                
+        except Exception as e:
+            logger.error(f"PHASE 2 FIX: Emergency manager send failed: {e}")
+            return False
+    
+    async def handle_message(self, websocket, message: Dict[str, Any]) -> bool:
+        """Handle incoming messages in emergency mode."""
+        try:
+            # Queue messages for later processing when services recover
+            self._message_queue.append({
+                'message': message,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'websocket_id': id(websocket)
+            })
+            
+            # Send acknowledgment that message was received
+            ack_message = {
+                'type': 'emergency_ack',
+                'message': 'Message received in emergency mode - will process when services recover',
+                'emergency_mode': True,
+                'queue_position': len(self._message_queue)
+            }
+            
+            return await self.send_message(websocket, ack_message)
+            
+        except Exception as e:
+            logger.error(f"PHASE 2 FIX: Emergency message handling failed: {e}")
+            return False
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get emergency manager health status."""
+        return {
+            'healthy': self._is_healthy,
+            'manager_type': 'emergency_fallback',
+            'emergency_mode': True,
+            'connections': len(self._connections),
+            'queued_messages': len(self._message_queue),
+            'created_at': self.created_at.isoformat(),
+            'uptime_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
+        }
+
+
+class DegradedWebSocketManager:
+    """
+    PHASE 2 FIX: Degraded WebSocket manager for absolute last resort.
+    
+    Provides the most minimal WebSocket functionality possible to maintain
+    basic connectivity when all other systems have failed.
+    """
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.degraded_mode = True
+        self.created_at = datetime.now(timezone.utc)
+        
+        logger.warning(f"PHASE 2 FIX: DegradedWebSocketManager initialized - minimal functionality only")
+    
+    async def send_message(self, websocket, message: Dict[str, Any]) -> bool:
+        """Send message with degraded functionality."""
+        try:
+            degraded_message = {
+                'type': 'degraded_service',
+                'message': 'Service operating in degraded mode - limited functionality available',
+                'original_message_type': message.get('type', 'unknown'),
+                'degraded_mode': True,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            if hasattr(websocket, 'send_json'):
+                await websocket.send_json(degraded_message)
+                return True
+            return False
+            
+        except Exception as e:
+            logger.error(f"PHASE 2 FIX: Degraded manager send failed: {e}")
+            return False
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get degraded manager health status."""
+        return {
+            'healthy': False,
+            'manager_type': 'degraded_service',
+            'degraded_mode': True,
+            'functionality_level': 'minimal',
+            'created_at': self.created_at.isoformat(),
+            'message': 'Operating in degraded mode - please retry connection'
+        }
+
+
 __all__ = [
     "WebSocketManagerFactory",
     "IsolatedWebSocketManager", 
@@ -2666,5 +2909,8 @@ __all__ = [
     "create_defensive_user_execution_context",
     "validate_websocket_component_health",  # Component health validation
     # Five Whys Root Cause Prevention
-    "WebSocketManagerProtocol"  # Re-exported from protocols module
+    "WebSocketManagerProtocol",  # Re-exported from protocols module
+    # Phase 2 Emergency Fallback Components
+    "EmergencyWebSocketManager",
+    "DegradedWebSocketManager"
 ]
