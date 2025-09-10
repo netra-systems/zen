@@ -277,17 +277,21 @@ async def websocket_endpoint(websocket: WebSocket):
             await safe_websocket_close(websocket, code=1000, reason="Connection establishment failed - graceful retry")
             return
         
-        # PHASE 1 FIX 1: Integrate ApplicationConnectionStateMachine after successful accept()
-        # This addresses the race condition where message handling begins before accept() completion
-        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+        # SINGLE COORDINATION STATE MACHINE: Initialize once after successful accept()
+        # This eliminates the race condition between multiple state machine instances
+        from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, ApplicationConnectionState
         
-        # Generate preliminary connection_id for state machine registration
-        # This will be updated with proper user context after authentication
-        preliminary_connection_id = f"ws_init_{int(time.time())}"
-        temp_user_id = "pending_auth"
+        # Generate single connection_id that will be used throughout the connection lifecycle
+        # Format: ws_<timestamp_ms>_<websocket_id> for uniqueness across restarts
+        connection_id = f"ws_{int(time.time() * 1000)}_{id(websocket)}"
+        temp_user_id = "pending_auth"  # Will be updated after authentication
         
+        # Store connection_id on websocket for lifecycle management
+        websocket.connection_id = connection_id
+        
+        # Initialize single state machine registry
         state_registry = get_connection_state_registry()
-        state_machine = state_registry.register_connection(preliminary_connection_id, temp_user_id)
+        state_machine = state_registry.register_connection(connection_id, temp_user_id)
         
         # Transition to ACCEPTED state after successful WebSocket accept()
         accept_transition_success = state_machine.transition_to(
@@ -296,14 +300,15 @@ async def websocket_endpoint(websocket: WebSocket):
             metadata={
                 "selected_protocol": selected_protocol,
                 "environment": environment,
-                "accept_timestamp": time.time()
+                "accept_timestamp": time.time(),
+                "connection_id": connection_id
             }
         )
         
         if accept_transition_success:
-            logger.info(f"State machine transitioned to ACCEPTED for {preliminary_connection_id}")
+            logger.info(f"Single state machine transitioned to ACCEPTED for {connection_id}")
         else:
-            logger.error(f"Failed to transition state machine to ACCEPTED for {preliminary_connection_id}")
+            logger.error(f"Failed to transition state machine to ACCEPTED for {connection_id}")
             # Don't fail the connection, but log the issue
         
         # CRITICAL RACE CONDITION FIX: Progressive post-accept delays for Cloud Run environments
@@ -329,44 +334,58 @@ async def websocket_endpoint(websocket: WebSocket):
             # Stage 3: Final stabilization delay with Windows-safe sleep
             await windows_safe_sleep(0.05)  # Increased to 50ms for enhanced GCP stability
             
-            # Stage 4: CRITICAL FIX - Initialize connection state machine AFTER stabilization
-            # This prevents get_connection_state_machine errors during accept() race conditions
+            # EVENT-DRIVEN STABILIZATION: Validate state machine readiness instead of duplicate creation
+            # This eliminates the duplicate state machine initialization race condition
             try:
-                from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
-                from shared.types.core_types import UserID, ensure_user_id
-                registry = get_connection_state_registry()
-                connection_id = f"ws_{int(time.time() * 1000)}_{id(websocket)}"
+                # Use the existing connection_id from websocket (set during initial registration)
+                if not hasattr(websocket, 'connection_id') or not websocket.connection_id:
+                    logger.error("COORDINATION ERROR: Missing connection_id on websocket - state machine not initialized")
+                    raise WebSocketDisconnect(code=1011, reason="Connection state coordination failed")
                 
-                # Use a default user ID for now - will be updated after authentication
-                default_user_id = ensure_user_id("staging-connection-init")
-                state_machine = registry.register_connection(connection_id, default_user_id)
+                # Get existing state machine instead of creating a new one
+                existing_state_machine = state_registry.get_connection_state_machine(websocket.connection_id)
+                if existing_state_machine is None:
+                    logger.error(f"COORDINATION ERROR: State machine lost for {websocket.connection_id}")
+                    raise WebSocketDisconnect(code=1011, reason="Connection state machine lost")
                 
-                # Store connection_id for later use
-                websocket.connection_id = connection_id
-                logger.info(f"RACE CONDITION FIX: Connection state machine initialized for {connection_id}")
+                # Validate current state is ACCEPTED (confirming accept() completed properly)
+                if existing_state_machine.current_state != ApplicationConnectionState.ACCEPTED:
+                    logger.warning(f"State machine in unexpected state: {existing_state_machine.current_state} for {websocket.connection_id}")
+                
+                logger.info(f"COORDINATION SUCCESS: State machine validated for {websocket.connection_id}")
+                
             except Exception as e:
-                logger.warning(f"RACE CONDITION WARNING: Failed to initialize connection state machine: {e}")
-                # Continue without state machine - fallback to basic WebSocket handling
+                logger.error(f"COORDINATION FAILURE: State machine validation failed: {e}")
+                # This is a critical failure - connection cannot proceed without proper coordination
+                raise WebSocketDisconnect(code=1011, reason="Connection coordination failed")
             
             logger.debug(f"Cloud Run race condition prevention complete for {environment}")
         elif environment == "testing" or is_testing:
             # CRITICAL FIX: E2E tests need more stability time to prevent 1011 errors
             await windows_safe_sleep(0.02)  # Increased to 20ms for E2E test stability
             
-            # E2E test connection state machine setup
+            # E2E TEST COORDINATION: Validate existing state machine for testing
             try:
-                from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
-                from shared.types.core_types import ensure_user_id
-                registry = get_connection_state_registry()
-                connection_id = f"e2e_{int(time.time() * 1000)}_{id(websocket)}"
+                # Verify the connection_id was set during initial state machine creation
+                if not hasattr(websocket, 'connection_id') or not websocket.connection_id:
+                    logger.warning("E2E TEST: Missing connection_id, creating fallback for testing")
+                    websocket.connection_id = f"e2e_{int(time.time() * 1000)}_{id(websocket)}"
+                    
+                    # Create state machine for E2E testing as fallback only
+                    from shared.types.core_types import ensure_user_id
+                    e2e_user_id = ensure_user_id("staging-e2e-user-test")
+                    state_machine = state_registry.register_connection(websocket.connection_id, e2e_user_id)
+                    
+                    # Transition to ACCEPTED state for E2E tests
+                    state_machine.transition_to(
+                        ApplicationConnectionState.ACCEPTED,
+                        reason="E2E test WebSocket accept completed",
+                        metadata={"environment": environment, "test_mode": True}
+                    )
                 
-                # Use E2E test user ID 
-                e2e_user_id = ensure_user_id("staging-e2e-user-test")
-                state_machine = registry.register_connection(connection_id, e2e_user_id)
-                websocket.connection_id = connection_id
-                logger.info(f"E2E TEST FIX: State machine initialized for {connection_id}")
+                logger.info(f"E2E TEST COORDINATION: Connection ready for {websocket.connection_id}")
             except Exception as e:
-                logger.debug(f"E2E TEST: State machine setup failed (acceptable): {e}")
+                logger.debug(f"E2E TEST: Coordination setup warning (non-critical): {e}")
         else:
             await windows_safe_sleep(0.015)  # Increased to 15ms for development environments
         
