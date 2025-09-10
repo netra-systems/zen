@@ -59,9 +59,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
     User Message → Triage Agent → AI Response
     """
     
-    async def asyncSetUp(self):
+    async def async_setup_method(self, method=None):
         """Set up mission critical test environment."""
-        await super().asyncSetUp()
+        await super().async_setup_method(method)
         self.env = IsolatedEnvironment()
         self.env.set('ENVIRONMENT', 'test')
         
@@ -397,9 +397,9 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
         except Exception as e:
             pytest.fail(f"Revenue impact validation should demonstrate business impact: {e}")
 
-    async def asyncTearDown(self):
+    async def async_teardown_method(self, method=None):
         """Clean up mission critical test environment."""
-        await super().asyncTearDown()
+        await super().async_teardown_method(method)
         
         # Log mission critical test results
         print(f"\n=== MISSION CRITICAL: Triage Start Failure Reproduction Results ===")
