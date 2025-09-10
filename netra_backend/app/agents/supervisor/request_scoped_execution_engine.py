@@ -26,9 +26,9 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.execution_context_manager import (
-    ExecutionContextManager,
-    RequestExecutionScope
+from netra_backend.app.agents.supervisor.agent_execution_context_manager import (
+    AgentExecutionContextManager as ExecutionContextManager,
+    # RequestExecutionScope,  # This class doesn't exist, commenting out for now
 )
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
@@ -90,6 +90,14 @@ class RequestScopedExecutionEngine:
             TypeError: If user_context is not a UserExecutionContext
             ValueError: If any required parameters are invalid
         """
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         # Validate user context immediately
         self.user_context = validate_user_context(user_context)
         

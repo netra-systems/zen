@@ -236,17 +236,16 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
                     assert hasattr(engine, 'execute_agent')
                     assert hasattr(engine, 'cleanup')
                     
-                    # Clean up
                     # Clean up (schedule async cleanup)
-            try:
-                import asyncio
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    asyncio.create_task(engine.cleanup())
-                else:
-                    loop.run_until_complete(engine.cleanup())
-            except:
-                pass  # Cleanup optional during testing
+                    try:
+                        import asyncio
+                        loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            asyncio.create_task(engine.cleanup())
+                        else:
+                            loop.run_until_complete(engine.cleanup())
+                    except:
+                        pass  # Cleanup optional during testing
                     
                     self.record_metric("ssot_engine_functional", True)
                     

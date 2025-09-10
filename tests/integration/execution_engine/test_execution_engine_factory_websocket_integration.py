@@ -116,26 +116,63 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             emitter_key = f"{user_id}_{thread_id}_{run_id}"
             self.user_emitters[emitter_key] = emitter
             
-            # Mock emitter methods with tracking
-            emitter.notify_agent_started = AsyncMock(side_effect=lambda *args, **kwargs: track_event('user_emitter_started', run_id, 'agent', *args, user_context=user_id, **kwargs))
-            emitter.notify_agent_thinking = AsyncMock(side_effect=lambda *args, **kwargs: track_event('user_emitter_thinking', run_id, 'agent', *args, user_context=user_id, **kwargs))
-            emitter.notify_tool_executing = AsyncMock(side_effect=lambda *args, **kwargs: track_event('user_emitter_tool_exec', run_id, 'agent', *args, user_context=user_id, **kwargs))
-            emitter.notify_tool_completed = AsyncMock(side_effect=lambda *args, **kwargs: track_event('user_emitter_tool_comp', run_id, 'agent', *args, user_context=user_id, **kwargs))
-            emitter.notify_agent_completed = AsyncMock(side_effect=lambda *args, **kwargs: track_event('user_emitter_completed', run_id, 'agent', *args, user_context=user_id, **kwargs))
+            # Mock emitter methods with tracking AND bridge calls (like real emitter)
+            def make_tracker(event_type, bridge_method_name):
+                async def tracker(*args, **kwargs):
+                    # Extract agent_name from kwargs if present, otherwise use default
+                    agent_name = kwargs.get('agent_name', 'test_agent')
+                    # Remove agent_name from kwargs to avoid conflicts
+                    clean_kwargs = {k: v for k, v in kwargs.items() if k != 'agent_name'}
+                    clean_kwargs['user_context'] = user_id
+                    track_event(event_type, run_id, agent_name, *args, **clean_kwargs)
+                    
+                    # Call the bridge method like the real emitter would
+                    bridge_method = getattr(websocket_bridge, bridge_method_name)
+                    bridge_kwargs = kwargs.copy()
+                    bridge_kwargs['run_id'] = run_id
+                    if 'agent_name' not in bridge_kwargs:
+                        bridge_kwargs['agent_name'] = agent_name
+                    await bridge_method(**bridge_kwargs)
+                    
+                    return True
+                return tracker
+            
+            emitter.notify_agent_started = make_tracker('user_emitter_started', 'notify_agent_started')
+            emitter.notify_agent_thinking = make_tracker('user_emitter_thinking', 'notify_agent_thinking')  
+            emitter.notify_tool_executing = make_tracker('user_emitter_tool_exec', 'notify_tool_executing')
+            emitter.notify_tool_completed = make_tracker('user_emitter_tool_comp', 'notify_tool_completed')
+            emitter.notify_agent_completed = make_tracker('user_emitter_completed', 'notify_agent_completed')
             
             return emitter
         
-        # Mock the UserWebSocketEmitter creation
-        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', side_effect=create_mock_emitter):
-            self.factory.set_tool_dispatcher_factory(Mock())
+        # Start persistent patch for UserWebSocketEmitter creation in the factory
+        self.websocket_emitter_patch = patch(
+            'netra_backend.app.agents.supervisor.execution_engine_factory.UserWebSocketEmitter', 
+            side_effect=create_mock_emitter
+        )
+        self.websocket_emitter_patch.start()
+        
+        # Configure factory with tool dispatcher
+        self.factory.set_tool_dispatcher_factory(Mock())
         
         # Record setup completion
         self.record_metric("websocket_integration_setup_complete", True)
         self.record_metric("websocket_bridge_configured", True)
     
+    @pytest.fixture(autouse=True)
+    async def auto_setup_async(self):
+        """Auto setup fixture to ensure async_setup_method is called."""
+        await self.async_setup_method()
+        yield
+        await self.async_teardown_method()
+    
     async def async_teardown_method(self, method=None):
         """Teardown test with factory cleanup."""
         try:
+            # Stop the WebSocket emitter patch if it exists
+            if hasattr(self, 'websocket_emitter_patch'):
+                self.websocket_emitter_patch.stop()
+            
             if hasattr(self, 'factory') and self.factory:
                 await self.factory.shutdown()
         finally:
@@ -178,7 +215,6 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             thread_id=user_context.thread_id,
             user_id=user_context.user_id,
             agent_name="test_websocket_agent",
-            prompt="Test WebSocket integration",
             metadata={"test": True, "websocket_integration": True}
         )
     
@@ -290,28 +326,26 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 agent_context_gamma = self.create_test_agent_context(user_gamma_context)
                 agent_context_delta = self.create_test_agent_context(user_delta_context)
                 
-                # Simulate WebSocket events from Engine Gamma
-                await engine_gamma.send_agent_thinking(
-                    agent_context_gamma, 
-                    "Engine Gamma thinking", 
+                # Simulate WebSocket events from Engine Gamma via emitter
+                await engine_gamma.websocket_emitter.notify_agent_thinking(
+                    agent_name=agent_context_gamma.agent_name,
+                    reasoning="Engine Gamma thinking",
                     step_number=1
                 )
                 
-                await engine_gamma.send_tool_executing(
-                    agent_context_gamma,
-                    "test_tool_gamma"
+                await engine_gamma.websocket_emitter.notify_tool_executing(
+                    tool_name="test_tool_gamma"
                 )
                 
-                # Simulate WebSocket events from Engine Delta  
-                await engine_delta.send_agent_thinking(
-                    agent_context_delta,
-                    "Engine Delta thinking",
+                # Simulate WebSocket events from Engine Delta via emitter
+                await engine_delta.websocket_emitter.notify_agent_thinking(
+                    agent_name=agent_context_delta.agent_name,
+                    reasoning="Engine Delta thinking",
                     step_number=1
                 )
                 
-                await engine_delta.send_tool_executing(
-                    agent_context_delta,
-                    "test_tool_delta"
+                await engine_delta.websocket_emitter.notify_tool_executing(
+                    tool_name="test_tool_delta"
                 )
                 
                 # Allow events to be processed
@@ -361,18 +395,18 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                         )
                 
                 # CRITICAL: Validate event content isolation
-                gamma_thinking_events = [e for e in gamma_events if e['type'] == 'agent_thinking']
-                delta_thinking_events = [e for e in delta_events if e['type'] == 'agent_thinking']
+                gamma_thinking_events = [e for e in gamma_events if e['type'] == 'user_emitter_thinking']
+                delta_thinking_events = [e for e in delta_events if e['type'] == 'user_emitter_thinking']
                 
-                # Check that Gamma events contain Gamma-specific content
-                gamma_has_gamma_content = any("Engine Gamma thinking" in str(e.get('args', [])) for e in gamma_thinking_events)
+                # Check that Gamma events contain Gamma-specific content (look in kwargs)
+                gamma_has_gamma_content = any("Engine Gamma thinking" in str(e.get('kwargs', {})) for e in gamma_thinking_events)
                 assert gamma_has_gamma_content, (
                     "SSOT VIOLATION: Gamma events missing Gamma-specific content. "
                     f"Events: {gamma_thinking_events}"
                 )
                 
                 # Check that Delta events don't contain Gamma content
-                delta_has_gamma_content = any("Engine Gamma thinking" in str(e.get('args', [])) for e in delta_thinking_events)
+                delta_has_gamma_content = any("Engine Gamma thinking" in str(e.get('kwargs', {})) for e in delta_thinking_events)
                 assert not delta_has_gamma_content, (
                     "SSOT VIOLATION: Delta events contain Gamma content. "
                     f"This indicates cross-user event contamination. Events: {delta_thinking_events}"
@@ -430,24 +464,23 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                     """Send multiple WebSocket events for a user engine."""
                     user_specific_data = f"user_{user_context.user_id}_data"
                     
-                    await engine.send_agent_thinking(
-                        agent_context,
-                        f"Thinking for {user_specific_data}",
+                    await engine.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context.agent_name,
+                        reasoning=f"Thinking for {user_specific_data}",
                         step_number=1
                     )
                     
-                    await engine.send_tool_executing(
-                        agent_context,
-                        f"tool_for_{user_specific_data}"
+                    await engine.websocket_emitter.notify_tool_executing(
+                        tool_name=f"tool_for_{user_specific_data}"
                     )
                     
                     # Simulate tool completion
                     await asyncio.sleep(0.05)  # Brief delay to simulate work
                     
-                    await engine.send_final_report(
-                        agent_context,
-                        {"result": f"completed_for_{user_specific_data}"},
-                        100.0  # 100ms duration
+                    await engine.websocket_emitter.notify_agent_completed(
+                        agent_name=agent_context.agent_name,
+                        result={"result": f"completed_for_{user_specific_data}"},
+                        duration=100.0
                     )
                 
                 # Execute all events concurrently
@@ -586,9 +619,15 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 # Clear previous events
                 self.websocket_events.clear()
                 
-                # Send test events through engine
-                await engine.send_agent_thinking(agent_context, "Bridge integration test", step_number=1)
-                await engine.send_tool_executing(agent_context, "bridge_test_tool")
+                # Send test events through engine via emitter
+                await engine.websocket_emitter.notify_agent_thinking(
+                    agent_name=agent_context.agent_name,
+                    reasoning="Bridge integration test", 
+                    step_number=1
+                )
+                await engine.websocket_emitter.notify_tool_executing(
+                    tool_name="bridge_test_tool"
+                )
                 
                 # Verify events were captured
                 bridge_events = [e for e in self.websocket_events if e['run_id'] == user_context.run_id]

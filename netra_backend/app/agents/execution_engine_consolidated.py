@@ -383,6 +383,14 @@ class ExecutionEngine:
             user_context: User context for isolation
             tool_dispatcher: Tool dispatcher for tool execution
         """
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.config = config or EngineConfig()
         self.registry = registry
         self.websocket_bridge = websocket_bridge

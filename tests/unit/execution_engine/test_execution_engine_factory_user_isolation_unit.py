@@ -217,14 +217,14 @@ class TestExecutionEngineFactoryUserIsolationUnit(SSotBaseTestCase):
                     )
                 
                 # CRITICAL: Metrics must be isolated
-                stats_a = await engine_a.get_user_execution_stats()
-                stats_b = await engine_b.get_user_execution_stats()
+                stats_a = engine_a.get_user_execution_stats()
+                stats_b = engine_b.get_user_execution_stats()
                 
                 # Modify stats in engine A
                 stats_a['test_metric'] = 'alpha_value'
                 
                 # Engine B stats must not be affected
-                stats_b_after = await engine_b.get_user_execution_stats()
+                stats_b_after = engine_b.get_user_execution_stats()
                 assert 'test_metric' not in stats_b_after, (
                     "SSOT VIOLATION: Engine B's stats were affected by Engine A changes. "
                     "This indicates shared statistics objects."
@@ -313,7 +313,7 @@ class TestExecutionEngineFactoryUserIsolationUnit(SSotBaseTestCase):
                     )
                 
                 # 5. Statistics must remain isolated
-                stats_y = await engine_y.get_user_execution_stats()
+                stats_y = engine_y.get_user_execution_stats()
                 assert 'user_x_contamination' not in str(stats_y), (
                     "SSOT VIOLATION: Engine X contamination data found in Engine Y statistics."
                 )

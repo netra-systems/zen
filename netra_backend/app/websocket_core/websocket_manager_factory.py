@@ -2176,6 +2176,118 @@ class WebSocketManagerFactory:
                 logger.error(f"Error cleaning up manager {key} during shutdown: {e}")
         
         logger.info("WebSocketManagerFactory shutdown completed")
+    
+    # ============================================================================
+    # SSOT INTERFACE STANDARDIZATION METHODS (Week 1 - Low Risk)
+    # ============================================================================
+    
+    async def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
+        """
+        Create an isolated WebSocket manager for a user with specified connection ID.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard factory interface
+        that SSOT validation tests expect. It creates a UserExecutionContext internally
+        and returns a properly isolated manager instance.
+        
+        Args:
+            user_id: User identifier for isolation
+            connection_id: Connection identifier for WebSocket state machine continuity
+            
+        Returns:
+            Isolated WebSocket manager instance
+            
+        Raises:
+            FactoryInitializationError: If manager creation fails
+        """
+        if not user_id or not isinstance(user_id, str):
+            raise ValueError(f"user_id must be non-empty string, got: {repr(user_id)}")
+        if not connection_id or not isinstance(connection_id, str):
+            raise ValueError(f"connection_id must be non-empty string, got: {repr(connection_id)}")
+        
+        try:
+            # Create UserExecutionContext using SSOT factory method
+            user_context = create_defensive_user_execution_context(
+                user_id=user_id.strip(),
+                websocket_client_id=connection_id.strip()
+            )
+            
+            # Use existing create_manager method
+            manager = await self.create_manager(user_context)
+            
+            logger.info(
+                f"🏭 SSOT INTERFACE: Created isolated manager via create_isolated_manager "
+                f"user={user_id[:8]}... connection={connection_id[:8]}..."
+            )
+            
+            return manager
+            
+        except Exception as e:
+            logger.error(f"Failed to create isolated manager for user {user_id}: {e}")
+            raise FactoryInitializationError(
+                f"create_isolated_manager failed for user {user_id}",
+                user_id=user_id,
+                error_code="CREATE_ISOLATED_MANAGER_FAILED",
+                details={"connection_id": connection_id, "error": str(e)}
+            ) from e
+    
+    def get_manager_by_user(self, user_id: str) -> Optional[IsolatedWebSocketManager]:
+        """
+        Get an active WebSocket manager for a specific user.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard lookup interface
+        that SSOT validation tests expect. Returns the first active manager for a user.
+        
+        Args:
+            user_id: User identifier to find manager for
+            
+        Returns:
+            Active manager instance if found, None otherwise
+        """
+        if not user_id or not isinstance(user_id, str):
+            logger.warning(f"Invalid user_id for manager lookup: {repr(user_id)}")
+            return None
+        
+        user_id = user_id.strip()
+        
+        with self._factory_lock:
+            # Find first manager for this user
+            for isolation_key, manager in self._active_managers.items():
+                if manager.user_context.user_id == user_id:
+                    logger.debug(f"🔍 SSOT INTERFACE: Found manager for user {user_id[:8]}... key={isolation_key[:8]}...")
+                    return manager
+            
+            logger.debug(f"🔍 SSOT INTERFACE: No manager found for user {user_id[:8]}...")
+            return None
+    
+    def get_active_connections_count(self) -> int:
+        """
+        Get total count of active connections across all managers.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard metrics interface
+        that SSOT validation tests expect for connection monitoring.
+        
+        Returns:
+            Total number of active WebSocket connections
+        """
+        total_connections = 0
+        
+        with self._factory_lock:
+            for manager in self._active_managers.values():
+                try:
+                    # Get connection count from each manager
+                    if hasattr(manager, 'get_connection_count'):
+                        total_connections += manager.get_connection_count()
+                    elif hasattr(manager, '_connections'):
+                        total_connections += len(getattr(manager, '_connections', {}))
+                    # Fallback to user connections count
+                    elif hasattr(manager, '_user_connections'):
+                        user_conns = getattr(manager, '_user_connections', {})
+                        total_connections += sum(len(conns) for conns in user_conns.values())
+                except Exception as e:
+                    logger.warning(f"Error getting connection count from manager: {e}")
+        
+        logger.debug(f"📊 SSOT INTERFACE: Active connections count = {total_connections}")
+        return total_connections
 
 
 # Global factory instance

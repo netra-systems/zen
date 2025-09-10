@@ -279,6 +279,14 @@ class BaseExecutionEngine:
     def __init__(self, reliability_manager: Optional[ReliabilityManager] = None,
                  monitor: Optional[ExecutionMonitor] = None,
                  strategy: ExecutionStrategy = ExecutionStrategy.SEQUENTIAL):
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         self.reliability_manager = reliability_manager
         self.monitor = monitor or ExecutionMonitor()
         self.error_handler = ExecutionErrorHandler
