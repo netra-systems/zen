@@ -495,4 +495,4 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         
         print(f"   Cross-Pattern Variance:")
         print(f"     Success rate variance: {success_rate_variance:.3f}")
-        print(f"     Avg time variance: {avg_time_variance*1000:.1f}ms")"
+        print(f"     Avg time variance: {avg_time_variance*1000:.1f}ms")
