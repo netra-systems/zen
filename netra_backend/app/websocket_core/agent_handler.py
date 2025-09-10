@@ -141,8 +141,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     thread_service = ThreadService()
                     message_handler = MessageHandlerService(
                         supervisor=supervisor,
-                        thread_service=thread_service,
-                        websocket_manager=ws_manager
+                        thread_service=thread_service
                     )
                     
                     # Route message using clean v3 pattern
@@ -231,8 +230,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     thread_service = ThreadService()
                     message_handler = MessageHandlerService(
                         supervisor=supervisor,
-                        thread_service=thread_service,
-                        websocket_manager=ws_manager
+                        thread_service=thread_service
                     )
                     
                     # Route message using v2 isolated components
