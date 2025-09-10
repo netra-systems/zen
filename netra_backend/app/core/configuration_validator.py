@@ -315,6 +315,68 @@ class ConfigurationValidator:
             self.logger.error(f"Failed to get OAuth credentials: {e}")
             raise
     
+    def validate_jwt(self) -> bool:
+        """
+        Validate JWT configuration using SSOT delegation.
+        
+        Returns:
+            bool: True if JWT configuration is valid
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT JWT validation
+                return central_validator.validate_jwt_configuration()
+            else:
+                # Fallback JWT validation
+                env = get_env()
+                jwt_secret = env.get("JWT_SECRET_KEY")
+                return bool(jwt_secret and len(jwt_secret) >= 32)
+        except Exception as e:
+            self.logger.error(f"JWT validation failed: {e}")
+            return False
+    
+    def validate_database(self) -> bool:
+        """
+        Validate database configuration using SSOT delegation.
+        
+        Returns:
+            bool: True if database configuration is valid
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT database validation
+                return central_validator.validate_database_configuration()
+            else:
+                # Fallback database validation
+                env = get_env()
+                db_url = env.get("DATABASE_URL")
+                db_host = env.get("POSTGRES_HOST") or env.get("DATABASE_HOST")
+                return bool(db_url or db_host)
+        except Exception as e:
+            self.logger.error(f"Database validation failed: {e}")
+            return False
+    
+    def get_environment(self) -> str:
+        """
+        Get current environment using SSOT delegation.
+        
+        Returns:
+            str: Current environment name
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT environment detection
+                return central_validator.get_current_environment()
+            else:
+                # Fallback environment detection
+                return self.environment
+        except Exception as e:
+            self.logger.error(f"Environment detection failed: {e}")
+            return self.environment
+    
     def register_rule(self, rule: ValidationRule) -> None:
         """Register a validation rule."""
         self.rules[rule.name] = rule
