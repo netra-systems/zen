@@ -12,12 +12,13 @@ Business Value Justification (BVJ):
 
 import os
 import re
-import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple, Union, Any
 from urllib.parse import urlparse
+
+from shared.logging.unified_logger_factory import get_logger
 
 from shared.config_builder_base import ConfigBuilderBase
 from shared.security_origins_config import SecurityOriginsConfig
@@ -315,7 +316,7 @@ class CORSConfigurationBuilder(ConfigBuilderBase):
         
         def __init__(self, parent):
             self.parent = parent
-            self.logger = logging.getLogger("netra.security.cors")
+            self.logger = get_logger("netra.security.cors")
             self._security_events = []
         
         def validate_content_type(self, content_type: str) -> bool:

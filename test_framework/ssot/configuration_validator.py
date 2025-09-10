@@ -135,6 +135,8 @@ class ConfigurationValidator:
     
     def __init__(self):
         self.env = get_env()
+        # Initialize SSOT OAuth validator
+        self._central_validator = None
         
     def validate_test_environment(self, service_name: str = None) -> Tuple[bool, List[str]]:
         """Validate test environment configuration.

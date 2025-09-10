@@ -10,7 +10,6 @@ to lifecycle-managed startup with proper dependency ordering.
 """
 
 import asyncio
-import logging
 from typing import Optional, Callable, Dict, Any
 from contextlib import asynccontextmanager
 
@@ -24,8 +23,9 @@ from shared.lifecycle.service_lifecycle_manager import (
     get_lifecycle_manager
 )
 from shared.configuration.central_config_validator import get_central_validator
+from shared.logging.unified_logger_factory import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class StartupIntegration:

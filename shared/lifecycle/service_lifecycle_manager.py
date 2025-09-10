@@ -17,7 +17,6 @@ Prevents cascade failures during service initialization by ensuring proper order
 """
 
 import asyncio
-import logging
 import threading
 import time
 from abc import ABC, abstractmethod
@@ -27,7 +26,9 @@ from enum import Enum
 from typing import Dict, List, Optional, Set, Callable, Any, TypeVar, Generic
 from collections import defaultdict
 
-logger = logging.getLogger(__name__)
+from shared.logging.unified_logger_factory import get_logger
+
+logger = get_logger(__name__)
 
 T = TypeVar('T')
 
