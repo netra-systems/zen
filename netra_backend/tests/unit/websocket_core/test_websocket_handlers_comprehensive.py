@@ -28,7 +28,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.async_test_helpers import AsyncTestFixtureMixin, async_cleanup_resources
 from test_framework.ssot.websocket_golden_path_helpers import WebSocketGoldenPathHelper
 from test_framework.ssot.e2e_auth_helper import create_authenticated_user
-from test_framework.ssot.agent_event_validators import validate_agent_events
+from netra_backend.app.websocket_core.event_validator import validate_agent_events
 
 # Import all handlers and related classes
 from netra_backend.app.websocket_core.handlers import (
