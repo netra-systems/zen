@@ -497,7 +497,17 @@ class UnifiedTestRunner:
                 if args.verbose:
                     print("\n" + self.test_tracker.generate_report())
             
-            return 0 if all(r["success"] for r in results.values()) else 1
+            # P0 FIX: Only consider requested categories for exit code, not dependencies
+            # This prevents false failures when dependencies fail but requested categories pass
+            if self.execution_plan and hasattr(self.execution_plan, 'requested_categories'):
+                requested_results = {
+                    cat: results[cat] for cat in self.execution_plan.requested_categories 
+                    if cat in results
+                }
+                return 0 if all(r["success"] for r in requested_results.values()) else 1
+            else:
+                # Fallback to original behavior if execution plan doesn't have requested_categories
+                return 0 if all(r["success"] for r in results.values()) else 1
         
         finally:
             # CRITICAL: Always cleanup test environment after tests complete

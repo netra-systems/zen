@@ -203,6 +203,7 @@ class ExecutionPlan:
     dependency_graph: Dict[str, Set[str]] = field(default_factory=dict)
     execution_order: List[str] = field(default_factory=list)
     parallel_groups: Dict[int, List[str]] = field(default_factory=dict)
+    requested_categories: Set[str] = field(default_factory=set)  # Originally requested categories (not dependencies)
     
     def get_phase_for_category(self, category_name: str) -> int:
         """Get the execution phase number for a category"""
@@ -229,6 +230,18 @@ class CategorySystem:
         """Initialize default test categories with enhanced configuration"""
         default_categories = [
             # Critical categories - must run first
+            TestCategory(
+                name="mission_critical",
+                description="Business-critical tests protecting core functionality",
+                priority=CategoryPriority.CRITICAL,
+                category_type=TestOrganizationType.QUALITY,
+                timeout_seconds=1200,  # 20 minutes for comprehensive tests
+                estimated_duration=timedelta(minutes=15),
+                max_parallel_instances=4,
+                database_dependent=True,
+                network_intensive=True,
+                tags={"mission-critical", "business-value", "core", "deployment"}
+            ),
             TestCategory(
                 name="smoke",
                 description="Quick validation tests for pre-commit checks",
@@ -511,7 +524,8 @@ class CategorySystem:
             total_estimated_duration=total_duration,
             dependency_graph=dependency_graph,
             execution_order=execution_order,
-            parallel_groups=parallel_groups
+            parallel_groups=parallel_groups,
+            requested_categories=set(valid_categories)  # Track originally requested categories
         )
     
     def _resolve_dependencies(self, category_names: List[str]) -> List[str]:
