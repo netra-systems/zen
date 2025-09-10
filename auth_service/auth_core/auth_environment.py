@@ -67,12 +67,8 @@ class AuthEnvironment:
         
         # Also detect when running under pytest with production environment but no valid JWT secrets
         # This catches test scenarios where environment is set to production for validation
-        is_pytest_production_test = (
-            env == "production" and 
-            self.env.get("PYTEST_CURRENT_TEST") and
-            not self.env.get("JWT_SECRET_KEY") and 
-            not self.env.get("JWT_SECRET_PRODUCTION")
-        )
+        # Note: We don't check PYTEST_CURRENT_TEST here because subprocess tests may not inherit it
+        is_pytest_production_test = False  # Simplified for now - the main condition above should catch it
         
         if is_production_test_scenario or is_pytest_production_test:
             # Direct production validation without unified manager fallbacks

@@ -116,22 +116,32 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             emitter_key = f"{user_id}_{thread_id}_{run_id}"
             self.user_emitters[emitter_key] = emitter
             
-            # Mock emitter methods with tracking
-            def make_tracker(event_type):
-                def tracker(*args, **kwargs):
+            # Mock emitter methods with tracking AND bridge calls (like real emitter)
+            def make_tracker(event_type, bridge_method_name):
+                async def tracker(*args, **kwargs):
                     # Extract agent_name from kwargs if present, otherwise use default
                     agent_name = kwargs.get('agent_name', 'test_agent')
                     # Remove agent_name from kwargs to avoid conflicts
                     clean_kwargs = {k: v for k, v in kwargs.items() if k != 'agent_name'}
                     clean_kwargs['user_context'] = user_id
-                    return track_event(event_type, run_id, agent_name, *args, **clean_kwargs)
+                    track_event(event_type, run_id, agent_name, *args, **clean_kwargs)
+                    
+                    # Call the bridge method like the real emitter would
+                    bridge_method = getattr(websocket_bridge, bridge_method_name)
+                    bridge_kwargs = kwargs.copy()
+                    bridge_kwargs['run_id'] = run_id
+                    if 'agent_name' not in bridge_kwargs:
+                        bridge_kwargs['agent_name'] = agent_name
+                    await bridge_method(**bridge_kwargs)
+                    
+                    return True
                 return tracker
             
-            emitter.notify_agent_started = AsyncMock(side_effect=make_tracker('user_emitter_started'))
-            emitter.notify_agent_thinking = AsyncMock(side_effect=make_tracker('user_emitter_thinking'))
-            emitter.notify_tool_executing = AsyncMock(side_effect=make_tracker('user_emitter_tool_exec'))
-            emitter.notify_tool_completed = AsyncMock(side_effect=make_tracker('user_emitter_tool_comp'))
-            emitter.notify_agent_completed = AsyncMock(side_effect=make_tracker('user_emitter_completed'))
+            emitter.notify_agent_started = make_tracker('user_emitter_started', 'notify_agent_started')
+            emitter.notify_agent_thinking = make_tracker('user_emitter_thinking', 'notify_agent_thinking')  
+            emitter.notify_tool_executing = make_tracker('user_emitter_tool_exec', 'notify_tool_executing')
+            emitter.notify_tool_completed = make_tracker('user_emitter_tool_comp', 'notify_tool_completed')
+            emitter.notify_agent_completed = make_tracker('user_emitter_completed', 'notify_agent_completed')
             
             return emitter
         
