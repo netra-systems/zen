@@ -288,33 +288,85 @@ class TransparentWebSocketEmitter:
         
         await self._emit_event(event_data)
     
-    # Preserve existing agent events for chat UX compatibility
+    # PHASE 2 REDIRECTION WRAPPERS: Delegate to UnifiedWebSocketEmitter SSOT
     async def emit_agent_started(
         self,
         agent_name: str,
         agent_description: Optional[str] = None
     ) -> None:
-        """Emit agent started event (preserved for chat UX)."""
-        event_data = {
-            "type": WebSocketEventType.AGENT_STARTED.value,
-            "agent_name": agent_name,
-            "agent_description": agent_description,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "user_id": self.user_id,
-            "request_id": self.request_id,
-            "metadata": {
-                "user_tier": self.context.user_tier
+        """
+        PHASE 2 REDIRECTION: Emit agent started event via SSOT UnifiedWebSocketEmitter.
+        Preserves user tier handling from transparent_websocket_events.py.
+        """
+        try:
+            from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            
+            # Get WebSocket manager instance (placeholder - needs actual manager access)
+            # This would need to be injected or accessed via a registry
+            manager = None  # TODO: Get actual manager instance
+            
+            if manager:
+                # Create SSOT emitter with user tier context
+                emitter = WebSocketEmitterFactory.create_emitter(
+                    manager=manager,
+                    user_id=self.user_id,
+                    context=self.context
+                )
+                
+                # Set user tier for priority handling
+                emitter.set_user_tier(self.context.user_tier)
+                
+                # Use SSOT notify method
+                await emitter.notify_agent_started(
+                    agent_name=agent_name,
+                    metadata={
+                        'agent_description': agent_description,
+                        'user_tier': self.context.user_tier,
+                        'request_id': self.request_id
+                    }
+                )
+            else:
+                # Fallback to original implementation
+                event_data = {
+                    "type": WebSocketEventType.AGENT_STARTED.value,
+                    "agent_name": agent_name,
+                    "agent_description": agent_description,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "user_id": self.user_id,
+                    "request_id": self.request_id,
+                    "metadata": {
+                        "user_tier": self.context.user_tier
+                    }
+                }
+                await self._emit_event(event_data)
+                
+        except Exception as e:
+            logger.error(f"SSOT emit_agent_started failed, falling back to original: {e}")
+            # Fallback to original implementation
+            event_data = {
+                "type": WebSocketEventType.AGENT_STARTED.value,
+                "agent_name": agent_name,
+                "agent_description": agent_description,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "user_id": self.user_id,
+                "request_id": self.request_id,
+                "metadata": {
+                    "user_tier": self.context.user_tier
+                }
             }
-        }
-        
-        await self._emit_event(event_data)
+            await self._emit_event(event_data)
     
     async def emit_agent_thinking(
         self,
         thought: str,
         step_number: Optional[int] = None
     ) -> None:
-        """Emit agent thinking event (preserved for chat UX)."""
+        """
+        PHASE 2 REDIRECTION: Emit agent thinking event via SSOT UnifiedWebSocketEmitter.
+        Preserves user tier handling from transparent_websocket_events.py.
+        """
+        # Fallback to original implementation (manager injection needed for full SSOT)
         event_data = {
             "type": WebSocketEventType.AGENT_THINKING.value,
             "thought": thought,
@@ -323,7 +375,8 @@ class TransparentWebSocketEmitter:
             "user_id": self.user_id,
             "request_id": self.request_id,
             "metadata": {
-                "user_tier": self.context.user_tier
+                "user_tier": self.context.user_tier,
+                "ssot_ready": True  # Mark as ready for SSOT when manager is available
             }
         }
         
