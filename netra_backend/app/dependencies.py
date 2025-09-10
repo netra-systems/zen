@@ -847,24 +847,78 @@ async def get_request_scoped_supervisor(
         # Get required components from app state (these should be stateless)
         llm_client = get_llm_client_from_app(request)
         
-        # Get WebSocket bridge from app state
-        websocket_bridge = getattr(request.app.state, 'websocket_bridge', None)
+        # Get WebSocket bridge from app state with defensive checks
+        websocket_bridge = getattr(request.app.state, 'agent_websocket_bridge', None)
         if not websocket_bridge:
-            logger.error("WebSocket bridge not available in app state")
+            # Try alternative attribute names
+            websocket_bridge = getattr(request.app.state, 'websocket_bridge', None)
+        
+        if not websocket_bridge:
+            # Check if startup is still in progress
+            startup_in_progress = getattr(request.app.state, 'startup_in_progress', False)
+            startup_complete = getattr(request.app.state, 'startup_complete', False)
+            
+            if startup_in_progress and not startup_complete:
+                logger.warning(f"Request received during startup - WebSocket bridge not yet available. User: {context.user_id}")
+                raise HTTPException(
+                    status_code=503,
+                    detail="Service temporarily unavailable - system is still starting up. Please retry in a few seconds."
+                )
+            else:
+                logger.error(f"WebSocket bridge not available after startup completion. Startup complete: {startup_complete}")
+                raise HTTPException(
+                    status_code=500,
+                    detail="WebSocket bridge unavailable (startup failed or invalid configuration - check app startup logs)"
+                )
+        
+        # Get tool dispatcher from legacy supervisor with defensive checks
+        legacy_supervisor = getattr(request.app.state, 'agent_supervisor', None)
+        
+        # RACE CONDITION FIX: Check if supervisor is available and properly initialized
+        if not legacy_supervisor:
+            # Check if startup is still in progress
+            startup_in_progress = getattr(request.app.state, 'startup_in_progress', False)
+            startup_complete = getattr(request.app.state, 'startup_complete', False)
+            
+            if startup_in_progress and not startup_complete:
+                logger.warning(f"Request received during startup - supervisor not yet available. User: {context.user_id}")
+                raise HTTPException(
+                    status_code=503,
+                    detail="Service temporarily unavailable - system is still starting up. Please retry in a few seconds."
+                )
+            else:
+                logger.error(f"Agent supervisor not available after startup completion. Startup complete: {startup_complete}")
+                raise HTTPException(
+                    status_code=500,
+                    detail="Agent supervisor not available (critical startup failure - check application logs)"
+                )
+        
+        # Check if supervisor has tool_dispatcher attribute
+        if not hasattr(legacy_supervisor, 'tool_dispatcher'):
+            logger.error(f"Agent supervisor missing tool_dispatcher attribute. Supervisor type: {type(legacy_supervisor)}")
             raise HTTPException(
                 status_code=500,
-                detail="WebSocket bridge unavailable (startup failed or invalid configuration - check app startup logs)"
+                detail="Agent supervisor configuration invalid (missing tool dispatcher)"
             )
         
-        # Get tool dispatcher from legacy supervisor for now
-        legacy_supervisor = request.app.state.agent_supervisor
-        tool_dispatcher = legacy_supervisor.tool_dispatcher if legacy_supervisor else None
+        tool_dispatcher = legacy_supervisor.tool_dispatcher
         if not tool_dispatcher:
-            logger.error("Tool dispatcher not available")
-            raise HTTPException(
-                status_code=500,
-                detail="Tool dispatcher unavailable (check supervisor initialization and configuration validity)"
-            )
+            logger.error(f"Tool dispatcher is None. Supervisor: {type(legacy_supervisor)}, User: {context.user_id}")
+            
+            # Check if this might be a UserContext-based architecture issue
+            if hasattr(request.app.state, 'tool_classes') and request.app.state.tool_classes:
+                logger.info("Detected UserContext-based tool configuration - attempting fallback creation")
+                # TODO: Implement tool dispatcher creation from tool_classes for UserContext architecture
+                # For now, return clear error about missing tool dispatcher
+                raise HTTPException(
+                    status_code=500,
+                    detail="Tool dispatcher not configured (UserContext-based architecture requires per-request tool creation)"
+                )
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Tool dispatcher unavailable (check supervisor initialization and configuration validity)"
+                )
         
         # Use core supervisor factory for consistency with WebSocket pattern
         from netra_backend.app.core.supervisor_factory import create_supervisor_core
