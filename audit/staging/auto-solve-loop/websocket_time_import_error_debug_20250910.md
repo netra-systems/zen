@@ -47,6 +47,23 @@ Line: 1293
 - **DECISION:** Selected WebSocket time import error as primary critical issue
 - **RATIONALE:** Direct blocker to core business value (chat functionality)
 
+### Step 1: Five WHYs Analysis ✅
+- **COMPLETED:** Comprehensive Five WHYs analysis with sub-agent
+- **ROOT CAUSE IDENTIFIED:** Dynamic import failure during GCP Cloud Run resource cleanup
+- **KEY INSIGHT:** Error "time not defined" is masking the real issue (not missing imports)
+- **CRITICAL FINDING:** Race condition between garbage collection and import resolution
+
+### Step 2: Test Strategy Planning ✅
+- **COMPLETED:** Comprehensive test strategy designed with sub-agent
+- **TEST APPROACH:** Multi-tier testing (unit/integration/e2e) designed to FAIL initially
+- **COVERAGE:** Import failures, WebSocket connections, Cloud Run simulation
+- **FRAMEWORK:** SSOT compliant with real services (no mocks in e2e)
+
+### Step 2.1: GitHub Issue Integration ✅
+- **COMPLETED:** GitHub issue created: https://github.com/netra-systems/netra-apex/issues/138
+- **LABELS:** claude-code-generated-issue, bug
+- **STATUS:** Open and tracked
+
 ### Step 1: Initial Code Analysis ✅
 - **DISCOVERED:** `time` is properly imported in websocket.py at line 33
 - **FOUND:** Error occurs at line 1293 in exception handler: `logger.error(f"WebSocket error: {e}", exc_info=True)`
