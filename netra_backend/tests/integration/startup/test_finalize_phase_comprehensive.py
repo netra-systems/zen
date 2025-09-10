@@ -99,9 +99,9 @@ class FinalizePhaseIntegrationTest(BaseIntegrationTest):
             
             # Store original values and set test values
             for key, value in test_env_vars.items():
-                if key in env:
-                    original_values[key] = env[key]
-                env[key] = value
+                if env.exists(key):
+                    original_values[key] = env.get(key)
+                env.set(key, value, source="test_setup")
             
             # Run complete startup sequence
             start_time, logger_instance = await run_complete_startup(app)
@@ -117,10 +117,10 @@ class FinalizePhaseIntegrationTest(BaseIntegrationTest):
         finally:
             # Restore original environment values
             for key, value in original_values.items():
-                env[key] = value
+                env.set(key, value, source="test_cleanup")
             for key in test_env_vars:
                 if key not in original_values:
-                    env.pop(key, None)
+                    env.delete(key, source="test_cleanup")
     
     def validate_startup_timing(self, app: 'FastAPI', max_startup_time: float = 60.0):
         """Validate startup completed within reasonable time limits."""

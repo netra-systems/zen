@@ -312,9 +312,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                             canonical_usage.append({
                                 'file': str(file_path.relative_to(project_root)),
                                 'import_statement': canonical_import
-                            }
-        for key, value in metrics.items():
-            self.record_metric(key, value)
+                            })
                     
                     # Check for forbidden imports (violations)
                     for forbidden_import in forbidden_imports:
@@ -329,9 +327,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                                 'file': str(file_path.relative_to(project_root)),
                                 'forbidden_import': forbidden_import,
                                 'violation_type': 'forbidden_websocket_import'
-                            }
-        for key, value in metrics.items():
-            self.record_metric(key, value)
+                            })
                 
                 except (UnicodeDecodeError, FileNotFoundError, PermissionError):
                     continue
@@ -350,9 +346,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                     'file': str(websocket_manager_file.relative_to(project_root)),
                     'forbidden_import': 'Missing WebSocketManager alias',
                     'violation_type': 'missing_canonical_alias'
-                }
-        for key, value in metrics.items():
-            self.record_metric(key, value)
+                })
         
         # Assert no import violations
         if import_violations:
@@ -900,9 +894,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                                     'manager_index': i,
                                     'violation': 'managers share connection dictionary reference',
                                     'class_name': manager_class.__name__
-                                }
-        for key, value in metrics.items():
-            self.record_metric(key, value)
+                                })
             
             if singleton_violations:
                 violation_details = "\n".join([

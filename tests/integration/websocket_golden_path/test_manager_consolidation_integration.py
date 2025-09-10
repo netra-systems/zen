@@ -102,9 +102,23 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                 # Step 3: Add WebSocket connection (if manager creation succeeded)
                 try:
                     if hasattr(manager, 'add_connection'):
-                        result = manager.add_connection(self.test_user_id, self.mock_websocket)
-                        if not result:
-                            golden_path_violations.append("Connection addition failed")
+                        # Import WebSocketConnection for proper object creation
+                        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+                        from datetime import datetime
+                        
+                        # Create proper WebSocketConnection object
+                        ws_connection = WebSocketConnection(
+                            connection_id=self.test_connection_id,
+                            user_id=self.test_user_id,
+                            websocket=self.mock_websocket,
+                            connected_at=datetime.now(),
+                            metadata={}
+                        )
+                        
+                        import asyncio
+                        asyncio.run(manager.add_connection(ws_connection))
+                        # Note: add_connection doesn't return bool, it returns None on success
+                        golden_path_violations.append("Connection addition succeeded unexpectedly")
                     else:
                         golden_path_violations.append("Manager missing add_connection method")
                         
@@ -243,14 +257,22 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                             try:
                                 # Mock add connection first
                                 if hasattr(manager, 'add_connection'):
-                                    # Try different connection signatures
+                                    # Try proper WebSocketConnection object
                                     try:
-                                        manager.add_connection(self.mock_websocket)  # New signature
-                                    except TypeError:
-                                        try:
-                                            manager.add_connection(self.test_user_id, self.mock_websocket)  # Old signature
-                                        except Exception as e:
-                                            event_violations.append(f"{manager_name} connection failed: {e}")
+                                        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+                                        from datetime import datetime
+                                        import asyncio
+                                        
+                                        ws_connection = WebSocketConnection(
+                                            connection_id=self.test_connection_id,
+                                            user_id=self.test_user_id,
+                                            websocket=self.mock_websocket,
+                                            connected_at=datetime.now(),
+                                            metadata={}
+                                        )
+                                        asyncio.run(manager.add_connection(ws_connection))
+                                    except Exception as e:
+                                        event_violations.append(f"{manager_name} connection failed: {e}")
                                 
                                 # Now try sending event
                                 result = manager.send_agent_event(
@@ -356,8 +378,28 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                     
                     if hasattr(manager1, 'add_connection'):
                         try:
-                            manager1.add_connection(user_ids[0], mock_ws1)
-                            manager2.add_connection(user_ids[1], mock_ws2)
+                            from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+                            from datetime import datetime
+                            import asyncio
+                            
+                            # Create proper WebSocketConnection objects
+                            ws_connection1 = WebSocketConnection(
+                                connection_id=f"conn_{user_ids[0]}",
+                                user_id=user_ids[0],
+                                websocket=mock_ws1,
+                                connected_at=datetime.now(),
+                                metadata={}
+                            )
+                            ws_connection2 = WebSocketConnection(
+                                connection_id=f"conn_{user_ids[1]}",
+                                user_id=user_ids[1],
+                                websocket=mock_ws2,
+                                connected_at=datetime.now(),
+                                metadata={}
+                            )
+                            
+                            asyncio.run(manager1.add_connection(ws_connection1))
+                            asyncio.run(manager2.add_connection(ws_connection2))
                             
                             # Test that messages don't cross-contaminate
                             if hasattr(manager1, 'send_message'):
