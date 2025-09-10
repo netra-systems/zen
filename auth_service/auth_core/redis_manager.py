@@ -181,90 +181,37 @@ class AuthRedisManager:
             return await self._redis.is_token_blacklisted(token)
         return False
     
-    # User Caching
+    # User Caching (redirected to SSOT)
     async def cache_user_data(self, user_id: str, user_data: Dict[str, Any], ttl_seconds: int = 1800) -> bool:
-        """Cache user data for fast lookup."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.user_cache_prefix}{user_id}"
-            user_json = json.dumps(user_data, default=str)
-            
-            await self.redis_client.setex(key, ttl_seconds, user_json)
-            logger.debug(f"Cached user data for {user_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to cache user data for {user_id}: {e}")
-            return False
+        """Cache user data for fast lookup (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.cache_user_data(user_id, user_data, ttl_seconds)
+        return False
     
     async def get_cached_user_data(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """Get cached user data."""
-        if not await self.ensure_connected():
-            return None
-        
-        try:
-            key = f"{self.user_cache_prefix}{user_id}"
-            user_json = await self.redis_client.get(key)
-            
-            if user_json:
-                return json.loads(user_json)
-            return None
-            
-        except Exception as e:
-            logger.error(f"Failed to get cached user data for {user_id}: {e}")
-            return None
+        """Get cached user data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.get_cached_user_data(user_id)
+        return None
     
     async def invalidate_user_cache(self, user_id: str) -> bool:
-        """Invalidate cached user data."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.user_cache_prefix}{user_id}"
-            result = await self.redis_client.delete(key)
-            logger.debug(f"Invalidated user cache for {user_id}")
-            return result > 0
-            
-        except Exception as e:
-            logger.error(f"Failed to invalidate user cache for {user_id}: {e}")
-            return False
+        """Invalidate cached user data (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.invalidate_user_cache(user_id)
+        return False
     
-    # Permission Caching
+    # Permission Caching (redirected to SSOT)
     async def cache_user_permissions(self, user_id: str, permissions: List[str], ttl_seconds: int = 1800) -> bool:
-        """Cache user permissions."""
-        if not await self.ensure_connected():
-            return False
-        
-        try:
-            key = f"{self.permission_prefix}{user_id}"
-            permissions_json = json.dumps(permissions)
-            
-            await self.redis_client.setex(key, ttl_seconds, permissions_json)
-            logger.debug(f"Cached permissions for user {user_id}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Failed to cache permissions for {user_id}: {e}")
-            return False
+        """Cache user permissions (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.cache_user_permissions(user_id, permissions, ttl_seconds)
+        return False
     
     async def get_cached_permissions(self, user_id: str) -> Optional[List[str]]:
-        """Get cached user permissions."""
-        if not await self.ensure_connected():
-            return None
-        
-        try:
-            key = f"{self.permission_prefix}{user_id}"
-            permissions_json = await self.redis_client.get(key)
-            
-            if permissions_json:
-                return json.loads(permissions_json)
-            return None
-            
-        except Exception as e:
-            logger.error(f"Failed to get cached permissions for {user_id}: {e}")
-            return None
+        """Get cached user permissions (redirects to SSOT)."""
+        if SSOT_AVAILABLE:
+            return await self._redis.get_cached_permissions(user_id)
+        return None
     
     # Health Check
     async def health_check(self) -> Dict[str, Any]:
