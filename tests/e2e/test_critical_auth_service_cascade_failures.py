@@ -26,7 +26,7 @@ import requests
 from fastapi.testclient import TestClient
 
 from test_framework.environment_markers import env, staging_only, env_requires
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.http_client import UnifiedHTTPClient as HTTPClient
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 @env("staging") 
 @env_requires(services=["auth_service", "backend", "frontend"], features=["full_system_configured"])
 @pytest.mark.e2e
-class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
+class TestCriticalAuthServiceCascadeFailures(SSotAsyncTestCase):
     """E2E test suite for auth service cascade failures across the system."""
     
     @pytest.mark.asyncio
@@ -331,9 +331,9 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
     def get_service_url(self, service: str, default: str) -> str:
         """Get service URL from environment or use default."""
         service_urls = {
-            'auth_service': get_env().get('AUTH_SERVICE_URL', default if 'auth' in service else 'http://localhost:8081'),
-            'backend': get_env().get('BACKEND_URL', default if 'backend' in service else 'http://localhost:8000'),  
-            'frontend': get_env().get('FRONTEND_URL', default if 'frontend' in service else 'http://localhost:3000')
+            'auth_service': self._env.get('AUTH_SERVICE_URL', default if 'auth' in service else 'http://localhost:8081'),
+            'backend': self._env.get('BACKEND_URL', default if 'backend' in service else 'http://localhost:8000'),  
+            'frontend': self._env.get('FRONTEND_URL', default if 'frontend' in service else 'http://localhost:3000')
         }
         return service_urls.get(service, default)
 
@@ -341,7 +341,7 @@ class TestCriticalAuthServiceCascadeFailures(BaseE2ETest):
 @env("staging")
 @env_requires(services=["auth_service", "backend"], features=["service_mesh_configured"])
 @pytest.mark.e2e
-class TestAuthServiceInterdependencyFailures(BaseE2ETest):
+class TestAuthServiceInterdependencyFailures(SSotAsyncTestCase):
     """Test auth service interdependency failures in service mesh."""
     
     @pytest.mark.asyncio
