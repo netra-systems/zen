@@ -42,6 +42,11 @@ from netra_backend.app.core.unified_logging import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+class ConfigurationError(Exception):
+    """Exception raised for configuration-related errors."""
+    pass
+
+
 class ConfigurationScope(Enum):
     """Configuration scope levels."""
     GLOBAL = "global"

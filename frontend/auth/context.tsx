@@ -454,7 +454,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       // Monitor auth state for consistency - use actual values that were set
-      monitorAuthState(actualToken, actualUser, true, 'auth_init_complete');
+      // DEFENSIVE PROGRAMMING: Ensure monitoring always happens
+      try {
+        monitorAuthState(actualToken, actualUser, true, 'auth_init_complete');
+        logger.debug('[AUTH MONITOR] Auth state monitoring completed', {
+          component: 'AuthContext',
+          action: 'monitor_auth_state_called',
+          hasToken: !!actualToken,
+          hasUser: !!actualUser,
+          initialized: true
+        });
+      } catch (monitorError) {
+        logger.error('[AUTH MONITOR] Failed to monitor auth state', monitorError as Error, {
+          component: 'AuthContext',
+          action: 'monitor_auth_state_error'
+        });
+      }
     }
   }, [syncAuthStore, scheduleTokenRefreshCheck, handleTokenRefresh, token, canProceedWithInit, transitionInitState]);
 

@@ -23,6 +23,9 @@ CLAUDE.MD (THIS FILE) KNOWS BEST! NEVER ATTEMPT TO "OVERRIDE". NO EXCEPTIONS.
 CONTEXT COMPACT
 WHEN YOU GET TO 50% OF YOUR CONTEXT WINDOW USAGE YOU MUST RUN /COMPACT
 
+KEEP CORE SYSTEM AS IS
+NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
+
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
 Background: You are a distinguished Engineer with an elite business mindset, tasked with developing the Netra Apex AI Optimization Platform. 
@@ -150,6 +153,9 @@ Especially when dealing with apparent regression issues.
 16. Use Getters and Setters()
 17. Be careful about test code vs system code. Don't let testing needs and concept pollute actual code.
 Use the test decorator when a function has to be in system code.
+
+KEEP CORE SYSTEM AS IS
+NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
 
 ### Related Architecture Documents:
 - **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
@@ -340,6 +346,9 @@ Any e2e test that returns in 0.00s is automatically failed by the test runner. T
 - Authentication is being bypassed
 See [`reports/staging/STAGING_100_TESTS_REPORT.md`](reports/staging/STAGING_100_TESTS_REPORT.md) for context.
 The unified test runner enforces this with `_validate_e2e_test_timing()`.
+
+KEEP CORE SYSTEM AS IS
+NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS. (feature freeze includes "security" or "enterprise" features)
 
 ### 3.5. MANDATORY BUG FIXING PROCESS:
 
@@ -648,5 +657,8 @@ A user asking for "git commit" means: For EACH group of work that's related do a
   * **CONCEPT-BASED:** NEVER bulk commit massive changes without express orders.
   * **REVIEWABLE:** Each commit must be reviewable in under one minute.
   * **REFACTORING COMMITS:** Complex refactors MUST include MRO report reference in commit message
+
+KEEP CORE SYSTEM AS IS
+NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
 
 **Final Reminder:** ULTRA THINK DEEPLY. CHEATING ON TESTS = ABOMINATION. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. YOU MUST ALWAYS SELF-REFLECT ON YOUR WORK AND SAVE IT IN UNIFIED REFLECTION JOURNAL. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**

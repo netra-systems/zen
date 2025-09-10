@@ -390,4 +390,109 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
             {"name": "burst", "operations": 50, "concurrency": 25, "delay": 0},
             {"name": "steady", "operations": 100, "concurrency": 10, "delay": 0.01},
             {"name": "mixed", "operations": 75, "concurrency": 15, "delay": 0.005}
-        ]\n        \n        pattern_results = []\n        \n        for pattern in patterns:\n            print(f"🔄 Testing {pattern['name']} usage pattern...")\n            \n            pattern_start = time.time()\n            operation_times = []\n            errors = []\n            \n            async def pattern_operation(op_id: int, delay: float) -> float:\n                """Execute operation with pattern-specific characteristics."""\n                if delay > 0:\n                    await asyncio.sleep(random.uniform(0, delay * 2))\n                \n                start_time = time.time()\n                try:\n                    # Simulate different query types\n                    query_type = op_id % 3\n                    if query_type == 0:\n                        await db.execute("SELECT $1 as operation_id", op_id)\n                    elif query_type == 1:\n                        await db.execute("SELECT COUNT(*) FROM generate_series(1, $1)", min(10, op_id % 15 + 1))\n                    else:\n                        await db.execute("SELECT $1, generate_series(1, 3)", op_id)\n                    \n                    return time.time() - start_time\n                except Exception as e:\n                    errors.append(f"Pattern {pattern['name']} operation {op_id} failed: {str(e)}")\n                    return -1\n            \n            # Execute pattern operations\n            if pattern["concurrency"] == pattern["operations"]:  # Burst pattern\n                tasks = [pattern_operation(i, pattern["delay"]) for i in range(pattern["operations"])]\n                results = await asyncio.gather(*tasks, return_exceptions=True)\n                operation_times = [r for r in results if isinstance(r, float) and r > 0]\n            else:  # Controlled concurrency\n                semaphore = asyncio.Semaphore(pattern["concurrency"])\n                \n                async def controlled_operation(op_id: int):\n                    async with semaphore:\n                        return await pattern_operation(op_id, pattern["delay"])\n                \n                tasks = [controlled_operation(i) for i in range(pattern["operations"])]\n                results = await asyncio.gather(*tasks, return_exceptions=True)\n                operation_times = [r for r in results if isinstance(r, float) and r > 0]\n            \n            pattern_duration = time.time() - pattern_start\n            \n            # Calculate pattern metrics\n            if operation_times:\n                pattern_metrics = {\n                    "name": pattern["name"],\n                    "total_operations": pattern["operations"],\n                    "successful_operations": len(operation_times),\n                    "failed_operations": len(errors),\n                    "success_rate": len(operation_times) / pattern["operations"],\n                    "average_time": statistics.mean(operation_times),\n                    "max_time": max(operation_times),\n                    "min_time": min(operation_times),\n                    "operations_per_second": len(operation_times) / pattern_duration,\n                    "total_duration": pattern_duration\n                }\n            else:\n                pattern_metrics = {\n                    "name": pattern["name"],\n                    "total_operations": pattern["operations"],\n                    "successful_operations": 0,\n                    "failed_operations": len(errors),\n                    "success_rate": 0,\n                    "average_time": 0,\n                    "max_time": 0,\n                    "min_time": 0,\n                    "operations_per_second": 0,\n                    "total_duration": pattern_duration\n                }\n            \n            pattern_results.append(pattern_metrics)\n            \n            # Pattern-specific assertions\n            assert pattern_metrics["success_rate"] >= 0.95, f"Pattern {pattern['name']} success rate {pattern_metrics['success_rate']:.3f} below 95%"\n            assert pattern_metrics["average_time"] < 0.1, f"Pattern {pattern['name']} avg time {pattern_metrics['average_time']:.3f}s exceeds 100ms"\n        \n        # Cross-pattern consistency checks\n        success_rates = [p["success_rate"] for p in pattern_results]\n        avg_times = [p["average_time"] for p in pattern_results]\n        \n        # Ensure consistent performance across patterns\n        success_rate_variance = max(success_rates) - min(success_rates)\n        avg_time_variance = max(avg_times) - min(avg_times)\n        \n        assert success_rate_variance < 0.1, f"Success rate variance {success_rate_variance:.3f} too high across patterns"\n        assert avg_time_variance < 0.05, f"Average time variance {avg_time_variance:.3f}s too high across patterns"\n        \n        print(f"✅ Connection Pool Efficiency Pattern Results:")\n        for pattern_metrics in pattern_results:\n            print(f"   {pattern_metrics['name'].title()} Pattern:")\n            print(f"     Operations: {pattern_metrics['successful_operations']}/{pattern_metrics['total_operations']}")\n            print(f"     Success rate: {pattern_metrics['success_rate']:.3f}")\n            print(f"     Avg time: {pattern_metrics['average_time']*1000:.1f}ms")\n            print(f"     Throughput: {pattern_metrics['operations_per_second']:.1f} ops/s")\n        \n        print(f"   Cross-Pattern Variance:")\n        print(f"     Success rate variance: {success_rate_variance:.3f}")\n        print(f"     Avg time variance: {avg_time_variance*1000:.1f}ms")"
+        ]
+        
+        pattern_results = []
+        
+        for pattern in patterns:
+            print(f"🔄 Testing {pattern['name']} usage pattern...")
+            
+            pattern_start = time.time()
+            operation_times = []
+            errors = []
+            
+            async def pattern_operation(op_id: int, delay: float) -> float:
+                """Execute operation with pattern-specific characteristics."""
+                if delay > 0:
+                    await asyncio.sleep(random.uniform(0, delay * 2))
+                
+                start_time = time.time()
+                try:
+                    # Simulate different query types
+                    query_type = op_id % 3
+                    if query_type == 0:
+                        await db.execute("SELECT $1 as operation_id", op_id)
+                    elif query_type == 1:
+                        await db.execute("SELECT COUNT(*) FROM generate_series(1, $1)", min(10, op_id % 15 + 1))
+                    else:
+                        await db.execute("SELECT $1, generate_series(1, 3)", op_id)
+                    
+                    return time.time() - start_time
+                except Exception as e:
+                    errors.append(f"Pattern {pattern['name']} operation {op_id} failed: {str(e)}")
+                    return -1
+            
+            # Execute pattern operations
+            if pattern["concurrency"] == pattern["operations"]:  # Burst pattern
+                tasks = [pattern_operation(i, pattern["delay"]) for i in range(pattern["operations"])]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                operation_times = [r for r in results if isinstance(r, float) and r > 0]
+            else:  # Controlled concurrency
+                semaphore = asyncio.Semaphore(pattern["concurrency"])
+                
+                async def controlled_operation(op_id: int):
+                    async with semaphore:
+                        return await pattern_operation(op_id, pattern["delay"])
+                
+                tasks = [controlled_operation(i) for i in range(pattern["operations"])]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                operation_times = [r for r in results if isinstance(r, float) and r > 0]
+            
+            pattern_duration = time.time() - pattern_start
+            
+            # Calculate pattern metrics
+            if operation_times:
+                pattern_metrics = {
+                    "name": pattern["name"],
+                    "total_operations": pattern["operations"],
+                    "successful_operations": len(operation_times),
+                    "failed_operations": len(errors),
+                    "success_rate": len(operation_times) / pattern["operations"],
+                    "average_time": statistics.mean(operation_times),
+                    "max_time": max(operation_times),
+                    "min_time": min(operation_times),
+                    "operations_per_second": len(operation_times) / pattern_duration,
+                    "total_duration": pattern_duration
+                }
+            else:
+                pattern_metrics = {
+                    "name": pattern["name"],
+                    "total_operations": pattern["operations"],
+                    "successful_operations": 0,
+                    "failed_operations": len(errors),
+                    "success_rate": 0,
+                    "average_time": 0,
+                    "max_time": 0,
+                    "min_time": 0,
+                    "operations_per_second": 0,
+                    "total_duration": pattern_duration
+                }
+            
+            pattern_results.append(pattern_metrics)
+            
+            # Pattern-specific assertions
+            assert pattern_metrics["success_rate"] >= 0.95, f"Pattern {pattern['name']} success rate {pattern_metrics['success_rate']:.3f} below 95%"
+            assert pattern_metrics["average_time"] < 0.1, f"Pattern {pattern['name']} avg time {pattern_metrics['average_time']:.3f}s exceeds 100ms"
+        
+        # Cross-pattern consistency checks
+        success_rates = [p["success_rate"] for p in pattern_results]
+        avg_times = [p["average_time"] for p in pattern_results]
+        
+        # Ensure consistent performance across patterns
+        success_rate_variance = max(success_rates) - min(success_rates)
+        avg_time_variance = max(avg_times) - min(avg_times)
+        
+        assert success_rate_variance < 0.1, f"Success rate variance {success_rate_variance:.3f} too high across patterns"
+        assert avg_time_variance < 0.05, f"Average time variance {avg_time_variance:.3f}s too high across patterns"
+        
+        print(f"✅ Connection Pool Efficiency Pattern Results:")
+        for pattern_metrics in pattern_results:
+            print(f"   {pattern_metrics['name'].title()} Pattern:")
+            print(f"     Operations: {pattern_metrics['successful_operations']}/{pattern_metrics['total_operations']}")
+            print(f"     Success rate: {pattern_metrics['success_rate']:.3f}")
+            print(f"     Avg time: {pattern_metrics['average_time']*1000:.1f}ms")
+            print(f"     Throughput: {pattern_metrics['operations_per_second']:.1f} ops/s")
+        
+        print(f"   Cross-Pattern Variance:")
+        print(f"     Success rate variance: {success_rate_variance:.3f}")
+        print(f"     Avg time variance: {avg_time_variance*1000:.1f}ms")

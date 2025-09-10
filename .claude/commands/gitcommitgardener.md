@@ -11,6 +11,7 @@ ALWAYS think about overall repo safety and STOP if anything might damage overall
 ALWAYS PRESERVE HISTORY AND ONLY DO MINIMAL ACTIONS NEEDED.
 STOP IF ANY TRULY SERIOUS MERGE PROBLEMS ARISE
 ALWAYS STAY ON CURRENT BRANCH.
+ALWAYS PREFER GIT MERGE over rebase, rebase is dangerous!
 
 File focus areas (output this to console) is: ${1 : all}
 

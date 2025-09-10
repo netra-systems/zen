@@ -102,8 +102,8 @@ class ThreadOperationManagerImpl {
       await this.cancelPendingOperations(mutexKey);
     }
     
-    // Check for duplicate operations unless skipped
-    if (!options.skipDuplicateCheck && this.isDuplicateOperation(type, threadId)) {
+    // Check for duplicate operations unless skipped or forced
+    if (!options.skipDuplicateCheck && !options.force && this.isDuplicateOperation(type, threadId)) {
       this.operationMutex.delete(mutexKey);
       logger.warn(`Duplicate ${type} operation for thread ${threadId} - skipping`);
       return { success: false, error: new Error('Operation already in progress') };

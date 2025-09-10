@@ -53,6 +53,32 @@ from shared.isolated_environment import get_environment_manager
 logger = central_logger.get_logger(__name__)
 
 
+class ErrorHandlingResult:
+    """
+    Result object for error handling operations.
+    
+    Provides a standardized interface for reporting error handling outcomes,
+    including recovery attempts, success status, and any resulting data.
+    """
+    
+    def __init__(
+        self,
+        attempted: bool = False,
+        success: bool = False,
+        retry_after: Optional[float] = None,
+        result: Optional[Any] = None,
+        error: Optional[Exception] = None,
+        recovery_method: Optional[str] = None
+    ):
+        """Initialize error handling result."""
+        self.attempted = attempted
+        self.success = success
+        self.retry_after = retry_after
+        self.result = result
+        self.error = error
+        self.recovery_method = recovery_method
+
+
 class RecoveryStrategy(ABC):
     """Base class for error recovery strategies."""
     

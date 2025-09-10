@@ -30,8 +30,7 @@ from netra_backend.app.services.security.input_validator import (
 )
 from netra_backend.app.services.security.injection_detector import (
     InjectionDetector,
-    InjectionType,
-    InjectionPattern
+    InjectionType
 )
 from netra_backend.app.services.security.data_sanitizer import (
     DataSanitizer,

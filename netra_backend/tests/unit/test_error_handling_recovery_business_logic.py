@@ -177,49 +177,44 @@ class TestErrorHandlingRecoveryBusinessLogic:
         error_scenarios = [
             {
                 "error": Exception("Database connection timeout"),
-                "expected_category": "critical",
-                "expected_impact": "high",
-                "should_retry": True
+                "expected_retryable": True
             },
             {
                 "error": ValueError("Invalid user input: email format"),
-                "expected_category": "user_error",
-                "expected_impact": "low", 
-                "should_retry": False
+                "expected_retryable": False
             },
             {
                 "error": ConnectionError("LLM API rate limit exceeded"),
-                "expected_category": "external_service",
-                "expected_impact": "medium",
-                "should_retry": True
+                "expected_retryable": True
             },
             {
                 "error": MemoryError("Out of memory"),
-                "expected_category": "system",
-                "expected_impact": "critical",
-                "should_retry": False
+                "expected_retryable": False
             }
         ]
         
         classifier = ErrorClassifier()
         
         for scenario in error_scenarios:
-            # When: Classifying error for business impact
+            # When: Classifying error for business impact using SSOT ErrorClassifier
             classification = classifier.classify_error(scenario["error"])
             
-            # Then: Should properly categorize by business impact
+            # Then: Should properly categorize using SSOT ErrorClassification dataclass
             assert classification is not None
-            assert classification.get("category") is not None
-            assert classification.get("impact") is not None
-            assert classification.get("should_retry") is not None
+            assert hasattr(classification, "category")
+            assert hasattr(classification, "severity")
+            assert hasattr(classification, "is_retryable")
+            assert hasattr(classification, "requires_fallback")
             
-            # Business logic should make sense
+            # Business logic should make sense - test timeout scenarios
             if "timeout" in str(scenario["error"]).lower():
-                assert classification.get("should_retry") is True
+                assert classification.is_retryable is True
             if "user input" in str(scenario["error"]).lower():
-                assert classification.get("impact") in ["low", "medium"]
+                # Validation errors typically shouldn't be retried
+                assert classification.is_retryable is False
             if "memory" in str(scenario["error"]).lower():
-                assert classification.get("impact") == "critical"
+                # Memory errors are typically critical and not retryable
+                assert classification.is_retryable is False
     
     @pytest.mark.unit
     def test_error_propagation_user_experience_protection(self):
