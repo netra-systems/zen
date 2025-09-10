@@ -46,19 +46,14 @@ import pytest
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SsotTestMetrics
 
 # Import all individual SSOT test classes for integration
-from tests.mission_critical.ssot.test_ssot_websocket_manager_compliance import TestWebSocketManagerSSot
+from tests.mission_critical.ssot.test_ssot_websocket_manager_compliance import TestWebSocketManagerSSotCompliance
 from tests.mission_critical.ssot.test_ssot_authentication_compliance import TestAuthenticationSSot
 from tests.mission_critical.ssot.test_ssot_database_manager_compliance import TestDatabaseManagerSSot
 from tests.mission_critical.ssot.test_ssot_environment_access_compliance import TestEnvironmentAccessSSot
 from tests.mission_critical.ssot.test_ssot_agent_registry_compliance import TestAgentRegistrySSot
-from tests.mission_critical.ssot.test_ssot_factory_pattern_compliance import TestFactoryPatternSSot
+from tests.mission_critical.ssot.test_ssot_factory_pattern_compliance import TestSSotFactoryPatternCompliance
 
-# Import SSOT components for integration testing
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.auth_integration.auth import auth_service_client
-from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.agents.registry import AgentRegistry
+# Import SSOT components for integration testing (with minimal dependencies to avoid import errors)
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 logger = logging.getLogger(__name__)
@@ -84,14 +79,14 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
         super().setup_method(method)
         
         # Initialize individual SSOT test instances for integration
-        self.websocket_ssot_test = TestWebSocketManagerSSot()
+        self.websocket_ssot_test = TestWebSocketManagerSSotCompliance()
         self.auth_ssot_test = TestAuthenticationSSot()
         self.database_ssot_test = TestDatabaseManagerSSot()
         self.environment_ssot_test = TestEnvironmentAccessSSot()
         self.agent_registry_ssot_test = TestAgentRegistrySSot()
-        self.factory_pattern_ssot_test = TestFactoryPatternSSot()
+        self.factory_pattern_ssot_test = TestSSotFactoryPatternCompliance()
         
-        # Initialize all individual test setups
+        # Initialize all individual test setups (handle different method signatures)
         for test_instance in [
             self.websocket_ssot_test,
             self.auth_ssot_test,
@@ -101,7 +96,12 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
             self.factory_pattern_ssot_test
         ]:
             if hasattr(test_instance, 'setup_method'):
-                test_instance.setup_method(method)
+                try:
+                    # Try with method parameter first
+                    test_instance.setup_method(method)
+                except TypeError:
+                    # Fallback to no parameters if method signature doesn't match
+                    test_instance.setup_method()
         
         # Track SSOT ecosystem health
         self.ssot_compliance_score = 0.0
@@ -119,7 +119,7 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
     def teardown_method(self, method=None):
         """Cleanup comprehensive integration test environment."""
         try:
-            # Cleanup individual test instances
+            # Cleanup individual test instances (handle different method signatures)
             for test_instance in [
                 self.websocket_ssot_test,
                 self.auth_ssot_test,
@@ -129,7 +129,12 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
                 self.factory_pattern_ssot_test
             ]:
                 if hasattr(test_instance, 'teardown_method'):
-                    test_instance.teardown_method(method)
+                    try:
+                        # Try with method parameter first
+                        test_instance.teardown_method(method)
+                    except TypeError:
+                        # Fallback to no parameters if method signature doesn't match
+                        test_instance.teardown_method()
             
             # Log final SSOT ecosystem health report
             self._generate_ssot_ecosystem_report()
@@ -228,12 +233,12 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
         
         # Run all individual SSOT tests to validate no conflicts
         ssot_test_methods = [
-            ("websocket", self.websocket_ssot_test.test_websocket_manager_ssot_compliance),
-            ("auth", self.auth_ssot_test.test_auth_service_ssot_compliance),
-            ("database", self.database_ssot_test.test_database_manager_ssot_compliance),
-            ("environment", self.environment_ssot_test.test_environment_access_ssot_compliance),
-            ("agent_registry", self.agent_registry_ssot_test.test_agent_registry_ssot_compliance),
-            ("factory_pattern", self.factory_pattern_ssot_test.test_factory_pattern_ssot_compliance)
+            ("websocket", self.websocket_ssot_test.test_websocket_ssot_comprehensive_validation),
+            ("auth", self.auth_ssot_test.test_auth_service_ssot_enforcement),
+            ("database", self.database_ssot_test.test_database_configuration_ssot),
+            ("environment", self.environment_ssot_test.test_configuration_ssot_compliance),
+            ("agent_registry", self.agent_registry_ssot_test.test_agent_routing_ssot_compliance),
+            ("factory_pattern", self.factory_pattern_ssot_test.test_factory_method_ssot_compliance)
         ]
         
         for component_name, test_method in ssot_test_methods:
@@ -503,7 +508,7 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
         """Validate WebSocket connection maintains SSOT compliance."""
         # Delegate to WebSocket SSOT test with integration context
         try:
-            self.websocket_ssot_test.test_websocket_manager_ssot_compliance()
+            self.websocket_ssot_test.test_websocket_ssot_comprehensive_validation()
             self.increment_websocket_events(5)  # Simulate critical events
         except Exception as e:
             self.ssot_violations.append(f"WebSocket SSOT violation: {e}")
@@ -512,7 +517,7 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
     async def _validate_authentication_flow_ssot(self):
         """Validate authentication flow maintains SSOT compliance."""
         try:
-            self.auth_ssot_test.test_auth_service_ssot_compliance()
+            self.auth_ssot_test.test_auth_service_ssot_enforcement()
         except Exception as e:
             self.ssot_violations.append(f"Auth SSOT violation: {e}")
             raise
@@ -520,8 +525,8 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
     async def _validate_agent_execution_flow_ssot(self):
         """Validate agent execution maintains SSOT compliance."""
         try:
-            self.agent_registry_ssot_test.test_agent_registry_ssot_compliance()
-            self.factory_pattern_ssot_test.test_factory_pattern_ssot_compliance()
+            self.agent_registry_ssot_test.test_agent_routing_ssot_compliance()
+            self.factory_pattern_ssot_test.test_factory_method_ssot_compliance()
         except Exception as e:
             self.ssot_violations.append(f"Agent execution SSOT violation: {e}")
             raise
@@ -529,7 +534,7 @@ class TestSSotComprehensiveIntegration(SSotAsyncTestCase):
     async def _validate_response_delivery_ssot(self):
         """Validate response delivery maintains SSOT compliance."""
         try:
-            self.database_ssot_test.test_database_manager_ssot_compliance()
+            self.database_ssot_test.test_database_configuration_ssot()
             self.increment_db_query_count(3)  # Simulate persistence operations
         except Exception as e:
             self.ssot_violations.append(f"Response delivery SSOT violation: {e}")
