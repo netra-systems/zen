@@ -1,0 +1,365 @@
+name: Test Workflow
+
+on:
+  workflow_call:
+    inputs:
+      test_level:
+        description: 'Test level to run'
+        required: false
+        type: string
+        default: 'integration'
+      real_services:
+        description: 'Use real services'
+        required: false
+        type: boolean
+        default: false
+      real_llm:
+        description: 'Use real LLM'
+        required: false
+        type: boolean
+        default: false
+      fail_fast:
+        description: 'Fail fast on first test failure'
+        required: false
+        type: boolean
+        default: true
+      coverage:
+        description: 'Generate coverage report'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  # ==========================================
+  # UNIT TESTS
+  # ==========================================
+  unit-tests:
+    name: Unit Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 30
+    if: contains(fromJSON('["unit", "integration", "comprehensive"]'), inputs.test_level)
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio pytest-timeout
+      
+      - name: Run unit tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          TEST_ENV: ci
+          FAIL_FAST: ${{ inputs.fail_fast && '--exitfirst' || '' }}
+        run: |
+          echo "=== Running Unit Tests ==="
+          python tests/unified_test_runner.py \
+            --category unit \
+            --no-coverage \
+            ${{ inputs.fail_fast && '--fast-fail' || '' }} \
+            --parallel
+      
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: |
+            test-results/
+            pytest-report.xml
+          retention-days: 7
+
+  # ==========================================
+  # INTEGRATION TESTS
+  # ==========================================
+  integration-tests:
+    name: Integration Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 45
+    if: contains(fromJSON('["integration", "comprehensive"]'), inputs.test_level)
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio pytest-timeout
+      
+      - name: Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U test_user; then
+              echo "PostgreSQL is ready"
+              break
+            fi
+            echo "Waiting for PostgreSQL... ($i/30)"
+            sleep 2
+          done
+          
+          echo "Waiting for Redis..."
+          for i in {1..30}; do
+            if redis-cli -h localhost -p 6379 ping; then
+              echo "Redis is ready"
+              break
+            fi
+            echo "Waiting for Redis... ($i/30)"
+            sleep 2
+          done
+      
+      - name: Run integration tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          TEST_ENV: ci
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          FAIL_FAST: ${{ inputs.fail_fast && '--exitfirst' || '' }}
+          USE_REAL_SERVICES: ${{ inputs.real_services }}
+        run: |
+          echo "=== Running Integration Tests ==="
+          python tests/unified_test_runner.py \
+            --category integration \
+            --no-coverage \
+            ${{ inputs.fail_fast && '--fast-fail' || '' }} \
+            ${{ inputs.real_services && '--real-services' || '' }} \
+            --parallel
+      
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            test-results/
+            pytest-report.xml
+          retention-days: 7
+
+  # ==========================================
+  # MISSION CRITICAL TESTS (Always run for PRs)
+  # ==========================================
+  mission-critical-tests:
+    name: Mission Critical Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-timeout
+      
+      - name: Run mission critical tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          TEST_ENV: ci
+        run: |
+          echo "=== Running Mission Critical Tests ==="
+          python tests/unified_test_runner.py \
+            --category mission_critical \
+            --no-coverage \
+            --fast-fail
+      
+      - name: Upload mission critical test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mission-critical-test-results
+          path: |
+            test-results/
+            pytest-report.xml
+          retention-days: 7
+
+  # ==========================================
+  # E2E TESTS (Optional, only for comprehensive)
+  # ==========================================
+  e2e-tests:
+    name: E2E Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 60
+    if: inputs.test_level == 'comprehensive'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio playwright
+          npx playwright install chromium
+      
+      - name: Start services with Docker Compose
+        run: |
+          docker-compose -f docker-compose.test.yml up -d
+          
+          # Wait for services to be ready
+          echo "Waiting for services to start..."
+          sleep 30
+          
+          # Check service health
+          docker-compose -f docker-compose.test.yml ps
+      
+      - name: Run E2E tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          TEST_ENV: ci
+          USE_REAL_SERVICES: true
+        run: |
+          echo "=== Running E2E Tests ==="
+          python tests/unified_test_runner.py \
+            --category e2e \
+            --no-coverage \
+            --real-services
+      
+      - name: Stop services
+        if: always()
+        run: |
+          docker-compose -f docker-compose.test.yml down
+      
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            test-results/
+            pytest-report.xml
+            playwright-results/
+          retention-days: 7
+
+  # ==========================================
+  # TEST SUMMARY
+  # ==========================================
+  test-summary:
+    name: Test Summary
+    needs: [unit-tests, integration-tests, mission-critical-tests]
+    if: always()
+    runs-on: warp-custom-default
+    steps:
+      - name: Generate test summary
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mission Critical | ${{ needs.mission-critical-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          OVERALL_STATUS="success"
+          if [[ "${{ needs.mission-critical-tests.result }}" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+            echo "### ❌ Mission Critical tests failed - blocking merge" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.unit-tests.result }}" == "failure" ]] || [[ "${{ needs.integration-tests.result }}" == "failure" ]]; then
+            OVERALL_STATUS="failure"
+            echo "### ❌ Some tests failed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "overall_status=$OVERALL_STATUS" >> $GITHUB_OUTPUT
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const unitStatus = '${{ needs.unit-tests.result }}';
+            const integrationStatus = '${{ needs.integration-tests.result }}';
+            const criticalStatus = '${{ needs.mission-critical-tests.result }}';
+            
+            const statusEmoji = (status) => {
+              switch(status) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'skipped': return '⏭️';
+                default: return '⏸️';
+              }
+            };
+            
+            const comment = `## Test Results
+            
+            | Test Suite | Status |
+            |------------|--------|
+            | Unit Tests | ${statusEmoji(unitStatus)} ${unitStatus} |
+            | Integration Tests | ${statusEmoji(integrationStatus)} ${integrationStatus} |
+            | Mission Critical | ${statusEmoji(criticalStatus)} ${criticalStatus} |
+            
+            ${criticalStatus === 'failure' ? '⚠️ **Mission Critical tests must pass before merging**' : ''}
+            `;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('## Test Results')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
