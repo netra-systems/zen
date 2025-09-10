@@ -421,13 +421,13 @@ class AgentRegistry(BaseAgentRegistry):
         logger.info("🔄 Enhanced AgentRegistry initialized with CanonicalToolDispatcher SSOT pattern")
         logger.info("✅ All agents will receive properly isolated tool dispatchers per user context")
         logger.info("🚨 User isolation and memory leak prevention enabled")
-        logger.info("🎯 SSOT compliance validated - UniversalAgentRegistry interface properly implemented")
+        logger.info("🎯 SSOT compliance validated - BaseAgentRegistry interface properly implemented")
     
     def _validate_ssot_compliance(self) -> None:
-        """Validate SSOT compliance with UniversalAgentRegistry interface.
+        """Validate SSOT compliance with BaseAgentRegistry interface.
         
         This method ensures that AgentRegistry properly implements the 
-        UniversalAgentRegistry interface and maintains Liskov Substitution Principle.
+        BaseAgentRegistry interface and maintains Liskov Substitution Principle.
         
         Raises:
             RuntimeError: If SSOT compliance validation fails

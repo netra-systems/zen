@@ -522,7 +522,7 @@ class TestGoldenPathExecution(SSotAsyncTestCase):
         
         print(f"  ✅ Golden Path error recovery validated")
     
-    def test_golden_path_performance_requirements(self):
+    async def test_golden_path_performance_requirements(self):
         """Test Golden Path meets performance requirements for production"""
         print("\n🔍 Testing Golden Path performance requirements...")
         
