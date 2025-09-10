@@ -33,7 +33,7 @@ import json
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 # CRITICAL FIX: Import Windows-safe asyncio patterns to prevent deadlocks
 from netra_backend.app.core.windows_asyncio_safe import (
@@ -80,6 +80,8 @@ from netra_backend.app.websocket_core.circuit_breaker import (
     websocket_connect_with_circuit_breaker,
     CircuitBreakerOpenError
 )
+# Environment constants for Cloud Run race condition fixes
+from netra_backend.app.core.environment_constants import get_current_environment
 
 logger = central_logger.get_logger(__name__)
 
@@ -163,6 +165,79 @@ WEBSOCKET_CONFIG.enable_compression = False
 HEARTBEAT_TIMEOUT_SECONDS = _timeout_config["heartbeat_timeout_seconds"]
 
 
+async def _initialize_connection_state(websocket: WebSocket, environment: str, selected_protocol: str, state_registry) -> Tuple[str, Any]:
+    """
+    PHASE 2 FIX 2: Consolidated connection state machine initialization.
+    
+    Creates a single state machine per connection, preventing duplicate registrations
+    and race conditions. Returns the preliminary connection ID and state machine.
+    
+    Args:
+        websocket: The WebSocket connection
+        environment: Deployment environment (staging, testing, development, etc.)
+        selected_protocol: The selected WebSocket subprotocol
+        state_registry: The connection state registry (passed from websocket_endpoint scope)
+    
+    Returns:
+        Tuple of (preliminary_connection_id, state_machine)
+    """
+    from shared.types.core_types import ensure_user_id
+    
+    try:
+        
+        # ISSUE #174 FIX: Use SSOT Connection ID Manager to generate unified connection identity
+        # This eliminates dual ID systems and provides single connection identity throughout lifecycle
+        from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager
+        
+        # Create unified connection identity using SSOT manager
+        connection_manager = get_connection_id_manager()
+        connection_identity = connection_manager.create_connection_identity(environment)
+        preliminary_connection_id = connection_identity.connection_id
+        
+        # Set temporary user based on environment (for state machine initialization)
+        if environment == "testing":
+            temp_user_id = ensure_user_id("staging-e2e-user-test")
+        elif environment in ["staging", "production"]:
+            temp_user_id = ensure_user_id("staging-connection-init")
+        else:
+            # Development and other environments
+            temp_user_id = ensure_user_id("dev-connection-init")
+        
+        logger.debug(f"✅ ISSUE #174 FIX: Created unified connection identity {preliminary_connection_id} using SSOT manager")
+        
+        # Register connection with state registry
+        state_machine = state_registry.register_connection(preliminary_connection_id, temp_user_id)
+        
+        # Store connection_id on websocket for later use
+        websocket.connection_id = preliminary_connection_id
+        
+        # Transition to ACCEPTED state after successful WebSocket accept()
+        accept_transition_success = state_machine.transition_to(
+            ApplicationConnectionState.ACCEPTED,
+            reason="WebSocket accept() completed successfully",
+            metadata={
+                "selected_protocol": selected_protocol,
+                "environment": environment,
+                "accept_timestamp": time.time(),
+                "connection_type": "consolidated_initialization"
+            }
+        )
+        
+        if accept_transition_success:
+            logger.info(f"PHASE 2 FIX 2: State machine initialized and transitioned to ACCEPTED for {preliminary_connection_id}")
+        else:
+            logger.error(f"PHASE 2 FIX 2: Failed to transition state machine to ACCEPTED for {preliminary_connection_id}")
+        
+        return preliminary_connection_id, state_machine
+        
+    except Exception as e:
+        logger.error(f"PHASE 2 FIX 2: Failed to initialize connection state machine: {e}")
+        # Generate fallback connection_id
+        fallback_connection_id = f"ws_fallback_{int(time.time() * 1000)}_{id(websocket)}"
+        websocket.connection_id = fallback_connection_id
+        return fallback_connection_id, None
+
+
 @router.websocket("/ws")
 @gcp_reportable(reraise=True)
 @windows_asyncio_safe
@@ -186,6 +261,17 @@ async def websocket_endpoint(websocket: WebSocket):
     heartbeat: Optional[WebSocketHeartbeat] = None
     user_id: Optional[str] = None
     authenticated = False
+    
+    # ISSUE #172 FIX: Initialize state_registry at function scope to prevent NameError in nested blocks
+    # This ensures state_registry is available throughout the entire websocket_endpoint function
+    from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry
+    try:
+        state_registry = get_connection_state_registry()
+        logger.debug(f"✅ ISSUE #172 FIX: state_registry initialized at function scope")
+    except Exception as e:
+        logger.error(f"❌ CRITICAL ERROR: Failed to initialize state_registry at function scope: {e}")
+        await websocket.close(code=1011, reason="Connection state initialization failed")
+        return
     
     try:
         # CRITICAL SECURITY FIX: Check environment early for security decisions
@@ -242,6 +328,8 @@ async def websocket_endpoint(websocket: WebSocket):
         # All authentication is now handled by the unified authentication service after WebSocket acceptance
         logger.info(f"🔒 SSOT COMPLIANCE: Skipping pre-connection auth validation in {environment} (handled by unified service)")
         
+        # ISSUE #172 FIX: state_registry already initialized at function scope - no need to re-initialize
+        
         # Prepare subprotocol handling
         subprotocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
         selected_protocol = None
@@ -250,35 +338,30 @@ async def websocket_endpoint(websocket: WebSocket):
         if "jwt-auth" in [p.strip() for p in subprotocols]:
             selected_protocol = "jwt-auth"
         
-        # ISSUE #128 FIX: Accept WebSocket connection with circuit breaker protection
+        # CRITICAL FIX: Accept WebSocket connection IMMEDIATELY and DIRECTLY
+        # The circuit breaker was causing race conditions in GCP Cloud Run
+        # WebSocket MUST be accepted before ANY other operations
         try:
-            circuit_breaker = get_websocket_circuit_breaker()
-            
             if selected_protocol:
-                await circuit_breaker.call_with_circuit_breaker(
-                    websocket.accept,
-                    subprotocol=selected_protocol,
-                    connection_type="websocket_accept_with_protocol"
-                )
-                logger.debug(f"WebSocket accepted with subprotocol: {selected_protocol}")
+                await websocket.accept(subprotocol=selected_protocol)
+                logger.debug(f"WebSocket accepted directly with subprotocol: {selected_protocol}")
             else:
-                await circuit_breaker.call_with_circuit_breaker(
-                    websocket.accept,
-                    connection_type="websocket_accept_no_protocol"
-                )
-                logger.debug("WebSocket accepted without subprotocol")
+                await websocket.accept()
+                logger.debug("WebSocket accepted directly without subprotocol")
+            
+            # CRITICAL: Give Cloud Run time to process the accept() before continuing
+            # This prevents the "Need to call 'accept' first" race condition
+            if environment in ["staging", "production"]:
+                await asyncio.sleep(0.2)  # 200ms for Cloud Run to stabilize (increased from 100ms)
+                logger.debug("Applied Cloud Run post-accept stabilization delay (200ms)")
                 
-        except CircuitBreakerOpenError as e:
-            logger.error(f"🔌 Circuit breaker OPEN - rejecting WebSocket connection: {e}")
-            await websocket.close(code=1013, reason="Service temporarily unavailable")
-            return
         except Exception as e:
-            logger.error(f"❌ WebSocket accept failed after circuit breaker retries: {e}")
-            await safe_websocket_close(websocket, code=1000, reason="Connection establishment failed - graceful retry")
+            logger.error(f"❌ WebSocket accept failed: {e}")
+            # Don't try to close - WebSocket isn't accepted yet
             return
         
-        # SINGLE COORDINATION STATE MACHINE: Initialize once after successful accept()
-        # This eliminates the race condition between multiple state machine instances
+        # UNIFIED COORDINATION: Single state machine initialization with HandshakeCoordinator integration
+        # This combines both approaches to prevent race conditions and provide systematic handshake management
         from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_registry, ApplicationConnectionState
         
         # Generate single connection_id that will be used throughout the connection lifecycle
@@ -311,6 +394,50 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.error(f"Failed to transition state machine to ACCEPTED for {connection_id}")
             # Don't fail the connection, but log the issue
         
+        # PHASE 3 FIX 3: HandshakeCoordinator Integration for Race Condition Prevention
+        # Systematic handshake management to prevent race conditions between accept() and message handling
+        from netra_backend.app.websocket_core.race_condition_prevention.handshake_coordinator import (
+            HandshakeCoordinator
+        )
+        
+        logger.debug(f"PHASE 3 FIX 3: Initializing HandshakeCoordinator for {environment} environment")
+        handshake_coordinator = HandshakeCoordinator(environment=environment)
+        
+        # Store coordinator on WebSocket for use in message handling
+        websocket.handshake_coordinator = handshake_coordinator
+        
+        # Execute handshake coordination after WebSocket accept() 
+        logger.info(f"PHASE 3 FIX 3: Starting handshake coordination for connection {connection_id}")
+        handshake_success = await handshake_coordinator.coordinate_handshake()
+        
+        if not handshake_success:
+            logger.error(f"PHASE 3 FIX 3: Handshake coordination failed for {connection_id}")
+            # Get coordination summary for debugging
+            coordination_summary = handshake_coordinator.get_coordination_summary()
+            logger.error(f"PHASE 3 FIX 3: Coordination summary: {coordination_summary}")
+            
+            # Close WebSocket with appropriate error code
+            await safe_websocket_close(
+                websocket, 
+                code=1013, 
+                reason="Handshake coordination failed - service temporarily unavailable"
+            )
+            return
+        
+        logger.info(f"PHASE 3 FIX 3: Handshake coordination successful for {connection_id}")
+        coordination_summary = handshake_coordinator.get_coordination_summary()
+        logger.debug(f"PHASE 3 FIX 3: Coordination metrics: {coordination_summary}")
+        
+        # PHASE 3 VALIDATION: Ensure coordinator is ready before proceeding
+        if not handshake_coordinator.is_ready_for_messages():
+            logger.error(f"PHASE 3 FIX 3: Coordinator not ready for messages after successful coordination")
+            await safe_websocket_close(
+                websocket,
+                code=1011,
+                reason="Handshake coordination incomplete"
+            )
+            return
+        
         # CRITICAL RACE CONDITION FIX: Progressive post-accept delays for Cloud Run environments
         # CRITICAL FIX: Windows-safe asyncio patterns to prevent deadlocks
         # This addresses the core race condition where message handling starts before handshake completion
@@ -334,37 +461,38 @@ async def websocket_endpoint(websocket: WebSocket):
             # Stage 3: Final stabilization delay with Windows-safe sleep
             await windows_safe_sleep(0.05)  # Increased to 50ms for enhanced GCP stability
             
-            # EVENT-DRIVEN STABILIZATION: Validate state machine readiness instead of duplicate creation
-            # This eliminates the duplicate state machine initialization race condition
+            # EVENT-DRIVEN STABILIZATION: Validate state machine readiness and connection_id coordination
+            # This ensures the state machine is properly initialized and connection_id is available
             try:
                 # Use the existing connection_id from websocket (set during initial registration)
                 if not hasattr(websocket, 'connection_id') or not websocket.connection_id:
-                    logger.error("COORDINATION ERROR: Missing connection_id on websocket - state machine not initialized")
-                    raise WebSocketDisconnect(code=1011, reason="Connection state coordination failed")
+                    logger.warning("COORDINATION WARNING: Missing connection_id on websocket, applying fallback")
+                    # Fallback to basic connection ID generation for race condition recovery
+                    websocket.connection_id = f"ws_fallback_{int(time.time() * 1000)}_{id(websocket)}"
                 
-                # Get existing state machine instead of creating a new one
+                logger.info(f"RACE CONDITION FIX: Using connection state machine for {websocket.connection_id}")
+                
+                # Get existing state machine to validate coordination
                 existing_state_machine = state_registry.get_connection_state_machine(websocket.connection_id)
                 if existing_state_machine is None:
-                    logger.error(f"COORDINATION ERROR: State machine lost for {websocket.connection_id}")
-                    raise WebSocketDisconnect(code=1011, reason="Connection state machine lost")
-                
-                # Validate current state is ACCEPTED (confirming accept() completed properly)
-                if existing_state_machine.current_state != ApplicationConnectionState.ACCEPTED:
-                    logger.warning(f"State machine in unexpected state: {existing_state_machine.current_state} for {websocket.connection_id}")
+                    logger.warning(f"COORDINATION WARNING: State machine lost for {websocket.connection_id} - proceeding with handshake coordinator")
+                else:
+                    # Validate current state is ACCEPTED (confirming accept() completed properly)
+                    if existing_state_machine.current_state != ApplicationConnectionState.ACCEPTED:
+                        logger.warning(f"State machine in unexpected state: {existing_state_machine.current_state} for {websocket.connection_id}")
                 
                 logger.info(f"COORDINATION SUCCESS: State machine validated for {websocket.connection_id}")
                 
             except Exception as e:
-                logger.error(f"COORDINATION FAILURE: State machine validation failed: {e}")
-                # This is a critical failure - connection cannot proceed without proper coordination
-                raise WebSocketDisconnect(code=1011, reason="Connection coordination failed")
+                logger.warning(f"COORDINATION ISSUE: State machine validation warning: {e}")
+                # Don't fail the connection, handshake coordinator should handle this
             
             logger.debug(f"Cloud Run race condition prevention complete for {environment}")
         elif environment == "testing" or is_testing:
             # CRITICAL FIX: E2E tests need more stability time to prevent 1011 errors
             await windows_safe_sleep(0.02)  # Increased to 20ms for E2E test stability
             
-            # E2E TEST COORDINATION: Validate existing state machine for testing
+            # E2E TEST COORDINATION: Validate connection state machine for testing environment
             try:
                 # Verify the connection_id was set during initial state machine creation
                 if not hasattr(websocket, 'connection_id') or not websocket.connection_id:
@@ -374,14 +502,16 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Create state machine for E2E testing as fallback only
                     from shared.types.core_types import ensure_user_id
                     e2e_user_id = ensure_user_id("staging-e2e-user-test")
-                    state_machine = state_registry.register_connection(websocket.connection_id, e2e_user_id)
+                    fallback_state_machine = state_registry.register_connection(websocket.connection_id, e2e_user_id)
                     
                     # Transition to ACCEPTED state for E2E tests
-                    state_machine.transition_to(
+                    fallback_state_machine.transition_to(
                         ApplicationConnectionState.ACCEPTED,
                         reason="E2E test WebSocket accept completed",
                         metadata={"environment": environment, "test_mode": True}
                     )
+                else:
+                    logger.info(f"E2E TEST FIX: Using existing state machine for {websocket.connection_id}")
                 
                 logger.info(f"E2E TEST COORDINATION: Connection ready for {websocket.connection_id}")
             except Exception as e:
@@ -447,8 +577,27 @@ async def websocket_endpoint(websocket: WebSocket):
         
         logger.info("🔒 SSOT AUTHENTICATION: Starting WebSocket authentication using unified service")
         
+        # PHASE 4 FIX: Register connection with state coordinator before authentication
+        from netra_backend.app.websocket_core.state_coordinator import (
+            get_websocket_state_coordinator,
+            ensure_coordinator_running,
+            coordinate_authentication_state
+        )
+        
+        await ensure_coordinator_running()
+        coordinator = get_websocket_state_coordinator()
+        await coordinator.register_connection(preliminary_connection_id)
+        
         # SSOT WebSocket Authentication - eliminates all authentication chaos
-        auth_result = await authenticate_websocket_ssot(websocket)
+        # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
+        auth_result = await authenticate_websocket_ssot(websocket, preliminary_connection_id=preliminary_connection_id)
+        
+        # PHASE 4 FIX: Coordinate authentication state transition
+        auth_success = await coordinate_authentication_state(
+            preliminary_connection_id, 
+            auth_result.success,
+            getattr(auth_result.user_context, 'user_id', None) if auth_result.success else None
+        )
         
         if not auth_result.success:
             # Enhanced authentication failure logging with 10x better debug info
@@ -504,6 +653,11 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, auth_error.model_dump())
             await windows_safe_sleep(0.1)  # Brief delay to ensure message is sent
+            
+            # PHASE 4 FIX: Coordinate failed state and unregister connection
+            await coordinate_authentication_state(preliminary_connection_id, False)
+            await coordinator.unregister_connection(preliminary_connection_id)
+            
             await safe_websocket_close(websocket, code=1011, reason="SSOT Auth failed")
             return
         
@@ -513,12 +667,38 @@ async def websocket_endpoint(websocket: WebSocket):
         
         logger.info(f"[OK] SSOT AUTHENTICATION SUCCESS: user={user_context.user_id[:8]}..., client_id={user_context.websocket_client_id}")
         
+        # ISSUE #174 FIX: Update connection identity in SSOT manager with authenticated user information
+        # This binds the user to the connection identity and maintains single connection ID throughout lifecycle
+        from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager
+        connection_manager = get_connection_id_manager()
+        auth_registered = connection_manager.register_authenticated_connection(
+            preliminary_connection_id,
+            user_context.user_id,
+            user_context.websocket_client_id,
+            getattr(user_context, 'thread_id', None)
+        )
+        
+        if auth_registered:
+            logger.debug(f"✅ ISSUE #174 FIX: Connection {preliminary_connection_id} authenticated and registered in SSOT manager")
+        else:
+            logger.error(f"❌ ISSUE #174 ERROR: Failed to register authenticated connection {preliminary_connection_id} in SSOT manager")
+        
         # CRITICAL FIX: Create isolated WebSocket manager with enhanced error handling
         # This prevents FactoryInitializationError from causing 1011 WebSocket errors
         try:
             ws_manager = await create_websocket_manager(user_context)
             logger.info(f"🏭 FACTORY PATTERN: Created isolated WebSocket manager (id: {id(ws_manager)})")
+            
+            # PHASE 4 FIX: Coordinate factory state transition
+            from netra_backend.app.websocket_core.state_coordinator import coordinate_factory_state
+            emergency_mode = hasattr(ws_manager, 'emergency_mode') and ws_manager.emergency_mode
+            await coordinate_factory_state(preliminary_connection_id, True, emergency_mode)
+            
         except Exception as factory_error:
+            # PHASE 4 FIX: Coordinate factory failure state  
+            from netra_backend.app.websocket_core.state_coordinator import coordinate_factory_state
+            await coordinate_factory_state(preliminary_connection_id, False)
+            
             # ENHANCED ERROR REPORTING: Component-specific error diagnosis
             from netra_backend.app.websocket_core.websocket_manager_factory import (
                 FactoryInitializationError, WebSocketComponentError, validate_websocket_component_health
@@ -683,6 +863,11 @@ async def websocket_endpoint(websocket: WebSocket):
         # Get shared services (these remain singleton as they don't hold user state)
         message_router = get_message_router()
         connection_monitor = get_connection_monitor()
+        
+        # PHASE 4 FIX: Coordinate event delivery activation
+        from netra_backend.app.websocket_core.state_coordinator import coordinate_event_delivery_state
+        event_delivery_active = ws_manager is not None and message_router is not None
+        await coordinate_event_delivery_state(preliminary_connection_id, event_delivery_active)
         
         # CRITICAL FIX: Handle cases where ws_manager creation failed but we want to continue with basic functionality
         if ws_manager is None:
@@ -1282,52 +1467,105 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.info(f"WebSocket authenticated for user: {user_id} at {datetime.now(timezone.utc).isoformat()}")
             
             # CRITICAL SECURITY FIX: Register connection with isolated or legacy manager
+            # PASS-THROUGH CONNECTION ID FIX: Use preliminary_connection_id to preserve state machine
             if 'user_context' in locals():
-                # Factory pattern: Create WebSocketConnection and add to isolated manager
+                # Factory pattern: Create WebSocketConnection using preliminary_connection_id
                 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
                 connection = WebSocketConnection(
-                    connection_id=user_context.websocket_client_id,
+                    connection_id=preliminary_connection_id,  # CRITICAL FIX: Use preliminary ID
                     user_id=user_id,
                     websocket=websocket,
                     connected_at=datetime.utcnow()
                 )
                 await ws_manager.add_connection(connection)
-                connection_id = user_context.websocket_client_id
-                logger.info(f"Registered connection with isolated manager: {connection_id}")
+                connection_id = preliminary_connection_id  # CRITICAL FIX: Use preliminary ID
+                logger.info(f"PASS-THROUGH FIX: Registered connection with isolated manager using preliminary ID: {connection_id}")
             else:
-                # Legacy pattern: Use old connect_user method
-                connection_id = await ws_manager.connect_user(user_id, websocket)
-                logger.info(f"Registered connection with legacy manager: {connection_id}")
+                # Legacy pattern: Use old connect_user method with preliminary_connection_id
+                connection_id = await ws_manager.connect_user(user_id, websocket, preliminary_connection_id)
+                logger.info(f"PASS-THROUGH FIX: Registered connection with legacy manager using preliminary ID: {connection_id}")
                 
-            # PHASE 1 FIX 1 CONTINUATION: Update state machine with real connection_id after authentication
-            # Replace preliminary state machine with properly identified one
+            # PASS-THROUGH CONNECTION ID FIX: Update existing state machine after authentication
+            # With connection_id pass-through, IDs should always match - no migration needed  
             try:
-                # Unregister preliminary connection
-                state_registry.unregister_connection(preliminary_connection_id)
+                # Get the existing state machine created during initialization
+                from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine, get_connection_state_registry
                 
-                # Register new state machine with real connection_id and user_id
-                final_state_machine = state_registry.register_connection(connection_id, user_id)
+                # ISSUE #172 FIX: state_registry available at function scope - no re-initialization needed
                 
-                # Transition directly to AUTHENTICATED state since we've completed auth
-                auth_transition_success = final_state_machine.transition_to(
-                    ApplicationConnectionState.AUTHENTICATED,
-                    reason="WebSocket authentication completed successfully",
-                    metadata={
-                        "user_id": user_id,
-                        "connection_id": connection_id,
-                        "auth_method": "SSOT",
-                        "auth_timestamp": time.time(),
-                        "websocket_client_id": getattr(user_context, 'websocket_client_id', None) if 'user_context' in locals() else None
-                    }
-                )
-                
-                if auth_transition_success:
-                    logger.info(f"State machine transitioned to AUTHENTICATED for {connection_id}")
-                else:
-                    logger.error(f"Failed to transition state machine to AUTHENTICATED for {connection_id}")
+                # PASS-THROUGH VALIDATION: Ensure connection IDs match (they should with our fix)
+                if connection_id != preliminary_connection_id:
+                    # CRITICAL ERROR: Pass-through strategy failed
+                    logger.critical(f"❌ PASS-THROUGH FAILED: connection_id '{connection_id}' != preliminary_connection_id '{preliminary_connection_id}'")
+                    logger.critical(f"❌ PASS-THROUGH FAILED: State machine continuity broken - this causes transition failures")
+                    logger.critical(f"❌ ROOT CAUSE: connection_id mismatch will cause state machine recreation and loss of ACCEPTED state")
                     
+                    # Log detailed diagnostic info
+                    diagnostic_info = {
+                        "preliminary_connection_id": preliminary_connection_id,
+                        "final_connection_id": connection_id,
+                        "user_id": user_id[:8] + "...",
+                        "pass_through_strategy": "FAILED",
+                        "expected_behavior": "IDs should match to preserve state machine",
+                        "actual_behavior": "Different IDs will cause state machine recreation"
+                    }
+                    logger.critical(f"❌ PASS-THROUGH DIAGNOSTIC: {json.dumps(diagnostic_info, indent=2)}")
+                    
+                    # Emergency recovery: Use the existing state machine with preliminary_connection_id
+                    final_state_machine = get_connection_state_machine(preliminary_connection_id)
+                    if final_state_machine:
+                        final_state_machine.user_id = user_id
+                        logger.warning(f"⚠️ EMERGENCY RECOVERY: Using existing state machine {preliminary_connection_id} despite ID mismatch")
+                    else:
+                        logger.critical(f"❌ EMERGENCY RECOVERY FAILED: No state machine found for {preliminary_connection_id}")
+                        # ISSUE #172 FIX: state_registry guaranteed available at function scope
+                        final_state_machine = state_registry.register_connection(preliminary_connection_id, user_id)
+                        logger.debug(f"✅ ISSUE #172 FIX: Successfully used state_registry with guaranteed scope")
+                else:
+                    # SUCCESS: Pass-through strategy worked correctly
+                    logger.info(f"✅ PASS-THROUGH SUCCESS: connection_id '{connection_id}' == preliminary_connection_id '{preliminary_connection_id}'")
+                    logger.info(f"✅ STATE MACHINE CONTINUITY: Preserved ACCEPTED state from initialization")
+                    
+                    # Update existing state machine with authenticated user_id
+                    final_state_machine = get_connection_state_machine(preliminary_connection_id)
+                    if final_state_machine:
+                        # Update user_id in the existing state machine
+                        final_state_machine.user_id = user_id
+                        logger.info(f"✅ PASS-THROUGH SUCCESS: Updated existing state machine with user_id {user_id}")
+                        
+                        # Log state machine status for validation
+                        current_state = final_state_machine.get_current_state()
+                        logger.info(f"✅ STATE VALIDATION: Current state machine state: {current_state}")
+                    else:
+                        # This should not happen but handle gracefully
+                        logger.warning(f"⚠️ UNEXPECTED: No existing state machine found for {preliminary_connection_id} despite pass-through success")
+                        # ISSUE #172 FIX: state_registry guaranteed available at function scope
+                        final_state_machine = state_registry.register_connection(connection_id, user_id)
+                        websocket.connection_id = connection_id
+                        logger.debug(f"✅ ISSUE #172 FIX: Successfully used state_registry with guaranteed scope")
+                
+                # Transition to AUTHENTICATED state
+                if final_state_machine:
+                    auth_transition_success = final_state_machine.transition_to(
+                        ApplicationConnectionState.AUTHENTICATED,
+                        reason="WebSocket authentication completed successfully",
+                        metadata={
+                            "user_id": user_id,
+                            "connection_id": connection_id or preliminary_connection_id,
+                            "auth_method": "SSOT",
+                            "auth_timestamp": time.time(),
+                            "consolidation_approach": "phase2_fix2",
+                            "websocket_client_id": getattr(user_context, 'websocket_client_id', None) if 'user_context' in locals() else None
+                        }
+                    )
+                    
+                    if auth_transition_success:
+                        logger.info(f"PHASE 2 FIX 2: State machine transitioned to AUTHENTICATED for {connection_id or preliminary_connection_id}")
+                    else:
+                        logger.error(f"PHASE 2 FIX 2: Failed to transition state machine to AUTHENTICATED for {connection_id or preliminary_connection_id}")
+                
             except Exception as state_machine_error:
-                logger.error(f"State machine update failed for {connection_id}: {state_machine_error}")
+                logger.error(f"PHASE 2 FIX 2: State machine update failed for {connection_id}: {state_machine_error}")
                 # Don't fail the connection, continue with existing flow
                 
             # CRITICAL FIX: Enhanced handshake coordination for race condition prevention
@@ -1589,6 +1827,27 @@ async def websocket_endpoint(websocket: WebSocket):
             
     except WebSocketDisconnect as e:
         logger.debug(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
+        
+        # ISSUE #174 FIX: Cleanup connection from SSOT Connection ID Manager
+        try:
+            from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager, ConnectionState
+            connection_manager = get_connection_id_manager()
+            
+            # Update connection state to disconnecting
+            if connection_id:
+                connection_manager.update_connection_state(
+                    connection_id, 
+                    ConnectionState.DISCONNECTING,
+                    {"disconnect_reason": e.reason, "disconnect_code": e.code}
+                )
+            
+            # Remove connection from SSOT registry
+            if connection_id and connection_manager.remove_connection(connection_id):
+                logger.debug(f"✅ ISSUE #174 CLEANUP: Connection {connection_id} removed from SSOT manager on disconnect")
+            else:
+                logger.warning(f"⚠️ ISSUE #174 CLEANUP: Could not remove connection {connection_id} from SSOT manager")
+        except Exception as cleanup_error:
+            logger.error(f"❌ ISSUE #174 ERROR: Failed to cleanup connection in SSOT manager: {cleanup_error}")
     
     except Exception as e:
         # ENHANCED EXCEPTION HANDLING: Component-specific error diagnosis and recovery
@@ -1597,6 +1856,27 @@ async def websocket_endpoint(websocket: WebSocket):
         )
         
         logger.error(f"WebSocket error: {e}", exc_info=True)
+        
+        # ISSUE #174 FIX: Cleanup connection from SSOT Connection ID Manager on error
+        try:
+            from netra_backend.app.websocket_core.connection_id_manager import get_connection_id_manager, ConnectionState
+            connection_manager = get_connection_id_manager()
+            
+            # Update connection state to error
+            if connection_id:
+                connection_manager.update_connection_state(
+                    connection_id,
+                    ConnectionState.ERROR,
+                    {"error_message": str(e), "error_type": type(e).__name__}
+                )
+            
+            # Remove connection from SSOT registry
+            if connection_id and connection_manager.remove_connection(connection_id):
+                logger.debug(f"✅ ISSUE #174 CLEANUP: Connection {connection_id} removed from SSOT manager on error")
+            else:
+                logger.warning(f"⚠️ ISSUE #174 CLEANUP: Could not remove connection {connection_id} from SSOT manager")
+        except Exception as cleanup_error:
+            logger.error(f"❌ ISSUE #174 ERROR: Failed to cleanup connection in SSOT manager: {cleanup_error}")
         
         # Diagnose the error type and create specific error code
         logger.info("🔍 ERROR DIAGNOSIS: Analyzing exception for component-specific reporting...")
@@ -1718,6 +1998,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 await safe_websocket_close(websocket, code=close_code, reason=close_reason[:50])
     
     finally:
+        # PHASE 4 FIX: Unregister connection from state coordinator
+        try:
+            from netra_backend.app.websocket_core.state_coordinator import get_websocket_state_coordinator
+            coordinator = get_websocket_state_coordinator()
+            if 'preliminary_connection_id' in locals():
+                await coordinator.unregister_connection(preliminary_connection_id)
+                logger.debug(f"PHASE 4 FIX: Unregistered connection {preliminary_connection_id} from state coordinator")
+        except Exception as e:
+            logger.error(f"PHASE 4 FIX: Error unregistering connection from coordinator: {e}")
+        
         # Clear GCP error reporting context
         clear_request_context()
         
@@ -1839,8 +2129,14 @@ async def _handle_websocket_messages(
             logger.warning(f"Connection {connection_id} state machine not ready for messages: {state_machine.current_state}")
             
             # Wait briefly for state machine to reach operational state
-            max_wait_attempts = 10
-            wait_delay = 0.1  # 100ms
+            # Increase attempts and delay for Cloud Run environments
+            environment = get_current_environment()
+            if environment in ["staging", "production"]:
+                max_wait_attempts = 20  # Increased from 10 for Cloud Run
+                wait_delay = 0.15  # 150ms (increased from 100ms for Cloud Run)
+            else:
+                max_wait_attempts = 10
+                wait_delay = 0.1  # 100ms
             
             for attempt in range(max_wait_attempts):
                 if state_machine.can_process_messages():
@@ -1870,6 +2166,15 @@ async def _handle_websocket_messages(
                 if not is_websocket_connected_and_ready(websocket):
                     logger.debug(f"WebSocket connection {connection_id} became unavailable before receive, exiting loop")
                     break
+                
+                # Enhanced Cloud Run validation: Double-check WebSocket state
+                environment = get_current_environment()
+                if environment in ["staging", "production"] and websocket.application_state != WebSocketState.CONNECTED:
+                    logger.warning(f"Cloud Run WebSocket state verification failed for {connection_id}: {websocket.application_state}")
+                    await asyncio.sleep(0.05)  # Brief delay to allow state stabilization
+                    if websocket.application_state != WebSocketState.CONNECTED:
+                        logger.error(f"Cloud Run WebSocket connection {connection_id} not in CONNECTED state, breaking loop")
+                        break
                 
                 # CRITICAL FIX: Use Windows-safe wait_for to prevent deadlocks
                 # Receive message with timeout
@@ -1955,10 +2260,40 @@ async def _handle_websocket_messages(
                 
                 # CRITICAL FIX: Check if the error is related to WebSocket connection state
                 error_message = str(e)
-                if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
-                    logger.error(f"WebSocket connection state error for {connection_id}: {error_message}")
-                    logger.error("This indicates a race condition between accept() and message handling")
-                    # Break immediately - don't retry connection state errors
+                
+                # Case 1: WebSocket not accepted yet (race condition in handshake) 
+                # CRITICAL: Check for 'accept' first since it's the more specific condition
+                if 'accept' in error_message.lower() and ('first' in error_message.lower() or 'call' in error_message.lower()):
+                    logger.error(f"🚨 WEBSOCKET NOT ACCEPTED ERROR for {connection_id}: {error_message}")
+                    logger.error(f"DIAGNOSTIC: This indicates websocket.accept() was never called or failed")
+                    logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
+                    logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
+                    logger.error("ROOT_CAUSE: Race condition - message handler started before accept() completed")
+                    logger.error("ACTUAL_ERROR_MESSAGE: " + repr(error_message))  # Show exact message
+                    # Break immediately - this is unrecoverable
+                    break
+                
+                # Case 2: WebSocket disconnected (connection lost) - but NOT accept related
+                elif "WebSocket is not connected" in error_message and "accept" not in error_message.lower():
+                    logger.error(f"🔌 WEBSOCKET DISCONNECTED ERROR for {connection_id}: {error_message}")
+                    logger.error(f"DIAGNOSTIC: WebSocket was connected but is now disconnected")
+                    logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
+                    logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
+                    logger.error("ROOT_CAUSE: Connection dropped - client disconnect, network issue, or server close")
+                    logger.error("ACTUAL_ERROR_MESSAGE: " + repr(error_message))  # Show exact message
+                    # Break immediately - connection is gone
+                    break
+                
+                # Case 3: Mixed error message (contains both "not connected" and "accept")
+                elif "WebSocket is not connected" in error_message and "accept" in error_message.lower():
+                    logger.error(f"⚠️ WEBSOCKET MIXED ERROR for {connection_id}: {error_message}")
+                    logger.error(f"DIAGNOSTIC: Complex error - WebSocket not connected AND needs accept()")
+                    logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
+                    logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
+                    logger.error("ROOT_CAUSE: Likely race condition - accept() failed or never called")
+                    logger.error("ACTUAL_ERROR_MESSAGE: " + repr(error_message))
+                    logger.error("INTERPRETATION: This should be treated as Case 1 (accept failure)")
+                    # Break immediately - this is unrecoverable like Case 1
                     break
                 else:
                     logger.error(f"Message handling error for {connection_id}: {e}", exc_info=True)
