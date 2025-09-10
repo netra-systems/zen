@@ -2390,19 +2390,25 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
     try:
         logger.warning("PHASE 2 FIX: Creating degraded service WebSocket manager - last resort")
         
-        # Create absolute minimal configuration
-        degraded_config = {
-            'user_id': 'degraded_service_user',
-            'websocket_client_id': f'degraded_ws_{int(time.time())}',
-            'thread_id': f'degraded_thread_{int(time.time())}',
-            'run_id': f'degraded_run_{int(time.time())}',
-            'degraded_mode': True,
-            'functionality_level': 'minimal',
-            'created_at': datetime.now(timezone.utc).isoformat()
-        }
-        
-        # Create degraded manager
-        degraded_manager = WebSocketManager(degraded_config)
+        # Create degraded UserExecutionContext for proper manager creation
+        try:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            degraded_user_context = UserExecutionContext(
+                user_id='degraded_service_user',
+                thread_id=f'degraded_thread_{int(time.time())}',
+                run_id=f'degraded_run_{int(time.time())}',
+                websocket_client_id=f'degraded_ws_{int(time.time())}',
+                agent_context={'degraded_mode': True, 'functionality_level': 'minimal'},
+                audit_metadata={'created_at': datetime.now(timezone.utc).isoformat(), 'source': 'degraded_service'}
+            )
+            
+            # Create degraded manager using SSOT factory method
+            degraded_manager = WebSocketManager.from_user_context(degraded_user_context)
+        except Exception as e:
+            logger.error(f"Failed to create degraded UserExecutionContext: {e}")
+            # Final fallback - create basic manager without context
+            degraded_manager = WebSocketManager()
+            logger.warning("Created basic WebSocket manager without user context as degraded fallback")
         
         logger.warning("PHASE 2 FIX: Degraded service manager created - limited functionality available")
         return degraded_manager
