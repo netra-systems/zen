@@ -44,12 +44,12 @@ class WebSocketStreamingTimeoutReproduction:
         REPRODUCES: Agent service streaming failed, using fallback: stream_agent_execution method not implemented
         EXPECTS: AttributeError from agents_execute.py:663
         """
-        from netra_backend.app.routes.agents_execute import stream_agent_execution
-        from netra_backend.app.models.agent_models import AgentStreamRequest
+        from netra_backend.app.routes.agents_execute import stream_agent_execution, AgentStreamRequest
         
         request = AgentStreamRequest(
             agent_type="data_analyst",
             message="Test streaming execution",
+            thread_id="test_thread_123",
             stream_updates=True
         )
         
