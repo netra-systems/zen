@@ -11,6 +11,9 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 # Import ExecutionStrategy from the authoritative source for compatibility
 from netra_backend.app.core.interfaces_execution import ExecutionStrategy
 
+# Import ExecutionStatus from the SSOT core enums module
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+
 if TYPE_CHECKING:
     from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
     from netra_backend.app.services.user_execution_context import UserExecutionContext
