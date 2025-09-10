@@ -456,35 +456,24 @@ describe('Auth State Mismatch E2E Tests - CRITICAL BUG REPRODUCTION', () => {
       // WebSocket should connect successfully
       await waitFor(() => {
         expect(screen.getByTestId('ws-connected')).toHaveTextContent('connected');
-      });
+      }, { timeout: 2000 });
 
       expect(screen.getByTestId('ws-error')).toHaveTextContent('no-error');
 
       // BUSINESS VALUE: Verify send button state reflects proper auth
       const sendButton = screen.getByTestId('send-message');
       
-      // If button is disabled, check if it's due to missing WebSocket connection
-      if (sendButton.hasAttribute('disabled')) {
-        const wsState = screen.getByTestId('ws-connected').textContent;
-        console.log('ℹ️ Send button disabled - checking WebSocket state:', { wsState });
-        
-        // If WebSocket is connected but button still disabled, that's unexpected
-        if (wsState === 'connected') {
-          console.warn('⚠️ WebSocket connected but send button disabled - possible implementation issue');
-        }
-        
-        // For now, accept that send may be disabled if WebSocket isn't connected
-        // The important thing is auth consistency
-      } else {
+      // Wait for send button to be enabled after WebSocket connection
+      await waitFor(() => {
         expect(sendButton).not.toBeDisabled();
-      }
+      }, { timeout: 1000 });
 
       await user.click(sendButton);
       
       await waitFor(() => {
         const messageCount = parseInt(screen.getByTestId('message-count').textContent || '0');
         expect(messageCount).toBeGreaterThan(0);
-      });
+      }, { timeout: 1000 });
     });
 
     test('SHOULD PASS: Clean logout clears all auth state', async () => {
