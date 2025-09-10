@@ -44,7 +44,8 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, WebSocketID
 
 # Import auth-related components for testing race conditions
-from netra_backend.app.auth.websocket_auth import WebSocketAuthenticator
+from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator as WebSocketAuthenticator
+from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator as JWTValidator
 
 logger = logging.getLogger(__name__)
 
