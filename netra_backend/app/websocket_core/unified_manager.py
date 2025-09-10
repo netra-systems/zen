@@ -2267,3 +2267,17 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     
     logger.critical(error_message)
     raise RuntimeError(error_message)
+
+
+# CRITICAL: Export alias for backward compatibility with migration_adapter
+# This ensures migration_adapter can import WebSocketManager 
+WebSocketManager = UnifiedWebSocketManager
+
+# Export list for the module
+__all__ = [
+    'WebSocketConnection',
+    'UnifiedWebSocketManager', 
+    'WebSocketManager',  # Alias for UnifiedWebSocketManager
+    '_serialize_message_safely',
+    'get_websocket_manager'
+]
