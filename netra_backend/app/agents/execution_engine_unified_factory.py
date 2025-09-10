@@ -29,11 +29,11 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher_consolidated import UnifiedToolDispatcher
 
 from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
-from netra_backend.app.agents.execution_engine_consolidated import (
-    ExecutionEngine as ConsolidatedExecutionEngine,
-    ExecutionEngineFactory as ConsolidatedFactory,
-    EngineConfig,
-    RequestScopedExecutionEngine
+# SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
+    ExecutionEngineFactory as UserExecutionEngineFactory,
+    get_execution_engine_factory
 )
 from netra_backend.app.agents.execution_engine_legacy_adapter import (
     ExecutionEngineFactory as AdapterFactory
@@ -131,16 +131,19 @@ class UnifiedExecutionEngineFactory:
             effective_config.enable_request_scoping = True
         
         logger.info(
-            f"Creating ConsolidatedExecutionEngine with user_context={user_context is not None}"
+            f"Creating UserExecutionEngine (SSOT) with user_context={user_context is not None}"
         )
         
-        # Create consolidated engine
-        engine = ConsolidatedExecutionEngine(
-            config=effective_config,
-            registry=effective_registry,
-            websocket_bridge=effective_websocket_bridge,
+        # SSOT MIGRATION: Create UserExecutionEngine instead of ConsolidatedExecutionEngine
+        if not user_context:
+            raise ValueError("UserExecutionEngine requires user_context for proper isolation")
+        
+        # Get the factory and create UserExecutionEngine synchronously
+        factory = get_execution_engine_factory()
+        engine = factory.create_execution_engine_sync(
             user_context=user_context,
-            tool_dispatcher=effective_tool_dispatcher
+            websocket_bridge=effective_websocket_bridge,
+            additional_config=kwargs
         )
         
         # Ensure interface compliance (ConsolidatedExecutionEngine should already implement it)

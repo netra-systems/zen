@@ -64,7 +64,8 @@ from netra_backend.app.cache.result_cache import ResultCache
 # Agent execution components
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
+# SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
 
 @pytest.mark.integration

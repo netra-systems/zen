@@ -14,7 +14,7 @@ from datetime import datetime, UTC
 import asyncio
 
 from auth_service.auth_core.config import AuthConfig
-from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
+from netra_backend.app.redis_manager import redis_manager
 
 logger = logging.getLogger(__name__)
 

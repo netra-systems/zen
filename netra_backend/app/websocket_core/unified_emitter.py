@@ -86,11 +86,17 @@ class UnifiedWebSocketEmitter:
     RETRY_BASE_DELAY = 0.1  # 100ms
     RETRY_MAX_DELAY = 2.0   # 2 seconds
     
+    # PERFORMANCE OPTIMIZATION: Fast mode for high-throughput scenarios
+    FAST_MODE_MAX_RETRIES = 1  # Minimal retries for performance
+    FAST_MODE_BASE_DELAY = 0.001  # 1ms instead of 100ms
+    FAST_MODE_MAX_DELAY = 0.01   # 10ms instead of 2s
+    
     def __init__(
         self,
         manager: 'UnifiedWebSocketManager',
         user_id: str,
-        context: Optional['UserExecutionContext'] = None
+        context: Optional['UserExecutionContext'] = None,
+        performance_mode: bool = False
     ):
         """
         Initialize emitter for specific user.
@@ -99,10 +105,12 @@ class UnifiedWebSocketEmitter:
             manager: UnifiedWebSocketManager instance
             user_id: User ID this emitter serves
             context: Optional execution context for additional metadata
+            performance_mode: Enable high-throughput mode with minimal retries
         """
         self.manager = manager
         self.user_id = user_id
         self.context = context
+        self.performance_mode = performance_mode
         
         # Metrics tracking
         self.metrics = EmitterMetrics()

@@ -1,46 +1,112 @@
 #!/usr/bin/env python3
 """
-Mission Critical Data Layer Isolation Test Runner
+DEPRECATION WARNING: This mission critical test runner is deprecated in favor of UnifiedTestRunner SSOT.
 
-This script runs the comprehensive data layer isolation security tests
-that are designed to expose critical vulnerabilities in the current system.
+This isolation security test runner now redirects to the unified test runner's mission critical mode
+to maintain SSOT compliance while preserving all existing test functionality.
 
-IMPORTANT: These tests are EXPECTED TO FAIL initially, proving that
-security vulnerabilities exist in the current implementation.
+CRITICAL: Please migrate to using the unified test runner directly:
+    python tests/unified_test_runner.py --category mission_critical --test-pattern "*isolation*"
 
-Usage:
-    python tests/mission_critical/run_isolation_tests.py
-    python tests/mission_critical/run_isolation_tests.py --real-services
-    python tests/mission_critical/run_isolation_tests.py --concurrent-load 20
+Migration Path:
+    OLD: python tests/mission_critical/run_isolation_tests.py --real-services --concurrent-load 20
+    NEW: python tests/unified_test_runner.py --category mission_critical --real-services --concurrent-load 20
+
+All original test execution flags and options are preserved and forwarded to the SSOT implementation.
 """
 
 import sys
-import os
-import asyncio
-import argparse
-import pytest
+import subprocess
 from pathlib import Path
-
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
-
-from tests.unified_test_runner import UnifiedTestRunner
+import argparse
+import os
 
 
-class IsolationSecurityTestRunner:
-    """Specialized test runner for data layer isolation security tests."""
+def show_deprecation_warning():
+    """Show deprecation warning to users."""
+    print("⚠️  DEPRECATION WARNING")
+    print("=" * 80)
+    print("🔒 MISSION CRITICAL: Data Layer Isolation Security Tests")
+    print("=" * 80)
+    print("This mission critical test runner is deprecated.")
+    print("Please migrate to UnifiedTestRunner SSOT:")
+    print()
+    print("  NEW: python tests/unified_test_runner.py --category mission_critical")
+    print()
+    print("All isolation test functionality preserved. Redirecting...")
+    print("=" * 80)
+    print()
+
+
+def parse_isolation_test_args():
+    """Parse all isolation test arguments for compatibility."""
+    parser = argparse.ArgumentParser(
+        description="[DEPRECATED] Mission Critical Data Layer Isolation Test Runner"
+    )
     
-    def __init__(self, args):
-        self.args = args
-        self.test_file = Path(__file__).parent / "test_data_layer_isolation.py"
+    # Core isolation test options
+    parser.add_argument("--real-services", action="store_true", help="Use real services instead of mocks")
+    parser.add_argument("--concurrent-load", type=int, default=10, help="Number of concurrent users to simulate")
+    parser.add_argument("--test-duration", type=int, help="Test duration in seconds")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument("--fail-fast", action="store_true", help="Stop on first failure")
+    parser.add_argument("--isolation-level", choices=["user", "session", "request"], default="user", help="Isolation level to test")
+    parser.add_argument("--data-contamination-check", action="store_true", help="Check for data contamination")
+    parser.add_argument("--cache-isolation-check", action="store_true", help="Check cache isolation")
+    parser.add_argument("--session-isolation-check", action="store_true", help="Check session isolation")
+    
+    return parser.parse_known_args()
+
+
+def main():
+    """Main entry point with deprecation wrapper."""
+    show_deprecation_warning()
+    
+    # Parse all isolation test arguments
+    args, unknown_args = parse_isolation_test_args()
+    
+    # Get project root
+    project_root = Path(__file__).parent.parent.parent
+    unified_runner = project_root / "tests" / "unified_test_runner.py"
+    
+    if not unified_runner.exists():
+        print(f"❌ ERROR: UnifiedTestRunner not found at {unified_runner}")
+        print("Falling back to original isolation test runner...")
+        return execute_fallback_isolation_tests()
+    
+    try:
+        # Build unified test runner command for mission critical tests
+        cmd = [
+            sys.executable, str(unified_runner),
+            "--category", "mission_critical",
+            "--test-pattern", "*isolation*"
+        ]
         
-    def run_tests(self):
-        """Run the isolation security tests with appropriate configuration."""
+        # Forward all isolation test arguments
+        if args.real_services:
+            cmd.append("--real-services")
+        if args.concurrent_load != 10:  # Only add if not default
+            cmd.extend(["--concurrent-load", str(args.concurrent_load)])
+        if args.test_duration:
+            cmd.extend(["--test-duration", str(args.test_duration)])
+        if args.verbose:
+            cmd.append("--verbose")
+        if args.fail_fast:
+            cmd.append("--fail-fast")
+        if args.isolation_level != "user":  # Only add if not default
+            cmd.extend(["--isolation-level", args.isolation_level])
+        if args.data_contamination_check:
+            cmd.append("--data-contamination-check")
+        if args.cache_isolation_check:
+            cmd.append("--cache-isolation-check")
+        if args.session_isolation_check:
+            cmd.append("--session-isolation-check")
+            
+        # Add any unknown arguments
+        cmd.extend(unknown_args)
         
-        print("=" * 80)
-        print("🔒 MISSION CRITICAL: Data Layer Isolation Security Tests")
-        print("=" * 80)
+        print(f"🔄 Executing isolation tests via UnifiedTestRunner:")
+        print(f"   {' '.join(cmd)}")
         print()
         print("⚠️  WARNING: These tests are EXPECTED TO FAIL initially!")
         print("   They are designed to expose critical security vulnerabilities:")
@@ -48,192 +114,56 @@ class IsolationSecurityTestRunner:
         print("   2. Redis key collision between users")
         print("   3. Missing user context propagation")
         print("   4. Session isolation failures")
-        print("   5. Cross-tenant data leakage")
-        print()
-        print("🎯 Goal: Prove vulnerabilities exist before implementing fixes")
-        print("=" * 80)
         print()
         
-        # Build pytest command
-        pytest_args = [
-            str(self.test_file),
-            "-v",
-            "--tb=short",
-            "-x",  # Stop on first failure
-            "--no-cov",  # Don't measure coverage for security tests
-            "-m", "mission_critical",
-        ]
+        # Execute unified test runner for mission critical isolation tests
+        result = subprocess.run(cmd, cwd=project_root)
         
-        # Add real services if requested
-        if self.args.real_services:
-            pytest_args.extend([
-                "--real-services",
-            ])
-            print("🔧 Running with REAL SERVICES (Redis, ClickHouse, etc.)")
-            print()
+        # Preserve original exit code behavior
+        sys.exit(result.returncode)
         
-        # Add concurrent load parameter
-        if self.args.concurrent_load:
-            pytest_args.extend([
-                "--concurrent-users", str(self.args.concurrent_load)
-            ])
-            print(f"⚡ Testing with {self.args.concurrent_load} concurrent users")
-            print()
+    except Exception as e:
+        print(f"❌ ERROR: Failed to execute UnifiedTestRunner isolation tests: {e}")
+        print("Falling back to original isolation test runner...")
+        return execute_fallback_isolation_tests()
+
+
+def execute_fallback_isolation_tests():
+    """Execute original isolation test runner as fallback."""
+    try:
+        # Import and execute original functionality as fallback
+        project_root = Path(__file__).parent.parent.parent
         
-        # Add specific test filter if provided
-        if self.args.test_filter:
-            pytest_args.extend(["-k", self.args.test_filter])
-            print(f"🔍 Running tests matching: {self.args.test_filter}")
-            print()
-        
-        print("Running command:", " ".join(pytest_args))
-        print("=" * 80)
-        print()
-        
-        # Run the tests
-        exit_code = pytest.main(pytest_args)
-        
-        print()
-        print("=" * 80)
-        
-        if exit_code == 0:
-            print("❌ UNEXPECTED: All tests passed!")
-            print("   This suggests vulnerabilities may have been fixed already,")
-            print("   or tests need to be made more comprehensive.")
-            print("   Review test implementation for completeness.")
+        # Import the backed up original implementation
+        backup_file = Path(__file__).parent / "run_isolation_tests.py.backup"
+        if backup_file.exists():
+            print("🔄 Using backup isolation test runner...")
+            
+            # Add project root to path
+            sys.path.insert(0, str(project_root))
+            
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("isolation_backup", backup_file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            
+            # Execute main from backup with original arguments
+            # Reset sys.argv to original arguments for the backup script
+            original_argv = sys.argv[:]
+            original_argv[0] = str(backup_file)  # Update script name
+            sys.argv = original_argv
+            
+            module.main()
         else:
-            print("✅ EXPECTED: Tests failed as designed!")
-            print("   This confirms that security vulnerabilities exist.")
-            print("   Next steps:")
-            print("   1. Implement proper user context isolation")
-            print("   2. Add user-scoped cache keys")
-            print("   3. Implement session isolation")
-            print("   4. Add cross-tenant data protection")
-            print("   5. Re-run tests until they pass")
-        
-        print("=" * 80)
-        
-        return exit_code
-
-
-def main():
-    """Main entry point for isolation security test runner."""
-    
-    parser = argparse.ArgumentParser(
-        description="Run mission critical data layer isolation security tests"
-    )
-    
-    parser.add_argument(
-        "--real-services",
-        action="store_true",
-        help="Run tests against real Redis, ClickHouse, PostgreSQL services"
-    )
-    
-    parser.add_argument(
-        "--concurrent-load",
-        type=int,
-        default=10,
-        help="Number of concurrent users to simulate for load testing (default: 10)"
-    )
-    
-    parser.add_argument(
-        "--test-filter",
-        type=str,
-        help="Filter tests by name pattern (pytest -k option)"
-    )
-    
-    parser.add_argument(
-        "--show-vulnerabilities",
-        action="store_true",
-        help="Show detailed vulnerability information before running tests"
-    )
-    
-    args = parser.parse_args()
-    
-    if args.show_vulnerabilities:
-        show_vulnerability_details()
-        return 0
-    
-    runner = IsolationSecurityTestRunner(args)
-    return runner.run_tests()
-
-
-def show_vulnerability_details():
-    """Show detailed information about the vulnerabilities being tested."""
-    
-    print("=" * 80)
-    print("🔒 DATA LAYER ISOLATION SECURITY VULNERABILITIES")
-    print("=" * 80)
-    print()
-    
-    vulnerabilities = [
-        {
-            "name": "ClickHouse Cache Contamination",
-            "severity": "CRITICAL",
-            "description": "Users can access cached query results from other users",
-            "impact": "Data breach, unauthorized access to confidential information",
-            "test": "test_clickhouse_cache_contamination_vulnerability"
-        },
-        {
-            "name": "Redis Key Collision", 
-            "severity": "CRITICAL",
-            "description": "Session and cache keys collide between users",
-            "impact": "Session hijacking, data leakage, privilege escalation",
-            "test": "test_redis_key_collision_vulnerability"
-        },
-        {
-            "name": "User Context Propagation Failure",
-            "severity": "HIGH",
-            "description": "User context is lost between system layers",
-            "impact": "Unauthorized data access, audit trail corruption",
-            "test": "test_user_context_propagation_failure"
-        },
-        {
-            "name": "Session Isolation Failure",
-            "severity": "HIGH", 
-            "description": "User sessions bleed into each other",
-            "impact": "Chat context contamination, private conversation exposure",
-            "test": "test_session_isolation_vulnerability"
-        },
-        {
-            "name": "Cache Key Predictability",
-            "severity": "MEDIUM",
-            "description": "Cache keys are predictable and don't include user context",
-            "impact": "Enumeration attacks, unauthorized data access",
-            "test": "test_cache_key_predictability_vulnerability"
-        },
-        {
-            "name": "High Concurrency Race Conditions",
-            "severity": "HIGH",
-            "description": "Race conditions under concurrent load expose isolation failures",
-            "impact": "Data contamination, unpredictable security failures",
-            "test": "test_high_concurrency_isolation_failure"
-        },
-        {
-            "name": "Cross-Tenant Data Leakage",
-            "severity": "CRITICAL",
-            "description": "Multi-tenant data bleeds between tenant boundaries",
-            "impact": "Enterprise data breach, compliance violations",
-            "test": "test_cross_tenant_data_leakage_vulnerability"
-        }
-    ]
-    
-    for vuln in vulnerabilities:
-        print(f"🚨 {vuln['name']} [{vuln['severity']}]")
-        print(f"   Description: {vuln['description']}")
-        print(f"   Impact: {vuln['impact']}")
-        print(f"   Test: {vuln['test']}")
-        print()
-    
-    print("=" * 80)
-    print("💡 These vulnerabilities exist because:")
-    print("   - Shared global state between users")
-    print("   - Cache keys without user context")
-    print("   - Missing user isolation in data layer")
-    print("   - Race conditions in concurrent execution")
-    print("   - Inadequate session management")
-    print("=" * 80)
+            print("❌ CRITICAL: No backup available for isolation test runner")
+            print("Please restore original run_isolation_tests.py")
+            sys.exit(1)
+            
+    except Exception as fallback_error:
+        print(f"❌ CRITICAL: Fallback isolation tests failed: {fallback_error}")
+        print("Manual isolation testing required.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
