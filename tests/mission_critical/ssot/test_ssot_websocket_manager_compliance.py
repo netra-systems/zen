@@ -773,7 +773,8 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             'compliance_status': 'PASS' if successful_events == len(critical_events) else 'FAIL'
         })
     
-    def test_websocket_factory_pattern_compliance(self):
+    @pytest.mark.asyncio
+    async def test_websocket_factory_pattern_compliance(self):
         """
         CRITICAL: Verify WebSocket factory pattern is correctly implemented.
         
