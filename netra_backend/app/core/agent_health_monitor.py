@@ -47,7 +47,58 @@ except ImportError:
 logger = central_logger.get_logger(__name__)
 
 
-class AgentHealthMonitor:
+class ServiceState(Enum):
+    """Service state during startup and runtime."""
+    STARTING = "starting"
+    GRACE_PERIOD = "grace_period"
+    READY = "ready"
+    MONITORING = "monitoring"
+    FAILED = "failed"
+
+
+@dataclass
+class UnifiedAgentHealthStatus:
+    """Unified health status for agents with enhanced capabilities."""
+    agent_name: str
+    overall_health: float  # 0.0 to 1.0
+    circuit_breaker_state: str
+    recent_errors: int
+    status: str  # healthy, degraded, unhealthy, dead
+    state: ServiceState = ServiceState.MONITORING
+    grace_period_remaining: float = 0.0
+    five_whys_analysis: Optional[Dict[str, str]] = None
+    system_metrics: Optional[Dict[str, Any]] = None
+    
+    # Backward compatibility fields
+    total_operations: int = 0
+    success_rate: float = 1.0
+    average_response_time: float = 0.0
+    last_error: Optional[AgentError] = None
+    
+    # Enhanced tracking
+    last_check: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    consecutive_failures: int = 0
+    startup_time: Optional[datetime] = None
+    ready_confirmed: bool = False
+    process_verified: bool = False
+    ports_verified: Set[int] = field(default_factory=set)
+    
+    def to_agent_health_status(self) -> AgentHealthStatus:
+        """Convert to legacy AgentHealthStatus for backward compatibility."""
+        return AgentHealthStatus(
+            agent_name=self.agent_name,
+            overall_health=self.overall_health,
+            circuit_breaker_state=self.circuit_breaker_state,
+            recent_errors=self.recent_errors,
+            total_operations=self.total_operations,
+            success_rate=self.success_rate,
+            average_response_time=self.average_response_time,
+            last_error=self.last_error,
+            status=self.status
+        )
+
+
+class UnifiedAgentHealthMonitor:
     """Monitor for agent health and performance metrics."""
     
     def __init__(self, max_operation_history: int = 100):
