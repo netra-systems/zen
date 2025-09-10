@@ -545,6 +545,8 @@ class FactoryMetrics:
     total_connections_managed: int = 0
     security_violations_detected: int = 0
     average_manager_lifetime_seconds: float = 0.0
+    emergency_cleanups: int = 0
+    failed_creations: int = 0
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert metrics to dictionary for monitoring."""
@@ -556,7 +558,9 @@ class FactoryMetrics:
             "resource_limit_hits": self.resource_limit_hits,
             "total_connections_managed": self.total_connections_managed,
             "security_violations_detected": self.security_violations_detected,
-            "average_manager_lifetime_seconds": self.average_manager_lifetime_seconds
+            "average_manager_lifetime_seconds": self.average_manager_lifetime_seconds,
+            "emergency_cleanups": self.emergency_cleanups,
+            "failed_creations": self.failed_creations
         }
 
 
@@ -2080,6 +2084,10 @@ class WebSocketManagerFactory:
             f"total_cleaned={total_cleaned} final_count={len(final_user_keys)}"
         )
         
+        # Update emergency cleanup metrics
+        if total_cleaned > 0:
+            self._factory_metrics.emergency_cleanups += 1
+        
         return total_cleaned
     
     def _start_background_cleanup(self) -> None:
@@ -2268,7 +2276,8 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
                 logger.error(f"❌ ATTEMPT {attempt + 1}: Manager creation failed: {creation_error}")
                 
                 if attempt == max_retries - 1:
-                    # Final attempt failed
+                    # Final attempt failed - increment failed creations metric
+                    self._factory_metrics.failed_creations += 1
                     raise FactoryInitializationError(
                         f"WebSocket manager creation failed after {max_retries} attempts. "
                         f"Final error: {creation_error}. This indicates persistent Cloud Run environment issues."
