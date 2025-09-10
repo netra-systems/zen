@@ -20,83 +20,35 @@
 
 **PROCESS TRACKING:** Log repetitive patterns and sub-optimal solutions. Before repeating approaches, prove new method differs from prior logged mistakes. 
 
-## USE SUB AGENTS (TASKS) EVERY POSSIBLE TIME
+## USE SUB AGENTS (TASKS) EXTENSIVELY
 
-IT IS ULTRA CRITICAL TO USE SUB AGENTS (TASKS) AND
-MANAGE THEIR CONTEXT:
-Here are the top strategies to prevent YOURSELF AND YOUR TASK AGENTS 
-agents from getting stuck:
+**AGENT MANAGEMENT STRATEGIES:**
+1. **Context Rotation:** Spawn new agents for specific tasks with clean contexts
+2. **Timeout Controls:** 30s simple tasks, 5min complex tasks
+3. **Progressive Scope:** Start minimal, add info only when needed
+4. **Fallback Hierarchy:** Precise → Broader → Manual → Human escalation
+5. **Anti-Stuck Patterns:** Detect repetition, auto-trigger context reset
 
-  1. Context Rotation & Fresh Perspectives
+**CORE DIRECTIVES:**
+- **Explain Reasoning:** Step-by-step analysis mandatory
+- **Ship for Value:** Fast time-to-market as startup
+- **Think with Nuance:** Balanced, practical decisions
+- **No Test Cheating:** Tests must be real and fail properly
 
-  - Agent Spawning: Create new sub-agents with clean contexts for specific tasks
-  - Context Switching: Periodically summarize progress and start with fresh context
-  - Multi-Agent Validation: Have different agents review/validate each other's work
+## 0. GOLDEN PATH MISSION
 
-  2. Systematic Timeout & Circuit Breakers
+**PRIMARY GOAL:** Get GOLDEN_PATH_USER_FLOW_COMPLETE.md working - users login → get AI responses.
 
-  - Time-based limits: Hard timeouts on operations (30s for simple tasks, 5min for complex)
-  - Progress detection: Reset with DIFFERENT NEW APPROACH IF NO PROGRESS
+**PRIORITIES:**
+1. **Business Value:** Working system serves business (Business > System > Tests)
+2. **User Experience:** Chat works end-to-end 
+3. **Staging Parity:** Staging environment functional
+4. **Configuration:** Stable across environments
 
-  3. Random Exploration Techniques
-
-  # Example: Random search order
-  import random
-  search_strategies = ['grep', 'find', 'ast_parse', 'fuzzy_match']
-  random.shuffle(search_strategies)
-
-  4. Constraint Injection
-
-  - Scope limiting: Force agents to work on smaller, atomic pieces
-  - Tool restrictions: Limit available tools to prevent analysis paralysis
-  - Format constraints: Require specific output formats to maintain focus
-
-  5. Progressive Disclosure
-
-  - Start with minimal context
-  - Add information only when needed
-  - Use "information diets" to prevent overthinking
-
-  6. Fallback Hierarchies
-
-  Approach 1 (precise) → Approach 2 (broader) → Approach 3 (manual) → Human escalation
-
-  7. Meta-Cognitive Monitoring
-
-  - Track "confusion signals" (repeated questions, circular logic)
-  - Detect when agent is rehashing same information
-  - Auto-trigger context reset when stuck patterns detected
-
-  The most effective is agent spawning with focused scopes - it's like giving the AI a "fresh brain" for each
-  subtask.
-
-## VITAL: NETRA IS YOUR MASTERPIECE.
-
-**Core Directives:**
-  * **Explain Your Reasoning:** Step-by-step analysis is mandatory for all tasks. Think carefully.
-  * **Ship for Value:** As a startup, time-to-market is critical. We must ship working products quickly.
-  * **Think with Nuance:** Use "wise mind" middle-ground thinking.
-  CHEATING ON TESTS = ABOMINATION
-
-## 0\. Current Mission: GOLDEN PATH
-
-CRITICAL: Your primary mission is get "Golden Path" as defined here working: GOLDEN_PATH_USER_FLOW_COMPLETE.md. 
-NOT all systems need to be stable at the moment. Accept lower priority issues to get Golden path working that is most important
-
-**Maintain the current feature set.**
-DO not make ANY new features unless strictly merging and refactoring existing methods into SSOT methods
-or adding clarity SSOT classes for misleading errors (e.g. "Auth" errors that should actually be another class because class is crossing it's bounds)
-
-**MUST ALWAYS THINK ABOUT:**
-  * **0.1: Business Value and Systems Up:** The point is to have a working real system. Tests exists to serve the working system. The system exists to serve the business. Business > Real System > Tests.
-  * **0.2: User and Dev Experience:** User chat works and first-time user experience work end-to-end.
-  * **0.3: Staging Parity:** The staging environment works end-to-end.
-  * **0.4: Configuration Stability:** Configurations are coherent and tested across all environments.
-
-**IMPORTANT: In the case of conflict between existing state of code and this document, this document wins.**
-
-CRUCIAL: ULTRA THINK DEEPLY.
-NEVER CREATE NEW SCRIPTS. ALWAYS USE EXISTING SSOT METHODS OR UPDATE AND IMPROVE SSOT METHODS.
+**RULES:**
+- This document overrides existing code conflicts
+- Use existing SSOT methods, never create new scripts
+- SSOT refactoring only, no new features
 
 
 ## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION

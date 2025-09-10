@@ -716,59 +716,72 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         
         self.mock_llm_manager.generate_response = AsyncMock(side_effect=slow_llm_response)
         
-        supervisor = SupervisorAgent(
-            llm_manager=self.mock_llm_manager,
-            websocket_bridge=self.mock_websocket_bridge
-        )
+        # Create a mock agent that will use the slow LLM manager
+        mock_orchestration_agent = Mock()
+        mock_orchestration_agent.execute = AsyncMock(side_effect=slow_llm_response)
         
-        context = self.create_error_test_context(
-            "agent_execution_timeout",
-            {"timeout_expected": True, "partial_results_acceptable": True}
-        )
-        
-        # Step 1: Execute with timeout (should be cancelled gracefully)
-        timeout_start = time.time()
-        
-        try:
-            # Set a reasonable timeout for the execution
-            timeout_result = await asyncio.wait_for(
-                supervisor.execute(context, stream_updates=False),
-                timeout=10.0  # 10 second timeout
+        # Mock the agent registry to return our slow mock agent
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_factory_getter:
+            mock_factory = Mock()
+            mock_registry = Mock()
+            mock_registry.get.return_value = mock_orchestration_agent
+            mock_factory.registry = mock_registry
+            mock_factory.configure = Mock()
+            mock_factory_getter.return_value = mock_factory
+            
+            supervisor = SupervisorAgent(
+                llm_manager=self.mock_llm_manager,
+                websocket_bridge=self.mock_websocket_bridge
             )
-            timeout_time = time.time() - timeout_start
             
-            # If we get here, the execution completed within timeout
-            assert timeout_result is not None, "Timeout execution should provide results"
-            self.logger.info(f"🕐 Execution completed within timeout: {timeout_time:.2f}s")
+            context = self.create_error_test_context(
+                "agent_execution_timeout",
+                {"timeout_expected": True, "partial_results_acceptable": True}
+            )
             
-        except asyncio.TimeoutError:
-            timeout_time = time.time() - timeout_start
-            self.logger.info(f"🕐 Execution timed out as expected: {timeout_time:.2f}s")
+            # Step 1: Execute with timeout (should be cancelled gracefully)
+            timeout_start = time.time()
             
-            # Step 2: Create mock partial result for timeout scenario
-            timeout_result = {
-                "status": "timeout_occurred",
-                "partial_results": True,
-                "execution_time": timeout_time,
-                "message": "Analysis partially completed before timeout",
-                "timeout_handled_gracefully": True
-            }
-        
-        # Step 3: Test quick recovery after timeout
-        recovery_start = time.time()
-        
-        # Reset LLM manager for quick response
-        self.mock_llm_manager.generate_response = AsyncMock(return_value={
-            "status": "post_timeout_recovery",
-            "summary": "Quick response after timeout recovery",
-            "performance": "normal"
-        })
-        
-        recovery_result = await asyncio.wait_for(
-            supervisor.execute(context, stream_updates=False),
-            timeout=5.0  # Shorter timeout for recovery
-        )
-        recovery_time = time.time() - recovery_start
+            try:
+                # Set a reasonable timeout for the execution
+                timeout_result = await asyncio.wait_for(
+                    supervisor.execute(context, stream_updates=False),
+                    timeout=10.0  # 10 second timeout
+                )
+                timeout_time = time.time() - timeout_start
+                
+                # If we get here, the execution completed within timeout
+                assert timeout_result is not None, "Timeout execution should provide results"
+                self.logger.info(f"🕐 Execution completed within timeout: {timeout_time:.2f}s")
+                
+            except asyncio.TimeoutError:
+                timeout_time = time.time() - timeout_start
+                self.logger.info(f"🕐 Execution timed out as expected: {timeout_time:.2f}s")
+                
+                # Step 2: Create mock partial result for timeout scenario
+                timeout_result = {
+                    "status": "timeout_occurred",
+                    "partial_results": True,
+                    "execution_time": timeout_time,
+                    "message": "Analysis partially completed before timeout",
+                    "timeout_handled_gracefully": True
+                }
+            
+            # Step 3: Test quick recovery after timeout
+            recovery_start = time.time()
+            
+            # Reset the mock agent for quick response
+            mock_orchestration_agent.execute = AsyncMock(return_value={
+                "status": "post_timeout_recovery",
+                "summary": "Quick response after timeout recovery",
+                "performance": "normal"
+            })
+            
+            recovery_result = await asyncio.wait_for(
+                supervisor.execute(context, stream_updates=False),
+                timeout=5.0  # Shorter timeout for recovery
+            )
+            recovery_time = time.time() - recovery_start
         
         # Validate results
         assert timeout_result is not None, "Timeout scenario must provide some result"
