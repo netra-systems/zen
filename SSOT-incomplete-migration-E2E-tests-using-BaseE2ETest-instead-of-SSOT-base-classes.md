@@ -98,10 +98,38 @@
 - ✅ No Docker dependencies required
 - ✅ Clear failure messages for migration guidance
 
-### 3) PLAN REMEDIATION 
-- [ ] Plan migration strategy for 114 files
-- [ ] Plan BaseE2ETest deprecation
-- [ ] Plan primary chat test file fix
+### 3) PLAN REMEDIATION ✅ COMPLETE
+
+**COMPREHENSIVE STRATEGY:** Systematic 3-phase migration plan for 131 class violations across 122 files
+
+**Phase 1: Golden Path Critical (8 files)**
+- Timeline: Week 1 (Business Priority: $500K+ ARR protection)
+- Focus: Core chat, WebSocket events, auth timing, multi-user isolation
+- Files: `test_real_e2e_chat_interaction.py`, `test_agent_websocket_events_real.py`, etc.
+
+**Phase 2: Auth & WebSocket Infrastructure (25 files)**  
+- Timeline: Week 2-3 (Authentication and real-time communication)
+- Focus: All websocket/ directory tests, auth flows, service integration
+- Method: Batch processing with validation checkpoints
+
+**Phase 3: General E2E Tests (~85 files)**
+- Timeline: Week 4-6 (Comprehensive test coverage preservation)  
+- Focus: Agent execution, database, performance, staging tests
+- Method: Automated batch processing where possible
+
+**Migration Methodology per File:**
+1. Inheritance: BaseE2ETest → SSotBaseTestCase/SSotAsyncTestCase
+2. Environment: os.environ → IsolatedEnvironment (self._env.get())
+3. Utilities: Map BaseE2ETest methods to SSOT equivalents
+4. Validation: Run preservation tests after each migration
+5. Commit: Atomic commits with validation proof
+
+**Risk Mitigation:**
+- ✅ Atomic changes (one file per commit) 
+- ✅ Functionality preservation tests
+- ✅ Golden path prioritization
+- ✅ Rollback procedures defined
+- ✅ Progressive validation checkpoints
 
 ### 4) EXECUTE REMEDIATION
 - [ ] Migrate files to SSOT base classes
