@@ -499,8 +499,26 @@ async def websocket_endpoint(websocket: WebSocket):
         
         logger.info("🔒 SSOT AUTHENTICATION: Starting WebSocket authentication using unified service")
         
+        # PHASE 4 FIX: Register connection with state coordinator before authentication
+        from netra_backend.app.websocket_core.state_coordinator import (
+            get_websocket_state_coordinator,
+            ensure_coordinator_running,
+            coordinate_authentication_state
+        )
+        
+        await ensure_coordinator_running()
+        coordinator = get_websocket_state_coordinator()
+        await coordinator.register_connection(preliminary_connection_id)
+        
         # SSOT WebSocket Authentication - eliminates all authentication chaos
         auth_result = await authenticate_websocket_ssot(websocket)
+        
+        # PHASE 4 FIX: Coordinate authentication state transition
+        auth_success = await coordinate_authentication_state(
+            preliminary_connection_id, 
+            auth_result.success,
+            getattr(auth_result.user_context, 'user_id', None) if auth_result.success else None
+        )
         
         if not auth_result.success:
             # Enhanced authentication failure logging with 10x better debug info
@@ -556,6 +574,11 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, auth_error.model_dump())
             await windows_safe_sleep(0.1)  # Brief delay to ensure message is sent
+            
+            # PHASE 4 FIX: Coordinate failed state and unregister connection
+            await coordinate_authentication_state(preliminary_connection_id, False)
+            await coordinator.unregister_connection(preliminary_connection_id)
+            
             await safe_websocket_close(websocket, code=1011, reason="SSOT Auth failed")
             return
         
@@ -570,7 +593,17 @@ async def websocket_endpoint(websocket: WebSocket):
         try:
             ws_manager = await create_websocket_manager(user_context)
             logger.info(f"🏭 FACTORY PATTERN: Created isolated WebSocket manager (id: {id(ws_manager)})")
+            
+            # PHASE 4 FIX: Coordinate factory state transition
+            from netra_backend.app.websocket_core.state_coordinator import coordinate_factory_state
+            emergency_mode = hasattr(ws_manager, 'emergency_mode') and ws_manager.emergency_mode
+            await coordinate_factory_state(preliminary_connection_id, True, emergency_mode)
+            
         except Exception as factory_error:
+            # PHASE 4 FIX: Coordinate factory failure state  
+            from netra_backend.app.websocket_core.state_coordinator import coordinate_factory_state
+            await coordinate_factory_state(preliminary_connection_id, False)
+            
             # ENHANCED ERROR REPORTING: Component-specific error diagnosis
             from netra_backend.app.websocket_core.websocket_manager_factory import (
                 FactoryInitializationError, WebSocketComponentError, validate_websocket_component_health
@@ -735,6 +768,11 @@ async def websocket_endpoint(websocket: WebSocket):
         # Get shared services (these remain singleton as they don't hold user state)
         message_router = get_message_router()
         connection_monitor = get_connection_monitor()
+        
+        # PHASE 4 FIX: Coordinate event delivery activation
+        from netra_backend.app.websocket_core.state_coordinator import coordinate_event_delivery_state
+        event_delivery_active = ws_manager is not None and message_router is not None
+        await coordinate_event_delivery_state(preliminary_connection_id, event_delivery_active)
         
         # CRITICAL FIX: Handle cases where ws_manager creation failed but we want to continue with basic functionality
         if ws_manager is None:
@@ -1794,6 +1832,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 await safe_websocket_close(websocket, code=close_code, reason=close_reason[:50])
     
     finally:
+        # PHASE 4 FIX: Unregister connection from state coordinator
+        try:
+            from netra_backend.app.websocket_core.state_coordinator import get_websocket_state_coordinator
+            coordinator = get_websocket_state_coordinator()
+            if 'preliminary_connection_id' in locals():
+                await coordinator.unregister_connection(preliminary_connection_id)
+                logger.debug(f"PHASE 4 FIX: Unregistered connection {preliminary_connection_id} from state coordinator")
+        except Exception as e:
+            logger.error(f"PHASE 4 FIX: Error unregistering connection from coordinator: {e}")
+        
         # Clear GCP error reporting context
         clear_request_context()
         
