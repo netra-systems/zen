@@ -51,8 +51,8 @@ class TestAuthServiceUrlConfigurationCritical(SSotAsyncTestCase):
         # Base environment config (minimal required for auth validator)
         self.base_config = {
             'SERVICE_ID': 'test-backend-service',
-            'SERVICE_SECRET': 'test-service-secret-32-characters-long',
-            'JWT_SECRET_KEY': 'test-jwt-secret-32-characters-long',
+            'SERVICE_SECRET': 'b8f9c2e5d1a7f4e9c0b3a6d9f2e5c8b1',  # Strong 32-char hex
+            'JWT_SECRET_KEY': 'a1b2c3d4e5f6789012345678901234567890',
             'CORS_ALLOWED_ORIGINS': 'http://localhost:3000',
             'ACCESS_TOKEN_EXPIRE_MINUTES': '30',
             'REFRESH_TOKEN_EXPIRE_DAYS': '7',
@@ -96,7 +96,7 @@ class TestAuthServiceUrlConfigurationCritical(SSotAsyncTestCase):
             success, results = await validator.validate_all()
             
             # CRITICAL: Validation MUST FAIL
-            self.assertFalse(success, "Auth validation should FAIL when AUTH_SERVICE_URL is missing")
+            assert not success, "Auth validation should FAIL when AUTH_SERVICE_URL is missing"
             
             # Find the specific AUTH_SERVICE_URL validation result
             auth_url_result = None
@@ -106,14 +106,11 @@ class TestAuthServiceUrlConfigurationCritical(SSotAsyncTestCase):
                     break
             
             # Validate the specific error condition from line 303
-            self.assertIsNotNone(auth_url_result, "AUTH_SERVICE_URL validation result should exist")
-            self.assertFalse(auth_url_result.valid, "AUTH_SERVICE_URL validation should fail")
-            self.assertEqual(
-                auth_url_result.error, 
-                "AUTH_SERVICE_URL not configured",
+            assert auth_url_result is not None, "AUTH_SERVICE_URL validation result should exist"
+            assert not auth_url_result.valid, "AUTH_SERVICE_URL validation should fail"
+            assert auth_url_result.error == "AUTH_SERVICE_URL not configured", \
                 "Error message should match line 303 expectation"
-            )
-            self.assertTrue(auth_url_result.is_critical, "AUTH_SERVICE_URL validation should be critical")
+            assert auth_url_result.is_critical, "AUTH_SERVICE_URL validation should be critical"
 
     async def test_validate_auth_at_startup_raises_exception_for_missing_auth_service_url(self):
         """

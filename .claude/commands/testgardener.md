@@ -17,14 +17,14 @@ ALWAYS think about overall repo safety and STOP if anything might damage overall
 8. ISSUE-WORKLOG-UPDATE = Update ISSUE-WORKLOG.
 9. ISSUE-WORKLOG-UPDATE-PUSH = 1:ISSUE-WORKLOG-UPDATE 2: Git commit and push safely (stop if not safe)
 10. UPDATE-ISSUE-COMMENT = UPDATE a comment on the ISSUE with the human readable noise-free updates (per @GITHUB_STYLE_GUIDE.md)
-
+11. ALL_TESTS = all unit, integration (non-docker), e2e gcp staging tests
 
 After reading instructions output the issue to console.
 
 PROCESS INSTRUCTIONS START:
 
-0) READ ISSUE: SNST: Use gh to read the ISSUE ${1 : latest open issue} in question.
-Carefully read all issue comments.
+0) Collect all tests with SNST:
+Log all tests that won't collect
 
 1) Spawn a sub agent to PLAN ONLY the update, align, or creation of: the required unit, integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused on: $1
 
