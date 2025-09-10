@@ -132,19 +132,58 @@ python scripts/deploy_to_gcp.py --project netra-staging --check-secrets
 python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-checks --check-secrets --check-apis
 ```
 
+## Live Service Verification
+
+### Cloud Run Service Status ✅
+```bash
+# Service successfully deployed and running
+NAME: netra-auth-service
+STATUS: Ready (True)
+URL: https://netra-auth-service-pnovr5vsba-uc.a.run.app
+CONTAINER_PORT: 8080 ✅
+```
+
+### Health Check Results ✅
+
+**Direct Cloud Run URL**:
+```bash
+curl -I https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+# Result: 200 OK ✅
+```
+
+**Custom Domain (Load Balancer)**:
+```bash
+curl -I https://auth.staging.netrasystems.ai/health  
+# Result: 200 OK ✅
+```
+
+**Service Headers Confirmed**:
+- `x-service-name: auth-service` ✅
+- `x-service-version: 1.0.0` ✅
+- Security headers present ✅
+
 ## Conclusion
 
-✅ **Auth service port configuration is CORRECT and requires no changes**
+✅ **NO AUTH PORT REGRESSION EXISTS** - Issue #128 is NOT related to auth service port configuration
 
-The 404 errors mentioned in issue #128 are NOT caused by port configuration regression. The auth service is properly configured to use:
-- Port 8080 for Cloud Run deployment (staging/production)
-- Port 8081 for local development
-- Proper environment variable fallbacks in place
+**VERIFIED WORKING**:
+- ✅ Auth service deployed correctly on port 8080 in Cloud Run
+- ✅ Load balancer routing correctly to custom domain
+- ✅ Health endpoints responding successfully (200 OK)
+- ✅ Service headers and security configuration working
 
-**Investigation should focus on**:
-1. Cloud Run deployment status
-2. Secret Manager configuration
-3. Load balancer configuration
-4. Service startup logs
+**Root Cause of Issue #128**: 
+The auth service port configuration is **working perfectly**. The 404 errors mentioned in issue #128 are NOT caused by auth service deployment issues.
 
-**No code changes required** for auth service port configuration.
+**Potential actual causes to investigate**:
+1. **Frontend routing issues** - Check frontend/Next.js routing configuration
+2. **WebSocket connection issues** - Based on test reports showing WebSocket failures
+3. **API endpoint mismatches** - Verify API route configurations
+4. **Network/DNS issues** - Client-side connectivity problems
+
+**RECOMMENDATION**: 
+🔍 **Issue #128 should focus on WebSocket connectivity and frontend routing** rather than auth service deployment. The auth service is confirmed working and accessible at both:
+- Direct URL: `https://netra-auth-service-pnovr5vsba-uc.a.run.app`  
+- Custom domain: `https://auth.staging.netrasystems.ai`
+
+**No code changes required** for auth service port configuration - it is working correctly.
