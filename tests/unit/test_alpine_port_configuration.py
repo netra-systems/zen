@@ -24,17 +24,16 @@ class TestAlpinePortConfiguration(BaseTestCase):
     These tests are expected to FAIL until the port configuration is fixed.
     """
     
-    @classmethod
-    def setUpClass(cls):
-        """Set up test class with Dockerfile paths."""
-        super().setUpClass()
-        cls.project_root = Path(__file__).parent.parent.parent
-        cls.alpine_dockerfiles = list(cls.project_root.glob("dockerfiles/*.alpine.Dockerfile"))
-        cls.gcp_dockerfiles = list(cls.project_root.glob("deployment/docker/*.gcp.Dockerfile"))
+    def setup_method(self, method=None):
+        """Set up test method with Dockerfile paths."""
+        super().setup_method(method)
+        self.project_root = Path(__file__).parent.parent.parent
+        self.alpine_dockerfiles = list(self.project_root.glob("dockerfiles/*.alpine.Dockerfile"))
+        self.gcp_dockerfiles = list(self.project_root.glob("deployment/docker/*.gcp.Dockerfile"))
         
         # Ensure we have the expected Dockerfiles
-        assert cls.alpine_dockerfiles, "No Alpine Dockerfiles found"
-        assert cls.gcp_dockerfiles, "No GCP Dockerfiles found"
+        assert self.alpine_dockerfiles, "No Alpine Dockerfiles found"
+        assert self.gcp_dockerfiles, "No GCP Dockerfiles found"
     
     def test_alpine_dockerfile_uses_dynamic_port_binding(self):
         """
