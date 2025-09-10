@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
 # Test utilities
-from test_framework.ssot.test_base import BaseTestCase
+from test_framework.ssot.base_test_case import BaseTestCase
 
 
 class TestDockerfileConfigurationDrift(BaseTestCase):

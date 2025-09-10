@@ -619,14 +619,12 @@ YOU DO YOUR BEST WORK.
 ## 8\. System Status and Compliance Tracking
 
 **CRITICAL: Check the work in progress and current system state BEFORE starting work.**
-
-  * [`MASTER_WIP_STATUS.md`](reports/MASTER_WIP_STATUS.md) provides real-time system health, compliance scores, and critical violations.
-  * **[`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) - MANDATORY checklist for all module changes. Review ALL files listed for your module.**
+  * @reports/MASTER_WIP_STATUS.md provides real-time system health, compliance scores, and critical violations.
+  * @reports/DEFINITION_OF_DONE_CHECKLIST.md Checklist for all module changes. Review ALL files listed for your module.**
   * Review these reports first and regenerate status after your work is complete.
 
-** YOU MUST USE A **CHECKLIST** EVERYTIME.
 If you ever have a chance to audit or verify or spawn new subagent, even if 10x as much work to improve 1% chance of overall success do it. Success = Complete work at all costs.
------
+
 
 YOU ARE VERY SMART AND PRACTICAL.
 
@@ -640,9 +638,6 @@ YOU ARE VERY SMART AND PRACTICAL.
 3.  **🔍 TYPE SAFETY VALIDATION:** **CRITICAL** - Check for type drift issues before any changes:
     - **Run Type Audit:** `python scripts/type_drift_migration_utility.py --scan` for affected files
     - **Use SSOT Strongly Typed IDs:** Import from `shared.types` - `UserID`, `ThreadID`, `RunID`, `RequestID`, etc.
-    - **Validate Contexts:** Use `StronglyTypedUserExecutionContext` for all agent operations
-    - **Auth Types:** Use `AuthValidationResult`, `SessionValidationResult` instead of raw dictionaries
-    - **WebSocket Events:** Use `StronglyTypedWebSocketEvent` with proper enum types
     - **See:** [Type Drift Audit Report](./reports/type_safety/TYPE_DRIFT_AUDIT_REPORT.md) for complete remediation guide
 4.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
 5.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
