@@ -39,33 +39,51 @@ Multiple competing tool dispatcher implementations violating SSOT principles and
 - [x] SSOT Audit Discovery (Step 0)
 - [x] GitHub Issue Created (#234)
 - [x] IND File Created
+- [x] Test Discovery and Planning (Step 1)
 
 ### 🔄 CURRENT
-- [ ] Test Discovery and Planning (Step 1)
+- [ ] Execute Test Plan for New Tests (Step 2)
 
 ### ⏳ PENDING  
-- [ ] Execute Test Plan (Step 2)
 - [ ] Plan SSOT Remediation (Step 3)
 - [ ] Execute Remediation (Step 4)
 - [ ] Test Fix Loop (Step 5)
 - [ ] PR Creation and Closure (Step 6)
 
-## Test Strategy (PLANNED)
+## Test Strategy (DISCOVERED)
 
-### Existing Tests to Validate
-- Mission critical WebSocket event suite
-- Agent execution integration tests
-- Tool dispatcher unit tests
+### Existing Test Coverage Found (60% - EXCELLENT)
+**Mission Critical Protection:**
+- `tests/mission_critical/test_tool_dispatcher_ssot_compliance.py` - 515 lines, DESIGNED TO FAIL with current violations
+- `tests/mission_critical/test_websocket_agent_events_suite.py` - Real WebSocket validation for 5 critical events
+- `tests/mission_critical/test_tool_executor_factory_ssot_violation.py` - Factory pattern SSOT compliance
 
-### New Tests Needed (~20%)
-- SSOT compliance validation for dispatcher factories
-- WebSocket event delivery consistency tests
-- User isolation verification across factory patterns
+**Unit & Integration Coverage:**
+- `tests/unit/ssot_validation/test_request_scoped_tool_dispatcher_ssot_compliance.py` - 496 lines focused validation
+- `tests/integration/test_tool_executor_factory_ssot_consolidation.py` - Post-consolidation validation
+- **Total Files Found:** 47+ factory pattern tests, 41+ tool dispatcher tests, 1115+ WebSocket event tests
 
-### Test Categories
-- Unit tests (no docker)
-- Integration tests (no docker) 
-- E2E tests on staging GCP
+### New Tests Needed (20% - CRITICAL GAPS)
+**SSOT Migration Validation:**
+- API compatibility preservation tests
+- WebSocket event delivery consistency post-consolidation  
+- Performance regression prevention (memory usage, execution time)
+- Golden Path preservation validation
+
+**Performance & Regression:**
+- Memory usage improvement validation (eliminate duplicate implementations)
+- Execution time maintenance or improvement
+- User isolation enhancement verification
+
+### Test Distribution Strategy
+- **60% Existing:** Validate current protection continues working
+- **20% Updates:** Modify tests for post-consolidation expectations  
+- **20% New:** Create SSOT migration-specific validation
+
+### Test Categories (No Docker Required)
+- Unit tests: No infrastructure dependencies
+- Integration tests (no-docker): Mocked external services only
+- E2E staging: Target GCP staging environment directly
 
 ## Remediation Strategy (PLANNED)
 
