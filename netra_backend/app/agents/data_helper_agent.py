@@ -68,7 +68,7 @@ class DataHelperAgent(BaseAgent):
         """
         from netra_backend.app.llm.llm_manager import LLMManager
         # SSOT COMPLIANCE: Import from facade that redirects to SSOT
-from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
         
         # Create dependencies (these will be injected later by the factory)
         llm_manager = LLMManager()

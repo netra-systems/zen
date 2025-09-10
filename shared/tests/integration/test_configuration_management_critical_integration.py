@@ -53,6 +53,7 @@ from test_framework.ssot.configuration_validator import (
 from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 
 # Import shared configuration system
+from shared.constants.service_identifiers import SERVICE_ID
 from shared.isolated_environment import (
     IsolatedEnvironment,
     get_env,
@@ -132,7 +133,7 @@ class TestConfigurationManagementCriticalIntegration(BaseIntegrationTest):
         with self.isolated_helper.create_isolated_context("backend") as context:
             # Set up minimal backend config without SERVICE_SECRET
             context.env.set("ENVIRONMENT", "staging", source="deployment")
-            context.env.set("SERVICE_ID", "netra-backend", source="service")
+            context.env.set("SERVICE_ID", SERVICE_ID, source="service")
             context.env.set("DATABASE_URL", "postgresql://test:test@localhost:5434/test_db", source="service")
             
             # WHEN: Validating configuration for critical variables
@@ -151,7 +152,7 @@ class TestConfigurationManagementCriticalIntegration(BaseIntegrationTest):
         # GIVEN: Backend service configuration WITH SERVICE_SECRET
         with self.isolated_helper.create_isolated_context("backend_fixed") as context:
             context.env.set("ENVIRONMENT", "staging", source="deployment")
-            context.env.set("SERVICE_ID", "netra-backend", source="service")
+            context.env.set("SERVICE_ID", SERVICE_ID, source="service")
             context.env.set("SERVICE_SECRET", "test_secret_value", source="secret_manager")
             context.env.set("DATABASE_URL", "postgresql://test:test@localhost:5434/test_db", source="service")
             
@@ -193,7 +194,7 @@ class TestConfigurationManagementCriticalIntegration(BaseIntegrationTest):
             
         # GIVEN: Service configuration with stable SERVICE_ID (correct pattern)
         with self.isolated_helper.create_isolated_context("auth_test_fixed") as context:
-            context.env.set("SERVICE_ID", "netra-backend", source="service")
+            context.env.set("SERVICE_ID", SERVICE_ID, source="service")
             context.env.set("ENVIRONMENT", "staging", source="deployment")
             
             # WHEN: Validating stable SERVICE_ID

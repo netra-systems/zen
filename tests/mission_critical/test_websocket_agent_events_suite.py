@@ -41,7 +41,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
@@ -343,7 +343,13 @@ class TestRealWebSocketComponents:
     async def test_websocket_notifier_all_methods(self):
         """Test that WebSocketNotifier has ALL required methods and they work."""
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        # Create user context for SSOT pattern
+        user_context = UserExecutionContext(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+        notifier = AgentWebSocketBridge.WebSocketNotifier(ws_manager, user_context)
         
         # Verify all methods exist
         required_methods = [
@@ -2836,7 +2842,11 @@ class TestAgentWebSocketIntegrationEnhanced:
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
-        websocket_notifier = WebSocketNotifier(user_context=user_context)
+        # Use SSOT pattern for WebSocketNotifier creation
+        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier(
+            emitter=user_context,  # Placeholder - would be actual emitter
+            exec_context=user_context
+        )
         execution_engine = ExecutionEngine()
         
         # Test WebSocket notifier initialization in execution engine
@@ -2875,7 +2885,11 @@ class TestAgentWebSocketIntegrationEnhanced:
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
-        websocket_notifier = WebSocketNotifier(user_context=user_context)
+        # Use SSOT pattern for WebSocketNotifier creation
+        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier(
+            emitter=user_context,  # Placeholder - would be actual emitter
+            exec_context=user_context
+        )
         
         # Create enhanced tool execution engine
         enhanced_tool_engine = UnifiedToolExecutionEngine(

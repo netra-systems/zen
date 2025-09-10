@@ -20,6 +20,9 @@ import aiohttp
 import websockets
 from websockets.exceptions import WebSocketException, ConnectionClosedError
 
+# SSOT Import - Use canonical DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
+
 logger = logging.getLogger(__name__)
 
 

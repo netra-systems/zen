@@ -35,6 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
@@ -158,7 +159,7 @@ class MinimalFallbackManager:
         )
 
 
-class UserExecutionEngine:
+class UserExecutionEngine(IExecutionEngine):
     """Per-user execution engine with isolated state.
     
     This engine is created per-request with UserExecutionContext and maintains
@@ -629,7 +630,7 @@ class UserExecutionEngine:
     
     async def execute_agent(self, 
                            context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
+                           user_context: Optional['UserExecutionContext'] = None) -> AgentExecutionResult:
         """Execute a single agent with complete user isolation.
         
         This method provides complete per-user isolation:

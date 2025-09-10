@@ -639,7 +639,7 @@ class JWTHandler:
         # If not in memory and Redis is available, check Redis asynchronously
         # We avoid asyncio.run() to prevent "coroutine was never awaited" warnings
         try:
-            if False  # Redis disabled:
+            if False:  # Redis disabled
                 # Schedule async Redis check without blocking
                 # This method is called from sync context, so we can't await
                 # Instead, we rely on in-memory cache and periodic sync from Redis
