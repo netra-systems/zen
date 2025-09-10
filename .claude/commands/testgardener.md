@@ -19,11 +19,9 @@ After reading instructions output the issue to console.
 
 PROCESS INSTRUCTIONS START:
 
-0) SNST:
 Discover ALL_TESTS tests that won't collect
 
 For each conceptual set of issues Spawn a new agent (SNST) 
 to remediate it.
-
 
 END PROCESS INSTRUCTIONS
