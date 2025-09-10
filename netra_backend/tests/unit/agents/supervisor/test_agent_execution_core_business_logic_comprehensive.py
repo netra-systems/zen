@@ -419,7 +419,7 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         mock_registry.get.return_value = successful_agent
         
         # Verify heartbeat is disabled (set to None) in initialization
-        assert execution_core.DEFAULT_TIMEOUT == 30.0
+        assert execution_core.DEFAULT_TIMEOUT == 25.0
         assert execution_core.HEARTBEAT_INTERVAL == 5.0
         
         # Execute and verify no heartbeat interference
@@ -437,7 +437,7 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         # BUSINESS VALUE: Proper timeouts ensure good user experience without resource waste
         
         # Verify timeout configuration supports business needs
-        assert AgentExecutionCore.DEFAULT_TIMEOUT == 30.0  # 30 seconds - reasonable for AI operations
+        assert AgentExecutionCore.DEFAULT_TIMEOUT == 25.0  # 25 seconds - optimized for faster feedback
         assert AgentExecutionCore.HEARTBEAT_INTERVAL == 5.0  # 5 seconds - good for progress updates
         
         # Verify timeouts are business-appropriate

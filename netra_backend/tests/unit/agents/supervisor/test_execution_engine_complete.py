@@ -144,28 +144,26 @@ class MockAgentCore:
 class TestExecutionEngineConstruction(SSotAsyncTestCase):
     """Test ExecutionEngine construction and initialization patterns."""
     
-    def setUp(self):
-        super().setUp()
+    def setup_method(self, method=None):
+        super().setup_method(method)
         self.env = get_env()
         self.registry = MockAgentRegistry()
         self.websocket_bridge = MockWebSocketBridge()
         
     def test_direct_construction_blocked(self):
         """Test that direct ExecutionEngine construction raises RuntimeError."""
-        with self.assertRaises(RuntimeError) as cm:
+        with self.expect_exception(RuntimeError, "Direct ExecutionEngine instantiation is no longer supported") as exc_info:
             ExecutionEngine(self.registry, self.websocket_bridge)
             
-        self.assertIn("Direct ExecutionEngine instantiation is no longer supported", str(cm.exception))
-        self.assertIn("create_request_scoped_engine", str(cm.exception))
+        assert "create_request_scoped_engine" in str(exc_info.value)
         
     def test_direct_construction_error_message_details(self):
         """Test detailed error message for direct construction."""
-        with self.assertRaises(RuntimeError) as cm:
+        with self.expect_exception(RuntimeError, "user isolation") as exc_info:
             ExecutionEngine(self.registry, self.websocket_bridge, None)
             
-        error_msg = str(cm.exception)
-        self.assertIn("user isolation", error_msg)
-        self.assertIn("concurrent execution safety", error_msg)
+        error_msg = str(exc_info.value)
+        assert "concurrent execution safety" in error_msg
         
     def test_factory_construction_requires_user_context(self):
         """Test that factory method requires UserExecutionContext."""
