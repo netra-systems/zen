@@ -33,9 +33,39 @@ Create unified shared modules:
 - `/shared/service_startup_coordinator.py` - Unified service startup coordination
 - `/shared/staging_configuration.py` - Staging-specific configuration management
 
+## Step 1.1 COMPLETE: Existing Tests Discovered
+
+### Critical Existing Tests Found:
+**MUST PASS after SSOT refactor:**
+
+1. **auth_service/tests/test_environment_loading.py** - GOLDEN STANDARD
+   - `test_main_loads_env_before_imports()` - Critical environment loading validation
+   - `test_jwt_secret_required_in_production()` - Production environment JWT validation
+   - `test_isolated_environment_integration()` - AuthEnvironment integration
+
+2. **netra_backend/tests/startup/test_comprehensive_startup.py**
+   - Complete startup validation suite including environment, auth, database, Redis
+
+3. **tests/integration/golden_path/test_configuration_environment_comprehensive.py**
+   - `TestIsolatedEnvironmentManagement` - Environment variable precedence testing
+   - Cross-environment configuration validation
+
+### Test Gaps Identified:
+- **Cross-Service Environment Loading Consistency** - No tests validate identical logic across services
+- **Staging Detection Race Conditions** - No tests for consistent staging detection
+- **SSOT Environment Manager Integration** - No tests for unified environment manager
+
+### Pre-Refactor Test Commands:
+```bash
+python -m pytest auth_service/tests/test_environment_loading.py -v
+python -m pytest netra_backend/tests/startup/test_comprehensive_startup.py -v
+python -m pytest tests/integration/golden_path/test_configuration_environment_comprehensive.py::TestIsolatedEnvironmentManagement -v
+```
+
 ## Process Progress
 - [x] Step 0: Discover Next SSOT Issue (SSOT AUDIT) - COMPLETE
-- [ ] Step 1: Discover and Plan Test
+- [x] Step 1.1: Discover Existing Tests - COMPLETE
+- [ ] Step 1.2: Plan New Tests  
 - [ ] Step 2: Execute Test Plan  
 - [ ] Step 3: Plan Remediation
 - [ ] Step 4: Execute Remediation
@@ -43,8 +73,8 @@ Create unified shared modules:
 - [ ] Step 6: PR and Closure
 
 ## Next Actions
-1. Discover existing tests protecting startup/staging functionality
-2. Plan new tests to validate SSOT refactor
+1. ✅ Discover existing tests protecting startup/staging functionality - COMPLETE
+2. Plan new tests to validate SSOT refactor - IN PROGRESS
 3. Execute test plan
 4. Plan and execute SSOT remediation
 5. Validate all tests pass
