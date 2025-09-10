@@ -98,26 +98,14 @@ class ExecutionEngine:
             websocket_bridge: WebSocket bridge for event emission
             user_context: Optional UserExecutionContext for per-request isolation
         """
-        raise RuntimeError(
-            "Direct ExecutionEngine instantiation is no longer supported. "
-            "Use create_request_scoped_engine(user_context, registry, websocket_bridge) "
-            "for proper user isolation and concurrent execution safety."
-        )
-    
-    @classmethod
-    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_bridge,
-                          user_context: Optional['UserExecutionContext'] = None):
-        """Internal factory initializer for creating request-scoped instances.
+        # CRITICAL FIX: Allow direct instantiation but require proper parameters for WebSocket integration
+        if not registry:
+            raise ValueError("AgentRegistry is required for ExecutionEngine initialization")
         
-        This method bypasses the __init__ RuntimeError and is only called
-        by factory methods to create properly isolated instances.
-        """
-        instance = cls.__new__(cls)
-        instance.registry = registry
-        instance.websocket_bridge = websocket_bridge
-        
-        # NEW: Store UserExecutionContext for per-request isolation
-        instance.user_context = user_context
+        # Initialize core properties
+        self.registry = registry
+        self.websocket_bridge = websocket_bridge
+        self.user_context = user_context
         
         # SECURITY FIX: Enforce mandatory AgentWebSocketBridge usage - no fallbacks allowed
         if not websocket_bridge:
@@ -126,37 +114,47 @@ class ExecutionEngine:
                 "No fallback paths allowed."
             )
         
+        # Initialize remaining components
+        self._init_core_components()
+        
+        if self.user_context:
+            logger.info(f"ExecutionEngine initialized with UserExecutionContext for user {self.user_context.user_id}")
+        else:
+            logger.info("ExecutionEngine initialized in legacy mode (no UserExecutionContext)")
+    
+    def _init_core_components(self) -> None:
+        """Initialize core ExecutionEngine components after validation."""
         # Validate that websocket_bridge is an AgentWebSocketBridge (not a deprecated notifier)
-        if not hasattr(websocket_bridge, 'notify_agent_started'):
+        if not hasattr(self.websocket_bridge, 'notify_agent_started'):
             raise RuntimeError(
                 f"websocket_bridge must be AgentWebSocketBridge instance with proper notification methods. "
-                f"Got: {type(websocket_bridge)}. Deprecated WebSocketNotifier fallbacks are eliminated for security."
+                f"Got: {type(self.websocket_bridge)}. Deprecated WebSocketNotifier fallbacks are eliminated for security."
             )
-        
-        # Store validated bridge directly
-        instance.websocket_bridge = websocket_bridge
             
         # RACE CONDITION FIX: Enhanced user isolation and state safety
         # NOTE: These remain as instance variables but are now scoped per ExecutionEngine instance
         # In the new architecture, each user request gets its own ExecutionEngine instance
-        instance.active_runs = {}
-        instance.run_history = []
-        instance.execution_tracker = get_execution_tracker()
+        self.active_runs = {}
+        self.run_history = []
+        self.execution_tracker = get_execution_tracker()
         
         # NEW: Per-user state isolation to prevent race conditions
-        instance._user_execution_states: Dict[str, Dict] = {}
-        instance._user_state_locks: Dict[str, asyncio.Lock] = {}
-        instance._state_lock_creation_lock = asyncio.Lock()
+        self._user_execution_states: Dict[str, Dict] = {}
+        self._user_state_locks: Dict[str, asyncio.Lock] = {}
+        self._state_lock_creation_lock = asyncio.Lock()
         
-        instance._init_components()
-        instance._init_death_monitoring()
+        self._init_components()
+        self._init_death_monitoring()
         
-        if instance.user_context:
-            logger.info(f"ExecutionEngine initialized with UserExecutionContext for user {instance.user_context.user_id}")
-        else:
-            logger.info("ExecutionEngine initialized in legacy mode (no UserExecutionContext)")
+    @classmethod
+    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_bridge,
+                          user_context: Optional['UserExecutionContext'] = None):
+        """Internal factory initializer for creating request-scoped instances.
         
-        return instance
+        DEPRECATED: Use standard __init__ instead. This method remains for backward compatibility.
+        """
+        logger.warning("Using deprecated _init_from_factory - migrate to standard __init__ for better integration")
+        return cls(registry, websocket_bridge, user_context)
     
     async def _get_user_state_lock(self, user_id: str) -> asyncio.Lock:
         """Get or create user-specific state lock for thread safety.
@@ -223,6 +221,10 @@ class ExecutionEngine:
             'dead_executions': 0,
             'timeout_executions': 0
         }
+        
+        # CRITICAL: Initialize user emitter management for per-user WebSocket events
+        self._user_emitters: Dict[str, Any] = {}  # UserWebSocketEmitter instances per user
+        self._user_emitter_lock = asyncio.Lock()
         
     def _init_death_monitoring(self) -> None:
         """Initialize agent death monitoring callbacks."""
@@ -382,15 +384,17 @@ class ExecutionEngine:
             
             try:
                 # periodic_update_manager removed - execute without tracking
-                # NEW: Send agent started via UserWebSocketEmitter if available
+                # CRITICAL FIX: Always send agent started via user-isolated emitter when possible
                 if effective_user_context:
+                    # Try user emitter first for proper isolation
                     success = await self._send_via_user_emitter(
                         'notify_agent_started',
                         context.agent_name,
                         {"status": "started", "context": context.metadata or {}, "isolated": True}
                     )
                     if not success:
-                        # Fallback to bridge
+                        # Fallback to bridge for backward compatibility
+                        logger.debug(f"Falling back to websocket bridge for agent_started (user: {effective_user_context.user_id})")
                         await self.websocket_bridge.notify_agent_started(
                             context.run_id, 
                             context.agent_name,
@@ -854,6 +858,44 @@ class ExecutionEngine:
     
     # === NEW: UserWebSocketEmitter Integration ===
     
+    async def _ensure_user_emitter(self, user_context: 'UserExecutionContext') -> Optional[Any]:
+        """Ensure UserWebSocketEmitter exists for the given user context.
+        
+        This method creates per-user WebSocket emitters for isolated event emission.
+        
+        Args:
+            user_context: User execution context for emitter creation
+            
+        Returns:
+            UserWebSocketEmitter instance or None if creation fails
+        """
+        if not user_context:
+            return None
+            
+        user_key = f"{user_context.user_id}_{user_context.thread_id}_{user_context.run_id}"
+        
+        async with self._user_emitter_lock:
+            if user_key not in self._user_emitters:
+                try:
+                    # Create UserWebSocketEmitter for this specific user context
+                    from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
+                    
+                    user_emitter = UserWebSocketEmitter(
+                        user_id=user_context.user_id,
+                        thread_id=user_context.thread_id,
+                        run_id=user_context.run_id,
+                        websocket_bridge=self.websocket_bridge
+                    )
+                    
+                    self._user_emitters[user_key] = user_emitter
+                    logger.debug(f"Created UserWebSocketEmitter for user {user_context.user_id}")
+                    
+                except Exception as e:
+                    logger.error(f"Failed to create UserWebSocketEmitter for user {user_context.user_id}: {e}")
+                    return None
+            
+            return self._user_emitters[user_key]
+    
     async def _send_via_user_emitter(self, method_name: str, *args, **kwargs) -> bool:
         """Send notification via UserWebSocketEmitter if available.
         
@@ -864,17 +906,12 @@ class ExecutionEngine:
             return False
         
         try:
-            # Get UserWebSocketEmitter from factory
-            factory = get_agent_instance_factory()
-            if hasattr(factory, '_websocket_emitters'):
-                context_id = f"{self.user_context.user_id}_{self.user_context.thread_id}_{self.user_context.run_id}"
-                emitter_key = f"{context_id}_emitter"
-                if emitter_key in factory._websocket_emitters:
-                    emitter = factory._websocket_emitters[emitter_key]
-                    method = getattr(emitter, method_name, None)
-                    if method:
-                        await method(*args, **kwargs)
-                        return True
+            user_emitter = await self._ensure_user_emitter(self.user_context)
+            if user_emitter:
+                method = getattr(user_emitter, method_name, None)
+                if method:
+                    await method(*args, **kwargs)
+                    return True
         except Exception as e:
             logger.debug(f"Failed to send via UserWebSocketEmitter: {e}")
         
@@ -884,7 +921,7 @@ class ExecutionEngine:
     async def send_agent_thinking(self, context: AgentExecutionContext, 
                                  thought: str, step_number: int = None) -> None:
         """Send agent thinking notification with UserExecutionContext support."""
-        # NEW: Try UserWebSocketEmitter first if available
+        # CRITICAL FIX: Try UserWebSocketEmitter first for proper isolation
         if self.user_context:
             success = await self._send_via_user_emitter(
                 'notify_agent_thinking',
@@ -893,7 +930,10 @@ class ExecutionEngine:
                 step_number
             )
             if success:
+                logger.debug(f"Agent thinking sent via user emitter for user {self.user_context.user_id}")
                 return
+            else:
+                logger.debug(f"User emitter failed, falling back to bridge for agent_thinking (user: {self.user_context.user_id})")
         
         # Fallback to bridge - fix parameter mapping for AgentWebSocketBridge
         await self.websocket_bridge.notify_agent_thinking(
@@ -918,15 +958,19 @@ class ExecutionEngine:
     async def send_tool_executing(self, context: AgentExecutionContext,
                                  tool_name: str) -> None:
         """Send tool executing notification with UserExecutionContext support."""
-        # NEW: Try UserWebSocketEmitter first if available
+        # CRITICAL FIX: Try UserWebSocketEmitter first for proper isolation
         if self.user_context:
             success = await self._send_via_user_emitter(
                 'notify_tool_executing',
                 context.agent_name,
-                tool_name
+                tool_name,
+                {}  # parameters
             )
             if success:
+                logger.debug(f"Tool executing sent via user emitter for user {self.user_context.user_id}: {tool_name}")
                 return
+            else:
+                logger.debug(f"User emitter failed, falling back to bridge for tool_executing (user: {self.user_context.user_id})")
         
         # Fallback to bridge - fix parameter mapping for AgentWebSocketBridge
         await self.websocket_bridge.notify_tool_executing(
@@ -939,7 +983,7 @@ class ExecutionEngine:
     async def send_final_report(self, context: AgentExecutionContext,
                                report: dict, duration_ms: float) -> None:
         """Send final report notification with UserExecutionContext support."""
-        # NEW: Try UserWebSocketEmitter first if available
+        # CRITICAL FIX: Try UserWebSocketEmitter first for proper isolation
         if self.user_context:
             # Enhance report with isolation info
             enhanced_report = report.copy()
@@ -957,7 +1001,10 @@ class ExecutionEngine:
                 duration_ms
             )
             if success:
+                logger.debug(f"Agent completed sent via user emitter for user {self.user_context.user_id}")
                 return
+            else:
+                logger.debug(f"User emitter failed, falling back to bridge for agent_completed (user: {self.user_context.user_id})")
         
         # Fallback to bridge - fix parameter mapping for AgentWebSocketBridge  
         await self.websocket_bridge.notify_agent_completed(

@@ -37,7 +37,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
 )
 from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper,
-    create_test_auth_context,
+    create_authenticated_user_context,
     get_test_jwt_token
 )
 
