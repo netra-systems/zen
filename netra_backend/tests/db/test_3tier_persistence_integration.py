@@ -35,7 +35,7 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.db.database_manager import get_database_manager, get_db_session
 from netra_backend.app.db.clickhouse import get_clickhouse_service, ClickHouseService
 from netra_backend.app.db.postgres import get_async_db
-from netra_backend.app.services.state_persistence_optimized import OptimizedStatePersistenceService
+from netra_backend.app.services.state_persistence import StatePersistenceService
 
 
 class TestRedisToPostgresDataFlow:
@@ -533,8 +533,8 @@ class Test3TierDataLifecycleManagement:
     
     @pytest.fixture
     def mock_persistence_service(self):
-        """Mock optimized state persistence service."""
-        mock_service = Mock(spec=OptimizedStatePersistenceService)
+        """Mock state persistence service."""
+        mock_service = Mock(spec=StatePersistenceService)
         mock_service.store_state = AsyncMock()
         mock_service.retrieve_state = AsyncMock()
         mock_service.promote_to_warm_storage = AsyncMock()
@@ -580,7 +580,7 @@ class Test3TierDataLifecycleManagement:
             "satisfaction_score": 4.2
         }
         
-        with patch('netra_backend.app.services.state_persistence_optimized.OptimizedStatePersistenceService', 
+        with patch('netra_backend.app.services.state_persistence.StatePersistenceService', 
                   return_value=mock_persistence_service):
             
             # Simulate complete 3-tier data lifecycle
@@ -662,7 +662,7 @@ class Test3TierDataLifecycleManagement:
             }
         ]
         
-        with patch('netra_backend.app.services.state_persistence_optimized.OptimizedStatePersistenceService',
+        with patch('netra_backend.app.services.state_persistence.StatePersistenceService',
                   return_value=mock_persistence_service):
             
             # Simulate tier optimization based on access patterns
@@ -746,7 +746,7 @@ class Test3TierDataLifecycleManagement:
             }
         }
         
-        with patch('netra_backend.app.services.state_persistence_optimized.OptimizedStatePersistenceService',
+        with patch('netra_backend.app.services.state_persistence.StatePersistenceService',
                   return_value=mock_persistence_service):
             
             # Mock data retrieval from each tier
