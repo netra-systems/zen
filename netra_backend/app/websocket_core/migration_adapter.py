@@ -49,7 +49,10 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketManagerAdapter:
+# DEPRECATED WebSocketManagerAdapter removed for SSOT compliance - use WebSocketManagerFactory directly
+
+# Keep the migration functions for backward compatibility
+class _LegacyWebSocketManagerAdapter:
     """
     DEPRECATED: Migration adapter that delegates to WebSocketManagerFactory.
     
@@ -468,15 +471,9 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> IsolatedWebSo
 
 
 __all__ = [
-    "WebSocketManagerAdapter",
     "get_legacy_websocket_manager",
     "migrate_singleton_usage"
 ]
 
-# ============================================================================
-# SSOT COMPLIANCE: Make WebSocketManagerAdapter an alias for WebSocketManagerFactory
-# This ensures that when tests check for factory implementations, they see only one canonical factory
-# ============================================================================
-
-# Override the class to make it an alias
-WebSocketManagerAdapter = WebSocketManagerFactory
+# DEPRECATED: WebSocketManagerAdapter removed for SSOT compliance
+# Use WebSocketManagerFactory directly from websocket_manager_factory module

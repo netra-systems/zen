@@ -36,7 +36,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @runtime_checkable
-class WebSocketManagerProtocol(Protocol):
+class WebSocketProtocol(Protocol):
     """
     CRITICAL INTERFACE CONTRACT: Formal protocol for all WebSocket manager implementations.
     
@@ -233,7 +233,7 @@ class WebSocketManagerProtocol(Protocol):
         ...
 
 
-class WebSocketManagerProtocolValidator:
+class WebSocketProtocolValidator:
     """
     Validator for WebSocket Manager Protocol compliance.
     
@@ -746,9 +746,11 @@ def validate_migration_compatibility(manager: Any) -> Dict[str, Any]:
 
 
 __all__ = [
+    'WebSocketProtocol',
+    'WebSocketProtocolValidator',
+    # Backward compatibility aliases
     'WebSocketManagerProtocol',
     'WebSocketManagerProtocolValidator',
-    'WebSocketProtocol',
     'get_protocol_documentation',
     # Backward Compatibility
     'ensure_connection_id_type',
@@ -760,3 +762,7 @@ __all__ = [
     # Migration Helpers
     'validate_migration_compatibility'
 ]
+
+# Backward compatibility aliases (to avoid breaking existing imports)
+WebSocketManagerProtocol = WebSocketProtocol
+WebSocketManagerProtocolValidator = WebSocketProtocolValidator
