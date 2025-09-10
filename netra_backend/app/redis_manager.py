@@ -887,6 +887,9 @@ class MockPipeline:
 # Global instance
 redis_manager = RedisManager()
 
+# Auth service compatibility alias
+auth_redis_manager = redis_manager
+
 
 async def get_redis() -> RedisManager:
     """Get Redis manager instance."""

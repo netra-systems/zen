@@ -19,7 +19,7 @@ sys.path.insert(0, str(project_root))
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
+# Note: optimized_state_persistence functionality has been merged into state_persistence_service
 from unittest.mock import AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -46,7 +46,7 @@ class PersistenceDemo:
     async def simulate_optimized_persistence(self, requests):
         """Simulate optimized persistence behavior with actual service."""
         # Enable optimized persistence for demo
-        optimized_service = optimized_state_persistence
+        optimized_service = state_persistence_service
         optimized_service.enabled = True
         
         # Mock the fallback service to avoid actual DB operations
@@ -205,14 +205,14 @@ class PersistenceDemo:
         os.environ["ENABLE_OPTIMIZED_PERSISTENCE"] = "false"
         
         # Create new service instance to pick up environment change
-        disabled_service = optimized_state_persistence.__class__()
+        disabled_service = state_persistence_service.__class__()
         print(f"   Optimized persistence enabled: {disabled_service.enabled}")
         
         # Test with feature enabled
         print("Testing with ENABLE_OPTIMIZED_PERSISTENCE=true") 
         os.environ["ENABLE_OPTIMIZED_PERSISTENCE"] = "true"
         
-        enabled_service = optimized_state_persistence.__class__()
+        enabled_service = state_persistence_service.__class__()
         print(f"   Optimized persistence enabled: {enabled_service.enabled}")
         print()
     

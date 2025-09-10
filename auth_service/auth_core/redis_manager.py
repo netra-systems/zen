@@ -23,6 +23,13 @@ from datetime import datetime, timedelta
 import json
 import logging
 
+try:
+    import redis.asyncio as redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    redis = None
+    REDIS_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 # Import SSOT Redis Manager
