@@ -224,7 +224,7 @@ class TestRequestScopedToolDispatcherSSotCompliance(SSotBaseTestCase):
             f"SSOT implementation must support all 5 critical WebSocket events consistently."
         )
 
-    async def test_user_isolation_validation(self):
+    def test_user_isolation_validation(self):
         """Test that unified implementation provides proper user isolation.
         
         EXPECTED: FAIL initially due to singleton remnants and shared state:

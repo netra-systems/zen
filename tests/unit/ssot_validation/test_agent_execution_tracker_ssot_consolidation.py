@@ -39,7 +39,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
             from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
             
             # If we can import it, the consolidation hasn't happened yet
-            self.fail(
+            pytest.fail(
                 "SSOT VIOLATION: AgentStateTracker still exists and should be deprecated. "
                 "All state tracking should be consolidated into AgentExecutionTracker."
             )
@@ -59,7 +59,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
             from netra_backend.app.agents.execution_timeout_manager import AgentExecutionTimeoutManager
             
             # If we can import it, the consolidation hasn't happened yet
-            self.fail(
+            pytest.fail(
                 "SSOT VIOLATION: AgentExecutionTimeoutManager still exists and should be deprecated. "
                 "All timeout management should be consolidated into AgentExecutionTracker."
             )
@@ -115,7 +115,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
             pass
             
         if violations:
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: ExecutionEngine has {len(violations)} SSOT violations. "
                 f"Should only use AgentExecutionTracker for all state management. "
                 f"Violations: {', '.join(violations)}"

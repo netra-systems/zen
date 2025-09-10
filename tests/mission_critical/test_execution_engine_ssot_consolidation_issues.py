@@ -144,7 +144,7 @@ class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
         
         # Check for inconsistent interfaces
         method_counts = [analysis['method_count'] for analysis in engine_analysis.values()]
-        if max(method_counts) - min(method_counts) > 10:
+        if max(method_counts) - min(method_counts) > 3:
             ssot_violations.append(f"Inconsistent interface sizes: {method_counts}")
         
         # This test should FAIL - we expect SSOT violations
