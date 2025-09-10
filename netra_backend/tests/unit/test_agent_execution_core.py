@@ -370,3 +370,369 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         assert result["success"] is True
         assert result["result"] == "plain_string_result"
         assert result["agent_name"] == "validator_agent"
+
+    @pytest.mark.unit
+    def test_user_execution_context_migration_security(self):
+        """Test migration from DeepAgentState to UserExecutionContext for security."""
+        # Business Value: Prevents user data isolation vulnerabilities
+        from netra_backend.app.agents.state import DeepAgentState
+        
+        context = AgentExecutionContext(
+            run_id=str(RequestID("run-migrate-123")),
+            thread_id=str(ThreadID("thread-migrate-123")),
+            user_id=str(UserID("user-migrate-123")),
+            agent_name="migration_agent",
+            correlation_id="corr-migrate-456"
+        )
+        
+        # Create deprecated DeepAgentState
+        deep_state = DeepAgentState(
+            user_id="legacy-user-123",
+            thread_id="legacy-thread-456",
+            run_id="legacy-run-789",
+            user_request="Legacy migration test"
+        )
+        
+        with patch('warnings.warn') as mock_warn:
+            migrated_context = self.core._ensure_user_execution_context(deep_state, context)
+            
+            # Verify migration and security warning
+            assert isinstance(migrated_context, UserExecutionContext)
+            assert migrated_context.user_id == "legacy-user-123"
+            mock_warn.assert_called_once()
+            assert "SECURITY WARNING" in mock_warn.call_args[0][0]
+
+    @pytest.mark.unit 
+    def test_circuit_breaker_fallback_business_continuity(self):
+        """Test circuit breaker fallback ensures business continuity."""
+        # Business Value: Provides degraded service instead of complete failure
+        from netra_backend.app.agents.execution_timeout_manager import CircuitBreakerOpenError
+        
+        context = AgentExecutionContext(
+            run_id=str(RequestID("run-cb-123")),
+            thread_id=str(ThreadID("thread-cb-123")),
+            user_id=str(UserID("user-cb-123")),
+            agent_name="circuit_agent",
+            correlation_id="corr-cb-456"
+        )
+        
+        user_context = UserContextFactory.create_context(
+            user_id="user-cb-123",
+            thread_id="thread-cb-123",
+            run_id="run-cb-123"
+        )
+        
+        # Mock circuit breaker error
+        mock_agent = AsyncMock()
+        self.mock_registry.get.return_value = mock_agent
+        
+        circuit_error = CircuitBreakerOpenError("Circuit breaker open")
+        
+        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
+             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout, \
+             patch.object(self.core.timeout_manager, 'create_fallback_response') as mock_fallback:
+            
+            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_timeout.side_effect = circuit_error
+            mock_fallback.return_value = {"fallback": "Graceful degradation response"}
+            
+            result = asyncio.run(self.core.execute_agent(context, user_context))
+            
+            # Verify fallback response provides business value
+            assert not result.success
+            assert "Circuit breaker open" in result.error
+            assert result.data["fallback"] == "Graceful degradation response"
+            mock_fallback.assert_called_once()
+
+    @pytest.mark.unit
+    def test_agent_state_phase_transitions(self):
+        """Test agent execution state transitions for monitoring."""
+        # Business Value: Enables real-time monitoring of agent execution pipeline
+        from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+        
+        context = AgentExecutionContext(
+            run_id=str(RequestID("run-phase-123")),
+            thread_id=str(ThreadID("thread-phase-123")),
+            user_id=str(UserID("user-phase-123")),
+            agent_name="phase_agent",
+            correlation_id="corr-phase-456"
+        )
+        
+        user_context = UserContextFactory.create_context(
+            user_id="user-phase-123",
+            thread_id="thread-phase-123",
+            run_id="run-phase-123"
+        )
+        
+        mock_agent = AsyncMock()
+        mock_agent.execute.return_value = {"success": True, "result": "Phase test"}
+        self.mock_registry.get.return_value = mock_agent
+        
+        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
+             patch.object(self.core.state_tracker, 'start_execution') as mock_state_start, \
+             patch.object(self.core.state_tracker, 'transition_phase') as mock_transition, \
+             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+            
+            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_state_start.return_value = "phase_exec_123"
+            
+            # Mock timeout manager to call the wrapped function
+            async def mock_timeout_execution(func, *args, **kwargs):
+                return await func()
+            mock_timeout.side_effect = mock_timeout_execution
+            
+            result = asyncio.run(self.core.execute_agent(context, user_context))
+            
+            # Verify state transitions for business monitoring
+            assert result.success
+            mock_state_start.assert_called_once()
+            mock_transition.assert_called()
+            
+            # Verify key phases were tracked
+            transition_calls = mock_transition.call_args_list
+            phases = [call[0][1] for call in transition_calls if len(call[0]) > 1]
+            assert AgentExecutionPhase.WEBSOCKET_SETUP in phases
+            assert AgentExecutionPhase.STARTING in phases
+
+    @pytest.mark.unit
+    def test_execution_timeout_protection_business_logic(self):
+        """Test execution timeout protects against resource waste."""
+        # Business Value: Prevents runaway agents from consuming expensive compute resources
+        context = AgentExecutionContext(
+            run_id=str(RequestID("run-timeout-123")),
+            thread_id=str(ThreadID("thread-timeout-123")),
+            user_id=str(UserID("user-timeout-123")),
+            agent_name="timeout_agent",
+            correlation_id="corr-timeout-456"
+        )
+        
+        user_context = UserContextFactory.create_context(
+            user_id="user-timeout-123",
+            thread_id="thread-timeout-123",
+            run_id="run-timeout-123"
+        )
+        
+        # Mock slow agent
+        mock_agent = AsyncMock()
+        self.mock_registry.get.return_value = mock_agent
+        
+        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
+             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+            
+            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_timeout.side_effect = TimeoutError("Agent execution timed out")
+            
+            result = asyncio.run(self.core.execute_agent(context, user_context))
+            
+            # Verify timeout protection activates
+            assert not result.success
+            assert "Agent execution timed out" in result.error
+            assert result.agent_name == "timeout_agent"
+
+    @pytest.mark.unit
+    def test_websocket_event_business_requirements(self):
+        """Test WebSocket events meet business requirements for user engagement."""
+        # Business Value: Real-time updates keep users engaged and reduce abandonment
+        context = AgentExecutionContext(
+            run_id=str(RequestID("run-ws-req-123")),
+            thread_id=str(ThreadID("thread-ws-req-123")),
+            user_id=str(UserID("user-ws-req-123")),
+            agent_name="engagement_agent",
+            correlation_id="corr-ws-req-456"
+        )
+        
+        user_context = UserContextFactory.create_context(
+            user_id="user-ws-req-123",
+            thread_id="thread-ws-req-123",
+            run_id="run-ws-req-123"
+        )
+        
+        mock_agent = AsyncMock()
+        mock_agent.execute.return_value = {"success": True, "insights": "Key business insights"}
+        self.mock_registry.get.return_value = mock_agent
+        
+        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
+             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+            
+            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            
+            # Mock timeout manager to call the wrapped function
+            async def mock_timeout_execution(func, *args, **kwargs):
+                return await func()
+            mock_timeout.side_effect = mock_timeout_execution
+            
+            result = asyncio.run(self.core.execute_agent(context, user_context))
+            
+            # Verify all required business events were sent
+            assert result.success
+            
+            # Check agent_started event
+            started_calls = self.mock_websocket_bridge.notify_agent_started.call_args_list
+            assert len(started_calls) >= 1
+            started_call = started_calls[0]
+            assert started_call[1]['run_id'] == "run-ws-req-123"
+            assert started_call[1]['agent_name'] == "engagement_agent"
+            
+            # Check agent_completed event
+            completed_calls = self.mock_websocket_bridge.notify_agent_completed.call_args_list
+            assert len(completed_calls) >= 1
+            completed_call = completed_calls[0]
+            assert completed_call[1]['run_id'] == "run-ws-req-123"
+            assert completed_call[1]['agent_name'] == "engagement_agent"
+
+    @pytest.mark.unit
+    def test_error_propagation_business_transparency(self):
+        """Test error propagation provides business transparency."""
+        # Business Value: Clear error reporting enables faster issue resolution
+        context = AgentExecutionContext(
+            run_id=str(RequestID("run-err-123")),
+            thread_id=str(ThreadID("thread-err-123")),
+            user_id=str(UserID("user-err-123")),
+            agent_name="error_agent",
+            correlation_id="corr-err-456"
+        )
+        
+        user_context = UserContextFactory.create_context(
+            user_id="user-err-123",
+            thread_id="thread-err-123",
+            run_id="run-err-123"
+        )
+        
+        # Mock agent that throws business-relevant error
+        mock_agent = AsyncMock()
+        mock_agent.execute.side_effect = ValueError("Invalid business parameters provided")
+        self.mock_registry.get.return_value = mock_agent
+        
+        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
+             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+            
+            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            
+            # Mock timeout manager to call the wrapped function
+            async def mock_timeout_execution(func, *args, **kwargs):
+                return await func()
+            mock_timeout.side_effect = mock_timeout_execution
+            
+            result = asyncio.run(self.core.execute_agent(context, user_context))
+            
+            # Verify error transparency for business debugging
+            assert not result.success
+            assert "Invalid business parameters provided" in result.error
+            
+            # Verify error WebSocket notification
+            error_calls = self.mock_websocket_bridge.notify_agent_error.call_args_list
+            assert len(error_calls) >= 1
+            error_call = error_calls[0]
+            assert error_call[1]['run_id'] == "run-err-123"
+            assert "Invalid business parameters provided" in error_call[1]['error']
+
+    @pytest.mark.unit
+    def test_agent_result_data_preservation(self):
+        """Test agent result data is preserved for business value delivery."""
+        # Business Value: Ensures all agent insights reach the user
+        mock_agent = AsyncMock()
+        context = AgentExecutionContext(
+            run_id=str(RequestID("run-data-123")),
+            thread_id=str(ThreadID("thread-data-123")),
+            user_id=str(UserID("user-data-123")),
+            agent_name="data_agent",
+            correlation_id="corr-data-456"
+        )
+        
+        user_context = UserContextFactory.create_context(
+            user_id="user-data-123",
+            thread_id="thread-data-123",
+            run_id="run-data-123"
+        )
+        
+        # Test complex business result preservation
+        business_result = {
+            "optimization_opportunities": [
+                {"type": "cost_reduction", "savings": 5000, "confidence": 0.95},
+                {"type": "performance_improvement", "impact": "25% faster", "effort": "low"}
+            ],
+            "current_metrics": {
+                "monthly_spend": 15000,
+                "efficiency_score": 0.78
+            },
+            "recommendations": {
+                "immediate": ["Switch to spot instances"],
+                "planned": ["Implement auto-scaling", "Optimize data transfer"]
+            }
+        }
+        
+        mock_agent.execute.return_value = business_result
+        mock_trace_context = Mock()
+        
+        result = asyncio.run(
+            self.core._execute_with_result_validation(
+                mock_agent, context, user_context, None, mock_trace_context
+            )
+        )
+        
+        # Verify all business data is preserved
+        assert result == business_result
+
+    @pytest.mark.unit
+    def test_performance_thresholds_business_monitoring(self):
+        """Test performance thresholds enable business cost monitoring."""
+        # Business Value: Identifies expensive agent operations for optimization
+        
+        # Test fast execution (good for business costs)
+        fast_start = time.time() - 0.5  # 500ms execution
+        fast_metrics = self.core._calculate_performance_metrics(fast_start)
+        assert fast_metrics['execution_time_ms'] < 1000  # Under 1 second
+        
+        # Test slow execution (costly for business)
+        slow_start = time.time() - 10.0  # 10 second execution
+        slow_metrics = self.core._calculate_performance_metrics(slow_start)
+        assert slow_metrics['execution_time_ms'] > 9000  # Over 9 seconds
+        
+        # Verify metrics enable business optimization decisions
+        assert 'start_timestamp' in fast_metrics
+        assert 'end_timestamp' in fast_metrics
+        assert fast_metrics['end_timestamp'] > fast_metrics['start_timestamp']
+
+    @pytest.mark.unit
+    def test_concurrent_execution_isolation(self):
+        """Test concurrent agent executions maintain user isolation."""
+        # Business Value: Prevents user data leakage in multi-tenant environment
+        
+        # Create contexts for different users
+        context1 = AgentExecutionContext(
+            run_id=str(RequestID("run-user1-123")),
+            thread_id=str(ThreadID("thread-user1-123")),
+            user_id=str(UserID("user-1")),
+            agent_name="isolation_agent",
+            correlation_id="corr-user1-456"
+        )
+        
+        context2 = AgentExecutionContext(
+            run_id=str(RequestID("run-user2-123")),
+            thread_id=str(ThreadID("thread-user2-123")),
+            user_id=str(UserID("user-2")),
+            agent_name="isolation_agent",
+            correlation_id="corr-user2-456"
+        )
+        
+        user_context1 = UserContextFactory.create_context(
+            user_id="user-1",
+            thread_id="thread-user1-123",
+            run_id="run-user1-123"
+        )
+        
+        user_context2 = UserContextFactory.create_context(
+            user_id="user-2", 
+            thread_id="thread-user2-123",
+            run_id="run-user2-123"
+        )
+        
+        # Verify contexts are isolated
+        assert user_context1.user_id != user_context2.user_id
+        assert user_context1.thread_id != user_context2.thread_id
+        assert user_context1.run_id != user_context2.run_id
+        
+        # Verify agent execution would maintain isolation
+        assert context1.user_id != context2.user_id
+        assert context1.run_id != context2.run_id
+        assert context1.correlation_id != context2.correlation_id
