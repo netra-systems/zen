@@ -66,7 +66,7 @@ except ImportError as e:
     ConsolidatedFactory = None
 
 try:
-    from netra_backend.app.core.execution_engine import ExecutionEngine as CoreExecutionEngine
+    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as CoreExecutionEngine
 except ImportError as e:
     logger.warning(f"Could not import CoreExecutionEngine: {e}")
     CoreExecutionEngine = None

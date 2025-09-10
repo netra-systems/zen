@@ -39,8 +39,12 @@ Direct `UnifiedStateManager()` instantiation in test file bypasses factory patte
   - **3 PASSED tests** ✅ (Factory pattern validation working)
   - **Comprehensive scope:** Found 12 files with 80+ violations
 
-### 3) PLAN REMEDIATION
-- [ ] Plan fix for direct instantiation violation
+### 3) ✅ PLAN REMEDIATION COMPLETE
+- [x] Plan fix for direct instantiation violation
+  - **DETAILED PLAN:** Replace `UnifiedStateManager()` with `StateManagerFactory.get_global_manager()`
+  - **LOW RISK:** Non-breaking change, maintains Golden Path
+  - **VALIDATION:** 3-phase test execution plan created
+  - **ATOMIC SCOPE:** Minimal change for SSOT compliance
 
 ### 4) EXECUTE REMEDIATION
 - [ ] Implement factory pattern usage in test file

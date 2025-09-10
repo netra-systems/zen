@@ -37,7 +37,7 @@ class TestThreadStateManagerCoordination(BaseIntegrationTest):
         """
         # Import the actual UnifiedStateManager
         try:
-            from netra_backend.app.core.managers.unified_state_manager import UnifiedStateManager
+            from netra_backend.app.core.managers.unified_state_manager import UnifiedStateManager, StateManagerFactory
         except ImportError:
             pytest.skip("UnifiedStateManager not available - may be in different location")
         
@@ -45,8 +45,8 @@ class TestThreadStateManagerCoordination(BaseIntegrationTest):
         db_session = real_services_fixture['db']
         redis_client = real_services_fixture['redis']
         
-        # Initialize state manager with real services
-        state_manager = UnifiedStateManager()
+        # Initialize state manager with real services using SSOT factory pattern
+        state_manager = StateManagerFactory.get_global_manager()
         
         # Test thread state creation
         test_thread_id = ThreadID("state-mgr-test-001")

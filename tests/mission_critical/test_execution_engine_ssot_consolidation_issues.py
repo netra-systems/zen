@@ -48,7 +48,7 @@ from netra_backend.app.agents.execution_engine_consolidated import (
     RequestScopedExecutionEngine,
     ExecutionEngineFactory as ConsolidatedFactory
 )
-from netra_backend.app.core.execution_engine import ExecutionEngine as CoreExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as CoreExecutionEngine
 from netra_backend.app.services.unified_tool_registry.execution_engine import (
     ToolExecutionEngine as ToolRegistryExecutionEngine
 )
