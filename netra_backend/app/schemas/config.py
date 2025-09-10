@@ -180,9 +180,16 @@ class WebSocketConfig(BaseModel):
     
     # PHASE 1 FEATURE FLAG: SSOT consolidation control
     ssot_consolidation_enabled: bool = Field(
-        default_factory=lambda: get_env().get("WEBSOCKET_SSOT_CONSOLIDATION", "false").lower() == "true", 
+        default=False, 
         description="Enable WebSocket SSOT consolidation to eliminate race conditions (Phase 1: backward compatibility)"
     )
+    
+    def __init__(self, **kwargs):
+        # Override with environment variable if not explicitly set
+        if 'ssot_consolidation_enabled' not in kwargs:
+            env_value = get_env().get("WEBSOCKET_SSOT_CONSOLIDATION", "false").lower()
+            kwargs['ssot_consolidation_enabled'] = env_value in ("true", "1", "yes", "on")
+        super().__init__(**kwargs)
 
 class AppConfig(BaseModel):
     """Base configuration class."""

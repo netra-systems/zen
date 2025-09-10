@@ -2570,6 +2570,16 @@ class AgentWebSocketBridge(MonitorableComponent):
         try:
             from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter, WebSocketEmitterFactory
             from netra_backend.app.agents.supervisor.user_execution_context import validate_user_context
+            from netra_backend.app.core.config import get_config
+            
+            # PHASE 2 FEATURE FLAG: Check if SSOT consolidation is enabled
+            config = get_config()
+            ssot_enabled = config.ws_config.ssot_consolidation_enabled
+            
+            if ssot_enabled:
+                logger.info(f"🚀 PHASE 2 ACTIVE: SSOT consolidation enabled for user {user_context.user_id}")
+            else:
+                logger.debug(f"📍 PHASE 2 INACTIVE: Using standard emitter for user {user_context.user_id}")
             
             # Validate user context before creating emitter
             validated_context = validate_user_context(user_context)
@@ -2577,10 +2587,13 @@ class AgentWebSocketBridge(MonitorableComponent):
             # Create isolated WebSocket manager for this user context
             isolated_manager = await create_websocket_manager(validated_context)
             
-            # Create isolated emitter using the factory pattern
+            # PHASE 2 REDIRECTION: Always use UnifiedWebSocketEmitter (it's already the SSOT)
+            # The feature flag is ready for future optimizations but current architecture is already consolidated
             emitter = WebSocketEmitterFactory.create_scoped_emitter(isolated_manager, validated_context)
             
-            logger.info(f"✅ USER EMITTER CREATED: {user_context.get_correlation_id()} - isolated from other users")
+            # PHASE 2 MONITORING: Track emitter creation for race condition metrics
+            emitter_type = "ssot_unified" if ssot_enabled else "standard_unified"
+            logger.info(f"✅ USER EMITTER CREATED: {user_context.get_correlation_id()} - type: {emitter_type}, isolated from other users")
             return emitter
             
         except Exception as e:
