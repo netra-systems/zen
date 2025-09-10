@@ -1597,7 +1597,7 @@ class AgentRegistry(BaseAgentRegistry):
         """
         try:
             status = {
-                'inheritance_chain_valid': isinstance(self, UniversalRegistry),
+                'inheritance_chain_valid': isinstance(self, BaseAgentRegistry),
                 'constructor_signature_aligned': hasattr(self, 'name') and self.name == "AgentRegistry",
                 'websocket_adapter_available': hasattr(self, 'websocket_manager'),
                 'parent_interface_accessible': hasattr(super(), 'set_websocket_bridge'),
