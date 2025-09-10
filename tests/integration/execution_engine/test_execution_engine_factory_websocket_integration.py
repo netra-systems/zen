@@ -609,9 +609,15 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                 # Clear previous events
                 self.websocket_events.clear()
                 
-                # Send test events through engine
-                await engine.send_agent_thinking(agent_context, "Bridge integration test", step_number=1)
-                await engine.send_tool_executing(agent_context, "bridge_test_tool")
+                # Send test events through engine via emitter
+                await engine.websocket_emitter.notify_agent_thinking(
+                    agent_name=agent_context.agent_name,
+                    reasoning="Bridge integration test", 
+                    step_number=1
+                )
+                await engine.websocket_emitter.notify_tool_executing(
+                    tool_name="bridge_test_tool"
+                )
                 
                 # Verify events were captured
                 bridge_events = [e for e in self.websocket_events if e['run_id'] == user_context.run_id]

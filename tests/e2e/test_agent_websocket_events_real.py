@@ -192,14 +192,14 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         }
         
         for key, value in test_vars.items():
-            self.env.set(key, value, source="agent_websocket_events_test")
+            self._env.set(key, value, source="agent_websocket_events_test")
         
         # Initialize SSOT auth helper - NO MOCKS
         self.auth_helper = E2EAuthHelper()
         self.active_connections = []
         self.websocket_url = "ws://localhost:8000/ws"
     
-    def teardown_method(self):
+    def teardown_method(self, method=None):
         """Cleanup real WebSocket connections."""
         for conn in self.active_connections:
             try:
@@ -208,8 +208,9 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
                 pass
         
         self.active_connections.clear()
-        self.env.disable_isolation(restore_original=True)
-        super().teardown_method()
+        if hasattr(self, '_env'):
+            self._env.disable_isolation(restore_original=True)
+        super().teardown_method(method)
     
     async def _create_real_authenticated_websocket(self, user_data) -> websockets.WebSocketServerProtocol:
         """Create REAL authenticated WebSocket connection."""
