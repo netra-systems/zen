@@ -177,6 +177,12 @@ class WebSocketConfig(BaseModel):
     send_timeout: int = Field(default=30, description="WebSocket send timeout (seconds)")
     heartbeat_timeout: int = Field(default=90, description="WebSocket heartbeat timeout (seconds)")
     heartbeat_interval: int = Field(default=30, description="WebSocket heartbeat interval (seconds)")
+    
+    # PHASE 1 FEATURE FLAG: SSOT consolidation control
+    ssot_consolidation_enabled: bool = Field(
+        default_factory=lambda: get_env().get("WEBSOCKET_SSOT_CONSOLIDATION", "false").lower() == "true", 
+        description="Enable WebSocket SSOT consolidation to eliminate race conditions (Phase 1: backward compatibility)"
+    )
 
 class AppConfig(BaseModel):
     """Base configuration class."""

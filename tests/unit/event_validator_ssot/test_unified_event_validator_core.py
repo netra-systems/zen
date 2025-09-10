@@ -25,6 +25,7 @@ Test Plan Phase 1: Unit Tests (No Docker)
 
 import pytest
 import sys
+import unittest
 from typing import Dict, Any, List, Optional, Set, Tuple
 from unittest.mock import patch, MagicMock
 from dataclasses import dataclass
@@ -71,7 +72,7 @@ except ImportError as e:
     ssot_framework_import_error = str(e)
 
 
-class TestUnifiedEventValidatorCore(SSotBaseTestCase):
+class TestUnifiedEventValidatorCore(SSotBaseTestCase, unittest.TestCase):
     """
     Unit tests for EventValidator SSOT core functionality.
     
