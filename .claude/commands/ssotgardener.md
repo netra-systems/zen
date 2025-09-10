@@ -20,7 +20,6 @@ Context
 6. FIRST DO NO HARM. Your mandate is to SAFELY refresh to SSOT methods.
 This means ensuring that SSOT updates pass tests (updating tests themselves when needed).
 
-
 PROCESS INSTRUCTIONS START:
 
 0) Discover Next SSOT Issue (SSOT AUDIT) : SNST: 
@@ -31,14 +30,16 @@ Git commit and push this file if safe to do so.
 0.3) Make or update github ISSUE.
 Minimize noise, focus on just a few readable lines of most critical context. Link to other docs for remaining context.
 Issue name style: SSOT-{context (one of: regression, incomplete-migration, recent-change, {custom})}-{brief human description}}
-OUTPUT the link here:
-
+Create a local md file with the same name ending in .md to record your work in progress
+OUTPUT the issue name, .md progress tracker name {issue name}.md, and github link here:
+IND = {issue name}.md
 
 1) DISCOVER AND PLAN TEST : SNST : (Pass context from 0):
 
-1.1) DISCOVER EXISTING: fine collection of existing tests
+1.1) DISCOVER EXISTING: find collection of existing tests
 tests protecting against breaking changes made by SSOT refactor or similar
 After refactors: these tests must continue to pass, or now pass if failing prior, or updated as a test and pass.
+Save to local.md file
 
 1.2) PLAN ONLY Plan for update, align, or creation of: the required unit,
 integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused
