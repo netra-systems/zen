@@ -102,7 +102,7 @@ class TestGoldenPathJWTValidationFailure:
         
         # EXPECT FAILURE - this reproduces the bug
         assert result["success"] is False
-        assert "key_manager" in result["message"].lower()
+        assert "key manager" in result["message"].lower()
         assert result["requirement"] == "jwt_validation_ready"
         assert result["details"]["key_manager"] is False
         

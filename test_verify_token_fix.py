@@ -66,7 +66,7 @@ async def test_verify_token_delegates_correctly():
         print("OK verify_token correctly validates invalid token as False")
         
     except Exception as e:
-        print(f"✓ verify_token handled error gracefully: {e}")
+        print(f"OK verify_token handled error gracefully: {e}")
 
 
 def test_interface_compatibility():
@@ -82,16 +82,16 @@ def test_interface_compatibility():
         "create_refresh_token": hasattr(validator, 'create_refresh_token')
     }
     
-    print(f"✓ Interface compatibility check: {capabilities}")
+    print(f"OK Interface compatibility check: {capabilities}")
     
     # All should be True now
     assert all(capabilities.values()), f"Some capabilities missing: {capabilities}"
-    print("✓ All Golden Path expected methods are available")
+    print("OK All Golden Path expected methods are available")
     
     # Golden Path also checks this condition
     jwt_ready = capabilities["create_access_token"] and capabilities["verify_token"]
     assert jwt_ready, "Golden Path JWT readiness check should pass"
-    print("✓ Golden Path JWT readiness condition satisfied")
+    print("OK Golden Path JWT readiness condition satisfied")
 
 
 async def main():
@@ -106,7 +106,7 @@ async def main():
         test_interface_compatibility()
         
         print("\n" + "=" * 60)
-        print("ALL TESTS PASSED! ✓")
+        print("ALL TESTS PASSED! OK")
         print("=" * 60)
         print("SUMMARY:")
         print("- UnifiedJWTValidator now has verify_token method")
@@ -115,7 +115,7 @@ async def main():
         print("- Backward compatibility maintained")
         
     except Exception as e:
-        print(f"\n❌ TEST FAILED: {e}")
+        print(f"\nERROR TEST FAILED: {e}")
         sys.exit(1)
 
 
