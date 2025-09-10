@@ -18,6 +18,8 @@ from argon2.exceptions import VerifyMismatchError
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from shared.isolated_environment import get_env
+# SSOT: Import SERVICE_ID constant
+from shared.constants.service_identifiers import SERVICE_ID
 # Session manager module was deleted - using direct functionality
 from auth_service.auth_core.database.repository import (
     AuthAuditRepository,
@@ -975,7 +977,7 @@ class AuthService:
         """Get service name from ID"""
         # In real implementation, lookup from database
         service_names = {
-            "backend": "netra-backend",
+            "backend": SERVICE_ID,
             "worker": "netra-worker",
             "scheduler": "netra-scheduler"
         }

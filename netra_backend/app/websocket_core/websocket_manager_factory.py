@@ -2346,21 +2346,27 @@ async def _create_emergency_fallback_manager(
         # Import minimal components needed for emergency manager
         from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, WebSocketManager
         
-        # Create minimal manager configuration
-        emergency_config = {
-            'user_id': getattr(user_context, 'user_id', f'emergency_{uuid.uuid4().hex[:8]}'),
-            'websocket_client_id': getattr(user_context, 'websocket_client_id', f'emergency_ws_{uuid.uuid4().hex[:8]}'),
-            'thread_id': getattr(user_context, 'thread_id', f'emergency_thread_{uuid.uuid4().hex[:8]}'),
-            'run_id': getattr(user_context, 'run_id', f'emergency_run_{uuid.uuid4().hex[:8]}'),
-            'emergency_mode': True,
-            'original_error': str(original_error),
-            'created_at': datetime.now(timezone.utc).isoformat()
-        }
-        
-        # Create emergency manager with minimal functionality
-        emergency_manager = WebSocketManager(emergency_config)
-        
-        logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_config['user_id'][:8]}...")
+        # Create emergency UserExecutionContext for proper manager creation
+        try:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            emergency_user_context = UserExecutionContext(
+                user_id=getattr(user_context, 'user_id', f'emergency_{uuid.uuid4().hex[:8]}'),
+                thread_id=getattr(user_context, 'thread_id', f'emergency_thread_{uuid.uuid4().hex[:8]}'),
+                run_id=getattr(user_context, 'run_id', f'emergency_run_{uuid.uuid4().hex[:8]}'),
+                websocket_client_id=getattr(user_context, 'websocket_client_id', f'emergency_ws_{uuid.uuid4().hex[:8]}'),
+                agent_context={'emergency_mode': True, 'original_error': str(original_error)},
+                audit_metadata={'created_at': datetime.now(timezone.utc).isoformat(), 'source': 'emergency_fallback'}
+            )
+            
+            # Create emergency manager using SSOT factory method
+            emergency_manager = WebSocketManager.from_user_context(emergency_user_context)
+            
+            logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_user_context.user_id[:8]}...")
+        except Exception as e:
+            logger.error(f"Failed to create emergency UserExecutionContext: {e}")
+            # Final fallback - create basic manager without context
+            emergency_manager = WebSocketManager()
+            logger.warning("Created basic WebSocket manager without user context as final fallback")
         return emergency_manager
         
     except Exception as e:

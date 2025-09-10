@@ -110,11 +110,30 @@ class E2EOAuthSimulationKeyValidator:
         
     async def validate_key_consistency(self) -> Dict[str, Any]:
         """
-        Validate E2E OAuth simulation key consistency between test environment and staging auth service.
+        DEPRECATED: Validate E2E OAuth simulation key consistency between test environment and staging auth service.
+        
+        This method now delegates to SSOT OAuth validation.
+        Use shared.configuration.central_config_validator.simulate_oauth_end_to_end() instead.
         
         Returns:
             Validation result with consistency status and any detected drift
         """
+        # SSOT OAuth validation - this replaces the duplicate implementation
+        try:
+            from shared.configuration.central_config_validator import simulate_oauth_end_to_end
+            
+            logger.warning(
+                "E2EOAuthSimulationKeyValidator is deprecated. "
+                "Use shared.configuration.central_config_validator.simulate_oauth_end_to_end() instead."
+            )
+            
+            # Use SSOT OAuth E2E validation
+            return simulate_oauth_end_to_end()
+            
+        except ImportError:
+            logger.error("Could not import SSOT OAuth validation - falling back to legacy implementation")
+        except Exception as e:
+            logger.error(f"SSOT OAuth validation failed: {e} - falling back to legacy implementation")
         try:
             current_env = self.env.get("ENVIRONMENT", "development").lower()
             
