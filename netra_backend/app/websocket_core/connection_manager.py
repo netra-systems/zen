@@ -35,5 +35,8 @@ class WebSocketConnectionManager(UnifiedWebSocketManager):
         logger.debug("WebSocketConnectionManager initialized (SSOT alias)")
 
 
+# SSOT alias for backward compatibility
+ConnectionManager = WebSocketConnectionManager
+
 # Export for backward compatibility
-__all__ = ['WebSocketConnectionManager']
+__all__ = ['WebSocketConnectionManager', 'ConnectionManager']
