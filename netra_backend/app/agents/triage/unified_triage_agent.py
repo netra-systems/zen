@@ -788,14 +788,20 @@ Focus on:
         Returns:
             Request string or None
         """
-        if hasattr(state, 'original_request'):
+        # Try original_request first (highest priority) - but only if it has a value
+        if hasattr(state, 'original_request') and state.original_request:
             return state.original_request
-        elif hasattr(state, 'request'):
+        # Then try request field
+        elif hasattr(state, 'request') and state.request:
             return state.request
-        elif hasattr(state, 'user_request'):
+        # Then try user_request field
+        elif hasattr(state, 'user_request') and state.user_request:
             return state.user_request
+        # Handle dict state
         elif isinstance(state, dict):
-            return state.get('request') or state.get('original_request') or state.get('user_request')
+            return (state.get('original_request') or 
+                   state.get('request') or 
+                   state.get('user_request'))
         return None
     
     def _validate_request(self, request: str) -> Dict[str, Any]:
