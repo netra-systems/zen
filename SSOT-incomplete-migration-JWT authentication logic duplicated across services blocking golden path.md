@@ -1,0 +1,90 @@
+# SSOT Incomplete Migration: JWT Authentication Logic Duplication
+
+**Issue:** [#184](https://github.com/netra-systems/netra-apex/issues/184)  
+**Created:** 2025-09-10  
+**Status:** In Progress  
+**Focus Area:** Golden Path User Flow (Login → AI Responses)
+
+## Problem Statement
+
+Critical JWT authentication SSOT violations directly blocking golden path user flow. Backend contains duplicated JWT logic that should exclusively reside in auth service, creating authentication inconsistencies that prevent users from completing login → AI response journey.
+
+**Business Impact:** $500K+ ARR chat functionality blocked  
+**SSOT Compliance Score:** 40/100
+
+## Critical Violations Identified
+
+### 1. Backend JWT Decoding Duplication
+- **File:** `netra_backend/app/clients/auth_client_core.py`
+- **Lines:** 940-955 (`_decode_test_jwt()`), 1016-1028 (`_decode_token()`)
+- **Issue:** Backend directly decodes JWT tokens instead of using auth service
+
+### 2. Backend JWT Secret Management  
+- **File:** `netra_backend/app/core/configuration/unified_secrets.py`
+- **Lines:** 75-90
+- **Issue:** JWT secret retrieval logic duplicated outside auth service
+
+### 3. WebSocket Auth Validation Duplication
+- **File:** `netra_backend/app/websocket_core/auth.py` 
+- **Lines:** 41-108 (`authenticate()` method with local validation fallback)
+- **Issue:** WebSocket bypasses auth service with local JWT validation
+
+## Root Cause Analysis
+Production incident pressure led to architectural compromises bypassing auth service SSOT without proper review.
+
+## Work Progress
+
+### Phase 0: SSOT Audit ✅
+- [x] Identified critical JWT SSOT violations
+- [x] Created GitHub issue #184
+- [x] Created progress tracking document
+
+### Phase 1: Test Discovery (In Progress)
+- [ ] Find existing tests protecting JWT authentication SSOT
+- [ ] Validate current test coverage for auth centralization
+- [ ] Document gaps in SSOT test validation
+
+### Phase 2: Test Planning (Pending)
+- [ ] Plan failing tests that reproduce SSOT violations
+- [ ] Design tests for ideal SSOT state (all JWT via auth service)
+- [ ] Align with testing best practices from reports/testing/TEST_CREATION_GUIDE.md
+
+### Phase 3: New Test Implementation (Pending)  
+- [ ] Create ~20% new tests focused on SSOT validation
+- [ ] Run tests without Docker (unit/integration/staging e2e only)
+- [ ] Ensure tests fail in current state
+
+### Phase 4: SSOT Remediation Planning (Pending)
+- [ ] Design auth service API calls to replace local JWT logic
+- [ ] Plan WebSocket auth refactor to use auth service exclusively
+- [ ] Create migration strategy for backend JWT removal
+
+### Phase 5: SSOT Remediation Execution (Pending)
+- [ ] Remove local JWT decoding from backend
+- [ ] Remove JWT secret management from backend config
+- [ ] Refactor WebSocket auth to use auth service only
+- [ ] Update all callers to use centralized auth
+
+### Phase 6: Test Fix Loop (Pending)
+- [ ] Run all SSOT validation tests
+- [ ] Fix any failures from remediation
+- [ ] Ensure 100% test pass rate
+- [ ] Validate golden path user flow works end-to-end
+
+### Phase 7: PR and Closure (Pending)
+- [ ] Create pull request with SSOT fixes
+- [ ] Cross-link issue #184 for auto-close
+- [ ] Document SSOT compliance improvement
+
+## Expected Outcome
+- JWT authentication centralized exclusively in auth service
+- Backend uses auth service API for all JWT operations  
+- SSOT compliance score improved from 40/100 to 95+/100
+- Golden path user flow (login → AI responses) unblocked
+- $500K+ ARR chat functionality restored
+
+## References
+- [Backend Auth SSOT Audit](reports/auth/BACKEND_AUTH_SSOT_AUDIT_20250107.md)
+- [Golden Path User Flow](docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)
+- [GitHub Style Guide](GITHUB_STYLE_GUIDE.md)
+- [Auth SSOT Implementation](reports/auth/AUTH_SSOT_IMPLEMENTATION_COMPLETE_20250107.md)
