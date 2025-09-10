@@ -671,11 +671,18 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
             execution_success = False
             if execution_engine:
                 try:
-                    # Simulate agent execution
-                    if hasattr(execution_engine, 'execute'):
-                        # Can't actually execute without full setup, but test the interface
+                    # Simulate agent execution - check for actual UserExecutionEngine methods
+                    if hasattr(execution_engine, 'execute_agent'):
+                        # UserExecutionEngine has execute_agent method
+                        execution_success = True
+                    elif hasattr(execution_engine, 'execute_agent_pipeline'):
+                        # UserExecutionEngine also has pipeline execution
+                        execution_success = True
+                    elif hasattr(execution_engine, 'execute'):
+                        # Generic execution method
                         execution_success = True
                     elif hasattr(execution_engine, 'run'):
+                        # Alternative execution method
                         execution_success = True
                     else:
                         golden_path_violations.append(

@@ -738,8 +738,9 @@ class AgentRegistry(UniversalAgentRegistry):
         
         This method integrates with the user isolation pattern by:
         1. Storing the WebSocket manager at the registry level
-        2. Propagating it to all existing user sessions
-        3. Ensuring new user sessions get the WebSocket manager automatically
+        2. Creating an adapter for SSOT compliance with UniversalAgentRegistry
+        3. Propagating it to all existing user sessions
+        4. Ensuring new user sessions get the WebSocket manager automatically
         
         CRITICAL: This enables real-time chat notifications across all user sessions.
         
@@ -753,15 +754,10 @@ class AgentRegistry(UniversalAgentRegistry):
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
             return
         
-        # FIXED: Direct assignment instead of inheritance violation
-        # Store at registry level using UniversalRegistry's interface
+        # FIXED: Store manager for user sessions
         self.websocket_manager = manager
         
-        # Use the standard bridge factory to create proper interface
-        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        # Create a default user context for registry-level bridge
+        # SSOT COMPLIANCE: Create adapter to bridge WebSocketManager to AgentWebSocketBridge interface
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system",
@@ -770,13 +766,13 @@ class AgentRegistry(UniversalAgentRegistry):
             run_id=f"websocket_run_{uuid.uuid4().hex[:8]}"
         )
         
-        # Create and set the standardized AgentWebSocketBridge  
+        # Create adapter for SSOT compliance
         try:
-            bridge = create_agent_websocket_bridge(default_context)
-            super().set_websocket_bridge(bridge)  # Use correct parent interface
-            logger.debug("Registry WebSocket bridge created using factory pattern")
+            adapter = WebSocketManagerAdapter(manager, default_context)
+            super().set_websocket_bridge(adapter)  # Use correct parent interface with adapter
+            logger.debug("Registry WebSocket adapter created for SSOT compliance")
         except Exception as e:
-            logger.warning(f"Failed to create registry WebSocket bridge: {e}")
+            logger.warning(f"Failed to create registry WebSocket adapter: {e}")
         
         # Propagate to all existing user sessions asynchronously
         # We use asyncio.create_task to avoid blocking in sync context
@@ -827,7 +823,7 @@ class AgentRegistry(UniversalAgentRegistry):
                 # No event loop exists
                 logger.warning("No event loop available - user sessions will get WebSocket manager on next access")
         
-        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support")
+        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support and SSOT compliance")
     
     async def set_websocket_manager_async(self, manager: 'WebSocketManager') -> None:
         """Async version of set_websocket_manager for async contexts.

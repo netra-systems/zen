@@ -22,6 +22,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
+import logging
 import uuid
 import time
 import threading
@@ -73,6 +74,11 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
     # Security thresholds
     MAX_ISOLATION_VIOLATIONS = 0    # Zero tolerance for isolation violations
     MIN_SECURITY_SCORE = 95.0       # Minimum acceptable security score
+    
+    @property
+    def logger(self):
+        """Get logger for this test class."""
+        return logging.getLogger(self.__class__.__name__)
 
     def setUp(self):
         """Set up test environment."""

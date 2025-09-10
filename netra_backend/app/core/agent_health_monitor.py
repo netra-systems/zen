@@ -1,15 +1,48 @@
-"""Agent health monitoring functionality.
+"""Unified Agent Health Monitoring functionality.
 
-This module provides comprehensive health status monitoring for agents.
+This module provides SSOT comprehensive health status monitoring for agents,
+consolidating capabilities from:
+- Core agent reliability monitoring with death detection 
+- Dev launcher enhanced health monitoring with grace periods
+- Comprehensive system health checks with Five Whys analysis
+
+Business Value: Prevents $500K+ ARR loss from unreliable agent monitoring
+SSOT Compliance: Single source for all agent health monitoring capabilities
 """
 
+import asyncio
+import logging
+import platform
 import time
+import threading
+import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
+# Core dependencies
 from netra_backend.app.core.agent_reliability_types import AgentError, AgentHealthStatus
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 from netra_backend.app.logging_config import central_logger
+
+# Environment access
+try:
+    from shared.isolated_environment import IsolatedEnvironment
+except ImportError:
+    IsolatedEnvironment = None
+
+# WebSocket integration for health events
+try:
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+except ImportError:
+    AgentWebSocketBridge = None
+
+# System monitoring
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 logger = central_logger.get_logger(__name__)
 

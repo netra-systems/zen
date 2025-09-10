@@ -34,9 +34,13 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-# NEW: Factory pattern imports
+# NEW: Factory pattern imports - UPDATED TO USE UNIFIED FACTORY
+from netra_backend.app.agents.execution_engine_unified_factory import (
+    UnifiedExecutionEngineFactory as ExecutionEngineFactory,  # Alias for backward compatibility
+    ExecutionEngineFactory as LegacyExecutionEngineFactoryAlias
+)
+# Legacy imports for configuration compatibility
 from netra_backend.app.agents.supervisor.execution_factory import (
-    ExecutionEngineFactory, 
     ExecutionFactoryConfig,
     UserExecutionContext as FactoryUserExecutionContext
 )

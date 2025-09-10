@@ -514,6 +514,29 @@ class UnifiedToolDispatcher:
             logger.error(f"🚨 Unexpected error registering tool {tool_name}: {e}")
             raise
     
+    def register_tools(self, tools: List['BaseTool']) -> int:
+        """Register multiple tools at once - pattern from competing implementations.
+        
+        Args:
+            tools: List of tools to register
+            
+        Returns:
+            Number of successfully registered tools
+        """
+        if not tools:
+            return 0
+            
+        successful_count = 0
+        for tool in tools:
+            try:
+                self.register_tool(tool)
+                successful_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to register tool {getattr(tool, 'name', 'unknown')}: {e}")
+                
+        logger.info(f"Registered {successful_count}/{len(tools)} tools in dispatcher {self.dispatcher_id}")
+        return successful_count
+    
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
         self._ensure_active()
@@ -869,20 +892,48 @@ class UnifiedToolDispatcher:
             logger.error(f"Error populating tools from registry: {e}")
     
     async def cleanup(self):
-        """Clean up dispatcher resources."""
+        """Clean up dispatcher resources with enhanced disposal pattern."""
         if not self._is_active:
             return
         
         self._is_active = False
         
-        # Clean up components
-        if hasattr(self, 'registry'):
-            self.registry.clear()
-        
-        # Unregister dispatcher
-        self._unregister_dispatcher(self)
-        
-        logger.info(f"Cleaned up dispatcher {self.dispatcher_id}")
+        # Enhanced cleanup from competing implementations
+        try:
+            # Clean up WebSocket connections
+            if hasattr(self, 'websocket_manager') and self.websocket_manager:
+                try:
+                    # Best-effort WebSocket cleanup
+                    if hasattr(self.websocket_manager, 'cleanup'):
+                        await self.websocket_manager.cleanup()
+                except Exception as e:
+                    logger.warning(f"WebSocket cleanup failed for {self.dispatcher_id}: {e}")
+            
+            # Clean up executor
+            if hasattr(self, 'executor') and self.executor:
+                try:
+                    if hasattr(self.executor, 'cleanup'):
+                        await self.executor.cleanup()
+                except Exception as e:
+                    logger.warning(f"Executor cleanup failed for {self.dispatcher_id}: {e}")
+            
+            # Clean up registry
+            if hasattr(self, 'registry'):
+                try:
+                    self.registry.clear()
+                except Exception as e:
+                    logger.warning(f"Registry cleanup failed for {self.dispatcher_id}: {e}")
+            
+            # Final metrics update
+            self._metrics['cleanup_time'] = datetime.now(timezone.utc)
+            
+            logger.info(f"✅ Cleaned up dispatcher {self.dispatcher_id}")
+            
+        except Exception as e:
+            logger.error(f"🚨 Cleanup failed for dispatcher {self.dispatcher_id}: {e}")
+        finally:
+            # Always unregister, even if cleanup partially fails
+            self._unregister_dispatcher(self)
     
     @classmethod
     def _register_dispatcher(cls, dispatcher: 'UnifiedToolDispatcher'):
