@@ -32,7 +32,6 @@ from netra_backend.app.websocket_core.canonical_imports import (
 # CANONICAL: WebSocket Manager Factory (PREFERRED)
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
-    IsolatedWebSocketManager, 
     get_websocket_manager_factory,
     create_websocket_manager,
     FactoryInitializationError,
@@ -53,8 +52,8 @@ from netra_backend.app.websocket_core.protocols import (
 
 # CANONICAL: Migration Support (Temporary - Remove After Migration)
 from netra_backend.app.websocket_core.migration_adapter import (
-    WebSocketManagerAdapter,
     get_legacy_websocket_manager,
+    migrate_singleton_usage,
 )
 
 # ============================================================================
@@ -87,13 +86,12 @@ __all__ = [
     'WebSocketManagerProtocolValidator',
     
     # SUPPORT: Use for implementation
-    'IsolatedWebSocketManager',
     'UnifiedWebSocketManager',
     'WebSocketConnection',
     
     # MIGRATION: Temporary compatibility (remove after migration)
-    'WebSocketManagerAdapter',
     'get_legacy_websocket_manager',
+    'migrate_singleton_usage',
     
     # ERRORS: For proper error handling
     'FactoryInitializationError',
