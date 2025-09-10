@@ -437,7 +437,7 @@ async def websocket_endpoint(websocket: WebSocket):
             )
             await safe_websocket_send(websocket, auth_error.model_dump())
             await windows_safe_sleep(0.1)  # Brief delay to ensure message is sent
-            await safe_websocket_close(websocket, code=1008, reason="SSOT Auth failed")
+            await safe_websocket_close(websocket, code=1011, reason="SSOT Auth failed")
             return
         
         # SSOT Authentication SUCCESS

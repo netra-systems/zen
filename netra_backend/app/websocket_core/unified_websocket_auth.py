@@ -743,23 +743,24 @@ class UnifiedWebSocketAuthenticator:
             # Force close connection as last resort
             if close_connection:
                 try:
-                    await websocket.close(code=1008, reason="Auth error")
+                    await websocket.close(code=1011, reason="Auth error")
                 except Exception:
                     pass  # Best effort close
     
     def _get_close_code_for_error(self, error_code: Optional[str]) -> int:
         """Get appropriate WebSocket close code for authentication error."""
         error_code_mapping = {
-            "NO_TOKEN": 1008,  # Policy violation
-            "INVALID_FORMAT": 1008,  # Policy violation
-            "VALIDATION_FAILED": 1008,  # Policy violation  
-            "TOKEN_EXPIRED": 1008,  # Policy violation
+            "NO_TOKEN": 1011,  # Server error (not client policy violation)
+            "INVALID_FORMAT": 1011,  # Server error (authentication system issue)
+            "VALIDATION_FAILED": 1011,  # Server error (authentication validation issue)  
+            "TOKEN_EXPIRED": 1011,  # Server error (authentication system managed expiry)
             "AUTH_SERVICE_ERROR": 1011,  # Server error
             "WEBSOCKET_AUTH_ERROR": 1011,  # Server error
             "INVALID_WEBSOCKET_STATE": 1002,  # Protocol error
+            "AUTH_CIRCUIT_BREAKER_OPEN": 1011,  # Server error
         }
         
-        return error_code_mapping.get(error_code, 1008)  # Default to policy violation
+        return error_code_mapping.get(error_code, 1011)  # Default to server error
     
     def get_websocket_auth_stats(self) -> Dict[str, Any]:
         """Get WebSocket authentication statistics for monitoring."""

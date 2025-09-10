@@ -84,11 +84,10 @@ class TestWebSocketAuthScopingIntegration:
         }
         
         # Create real JWT token for staging
-        test_token = await auth_helper.create_test_jwt_token(
+        test_token = auth_helper.create_test_jwt_token(
             user_id=test_user_context["user_id"],
             email=test_user_context["email"], 
-            permissions=test_user_context["permissions"],
-            environment="staging"
+            permissions=test_user_context["permissions"]
         )
         
         # Mock WebSocket with real-like attributes for staging
