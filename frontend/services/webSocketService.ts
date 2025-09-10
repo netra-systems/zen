@@ -39,6 +39,34 @@ interface WebSocketOptions {
 }
 
 class WebSocketService {
+  // Environment-specific timeout configuration
+  private getEnvironmentTimeouts() {
+    const isStaging = typeof window !== 'undefined' && 
+      (window.location.hostname.includes('staging') || 
+       process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ||
+       process.env.NODE_ENV === 'staging');
+    
+    if (isStaging) {
+      return {
+        baseReconnectDelay: 1000,     // 1s for staging (network latency)
+        maxReconnectDelay: 30000,     // 30s for staging
+        connectionInterval: 3000,     // 3s minimum for staging
+        heartbeatInterval: 30000,     // 30s heartbeat for staging
+        maxMessageAssemblyTime: 300000, // 5 minutes for large messages
+        authCooldown: 10000           // 10s auth cooldown for staging
+      };
+    }
+    
+    return {
+      baseReconnectDelay: 100,        // Keep fast for dev
+      maxReconnectDelay: 10000,       // 10s for dev
+      connectionInterval: 1000,       // 1s for dev
+      heartbeatInterval: 15000,       // 15s for dev
+      maxMessageAssemblyTime: 60000,  // 1 minute for dev
+      authCooldown: 5000              // 5s auth cooldown for dev
+    };
+  }
+
   private ws: WebSocket | null = null;
   private status: WebSocketStatus = 'CLOSED';
   private state: WebSocketState = 'disconnected';
@@ -59,13 +87,15 @@ class WebSocketService {
   // Connection deduplication and throttling
   private connectionAttemptId: string | null = null;
   private lastConnectionAttempt: number = 0;
-  private readonly MIN_CONNECTION_INTERVAL = 1000; // 1 second minimum between attempts
+  private get MIN_CONNECTION_INTERVAL() { 
+    return this.getEnvironmentTimeouts().connectionInterval; 
+  }
   
   // Enhanced refresh handling
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 10;
-  private baseReconnectDelay: number = 100;  // Start with 100ms for faster initial reconnect
-  private maxReconnectDelay: number = 10000;  // Cap at 10s instead of 30s
+  private baseReconnectDelay: number = this.getEnvironmentTimeouts().baseReconnectDelay;
+  private maxReconnectDelay: number = this.getEnvironmentTimeouts().maxReconnectDelay;
   
   // Auth refresh coordination to prevent spam
   private lastRefreshAttempt: number = 0;
@@ -77,7 +107,9 @@ class WebSocketService {
   // Auth failure handling
   private authRetryCount: number = 0;
   private readonly MAX_AUTH_RETRIES = 3;
-  private readonly AUTH_COOLDOWN_MS = 5000; // 5 seconds cooldown after auth failures
+  private get AUTH_COOLDOWN_MS() { 
+    return this.getEnvironmentTimeouts().authCooldown; 
+  }
   private lastAuthFailure: number = 0;
   
   // Large message handling

@@ -611,13 +611,29 @@ class UnifiedWebSocketManager:
         from shared.isolated_environment import get_env
         environment = get_env().get("ENVIRONMENT", "development").lower()
         
+        # CRITICAL FIX: GCP staging auto-detection to prevent 1011 errors  
+        # Environment variable propagation gaps in Cloud Run require auto-detection
+        if not environment or environment == "development":
+            # Auto-detect GCP staging based on service URLs and project context
+            gcp_project = get_env().get("GCP_PROJECT_ID", "")
+            backend_url = get_env().get("BACKEND_URL", "")
+            auth_service_url = get_env().get("AUTH_SERVICE_URL", "")
+            
+            if ("staging" in gcp_project or 
+                "staging.netrasystems.ai" in backend_url or 
+                "staging.netrasystems.ai" in auth_service_url or
+                "netra-staging" in gcp_project):
+                logger.info("🔍 GCP staging environment auto-detected - adjusting WebSocket retry configuration")
+                environment = "staging"
+        
         # Retry configuration based on environment
         max_retries = 1  # Default for development
         retry_delay = 0.5  # seconds
         
         if environment in ["staging", "production"]:
-            max_retries = 3  # More retries for cloud environments
+            max_retries = 3  # More retries for cloud environments  
             retry_delay = 1.0  # Longer delay for Cloud Run
+            logger.debug(f"WebSocket using {environment} retry config: {max_retries} retries with {retry_delay}s delay")
         
         # Try with retries
         for attempt in range(max_retries):
