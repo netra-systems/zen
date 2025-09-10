@@ -271,10 +271,8 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
                 'recovery_max_attempts': 3
             }
             
-            # Create bridge instance
-            websocket_bridge = AgentWebSocketBridge(
-                config_overrides=bridge_config
-            )
+            # Create bridge instance  
+            websocket_bridge = AgentWebSocketBridge()
             
             bridge_time = time.time() - start_time
             self._record_timing('websocket_bridge_setup', bridge_time)

@@ -66,8 +66,9 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         super().setUp()
-        self.test_user_id = "test_user_golden_path"
-        self.test_connection_id = "test_conn_golden_path"
+        import uuid
+        self.test_user_id = str(uuid.uuid4())
+        self.test_connection_id = str(uuid.uuid4())
         self.mock_websocket = MockWebSocketConnection(
             user_id=self.test_user_id,
             connection_id=self.test_connection_id,
@@ -342,8 +343,9 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
             factory = WebSocketManagerFactory()
             
             # Create managers for different users
+            import uuid
             user_managers = {}
-            test_users = ["user1", "user2", "user3"]
+            test_users = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
             
             for user_id in test_users:
                 try:
