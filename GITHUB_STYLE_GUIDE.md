@@ -24,6 +24,8 @@ for work occuring within a similar amount of time.
 - Every piece of communication should have a clear next step
 - Use imperatives: "Fix X," "Update Y," "Review Z"
 - Include specific file paths, line numbers, and error messages
+- Every update must update the Title if reasonable to do so
+- Use sub tasks or other measures of precent compelete. update when new information on status is known.
 
 ---
 
