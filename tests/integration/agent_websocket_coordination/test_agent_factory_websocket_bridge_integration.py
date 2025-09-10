@@ -19,7 +19,7 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.agents.supervisor.execution_engine_factory import create_execution_engine_factory, ExecutionEngineFactory
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
@@ -57,31 +57,18 @@ class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
         mock_emitter.notify_tool_completed = AsyncMock(return_value=True)
         mock_emitter.notify_agent_completed = AsyncMock(return_value=True)
         
-<<<<<<< HEAD
         # Create WebSocket bridge and execution engine factory
         websocket_bridge = AgentWebSocketBridge(websocket_emitter=mock_emitter)
         factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
-=======
-        # Create agent factory with WebSocket bridge
-        factory = create_execution_engine_factory(
-            user_context=user_context,
-            websocket_emitter=mock_emitter
-        )
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         
         # Verify factory has WebSocket bridge
         assert hasattr(factory, '_websocket_bridge'), "Factory should have WebSocket bridge"
         bridge = factory._websocket_bridge
         assert isinstance(bridge, AgentWebSocketBridge), "Bridge should be AgentWebSocketBridge instance"
         
-<<<<<<< HEAD
         # Create agent instance through agent instance factory
         agent_instance_factory = get_agent_instance_factory()
         agent = await agent_instance_factory.create_agent_instance(
-=======
-        # Create agent instance through factory
-        agent = await factory.create_agent_instance(
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
             agent_name="triage_agent",
             user_context=user_context
         )
@@ -133,17 +120,9 @@ class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
         mock_emitter.notify_tool_completed = AsyncMock(side_effect=lambda *a, **k: track_event('tool_completed', *a, **k))
         mock_emitter.notify_agent_completed = AsyncMock(side_effect=lambda *a, **k: track_event('agent_completed', *a, **k))
         
-<<<<<<< HEAD
         # Create WebSocket bridge and execution engine factory
         websocket_bridge = AgentWebSocketBridge(websocket_emitter=mock_emitter)
         factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
-=======
-        # Create factory
-        factory = create_execution_engine_factory(
-            user_context=user_context,
-            websocket_emitter=mock_emitter
-        )
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         
         bridge = factory._websocket_bridge
         
@@ -202,7 +181,6 @@ class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
         mock_emitter.notify_agent_thinking = AsyncMock(side_effect=lambda agent_name, *a, **k: track_agent_event('agent_thinking', agent_name, *a, **k))
         mock_emitter.notify_agent_completed = AsyncMock(side_effect=lambda agent_name, *a, **k: track_agent_event('agent_completed', agent_name, *a, **k))
         
-<<<<<<< HEAD
         # Create WebSocket bridge and execution engine factory
         websocket_bridge = AgentWebSocketBridge(websocket_emitter=mock_emitter)
         factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
@@ -213,19 +191,6 @@ class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
         agent_instance_factory = get_agent_instance_factory()
         agent1 = await agent_instance_factory.create_agent_instance("triage_agent", user_context)
         agent2 = await agent_instance_factory.create_agent_instance("cost_optimizer", user_context)
-=======
-        # Create factory
-        factory = create_execution_engine_factory(
-            user_context=user_context,
-            websocket_emitter=mock_emitter
-        )
-        
-        bridge = factory._websocket_bridge
-        
-        # Create multiple agents through factory
-        agent1 = await factory.create_agent_instance("triage_agent", user_context)
-        agent2 = await factory.create_agent_instance("cost_optimizer", user_context)
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         
         # Emit events for different agents
         await bridge.emit_agent_started("triage_agent", {"status": "triage starting"})
@@ -277,7 +242,6 @@ class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
         mock_emitter.notify_tool_completed = AsyncMock(return_value=True) 
         mock_emitter.notify_agent_completed = AsyncMock(return_value=True)
         
-<<<<<<< HEAD
         # Create WebSocket bridge and execution engine factory (should not fail even with broken WebSocket)
         websocket_bridge = AgentWebSocketBridge(websocket_emitter=mock_emitter)
         factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
@@ -287,18 +251,6 @@ class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
         # Test that agent instance factory still creates agents despite WebSocket issues
         agent_instance_factory = get_agent_instance_factory()
         agent = await agent_instance_factory.create_agent_instance("triage_agent", user_context)
-=======
-        # Create factory (should not fail even with broken WebSocket)
-        factory = create_execution_engine_factory(
-            user_context=user_context,
-            websocket_emitter=mock_emitter
-        )
-        
-        bridge = factory._websocket_bridge
-        
-        # Test that factory still creates agents despite WebSocket issues
-        agent = await factory.create_agent_instance("triage_agent", user_context)
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         assert agent is not None, "Factory should create agent even with WebSocket issues"
         
         # Test bridge error handling for different event types
@@ -372,17 +324,9 @@ class TestAgentFactoryWebSocketBridgeIntegration(SSotAsyncTestCase):
         mock_emitter.notify_tool_completed = AsyncMock(side_effect=lambda tool_name, *a, **k: track_state('tool_completed', tool_name, *a, **k))
         mock_emitter.notify_agent_completed = AsyncMock(side_effect=lambda agent_name, *a, **k: track_state('agent_completed', agent_name, *a, **k))
         
-<<<<<<< HEAD
         # Create WebSocket bridge and execution engine factory
         websocket_bridge = AgentWebSocketBridge(websocket_emitter=mock_emitter)
         factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
-=======
-        # Create factory
-        factory = create_execution_engine_factory(
-            user_context=user_context,
-            websocket_emitter=mock_emitter
-        )
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         
         bridge = factory._websocket_bridge
         

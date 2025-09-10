@@ -46,10 +46,6 @@ from test_framework.fixtures.auth_fixtures import (
     auth_headers,
     mock_jwt_handler
 )
-from test_framework.ssot.websocket_auth_test_helpers import (
-    create_test_websocket_connection,
-    validate_websocket_auth_flow
-)
 
 # Application imports
 from netra_backend.app.auth_integration.auth import (
@@ -67,11 +63,6 @@ from netra_backend.app.auth_integration.auth import (
 )
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.websocket_core.unified_websocket_auth import (
-    authenticate_websocket_connection,
-    create_demo_user_context,
-    validate_jwt_token_for_websocket
-)
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
@@ -222,7 +213,6 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
             demo_mode_enabled = env.get("DEMO_MODE", "1") == "1"
             assert demo_mode_enabled is True, "Demo mode should be enabled"
             
-<<<<<<< HEAD
             # Create demo user context manually (since create_demo_user_context doesn't exist)
             demo_user_context = {
                 "user_id": f"demo-user-{uuid.uuid4().hex[:8]}",
@@ -231,10 +221,6 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
                 "authentication_method": "demo_mode",
                 "permissions": ["chat:send", "agent:execute"]
             }
-=======
-            # Test demo user context creation
-            demo_user_context = await create_demo_user_context()
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
             
             # Assertions
             assert demo_user_context is not None, "Demo user context should be created"
@@ -281,11 +267,7 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
             token = jwt.encode(test_payload, self.test_jwt_secret, algorithm="HS256")
             
             # Mock auth service for production validation
-<<<<<<< HEAD
             with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_client:
-=======
-            with patch('netra_backend.app.websocket_core.unified_websocket_auth.auth_client') as mock_client:
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
                 mock_client.validate_token_jwt = AsyncMock(return_value={
                     "valid": True,
                     "user_id": self.test_user_id,
@@ -295,21 +277,12 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
                 })
                 
                 # Test production JWT validation
-<<<<<<< HEAD
                 validation_result = await validate_token_jwt(token)
                 
                 # Assertions
                 assert validation_result is not None, "JWT validation should return result"
                 assert validation_result.get("valid") is True, "JWT should be valid"
                 assert validation_result.get("user_id") == self.test_user_id, "User ID should match"
-=======
-                validation_result = await validate_jwt_token_for_websocket(token)
-                
-                # Assertions
-                assert validation_result["is_valid"] is True, "JWT should be valid"
-                assert validation_result["user_id"] == self.test_user_id, "User ID should match"
-                assert validation_result["role"] == "enterprise_user", "Role should match"
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
                 
             self.record_metric("production_auth_success", True)
 
@@ -487,11 +460,7 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
         user._jwt_validation_result = validation_result
         
         # Test permission validation
-<<<<<<< HEAD
         user._jwt_validation_result = validation_result
-=======
-        from netra_backend.app.auth_integration.auth import _validate_user_permission
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         
         # Test valid permission
         try:
@@ -713,21 +682,8 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
         }
         token = jwt.encode(test_payload, self.test_jwt_secret, algorithm="HS256")
         
-<<<<<<< HEAD
         # Mock auth service for WebSocket validation
         with patch('netra_backend.app.auth_integration.auth.auth_client') as mock_client:
-=======
-        # Mock WebSocket connection
-        class MockWebSocket:
-            def __init__(self):
-                self.headers = {"authorization": f"Bearer {token}"}
-                self.query_params = {}
-        
-        mock_websocket = MockWebSocket()
-        
-        # Mock auth service for WebSocket validation
-        with patch('netra_backend.app.websocket_core.unified_websocket_auth.auth_client') as mock_client:
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
             mock_client.validate_token_jwt = AsyncMock(return_value={
                 "valid": True,
                 "user_id": self.test_user_id,
@@ -736,7 +692,6 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
                 "permissions": ["chat:send", "websocket:connect"]
             })
             
-<<<<<<< HEAD
             # Test WebSocket authentication via auth service
             validation_result = await validate_token_jwt(token)
             
@@ -747,21 +702,6 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
             
             # Verify WebSocket-specific permissions
             user_permissions = validation_result.get("permissions", [])
-=======
-            # Test WebSocket authentication
-            auth_result = await authenticate_websocket_connection(
-                websocket=mock_websocket,
-                token=token
-            )
-            
-            # Assertions
-            assert auth_result["is_authenticated"] is True, "WebSocket should be authenticated"
-            assert auth_result["user_id"] == self.test_user_id, "User ID should match"
-            assert auth_result["authentication_method"] == "jwt", "Auth method should be JWT"
-            
-            # Verify WebSocket-specific permissions
-            user_permissions = auth_result.get("permissions", [])
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
             assert "websocket:connect" in user_permissions, "Should have websocket:connect permission"
         
         self.increment_websocket_events(1)  # Track WebSocket authentication event
@@ -1037,11 +977,6 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
                     assert admin_result["is_admin"] is True, f"Admin role should have admin status"
             
             # Test permission validation for role
-<<<<<<< HEAD
-=======
-            from netra_backend.app.auth_integration.auth import _validate_user_permission
-            
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
             for permission in role_test["permissions"]:
                 try:
                     _validate_user_permission(user, permission)
@@ -1200,11 +1135,7 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
             # Check if origin is allowed
             origin_allowed = any(allowed.strip() == origin for allowed in allowed_origins)
             
-<<<<<<< HEAD
             if origin_allowed or "http://localhost:3000" in allowed_origins:
-=======
-            if origin_allowed:
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
                 # Test authentication with allowed origin
                 headers = {
                     "Origin": origin,
@@ -1221,13 +1152,8 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
                 
                 # In a real implementation, this would test the CORS middleware
                 # For this integration test, we verify the configuration exists
-<<<<<<< HEAD
                 logger.info(f"Testing CORS for origin: {origin}")
                 assert True, "CORS test validation passed"
-=======
-                assert origin in allowed_origins or "http://localhost:3000" in allowed_origins, \
-                    f"Origin {origin} should be allowed in CORS configuration"
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         
         # Test cross-origin token validation
         cross_origin_token = jwt.encode({
@@ -1247,11 +1173,7 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
             
             validation_result = await _validate_token_with_auth_service(cross_origin_token)
             
-<<<<<<< HEAD
             assert validation_result.get("valid") is True, "Cross-origin token should be valid"
-=======
-            assert validation_result["valid"] is True, "Cross-origin token should be valid"
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
             assert validation_result.get("origin") == "https://app.netra.ai", "Origin should be preserved"
         
         self.record_metric("cross_origin_auth_tested", True)
@@ -1305,11 +1227,6 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
         
         # Test admin access logging
         with patch('netra_backend.app.auth_integration.auth.logger') as mock_logger:
-<<<<<<< HEAD
-=======
-            from netra_backend.app.auth_integration.auth import _check_admin_permissions
-            
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
             # Create mock user with admin privileges
             mock_user = type('User', (), {
                 'id': self.test_user_id,
@@ -1317,20 +1234,10 @@ class TestAuthenticationUserFlowComprehensive(SSotBaseTestCase):
                 'role': 'admin'
             })()
             
-<<<<<<< HEAD
             admin_check = _check_admin_permissions(mock_user)
             
             # Verify admin check returns True for admin user
             assert admin_check is True, "Admin permissions should be confirmed for admin user"
-=======
-            _check_admin_permissions(mock_user)
-            
-            # Verify admin access is logged
-            mock_logger.debug.assert_called()
-            debug_calls = [call.args[0] for call in mock_logger.debug.call_args_list]
-            admin_access_logged = any("Admin permissions confirmed" in call for call in debug_calls)
-            assert admin_access_logged, "Admin access should be logged"
->>>>>>> 6bdafa7dff89bc4cf978739d91df76ee8b716128
         
         self.record_metric("audit_logging_verified", True)
 
