@@ -271,115 +271,66 @@ python tests/unified_test_runner.py --real-services
 python scripts/refresh_dev_services.py refresh --services backend auth
 ```
 
-### 7.3. Unified Test Runner
+### 7.2. Unified Test Runner
+**RULES:** Real services required, mocks forbidden (except unit tests), E2E auth mandatory
 
-IMPORTANT: Use real services, real llm, docker compose etc. whenever possible for testing.
-MOCKS are FORBIDDEN in dev, staging or production.  (Except limited cases for unit tests if you can prove it's needed)
-FAKE TESTS ARE BAD
+**Commands:**
+- **Fast:** `python tests/unified_test_runner.py --category integration --no-coverage --fast-fail`
+- **Real Services:** `python tests/unified_test_runner.py --real-services`
+- **E2E:** `python tests/unified_test_runner.py --category e2e`
+- **Release:** `python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
 
-**🚨 E2E AUTH ENFORCEMENT:** ALL e2e tests MUST authenticate with the system using real auth flows (JWT, OAuth, etc.). The ONLY exceptions are tests specifically validating the auth system itself. This is NON-NEGOTIABLE for ensuring proper multi-user isolation and real-world scenarios. Use @e2e_auth_helper.py for SSOT auth patterns.
+### 7.3. Deployment (GCP)
+```bash
+python scripts/deploy_to_gcp.py --project netra-staging --build-local
+```
+## 8. SPECIFICATIONS REFERENCE
 
-**See @TEST_CREATION_GUIDE.md for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
-**See @TEST_ARCHITECTURE_VISUAL_OVERVIEW.md for complete visual guide to test infrastructure, layers, and execution flows.**
+**Key Specs:**
+- @MISSION_CRITICAL_NAMED_VALUES_INDEX.xml - Cascade failure prevention
+- @index.xml - All learnings index
+- @core.xml - System architecture
+- @type_safety.xml - Type safety rules
+- @mega_class_exceptions.xml - SSOT classes up to 2000 lines
+- @git_commit_atomic_units.xml - Commit standards
+- @configuration_architecture.md - Environment management
 
-**The test runner automatically starts Docker when needed:**
+**Environment Access:** Only through service-specific SSOT configs, no direct os.environ
 
-  * **Default (Fast Feedback):** `python tests/unified_test_runner.py --category integration --no-coverage --fast-fail`
-  * **With Real Services:** `python tests/unified_test_runner.py --real-services` (Docker starts automatically)
-  * **E2E Tests:** `python tests/unified_test_runner.py --category e2e` (Docker starts automatically)
-  * **Before Release:** `python tests/unified_test_runner.py --categories smoke unit integration api --real-llm --env staging`
-  * **Mission Critical Tests:** `python tests/mission_critical/test_websocket_agent_events_suite.py`
+## 9. SYSTEM STATUS TRACKING
 
-#### Docker Environment Configuration
-- **Test Environment (Default)**: PostgreSQL (5434), Redis (6381), Backend (8000), Auth (8081)
-- **Development Environment**: PostgreSQL (5432), Redis (6379), Backend (8000), Auth (8081)
-- **Production Environment**: Standard production ports
+**Pre-Work Check:**
+- @reports/MASTER_WIP_STATUS.md - System health and compliance
+- @reports/DEFINITION_OF_DONE_CHECKLIST.md - Module checklists
+- Regenerate status after work completion
 
-### 7.4. Deployment (GCP)
-
-**Use ONLY the official deployment script.**
-  * **Default:** `python scripts/deploy_to_gcp.py --project netra-staging --build-local`
------
-
-DO THE RIGHT THING - NOT JUST THE FASTEST THING.
-
-## 8\. Detailed Specifications Reference
-
-This is a non-exhaustive list of mission-critical specs.
-| Spec | Purpose |
-| :--- | :--- |
-| @MISSION_CRITICAL_NAMED_VALUES_INDEX.xml | ** CRITICAL:** Master index of ALL values that cause cascade failures. CHECK FIRST! |
-| @index.xml | Index of all learnings. **Check first.** |
-| @core.xml | Core system architecture. |
-| @type_safety.xml | Type safety and duplication rules. |
-| @conventions.xml | Standards and guidelines. |
-| @mega_class_exceptions.xml | **CRITICAL:** Approved exceptions for central SSOT classes up to 2000 lines. |
-| @git_commit_atomic_units.xml | **CRITICAL:** Git commit standards. |
-| @import_management_architecture.xml | **CRITICAL:** Absolute import rules. |
-| @configuration_architecture.md | **CRITICAL:** Configuration and environment management architecture with complete diagrams and flows. |
-
-Direct OS.env access is FORBIDDEN except in each services canonical env config SSOT. Applies to ALL tests too. EACH SERVICE MUST MAINTAIN INDEPENDENCE. Import ONLY from the env of the service.
-
------
-DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
-YOU DO YOUR BEST WORK.
-
-## 8\. System Status and Compliance Tracking
-
-**CRITICAL: Check the work in progress and current system state BEFORE starting work.**
-  * @reports/MASTER_WIP_STATUS.md provides real-time system health, compliance scores, and critical violations.
-  * @reports/DEFINITION_OF_DONE_CHECKLIST.md Checklist for all module changes. Review ALL files listed for your module.**
-  * Review these reports first and regenerate status after your work is complete.
-
-If you ever have a chance to audit or verify or spawn new subagent, even if 10x as much work to improve 1% chance of overall success do it. Success = Complete work at all costs.
-
-
-YOU ARE VERY SMART AND PRACTICAL.
-
-## 9\. Execution Checklist
+## 10. EXECUTION CHECKLIST
 
 ### For Every Code Change:
+1. **Assess Scope:** Determine if specialized agents needed
+2. **Check Critical Values:** @MISSION_CRITICAL_NAMED_VALUES_INDEX.xml
+3. **Type Safety:** Run `python scripts/type_drift_migration_utility.py --scan`
+4. **Review DoD:** @DEFINITION_OF_DONE_CHECKLIST.md for your module
+5. **Check Learnings:** @index.xml and recent commits
+6. **Verify Strings:** `python scripts/query_string_literals.py validate/search`
+7. **Review Specs:** @type_safety.xml and @conventions.xml
+8. **Create Tests:** New real test suite (preferably failing tests)
+9. **Run Tests:** Local tests with real services
+10. **Complete DoD:** All module checklist items
+11. **Update Docs:** Specs reflect reality
+12. **Refresh Indexes:** String literals if needed
+13. **Update Status:** Regenerate reports and learnings
+14. **Save Learnings:** @index.xml
 
-1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
-2.  **🚨 CHECK CRITICAL VALUES:** Open @MISSION_CRITICAL_NAMED_VALUES_INDEX.xml - validate ALL named values!
-    - **ATTENTION:** OAuth credentials, JWT keys, database URLs - see @OAUTH_REGRESSION_ANALYSIS_20250905.md
-3.  **🔍 TYPE SAFETY VALIDATION:** **CRITICAL** - Check for type drift issues before any changes:
-    - **Run Type Audit:** `python scripts/type_drift_migration_utility.py --scan` for affected files
-    - **Use SSOT Strongly Typed IDs:** Import from `shared.types` - `UserID`, `ThreadID`, `RunID`, `RequestID`, etc.
-    - **See:** @TYPE_DRIFT_AUDIT_REPORT.md for complete remediation guide
-4.  **Review DoD Checklist:** Open @DEFINITION_OF_DONE_CHECKLIST.md and identify your module's section.
-5.  **Check Learnings:** Search recent @index.xml and recent commit changes.
-6.  **Verify Strings:** **MANDATORY STRING LITERAL VALIDATION** - See @STRING_LITERALS_USAGE_GUIDE.md:
-    - **NEVER guess string literals** - Always validate: `python scripts/query_string_literals.py validate "your_string"`
-    - **Search for existing:** `python scripts/query_string_literals.py search "keyword" --category critical_config`
-    - **Check environment health:** `python scripts/query_string_literals.py check-env staging`
-    - **🚨 CRITICAL CONFIGS:** 11 env vars + 12 domains cause CASCADE FAILURES - use `show-critical`
-7.  **Review Core Specs:** Re-read @type_safety.xml and @conventions.xml.
-8.  **Create New Test Suite:** Create a new real test suite of difficult tests idealy failing tests.
-9.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
-10. **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
-11. **Update Documentation:** Ensure specs reflect the implemented reality.
-12. **Refresh Indexes:** Update the string literal index if new constants were added.
-13. **Update Status:** Regenerate and refresh reports .mds and learnings.
-14. **Save new Learnings:** @index.xml.
+### 10.1. Git Commit Standards
+**Follow @git_commit_atomic_units.xml:**
+- Small, focused, conceptually similar units
+- Each commit reviewable in <1 minute
+- Complex refactors include MRO report reference
+- 1-10 commits per related work group
 
-### 9.1 Git Commit Standards.
-**All commits follow @git_commit_atomic_units.xml.**
-**Windows Unicode/emoji issues: See @windows_unicode_handling.xml.**
-A user asking for "git commit" means: For EACH group of work that's related do a commit. e.g. 1-10 commits as per need.
-  * **GROUP CONCEPTS - LIMIT COUNT OF FILES:** Commits must be small, focused, and conceptually similar units.
-  * **CONCEPT-BASED:** NEVER bulk commit massive changes without express orders.
-  * **REVIEWABLE:** Each commit must be reviewable in under one minute.
-  * **REFACTORING COMMITS:** Complex refactors MUST include MRO report reference in commit message
-
-KEEP CORE SYSTEM AS IS
-NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
-DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK!
-GOlDEN PATH = MUST WORK
-
-The #1 priority right now is the GOLDEN PATH that the users can login and complete getting a message back.
-The secondary items are database flows or other features.
-Even Auth can be more permissive for now (log issue in git for items temporarily bypassed)
-IT MUST allow allow the golden path through!!! (and keep logging errors for future work)
-
-**Final Reminder:** ULTRA THINK DEEPLY. CHEATING ON TESTS = ABOMINATION. Your mission is to generate monetization-focused value. Prioritize a coherent, unified system that delivers end-to-end value for our customers. YOU MUST ALWAYS SELF-REFLECT ON YOUR WORK AND SAVE IT IN UNIFIED REFLECTION JOURNAL. **Think deeply. YOUR WORK MATTERS. THINK STEP BY STEP AS DEEPLY AS POSSIBLE.**
+**FINAL REMINDER:** 
+- **GOLDEN PATH PRIORITY:** Users login → get AI responses
+- **ULTRA THINK DEEPLY:** Deep analysis required
+- **NO TEST CHEATING:** Real tests that fail properly
+- **COMPLETE WORK:** Finish tasks fully with self-reflection
