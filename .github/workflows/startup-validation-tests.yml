@@ -59,7 +59,7 @@ jobs:
         run: |
           echo "🚀 Running Startup Smoke Tests (Fast Validation)"
           echo "=============================================="
-          python -m pytest tests/mission_critical/test_startup_wiring_smoke.py -v --tb=short --timeout=30
+          python -m pytest tests/smoke/test_startup_wiring_smoke.py -v --tb=short --timeout=30
         continue-on-error: false
         
       - name: Run Phase Ordering Tests
