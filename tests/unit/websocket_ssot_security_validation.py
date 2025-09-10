@@ -206,12 +206,12 @@ class TestWebSocketSingletonSecurityValidation(BaseTestClass):
         
         # Search for shared state patterns that enable data leakage
         risky_patterns = [
-            'class.*Manager.*:',  # Manager classes often have shared state
-            '_instance.*=.*None',  # Singleton pattern markers
-            'global.*websocket',   # Global WebSocket variables
-            'cache.*=.*{}',       # Shared caches
-            'connections.*=.*[]', # Shared connection lists
-            'sessions.*=.*{}'     # Shared session storage
+            r'class.*Manager.*:',  # Manager classes often have shared state
+            r'_instance.*=.*None',  # Singleton pattern markers
+            r'global.*websocket',   # Global WebSocket variables
+            r'cache.*=.*\{\}',       # Shared caches
+            r'connections.*=.*\[\]', # Shared connection lists
+            r'sessions.*=.*\{\}'     # Shared session storage
         ]
         
         python_files = list(self.project_root.rglob("*.py"))

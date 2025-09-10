@@ -30,10 +30,14 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Type
 from unittest.mock import Mock, patch
 
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+try:
+    from test_framework.ssot.base_test_case import SSotBaseTestCase
+    BaseTestClass = SSotBaseTestCase
+except ImportError:
+    BaseTestClass = unittest.TestCase
 
 
-class TestWebSocketSSotIntegrationCompliance(SSotBaseTestCase):
+class TestWebSocketSSotIntegrationCompliance(BaseTestClass):
     """
     Integration tests to validate WebSocket SSOT compliance across module boundaries.
     
@@ -423,7 +427,7 @@ class TestWebSocketSSotIntegrationCompliance(SSotBaseTestCase):
             print(f"CROSS-SERVICE VIOLATION: {violation}")
 
 
-class TestWebSocketSSotRegressionPrevention(SSotBaseTestCase):
+class TestWebSocketSSotRegressionPrevention(BaseTestClass):
     """
     Tests to prevent regression back to SSOT violations after remediation.
     """
