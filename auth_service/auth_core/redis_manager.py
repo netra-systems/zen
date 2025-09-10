@@ -32,13 +32,14 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-# Import SSOT Redis Manager
-try:
-    from netra_backend.app.redis_manager import redis_manager as ssot_redis_manager
-    SSOT_AVAILABLE = True
-except ImportError:
-    SSOT_AVAILABLE = False
-    logger.warning("SSOT Redis manager not available - falling back to standalone auth implementation")
+# Import SSOT Redis Manager - DISABLED for microservice independence
+# try:
+#     from netra_backend.app.redis_manager import redis_manager as ssot_redis_manager
+#     SSOT_AVAILABLE = True
+# except ImportError:
+SSOT_AVAILABLE = False
+ssot_redis_manager = None
+logger.info("Auth service running in standalone mode - using independent Redis implementation")
 
 # Issue deprecation warning
 warnings.warn(
@@ -76,12 +77,17 @@ class AuthRedisManager:
         self.redis_client = None
         self._connection_pool = None
         self.connected = False
-        self._enabled = False
+        self._enabled = True  # Enable in standalone mode
+        self._initialized = False
+        self.host = 'redis'
+        self.port = 6379
+        self.db = 0
+        self.password = None
     
     @property
     def enabled(self):
-        """Check if Redis is enabled (redirects to SSOT)."""
-        return SSOT_AVAILABLE and self._redis.is_connected
+        """Check if Redis is enabled (standalone mode)."""
+        return self._enabled and REDIS_AVAILABLE
     
     def _lazy_init(self):
         """Lazy initialization of Redis configuration."""
@@ -121,11 +127,38 @@ class AuthRedisManager:
             self._initialized = True
     
     async def connect(self) -> bool:
-        """Connect to Redis server (redirects to SSOT)."""
-        if SSOT_AVAILABLE:
-            await self._redis.initialize()
-            return self._redis.is_connected
-        return False
+        """Connect to Redis server (standalone mode)."""
+        if not self._enabled:
+            return False
+        
+        if not REDIS_AVAILABLE:
+            logger.warning("Redis not available - operating without Redis")
+            return False
+            
+        try:
+            self._lazy_init()
+            
+            # Create connection pool
+            self._connection_pool = redis.ConnectionPool(
+                host=self.host,
+                port=self.port,
+                db=self.db,
+                password=self.password,
+                decode_responses=True
+            )
+            
+            self.redis_client = redis.Redis(connection_pool=self._connection_pool)
+            
+            # Test connection
+            await self.redis_client.ping()
+            self.connected = True
+            logger.info(f"Connected to Redis at {self.host}:{self.port}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to connect to Redis: {e}")
+            self.connected = False
+            return False
     
     async def disconnect(self):
         """Disconnect from Redis."""
@@ -139,23 +172,32 @@ class AuthRedisManager:
     
     def get_client(self) -> Optional[redis.Redis]:
         """Get the Redis client instance."""
+        if not self.connected:
+            return None
         self._lazy_init()  # Ensure configuration is loaded
         return self.redis_client
     
     async def ensure_connected(self) -> bool:
-        """Ensure Redis connection is active (redirects to SSOT)."""
-        if not SSOT_AVAILABLE:
+        """Ensure Redis connection is active (standalone mode)."""
+        if not self._enabled:
             return False
-        if not self._redis.is_connected:
-            await self._redis.initialize()
-        return self._redis.is_connected
+        if not self.connected:
+            return await self.connect()
+        return True
     
-    # Session Management (redirected to SSOT)
+    # Session Management (standalone mode)
     async def store_session(self, session_id: str, session_data: Dict[str, Any], ttl_seconds: int = 3600) -> bool:
-        """Store user session data (redirects to SSOT)."""
-        if SSOT_AVAILABLE:
-            return await self._redis.store_session(session_id, session_data, ttl_seconds)
-        return False
+        """Store user session data (standalone mode)."""
+        if not await self.ensure_connected():
+            return False
+        
+        try:
+            key = f"{self.session_prefix}{session_id}"
+            await self.redis_client.setex(key, ttl_seconds, json.dumps(session_data))
+            return True
+        except Exception as e:
+            logger.error(f"Failed to store session {session_id}: {e}")
+            return False
     
     async def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve user session data (redirects to SSOT)."""

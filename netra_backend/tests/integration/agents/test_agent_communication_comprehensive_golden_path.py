@@ -36,7 +36,8 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 
 # Agent Communication Components Under Test
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 

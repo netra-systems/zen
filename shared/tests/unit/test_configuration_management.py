@@ -41,6 +41,7 @@ from uuid import uuid4
 import sys
 
 # Import SSOT components under test
+from shared.constants.service_identifiers import SERVICE_ID
 from shared.isolated_environment import (
     IsolatedEnvironment,
     EnvironmentValidator,
@@ -71,11 +72,11 @@ class TestIsolatedEnvironmentValidationPatterns:
         """
         # Test proper SSOT access patterns
         clean_env.set("SERVICE_SECRET", "test-service-secret-32-chars-long", "unit_test")
-        clean_env.set("SERVICE_ID", "netra-backend", "unit_test")
+        clean_env.set("SERVICE_ID", SERVICE_ID, "unit_test")
         
         # Verify isolated access works correctly
         assert clean_env.get("SERVICE_SECRET") == "test-service-secret-32-chars-long"
-        assert clean_env.get("SERVICE_ID") == "netra-backend"
+        assert clean_env.get("SERVICE_ID") == SERVICE_ID
         
         # Verify source tracking (critical for debugging production issues)
         assert clean_env.get_variable_source("SERVICE_SECRET") == "unit_test"
@@ -109,8 +110,8 @@ class TestIsolatedEnvironmentValidationPatterns:
                 pytest.fail(f"SERVICE_ID '{service_id}' has timestamp suffix - will cause recurring auth failures every 60s")
         
         # Test correct stable SERVICE_ID
-        clean_env.set("SERVICE_ID", "netra-backend", "test_stable")
-        assert clean_env.get("SERVICE_ID") == "netra-backend"
+        clean_env.set("SERVICE_ID", SERVICE_ID, "test_stable")
+        assert clean_env.get("SERVICE_ID") == SERVICE_ID
 
     @pytest.mark.unit
     def test_environment_specific_configuration_isolation(self, clean_env):
@@ -376,7 +377,7 @@ class TestEnvironmentValidatorCascadeFailurePrevention:
         # Add required backend variables
         backend_config = {
             "SERVICE_SECRET": "backend-service-secret-32-chars-long",
-            "SERVICE_ID": "netra-backend",
+            "SERVICE_ID": SERVICE_ID,
             "DATABASE_URL": "postgresql://user:pass@localhost:5432/db", 
             "JWT_SECRET_KEY": "jwt-secret-key-32-characters-minimum"
         }
@@ -418,7 +419,7 @@ class TestEnvironmentValidatorCascadeFailurePrevention:
                 assert any("timestamp" in error.lower() or "stable" in error.lower() for error in result.errors)
         
         # Test correct stable SERVICE_ID
-        env.set("SERVICE_ID", "netra-backend", "stable_test") 
+        env.set("SERVICE_ID", SERVICE_ID, "stable_test") 
         result = validator.validate_service_id_stability()
         assert result.is_valid
         assert len(result.errors) == 0

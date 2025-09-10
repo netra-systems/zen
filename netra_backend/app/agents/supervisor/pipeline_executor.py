@@ -11,7 +11,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,
 )

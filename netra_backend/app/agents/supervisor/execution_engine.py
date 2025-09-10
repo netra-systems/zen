@@ -1,4 +1,37 @@
+"""
+🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+
+This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
+
+MIGRATION REQUIRED:
+- Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- This file will be REMOVED in the next release
+
+SECURITY FIX: Multiple ExecutionEngine implementations caused WebSocket user 
+isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH.
+"""
+
+"""
+🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+
+This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
+
+MIGRATION REQUIRED:
+- Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- This file will be REMOVED in the next release
+
+SECURITY FIX: Multiple ExecutionEngine implementations caused WebSocket user 
+isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH.
+"""
+
 """Execution engine for supervisor agent pipelines with UserExecutionContext support.
+
+🚨 CRITICAL SSOT MIGRATION NOTICE 🚨
+This ExecutionEngine is DEPRECATED and will be REMOVED in the next release.
+
+MIGRATION REQUIRED:
+- NEW CODE: Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- EXISTING CODE: Replace imports with 'from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine'
 
 DEPRECATION WARNING: This ExecutionEngine uses global state and is not safe for concurrent users.
 For new code, use RequestScopedExecutionEngine or the factory methods provided below.
@@ -16,6 +49,7 @@ Migration Guide:
 import asyncio
 import hashlib
 import time
+import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -69,6 +103,11 @@ logger = central_logger.get_logger(__name__)
 class ExecutionEngine:
     """Request-scoped agent execution orchestration.
     
+    🚨 DEPRECATED - Use UserExecutionEngine instead!
+    
+    MIGRATION PATH:
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+    
     REQUIRED: Use factory methods for instantiation:
     - create_request_scoped_engine() for isolated instances
     - ExecutionContextManager for automatic cleanup
@@ -82,6 +121,18 @@ class ExecutionEngine:
     - Semaphore-based concurrency control for 5+ concurrent users
     - Guaranteed WebSocket event delivery with proper sequencing
     """
+    
+    def __init__(self, *args, **kwargs):
+        """Initialize ExecutionEngine with deprecation warning."""
+        import warnings
+        warnings.warn(
+            "supervisor.execution_engine.ExecutionEngine is DEPRECATED and will be REMOVED. "
+            "Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine instead. "
+            "SSOT Compliance: Only UserExecutionEngine should be used for new development.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        # Continue with original initialization (no parent class, so continue with existing init logic below)
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
@@ -99,10 +150,11 @@ class ExecutionEngine:
             websocket_bridge: WebSocket bridge for event emission
             user_context: Optional UserExecutionContext for per-request isolation
         """
-        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of ConsolidatedExecutionEngine
         import warnings
         warnings.warn(
-            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            "SupervisorExecutionEngine is deprecated. "
+            "Use ConsolidatedExecutionEngine via UnifiedExecutionEngineFactory instead.",
             DeprecationWarning,
             stacklevel=2
         )
@@ -655,11 +707,9 @@ class ExecutionEngine:
         await self._wait_for_retry(context.retry_count)
         return await self.execute_agent(context, user_context)
     
-    async def execute_pipeline(self, steps: List[PipelineStep],
-                              context: AgentExecutionContext,
-                              user_context: Optional['UserExecutionContext']) -> List[AgentExecutionResult]:
-        """Execute a pipeline of agents."""
-        return await self._execute_pipeline_steps(steps, context, user_context)
+    # SSOT COMPLIANCE: execute_pipeline method removed - use UserExecutionEngine directly
+    # This method has been removed to eliminate SSOT violations.
+    # Use UserExecutionEngine.execute_pipeline() for all pipeline execution.
     
     async def _execute_pipeline_steps(self, steps: List[PipelineStep],
                                      context: AgentExecutionContext,

@@ -1026,6 +1026,186 @@ class CentralConfigurationValidator:
         credentials = self.get_oauth_credentials()
         return credentials["client_secret"]
     
+    def validate_oauth_token_comprehensive(self, token: str) -> bool:
+        """
+        SSOT: Comprehensive OAuth token validation.
+        
+        Replaces duplicate OAuth token validation logic from auth_integration/validators.py.
+        
+        Args:
+            token: OAuth token to validate
+            
+        Returns:
+            bool: True if token is valid format, False otherwise
+        """
+        if not token:
+            return False
+        
+        # Check OAuth token length constraints
+        return 10 <= len(token) <= 2000
+    
+    def validate_oauth_credentials_endpoint(self, credentials: dict) -> dict:
+        """
+        SSOT: OAuth credential validation for routes.
+        
+        Replaces duplicate OAuth credential validation from auth_routes/oauth_validation.py.
+        
+        Args:
+            credentials: Dict containing OAuth config (client_id, client_secret)
+            
+        Returns:
+            dict: Validation result with 'valid' and 'errors' keys
+        """
+        errors = []
+        
+        # Validate client_id
+        client_id = credentials.get('client_id')
+        if not client_id:
+            errors.append("OAuth client_id is required")
+        elif client_id in ["", "your-client-id", "REPLACE_WITH"]:
+            errors.append("OAuth client_id contains placeholder value")
+        
+        # Validate client_secret
+        client_secret = credentials.get('client_secret')
+        if not client_secret:
+            errors.append("OAuth client_secret is required")
+        elif client_secret in ["", "your-client-secret", "REPLACE_WITH"]:
+            errors.append("OAuth client_secret contains placeholder value")
+        elif len(client_secret) < 10:
+            errors.append("OAuth client_secret too short (minimum 10 characters)")
+        
+        return {
+            "valid": len(errors) == 0,
+            "errors": errors
+        }
+    
+    def validate_oauth_provider_configuration(self, provider: str) -> bool:
+        """
+        SSOT: OAuth provider configuration validation.
+        
+        Replaces duplicate OAuth provider validation from configuration_validator.py.
+        
+        Args:
+            provider: OAuth provider name (e.g., 'google')
+            
+        Returns:
+            bool: True if provider configuration is valid
+        """
+        if provider.lower() != 'google':
+            # Only Google OAuth is currently supported
+            return False
+        
+        try:
+            # Use SSOT OAuth credentials validation
+            oauth_creds = self.get_oauth_credentials()
+            
+            # Validate credentials exist and are non-empty
+            return (
+                oauth_creds.get('client_id') and 
+                oauth_creds.get('client_secret') and
+                len(oauth_creds['client_secret']) >= 10
+            )
+        except ValueError:
+            # OAuth credentials not configured for current environment
+            return False
+    
+    def simulate_oauth_end_to_end(self) -> dict:
+        """
+        SSOT: OAuth E2E simulation validation.
+        
+        Replaces duplicate OAuth E2E simulation from configuration_drift_monitor.py.
+        
+        Returns:
+            dict: Simulation result with validation status
+        """
+        import time
+        
+        environment = self.get_environment()
+        current_env_str = environment.value
+        
+        # Get E2E OAuth simulation key
+        e2e_oauth_key = self.env_getter("E2E_OAUTH_SIMULATION_KEY")
+        
+        validation_result = {
+            "config_key": "E2E_OAUTH_SIMULATION_KEY",
+            "environment": current_env_str,
+            "validation_timestamp": time.time(),
+            "key_available": e2e_oauth_key is not None,
+            "key_length": len(e2e_oauth_key) if e2e_oauth_key else 0,
+            "drift_detected": False,
+            "drift_details": [],
+            "business_impact": "none"
+        }
+        
+        if not e2e_oauth_key:
+            validation_result.update({
+                "drift_detected": True,
+                "business_impact": "high",
+                "error": "E2E_OAUTH_SIMULATION_KEY missing - E2E authentication bypass unavailable"
+            })
+            return validation_result
+        
+        # Validate key format and content
+        if len(e2e_oauth_key) < 32:
+            validation_result.update({
+                "drift_detected": True,
+                "business_impact": "moderate",
+                "warning": f"E2E_OAUTH_SIMULATION_KEY too short ({len(e2e_oauth_key)} chars, expected 32+)"
+            })
+        
+        return validation_result
+    
+    def validate_oauth_configs_for_environment(self, environment: str) -> Dict[str, Any]:
+        """
+        SSOT: Validate OAuth configuration for a specific environment.
+        
+        Replaces duplicate OAuth config validation from cross_service_validator.py.
+        
+        Args:
+            environment: The environment to validate (development, test, staging, production)
+            
+        Returns:
+            Dict with 'valid' (bool) and 'errors' (list) keys
+        """
+        errors = []
+        
+        try:
+            # Check for environment-specific OAuth credentials
+            client_id_key = f"GOOGLE_OAUTH_CLIENT_ID_{environment.upper()}"
+            client_secret_key = f"GOOGLE_OAUTH_CLIENT_SECRET_{environment.upper()}"
+            
+            client_id = self.env_getter(client_id_key)
+            client_secret = self.env_getter(client_secret_key)
+            
+            # Validate client ID
+            if not client_id:
+                errors.append(f"Missing {client_id_key} for {environment} environment")
+            elif client_id in ["", "your-client-id", "REPLACE_WITH"]:
+                errors.append(f"Invalid {client_id_key} - contains placeholder value")
+            
+            # Validate client secret
+            if not client_secret:
+                errors.append(f"Missing {client_secret_key} for {environment} environment")
+            elif client_secret in ["", "your-client-secret", "REPLACE_WITH"]:
+                errors.append(f"Invalid {client_secret_key} - contains placeholder value")
+            elif len(client_secret) < 10:
+                errors.append(f"Invalid {client_secret_key} - too short (minimum 10 characters)")
+            
+            # Additional validation for production/staging
+            if environment.lower() in ['staging', 'production']:
+                # Check that we're not using development credentials in production
+                dev_client_id = self.env_getter("GOOGLE_OAUTH_CLIENT_ID_DEVELOPMENT")
+                if client_id == dev_client_id and dev_client_id:
+                    errors.append(f"Security issue: {environment} environment is using development OAuth credentials")
+            
+        except Exception as e:
+            errors.append(f"OAuth validation error for {environment}: {str(e)}")
+        
+        return {
+            "valid": len(errors) == 0,
+            "errors": errors
+        }
+    
     def validate_startup_requirements(self) -> None:
         """
         Validate all startup requirements before service initialization.
@@ -1202,6 +1382,56 @@ def get_oauth_client_secret() -> str:
     """
     validator = get_central_validator()
     return validator.get_oauth_client_secret()
+
+
+def validate_oauth_token_comprehensive(token: str) -> bool:
+    """
+    SSOT: Comprehensive OAuth token validation.
+    
+    Replaces duplicate OAuth token validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_token_comprehensive(token)
+
+
+def validate_oauth_credentials_endpoint(credentials: dict) -> dict:
+    """
+    SSOT: OAuth credential validation for routes.
+    
+    Replaces duplicate OAuth credential validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_credentials_endpoint(credentials)
+
+
+def validate_oauth_provider_configuration(provider: str) -> bool:
+    """
+    SSOT: OAuth provider configuration validation.
+    
+    Replaces duplicate OAuth provider validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_provider_configuration(provider)
+
+
+def simulate_oauth_end_to_end() -> dict:
+    """
+    SSOT: OAuth E2E simulation validation.
+    
+    Replaces duplicate OAuth E2E simulation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.simulate_oauth_end_to_end()
+
+
+def validate_oauth_configs_for_environment(environment: str) -> Dict[str, Any]:
+    """
+    SSOT: Validate OAuth configuration for a specific environment.
+    
+    Replaces duplicate OAuth config validation logic across all services.
+    """
+    validator = get_central_validator()
+    return validator.validate_oauth_configs_for_environment(environment)
 
 
 def check_config_before_deletion(config_key: str, service_name: Optional[str] = None) -> Dict[str, Any]:

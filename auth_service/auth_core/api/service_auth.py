@@ -19,6 +19,8 @@ from pydantic import BaseModel, Field
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
+# SSOT: Import SERVICE_ID constant for service registry
+from shared.constants.service_identifiers import SERVICE_ID
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +83,7 @@ class ServiceValidationResponse(BaseModel):
 
 # Service registry (in production, this would be in database)
 SERVICE_REGISTRY = {
-    "netra-backend": {
+    SERVICE_ID: {
         "name": "Netra Backend Service", 
         "permissions": ["jwt_validation", "websocket_auth", "user_management"],
         "rate_limit": 1000  # requests per minute
@@ -461,7 +463,7 @@ async def service_auth_health() -> Dict[str, Any]:
     """
     try:
         # Test service authentication flow
-        test_service_id = "netra-backend"
+        test_service_id = SERVICE_ID
         test_secret = get_env().get("SERVICE_SECRET", "")
         
         if not test_secret:

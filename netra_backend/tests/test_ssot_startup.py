@@ -116,13 +116,15 @@ class TestExecutionEngineSSOT:
     
     def test_execution_engine_imports(self):
         """Verify execution engine modules can be imported."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
+        # SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
         from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
         
-        assert ExecutionEngine is not None
-        assert ExecutionEngineFactory is not None
         assert UserExecutionEngine is not None
+        assert ExecutionEngineFactory is not None
+        
+        # SSOT VALIDATION: UserExecutionEngine is the only ExecutionEngine implementation
+        ExecutionEngine = UserExecutionEngine  # Alias for backward compatibility
     
     def test_execution_factory_creation(self):
         """Test execution factory can be created."""

@@ -27,7 +27,7 @@ import sys
 # Import types for contract validation
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
-from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory as ExecutionEngineFactory
 from netra_backend.app.llm.llm_manager import LLMManager
 
 logger = logging.getLogger(__name__)
@@ -524,11 +524,12 @@ if __name__ == "__main__":
             # Simulate properly configured app state
             from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory as ExecutionEngineFactory
             
             self.websocket_connection_pool = WebSocketConnectionPool()
             self.agent_websocket_bridge = AgentWebSocketBridge(connection_pool=self.websocket_connection_pool)
-            self.execution_engine_factory = ExecutionEngineFactory(websocket_bridge=self.agent_websocket_bridge)
+            self.execution_engine_factory = ExecutionEngineFactory()
+            self.execution_engine_factory.configure(websocket_bridge=self.agent_websocket_bridge)
     
     # Test with properly configured state
     print("Testing with properly configured app state...")

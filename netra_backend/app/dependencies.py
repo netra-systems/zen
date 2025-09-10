@@ -34,9 +34,13 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
 )
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-# NEW: Factory pattern imports
+# NEW: Factory pattern imports - UPDATED TO USE UNIFIED FACTORY
+from netra_backend.app.agents.execution_engine_unified_factory import (
+    UnifiedExecutionEngineFactory as ExecutionEngineFactory,  # Alias for backward compatibility
+    ExecutionEngineFactory as LegacyExecutionEngineFactoryAlias
+)
+# Legacy imports for configuration compatibility
 from netra_backend.app.agents.supervisor.execution_factory import (
-    ExecutionEngineFactory, 
     ExecutionFactoryConfig,
     UserExecutionContext as FactoryUserExecutionContext
 )
@@ -528,10 +532,11 @@ def get_service_user_context() -> str:
     """
     from netra_backend.app.core.configuration import get_configuration
     from shared.isolated_environment import get_env
+    from shared.constants.service_identifiers import SERVICE_ID
     
     # Get service ID from configuration or environment
     config = get_configuration()
-    service_id = config.service_id or "netra-backend"
+    service_id = config.service_id or SERVICE_ID
     
     # If configuration doesn't have service_id, try environment
     if not config.service_id:
@@ -540,8 +545,8 @@ def get_service_user_context() -> str:
         if env_service_id:
             service_id = env_service_id
         else:
-            logger.warning("SERVICE_ID not found in config or environment - using default: netra-backend")
-            service_id = "netra-backend"
+            logger.warning("SERVICE_ID not found in config or environment - using SSOT default")
+            service_id = SERVICE_ID
     
     # Return service context format
     service_context = f"service:{service_id}"
@@ -1240,27 +1245,43 @@ def get_corpus_service(request: Request, user_context=None) -> "CorpusService":
     
     return corpus_service
 
-def get_llm_manager(request: Request):
-    """Get LLM manager from app state.
+def get_llm_manager(request: Request = None, user_context: Optional['UserExecutionContext'] = None):
+    """Get LLM manager with proper user isolation.
     
-    CRITICAL: This service MUST be initialized during startup.
+    SSOT MIGRATION: Updated to use factory pattern with user isolation.
+    This prevents conversation mixing between users by creating isolated instances.
+    
+    Args:
+        request: Optional FastAPI request (for backward compatibility)
+        user_context: Optional UserExecutionContext for user-scoped operations
+        
+    Returns:
+        LLMManager: User-isolated LLM manager instance
     """
-    if not hasattr(request.app.state, 'llm_manager'):
-        logger.critical("CRITICAL: llm_manager not initialized - startup sequence failed!")
-        raise RuntimeError(
-            "CRITICAL STARTUP FAILURE: llm_manager is not initialized. "
-            "This indicates the application started in a degraded state."
-        )
+    from netra_backend.app.llm.llm_manager import create_llm_manager
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     
-    llm_manager = request.app.state.llm_manager
-    if llm_manager is None:
-        logger.critical("CRITICAL: llm_manager is None - initialization failed!")
-        raise RuntimeError(
-            "CRITICAL INITIALIZATION FAILURE: llm_manager is None. "
-            "Critical services must never be None."
-        )
+    # If no user context provided, try to extract from request
+    if user_context is None and request is not None:
+        # Try to extract user context from request
+        try:
+            # Look for user context in request state or headers
+            if hasattr(request, 'state') and hasattr(request.state, 'user_context'):
+                user_context = request.state.user_context
+            elif hasattr(request, 'headers'):
+                # Extract user info from headers for user context creation
+                user_id = request.headers.get('X-User-ID')
+                session_id = request.headers.get('X-Session-ID')
+                if user_id:
+                    user_context = UserExecutionContext(
+                        user_id=user_id,
+                        session_id=session_id or f"session_{user_id[:8]}"
+                    )
+        except Exception as e:
+            logger.warning(f"Could not extract user context from request: {e}")
     
-    return llm_manager
+    # Create user-isolated LLM manager using factory pattern
+    return create_llm_manager(user_context)
 
 def get_message_handler_service(request: Request):
     """Get message handler service from app state or create one.

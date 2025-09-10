@@ -2,13 +2,11 @@
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.types.core_types import AgentExecutionContext
-from netra_backend.app.services.unified_tool_registry.execution_engine import (
-    ToolExecutionEngine as ExecutionEngine,
-)
 
+# Note: ExecutionEngine removed from __init__.py to avoid circular imports
+# Import directly from execution_engine_interface or unified_factory as needed
 
 __all__ = [
     'AgentExecutionContext',
-    'ExecutionEngine',
     'AgentRegistry'
 ]

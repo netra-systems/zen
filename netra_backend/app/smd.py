@@ -974,7 +974,9 @@ class StartupOrchestrator:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.security_service import SecurityService
         
-        self.app.state.llm_manager = LLMManager()
+        # SSOT FIX: Use factory pattern for LLM manager creation
+        from netra_backend.app.llm.llm_manager import create_llm_manager
+        self.app.state.llm_manager = create_llm_manager()
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
@@ -1595,13 +1597,11 @@ class StartupOrchestrator:
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    ✓ AgentInstanceFactory configured")
             
-            # 5. Configure ExecutionEngineFactory with WebSocket bridge
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                configure_execution_engine_factory
-            )
-            execution_engine_factory = await configure_execution_engine_factory(
-                websocket_bridge=self.app.state.agent_websocket_bridge
-            )
+            # 5. Configure ExecutionEngineFactory with WebSocket bridge (MIGRATION: Using UnifiedExecutionEngineFactory)
+            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+            execution_engine_factory = UnifiedExecutionEngineFactory()
+            # Configure with WebSocket bridge for compatibility
+            execution_engine_factory.configure(websocket_bridge=self.app.state.agent_websocket_bridge)
             self.app.state.execution_engine_factory = execution_engine_factory
             self.logger.info("    ✓ ExecutionEngineFactory configured with WebSocket bridge")
             

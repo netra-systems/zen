@@ -16,7 +16,7 @@ import uuid
 import logging
 from unittest.mock import patch
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 

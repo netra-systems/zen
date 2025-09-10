@@ -945,8 +945,8 @@ class WebSocketManagerFactory:
                 else:
                     logger.info(f"✅ Emergency cleanup successful - proceeding with manager creation for user {user_id[:8]}...")
             
-            # Create new isolated manager
-            manager = WebSocketManager(user_context)
+            # Create new isolated manager using SSOT factory method
+            manager = WebSocketManager.from_user_context(user_context)
             
             # Register manager
             self._active_managers[isolation_key] = manager
@@ -1482,8 +1482,8 @@ class WebSocketManagerFactory:
                         # No event loop running, can use asyncio.run directly
                         manager = asyncio.run(self.create_manager(user_context))
                 except RuntimeError:
-                    # Fallback to direct instantiation for tests
-                    manager = WebSocketManager(user_context)
+                    # Fallback to direct instantiation for tests using SSOT factory method
+                    manager = WebSocketManager.from_user_context(user_context)
                     
                     # Register the manager manually for consistency
                     isolation_key = self._generate_isolation_key(user_context)
@@ -2346,21 +2346,27 @@ async def _create_emergency_fallback_manager(
         # Import minimal components needed for emergency manager
         from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, WebSocketManager
         
-        # Create minimal manager configuration
-        emergency_config = {
-            'user_id': getattr(user_context, 'user_id', f'emergency_{uuid.uuid4().hex[:8]}'),
-            'websocket_client_id': getattr(user_context, 'websocket_client_id', f'emergency_ws_{uuid.uuid4().hex[:8]}'),
-            'thread_id': getattr(user_context, 'thread_id', f'emergency_thread_{uuid.uuid4().hex[:8]}'),
-            'run_id': getattr(user_context, 'run_id', f'emergency_run_{uuid.uuid4().hex[:8]}'),
-            'emergency_mode': True,
-            'original_error': str(original_error),
-            'created_at': datetime.now(timezone.utc).isoformat()
-        }
-        
-        # Create emergency manager with minimal functionality
-        emergency_manager = WebSocketManager(emergency_config)
-        
-        logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_config['user_id'][:8]}...")
+        # Create emergency UserExecutionContext for proper manager creation
+        try:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            emergency_user_context = UserExecutionContext(
+                user_id=getattr(user_context, 'user_id', f'emergency_{uuid.uuid4().hex[:8]}'),
+                thread_id=getattr(user_context, 'thread_id', f'emergency_thread_{uuid.uuid4().hex[:8]}'),
+                run_id=getattr(user_context, 'run_id', f'emergency_run_{uuid.uuid4().hex[:8]}'),
+                websocket_client_id=getattr(user_context, 'websocket_client_id', f'emergency_ws_{uuid.uuid4().hex[:8]}'),
+                agent_context={'emergency_mode': True, 'original_error': str(original_error)},
+                audit_metadata={'created_at': datetime.now(timezone.utc).isoformat(), 'source': 'emergency_fallback'}
+            )
+            
+            # Create emergency manager using SSOT factory method
+            emergency_manager = WebSocketManager.from_user_context(emergency_user_context)
+            
+            logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_user_context.user_id[:8]}...")
+        except Exception as e:
+            logger.error(f"Failed to create emergency UserExecutionContext: {e}")
+            # Final fallback - create basic manager without context
+            emergency_manager = WebSocketManager()
+            logger.warning("Created basic WebSocket manager without user context as final fallback")
         return emergency_manager
         
     except Exception as e:
@@ -2384,19 +2390,25 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
     try:
         logger.warning("PHASE 2 FIX: Creating degraded service WebSocket manager - last resort")
         
-        # Create absolute minimal configuration
-        degraded_config = {
-            'user_id': 'degraded_service_user',
-            'websocket_client_id': f'degraded_ws_{int(time.time())}',
-            'thread_id': f'degraded_thread_{int(time.time())}',
-            'run_id': f'degraded_run_{int(time.time())}',
-            'degraded_mode': True,
-            'functionality_level': 'minimal',
-            'created_at': datetime.now(timezone.utc).isoformat()
-        }
-        
-        # Create degraded manager
-        degraded_manager = WebSocketManager(degraded_config)
+        # Create degraded UserExecutionContext for proper manager creation
+        try:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            degraded_user_context = UserExecutionContext(
+                user_id='degraded_service_user',
+                thread_id=f'degraded_thread_{int(time.time())}',
+                run_id=f'degraded_run_{int(time.time())}',
+                websocket_client_id=f'degraded_ws_{int(time.time())}',
+                agent_context={'degraded_mode': True, 'functionality_level': 'minimal'},
+                audit_metadata={'created_at': datetime.now(timezone.utc).isoformat(), 'source': 'degraded_service'}
+            )
+            
+            # Create degraded manager using SSOT factory method
+            degraded_manager = WebSocketManager.from_user_context(degraded_user_context)
+        except Exception as e:
+            logger.error(f"Failed to create degraded UserExecutionContext: {e}")
+            # Final fallback - create basic manager without context
+            degraded_manager = WebSocketManager()
+            logger.warning("Created basic WebSocket manager without user context as degraded fallback")
         
         logger.warning("PHASE 2 FIX: Degraded service manager created - limited functionality available")
         return degraded_manager

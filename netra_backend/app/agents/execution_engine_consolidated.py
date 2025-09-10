@@ -1,4 +1,37 @@
+"""
+🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+
+This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
+
+MIGRATION REQUIRED:
+- Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- This file will be REMOVED in the next release
+
+SECURITY FIX: Multiple ExecutionEngine implementations caused WebSocket user 
+isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH.
+"""
+
+"""
+🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+
+This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
+
+MIGRATION REQUIRED:
+- Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- This file will be REMOVED in the next release
+
+SECURITY FIX: Multiple ExecutionEngine implementations caused WebSocket user 
+isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH.
+"""
+
 """Unified Execution Engine - SSOT Implementation with Extension Pattern.
+
+🚨 CRITICAL SSOT MIGRATION NOTICE 🚨
+This execution_engine_consolidated.py is DEPRECATED and will be REMOVED in the next release.
+
+MIGRATION REQUIRED:
+- NEW CODE: Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- EXISTING CODE: Replace imports with 'from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine'
 
 This module consolidates all execution engine implementations into a single,
 extensible architecture supporting composition and request-scoped isolation.
@@ -44,6 +77,7 @@ from netra_backend.app.core.agent_execution_tracker import (
     ExecutionState
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
 
 logger = central_logger.get_logger(__name__)
 
@@ -354,7 +388,7 @@ class WebSocketExtension(ExecutionExtension):
 # UNIFIED EXECUTION ENGINE
 # ============================================================================
 
-class ExecutionEngine:
+class ExecutionEngine(IExecutionEngine):
     """Unified execution engine with composition pattern.
     
     This is the SSOT for all agent execution, consolidating functionality
@@ -364,6 +398,8 @@ class ExecutionEngine:
     - WebSocket event integration
     - Performance optimization
     - Fallback mechanisms
+    
+    Implements IExecutionEngine interface for SSOT compliance.
     """
     
     def __init__(
@@ -599,6 +635,59 @@ class ExecutionEngine:
     def with_request_scope(self, request_id: str) -> 'RequestScopedExecutionEngine':
         """Create request-scoped execution engine."""
         return RequestScopedExecutionEngine(self, request_id)
+    
+    # ============================================================================
+    # IEXECUTIONENGINE INTERFACE IMPLEMENTATION
+    # ============================================================================
+    
+    async def execute_agent(
+        self,
+        context: AgentExecutionContext,
+        user_context: Optional['UserExecutionContext'] = None
+    ) -> AgentExecutionResult:
+        """Execute agent - interface method delegates to execute().
+        
+        Args:
+            context: Agent execution context
+            user_context: Optional user context for isolation
+            
+        Returns:
+            AgentExecutionResult: Results of agent execution
+        """
+        # Convert AgentExecutionContext to the format expected by execute()
+        return await self.execute(
+            context.agent_name,
+            context,  # Pass full context as task
+            user_context,
+            context  # context_override
+        )
+    
+    # SSOT COMPLIANCE: execute_pipeline method removed to eliminate duplication
+    # This method has been removed to establish UserExecutionEngine as the SSOT.
+    # Use UserExecutionEngine.execute_pipeline() for all pipeline execution.
+    
+    async def get_execution_stats(self) -> Dict[str, Any]:
+        """Get execution statistics - interface method delegates to get_metrics().
+        
+        Returns:
+            Dict containing execution metrics and performance data
+        """
+        return self.get_metrics()
+    
+    async def shutdown(self) -> None:
+        """Shutdown engine - interface method delegates to cleanup().
+        
+        Performs cleanup and resource release.
+        """
+        await self.cleanup()
+    
+    def get_engine_type(self) -> str:
+        """Get engine type identifier."""
+        return "ConsolidatedExecutionEngine"
+    
+    def has_user_context_support(self) -> bool:
+        """Check if engine supports UserExecutionContext."""
+        return True  # ConsolidatedExecutionEngine supports user context
 
 
 # ============================================================================

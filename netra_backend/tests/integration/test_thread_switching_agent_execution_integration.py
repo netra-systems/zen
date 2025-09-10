@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 from shared.types import UserID, ThreadID, RunID, ensure_user_id, ensure_thread_id
 
 # Agent execution imports - SSOT components
-from netra_backend.app.core.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.tools.tool_dispatcher import UnifiedToolDispatcher, create_request_scoped_dispatcher
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
 from netra_backend.app.agents.supervisor.execution_engine_factory import create_request_scoped_engine

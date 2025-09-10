@@ -52,7 +52,11 @@ This directory contains critical checklists and runbooks for operating, maintain
 
 ### Issue: Authentication Fails Every Minute
 **File**: [COMMON_MISTAKES_RUNBOOK.md](./COMMON_MISTAKES_RUNBOOK.md#1-service_id-with-timestamps)
-**Quick Fix**: SERVICE_ID must be "netra-backend" (no timestamps)
+**Quick Fix**: SERVICE_ID must be imported from SSOT constant (no hardcoded values)
+```python
+from shared.constants.service_identifiers import SERVICE_ID
+# SERVICE_ID resolves to "netra-backend"
+```
 
 ### Issue: Chat Appears Frozen
 **File**: [WEBSOCKET_EVENT_VERIFICATION_CHECKLIST.md](./WEBSOCKET_EVENT_VERIFICATION_CHECKLIST.md)
