@@ -454,24 +454,23 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
                     """Send multiple WebSocket events for a user engine."""
                     user_specific_data = f"user_{user_context.user_id}_data"
                     
-                    await engine.send_agent_thinking(
-                        agent_context,
-                        f"Thinking for {user_specific_data}",
+                    await engine.websocket_emitter.notify_agent_thinking(
+                        agent_name=agent_context.agent_name,
+                        reasoning=f"Thinking for {user_specific_data}",
                         step_number=1
                     )
                     
-                    await engine.send_tool_executing(
-                        agent_context,
-                        f"tool_for_{user_specific_data}"
+                    await engine.websocket_emitter.notify_tool_executing(
+                        tool_name=f"tool_for_{user_specific_data}"
                     )
                     
                     # Simulate tool completion
                     await asyncio.sleep(0.05)  # Brief delay to simulate work
                     
-                    await engine.send_final_report(
-                        agent_context,
-                        {"result": f"completed_for_{user_specific_data}"},
-                        100.0  # 100ms duration
+                    await engine.websocket_emitter.notify_agent_completed(
+                        agent_name=agent_context.agent_name,
+                        result={"result": f"completed_for_{user_specific_data}"},
+                        duration=100.0
                     )
                 
                 # Execute all events concurrently

@@ -25,7 +25,7 @@ import pytest
 
 # CRITICAL SSOT imports for real authentication and services - NO MOCKS
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
@@ -172,14 +172,14 @@ class RealWebSocketEventCollector:
 
 
 @pytest.mark.e2e
-class TestAgentWebSocketEventsReal(BaseE2ETest):
+class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
     """CLAUDE.md compliant agent WebSocket events tests using REAL services."""
     
-    def setup_method(self):
+    def setup_method(self, method=None):
         """Setup method with real services initialization."""
-        super().setup_method()
-        self.env = get_env()
-        self.env.enable_isolation(backup_original=True)
+        super().setup_method(method)
+        # Use SSOT environment access via self._env
+        self._env.enable_isolation(backup_original=True)
         
         # Set test environment for REAL services
         test_vars = {
