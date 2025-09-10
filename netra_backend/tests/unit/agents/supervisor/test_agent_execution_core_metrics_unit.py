@@ -152,7 +152,7 @@ class TestAgentExecutionCoreMetrics:
         # Verify computed metrics
         assert combined_metrics['result_success'] is True
         assert combined_metrics['total_duration_seconds'] == 3.75
-        assert combined_metrics['state_size'] > 0
+        assert combined_metrics['context_size'] > 0
     
     @pytest.mark.asyncio
     async def test_collect_metrics_handles_empty_sources(self, execution_core, sample_state):
@@ -171,8 +171,8 @@ class TestAgentExecutionCoreMetrics:
         # Should still create basic computed metrics
         assert isinstance(combined_metrics, dict)
         assert combined_metrics['result_success'] is False
-        assert 'state_size' in combined_metrics
-        assert combined_metrics['state_size'] > 0  # State has some data
+        assert 'context_size' in combined_metrics
+        assert combined_metrics['context_size'] > 0  # State has some data
         
         # No duration since result doesn't have it
         assert 'total_duration_seconds' not in combined_metrics
@@ -196,14 +196,14 @@ class TestAgentExecutionCoreMetrics:
         metrics = await execution_core._collect_metrics(exec_id, result, large_state)
         
         # State size should be reasonably large
-        assert metrics['state_size'] > 10000  # At least 10KB of string data
+        assert metrics['context_size'] > 10000  # At least 10KB of string data
         
         # Test with minimal state
         minimal_state = Mock(spec=DeepAgentState)
         minimal_state.__dict__ = {}
         
         metrics_minimal = await execution_core._collect_metrics(exec_id, result, minimal_state)
-        assert metrics_minimal['state_size'] < metrics['state_size']
+        assert metrics_minimal['context_size'] < metrics['context_size']
     
     @pytest.mark.asyncio
     async def test_persist_metrics_numeric_filtering(self, execution_core, sample_state):

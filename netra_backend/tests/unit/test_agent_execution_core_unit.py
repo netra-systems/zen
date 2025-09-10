@@ -481,7 +481,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             mock_collect.return_value = {
                 'execution_time_ms': 150,
                 'memory_usage_mb': 45.2,
-                'state_size': 1024
+                'context_size': 1024
             }
             
             # Act

@@ -1735,14 +1735,14 @@ class TestExecutionEngineComprehensiveRealServices(SSotAsyncTestCase):
             assert "agent_started" in event_types, f"Step {step_result['step']} should have started event"
         
         # Record state management metrics
-        final_state_size = len(str(complex_state.__dict__))
+        final_context_size = len(str(complex_state.__dict__))
         
         test_ctx.performance_metrics["complex_state_management"] = {
             "steps_executed": len(step_results),
             "final_conversation_length": final_conversation_length,
             "final_insights_count": final_insights_count,
             "final_cross_step_data_keys": len(actual_cross_step_keys),
-            "final_state_size_chars": final_state_size,
+            "final_context_size_chars": final_context_size,
             "total_websocket_events": total_events,
             "state_snapshots": state_snapshots
         }
@@ -1751,7 +1751,7 @@ class TestExecutionEngineComprehensiveRealServices(SSotAsyncTestCase):
         self.record_metric("complex_state_conversation_final_length", final_conversation_length)
         self.record_metric("complex_state_insights_accumulated", final_insights_count)
         self.record_metric("complex_state_cross_step_data_preserved", len(actual_cross_step_keys))
-        self.record_metric("complex_state_size_final_chars", final_state_size)
+        self.record_metric("complex_state_size_final_chars", final_context_size)
         self.record_metric("complex_state_management_verified", True)
     
     # ============================================================================
