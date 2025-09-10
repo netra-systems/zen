@@ -213,37 +213,38 @@ class AuthRedisManager:
             return await self._redis.get_cached_permissions(user_id)
         return None
     
-    # Health Check
+    # Health Check (redirected to SSOT)
     async def health_check(self) -> Dict[str, Any]:
-        """Check Redis health and return status."""
+        """Check Redis health and return status (redirects to SSOT)."""
         try:
+            if not SSOT_AVAILABLE:
+                return {"status": "unhealthy", "error": "SSOT Redis manager not available"}
+            
             if not await self.ensure_connected():
                 return {"status": "unhealthy", "error": "Cannot connect to Redis"}
             
-            # Test basic operations
-            test_key = "auth:health:test"
-            await self.redis_client.set(test_key, "test", ex=5)
-            test_value = await self.redis_client.get(test_key)
-            await self.redis_client.delete(test_key)
+            # Test basic auth operations using SSOT
+            test_session_id = f"health_check_{int(datetime.utcnow().timestamp())}"
+            test_session_data = {"test": "data", "timestamp": datetime.utcnow().isoformat()}
             
-            if test_value != "test":
-                return {"status": "unhealthy", "error": "Basic operations failed"}
+            # Test session operations
+            store_success = await self.store_session(test_session_id, test_session_data, 5)
+            if not store_success:
+                return {"status": "unhealthy", "error": "Failed to store test session"}
             
-            # Get connection info
-            info = await self.redis_client.info()
+            retrieved_data = await self.get_session(test_session_id)
+            if retrieved_data != test_session_data:
+                return {"status": "unhealthy", "error": "Session data mismatch"}
+            
+            delete_success = await self.delete_session(test_session_id)
+            if not delete_success:
+                return {"status": "unhealthy", "error": "Failed to delete test session"}
             
             return {
                 "status": "healthy",
                 "connection": {
-                    "host": self.host,
-                    "port": self.port,
-                    "db": self.db,
-                },
-                "server_info": {
-                    "version": info.get("redis_version"),
-                    "uptime_seconds": info.get("uptime_in_seconds"),
-                    "connected_clients": info.get("connected_clients"),
-                    "used_memory_human": info.get("used_memory_human"),
+                    "ssot_available": SSOT_AVAILABLE,
+                    "ssot_connected": self._redis.is_connected if SSOT_AVAILABLE else False,
                 },
                 "timestamp": datetime.utcnow().isoformat(),
             }
