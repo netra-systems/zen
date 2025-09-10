@@ -390,13 +390,29 @@ class OptimizationsCoreSubAgent(BaseAgent):
         """Factory method for creating OptimizationsCoreSubAgent with user context.
         
         This method enables the agent to be created through AgentInstanceFactory
-        with proper user context isolation, avoiding deprecated global tool_dispatcher warnings.
+        with proper user context isolation, following the golden pattern from UnifiedTriageAgent.
         
         Args:
             context: User execution context for isolation
             
         Returns:
-            OptimizationsCoreSubAgent: Configured agent instance without deprecated warnings
+            OptimizationsCoreSubAgent: Configured agent instance with proper context
         """
-        # Create agent without tool_dispatcher parameter to avoid deprecation warning
-        return cls()
+        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+        
+        # Create dependencies (these will be injected later by the factory)
+        llm_manager = LLMManager()
+        tool_dispatcher = UnifiedToolDispatcher.create_for_user(context)
+        
+        # Create agent with proper context following triage agent pattern
+        agent = cls(
+            llm_manager=llm_manager,
+            tool_dispatcher=tool_dispatcher
+        )
+        
+        # Set user context for WebSocket integration
+        if hasattr(agent, 'set_user_context'):
+            agent.set_user_context(context)
+        
+        return agent
