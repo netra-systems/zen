@@ -23,20 +23,23 @@ This test validates:
 
 import unittest
 import os
+import sys
 import ast
 import logging
 from pathlib import Path
 from typing import List, Dict, Set, Tuple
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+
+# Add project root to Python path for imports
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 logger = logging.getLogger(__name__)
 
-class RedisImportPatternComplianceTest(SSotBaseTestCase):
+class RedisImportPatternComplianceTest(unittest.TestCase):
     """Test Redis import pattern compliance across entire codebase."""
     
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
         cls.project_root = Path(__file__).parent.parent.parent
         cls.ssot_import_pattern = "from netra_backend.app.redis_manager import redis_manager"
         cls.deprecated_patterns = [
