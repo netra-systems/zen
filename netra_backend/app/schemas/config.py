@@ -167,6 +167,14 @@ class LLMConfig(BaseModel):
 
 class WebSocketConfig(BaseModel):
     ws_url: str = Field(default="ws://localhost:8000/ws", description="The WebSocket URL for the frontend to connect to.")
+    
+    # CRITICAL: Cloud-native timeout configuration for $200K+ MRR reliability
+    # These timeouts are managed by timeout_configuration.py for environment awareness
+    connection_timeout: int = Field(default=60, description="WebSocket connection timeout (seconds)")
+    recv_timeout: int = Field(default=35, description="WebSocket receive timeout (seconds) - MUST be > agent execution timeout")
+    send_timeout: int = Field(default=30, description="WebSocket send timeout (seconds)")
+    heartbeat_timeout: int = Field(default=90, description="WebSocket heartbeat timeout (seconds)")
+    heartbeat_interval: int = Field(default=30, description="WebSocket heartbeat interval (seconds)")
 
 class AppConfig(BaseModel):
     """Base configuration class."""
@@ -276,13 +284,20 @@ class AppConfig(BaseModel):
         description="Disable HTTPS-only mode for sessions (dev/testing)"
     )
     
-    # Agent Configuration
+    # Agent Configuration - CRITICAL: Timeout hierarchy coordination for $200K+ MRR reliability
     agent_cache_ttl: int = Field(default=300, description="Agent cache TTL in seconds")
     agent_max_cache_size: int = Field(default=1000, description="Agent maximum cache entries")
     agent_redis_ttl: int = Field(default=3600, description="Agent Redis cache TTL in seconds")
-    agent_default_timeout: float = Field(default=30.0, description="Agent default timeout in seconds")
+    
+    # PRIORITY 3 FIX: Cloud-native timeout configuration with WebSocket coordination
+    # These values are environment-aware and managed by timeout_configuration.py
+    agent_default_timeout: float = Field(default=30.0, description="Agent default execution timeout (seconds) - MUST be < WebSocket recv timeout")
+    agent_thinking_timeout: float = Field(default=25.0, description="Agent thinking phase timeout (seconds)")
+    agent_tool_timeout: float = Field(default=20.0, description="Agent tool execution timeout (seconds)")
+    agent_completion_timeout: float = Field(default=15.0, description="Agent completion timeout (seconds)")
     agent_long_timeout: float = Field(default=300.0, description="Agent long operation timeout in seconds")
     agent_recovery_timeout: float = Field(default=45.0, description="Agent recovery timeout in seconds")
+    
     agent_default_user_id: str = Field(default="default_user", description="Agent default user ID")
     agent_admin_user_id: str = Field(default="admin", description="Agent admin user ID")
     agent_max_retries: int = Field(default=3, description="Agent maximum retry attempts")
