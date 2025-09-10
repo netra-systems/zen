@@ -336,10 +336,7 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
 ### 10.1. Git Commit Standards
 **Follow @git_commit_atomic_units.xml:**
-- Small, focused, conceptually similar units
-- Each commit reviewable in <1 minute
-- Complex refactors include MRO report reference
-- 1-10 commits per related work group
+- Stay on develop-long-lived branch as current branch.
 
 **FINAL REMINDER:** 
 - **GOLDEN PATH PRIORITY:** Users login → get AI responses
