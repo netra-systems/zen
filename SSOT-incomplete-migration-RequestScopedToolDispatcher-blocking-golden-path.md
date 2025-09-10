@@ -1,0 +1,123 @@
+# SSOT-incomplete-migration-RequestScopedToolDispatcher-blocking-golden-path
+
+**Issue:** [#218](https://github.com/netra-systems/netra-apex/issues/218)  
+**Priority:** CRITICAL - Blocking golden path functionality  
+**Status:** 🔍 DISCOVERY PHASE  
+
+## Mission Critical Summary
+
+**IMPACT:** $500K+ ARR at risk - RequestScopedToolDispatcher SSOT violations causing WebSocket event failures, breaking user chat functionality (90% of platform value).
+
+**ROOT CAUSE:** Incomplete migration to SSOT patterns with duplicate implementations and bypassed facades causing race conditions in agent execution.
+
+## Critical Violations Discovered
+
+### 🚨 CRITICAL: Duplicate Implementation Violation
+- **Location:** `/netra_backend/app/core/tools/unified_tool_dispatcher.py` (1,084 lines)
+- **Issue:** Complete duplicate of RequestScopedToolDispatcher functionality
+- **Impact:** WebSocket events deliver inconsistently → broken chat UX
+- **Evidence:** Two parallel dispatch() implementations with different WebSocket strategies
+
+### 🚨 HIGH: Bypass Import Violations  
+- **Count:** 32+ files directly importing deprecated patterns
+- **Location:** Multiple agent files bypassing SSOT facade
+- **Impact:** Agents use different dispatcher implementations
+- **Critical Files:**
+  - `/netra_backend/app/agents/tool_dispatcher_core.py:38` - ToolDispatcher class (LEGACY)
+  - `/tests/e2e/test_tool_dispatcher_core_e2e_batch2.py:25` - Direct import bypassing facade
+
+### 🚨 HIGH: Factory Pattern Inconsistency
+- **Count:** 3 competing factory implementations
+- **Impact:** Different dispatcher instances with varying capabilities
+- **Factories:**
+  - `ToolExecutorFactory` (/netra_backend/app/agents/tool_executor_factory.py:49)
+  - `UnifiedToolDispatcherFactory` (/netra_backend/app/core/tools/unified_tool_dispatcher.py:887)
+  - `ToolDispatcher.create_request_scoped_dispatcher()` (static method)
+
+## Process Tracking
+
+### ✅ PHASE 0: DISCOVERY COMPLETE
+- [x] SSOT audit completed by subagent
+- [x] GitHub issue #218 created
+- [x] Progress tracking document created
+- [x] Critical violations identified and prioritized
+
+### 🔄 PHASE 1: TEST DISCOVERY & PLANNING (CURRENT)
+- [ ] SNST: Discover existing tests protecting against breaking changes
+- [ ] SNST: Plan new SSOT validation tests
+- [ ] Document test strategy in this IND
+- [ ] Update issue with test findings
+
+### 📋 PHASE 2: TEST EXECUTION (PENDING)
+- [ ] SNST: Execute new test plan for SSOT validation
+- [ ] Run tests without Docker (unit, integration, staging e2e)
+- [ ] Document test results
+
+### 🔧 PHASE 3: REMEDIATION PLANNING (PENDING)  
+- [ ] SNST: Plan SSOT consolidation approach
+- [ ] Design unified implementation strategy
+- [ ] Plan factory pattern consolidation
+
+### 🚀 PHASE 4: REMEDIATION EXECUTION (PENDING)
+- [ ] SNST: Execute SSOT remediation plan
+- [ ] Consolidate duplicate implementations
+- [ ] Fix bypass imports
+- [ ] Unify factory patterns
+
+### 🧪 PHASE 5: TEST FIX LOOP (PENDING)
+- [ ] SNST: Prove system stability maintained
+- [ ] Run all existing tests
+- [ ] Fix any breaking changes
+- [ ] Validate golden path functionality
+
+### 📋 PHASE 6: PR & CLOSURE (PENDING)
+- [ ] SNST: Create pull request
+- [ ] Cross-link issue for auto-close
+- [ ] Verify all tests passing
+
+## Golden Path Validation Requirements
+
+### Must Pass Tests:
+- `python tests/mission_critical/test_websocket_agent_events_suite.py`
+- `python tests/mission_critical/test_concurrent_user_isolation.py`  
+- `python tests/e2e/test_golden_path_user_flow.py`
+
+### Business Success Criteria:
+- [ ] Users can login successfully
+- [ ] Chat interface responds with AI-generated content
+- [ ] WebSocket events deliver consistently (all 5 critical events)
+- [ ] No cross-user data leakage
+- [ ] Agent responses provide substantive value
+
+## Risk Mitigation
+
+### Breaking Change Prevention:
+- All existing tests must continue to pass
+- Backwards compatibility maintained during transition
+- Atomic commits for safe rollback
+- Staging environment validation before deployment
+
+### Security Requirements:
+- User isolation maintained across all dispatcher instances
+- Permission layer consistent in unified implementation
+- No bypass of security validation in SSOT facade
+
+## Timeline & Next Actions
+
+**IMMEDIATE (Today):**
+1. SNST: Launch test discovery subagent
+2. Document existing test coverage
+3. Plan SSOT validation tests
+
+**SHORT TERM (1-2 days):**
+1. Execute test plan 
+2. Plan and execute SSOT remediation
+3. Validate system stability
+
+**SUCCESS DEADLINE:** All phases complete within 3 process cycles
+
+---
+
+**Last Updated:** 2025-09-10  
+**Next Review:** After each phase completion  
+**Assigned:** SSOT Gardener Process

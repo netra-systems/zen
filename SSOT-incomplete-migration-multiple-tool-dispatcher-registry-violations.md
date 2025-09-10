@@ -27,13 +27,32 @@
 ## Process Status
 - [x] Step 0: SSOT Audit - COMPLETED
 - [x] GitHub Issue Created: #205
-- [ ] Step 1: Test Discovery & Planning
+- [x] Step 1: Test Discovery & Planning - COMPLETED
 - [ ] Step 2: Test Execution  
 - [ ] Step 3: Remediation Planning
 - [ ] Step 4: Remediation Execution
 - [ ] Step 5: Test Fix Loop
 - [ ] Step 6: PR & Closure
 
+## Test Discovery Results (Step 1)
+
+### Existing Test Coverage
+- **147 existing test files** protect tool dispatcher systems
+- **Mission Critical:** WebSocket agent events suite ($500K+ ARR protection)
+- **Factory Isolation:** Multi-user context separation tests
+- **Risk:** High risk to mission critical WebSocket tests during refactor
+
+### Test Plan Summary
+- **Existing Tests (60%):** Update 147 tests to use UniversalRegistry SSOT
+- **New SSOT Tests (20%):** Create failing tests that reproduce violations
+- **Edge Cases (20%):** WebSocket consistency, performance validation
+
+### Key Files to Test
+- `tool_dispatcher_core.py` - Factory-enforced but not SSOT
+- `request_scoped_tool_dispatcher.py` - Per-request isolation
+- `unified_tool_dispatcher.py` - SSOT consolidation attempt
+
 ## Work Log
 - **2025-01-09:** Initial SSOT audit completed via subagent
 - **2025-01-09:** Created GitHub issue #205 and progress tracker
+- **2025-01-09:** Test discovery and planning completed - 147 tests identified
