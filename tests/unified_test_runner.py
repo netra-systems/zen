@@ -1459,6 +1459,7 @@ class UnifiedTestRunner:
             'api',  # API tests typically need backend services
             'websocket',  # WebSocket tests need backend
             'post_deployment',  # Post-deployment tests need services
+            'deployment_critical',  # Cloud Run deployment tests need real services - P0 Issue #146
         }
         
         # Categories that DON'T require Docker
@@ -1551,11 +1552,11 @@ class UnifiedTestRunner:
     def _get_categories_for_service(self, service: str) -> List[str]:
         """Get categories relevant to a specific service (legacy compatibility)."""
         service_category_mapping = {
-            "backend": ["unit", "integration", "api", "database", "agent", "websocket", "security"],
+            "backend": ["unit", "integration", "api", "database", "agent", "websocket", "security", "deployment_critical"],
             "frontend": ["unit", "integration", "e2e", "cypress", "performance"],
             "auth": ["unit", "integration", "auth", "security"],
             "auth_service": ["unit", "integration", "auth", "security"],
-            "all": ["smoke", "unit", "integration", "api", "e2e", "database", "agent", "websocket", "security"]
+            "all": ["smoke", "unit", "integration", "api", "e2e", "database", "agent", "websocket", "security", "deployment_critical"]
         }
         
         categories = service_category_mapping.get(service, ["unit", "integration"])
@@ -2148,6 +2149,8 @@ class UnifiedTestRunner:
                 "websocket": [str(config["test_dir"]), "-k", '"websocket or ws"'],
                 "agent": ["netra_backend/tests/agents"],
                 "security": [str(config["test_dir"]), "-k", '"auth or security"'],
+                # CRITICAL: Cloud Run deployment tests - P0 Issue #146
+                "deployment_critical": ["tests/integration/test_cloud_run_port_config.py", "tests/integration/test_health_endpoints.py", "tests/e2e/test_staging_deployment.py", "tests/unit/test_deployment_configs.py", "-m", "deployment_critical"],
                 # FIXED: E2E category now points only to actual e2e tests
                 "e2e_critical": ["tests/e2e/critical"],  # Curated critical e2e tests
                 "e2e": ["tests/e2e/integration"],  # Actual e2e integration tests only

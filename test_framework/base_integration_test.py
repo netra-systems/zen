@@ -165,15 +165,21 @@ class BaseIntegrationTest(ABC):
         """
         assert result is not None, "Integration test must produce real results"
         
+        # Check both nested 'results' and top-level for backward compatibility
+        nested_results = result.get('results', {}) if isinstance(result.get('results'), dict) else {}
+        
         if expected_value_type == 'cost_savings':
-            assert 'potential_savings' in result or 'cost_reduction' in result, \
-                "Cost optimization must identify potential savings"
+            has_savings = ('potential_savings' in result or 'cost_reduction' in result or
+                          'potential_savings' in nested_results or 'cost_reduction' in nested_results)
+            assert has_savings, "Cost optimization must identify potential savings"
         elif expected_value_type == 'insights':
-            assert 'recommendations' in result or 'analysis' in result, \
-                "Analysis must provide actionable insights"  
+            has_insights = ('recommendations' in result or 'analysis' in result or
+                           'recommendations' in nested_results or 'analysis' in nested_results)
+            assert has_insights, "Analysis must provide actionable insights"  
         elif expected_value_type == 'automation':
-            assert 'actions_taken' in result or 'automated_tasks' in result, \
-                "Automation must execute real actions"
+            has_automation = ('actions_taken' in result or 'automated_tasks' in result or
+                             'actions_taken' in nested_results or 'automated_tasks' in nested_results)
+            assert has_automation, "Automation must execute real actions"
         else:
             assert len(result) > 0, f"Business value type '{expected_value_type}' must produce measurable results"
 
