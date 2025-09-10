@@ -259,14 +259,21 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                 }
                 tracker._state_executions[state_id]["phases"].append(transition)
                 
+                # Debug output to understand why notify_agent_completed isn't called
+                print(f"DEBUG: transition_phase called: state_id={state_id}, phase={phase}, websocket_manager={websocket_manager is not None}")
+                
                 # Simulate WebSocket notifications for COMPLETED phase
                 if websocket_manager and phase == AgentExecutionPhase.COMPLETED:
                     execution = tracker._state_executions[state_id]
+                    print(f"DEBUG: About to call notify_agent_completed for {execution['agent_name']}")
                     await websocket_manager.notify_agent_completed(
                         run_id=execution["run_id"],
                         agent_name=execution["agent_name"],
                         result={"status": "completed", "success": True}
                     )
+                    print(f"DEBUG: Called notify_agent_completed for {execution['agent_name']}")
+                elif phase == AgentExecutionPhase.COMPLETED:
+                    print(f"DEBUG: COMPLETED phase reached but websocket_manager is None or falsy: {websocket_manager}")
         
         def complete_execution(state_id, success=True):
             if state_id in tracker._state_executions:
