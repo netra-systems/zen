@@ -131,12 +131,111 @@ This is preventing users from logging in and threatening the core chat functiona
 
 ## Next Steps
 1. ✅ Five WHYs Analysis completed - ARCHITECTURAL MISMATCH identified
-2. Update Golden Path Validator to check auth service integration instead of local tables
-3. Fix schema validation to be service-aware (ignore auth service tables)
-4. Plan comprehensive database schema test suite
+2. ✅ Comprehensive Test Suite Plan created - Service-aware validation architecture
+3. Update Golden Path Validator to check auth service integration instead of local tables
+4. Fix schema validation to be service-aware (ignore auth service tables)
 5. Create GitHub issue with claude-code-generated-issue label
 6. Execute remediation plan
+
+## COMPREHENSIVE TEST SUITE PLAN
+
+### Test Plan Overview
+**MISSION**: Create test suites that validate microservice integration instead of monolithic table checking
+
+**ROOT CAUSE ADDRESSED**: Golden Path Validator contains stale monolithic assumptions - needs service-aware validation
+
+### Test Architecture Strategy
+
+#### Phase 1: High Priority Tests (Immediate Implementation)
+1. **Unit Tests - Service Boundary Validation**
+   - `netra_backend/tests/unit/test_golden_path_validator_service_aware.py`
+   - **Purpose**: Test Golden Path Validator with service-aware logic
+   - **Current (Failing)**: Expects `user_sessions` table in backend database
+   - **Target (Fixed)**: Checks Auth Service availability instead of local tables
+   - **Expected Results**: 100% failure rate initially, 100% success after fix
+
+2. **Unit Tests - Auth Service Integration Logic**
+   - `netra_backend/tests/unit/test_auth_service_integration_logic.py`
+   - **Purpose**: Test logic for integrating with Auth Service vs direct database access
+   - **Validation**: Auth Service health checks, capability validation
+   - **Expected Results**: Define service integration contract
+
+#### Phase 2: Core Fix Validation Tests
+3. **Integration Tests - Service Communication**
+   - `netra_backend/tests/integration/test_golden_path_validator_service_integration.py`
+   - **Purpose**: Test real Auth Service + Backend Service integration
+   - **Setup**: Start real Auth Service with test database
+   - **Current (Failing)**: Golden Path Validator fails due to missing `user_sessions` table
+   - **Target (Fixed)**: Golden Path Validator passes by checking Auth Service integration
+
+4. **Integration Tests - Database Schema Service Boundaries**
+   - `netra_backend/tests/integration/test_database_schema_service_boundaries.py`
+   - **Purpose**: Test that schema validation respects service boundaries
+   - **Current (Failing)**: Backend validation reports auth tables as "extra"
+   - **Target (Fixed)**: Backend validation ignores auth service table prefixes
+
+#### Phase 3: Complete Coverage Tests
+5. **E2E Tests - Authentication Golden Path Service-Aware**
+   - `tests/e2e/test_authentication_golden_path_service_aware.py`
+   - **Purpose**: Test complete user flow with service-aware architecture
+   - **🚨 CRITICAL**: Must use real authentication (JWT/OAuth) per CLAUDE.md requirements
+   - **Flow**: User registers → Auth Service creates session → Backend validates via service call → Chat works
+
+### Specific Test Cases
+
+#### Critical Failing Scenarios (Current State)
+```python
+def test_current_monolithic_assumptions_fail():
+    """Reproduce exact current failure: Missing user_sessions table"""
+    validator = GoldenPathValidator()
+    result = validator.validate_database_schema()
+    
+    # Capture production errors
+    assert not result.overall_success
+    assert "Missing critical user tables: ['user_sessions']" in result.critical_failures
+    assert "Extra tables in database not defined in models" in result.warnings
+```
+
+#### Target Success Scenarios (Fixed State)
+```python
+def test_target_service_aware_validation_passes():
+    """Test service-aware validation passes correctly"""
+    validator = GoldenPathValidatorServiceAware()  # Updated class
+    result = validator.validate_service_integration()
+    
+    # New success criteria
+    assert result.overall_success
+    assert result.auth_service_available
+    assert result.session_management_functional
+    assert "user_sessions" not in result.required_local_tables
+```
+
+### Expected Test Results Summary
+
+**Before Fix (Current State):**
+- Unit Tests: 100% failure rate on Golden Path validation
+- Integration Tests: Service communication failure, schema conflicts
+- E2E Tests: Authentication flow blocked, chat functionality threatened
+- Error: "Missing critical user tables: ['user_sessions']"
+
+**After Fix (Target State):**
+- Unit Tests: 100% success rate on service-aware validation
+- Integration Tests: Cross-service communication works, session management functional
+- E2E Tests: Complete authentication flow, Golden Path validation passes
+- Success: "Golden path validation passed: Auth service integration functional"
+
+### Implementation Timeline
+- **Week 1**: Phase 1 tests (Unit test failure reproduction)
+- **Week 2**: Phase 2 tests (Integration with real services)
+- **Week 3**: Phase 3 tests (E2E complete user flows)
+- **Week 4**: CI/CD integration and monitoring setup
+
+### Regression Prevention
+1. **Service Boundary Validation CI Test** - Prevent architectural drift
+2. **Auth Service Integration Health Check** - Catch communication issues early
+3. **Migration Impact Assessment Tests** - Validate migrations respect service boundaries
 
 ---
 *Debug log created as part of audit-staging-logs-gcp-loop process*
 *Five WHYs analysis completed by Claude Code debugging agent on 2025-09-09*
+*Comprehensive test suite plan added by Claude Code test planning agent on 2025-09-09*

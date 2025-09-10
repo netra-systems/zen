@@ -206,14 +206,6 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         if test_duration > 1.0:  # Log slow tests
             print(f"SLOW TEST WARNING: {method.__name__ if method else 'unknown'} took {test_duration:.2f}s")
     
-    async def _cleanup_all_connections(self):
-        """Cleanup all connections to prevent test interference."""
-        try:
-            all_connections = list(self.manager._connections.keys())
-            for conn_id in all_connections:
-                await self.manager.remove_connection(conn_id)
-        except Exception:
-            pass  # Best effort cleanup
     
     def create_mock_connection(self, user_id: str, connection_id: str = None, 
                               should_fail: bool = False) -> WebSocketConnection:
@@ -235,17 +227,8 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
                 context={"user_id": user_id}
             )
         
-        # Generate proper user_id if needed, or validate existing one
-        if user_id.startswith("user_") or "_test_" in user_id:
-            # Generate a proper structured user ID for test users
-            validated_user_id = UserID(self.id_manager.generate_id(
-                IDType.USER,
-                prefix="test_user",
-                context={"original_id": user_id}
-            ))
-        else:
-            # Validate existing user_id
-            validated_user_id = ensure_user_id(user_id)
+        # Use the provided user_id (should already be properly formatted from test)
+        validated_user_id = UserID(user_id)
         
         mock_websocket = MockWebSocket(validated_user_id, connection_id, should_fail)
         
@@ -288,10 +271,10 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         Business Impact: Data leakage between users would be a $100K+ security breach.
         This test validates the core security promise of the platform.
         """
-        # Create connections for different users
-        user_a_id = "user_a_isolation_test"
-        user_b_id = "user_b_isolation_test"
-        user_c_id = "user_c_isolation_test"
+        # Create connections for different users using proper IDs
+        user_a_id = self.id_manager.generate_id(IDType.USER, prefix="test_user_a")
+        user_b_id = self.id_manager.generate_id(IDType.USER, prefix="test_user_b")
+        user_c_id = self.id_manager.generate_id(IDType.USER, prefix="test_user_c")
         
         conn_a = self.create_mock_connection(user_a_id, "conn_a_isolation")
         conn_b = self.create_mock_connection(user_b_id, "conn_b_isolation")  
@@ -386,7 +369,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         
         Business Impact: Connection leaks lead to memory exhaustion and system crashes.
         """
-        user_id = "lifecycle_test_user"
+        user_id = self.id_manager.generate_id(IDType.USER, prefix="lifecycle_test_user")
         connection_id = "lifecycle_test_conn"
         
         # Phase 1: Connection Creation
@@ -457,7 +440,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         Business Impact: These events enable 90% of platform value through real-time chat.
         Without these events, users see blank screens and we lose revenue.
         """
-        user_id = "events_test_user"
+        user_id = self.id_manager.generate_id(IDType.USER, prefix="events_test_user")
         connection = self.create_mock_connection(user_id)
         await self.manager.add_connection(connection)
         
@@ -581,7 +564,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         
         Business Impact: Serialization failures cause blank screens and lost revenue.
         """
-        user_id = "serialization_test_user"
+        user_id = self.id_manager.generate_id(IDType.USER, prefix="serialization_test_user")
         connection = self.create_mock_connection(user_id)
         await self.manager.add_connection(connection)
         
@@ -697,7 +680,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         
         async def simulate_user_operations(user_index: int):
             """Simulate concurrent operations for a single user."""
-            user_id = f"race_test_user_{user_index:03d}"
+            user_id = self.id_manager.generate_id(IDType.USER, prefix=f"race_test_user_{user_index:03d}")
             operations_completed = 0
             errors = []
             
@@ -811,7 +794,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         
         Business Impact: Lost messages mean lost customer communications and revenue.
         """
-        user_id = "recovery_test_user"
+        user_id = self.id_manager.generate_id(IDType.USER, prefix="recovery_test_user")
         
         # Phase 1: Send messages before connection exists (should queue for recovery)
         pre_connection_messages = []
@@ -1016,7 +999,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
                 pass
         
         # Edge Case 2: Extremely large messages
-        large_user_id = "large_message_test_user"
+        large_user_id = self.id_manager.generate_id(IDType.USER, prefix="large_message_test_user")
         large_connection = self.create_mock_connection(large_user_id)
         await self.manager.add_connection(large_connection)
         
@@ -1042,7 +1025,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         assert large_message_time < 1.0, f"Large message handling too slow: {large_message_time:.3f}s"
         
         # Edge Case 3: Rapid connection/disconnection cycles
-        rapid_user_id = "rapid_cycle_test_user"
+        rapid_user_id = self.id_manager.generate_id(IDType.USER, prefix="rapid_cycle_test_user")
         
         for cycle in range(10):
             # Rapid connect
@@ -1059,7 +1042,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
             assert not self.manager.is_connection_active(rapid_user_id)
         
         # Edge Case 4: Multiple connections for same user with one failing
-        multi_conn_user_id = "multi_connection_test_user"
+        multi_conn_user_id = self.id_manager.generate_id(IDType.USER, prefix="multi_connection_test_user")
         
         # Create multiple connections
         good_connection_1 = self.create_mock_connection(multi_conn_user_id, "good_conn_1")
@@ -1118,7 +1101,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         initial_stats = self.manager.get_stats()
         
         # Performance Test 1: High-frequency message sending
-        perf_user_id = "performance_test_user"
+        perf_user_id = self.id_manager.generate_id(IDType.USER, prefix="performance_test_user")
         perf_connection = self.create_mock_connection(perf_user_id)
         await self.manager.add_connection(perf_connection)
         
@@ -1160,7 +1143,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         # Create many connections
         create_start = time.time()
         for i in range(connection_count):
-            user_id = f"mem_test_user_{i:03d}"
+            user_id = self.id_manager.generate_id(IDType.USER, prefix=f"mem_test_user_{i:03d}")
             connection = self.create_mock_connection(user_id, f"mem_conn_{i:03d}")
             await self.manager.add_connection(connection)
             test_connections.append(connection)
@@ -1192,7 +1175,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         
         # Memory Test 2: Error data cleanup
         # Create some error conditions to test cleanup
-        error_user_id = "error_cleanup_test_user"
+        error_user_id = self.id_manager.generate_id(IDType.USER, prefix="error_cleanup_test_user")
         
         # Generate errors for cleanup testing
         for i in range(10):
@@ -1220,7 +1203,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         
         Business Impact: Ensures interface compatibility prevents system integration failures.
         """
-        user_id = "five_whys_test_user"
+        user_id = self.id_manager.generate_id(IDType.USER, prefix="five_whys_test_user")
         thread_id = "five_whys_thread_123"
         
         # Test get_connection_id_by_websocket method
@@ -1273,7 +1256,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         This test simulates the complete user journey that generates revenue.
         """
         # Phase 1: User Authentication and Connection
-        user_id = "business_workflow_user"
+        user_id = self.id_manager.generate_id(IDType.USER, prefix="business_workflow_user")
         connection_id = "business_workflow_conn"
         thread_id = "business_thread_12345"
         
