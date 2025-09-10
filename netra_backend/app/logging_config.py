@@ -43,16 +43,15 @@ def get_central_logger():
     """DEPRECATED: Use shared.logging.unified_logging_ssot.get_logger instead."""
     return _ssot_instance
 
-def get_logger(name=None):
-    """DEPRECATED: Use shared.logging.unified_logging_ssot.get_logger instead."""
-    return ssot_get_logger(name)
+# Make get_logger an alias for get_central_logger for backward compatibility
+get_logger = get_central_logger
 
 def log_execution_time(operation_name=None):
     """DEPRECATED: Use shared.logging.unified_logging_ssot.log_performance instead."""
     return ssot_log_performance(operation_name or "unknown_operation")
 
-# Context variables for backward compatibility
-from shared.logging.unified_logging_ssot import (
+# Context variables for backward compatibility - use original instances
+from netra_backend.app.core.logging_context import (
     request_id_context,
     user_id_context,
     trace_id_context,
