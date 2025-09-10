@@ -16,17 +16,8 @@ from netra_backend.app.websocket_core.types import WebSocketConnectionState, Web
 from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
 
 
-class ConnectionManager(CoreManager):
-    """
-    Compatibility wrapper for WebSocket connection management.
-    
-    Delegates all functionality to the core WebSocket manager while
-    maintaining the expected interface for legacy code.
-    """
-    
-    def __init__(self, *args, **kwargs):
-        """Initialize connection manager with compatibility layer."""
-        super().__init__(*args, **kwargs)
+# DEPRECATED: Use UnifiedWebSocketManager directly
+ConnectionManager = CoreManager
 
 
 class ConnectionInfo(CoreConnectionInfo):
