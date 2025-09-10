@@ -27,6 +27,7 @@ from netra_backend.app.core.request_context import (
     create_error_context_middleware,
     create_request_logging_middleware,
 )
+from netra_backend.app.core.telemetry_bootstrap import bootstrap_telemetry
 
 # OAuth now handled by auth service
 
@@ -160,6 +161,9 @@ def setup_root_endpoint(app: FastAPI) -> None:
 
 def create_app() -> FastAPI:
     """Create and fully configure the FastAPI application."""
+    # Initialize telemetry BEFORE creating FastAPI app to ensure automatic instrumentation
+    _initialize_telemetry()
+    
     app = create_fastapi_app()
     _configure_app_handlers(app)
     _configure_app_routes(app)
@@ -183,6 +187,27 @@ def _configure_app_routes(app: FastAPI) -> None:
     """Configure application routes."""
     register_api_routes(app)
     setup_root_endpoint(app)
+
+
+def _initialize_telemetry() -> None:
+    """Initialize OpenTelemetry automatic instrumentation.
+    
+    Called early in application startup to ensure instrumentation is active
+    before FastAPI app creation and middleware setup.
+    """
+    try:
+        success = bootstrap_telemetry()
+        if success:
+            # Use standard logging since central_logger may not be fully initialized yet
+            import logging
+            logging.info("OpenTelemetry automatic instrumentation initialized successfully")
+        else:
+            import logging
+            logging.debug("OpenTelemetry initialization skipped (disabled or unavailable)")
+    except Exception as e:
+        # Don't let telemetry initialization break the app
+        import logging
+        logging.warning(f"Failed to initialize telemetry: {e}")
 
 
 def _install_gcp_error_handlers(app: FastAPI) -> None:

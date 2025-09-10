@@ -366,6 +366,19 @@ class AppConfig(BaseModel):
     skip_migrations: str = Field(default="false", description="Skip migrations flag")
     disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
     
+    # OpenTelemetry configuration
+    otel_enabled: str = Field(default="auto", description="OpenTelemetry telemetry enabled (auto/true/false)")
+    otel_service_name: Optional[str] = Field(default=None, description="Service name for telemetry")
+    otel_exporter_otlp_endpoint: Optional[str] = Field(default=None, description="OTLP endpoint for trace export")
+    otel_exporter_otlp_headers: Optional[str] = Field(default=None, description="OTLP headers in key=value,key=value format")
+    otel_console_exporter: str = Field(default="false", description="Enable console exporter for debugging")
+    otel_instrument_fastapi: str = Field(default="true", description="Enable FastAPI automatic instrumentation")
+    otel_instrument_requests: str = Field(default="true", description="Enable requests automatic instrumentation")
+    otel_instrument_redis: str = Field(default="true", description="Enable Redis automatic instrumentation")
+    otel_instrument_sqlalchemy: str = Field(default="true", description="Enable SQLAlchemy automatic instrumentation")
+    otel_excluded_urls: str = Field(default="/health,/metrics,/docs,/openapi.json", description="URLs to exclude from telemetry")
+    otel_resource_attributes: Optional[str] = Field(default=None, description="Additional resource attributes")
+    
     # Service availability flags for staging infrastructure (pragmatic degradation)
     redis_optional_in_staging: bool = Field(default=False, description="Allow staging to run without Redis (graceful degradation)")
     clickhouse_optional_in_staging: bool = Field(default=False, description="Allow staging to run without ClickHouse (graceful degradation)")
@@ -549,6 +562,11 @@ class DevelopmentConfig(AppConfig):
     log_level: str = "DEBUG"
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
+    
+    # Development telemetry settings
+    otel_enabled: str = "true"
+    otel_console_exporter: str = "true"  # Enable console output for development
+    otel_service_name: Optional[str] = "netra-backend-dev"
     
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(
@@ -744,6 +762,11 @@ class ProductionConfig(AppConfig):
     environment: str = "production"
     debug: bool = False
     log_level: str = "INFO"
+    
+    # Production telemetry settings
+    otel_enabled: str = "true"
+    otel_console_exporter: str = "false"  # Disable console output for production
+    otel_service_name: Optional[str] = "netra-backend"
     
     def _load_database_url_from_unified_config_production(self, data: dict) -> None:
         """Load database URL from environment using DatabaseURLBuilder SSOT.
@@ -948,6 +971,11 @@ class StagingConfig(AppConfig):
     environment: str = "staging"
     debug: bool = False
     log_level: str = "INFO"
+    
+    # Staging telemetry settings
+    otel_enabled: str = "true"
+    otel_console_exporter: str = "false"  # Disable console output for staging
+    otel_service_name: Optional[str] = "netra-backend-staging"
     
     # CRITICAL: Remove optional flags - services are MANDATORY
     redis_optional_in_staging: bool = False  # Redis is MANDATORY
@@ -1202,6 +1230,11 @@ class NetraTestingConfig(AppConfig):
     jwt_secret_key: str = "mock_jwt_auth_key_for_checking_32_chars_minimum_required_length"  # Test-safe JWT secret
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Test-safe Fernet key (same as dev)
     secret_key: str = "mock-fastapi-session-secret-key-for-testing-32-chars-minimum-required"  # Test-safe SECRET_KEY (32+ chars)
+    
+    # Testing telemetry settings
+    otel_enabled: str = "false"  # Disabled by default for tests to avoid overhead
+    otel_console_exporter: str = "true"  # Enable console output when telemetry is enabled for debugging
+    otel_service_name: Optional[str] = "netra-backend-test"
     
     def __init__(self, **data):
         """Initialize test configuration using DatabaseURLBuilder."""
