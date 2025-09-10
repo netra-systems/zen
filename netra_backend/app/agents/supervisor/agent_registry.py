@@ -463,7 +463,7 @@ class AgentRegistry(BaseAgentRegistry):
             
             # 6. Validate parent class methods are accessible
             if not hasattr(super(), 'set_websocket_bridge'):
-                raise RuntimeError("Parent UniversalAgentRegistry missing set_websocket_bridge method")
+                raise RuntimeError("Parent BaseAgentRegistry missing set_websocket_bridge method")
             
             logger.debug("✅ SSOT compliance validation passed")
             
