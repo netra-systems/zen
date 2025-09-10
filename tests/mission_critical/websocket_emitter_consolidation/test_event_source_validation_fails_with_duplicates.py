@@ -243,18 +243,21 @@ class TestEventSourceValidationFailsWithDuplicates(SSotAsyncTestCase):
         )
     
     async def _simulate_events_from_multiple_sources(self):
-        """Simulate events coming from all 4 duplicate emitter sources."""
+        """Simulate events coming from remaining duplicate emitter sources after partial SSOT consolidation."""
         # Source 1: Unified Emitter (intended SSOT)
         await self._emit_from_source("unified_emitter", "unified_emitter.py", 137)
         
-        # Source 2: Agent WebSocket Bridge (duplicate)
+        # Source 2: Agent WebSocket Bridge (duplicate - STILL NEEDS FIXING)
         await self._emit_from_source("bridge_emitter", "agent_websocket_bridge.py", 1752)
         
-        # Source 3: Base Agent (agent-level bypass)  
+        # Source 3: Base Agent (agent-level bypass - STILL NEEDS FIXING)
         await self._emit_from_source("agent_emitter", "base_agent.py", 933)
         
-        # Source 4: Transparent WebSocket Events (transparency duplicate)
-        await self._emit_from_source("transparent_emitter", "transparent_websocket_events.py", 292)
+        # Source 4: Transparent WebSocket Events - FIXED via SSOT redirection
+        # This source is eliminated - transparent_websocket_events.py now imports UnifiedWebSocketEmitter
+        # All emissions from this source now appear as "unified_emitter" in call stack
+        
+        # PARTIAL SSOT PROGRESS: 4 sources → 3 sources (transparent_emitter eliminated)
     
     async def _emit_from_source(self, source_name: str, source_file: str, source_line: int):
         """Simulate emitting events from a specific source."""
