@@ -34,9 +34,11 @@ WebSocket connections fail completely due to missing `get_db_session_factory` fu
   - [x] Created GitHub issue #204
   - [x] Created progress tracker file
 
-- [ ] **Step 1: Discover and Plan Test**
-  - [ ] Find existing tests protecting against breaking changes
-  - [ ] Plan required test suites focused on ideal SSOT state
+- [x] **Step 1: Discover and Plan Test** - COMPLETED
+  - [x] Found existing tests protecting against breaking changes (458+ test files)
+  - [x] Planned required test suites focused on ideal SSOT state
+  - [x] Identified gaps in SSOT validation testing
+  - [x] Created comprehensive test strategy for ~20% new tests
 
 - [ ] **Step 2: Execute Test Plan** 
 - [ ] **Step 3: Plan Remediation**
@@ -62,8 +64,48 @@ WebSocket connections fail completely due to missing `get_db_session_factory` fu
 - Auth service: Different interface entirely
 ```
 
+## Test Discovery Results (Step 1)
+
+### Existing Test Coverage (1.1)
+- **458+ test files** mention DatabaseManager
+- **Key Infrastructure Tests:**
+  - Database session integration tests (existing)
+  - WebSocket database integration with REAL services
+  - Request-scoped session factory tests
+  - Mission critical database session isolation
+  - Memory leak prevention for database sessions
+
+### Test Gaps Identified (1.2)
+- ❌ **NO TESTS** validate that `get_db_session_factory` should not exist
+- ❌ **NO TESTS** verify only ONE DatabaseManager implementation exists
+- ❌ **NO TESTS** detect circular import dependencies
+
+### New Test Plan (~20% New Tests)
+**4 New Test Files Planned:**
+1. `test_database_ssot_function_violations.py` - Missing function detection tests
+2. `test_database_manager_ssot_consolidation.py` - SSOT consolidation validation  
+3. `test_database_import_dependency_resolution.py` - Import/dependency resolution
+4. `test_database_golden_path_session_factory.py` - Golden path validation
+
+**Test Strategy:**
+- **Pre-SSOT:** Tests FAIL (reproduce current violations)
+- **Post-SSOT:** Tests PASS (validate remediated state)
+- **Integration:** Build on existing SSOT test framework
+- **Execution:** No Docker required - unit/integration/staging e2e only
+
+### Success Criteria
+**Pre-Refactor (Must FAIL):**
+- Import of `get_db_session_factory` fails with ImportError ❌
+- Multiple DatabaseManager implementations detected ❌
+- WebSocket factory creation blocked by missing function ❌
+
+**Post-Refactor (Must PASS):**
+- Single DatabaseManager implementation accessible ✅
+- WebSocket factory creates database sessions successfully ✅
+- Golden path: user login → database session → AI responses works ✅
+
 ## Next Actions
 
-1. Spawn sub-agent for Step 1: Discover existing tests and plan SSOT test strategy
-2. Focus on tests that validate WebSocket database factory functionality
-3. Plan tests for consolidated DatabaseManager SSOT patterns
+1. **CURRENT STEP:** Execute test plan (~20% new SSOT tests)
+2. Focus on failing tests that reproduce SSOT violations
+3. Build new tests using existing SSOT framework patterns
