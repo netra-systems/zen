@@ -47,21 +47,63 @@ Multiple AgentHealthMonitor implementations violate SSOT principles and block go
 ## Progress Tracking
 
 - [x] Step 0: SSOT Audit Complete
-- [x] GitHub Issue Created (#211)
+- [x] GitHub Issue Created (#211)  
 - [x] IND File Created
-- [ ] Step 1: Test Discovery and Planning
-- [ ] Step 2: Execute Test Plan  
+- [x] Step 1: Test Discovery and Planning Complete
+- [ ] Step 2: Execute Test Plan (IN PROGRESS)
 - [ ] Step 3: Plan SSOT Remediation
 - [ ] Step 4: Execute Remediation
 - [ ] Step 5: Test Fix Loop
 - [ ] Step 6: PR and Closure
 
+## Step 1: Test Discovery Results ✅
+
+### Existing Tests Inventory
+**Critical Finding:** Multiple broken health monitoring tests requiring repair before reliable validation:
+
+**Core Health Monitoring Tests:**
+- `/netra_backend/tests/integration/test_agent_health_monitor.py` - Basic health monitoring
+- `/tests/mission_critical/test_agent_lifecycle.py` - Agent lifecycle management
+- `/tests/integration/test_websocket_agent_integration.py` - WebSocket health integration
+
+**Fragmented Test Coverage:**
+- Agent death detection spread across 3+ test modules
+- Inconsistent timeout threshold testing (10s vs 30s vs 60s)
+- WebSocket health monitoring tested separately from agent health
+
+### Test Plan Strategy (Phase-Based Approach)
+
+#### Phase 1: SSOT Violation Reproduction Tests (SHOULD FAIL)
+1. **Multi-Implementation Inconsistency Test** - Expose different death detection thresholds
+2. **Race Condition Reproduction Test** - Show scattered agent status conflicts
+3. **WebSocket Health Fragmentation Test** - Demonstrate disconnected monitoring systems
+
+#### Phase 2: SSOT Validation Tests (SHOULD PASS AFTER FIX)
+1. **Unified Health Interface Test** - Validate single health monitoring entry point
+2. **Consistent Death Detection Test** - Verify standardized timeout thresholds
+3. **Integrated WebSocket-Agent Health Test** - Test coordinated health assessment
+
+#### Phase 3: Golden Path Protection Tests
+1. **End-to-End Health Monitoring Test** - Validate complete user journey health
+2. **Performance Impact Test** - Ensure <50ms health checking overhead
+3. **Failure Recovery Test** - Test graceful degradation scenarios
+
+### Risk Assessment
+- **High Risk:** Multiple health monitors could conflict during migration
+- **Medium Risk:** WebSocket health integration might break during consolidation
+- **Low Risk:** Performance impact from centralized health checking
+
+### Execution Strategy
+1. Create reproduction tests first (validate they fail)
+2. Implement SSOT health monitor
+3. Run validation tests (ensure they pass)
+4. Update existing tests for SSOT compliance
+
 ## Next Actions
 
-1. Discover existing tests protecting health monitoring functionality
-2. Plan test suite for SSOT AgentHealthMonitor
-3. Create failing tests that reproduce SSOT violations
-4. Execute remediation plan
+1. Execute Step 2: Create new SSOT validation tests (20% focus)
+2. Focus on reproduction tests that expose current violations
+3. Prepare test framework for SSOT remediation validation
 
 ## Business Value Justification
 
