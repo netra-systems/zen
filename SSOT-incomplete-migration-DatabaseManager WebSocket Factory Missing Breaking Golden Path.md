@@ -40,7 +40,12 @@ WebSocket connections fail completely due to missing `get_db_session_factory` fu
   - [x] Identified gaps in SSOT validation testing
   - [x] Created comprehensive test strategy for ~20% new tests
 
-- [ ] **Step 2: Execute Test Plan** 
+- [x] **Step 2: Execute Test Plan** - COMPLETED
+  - [x] Created 4 new mission-critical test files reproducing SSOT violations
+  - [x] All tests inherit from SSOT framework (SSotBaseTestCase)
+  - [x] Tests validate GitHub Issue #204 exact error reproduction
+  - [x] Test execution verified - properly detect SSOT violations
+
 - [ ] **Step 3: Plan Remediation**
 - [ ] **Step 4: Execute Remediation**  
 - [ ] **Step 5: Test Fix Loop**
@@ -104,8 +109,42 @@ WebSocket connections fail completely due to missing `get_db_session_factory` fu
 - WebSocket factory creates database sessions successfully ✅
 - Golden path: user login → database session → AI responses works ✅
 
+## Test Files Created (Step 2)
+
+**4 New Mission-Critical Test Files:**
+1. **`test_database_ssot_function_violations.py`** - Missing function detection  
+   - Reproduces exact GitHub Issue #204 error
+   - Tests WebSocket factory failures with missing `get_db_session_factory`
+   - Validates replacement function `get_database_manager` works
+
+2. **`test_database_manager_ssot_consolidation.py`** - SSOT consolidation validation
+   - Detects duplicate DatabaseManager implementations across 3 locations
+   - AST-based codebase scanning for import consistency
+   - Validates single source after SSOT remediation
+
+3. **`test_database_import_dependency_resolution.py`** - Import/dependency resolution
+   - Custom directed graph implementation for circular dependency detection
+   - WebSocket factory import resolution validation
+   - Startup sequence database initialization order testing
+
+4. **`test_database_golden_path_session_factory.py`** - Golden path validation
+   - Async WebSocket manager database session creation tests
+   - User login database session flow validation
+   - Agent execution database access testing
+
+**Test Execution Commands:**
+```bash
+# Run all DatabaseManager SSOT tests
+python -m pytest tests/mission_critical/test_database_* -v
+
+# Run specific violation reproduction
+python -m pytest tests/mission_critical/test_database_ssot_function_violations.py
+```
+
+**Status:** All tests pass collection and reproduce SSOT violations as designed ✅
+
 ## Next Actions
 
-1. **CURRENT STEP:** Execute test plan (~20% new SSOT tests)
-2. Focus on failing tests that reproduce SSOT violations
-3. Build new tests using existing SSOT framework patterns
+1. **CURRENT STEP:** Plan SSOT remediation strategy
+2. Focus on fixing missing `get_db_session_factory` function first (blocks WebSocket)
+3. Plan consolidation of duplicate DatabaseManager classes
