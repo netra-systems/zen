@@ -21,6 +21,7 @@ CRITICAL BUSINESS LOGIC:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from typing import Dict, List, Optional
@@ -224,6 +225,8 @@ class RevenueCalculator:
         return validation_results
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestRevenueCalculationBusinessLogic:
     """Test revenue calculation business logic that protects $500K+ ARR."""
     

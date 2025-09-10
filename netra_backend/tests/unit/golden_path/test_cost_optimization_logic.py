@@ -414,6 +414,8 @@ class MockCostOptimizationAnalyzer:
         }
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestCostOptimizationLogic(SSotBaseTestCase):
     """Test cost optimization business logic validation."""
     

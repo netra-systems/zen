@@ -23,6 +23,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field
@@ -536,6 +537,8 @@ class UserExecutionContextFactory:
         pass
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestExecutionContextIsolationBusinessLogic:
     """Test execution context isolation business logic for multi-user platform."""
     

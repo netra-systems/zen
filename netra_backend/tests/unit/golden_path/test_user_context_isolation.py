@@ -544,6 +544,8 @@ class MockUserContextIsolationValidator:
         return recommendations
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestUserContextIsolationLogic(SSotBaseTestCase):
     """Test user context isolation business logic validation."""
     

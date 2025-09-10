@@ -23,6 +23,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
@@ -558,6 +559,8 @@ class UserContextFactory:
         return (now - created_at).total_seconds() / 60
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestUserContextFactoryBusinessLogic:
     """Test user context factory business logic for multi-tenant platform."""
     

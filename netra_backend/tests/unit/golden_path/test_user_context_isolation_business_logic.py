@@ -18,6 +18,8 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, ensure_u
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
     """Golden Path Unit Tests for User Context Isolation Business Logic."""
 

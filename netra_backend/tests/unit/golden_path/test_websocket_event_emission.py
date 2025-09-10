@@ -478,6 +478,8 @@ class MockWebSocketEventGenerator:
         }
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestWebSocketEventEmissionLogic(SSotBaseTestCase):
     """Test WebSocket event emission business logic validation."""
     

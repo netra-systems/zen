@@ -23,6 +23,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
@@ -480,6 +481,8 @@ class AgentOrchestrator:
         return resolved_sequence
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestAIAgentOrchestrationBusinessLogic:
     """Test AI agent orchestration business logic that drives value delivery."""
     

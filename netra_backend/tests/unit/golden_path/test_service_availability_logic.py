@@ -296,6 +296,8 @@ class MockServiceDependencyValidator:
         }
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestServiceAvailabilityLogic(SSotBaseTestCase):
     """Test service availability validation business logic."""
     

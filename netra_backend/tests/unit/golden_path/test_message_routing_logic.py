@@ -668,6 +668,8 @@ class MockMessageRoutingEngine:
             return "Poor - Routing inefficiencies may impact user satisfaction and business value"
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestMessageRoutingLogic(SSotBaseTestCase):
     """Test message routing business logic validation."""
     

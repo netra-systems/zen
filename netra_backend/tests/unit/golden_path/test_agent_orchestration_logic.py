@@ -538,6 +538,8 @@ class MockAgentOrchestrator:
         }
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestAgentOrchestrationLogic(SSotBaseTestCase):
     """Test agent orchestration business logic validation."""
     
