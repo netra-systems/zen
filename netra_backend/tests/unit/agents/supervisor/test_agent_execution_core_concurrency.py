@@ -240,7 +240,6 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
         
         def start_execution(agent_name, run_id, user_id, metadata=None):
             state_id = f"{agent_name}_{run_id}_{time.time()}"
-            print(f"DEBUG: start_execution called for {agent_name}, state_id={state_id}")
             tracker._state_executions[state_id] = {
                 "agent_name": agent_name,
                 "run_id": run_id,
@@ -251,7 +250,6 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
             return state_id
         
         async def transition_phase(state_id, phase, metadata=None, websocket_manager=None):
-            print(f"DEBUG: transition_phase called with state_id={state_id}, phase={phase}")
             if state_id in tracker._state_executions:
                 transition = {
                     "phase": phase,
@@ -261,12 +259,8 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                 }
                 tracker._state_executions[state_id]["phases"].append(transition)
                 
-                # DEBUG: Print phase transitions
-                print(f"DEBUG: State tracker transition_phase called with phase={phase}, websocket_manager={websocket_manager is not None}")
-                
                 # Simulate WebSocket notifications for COMPLETED phase
                 if websocket_manager and phase == AgentExecutionPhase.COMPLETED:
-                    print(f"DEBUG: Calling notify_agent_completed for {state_id}")
                     execution = tracker._state_executions[state_id]
                     await websocket_manager.notify_agent_completed(
                         run_id=execution["run_id"],
@@ -275,13 +269,10 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                     )
         
         def complete_execution(state_id, success=True):
-            print(f"DEBUG: complete_execution called with state_id={state_id}, success={success}")
             if state_id in tracker._state_executions:
                 tracker._state_executions[state_id]["completed"] = True
                 tracker._state_executions[state_id]["success"] = success
                 tracker._state_executions[state_id]["completion_time"] = time.time()
-            else:
-                print(f"DEBUG: WARNING - state_id {state_id} not found in executions!")
         
         tracker.start_execution = Mock(side_effect=start_execution)
         tracker.transition_phase = AsyncMock(side_effect=transition_phase)
