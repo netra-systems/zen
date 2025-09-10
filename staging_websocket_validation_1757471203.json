@@ -1,0 +1,44 @@
+{
+  "deployment_validation": {
+    "backend": {
+      "status": 200,
+      "healthy": true,
+      "response_time_ms": 132.59,
+      "url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health"
+    },
+    "auth": {
+      "status": 200,
+      "healthy": true,
+      "response_time_ms": 135.97,
+      "url": "https://netra-auth-service-pnovr5vsba-uc.a.run.app/health"
+    },
+    "frontend": {
+      "status": 200,
+      "healthy": true,
+      "response_time_ms": 165.96,
+      "url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app/"
+    }
+  },
+  "websocket_validation": {
+    "connection_successful": true,
+    "error_1011_detected": false,
+    "connection_time_ms": 368.43,
+    "close_code": null,
+    "close_reason": null,
+    "errors": []
+  },
+  "golden_path_validation": {
+    "login_flow": false,
+    "api_access": true,
+    "websocket_ready": true,
+    "overall_success": true
+  },
+  "error_1011_check": {
+    "error_1011_found_in_logs": false,
+    "websocket_connections_working": true,
+    "deprecation_warnings_only": true,
+    "log_analysis": "No WebSocket Error 1011 found in recent staging logs. WebSocket connections are being accepted successfully."
+  },
+  "timestamp": "2025-09-10T02:26:41.780664",
+  "overall_validation_success": true
+}
