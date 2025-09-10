@@ -99,7 +99,7 @@ class ExecutionEngine:
             user_context: Optional UserExecutionContext for per-request isolation
         """
         # CRITICAL FIX: Allow direct instantiation but require proper parameters for WebSocket integration
-        if not registry:
+        if registry is None:
             raise ValueError("AgentRegistry is required for ExecutionEngine initialization")
         
         # Initialize core properties

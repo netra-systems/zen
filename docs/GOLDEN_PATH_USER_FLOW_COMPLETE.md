@@ -15,10 +15,11 @@ This document presents the complete "golden path" analysis of Netra Apex's user 
 ## Table of Contents
 
 1. [Ideal State: Golden Path Flow](#ideal-state-golden-path-flow)
-2. [Current State: Issues and Breaks](#current-state-issues-and-breaks)
-3. [Persistence and Exit Points](#persistence-and-exit-points)
-4. [Critical Fix Recommendations](#critical-fix-recommendations)
-5. [Testing Strategy](#testing-strategy)
+2. [Demo Mode Configuration](#demo-mode-configuration)
+3. [Current State: Issues and Breaks](#current-state-issues-and-breaks)
+4. [Persistence and Exit Points](#persistence-and-exit-points)
+5. [Critical Fix Recommendations](#critical-fix-recommendations)
+6. [Testing Strategy](#testing-strategy)
 
 ---
 
@@ -67,8 +68,11 @@ flowchart TD
     U --> UI
     UI --> WS_INIT
     WS_INIT --> WS_CONNECT
-    WS_CONNECT --> JWT_AUTH
+    WS_CONNECT --> DEMO_CHECK
+    DEMO_CHECK -->|Yes (DEMO_MODE=1)| DEMO_AUTH
+    DEMO_CHECK -->|No (DEMO_MODE=0)| JWT_AUTH
     JWT_AUTH --> USER_CTX
+    DEMO_AUTH --> USER_CTX
     USER_CTX --> WS_READY
     WS_READY --> USER_MSG
     USER_MSG --> MSG_ROUTE
@@ -208,6 +212,61 @@ graph LR
     style TC fill:#F0E68C
     style AC fill:#FFA07A
 ```
+
+---
+
+## Demo Mode Configuration
+
+### 🎯 Default Demo Mode for Isolated Environments
+
+**CONFIGURATION**: The system defaults to `DEMO_MODE=1` to enable seamless demonstration in isolated networks without requiring complex OAuth/JWT setup.
+
+#### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DEMO_MODE` | `1` | **ENABLED by default** - Bypasses WebSocket authentication for demo environments |
+| `DEMO_MODE` | `0` | **DISABLED** - Requires full JWT/OAuth authentication flow |
+
+#### Demo Mode Features
+
+1. **Authentication Bypass**: WebSocket connections automatically authenticated with demo user context
+2. **Demo User Creation**: Automatic creation of demo users with format: `demo-user-{timestamp}`
+3. **Safety Logging**: All demo mode activations logged at WARNING level for security awareness
+4. **Full Functionality**: All chat, agent execution, and WebSocket events work normally
+5. **Isolated Network Safe**: Designed for completely isolated demonstration environments
+
+#### Demo Mode Flow
+
+```mermaid
+sequenceDiagram
+    participant User as Demo User
+    participant WS as WebSocket
+    participant Auth as Auth System
+    participant Context as UserContext
+    
+    User->>WS: Connect to /ws (no auth headers)
+    WS->>Auth: Check DEMO_MODE environment
+    
+    alt DEMO_MODE=1 (DEFAULT)
+        Auth->>Auth: Create demo user context
+        Auth->>Context: Generate demo-user-{timestamp}
+        Context-->>WS: Demo authentication success
+        WS->>User: Connection ready - chat enabled
+        Note right of User: Full chat functionality available
+    else DEMO_MODE=0
+        Auth->>Auth: Require JWT authentication
+        Auth-->>WS: Authentication failed (no token)
+        WS->>User: Connection closed (auth required)
+    end
+```
+
+#### Security Considerations
+
+- **Production Safety**: Demo mode automatically disabled in production environments
+- **Isolation Required**: Only use in completely isolated networks
+- **Logging**: All demo mode usage logged for security auditing
+- **Override**: Set `DEMO_MODE=0` to disable and require full authentication
 
 ---
 
