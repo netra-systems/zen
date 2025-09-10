@@ -105,73 +105,48 @@ Every task needs:
 
 -----
 
-## 2\. Engineering Principles: Modularity, Clarity, and Cohesion
+## 2. ENGINEERING PRINCIPLES
 
-CRITICAL: Develop a globally coherent and modular architecture. 
-**Globally correct is better than locally correct.** Systems must be stable by default.
+**CORE:** Globally coherent and modular architecture. Globally correct > locally correct.
 
 ### 2.1. Architectural Tenets
+- **SRP:** One clear purpose per module/function/task
+- **SSOT:** One canonical implementation per service (configs are environment-specific exceptions)
+- **Search First:** Check existing implementations before creating
+- **Atomic Scope:** Complete functional updates only
+- **No Random Features:** Minimal changes for specific goals
+- **Basics First:** Common flows before edge cases
+- **Remove Legacy:** Delete old code during refactors
+- **Interface-First:** Define contracts before implementation
+- **Stability by Default:** Atomic changes, flag breaking changes
 
-  * **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
-  * **Single Source of Truth (SSOT):** **CRITICAL:** A concept must have ONE canonical implementation per service. Avoid multiple variations of the same logic; extend existing functions with parameters instead. (Cross-service duplication may be acceptable for independence; see `SPEC/acceptable_duplicates.xml`).
-    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See @CONFIG_REGRESSION_PREVENTION_PLAN.md
-    - **NEVER blindly consolidate "duplicate" configs** - They may serve different environments/services
-    - **Check ConfigDependencyMap BEFORE deleting** - One deletion can break multiple services
-    - **Environment isolation is CRITICAL** - Test configs must NOT leak to staging/production
-    - **🚨 AUTH VALIDATION REGRESSION PREVENTION:** See @FIVE_WHYS_BACKEND_500_ERROR_20250907.md - Auth validation MUST NOT be overly strict for hex strings or staging environments. **HEX STRINGS ARE VALID SECRETS** (e.g. SERVICE_SECRET from `openssl rand -hex 32`). OAuth redirect mismatches should be warnings in non-prod, not failures.
-  * **"Search First, Create Second":** Always check for existing implementations before writing new code.
-  * **ATOMIC SCOPE:** Edits must be complete, functional updates. Delegate tasks to sub-agents with scopes you are certain they can handle. Split and divide work appropriately.
-  * **Complete Work:** An update is complete only when all relevant parts of the system are updated, integrated, tested, validated, and documented, and all legacy code has been removed.
-  * **RANDOM FEATURES ARE FORBIDDEN:** Edits must focus on the most minimal change required to achieve the goal.
-  * **BASICS FIRST:** Prioritize basic and expected user flows over exotic edge cases.
-  * **LEGACY IS FORBIDDEN:** Always remove ALL related legacy code as part of any refactoring effort.
-  * **Evolutionary Architecture:** Design systems to meet *current* needs while allowing for future adaptation (Just-in-Time Architecture).
-  * **Operational Simplicity:** Favor architectures with fewer moving parts to reduce maintenance costs.
-  * **High Cohesion, Loose Coupling:** Group related logic together while maximizing module independence.
-  * **Interface-First Design:** Define clear interfaces and contracts before implementation.
-  * **Composability:** Design components for reuse.
-  * **Stability by Default:** Changes must be atomic. Explicitly flag any breaking changes.
-
-Use Test Runner to discover tests e.g. `python tests/unified_test_runner.py` (absolute path: `/Users/anthony/Documents/GitHub/netra-apex/tests/unified_test_runner.py`). Read testing xmls.
-
-**A compliance checklist against these tenets MUST be saved after every work session.**
+**TEST DISCOVERY:** `python tests/unified_test_runner.py`
+**COMPLIANCE:** Save checklist after every session.
 
 ### 2.2. Complexity Management
+- **Anti-Over-Engineering:** Finite complexity budget, value > complexity
+- **Rule of Two:** Abstract only after 2+ implementations  
+- **Code Clarity:** Functions <25 lines, modules <750 lines (2000 for SSOT mega classes)
+- **Task Decomposition:** Use sub-agents for complex tasks
 
-  * **Architectural Simplicity (Anti-Over-Engineering):** Assume a finite complexity budget. Every new service, queue, or abstraction must provide more value than the complexity it adds. Strive for the fewest possible steps between a request's entry point and the business logic.
-    - **⚠️ OVER-ENGINEERING AUDIT:** See @OVER_ENGINEERING_AUDIT_20250908.md - System currently has 18,264 violations requiring consolidation
-    - **Current Issues:** 154 manager classes, 78 factory classes, 110 duplicate types - many represent unnecessary abstraction layers
-    - **Success Patterns:** Unified managers (Configuration, State, Lifecycle) represent correct SSOT consolidation approach
-  * **"Rule of Two":** Do not abstract or generalize a pattern until you have implemented it at least twice.
-  * **Code Clarity:** Aim for concise functions (\<25 lines) and focused modules (\<750 lines). Exceeding these is a signal to re-evaluate for SRP adherence.
-  * **Mega Class Exceptions:** Central SSOT classes defined in @mega_class_exceptions.xml may extend to 2000 lines with explicit justification. These must be true integration points that cannot be split without violating SSOT principles.
-    - **Naming Clarity Initiative:** See @MANAGER_RENAMING_PLAN_20250908.md for business-focused naming of unified SSOT classes
-  * **Task Decomposition:** If a task is too large or complex, decompose and delegate it to specialized sub-agents with fresh contexts. ALWAYS carefully manage your own context use and agents context use.
-
-### 2.3. Code Quality Standards
-
-  * **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
-  * **Environment:** All environment access MUST go through `IsolatedEnvironment` as defined in @unified_environment_management.xml.
-  * **Configuration Architecture:** Follow the comprehensive configuration system documented in @configuration_architecture.md.
-  * **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
-    - **Over-Engineering Monitoring:** Track progress on reducing 18,264 violations identified in @OVER_ENGINEERING_AUDIT_20250908.md
-    - **Naming Convention Validation:** Follow @naming_conventions_business_focused.xml for all new classes
+### 2.3. Quality Standards
+- **Type Safety:** Follow `SPEC/type_safety.xml`
+- **Environment:** Use `IsolatedEnvironment` for all env access
+- **Configuration:** Follow `@configuration_architecture.md`
+- **Compliance:** Run `python scripts/check_architecture_compliance.py`
 
 ### 2.4. Strategic Trade-offs
+Propose trade-offs with BVJ justification, risk assessment, and debt mitigation plan.
 
-You are authorized to propose strategic trade-offs (e.g., accepting temporary complexity to ship a critical feature). Justify these in the BVJ, including the risks and a plan to address the resulting technical debt.
+### 2.5. Observability 
+- **Three Pillars:** Logging, metrics, distributed tracing (OpenTelemetry)
+- **SLOs:** Service Level Objectives for critical services
+- **Error Budgets:** Balance velocity with stability
 
-### 2.5. Observability and Data-Driven Operations
-
-  * **The Three Pillars:** Implement comprehensive logging, metrics, and distributed tracing (OpenTelemetry) across all services.
-  * **SLOs:** Define Service Level Objectives (SLOs) for all critical services.
-  * **Error Budgets:** Use error budgets to balance velocity with stability. If an SLO is breached, development focus MUST shift to restoring stability.
-
-### 2.6. Pragmatic Rigor and Resilience
-
-  * **Pragmatic Rigor:** Apply standards intelligently to ensure correctness, not rigidly for theoretical purity. Avoid architectural overkill.
-  * **"Boring Technology":** Favor proven, operationally simple technologies.
-  * **Resilience by Default:** Default to a functional, permissive state. Add strictness only where explicitly required (e.g., security). Adhere to Postel's Law: "Be conservative in what you send, liberal in what you accept."
+### 2.6. Pragmatic Rigor
+- Apply standards intelligently, not rigidly
+- Favor "boring technology" - proven and simple
+- Default to functional/permissive state, add strictness only when required
 
 -----
 
