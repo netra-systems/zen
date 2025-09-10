@@ -334,9 +334,10 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
         
         # Add mock tool dispatcher for testing (if needed)
         if not hasattr(user_context, 'tool_dispatcher'):
-            # Cannot set attributes on frozen dataclass, so we'll use a different approach
-            # Mock the tool dispatcher access instead of setting it
-            pass
+            # Cannot set attributes on frozen dataclass, so we'll use object.__setattr__
+            from unittest.mock import Mock
+            mock_tool_dispatcher = Mock()
+            object.__setattr__(user_context, 'tool_dispatcher', mock_tool_dispatcher)
         
         return user_context
 
