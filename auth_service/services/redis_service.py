@@ -7,7 +7,7 @@ following SSOT principles and maintaining service independence.
 
 import logging
 from typing import Any, Optional, List
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
 from auth_service.auth_core.config import AuthConfig
 
 logger = logging.getLogger(__name__)

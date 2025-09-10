@@ -24,9 +24,9 @@ from netra_backend.app.agents.supervisor.agent_execution_context_manager import 
 )
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
-    AgentExecutionResult,
-    ExecutionStatus
+    AgentExecutionResult
 )
+from netra_backend.app.agents.base.execution_context import ExecutionStatus
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
 
@@ -61,7 +61,7 @@ class TestAgentExecutionContextManagement(BaseIntegrationTest):
         assert execution_context is not None
         assert execution_context.execution_id == execution_id
         assert execution_context.user_context.user_id == user_context.user_id
-        assert execution_context.status == ExecutionStatus.CREATED
+        assert execution_context.status == ExecutionStatus.PENDING
         
         # Update context status
         await context_manager.update_execution_status(

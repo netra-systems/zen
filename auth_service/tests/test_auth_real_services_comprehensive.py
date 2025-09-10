@@ -37,7 +37,7 @@ from auth_service.auth_core.database.models import Base, AuthUser, AuthSession, 
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
 from auth_service.main import app
 
 # Import test framework utilities

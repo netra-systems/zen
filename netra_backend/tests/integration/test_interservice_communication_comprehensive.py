@@ -39,7 +39,7 @@ from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message
 from netra_backend.app.core.configuration import get_configuration
 from netra_backend.app.database import get_db, get_system_db
-from netra_backend.app.core.redis_connection_handler import RedisConnectionHandler
+from netra_backend.app.redis_manager import redis_manager as RedisConnectionHandler
 
 
 class TestInterserviceCommunicationComprehensive(BaseIntegrationTest):

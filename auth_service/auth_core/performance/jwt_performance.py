@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional, Tuple
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 
-from auth_service.auth_core.redis_manager import auth_redis_manager
+from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)

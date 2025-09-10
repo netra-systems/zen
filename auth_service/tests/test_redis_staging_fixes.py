@@ -25,7 +25,7 @@ async def test_redis_no_localhost_fallback_in_staging(isolated_test_env):
     env.set("REDIS_FALLBACK_ENABLED", "false", "test_redis_staging")
     
     # Import after setting env vars
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     
     manager = AuthRedisManager()
     await manager.initialize()
@@ -45,7 +45,7 @@ async def test_redis_localhost_rejected_in_staging(isolated_test_env):
     env.set("REDIS_REQUIRED", "true", "test_redis_staging")
     env.set("REDIS_FALLBACK_ENABLED", "false", "test_redis_staging")
     
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     
     manager = AuthRedisManager()
     
@@ -66,7 +66,7 @@ async def test_redis_required_in_staging(isolated_test_env):
     env.set("REDIS_REQUIRED", "true", "test_redis_staging")
     env.set("REDIS_FALLBACK_ENABLED", "false", "test_redis_staging")
     
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     
     manager = AuthRedisManager()
     
@@ -86,7 +86,7 @@ async def test_redis_graceful_degradation_when_not_required(isolated_test_env):
     # No REDIS_URL
     env.set("REDIS_REQUIRED", "false", "test_redis_staging")
     
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     
     manager = AuthRedisManager()
     await manager.initialize()
@@ -110,7 +110,7 @@ async def test_redis_localhost_allowed_in_development(isolated_test_env, real_au
     # No REDIS_URL - should fallback to localhost
     env.set("REDIS_URL", "redis://localhost:6381/3", "test_redis_staging")  # Use test Redis
     
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     
     manager = AuthRedisManager()
     
@@ -136,7 +136,7 @@ async def test_redis_connection_configuration(isolated_test_env, real_auth_redis
     env.set("REDIS_URL", "redis://localhost:6381/3", "test_redis_staging")  # Use test Redis
     env.set("REDIS_REQUIRED", "false", "test_redis_staging")
     
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     
     manager = AuthRedisManager()
     
@@ -162,7 +162,7 @@ async def test_redis_connection_with_valid_staging_url(isolated_test_env, real_a
     env.set("REDIS_URL", "redis://localhost:6381/3", "test_redis_staging")  # Use test Redis
     env.set("REDIS_REQUIRED", "false", "test_redis_staging")
     
-    from auth_service.auth_core.redis_manager import AuthRedisManager
+    from netra_backend.app.redis_manager import RedisManager as AuthRedisManager
     
     manager = AuthRedisManager()
     

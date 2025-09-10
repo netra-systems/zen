@@ -19,7 +19,7 @@ import jwt
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.core.jwt_cache import jwt_validation_cache
 from shared.isolated_environment import get_env
-from auth_service.auth_core.redis_manager import auth_redis_manager
+from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 
 logger = logging.getLogger(__name__)
 
