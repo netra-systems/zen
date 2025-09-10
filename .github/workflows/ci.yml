@@ -2,9 +2,7 @@ name: CI Pipeline
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-  push:
-    branches: [main, develop, staging, critical-remediation-*]
+    types: [opened]
   workflow_dispatch:
     inputs:
       test_level:
