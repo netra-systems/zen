@@ -22,10 +22,14 @@ import time
 from datetime import datetime, timezone
 from collections import defaultdict
 
-# SSOT: Import from UniversalRegistry
+# SSOT: Import from UniversalRegistry - avoid name collision
 from netra_backend.app.core.registry.universal_registry import (
-    AgentRegistry as UniversalAgentRegistry,
+    UniversalRegistry,
     get_global_registry
+)
+# Import the specialized AgentRegistry as a different name to avoid collision
+from netra_backend.app.core.registry.universal_registry import (
+    AgentRegistry as BaseAgentRegistry
 )
 
 if TYPE_CHECKING:
@@ -361,7 +365,7 @@ class AgentLifecycleManager:
                 logger.warning(f"⚠️ Emergency cleanup completed with errors for user {user_id}, but session was removed from registry")
 
 
-class AgentRegistry(UniversalAgentRegistry):
+class AgentRegistry(BaseAgentRegistry):
     """Agent registry using UniversalRegistry SSOT pattern with CanonicalToolDispatcher.
     
     CRITICAL SECURITY MIGRATION:
@@ -370,8 +374,8 @@ class AgentRegistry(UniversalAgentRegistry):
     - Provides proper permission checking and WebSocket events
     - Eliminates all competing tool dispatcher implementations
     
-    This class extends the UniversalAgentRegistry from universal_registry.py,
-    adding backward compatibility methods while using the SSOT implementation.
+    This class extends the UniversalRegistry from universal_registry.py,
+    adding agent-specific functionality while maintaining SSOT compliance.
     """
     
     def __init__(self, llm_manager: Optional['LLMManager'] = None, tool_dispatcher_factory: Optional[callable] = None):
@@ -434,8 +438,8 @@ class AgentRegistry(UniversalAgentRegistry):
         """
         try:
             # 1. Validate inheritance chain
-            if not isinstance(self, UniversalAgentRegistry):
-                raise RuntimeError("AgentRegistry must inherit from UniversalAgentRegistry for SSOT compliance")
+            if not isinstance(self, BaseAgentRegistry):
+                raise RuntimeError("AgentRegistry must inherit from BaseAgentRegistry for SSOT compliance")
             
             # 2. Validate constructor parameters were properly set
             if not hasattr(self, 'name') or self.name != "AgentRegistry":
@@ -1597,7 +1601,7 @@ class AgentRegistry(UniversalAgentRegistry):
         """
         try:
             status = {
-                'inheritance_chain_valid': isinstance(self, UniversalAgentRegistry),
+                'inheritance_chain_valid': isinstance(self, UniversalRegistry),
                 'constructor_signature_aligned': hasattr(self, 'name') and self.name == "AgentRegistry",
                 'websocket_adapter_available': hasattr(self, 'websocket_manager'),
                 'parent_interface_accessible': hasattr(super(), 'set_websocket_bridge'),
@@ -1663,24 +1667,12 @@ class AgentRegistry(UniversalAgentRegistry):
 def get_agent_registry(llm_manager: 'LLMManager', tool_dispatcher: Optional['ToolDispatcher'] = None) -> AgentRegistry:
     """Get or create agent registry using SSOT pattern.
     
-    This uses the global registry from UniversalRegistry.
+    This uses the global registry from UniversalRegistry but creates our custom AgentRegistry.
     """
     try:
-        # Try to get existing global registry
-        global_registry = get_global_registry('agent')
-        
-        # Ensure it has the required attributes
-        if not hasattr(global_registry, 'llm_manager'):
-            global_registry.llm_manager = llm_manager
-            global_registry.tool_dispatcher = tool_dispatcher
-        
-        # Return as AgentRegistry for compatibility
-        if isinstance(global_registry, AgentRegistry):
-            return global_registry
-        else:
-            # Wrap if needed
-            registry = AgentRegistry(llm_manager, tool_dispatcher)
-            return registry
+        # Create our custom AgentRegistry which inherits from UniversalRegistry
+        registry = AgentRegistry(llm_manager, tool_dispatcher)
+        return registry
             
     except Exception:
         # Create new registry

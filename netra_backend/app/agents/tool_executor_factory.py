@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.agents.request_scoped_tool_dispatcher import RequestScopedToolDispatcher
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
@@ -327,7 +327,6 @@ class ToolExecutorFactory:
         
         try:
             # Create test user context
-            from netra_backend.app.services.user_execution_context import UserExecutionContext
             test_context = UserExecutionContext(
                 user_id="health_check_user",
                 thread_id="health_check_thread",
