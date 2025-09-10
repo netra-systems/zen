@@ -659,7 +659,7 @@ class TestServiceHealthMonitoringRecovery(BaseIntegrationTest):
             
             if error_injection and target_status in [HealthStatus.DEGRADED, HealthStatus.UNHEALTHY]:
                 # Create modified health simulation for this service
-                async def create_degraded_health_sim(service, error_rate):
+                def create_degraded_health_sim(service, error_rate):
                     async def degraded_health_sim(service_name):
                         # Inject errors and slow responses to trigger degraded/unhealthy status
                         if random.random() < 0.3:  # 30% chance of slow response
@@ -678,13 +678,13 @@ class TestServiceHealthMonitoringRecovery(BaseIntegrationTest):
                 
                 # Replace simulation method for this service
                 if service_name == "database_service":
-                    monitor._simulate_database_health = await create_degraded_health_sim(service_name, error_rate)
+                    monitor._simulate_database_health = create_degraded_health_sim(service_name, error_rate)
                 elif service_name == "api_service":
-                    monitor._simulate_api_health = await create_degraded_health_sim(service_name, error_rate)
+                    monitor._simulate_api_health = create_degraded_health_sim(service_name, error_rate)
                 elif service_name == "cache_service":
-                    monitor._simulate_cache_health = await create_degraded_health_sim(service_name, error_rate)
+                    monitor._simulate_cache_health = create_degraded_health_sim(service_name, error_rate)
                 elif service_name == "auth_service":
-                    monitor._simulate_auth_health = await create_degraded_health_sim(service_name, error_rate)
+                    monitor._simulate_auth_health = create_degraded_health_sim(service_name, error_rate)
     
     @pytest.mark.asyncio
     async def test_automated_recovery_action_effectiveness(self):
@@ -845,7 +845,7 @@ class TestServiceHealthMonitoringRecovery(BaseIntegrationTest):
             
             if failure_pattern == "persistent_unhealthy":
                 # Create simulation that consistently reports unhealthy status
-                async def create_unhealthy_sim(service):
+                def create_unhealthy_sim(service):
                     async def unhealthy_sim(service_name):
                         await asyncio.sleep(random.uniform(0.5, 2.0))  # Slow response
                         
@@ -859,11 +859,11 @@ class TestServiceHealthMonitoringRecovery(BaseIntegrationTest):
                     return unhealthy_sim
                 
                 if service_name == "database_service":
-                    monitor._simulate_database_health = await create_unhealthy_sim(service_name)
+                    monitor._simulate_database_health = create_unhealthy_sim(service_name)
             
             elif failure_pattern == "persistent_degraded":
                 # Create simulation that reports degraded performance
-                async def create_degraded_sim(service):
+                def create_degraded_sim(service):
                     async def degraded_sim(service_name):
                         await asyncio.sleep(random.uniform(0.3, 1.0))
                         
@@ -877,7 +877,7 @@ class TestServiceHealthMonitoringRecovery(BaseIntegrationTest):
                     return degraded_sim
                 
                 if service_name == "api_service":
-                    monitor._simulate_api_health = await create_degraded_sim(service_name)
+                    monitor._simulate_api_health = create_degraded_sim(service_name)
     
     @pytest.mark.asyncio
     async def test_service_dependency_health_propagation(self):

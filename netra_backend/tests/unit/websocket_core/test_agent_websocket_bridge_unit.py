@@ -44,7 +44,14 @@ class TestAgentWebSocketBridgeCore:
     @pytest.fixture
     def agent_websocket_bridge(self, integration_config):
         """Create AgentWebSocketBridge instance with test configuration."""
-        return AgentWebSocketBridge(integration_config)
+        # Create a mock UserExecutionContext for testing
+        from unittest.mock import Mock
+        mock_user_context = Mock()
+        mock_user_context.user_id = "test_user_123"
+        mock_user_context.thread_id = "test_thread_456"
+        
+        # Create bridge with user context (constructor expects UserExecutionContext, not IntegrationConfig)
+        return AgentWebSocketBridge(mock_user_context)
     
     def test_initializes_with_correct_default_state(self, agent_websocket_bridge):
         """Test bridge initializes with proper default state."""
