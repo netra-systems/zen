@@ -31,16 +31,30 @@ class TestUserSessionsTableDeployment(BaseIntegrationTest):
         from the database, even though the schema exists in staging_init.sql.
         After remediation, this test should PASS.
         """
-        # Get database connection
-        db_info = real_services_fixture["db_info"]
+        # Get database connection info from fixture
+        if not real_services_fixture["database_available"]:
+            pytest.skip("Database not available for integration testing")
+        
+        # Extract connection info from database URL
+        database_url = real_services_fixture["database_url"]
+        
+        # Parse database URL - expected format: postgresql+asyncpg://user:password@host:port/database
+        import re
+        url_pattern = r"postgresql\+asyncpg://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)"
+        match = re.match(url_pattern, database_url)
+        
+        if not match:
+            pytest.fail(f"Cannot parse database URL: {database_url}")
+        
+        user, password, host, port, database = match.groups()
         
         # Connect to PostgreSQL database
         conn = await asyncpg.connect(
-            host=db_info["host"],
-            port=db_info["port"],
-            database=db_info["database"],
-            user=db_info["user"],
-            password=db_info["password"]
+            host=host,
+            port=int(port),
+            database=database,
+            user=user,
+            password=password
         )
         
         try:
@@ -150,15 +164,29 @@ class TestUserSessionsTableDeployment(BaseIntegrationTest):
         it creates the user_sessions table with the correct schema.
         Should FAIL initially due to incomplete database migration.
         """
-        # Get database connection
-        db_info = real_services_fixture["db_info"]
+        # Get database connection info from fixture
+        if not real_services_fixture["database_available"]:
+            pytest.skip("Database not available for integration testing")
+        
+        # Extract connection info from database URL
+        database_url = real_services_fixture["database_url"]
+        
+        # Parse database URL
+        import re
+        url_pattern = r"postgresql\+asyncpg://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)"
+        match = re.match(url_pattern, database_url)
+        
+        if not match:
+            pytest.fail(f"Cannot parse database URL: {database_url}")
+        
+        user, password, host, port, database = match.groups()
         
         conn = await asyncpg.connect(
-            host=db_info["host"],
-            port=db_info["port"],
-            database=db_info["database"],
-            user=db_info["user"],
-            password=db_info["password"]
+            host=host,
+            port=int(port),
+            database=database,
+            user=user,
+            password=password
         )
         
         try:
@@ -233,15 +261,29 @@ class TestUserSessionsTableDeployment(BaseIntegrationTest):
         it supports the operations required by the authentication system.
         Should FAIL initially because table is missing.
         """
-        # Get database connection
-        db_info = real_services_fixture["db_info"]
+        # Get database connection info from fixture
+        if not real_services_fixture["database_available"]:
+            pytest.skip("Database not available for integration testing")
+        
+        # Extract connection info from database URL
+        database_url = real_services_fixture["database_url"]
+        
+        # Parse database URL
+        import re
+        url_pattern = r"postgresql\+asyncpg://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)"
+        match = re.match(url_pattern, database_url)
+        
+        if not match:
+            pytest.fail(f"Cannot parse database URL: {database_url}")
+        
+        user, password, host, port, database = match.groups()
         
         conn = await asyncpg.connect(
-            host=db_info["host"],
-            port=db_info["port"],
-            database=db_info["database"],
-            user=db_info["user"],
-            password=db_info["password"]
+            host=host,
+            port=int(port),
+            database=database,
+            user=user,
+            password=password
         )
         
         try:

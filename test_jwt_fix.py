@@ -73,7 +73,7 @@ async def test_jwt_fix():
         return success
         
     except Exception as e:
-        print(f"\n❌ JWT VALIDATION TEST ERROR: {e}")
+        print(f"\nJWT VALIDATION TEST ERROR: {e}")
         return False
 
 
@@ -121,13 +121,13 @@ async def main():
     print("=" * 80)
     
     if overall_success:
-        print("🎉 JWT VALIDATION REMEDIATION: SUCCESS")
-        print("   • KeyManager now has JWT interface methods")
-        print("   • Golden Path Validator can find JWT capabilities") 
-        print("   • Methods properly delegate to UnifiedJWTValidator")
-        print("   • Zero breaking changes - SSOT principles maintained")
+        print("JWT VALIDATION REMEDIATION: SUCCESS")
+        print("   - KeyManager now has JWT interface methods")
+        print("   - Golden Path Validator can find JWT capabilities") 
+        print("   - Methods properly delegate to UnifiedJWTValidator")
+        print("   - Zero breaking changes - SSOT principles maintained")
     else:
-        print("❌ JWT VALIDATION REMEDIATION: FAILED")
+        print("JWT VALIDATION REMEDIATION: FAILED")
         print("   Fix may need additional work")
     
     return overall_success
