@@ -102,11 +102,11 @@ class TestOAuthSecurityComprehensive:
         expected_client_secret_var = f"GOOGLE_OAUTH_CLIENT_SECRET_{environment.value.upper()}"
         
         # Verify environment-specific variables are used
-        actual_client_id_env = get_env(expected_client_id_var)
+        actual_client_id_env = get_env().get(expected_client_id_var)
         assert actual_client_id_env == client_id, \
             f"OAuth should use environment-specific client ID variable: {expected_client_id_var}"
         
-        actual_client_secret_env = get_env(expected_client_secret_var)
+        actual_client_secret_env = get_env().get(expected_client_secret_var)
         assert actual_client_secret_env == client_secret, \
             f"OAuth should use environment-specific client secret variable: {expected_client_secret_var}"
         

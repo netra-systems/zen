@@ -163,10 +163,13 @@ class ExecutionEngineFactory:
                 # Check per-user engine limits
                 await self._enforce_user_engine_limits(validated_context.user_id)
                 
-                # Get agent factory instance (configured globally)
-                agent_factory = get_agent_instance_factory()
+                # Create NEW agent factory instance per user for complete isolation
+                # This prevents shared state between users - each gets their own factory
+                from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+                agent_factory = AgentInstanceFactory()
+                
                 if not agent_factory:
-                    raise ExecutionEngineFactoryError("AgentInstanceFactory not available")
+                    raise ExecutionEngineFactoryError("AgentInstanceFactory creation failed")
                 
                 # Create user WebSocket emitter via factory
                 websocket_emitter = await self._create_user_websocket_emitter(

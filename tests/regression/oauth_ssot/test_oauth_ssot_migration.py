@@ -216,7 +216,7 @@ class TestOAuthSSOTMigration:
         # Test scenario 4: Environment-specific OAuth loading
         environment = validator.get_environment()
         expected_client_id_var = f"GOOGLE_OAUTH_CLIENT_ID_{environment.value.upper()}"
-        actual_client_id = get_env(expected_client_id_var)
+        actual_client_id = get_env().get(expected_client_id_var)
         assert actual_client_id == oauth_creds["client_id"], \
             f"Environment-specific OAuth loading should work. Expected var: {expected_client_id_var}"
         
@@ -281,7 +281,7 @@ class TestOAuthSSOTMigration:
         
         # Verify the expected variables exist in environment
         for var_type, var_name in expected_variables.items():
-            var_value = get_env(var_name)
+            var_value = get_env().get(var_name)
             assert var_value is not None, \
                 f"Environment variable {var_name} should exist for {var_type}"
             assert len(var_value) > 0, \
@@ -289,8 +289,8 @@ class TestOAuthSSOTMigration:
         
         # Test OAuth credentials use correct environment variables
         oauth_creds = validator.get_oauth_credentials()
-        expected_client_id = get_env(expected_variables["client_id"])
-        expected_client_secret = get_env(expected_variables["client_secret"])
+        expected_client_id = get_env().get(expected_variables["client_id"])
+        expected_client_secret = get_env().get(expected_variables["client_secret"])
         
         assert oauth_creds["client_id"] == expected_client_id, \
             f"OAuth client ID should use environment-specific variable"
