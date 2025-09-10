@@ -2031,16 +2031,6 @@ async def _handle_websocket_messages(
                     break
                 
                 # CRITICAL FIX: Use Windows-safe wait_for to prevent deadlocks
-                # CRITICAL GCP FIX: Validate WebSocket state before receive_text to prevent race condition
-                if not hasattr(websocket, 'client_state') or websocket.client_state != WebSocketState.CONNECTED:
-                    logger.error(f"WebSocket not in CONNECTED state before receive_text: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown'))}")
-                    logger.error("This is the GCP Cloud Run race condition - WebSocket not ready for messages")
-                    # Wait briefly and retry
-                    await asyncio.sleep(0.1)
-                    if not hasattr(websocket, 'client_state') or websocket.client_state != WebSocketState.CONNECTED:
-                        logger.error("WebSocket still not connected after delay - breaking message loop")
-                        break
-                
                 # Receive message with timeout
                 raw_message = await windows_safe_wait_for(
                     websocket.receive_text(),
@@ -2127,23 +2117,7 @@ async def _handle_websocket_messages(
                 if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
                     logger.error(f"WebSocket connection state error for {connection_id}: {error_message}")
                     logger.error("This indicates a race condition between accept() and message handling")
-                    
-                    # CRITICAL GCP FIX: In Cloud Run, this can happen due to container lifecycle
-                    # Try to wait briefly for WebSocket to stabilize before giving up
-                    from shared.isolated_environment import get_env
-                    environment = get_env().get("ENVIRONMENT", "development").lower()
-                    if environment in ["staging", "production"]:
-                        logger.warning("GCP Cloud Run race condition detected - attempting recovery")
-                        await asyncio.sleep(0.5)  # Give Cloud Run time to stabilize
-                        
-                        # Check if WebSocket is now ready
-                        if hasattr(websocket, 'client_state') and websocket.client_state == WebSocketState.CONNECTED:
-                            logger.info("WebSocket recovered after Cloud Run stabilization delay")
-                            error_count = 0  # Reset error count
-                            continue  # Try again
-                    
-                    # Break if not recovered
-                    logger.error("WebSocket race condition not recoverable - closing connection")
+                    # Break immediately - don't retry connection state errors
                     break
                 else:
                     logger.error(f"Message handling error for {connection_id}: {e}", exc_info=True)
