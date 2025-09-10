@@ -96,11 +96,19 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         # Removed automatic staging environment detection to prevent auth bypass
         is_e2e_via_env_vars = (
             env.get("E2E_TESTING", "0") == "1" or 
-            env.get("PYTEST_RUNNING", "0") == "1" or
             env.get("STAGING_E2E_TEST", "0") == "1" or
             env.get("E2E_OAUTH_SIMULATION_KEY") is not None or
             env.get("E2E_TEST_ENV") == "staging"
         )
+        
+        # CRITICAL FIX: Don't auto-enable E2E bypass for all pytest runs
+        # Only enable for specific E2E tests, not unit tests
+        pytest_e2e_mode = (
+            env.get("PYTEST_RUNNING", "0") == "1" and 
+            env.get("E2E_TEST_ALLOW_BYPASS", "0") == "1"  # Must be explicitly enabled
+        )
+        
+        is_e2e_via_env_vars = is_e2e_via_env_vars or pytest_e2e_mode
         
         # CRITICAL SECURITY FIX: Only use explicit environment variables for E2E bypass
         # Do NOT automatically bypass auth for staging deployments
