@@ -1314,6 +1314,30 @@ class WebSocketEmitterFactory:
         )
     
     @staticmethod
+    def create_performance_emitter(
+        manager: 'UnifiedWebSocketManager',
+        user_id: str,
+        context: Optional['UserExecutionContext'] = None
+    ) -> UnifiedWebSocketEmitter:
+        """
+        Create a performance-optimized emitter for high-throughput scenarios.
+        
+        Args:
+            manager: WebSocket manager
+            user_id: Target user ID
+            context: Optional execution context
+            
+        Returns:
+            UnifiedWebSocketEmitter with performance mode enabled
+        """
+        return UnifiedWebSocketEmitter(
+            manager=manager,
+            user_id=user_id,
+            context=context,
+            performance_mode=True
+        )
+    
+    @staticmethod
     def create_auth_emitter(
         manager: 'UnifiedWebSocketManager',
         user_id: str,
