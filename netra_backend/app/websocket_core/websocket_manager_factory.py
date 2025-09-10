@@ -2492,6 +2492,32 @@ class WebSocketManagerFactory:
             raise
     
     async def handle_disconnection(self, user_id: str) -> bool:
+        """Handle disconnection."""
+        return await self.remove_connection(user_id)
+    
+    async def send_agent_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> bool:
+        """
+        Send an agent event to a specific user.
+        
+        SSOT INTERFACE COMPLIANCE: Sends structured events via user's manager.
+        
+        Args:
+            user_id: Target user identifier
+            event_type: Type of agent event
+            data: Event data payload
+            
+        Returns:
+            True if event sent successfully, False otherwise
+        """
+        event_message = {
+            'type': 'agent_event',
+            'event_type': event_type,
+            'data': data,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        return await self.send_message(user_id, event_message)
+    
+    async def handle_disconnection(self, user_id: str) -> bool:
         """
         Handle a WebSocket disconnection.
         
