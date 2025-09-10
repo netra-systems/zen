@@ -1326,12 +1326,16 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                 {
                     "status": "memory_pressure_detected",
                     "cleanup_triggered": True,
-                    "memory_usage": f"{peak_memory:.1f}MB"
+                    "memory_usage": f"{peak_memory:.1f}MB",
+                    "recommendations": ["Memory optimization in progress", "Resource cleanup initiated"],
+                    "analysis": "System detected memory pressure and triggered cleanup procedures"
                 },
                 {
                     "status": "memory_cleaned",
                     "summary": "Analysis completed with memory optimization",
-                    "resource_cleanup": "successful"
+                    "resource_cleanup": "successful",
+                    "recommendations": ["Memory resources optimized", "System performance restored"],
+                    "analysis": "Memory pressure test completed successfully with resource cleanup"
                 }
             ]
             
