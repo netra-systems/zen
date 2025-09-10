@@ -110,6 +110,9 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         
         is_e2e_via_env_vars = is_e2e_via_env_vars or pytest_e2e_mode
         
+        # CRITICAL SECURITY FIX: Declare is_production BEFORE usage to prevent UnboundLocalError
+        is_production = current_env in ['production', 'prod'] or 'prod' in google_project.lower()
+        
         # CRITICAL SECURITY FIX: Only use explicit environment variables for E2E bypass
         # Do NOT automatically bypass auth for staging deployments
         # ADDITIONAL FIX: Allow staging environment auto-detection for WebSocket E2E tests
@@ -148,7 +151,7 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         
         # CRITICAL SECURITY FIX: Prevent header-based bypass in production
         # Headers can be spoofed by attackers, so only allow them in safe environments
-        is_production = current_env in ['production', 'prod'] or 'prod' in google_project.lower()
+        # Note: is_production already declared earlier to prevent UnboundLocalError
         
         # CRITICAL SECURITY: Production environments NEVER allow E2E bypass
         if is_production:

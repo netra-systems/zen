@@ -26,9 +26,10 @@ async def test_factory_direct():
         
         print("Imports successful")
         
-        # Get agent class registry
-        print("\n1. Getting agent class registry...")
-        registry = get_agent_class_registry()
+        # Initialize agent class registry
+        print("\n1. Initializing agent class registry...")
+        from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+        registry = initialize_agent_class_registry()
         print(f"Registry agents: {registry.list_agent_names()}")
         print(f"Registry frozen: {registry.is_frozen()}")
         print(f"Registry size: {len(registry)}")

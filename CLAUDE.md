@@ -438,12 +438,9 @@ This index is the SSOT for all platform-specific constants, paths, and identifie
 1.  **ALWAYS Validate** literals before use: `python scripts/query_string_literals.py validate "your_string"`
 2.  **NEVER Guess** config keys or paths; query the index first with search: `python scripts/query_string_literals.py search "keyword"`
 3.  **CHECK Environment Health:** `python scripts/query_string_literals.py check-env staging` (or production)
-4.  **SHOW Critical Configs:** `python scripts/query_string_literals.py show-critical` 
 5.  **UPDATE Index** after adding new constants: `python scripts/scan_string_literals.py`
 
 **Cross-Reference with Step 6 in Execution Checklist below ⬇️**
-
------
 
 ## 5\. Architecture and Conventions
 
@@ -484,6 +481,7 @@ for the simple "pip package test" to determine what belongs in `/shared`.
 CHEATING ON TESTS = ABOMINATION
 ULTRA THINK DEEPLY
 SOLVE FOR THE GREATER GOOD OF THE OVERALL SYSTEM
+IGNORE DOCKER ISSUES FOR NOW (just log them). ONLY GCP STAGING MATTERS FOR HOSTING.
 
 ## 6\. MISSION CRITICAL: WebSocket Agent Events (Infrastructure for Chat Value)
 
