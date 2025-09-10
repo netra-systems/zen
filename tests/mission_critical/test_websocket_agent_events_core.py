@@ -66,7 +66,7 @@ except ImportError:
 # Import production WebSocket components for validation
 try:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
     PRODUCTION_COMPONENTS_AVAILABLE = True
