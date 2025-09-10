@@ -722,6 +722,31 @@ class WebSocketManager:
         # Don't return silently - emit to user notification system
         await self._emit_connection_error_notification(user_id, event_type)
     
+    async def send_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
+        """
+        Send an event to a specific user - SSOT compatibility interface.
+        
+        CRITICAL SSOT FIX: This method was missing from the WebSocket manager interface,
+        causing test failures and SSOT violations. It delegates to emit_critical_event
+        to maintain consistency while providing the expected interface.
+        
+        This method prevents the interface violations identified in Issue #186:
+        - Provides consistent send_event interface across all managers
+        - Maintains backward compatibility with existing code
+        - Ensures all WebSocket managers expose the same event sending interface
+        
+        Args:
+            user_id: Target user ID (accepts both str and UserID)
+            event_type: Type of event to send (e.g., 'agent_started', 'tool_executing') 
+            data: Event payload data
+            
+        Raises:
+            ValueError: If user_id or event_type is invalid
+            RuntimeError: If WebSocket manager is not active
+        """
+        # Delegate to the comprehensive emit_critical_event method
+        await self.emit_critical_event(user_id, event_type, data)
+    
     async def send_to_user_with_wait(self, user_id: str, message: Dict[str, Any], 
                                       wait_timeout: float = 3.0) -> bool:
         """
