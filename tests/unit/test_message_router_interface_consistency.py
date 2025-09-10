@@ -17,6 +17,7 @@ GitHub Issue: #217 - MessageRouter SSOT violations blocking golden path
 
 import inspect
 import ast
+import unittest
 from typing import Dict, List, Set, Optional, Any, Union
 from pathlib import Path
 import importlib.util
@@ -25,12 +26,17 @@ import sys
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestMessageRouterInterfaceConsistency(SSotBaseTestCase):
+class TestMessageRouterInterfaceConsistency(SSotBaseTestCase, unittest.TestCase):
     """Test interface consistency across MessageRouter implementations."""
 
     def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        if hasattr(super(), 'setUp'):
+            super().setUp()
+        
+        # Initialize logger
+        import logging
+        self.logger = logging.getLogger(__name__)
         
         # Expected canonical interface signature
         self.canonical_interface = {

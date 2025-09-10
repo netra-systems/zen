@@ -1405,6 +1405,15 @@ async def create_request_scoped_dispatcher(
 
 
 # ============================================================================
+# COMPATIBILITY LAYER FOR PHASE 4A MIGRATION
+# ============================================================================
+
+# Compatibility alias for RequestScopedToolDispatcher during SSOT migration
+# This allows existing code to use UnifiedToolDispatcher transparently
+RequestScopedToolDispatcher = UnifiedToolDispatcher
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -1412,6 +1421,9 @@ __all__ = [
     # Core classes
     'UnifiedToolDispatcher',
     'UnifiedToolDispatcherFactory',
+    
+    # Compatibility aliases
+    'RequestScopedToolDispatcher',
     
     # Data models
     'ToolDispatchRequest',

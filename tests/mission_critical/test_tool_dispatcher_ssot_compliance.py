@@ -80,7 +80,8 @@ class SSotComplianceReport:
 class TestToolDispatcherSSotCompliance:
     """CRITICAL: Tool Dispatcher SSOT compliance validation."""
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
         """Setup for SSOT compliance testing."""
         self.project_root = Path(__file__).parent.parent.parent
         self.source_dirs = [

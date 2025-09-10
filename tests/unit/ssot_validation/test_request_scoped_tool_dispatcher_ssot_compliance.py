@@ -423,7 +423,7 @@ class TestRequestScopedToolDispatcherFactoryConsistency(SSotBaseTestCase):
             run_id=f"factory_test_run_{uuid.uuid4()}"
         )
 
-    def test_factory_produces_identical_instances(self):
+    async def test_factory_produces_identical_instances(self):
         """Test that factory methods produce functionally identical instances.
         
         EXPECTED: FAIL initially due to competing factories producing different types
