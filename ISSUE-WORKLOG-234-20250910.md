@@ -244,7 +244,61 @@ This provides the safest path to SSOT consolidation without breaking the Golden 
 - All 5 critical WebSocket events validated functional
 - Performance equal or better than current best implementation
 
-**Next Action:** Begin Phase 2 Day 1 - SSOT Factory Enhancement
+## Step 5: PLAN REMEDIATION
+
+### ✅ Phase 2 Factory Pattern Consolidation - Specific Remediation Strategy
+
+**Executive Summary:** Comprehensive plan to consolidate 4+ competing tool dispatcher implementations into single SSOT approach while maintaining $500K+ ARR chat functionality.
+
+#### SSOT Target Architecture Decision:
+
+**Selected SSOT Implementation:** RequestScopedToolDispatcher
+**Rationale:**
+- ✅ Proper user isolation (UserExecutionContext binding)
+- ✅ Complete WebSocket event integration (all 5 critical events)
+- ✅ Production-ready error handling and resource cleanup
+- ✅ Memory-efficient per-request pattern
+- ✅ Comprehensive logging and metrics
+
+#### Migration Strategy (4-Day Implementation):
+
+**Phase 2A: Factory Consolidation (Days 1-2)**
+1. Create SSOT Factory Interface (`ToolDispatcherFactory`)
+2. Migrate UnifiedToolDispatcher redirects with deprecation warnings
+3. Consolidate ToolExecutorFactory functionality
+
+**Phase 2B: WebSocket Bridge Unification (Days 2-3)**
+4. Standardize WebSocket Bridge Interface (`StandardWebSocketBridge`)
+5. Eliminate 2+ duplicate WebSocketBridgeAdapter implementations
+
+**Phase 2C: Import Path Cleanup (Days 3-4)**
+6. Replace 32+ bypass imports with direct SSOT imports
+7. Update all consumer imports, remove try/except fallback patterns
+
+#### Backward Compatibility Strategy:
+- **Compatibility Wrapper Pattern** for 30-day transition
+- **Deprecation Timeline:** Warnings → Migration guidance → Removal
+- **100% Interface Preservation** during migration
+
+#### WebSocket Event Preservation:
+- **All 5 Critical Events Protected:** agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
+- **Event Delivery Guarantees** through SSOT WebSocketBridge
+- **No Silent Failures** - fallback logging if WebSocket unavailable
+
+#### Success Criteria:
+- Single SSOT factory implementation operational ✅
+- All 4 competing factories safely deprecated ✅  
+- 100% backward compatibility maintained ✅
+- All 5 critical WebSocket events functional ✅
+- 15-25% memory reduction achieved ✅
+
+#### Risk Mitigation:
+- Git branch strategy with atomic commits
+- Gradual rollout per service
+- WebSocket event delivery rate monitoring  
+- Instant rollback capability
+
+**Next Action:** Execute Step 6 - Implement the Phase 2 remediation plan with business continuity protection.
 
 ---
 
