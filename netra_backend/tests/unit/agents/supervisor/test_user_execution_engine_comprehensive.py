@@ -1366,11 +1366,7 @@ class TestUserExecutionEngineComprehensive:
             )
             
             state = DeepAgentState(
-                user_request={
-                    "prompt": "Optimize my AI infrastructure costs",
-                    "monthly_ai_spend": 75000,
-                    "optimization_goal": "reduce_costs_maintain_performance"
-                },
+                user_request="Optimize my AI infrastructure costs with monthly spend of $75000, goal: reduce_costs_maintain_performance",
                 user_id=test_user_context.user_id,
                 chat_thread_id=test_user_context.thread_id,
                 run_id=test_user_context.run_id,
@@ -1391,8 +1387,8 @@ class TestUserExecutionEngineComprehensive:
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=1.2,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=1.2,
                         metadata={
                             "orchestration_plan": ["data_analysis", "optimization", "report_generation"],
                             "estimated_savings_potential": "20-30%",
@@ -1403,8 +1399,8 @@ class TestUserExecutionEngineComprehensive:
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=3.5,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=3.5,
                         metadata={
                             "current_monthly_spend": 75000,
                             "top_cost_drivers": ["gpt-4_api_calls", "vector_storage", "compute_instances"],
@@ -1418,8 +1414,8 @@ class TestUserExecutionEngineComprehensive:
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=2.8,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=2.8,
                         metadata={
                             "optimization_recommendations": [
                                 {
@@ -1446,8 +1442,8 @@ class TestUserExecutionEngineComprehensive:
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=1.8,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=1.8,
                         metadata={
                             "executive_summary": "Identified $332K annual savings opportunity",
                             "action_items": [

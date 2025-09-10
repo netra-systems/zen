@@ -121,8 +121,8 @@ class AgentMessageHandler(BaseMessageHandler):
                 connection_id=connection_id
             )
             
-            # Get database session using async generator pattern
-            async for db_session in get_request_scoped_db_session():
+            # Get database session using async context manager pattern
+            async with get_request_scoped_db_session() as db_session:
                 try:
                     # Get app_state from WebSocket connection for bridge access
                     app_state = None
@@ -202,9 +202,9 @@ class AgentMessageHandler(BaseMessageHandler):
                     else:
                         logger.warning(f"Could not find connection ID for websocket of user {user_id}")
             
-            # Get database session using async generator pattern
+            # Get database session using async context manager pattern
             # CRITICAL: Using v2 factory pattern for complete isolation
-            async for db_session in get_request_scoped_db_session():
+            async with get_request_scoped_db_session() as db_session:
                 try:
                     # Get UserExecutionContext for session continuity
                     # Use existing IDs from message context for conversation continuity

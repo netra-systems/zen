@@ -362,10 +362,11 @@ class TestTriageAgentIntegration(SSotBaseTestCase):
             )
             
             # Mock WebSocket methods
-            agent.emit_agent_started = asyncio.coroutine(lambda msg: None)()
-            agent.emit_thinking = asyncio.coroutine(lambda msg: None)()
-            agent.emit_agent_completed = asyncio.coroutine(lambda data: None)()
-            agent.emit_error = asyncio.coroutine(lambda msg, type, data: None)()
+            from unittest.mock import AsyncMock
+            agent.emit_agent_started = AsyncMock()
+            agent.emit_thinking = AsyncMock()
+            agent.emit_agent_completed = AsyncMock()
+            agent.emit_error = AsyncMock()
             agent.store_metadata_result = lambda ctx, key, value: None
             
             # Create execution state
@@ -443,10 +444,11 @@ class TestTriageAgentIntegration(SSotBaseTestCase):
         )
         
         # Mock WebSocket methods
-        agent.emit_agent_started = asyncio.coroutine(lambda msg: None)()
-        agent.emit_thinking = asyncio.coroutine(lambda msg: None)()
-        agent.emit_agent_completed = asyncio.coroutine(lambda data: None)()
-        agent.emit_error = asyncio.coroutine(lambda msg, type, data: None)()
+        from unittest.mock import AsyncMock
+        agent.emit_agent_started = AsyncMock()
+        agent.emit_thinking = AsyncMock()
+        agent.emit_agent_completed = AsyncMock()
+        agent.emit_error = AsyncMock()
         agent.store_metadata_result = lambda ctx, key, value: None
         
         # Execute triage
@@ -526,10 +528,11 @@ class TestTriageAgentIntegration(SSotBaseTestCase):
         )
         
         # Mock WebSocket methods
-        agent.emit_agent_started = asyncio.coroutine(lambda msg: None)()
-        agent.emit_thinking = asyncio.coroutine(lambda msg: None)()
-        agent.emit_agent_completed = asyncio.coroutine(lambda data: None)()
-        agent.emit_error = asyncio.coroutine(lambda msg, type, data: None)()
+        from unittest.mock import AsyncMock
+        agent.emit_agent_started = AsyncMock()
+        agent.emit_thinking = AsyncMock()
+        agent.emit_agent_completed = AsyncMock()
+        agent.emit_error = AsyncMock()
         agent.store_metadata_result = lambda ctx, key, value: None
         
         # Execute triage (should succeed despite database error)
@@ -585,10 +588,11 @@ class TestTriageAgentIntegration(SSotBaseTestCase):
         )
         
         # Mock WebSocket methods
-        agent.emit_agent_started = asyncio.coroutine(lambda msg: None)()
-        agent.emit_thinking = asyncio.coroutine(lambda msg: None)()
-        agent.emit_agent_completed = asyncio.coroutine(lambda data: None)()
-        agent.emit_error = asyncio.coroutine(lambda msg, type, data: None)()
+        from unittest.mock import AsyncMock
+        agent.emit_agent_started = AsyncMock()
+        agent.emit_thinking = AsyncMock()
+        agent.emit_agent_completed = AsyncMock()
+        agent.emit_error = AsyncMock()
         agent.store_metadata_result = lambda ctx, key, value: None
         
         request_text = "Optimize my deep learning training costs"
@@ -880,10 +884,11 @@ class TestTriageAgentIntegration(SSotBaseTestCase):
         )
         
         # Mock WebSocket methods
-        agent.emit_agent_started = asyncio.coroutine(lambda msg: None)()
-        agent.emit_thinking = asyncio.coroutine(lambda msg: None)()
-        agent.emit_agent_completed = asyncio.coroutine(lambda data: None)()
-        agent.emit_error = asyncio.coroutine(lambda msg, type, data: None)()
+        from unittest.mock import AsyncMock
+        agent.emit_agent_started = AsyncMock()
+        agent.emit_thinking = AsyncMock()
+        agent.emit_agent_completed = AsyncMock()
+        agent.emit_error = AsyncMock()
         agent.store_metadata_result = lambda ctx, key, value: None
         
         # Execute triage (should fallback when LLM fails)
@@ -937,10 +942,11 @@ class TestTriageAgentIntegration(SSotBaseTestCase):
         )
         
         # Mock WebSocket methods
-        agent.emit_agent_started = asyncio.coroutine(lambda msg: None)()
-        agent.emit_thinking = asyncio.coroutine(lambda msg: None)()
-        agent.emit_agent_completed = asyncio.coroutine(lambda data: None)()
-        agent.emit_error = asyncio.coroutine(lambda msg, type, data: None)()
+        from unittest.mock import AsyncMock
+        agent.emit_agent_started = AsyncMock()
+        agent.emit_thinking = AsyncMock()
+        agent.emit_agent_completed = AsyncMock()
+        agent.emit_error = AsyncMock()
         agent.store_metadata_result = lambda ctx, key, value: None
         
         # Execute with timeout
@@ -1007,10 +1013,11 @@ class TestTriageAgentIntegration(SSotBaseTestCase):
             )
             
             # Mock WebSocket methods for performance
-            agent.emit_agent_started = asyncio.coroutine(lambda msg: None)()
-            agent.emit_thinking = asyncio.coroutine(lambda msg: None)()
-            agent.emit_agent_completed = asyncio.coroutine(lambda data: None)()
-            agent.emit_error = asyncio.coroutine(lambda msg, type, data: None)()
+            from unittest.mock import AsyncMock
+            agent.emit_agent_started = AsyncMock()
+            agent.emit_thinking = AsyncMock()
+            agent.emit_agent_completed = AsyncMock()
+            agent.emit_error = AsyncMock()
             agent.store_metadata_result = lambda ctx, key, value: None
             
             state = IntegrationTestState(

@@ -72,10 +72,10 @@ class MockState:
     user_request: Optional[str] = None
     
     def __post_init__(self):
-        # Provide fallback aliases
-        if not self.request:
+        # Provide fallback aliases only when fields are None
+        if self.request is None:
             self.request = self.original_request
-        if not self.user_request:
+        if self.user_request is None:
             self.user_request = self.original_request
 
 
