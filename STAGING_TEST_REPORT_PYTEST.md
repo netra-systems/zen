@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-09 18:28:57
+**Generated:** 2025-09-09 18:29:28
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,24 +10,24 @@
 - **Passed:** 1 (100.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 5.95 seconds
+- **Duration:** 9.31 seconds
 - **Pass Rate:** 100.0%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_websocket_connection_real | PASS passed | 4.236s | test_priority1_critical.py |
+| test_websocket_event_flow_real | PASS passed | 4.046s | test_1_websocket_events_staging.py |
 
 ## Pytest Output Format
 
 ```
-test_priority1_critical.py::test_001_websocket_connection_real PASSED
+test_1_websocket_events_staging.py::test_websocket_event_flow_real PASSED
 
 ==================================================
-1 passed, 0 failed in 5.95s
+1 passed, 0 failed in 9.31s
 ```
 
 ## Test Coverage Matrix

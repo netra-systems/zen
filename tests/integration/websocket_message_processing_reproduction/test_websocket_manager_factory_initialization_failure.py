@@ -56,17 +56,17 @@ class TestWebSocketManagerFactoryInitializationFailure:
     @pytest.fixture
     def test_user_id(self):
         """Generate consistent test user ID using SSOT."""
-        return UnifiedIdGenerator.generate_user_id()
+        return UnifiedIdGenerator.generate_base_id("user")
     
     @pytest.fixture
     def test_thread_id(self):
         """Generate consistent test thread ID using SSOT."""
-        return UnifiedIdGenerator.generate_thread_id()
+        return UnifiedIdGenerator.generate_base_id("thread")
     
     @pytest.fixture
     def test_run_id(self):
         """Generate consistent test run ID using SSOT."""
-        return UnifiedIdGenerator.generate_run_id()
+        return UnifiedIdGenerator.generate_base_id("run")
     
     @pytest.fixture
     async def real_user_execution_context(self, test_user_id, test_thread_id, test_run_id):

@@ -134,7 +134,7 @@ NEVER CREATE NEW SCRIPTS. ALWAYS USE EXISTING SSOT METHODS OR UPDATE AND IMPROVE
 
 ## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
 
-> **⚠️ MANDATORY READING**: The **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
+> **⚠️ MANDATORY READING**: The **User Context Architecture** @USER_CONTEXT_ARCHITECTURE.md is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
 
 Recent issues to be extra aware of:
 1. Race conditions. Plan ahead and think about race conditions in all aspects of your code and refactors.
@@ -143,7 +143,7 @@ The system has a lot of async, websockets, and other patterns that require heavy
 3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
 4. This is a multi-user system.
 5. Update tests to SSOT methods. NEVER re-create legacy code to pass old tests!
-6. **CONFIG/ENV REGRESSION PREVENTION:** See [OAuth Regression Analysis](./reports/auth/OAUTH_REGRESSION_ANALYSIS_20250905.md) and [Config Regression Prevention Plan](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md)
+6. **CONFIG/ENV REGRESSION PREVENTION:** See @OAUTH_REGRESSION_ANALYSIS_20250905.md and @CONFIG_REGRESSION_PREVENTION_PLAN.md
 Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
    - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
    - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  

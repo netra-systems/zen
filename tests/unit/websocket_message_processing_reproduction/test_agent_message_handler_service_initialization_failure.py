@@ -62,20 +62,22 @@ class TestAgentMessageHandlerServiceInitializationFailure:
     @pytest.fixture 
     def test_user_id(self):
         """Generate consistent test user ID."""
-        return UnifiedIdGenerator.generate_user_id()
+        return UnifiedIdGenerator.generate_base_id("user")
     
     @pytest.fixture
     def test_message(self, test_user_id):
         """Create test WebSocket message that should trigger agent processing."""
+        thread_id = UnifiedIdGenerator.generate_base_id("thread")
+        run_id = UnifiedIdGenerator.generate_base_id("run")
         return WebSocketMessage(
             type=MessageType.START_AGENT,
             user_id=test_user_id,
-            thread_id=UnifiedIdGenerator.generate_thread_id(),
+            thread_id=thread_id,
             payload={
                 "user_request": "Help me optimize my AI infrastructure costs",
                 "agent_type": "cost_optimization",
-                "thread_id": UnifiedIdGenerator.generate_thread_id(),
-                "run_id": UnifiedIdGenerator.generate_run_id()
+                "thread_id": thread_id,
+                "run_id": run_id
             }
         )
     
