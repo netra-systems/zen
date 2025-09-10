@@ -240,6 +240,7 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
         
         def start_execution(agent_name, run_id, user_id, metadata=None):
             state_id = f"{agent_name}_{run_id}_{time.time()}"
+            print(f"DEBUG: start_execution called for {agent_name}, state_id={state_id}")
             tracker._state_executions[state_id] = {
                 "agent_name": agent_name,
                 "run_id": run_id,
@@ -274,10 +275,13 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                     )
         
         def complete_execution(state_id, success=True):
+            print(f"DEBUG: complete_execution called with state_id={state_id}, success={success}")
             if state_id in tracker._state_executions:
                 tracker._state_executions[state_id]["completed"] = True
                 tracker._state_executions[state_id]["success"] = success
                 tracker._state_executions[state_id]["completion_time"] = time.time()
+            else:
+                print(f"DEBUG: WARNING - state_id {state_id} not found in executions!")
         
         tracker.start_execution = Mock(side_effect=start_execution)
         tracker.transition_phase = AsyncMock(side_effect=transition_phase)
