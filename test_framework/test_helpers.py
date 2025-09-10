@@ -357,7 +357,7 @@ def wait_for_database_migration(db_url: str = None, timeout: int = 30) -> bool:
         env = get_env()
         
         # Use database manager for migration status
-        from netra_backend.app.services.database.database_manager import DatabaseManager
+        from netra_backend.app.db.database_manager import DatabaseManager
         
         start_time = time.time()
         
