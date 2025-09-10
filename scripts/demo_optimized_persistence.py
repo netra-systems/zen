@@ -19,7 +19,6 @@ sys.path.insert(0, str(project_root))
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
 from unittest.mock import AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -46,17 +45,17 @@ class PersistenceDemo:
     async def simulate_optimized_persistence(self, requests):
         """Simulate optimized persistence behavior with actual service."""
         # Enable optimized persistence for demo
-        optimized_service = optimized_state_persistence
-        optimized_service.enabled = True
+        optimized_service = state_persistence_service
+        optimized_service._optimization_enabled = True
         
-        # Mock the fallback service to avoid actual DB operations
-        original_fallback = optimized_service._fallback_service.save_agent_state
+        # Mock the internal save method to avoid actual DB operations
+        original_save = optimized_service._execute_state_save_transaction
         
         async def mock_save(request, session):
             await asyncio.sleep(0.001)  # Simulate DB write latency
-            return True, f"snapshot_{request.run_id}"
+            return f"snapshot_{request.run_id}"
         
-        optimized_service._fallback_service.save_agent_state = mock_save
+        optimized_service._execute_state_save_transaction = mock_save
         
         start_time = time.time()
         saved_count = 0
@@ -73,8 +72,8 @@ class PersistenceDemo:
                     saved_count += 1
                     
         finally:
-            # Restore original service
-            optimized_service._fallback_service.save_agent_state = original_fallback
+            # Restore original service method
+            optimized_service._execute_state_save_transaction = original_save
             
         duration = time.time() - start_time
         return saved_count, skipped_count, duration
@@ -205,15 +204,15 @@ class PersistenceDemo:
         os.environ["ENABLE_OPTIMIZED_PERSISTENCE"] = "false"
         
         # Create new service instance to pick up environment change
-        disabled_service = optimized_state_persistence.__class__()
-        print(f"   Optimized persistence enabled: {disabled_service.enabled}")
+        disabled_service = state_persistence_service.__class__()
+        print(f"   Optimized persistence enabled: {disabled_service._optimization_enabled}")
         
         # Test with feature enabled
         print("Testing with ENABLE_OPTIMIZED_PERSISTENCE=true") 
         os.environ["ENABLE_OPTIMIZED_PERSISTENCE"] = "true"
         
-        enabled_service = optimized_state_persistence.__class__()
-        print(f"   Optimized persistence enabled: {enabled_service.enabled}")
+        enabled_service = state_persistence_service.__class__()
+        print(f"   Optimized persistence enabled: {enabled_service._optimization_enabled}")
         print()
     
     async def demonstrate_monitoring(self):
