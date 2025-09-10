@@ -17,7 +17,7 @@ Business Value Justification (BVJ):
 """
 
 from netra_backend.app.websocket_core.unified_manager import (
-    WebSocketManager as UnifiedWebSocketManager,
+    UnifiedWebSocketManager,
     WebSocketConnection,
     _serialize_message_safely
 )

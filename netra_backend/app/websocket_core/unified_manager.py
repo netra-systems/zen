@@ -2371,4 +2371,6 @@ def get_websocket_manager() -> WebSocketManager:
 
 
 # Backward compatibility alias
+# SSOT ENFORCEMENT: UnifiedWebSocketManager points to the same singleton class
+# This ensures both import paths return the exact same class instance
 UnifiedWebSocketManager = WebSocketManager
