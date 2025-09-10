@@ -17,25 +17,29 @@ Context
 3. Focus areas (output this to console) is SSOT ISSUE: ${1 : latest}
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
+6. FIRST DO NO HARM. Your mandate is to SAFELY refresh to SSOT methods.
+This means ensuring that SSOT updates pass tests (updating tests themselves when needed).
+
 
 PROCESS INSTRUCTIONS START:
 
 0) Discover Next SSOT Issue (SSOT AUDIT) : SNST: 
 0.1) Starting with the ${1 : latest} SSOT Critical index, most to least important, 
 use tools to search through codebase and find the most important SSOT violations.
-0.2) Save findings to a .md file, including line numbers
-0.2) Make or update github ISSUE
+0.2) Save findings to a .md file, including line numbers.
+Git commit and push this file if safe to do so.
+0.3) Make or update github ISSUE.
+Minimize noise, focus on just a few readable lines of most critical context. Link to other docs for remaining context.
 OUTPUT the ISSUE ID here:
 
-2) STATUS DECISION : SNST : (Pass context from 1): 
-IF the issue appears to already be resolved close the issue and repeat PROCESS loop, otherwise continue to the next step.
-2.1) UPDATE the existing comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md  .
+1) DISCOVER AND PLAN TEST : SNST : (Pass context from 1 and 2):
 
-OPTIONAL STEPS IF ISSUE IS OPEN:
+1.1) DISCOVER EXISTING: the identication (collection of existing tests)
+tests protecting against breaking changes made by SSOT refactor or similar
 
-3) PLAN TEST : SNST : (Pass context from 1 and 2):
-PLAN ONLY the update, align, or creation of: the required unit, integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused
-on reproducing the item in question (failing tests). following reports\testing\TEST_CREATION_GUIDE.md
+1.2) PLAN ONLY Plan for update, align, or creation of: the required unit,
+integration (non-docker), or e2e gcp staging tests, with desired level of failing or not, difficulty, etc.: suites focused
+on reproducing the SSOT violation in question (failing tests). following reports\testing\TEST_CREATION_GUIDE.md
 and all of the latest testing best practices as per claude.md
 ONLY RUN tests that don't require docker, such as unit, integration (no docker), or e2e on staging gcp remote.
 3.1) UPDATE the comment on the ISSUE with the TEST PLAN following @GITHUB_STYLE_GUIDE.md.
