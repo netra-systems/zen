@@ -720,12 +720,18 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         mock_orchestration_agent = Mock()
         mock_orchestration_agent.execute = AsyncMock(side_effect=slow_llm_response)
         
+        # Add logging to track calls
+        def mock_get_agent(agent_name):
+            self.logger.info(f"🔍 Mock registry.get called for agent: {agent_name}")
+            return mock_orchestration_agent
+        
         # Mock the agent registry to return our slow mock agent
         with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_factory_getter:
             mock_factory = Mock()
             mock_registry = Mock()
-            mock_registry.get.return_value = mock_orchestration_agent
+            mock_registry.get = Mock(side_effect=mock_get_agent)
             mock_factory.registry = mock_registry
+            mock_factory._agent_registry = mock_registry  # Also set the internal registry
             mock_factory.configure = Mock()
             mock_factory_getter.return_value = mock_factory
             
