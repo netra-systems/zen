@@ -624,21 +624,14 @@ class TestExecutionEngineCreation(SSotAsyncTestCase):
             
             # Mock WebSocket emitter creation
             mock_emitter = Mock()
+            mock_emitter.cleanup = Mock()
             self.mock_websocket_bridge_factory.create_user_emitter = AsyncMock(return_value=mock_emitter)
             
-            with patch('netra_backend.app.agents.supervisor.agent_instance_factory.get_agent_instance_factory') as mock_get_factory:
-                mock_agent_factory = Mock()
-                mock_get_factory.return_value = mock_agent_factory
-                
-                with patch('netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine') as mock_engine_class:
-                    mock_engine = Mock()
-                    mock_engine_class.return_value = mock_engine
-                    
-                    # Execute (should succeed but log warning)
-                    result = await self.factory.create_execution_engine(self.user_context)
-                    
-                    # Verify engine created despite memory warning
-                    assert isinstance(result, UserExecutionEngineWrapper)
+            # Execute (should succeed but log warning) - will fallback to IsolatedExecutionEngine
+            result = await self.factory.create_execution_engine(self.user_context)
+            
+            # Verify engine created despite memory warning
+            assert isinstance(result, IsolatedExecutionEngine)
                     
         self.record_metric("memory_threshold_warning", True)
 

@@ -30,7 +30,6 @@ from typing import Dict, Any
 # SSOT imports using absolute paths
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
-    IsolatedWebSocketManager,
     ConnectionLifecycleManager,
     FactoryMetrics,
     ManagerMetrics,
@@ -42,6 +41,9 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     _validate_ssot_user_context,
     _validate_ssot_user_context_staging_safe
 )
+
+# Import WebSocketManager (replacement for removed IsolatedWebSocketManager)
+from netra_backend.app.websocket_core.unified_manager import WebSocketManager as IsolatedWebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
