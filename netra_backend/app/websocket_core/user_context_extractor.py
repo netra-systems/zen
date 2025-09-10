@@ -346,7 +346,8 @@ class UserContextExtractor:
     async def extract_user_context_from_websocket(
         self, 
         websocket: WebSocket,
-        additional_metadata: Optional[Dict[str, Any]] = None
+        additional_metadata: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None
     ) -> Tuple[UserExecutionContext, Dict[str, Any]]:
         """
         Extract complete user context from WebSocket connection with E2E fast path support.
@@ -413,7 +414,8 @@ class UserContextExtractor:
             user_context = self.create_user_context_from_jwt(
                 jwt_payload, 
                 websocket, 
-                additional_metadata
+                additional_metadata,
+                preliminary_connection_id
             )
             
             # Extract additional auth info

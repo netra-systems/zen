@@ -333,51 +333,20 @@ class TransparentWebSocketEmitter:
         PHASE 2 REDIRECTION: Emit agent started event via SSOT UnifiedWebSocketEmitter.
         Preserves user tier handling from transparent_websocket_events.py.
         """
-        try:
-            from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
-            from netra_backend.app.websocket_core import create_websocket_manager
-            
-            # Get WebSocket manager instance via factory
-            manager = await create_websocket_manager()
-            
-            if manager:
-                # Create SSOT emitter with user tier context
-                emitter = WebSocketEmitterFactory.create_emitter(
-                    manager=manager,
-                    user_id=self.user_id,
-                    context=self.context
-                )
-                
-                # Set user tier for priority handling
-                emitter.set_user_tier(self.context.user_tier)
-                
-                # Use SSOT notify method
-                await emitter.notify_agent_started(
-                    agent_name=agent_name,
-                    metadata={
-                        'agent_description': agent_description,
-                        'user_tier': self.context.user_tier,
-                        'request_id': self.request_id
-                    }
-                )
-            else:
-                # Fallback to original implementation
-                event_data = {
-                    "type": WebSocketEventType.AGENT_STARTED.value,
-                    "agent_name": agent_name,
-                    "agent_description": agent_description,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "user_id": self.user_id,
-                    "request_id": self.request_id,
-                    "metadata": {
-                        "user_tier": self.context.user_tier
-                    }
+        # SSOT DELEGATION: Direct delegation to unified emitter
+        unified_emitter = await self._get_unified_emitter()
+        if unified_emitter:
+            await unified_emitter.notify_agent_started(
+                agent_name=agent_name,
+                metadata={
+                    'agent_description': agent_description,
+                    'user_tier': getattr(self.context, 'user_tier', 'free'),
+                    'request_id': self.request_id,
+                    'ssot_delegated': True
                 }
-                await self._emit_event(event_data)
-                
-        except Exception as e:
-            logger.error(f"SSOT emit_agent_started failed, falling back to original: {e}")
-            # Fallback to original implementation
+            )
+        else:
+            # Fallback for compatibility only
             event_data = {
                 "type": WebSocketEventType.AGENT_STARTED.value,
                 "agent_name": agent_name,
@@ -386,7 +355,8 @@ class TransparentWebSocketEmitter:
                 "user_id": self.user_id,
                 "request_id": self.request_id,
                 "metadata": {
-                    "user_tier": self.context.user_tier
+                    "user_tier": getattr(self.context, 'user_tier', 'free'),
+                    "ssot_fallback": True
                 }
             }
             await self._emit_event(event_data)
