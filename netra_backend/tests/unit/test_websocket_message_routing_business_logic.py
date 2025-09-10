@@ -33,7 +33,14 @@ class TestWebSocketMessageRoutingBusinessLogic:
     @pytest.fixture
     def message_queue(self):
         """Create WebSocket message queue for testing."""
-        return MessageQueue(max_size=1000)
+        from shared.types.core_types import ConnectionID, UserID
+        test_connection_id = ConnectionID(str(uuid.uuid4()))
+        test_user_id = UserID(str(uuid.uuid4()))
+        return MessageQueue(
+            connection_id=test_connection_id,
+            user_id=test_user_id,
+            max_size=1000
+        )
     
     @pytest.fixture
     def connection_manager(self):

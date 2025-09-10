@@ -208,8 +208,18 @@ class TestEnvironmentDetection:
             self.env.reset_to_original()
             self.env.enable_isolation()
             
+            # For testing environment normalization, clear test context indicators
+            # to ensure we get proper environment detection without test interference
+            self.env.set("PYTEST_CURRENT_TEST", "", "normalization_test")
+            self.env.delete("PYTEST_CURRENT_TEST", "normalization_test")
+            self.env.set("TESTING", "false", "normalization_test")
+            self.env.set("TEST_MODE", "false", "normalization_test")
+            
             if input_env:  # Only set if not empty (testing default case)
                 self.env.set("ENVIRONMENT", input_env, "normalization_test")
+            else:
+                # For empty case, explicitly unset ENVIRONMENT to test default
+                self.env.delete("ENVIRONMENT", "normalization_test")
             
             backend_env = BackendEnvironment()
             actual_env = backend_env.get_environment()
