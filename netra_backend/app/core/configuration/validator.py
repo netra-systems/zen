@@ -55,6 +55,8 @@ class ConfigurationValidator:
         self._validation_rules = self._load_validation_rules()
         self._critical_fields = self._load_critical_fields()
         self._init_validators()
+        # Initialize SSOT OAuth validator
+        self._central_validator = None
     
     def _get_environment(self) -> str:
         """Get current environment for validation rules."""

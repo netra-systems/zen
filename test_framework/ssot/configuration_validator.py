@@ -472,6 +472,122 @@ class ConfigurationValidator:
                 errors.append("REMEDY: Set REDIS_HOST=localhost for non-Docker mode")
         
         return errors
+    
+    def _get_central_validator(self):
+        """Get central SSOT validator instance."""
+        if self._central_validator is None:
+            try:
+                from shared.configuration.central_config_validator import get_central_validator
+                self._central_validator = get_central_validator()
+            except ImportError as e:
+                logger.warning(f"Central SSOT validator not available: {e}")
+                self._central_validator = None
+        return self._central_validator
+    
+    # =============================================================================
+    # OAuth Validation Methods - FACADE PATTERN (Delegates to SSOT)
+    # =============================================================================
+    
+    def validate_oauth_config(self) -> Dict[str, Any]:
+        """
+        Validate OAuth configuration using SSOT delegation.
+        
+        This method delegates OAuth validation to the central SSOT validator.
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT OAuth provider validation
+                is_valid = central_validator.validate_oauth_provider_configuration('google')
+                
+                if is_valid:
+                    return {'valid': True, 'errors': []}
+                else:
+                    return {'valid': False, 'errors': ['OAuth provider configuration invalid']}
+            else:
+                # Fallback validation for test environment
+                oauth_id = self.env.get("GOOGLE_OAUTH_CLIENT_ID_TEST")
+                oauth_secret = self.env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST")
+                
+                if not oauth_id or not oauth_secret:
+                    return {'valid': False, 'errors': ['OAuth test credentials missing']}
+                
+                return {'valid': True, 'errors': []}
+                
+        except Exception as e:
+            logger.error(f"OAuth configuration validation failed: {e}")
+            return {'valid': False, 'errors': [str(e)]}
+    
+    def validate_oauth_credentials(self, credentials: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate OAuth credentials using SSOT delegation.
+        
+        Args:
+            credentials: OAuth credentials to validate
+            
+        Returns:
+            Dict with validation results
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT OAuth credential validation
+                return central_validator.validate_oauth_credentials_endpoint(credentials)
+            else:
+                # Fallback validation for test environment
+                errors = []
+                
+                client_id = credentials.get('client_id')
+                if not client_id:
+                    errors.append("OAuth client_id is required")
+                elif client_id in ["", "your-client-id", "REPLACE_WITH"]:
+                    errors.append("OAuth client_id contains placeholder value")
+                
+                client_secret = credentials.get('client_secret')
+                if not client_secret:
+                    errors.append("OAuth client_secret is required")
+                elif client_secret in ["", "your-client-secret", "REPLACE_WITH"]:
+                    errors.append("OAuth client_secret contains placeholder value")
+                elif len(client_secret) < 10:
+                    errors.append("OAuth client_secret too short (minimum 10 characters)")
+                
+                return {
+                    "valid": len(errors) == 0,
+                    "errors": errors
+                }
+                
+        except Exception as e:
+            logger.error(f"OAuth credential validation failed: {e}")
+            return {"valid": False, "errors": [str(e)]}
+    
+    def get_oauth_credentials(self) -> Dict[str, str]:
+        """
+        Get validated OAuth credentials using SSOT delegation.
+        
+        Returns:
+            Dict containing OAuth credentials
+        """
+        try:
+            central_validator = self._get_central_validator()
+            if central_validator:
+                # Use SSOT OAuth credential retrieval
+                return central_validator.get_oauth_credentials()
+            else:
+                # Fallback credential retrieval for test environment
+                client_id = self.env.get("GOOGLE_OAUTH_CLIENT_ID_TEST")
+                client_secret = self.env.get("GOOGLE_OAUTH_CLIENT_SECRET_TEST")
+                
+                if not client_id or not client_secret:
+                    raise ValueError("OAuth test credentials not configured")
+                
+                return {
+                    "client_id": client_id,
+                    "client_secret": client_secret
+                }
+                
+        except Exception as e:
+            logger.error(f"Failed to get OAuth credentials: {e}")
+            raise
 
 
 # =============================================================================
