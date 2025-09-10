@@ -52,7 +52,7 @@ import pytest
 from loguru import logger
 
 # SSOT imports as per TEST_CREATION_GUIDE.md
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.websocket_helpers import MockWebSocketConnection
 from shared.isolated_environment import get_env
 
@@ -218,23 +218,25 @@ def get_event_counts(events: List[Dict[str, Any]]) -> Dict[str, int]:
     return event_counts
 
 
-class TestRealE2EChatInteraction(BaseE2ETest):
+class TestRealE2EChatInteraction(SSotAsyncTestCase):
     """Comprehensive E2E tests for chat interaction experience."""
     
-    def setup_method(self):
+    def setup_method(self, method=None):
         """Setup before each test method."""
-        super().setup_method()
-        self.env = get_env()
+        super().setup_method(method)
+        # Environment access now via self._env (SSOT pattern)
         self.mock_websocket: Optional[MockWebSocketConnection] = None
         self.base_backend_url = f"http://localhost:{TEST_PORTS['backend']}"
         self.base_auth_url = f"http://localhost:{TEST_PORTS['auth']}"
         logger.info("Chat interaction E2E test setup completed")
     
-    async def teardown_method(self):
+    def teardown_method(self, method=None):
         """Cleanup after each test method."""
-        if self.mock_websocket:
+        if hasattr(self, 'mock_websocket') and self.mock_websocket:
             self.mock_websocket.closed = True
         logger.info("Chat interaction E2E test cleanup completed")
+        # Call parent teardown (SSOT pattern)
+        super().teardown_method(method)
     
     def get_test_scenarios(self) -> List[ChatTestScenario]:
         """Define comprehensive test scenarios for different types of AI value delivery."""

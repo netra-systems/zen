@@ -17,6 +17,7 @@ import pytest
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
 from tests.e2e.staging_test_config import get_staging_config
 from tests.helpers.auth_test_utils import TestAuthHelper
+from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout, get_timeout_config
 
 
 class TestAgentPipelineStaging(StagingTestBase):
@@ -276,7 +277,8 @@ class TestAgentPipelineStaging(StagingTestBase):
             
             while time.time() - start_listen < listen_timeout:
                 # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-                response = await asyncio.wait_for(ws.recv(), timeout=3)
+                # PRIORITY 3 FIX: Use centralized timeout configuration (35s for staging)
+                response = await asyncio.wait_for(ws.recv(), timeout=get_websocket_recv_timeout())
                 event = json.loads(response)
                 pipeline_events.append(event)
                 
@@ -413,7 +415,8 @@ class TestAgentPipelineStaging(StagingTestBase):
             
             # Listen for status response
             # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-            response = await asyncio.wait_for(ws.recv(), timeout=3)
+            # PRIORITY 3 FIX: Use centralized timeout configuration (35s for staging)
+            response = await asyncio.wait_for(ws.recv(), timeout=get_websocket_recv_timeout())
             status_event = json.loads(response)
             websocket_lifecycle_events.append(status_event)
             print(f"[INFO] WebSocket status event: {status_event.get('type')}")
@@ -508,7 +511,8 @@ class TestAgentPipelineStaging(StagingTestBase):
                 await ws.send(json.dumps(invalid_req))
                 
                 # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
-                response = await asyncio.wait_for(ws.recv(), timeout=2)
+                # PRIORITY 3 FIX: Use centralized timeout configuration (35s for staging)
+                response = await asyncio.wait_for(ws.recv(), timeout=get_websocket_recv_timeout())
                 error_event = json.loads(response)
                 if error_event.get("type") == "error":
                     websocket_errors.append({

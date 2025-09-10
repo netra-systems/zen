@@ -217,6 +217,14 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
         This method bypasses the __init__ RuntimeError and is only called
         by factory methods to create properly isolated instances.
         """
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         # Create instance without calling __init__
         instance = cls.__new__(cls)
         
