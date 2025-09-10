@@ -75,8 +75,8 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     validate_websocket_token_business_logic
 )
 from netra_backend.app.websocket_core.unified_manager import WebSocketManager as WebSocketConnectionManager
-from netra_backend.app.core.security import SecurityService
-from netra_backend.app.middleware.authentication_middleware import AuthenticationMiddleware
+from netra_backend.app.core import security
+from netra_backend.app.middleware.auth_middleware import AuthenticationMiddleware
 
 
 class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):

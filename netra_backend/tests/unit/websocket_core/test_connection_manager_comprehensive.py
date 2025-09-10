@@ -201,21 +201,22 @@ class TestWebSocketConnectionManagerCore(SSotAsyncTestCase):
             self.manager = WebSocketConnectionManager()
             test_data = self._create_test_connection_data("prod_user")
             
-            # Mock JWT validation
-            with patch('netra_backend.app.websocket_core.unified_websocket_auth.validate_jwt') as mock_jwt:
-                mock_jwt.return_value = {"user_id": test_data.user_id, "valid": True}
-                
-                # Act - Connect with JWT authentication
-                connection_id = await self.manager.handle_connection(
-                    test_data.websocket,
-                    user_id=test_data.user_id
-                )
-                
-                # Assert - Connection established with authentication
-                assert connection_id is not None
-                
-                self.test_connections.append(test_data)
-                self.record_metric("jwt_authentication", "success")
+            # Act - Connect in production mode (should still work for unit test)
+            connection_id = await self.manager.handle_connection(
+                test_data.websocket,
+                user_id=test_data.user_id
+            )
+            
+            # Assert - Connection established 
+            assert connection_id is not None
+            
+            # Verify connection is tracked properly
+            connection = self.manager.get_connection(connection_id)
+            assert connection is not None
+            assert connection.user_id == test_data.user_id
+            
+            self.test_connections.append(test_data)
+            self.record_metric("jwt_authentication", "success")
     
     async def test_user_execution_context_creation(self):
         """
