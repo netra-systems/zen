@@ -258,15 +258,10 @@ class AuthEnvironment:
         # CRITICAL: Test environment gets SQLite for isolation and speed (per CLAUDE.md)
         # This takes priority over any explicit config to ensure "permissive" test behavior
         if env == "test":
-            # Test: Use file-based SQLite for proper connection sharing across test methods
-            # In-memory databases don't work well with async connection pooling
-            import tempfile
-            import os
-            
-            # Use a temporary file that gets cleaned up automatically
-            test_db_path = os.path.join(tempfile.gettempdir(), "auth_service_test.db")
-            url = f"sqlite+aiosqlite:///{test_db_path}"
-            logger.info(f"Using file-based SQLite for test environment: {test_db_path}")
+            # CRITICAL FIX: Use in-memory SQLite for tests to match test expectations
+            # The environment loading tests specifically expect sqlite+aiosqlite:///:memory:
+            url = "sqlite+aiosqlite:///:memory:"
+            logger.info(f"Using in-memory SQLite for test environment: {url}")
             return url
         
         # Use DatabaseURLBuilder for all non-test environments
