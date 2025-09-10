@@ -10,7 +10,7 @@ Context
 You MUST follow @GITHUB_STYLE_GUIDE.md
 3. TEST UPDATES: ${1 : all}. This is your focus area.
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
-5. ALL Github output (issues, titles, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
+5. -
 6. FIRST DO NO HARM. Your mandate is to SAFELY progress issues.
 ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
 7. ALL_TESTS = all unit, integration (non-docker), e2e gcp staging tests
