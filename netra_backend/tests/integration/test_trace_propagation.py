@@ -21,11 +21,11 @@ import pytest
 import asyncio
 import httpx
 import json
-from test_framework.ssot.base_test_case import SsotBaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 
 
-class TestTracePropagation(SsotBaseTestCase):
+class TestTracePropagation(SSotBaseTestCase):
     """Integration tests for distributed trace propagation - MUST FAIL before implementation."""
 
     @pytest.mark.integration
@@ -261,7 +261,7 @@ class TestTracePropagation(SsotBaseTestCase):
             assert context is None  # Should fail before implementation
 
 
-class TestTraceContextValidation(SsotBaseTestCase):
+class TestTraceContextValidation(SSotBaseTestCase):
     """Test trace context validation - MUST FAIL before implementation."""
 
     @pytest.mark.integration
@@ -352,7 +352,7 @@ class TestTraceContextValidation(SsotBaseTestCase):
             assert baggage is None  # Should fail before implementation
 
 
-class TestDatabaseInstrumentation(SsotBaseTestCase):
+class TestDatabaseInstrumentation(SSotBaseTestCase):
     """Test database instrumentation - MUST FAIL before implementation."""
 
     @pytest.mark.integration
@@ -419,7 +419,7 @@ class TestDatabaseInstrumentation(SsotBaseTestCase):
             assert len(connection_spans) == 0  # Should fail before implementation
 
 
-class TestRedisInstrumentation(SsotBaseTestCase):
+class TestRedisInstrumentation(SSotBaseTestCase):
     """Test Redis instrumentation - MUST FAIL before implementation."""
 
     @pytest.mark.integration

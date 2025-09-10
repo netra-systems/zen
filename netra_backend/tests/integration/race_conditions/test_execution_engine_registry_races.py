@@ -28,14 +28,14 @@ from unittest.mock import Mock, AsyncMock, MagicMock
 import pytest
 
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.agents.agent_registry import AgentRegistry, get_agent_registry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, get_agent_registry
 from netra_backend.app.agents.agent_factory import AgentFactory, get_agent_factory
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionTracker, get_execution_tracker
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.database import DatabaseTestHelper
-from test_framework.ssot.real_services_test_fixtures import requires_real_database, requires_real_redis
+# Skip requires_real functions - using real services by default in integration tests
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
