@@ -1477,7 +1477,14 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                     "failures_handled": active_failures
                 }
         
-        self.mock_llm_manager.generate_response.side_effect = catastrophic_llm_response
+        # Mock supervisor internal methods to ensure multiple failures test logic is executed
+        supervisor._create_isolated_agent_instances = AsyncMock(return_value={
+            'data_agent': Mock(name='data_agent_mock'),
+            'optimization_agent': Mock(name='optimization_agent_mock')
+        })
+        supervisor._execute_workflow_with_isolated_agents = AsyncMock(
+            side_effect=catastrophic_llm_response
+        )
         
         # Step 2: Execute under catastrophic conditions
         catastrophic_start = time.time()
