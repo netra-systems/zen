@@ -38,7 +38,7 @@ from netra_backend.app.core.unified_logging import UnifiedLogger
 
 # Backward compatibility aliases
 central_logger = _ssot_instance
-CentralLogger = type(_ssot_instance)
+CentralLogger = UnifiedLogger
 
 # Backward compatibility functions
 def get_central_logger():
