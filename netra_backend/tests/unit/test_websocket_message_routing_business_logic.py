@@ -21,7 +21,7 @@ from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
-from netra_backend.app.websocket_core.message_queue import WebSocketMessageQueue
+from netra_backend.app.websocket_core.message_queue import MessageQueue
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 from netra_backend.app.websocket_core.batch_message_handler import BatchMessageHandler
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
