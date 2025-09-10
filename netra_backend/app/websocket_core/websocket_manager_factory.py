@@ -777,15 +777,15 @@ class ConnectionLifecycleManager:
                 pass
 
 
-class IsolatedWebSocketManager(WebSocketManagerProtocol):
+# IsolatedWebSocketManager removed for SSOT compliance - use UnifiedWebSocketManager instead
+
+class WebSocketManagerFactory:
     """
-    User-isolated WebSocket manager with completely private state.
+    Factory for creating isolated WebSocket manager instances per user connection.
     
-    🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class explicitly implements 
-    WebSocketManagerProtocol to prevent interface drift during migrations.
-    
-    This addresses the root cause identified in Five Whys analysis:
-    "lack of formal interface contracts causing implementation drift."
+    This factory ensures complete user isolation by creating separate manager instances
+    for each user context. It enforces resource limits, handles cleanup, and provides
+    emergency fallback capabilities when needed.
     
     PROTOCOL COMPLIANCE: This manager implements ALL required methods from
     WebSocketManagerProtocol, ensuring consistent interface across migrations.
@@ -3139,7 +3139,6 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
 
 __all__ = [
     "WebSocketManagerFactory",
-    "IsolatedWebSocketManager", 
     "ConnectionLifecycleManager",
     "FactoryMetrics",
     "ManagerMetrics",
