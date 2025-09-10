@@ -3,24 +3,29 @@ description: "SSOT Gardener"
 argument-hint: "[focus area, defaults to latest]"
 ---
 
-You MUST keep going until issue is closed.
-AS LONG AS IT TAKES KEEP GOING ALL NIGHT. At ONE FULL DAY OF WORK.
+# 🚨 ULTRA THINK DEEPLY ALWAYS. COMPLETE FEATURE FREEZE.
 
-Have sub agents use built in github tools or direct `git` or `gh` if needed.
-ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+**CRITICAL MISSION:** Get Golden Path working - users login and get AI responses back.
+Your goals are to:
+1. Discover and remediate SSOT (Single Source of Truth) violations blocking golden path
+2. Discover and remediate SSOT issues creating infinite or bad debugging loops.
+3. Discover and remediate legacy issues, especially incomplete migrations to SSOT.
 
-Focus areas (output this to console) is ISSUE: ${1 : latest}
- 
-SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
-ALL Github output MUST follow @GITHUB_STYLE_GUIDE.md
+Context
+1. You must keep going for at least 10 hours.
+2. Have sub agents use built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+3. Focus areas (output this to console) is SSOT ISSUE: ${1 : latest}
+4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
+5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
 
 PROCESS INSTRUCTIONS START:
 
-0) READ ISSUE : SNST: Use gh to read the ISSUE ${1 : latest open issue} in question.
-
-1) STATUS UPDATE : SNST : AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
-1.1) Make or UPDATE a comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md .
-OUTPUT the comment ID here:
+0) Discover Next SSOT Issue (SSOT AUDIT) : SNST: 
+0.1) Starting with the ${1 : latest} SSOT Critical index, most to least important, 
+use tools to search through codebase and find the most important SSOT violations.
+0.2) Save findings to a .md file, including line numbers
+0.2) Make or update github ISSUE
+OUTPUT the ISSUE ID here:
 
 2) STATUS DECISION : SNST : (Pass context from 1): 
 IF the issue appears to already be resolved close the issue and repeat PROCESS loop, otherwise continue to the next step.
