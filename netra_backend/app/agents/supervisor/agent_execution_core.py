@@ -250,12 +250,8 @@ class AgentExecutionCore:
                     )
                     self.state_tracker.complete_execution(state_exec_id, success=False)
                     
-                    if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_error(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            error=agent.error or "Agent not found"
-                        )
+                    # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
+                    # Removing manual call to prevent duplicate notifications
                     return agent
                 
                 # CRITICAL REMEDIATION: Execute with comprehensive timeout management
