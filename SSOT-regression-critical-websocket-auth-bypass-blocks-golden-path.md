@@ -75,9 +75,27 @@ decoded_token = jwt.decode(
 - **BEFORE SSOT FIX**: Tests PASS (proving violations exist)
 - **AFTER SSOT FIX**: Tests FAIL (proving violations resolved)
 
-### Step 3: Plan SSOT Remediation
-- [ ] Plan removal of WebSocket JWT bypass
-- [ ] Plan UnifiedAuthInterface integration
+### Step 3: Plan SSOT Remediation ✅ COMPLETE
+- [x] Planned removal of WebSocket JWT bypass
+- [x] Planned UnifiedAuthInterface integration
+
+#### Four-Phase Remediation Strategy:
+**Plan A**: WebSocket Auth Bypass Removal - Remove `verify_signature: False` and fallback logic
+**Plan B**: Backend JWT Import Elimination - Replace 62 direct JWT imports with SSOT calls  
+**Plan C**: UnifiedAuthInterface Integration - WebSocket layer delegation with caching
+**Plan D**: Risk Mitigation - Feature flags, gradual rollout, emergency rollback
+
+#### Key Changes Required:
+1. **`user_context_extractor.py:193-196`** - Remove JWT bypass, implement UnifiedAuthInterface delegation
+2. **`user_context_extractor.py:265-324`** - Remove fallback auth logic
+3. **62 Backend files** - Replace direct JWT imports with auth service calls
+4. **Configuration consolidation** - Unified JWT secret management
+
+#### Success Criteria:
+- All 21 SSOT violation tests FAIL (proving violations fixed)
+- Zero backend JWT imports in production code  
+- WebSocket auth <5s latency maintained
+- Golden Path functionality preserved
 
 ### Step 4: Execute SSOT Remediation  
 - [ ] Remove direct JWT operations

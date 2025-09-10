@@ -27,6 +27,7 @@ import asyncio
 import pytest
 import time
 import gc
+import unittest
 from typing import Dict, List, Any, Optional
 from unittest.mock import MagicMock, AsyncMock, patch
 
@@ -34,7 +35,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 
-class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
+class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase, unittest.TestCase):
     """
     Tests that SHOULD PASS to validate UserExecutionEngine SSOT compliance.
     
@@ -113,7 +114,7 @@ class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
                 self.assertIsNot(engine_a._execution_state, engine_b._execution_state,
                     "Execution states must be separate objects")
             
-            self.logger.info("UserExecutionEngine isolation validation PASSED")
+            print("INFO: UserExecutionEngine isolation validation PASSED")
             
         except ImportError as e:
             self.fail(f"Cannot import UserExecutionEngine: {e}")
@@ -212,7 +213,7 @@ class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
                 self.assertNotIn("User A's private thoughts", user_b_combined,
                     "User B must never receive User A's private thoughts")
             
-            self.logger.info("WebSocket event isolation validation PASSED")
+            print("INFO: WebSocket event isolation validation PASSED")
             
         except Exception as e:
             self.fail(f"WebSocket event isolation test failed: {e}")
@@ -263,16 +264,16 @@ class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
                 # Some implementations may allow None and set defaults
             except (ValueError, TypeError) as e:
                 # This is expected - invalid context should be rejected
-                self.logger.info(f"Invalid context properly rejected: {e}")
+                print(f"INFO: Invalid context properly rejected: {e}")
             
             # Test 4: Check if cleanup methods exist
             cleanup_methods = ['cleanup', 'dispose', '__del__', '_cleanup_resources']
             has_cleanup = any(hasattr(engine, method) for method in cleanup_methods)
             
             if not has_cleanup:
-                self.logger.warning("No explicit cleanup methods found - ensure proper garbage collection")
+                print("WARNING: No explicit cleanup methods found - ensure proper garbage collection")
             
-            self.logger.info("Factory pattern validation PASSED")
+            print("INFO: Factory pattern validation PASSED")
             
         except Exception as e:
             self.fail(f"Factory pattern test failed: {e}")
@@ -347,7 +348,7 @@ class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
                 self.assertGreater(cleanup_efficiency, 0.8,  # At least 80% cleanup
                     f"Cleanup efficiency {cleanup_efficiency:.2%} is too low. Memory leaks suspected.")
             
-            self.logger.info(f"Memory management test PASSED. Growth: {creation_growth}, Remaining: {remaining_growth}")
+            print(f"INFO: Memory management test PASSED. Growth: {creation_growth}, Remaining: {remaining_growth}")
             
         except Exception as e:
             self.fail(f"Memory management test failed: {e}")
@@ -435,7 +436,7 @@ class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
             self.assertEqual(len(user_ids), len(contexts),
                 "User isolation failed - duplicate or missing user executions")
             
-            self.logger.info(f"Concurrent execution test PASSED for {len(contexts)} users")
+            print(f"INFO: Concurrent execution test PASSED for {len(contexts)} users")
             
         except Exception as e:
             self.fail(f"Concurrent user execution test failed: {e}")
@@ -495,7 +496,7 @@ class TestUserExecutionEngineSSotValidation(SSotAsyncTestCase):
             self.assertGreater(len(isolation_found), 1,
                 f"Documentation should emphasize user isolation. Found: {isolation_found}")
             
-            self.logger.info(f"SSOT documentation validation PASSED. Indicators: {found_indicators}")
+            print(f"INFO: SSOT documentation validation PASSED. Indicators: {found_indicators}")
             
         except Exception as e:
             self.fail(f"SSOT documentation test failed: {e}")

@@ -658,7 +658,7 @@ class JWTHandler:
         # If not in memory and Redis is available, check Redis asynchronously
         # We avoid asyncio.run() to prevent "coroutine was never awaited" warnings
         try:
-            if False  # Redis disabled:
+            if False:  # Redis disabled
                 # Schedule async Redis check without blocking
                 # This method is called from sync context, so we can't await
                 # Instead, we rely on in-memory cache and periodic sync from Redis
@@ -749,7 +749,7 @@ class JWTHandler:
         """Initialize blacklists from Redis on startup for persistence"""
         try:
             # Check if Redis is available in a non-async context
-            if not False  # Redis disabled:
+            if True:  # Redis disabled - skip condition
                 logger.debug("Redis not available, using in-memory blacklists only")
                 return
             
@@ -771,7 +771,7 @@ class JWTHandler:
     async def _load_blacklists_from_redis(self) -> None:
         """Load blacklists from Redis - async version"""
         try:
-            if not False  # Redis disabled:
+            if True:  # Redis disabled - skip condition
                 return
                 
             # Load token blacklist
@@ -796,7 +796,7 @@ class JWTHandler:
     async def _persist_token_blacklist(self, token: str) -> bool:
         """Persist token to Redis blacklist"""
         try:
-            if not False  # Redis disabled:
+            if True:  # Redis disabled - skip condition
                 return True  # Fallback to in-memory only
             
             redis_client = None  # Redis disabled
@@ -814,7 +814,7 @@ class JWTHandler:
     async def _persist_user_blacklist(self, user_id: str) -> bool:
         """Persist user to Redis blacklist"""
         try:
-            if not False  # Redis disabled:
+            if True:  # Redis disabled - skip condition
                 return True  # Fallback to in-memory only
             
             redis_client = None  # Redis disabled

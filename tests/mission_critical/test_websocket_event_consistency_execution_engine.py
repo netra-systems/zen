@@ -36,6 +36,7 @@ import asyncio
 import pytest
 import time
 import uuid
+import unittest
 from typing import Dict, List, Any, Optional, Tuple
 from unittest.mock import MagicMock, AsyncMock, patch
 from dataclasses import dataclass
@@ -93,7 +94,7 @@ class WebSocketEventCapture:
         return len(missing_critical) == 0, missing_critical
 
 
-class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
+class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase, unittest.TestCase):
     """
     Mission critical tests for WebSocket event consistency in ExecutionEngine.
     
@@ -205,7 +206,7 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
             self.assertTrue(all(i > started_index for i in thinking_indices),
                 "agent_thinking events must come after agent_started")
             
-            self.logger.info(f"Critical WebSocket events test PASSED. Events: {event_sequence}")
+            print(f"INFO: Critical WebSocket events test PASSED. Events: {event_sequence}")
             
         except Exception as e:
             self.fail(f"Critical WebSocket events test FAILED: {e}")
@@ -310,7 +311,7 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
                 self.assertTrue(has_completion_info,
                     f"agent_completed event should contain completion info. Got: {completed_event.data}")
             
-            self.logger.info("WebSocket event content validation PASSED")
+            print("INFO: WebSocket event content validation PASSED")
             
         except Exception as e:
             self.fail(f"WebSocket event content validation FAILED: {e}")
@@ -409,7 +410,7 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
             self.assertNotIn(user1_data['session_id'], event_str,
                 f"User2 events contain User1's session ID: {event.data}")
         
-        self.logger.info("WebSocket event user isolation test PASSED")
+        print("INFO: WebSocket event user isolation test PASSED")
 
     @pytest.mark.mission_critical
     @pytest.mark.integration
@@ -482,7 +483,7 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
                 self.assertLess(event_overhead, 1.2,  # Event timing should not exceed 120% of execution
                     f"Event sending overhead too high: {event_overhead:.2%}")
             
-            self.logger.info(f"WebSocket event timing test PASSED. "
+            print(f"INFO: WebSocket event timing test PASSED. "
                            f"Execution: {total_execution_time:.3f}s, Events: {len(events)}")
             
         except Exception as e:
@@ -549,11 +550,11 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
             
             # It's good (but not required) if error is indicated in events
             if error_indicated:
-                self.logger.info("Error properly indicated in WebSocket events")
+                print("INFO: Error properly indicated in WebSocket events")
             else:
-                self.logger.warning("Error not explicitly indicated in events - consider improving error reporting")
+                print("WARNING: Error not explicitly indicated in events - consider improving error reporting")
             
-            self.logger.info("WebSocket events error scenarios test PASSED")
+            print("INFO: WebSocket events error scenarios test PASSED")
             
         except Exception as e:
             self.fail(f"WebSocket events error scenarios test FAILED: {e}")
@@ -615,7 +616,7 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase):
                 })
                 
         except Exception as e:
-            self.logger.error(f"Error in simulate_complete_agent_execution: {e}")
+            print(f"ERROR: Error in simulate_complete_agent_execution: {e}")
             raise
 
     async def _simulate_agent_execution_with_error(self, engine, user_data):

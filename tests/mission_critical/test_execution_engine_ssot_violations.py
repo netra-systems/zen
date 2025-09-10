@@ -25,6 +25,7 @@ CRITICAL: These are FAILING tests that prove problems exist.
 import asyncio
 import pytest
 import time
+import unittest
 from typing import Dict, List, Any
 from unittest.mock import patch, MagicMock
 
@@ -32,7 +33,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
 
-class TestExecutionEngineSSotViolations(SSotBaseTestCase):
+class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
     """
     Tests that SHOULD FAIL to demonstrate current SSOT violations.
     
@@ -75,7 +76,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
             
         except ImportError as e:
             # If we can't import them all, that's actually good (less SSOT violations)
-            self.logger.info(f"Some ExecutionEngine implementations not found: {e}")
+            print(f"INFO: Some ExecutionEngine implementations not found: {e}")
 
     @pytest.mark.mission_critical  
     @pytest.mark.unit
@@ -129,10 +130,10 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
                 )
             
             # If we reach here, the current implementation might already be fixed
-            self.logger.info("No obvious global state violations detected - implementation may be correct")
+            print("INFO: No obvious global state violations detected - implementation may be correct")
             
         except Exception as e:
-            self.logger.error(f"Error testing global state sharing: {e}")
+            print(f"ERROR: Error testing global state sharing: {e}")
             # This might indicate the SSOT violations are even worse
             self.fail(f"Cannot properly test for SSOT violations due to implementation issues: {e}")
 
@@ -190,10 +191,10 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
                             "This causes events to be sent to all connected users instead of target user."
                         )
             
-            self.logger.info("No obvious WebSocket cross-contamination detected")
+            print("INFO: No obvious WebSocket cross-contamination detected")
             
         except Exception as e:
-            self.logger.error(f"Error testing WebSocket event isolation: {e}")
+            print(f"ERROR: Error testing WebSocket event isolation: {e}")
             # Implementation issues prevent proper testing - also a violation
             self.fail(f"Cannot test WebSocket isolation due to implementation problems: {e}")
 
@@ -220,7 +221,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
                 )
             except TypeError as e:
                 # If it fails, that might mean factory pattern is enforced (good)
-                self.logger.info(f"Direct instantiation prevented: {e}")
+                print(f"INFO: Direct instantiation prevented: {e}")
             
             # Test 2: Check if proper factory methods exist
             factory_methods = [
@@ -256,7 +257,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
                 # If instantiation fails, we can't test singleton pattern
                 pass
             
-            self.logger.info("Factory pattern testing completed")
+            print("INFO: Factory pattern testing completed")
             
         except ImportError as e:
             self.fail(f"Cannot import ExecutionEngine to test factory pattern: {e}")
@@ -296,7 +297,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
                             "execution_history": [f"step_{j}" for j in range(100)]
                         }
                 except Exception as e:
-                    self.logger.error(f"Error creating ExecutionEngine {i}: {e}")
+                    print(f"ERROR: Error creating ExecutionEngine {i}: {e}")
             
             # Check if objects accumulated globally (memory leak)
             gc.collect()
@@ -323,10 +324,10 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
                     f"This indicates global state preventing proper cleanup."
                 )
             
-            self.logger.info(f"Memory test completed. Object growth: {object_growth}")
+            print(f"INFO: Memory test completed. Object growth: {object_growth}")
             
         except Exception as e:
-            self.logger.error(f"Memory leak testing failed: {e}")
+            print(f"ERROR: Memory leak testing failed: {e}")
             # If we can't test memory leaks, that's also concerning
             self.fail(f"Cannot test for memory leaks due to implementation issues: {e}")
 
@@ -387,7 +388,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
                     f"Only one can be the true SSOT."
                 )
             
-            self.logger.info(f"SSOT documentation check completed. Found {len(implementations_found)} implementations.")
+            print(f"INFO: SSOT documentation check completed. Found {len(implementations_found)} implementations.")
             
         except Exception as e:
             self.fail(f"SSOT documentation testing failed: {e}")

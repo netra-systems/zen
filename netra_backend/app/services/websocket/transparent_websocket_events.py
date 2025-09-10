@@ -48,18 +48,53 @@ class WebSocketEventType(Enum):
 
 
 class TransparentWebSocketEmitter:
-    """WebSocket emitter that provides transparent service status communication.
+    """
+    SSOT WRAPPER: Delegates all WebSocket events to UnifiedWebSocketEmitter.
     
-    This class ensures users get real-time visibility into service status
-    instead of misleading mock responses or silent failures.
+    This class now serves as a compatibility wrapper that maintains the 
+    transparent service status API while delegating all actual emission
+    to the unified SSOT emitter for race condition elimination.
+    
+    CRITICAL: This class no longer emits directly - it's a redirection wrapper.
     """
     
     def __init__(self, context: UserExecutionContext):
-        """Initialize transparent WebSocket emitter with user context."""
+        """Initialize SSOT wrapper with user context."""
         self.context = context
         self.user_id = context.user_id
         self.request_id = context.request_id
-        self.events_sent = []
+        self.events_sent = []  # Preserved for compatibility
+        self._unified_emitter = None  # Will be lazy-loaded
+    
+    async def _get_unified_emitter(self):
+        """Get or create the unified SSOT emitter."""
+        if self._unified_emitter is None:
+            try:
+                from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+                from netra_backend.app.websocket_core import create_websocket_manager
+                
+                # Get manager from context or create one
+                manager = getattr(self.context, 'websocket_manager', None)
+                if not manager:
+                    manager = await create_websocket_manager()
+                
+                # Create SSOT emitter with context
+                self._unified_emitter = WebSocketEmitterFactory.create_emitter(
+                    manager=manager,
+                    user_id=self.user_id,
+                    context=self.context
+                )
+                
+                # Set user tier for priority handling
+                if hasattr(self.context, 'user_tier'):
+                    self._unified_emitter.set_user_tier(self.context.user_tier)
+                
+            except Exception as e:
+                logger.error(f"Failed to create unified emitter: {e}")
+                # Return None to trigger fallback behavior
+                return None
+        
+        return self._unified_emitter
         
     async def emit_service_initializing(
         self,
@@ -300,11 +335,10 @@ class TransparentWebSocketEmitter:
         """
         try:
             from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            from netra_backend.app.websocket_core import create_websocket_manager
             
-            # Get WebSocket manager instance (placeholder - needs actual manager access)
-            # This would need to be injected or accessed via a registry
-            manager = None  # TODO: Get actual manager instance
+            # Get WebSocket manager instance via factory
+            manager = await create_websocket_manager()
             
             if manager:
                 # Create SSOT emitter with user tier context
@@ -363,24 +397,36 @@ class TransparentWebSocketEmitter:
         step_number: Optional[int] = None
     ) -> None:
         """
-        PHASE 2 REDIRECTION: Emit agent thinking event via SSOT UnifiedWebSocketEmitter.
+        SSOT REDIRECTION: Emit agent thinking event via SSOT UnifiedWebSocketEmitter.
         Preserves user tier handling from transparent_websocket_events.py.
         """
-        # Fallback to original implementation (manager injection needed for full SSOT)
-        event_data = {
-            "type": WebSocketEventType.AGENT_THINKING.value,
-            "thought": thought,
-            "step_number": step_number,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "user_id": self.user_id,
-            "request_id": self.request_id,
-            "metadata": {
-                "user_tier": self.context.user_tier,
-                "ssot_ready": True  # Mark as ready for SSOT when manager is available
+        # SSOT DELEGATION: Direct delegation to unified emitter
+        unified_emitter = await self._get_unified_emitter()
+        if unified_emitter:
+            await unified_emitter.notify_agent_thinking(
+                reasoning=thought,
+                step_number=step_number,
+                metadata={
+                    "user_tier": getattr(self.context, 'user_tier', 'free'),
+                    "request_id": self.request_id,
+                    "ssot_delegated": True
+                }
+            )
+        else:
+            # Fallback for compatibility only
+            event_data = {
+                "type": WebSocketEventType.AGENT_THINKING.value,
+                "thought": thought,
+                "step_number": step_number,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "user_id": self.user_id,
+                "request_id": self.request_id,
+                "metadata": {
+                    "user_tier": getattr(self.context, 'user_tier', 'free'),
+                    "ssot_fallback": True
+                }
             }
-        }
-        
-        await self._emit_event(event_data)
+            await self._emit_event(event_data)
     
     async def emit_tool_executing(
         self,
@@ -443,27 +489,49 @@ class TransparentWebSocketEmitter:
         await self._emit_event(event_data)
     
     async def _emit_event(self, event_data: Dict[str, Any]) -> None:
-        """Internal method to emit WebSocket event.
+        """
+        SSOT REDIRECTION: Delegate event emission to UnifiedWebSocketEmitter.
         
-        This method handles the actual WebSocket communication and ensures
-        events are properly delivered to the user's WebSocket connection.
+        This method now redirects all emission to the SSOT emitter to eliminate
+        race conditions and multiple emission sources.
         """
         try:
-            # Store event for tracking
+            # Store event for compatibility tracking
             self.events_sent.append(event_data)
             
-            # Get WebSocket connection for this user/request
-            websocket_manager = self.context.websocket_manager
-            if websocket_manager:
-                await websocket_manager.send_to_user(
-                    user_id=self.user_id,
-                    event_data=event_data
-                )
+            # SSOT DELEGATION: Use unified emitter for actual emission
+            unified_emitter = await self._get_unified_emitter()
+            if unified_emitter:
+                # Extract event type and delegate to appropriate method
+                event_type = event_data.get("type", "unknown")
+                
+                if event_type == WebSocketEventType.AGENT_STARTED.value:
+                    await unified_emitter.emit_agent_started(event_data)
+                elif event_type == WebSocketEventType.AGENT_THINKING.value:
+                    await unified_emitter.emit_agent_thinking(event_data)
+                elif event_type == WebSocketEventType.TOOL_EXECUTING.value:
+                    await unified_emitter.emit_tool_executing(event_data)
+                elif event_type == WebSocketEventType.TOOL_COMPLETED.value:
+                    await unified_emitter.emit_tool_completed(event_data)
+                elif event_type == WebSocketEventType.AGENT_COMPLETED.value:
+                    await unified_emitter.emit_agent_completed(event_data)
+                else:
+                    # For non-critical events, use custom emission
+                    await unified_emitter.notify_custom(event_type, event_data)
             else:
-                logger.warning(f"No WebSocket manager available for user {self.user_id}")
+                # Fallback only if SSOT emitter creation fails
+                logger.warning(f"SSOT fallback: Direct emission for user {self.user_id}")
+                websocket_manager = self.context.websocket_manager
+                if websocket_manager:
+                    await websocket_manager.send_to_user(
+                        user_id=self.user_id,
+                        event_data=event_data
+                    )
+                else:
+                    logger.error(f"No WebSocket manager available for user {self.user_id}")
                 
         except Exception as e:
-            logger.error(f"Failed to emit WebSocket event: {e}")
+            logger.error(f"Failed to emit WebSocket event via SSOT: {e}")
             # Don't raise exception - WebSocket failures shouldn't break service logic
     
     def get_events_summary(self) -> Dict[str, Any]:
