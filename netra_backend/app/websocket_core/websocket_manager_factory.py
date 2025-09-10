@@ -2349,8 +2349,8 @@ async def _perform_service_readiness_checks() -> Dict[str, Any]:
     
     # Check 3: Database session factory
     try:
-        from netra_backend.app.db.session import get_db_session_factory
-        db_factory = get_db_session_factory()
+        from netra_backend.app.db.session import get_database_manager
+        db_factory = get_database_manager()
         if not db_factory:
             raise Exception("Database session factory is None")
         health_result["service_details"]["database"] = "healthy"
@@ -2462,8 +2462,8 @@ def validate_websocket_component_health(user_context: Optional[UserExecutionCont
         
         # Component 2: Database Connectivity
         try:
-            from netra_backend.app.db.session import get_db_session_factory
-            db_factory = get_db_session_factory()
+            from netra_backend.app.db.session import get_database_manager
+            db_factory = get_database_manager()
             if db_factory is None:
                 raise Exception("Database session factory is None")
             health_result["component_details"]["database"] = {
