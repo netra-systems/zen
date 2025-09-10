@@ -40,6 +40,9 @@ class TestGCPRedisWebSocketGoldenPath(unittest.TestCase):
         self.staging_base_url = "https://netra-staging.example.com"  # Replace with actual staging URL
         self.test_websocket_connections = []
         self.test_redis_keys = set()
+    
+    async def asyncTearDown(self):
+        """Async cleanup of test resources."""
         # Close WebSocket connections
         for ws in self.test_websocket_connections:
             try:
@@ -59,10 +62,8 @@ class TestGCPRedisWebSocketGoldenPath(unittest.TestCase):
                         pass
         except Exception:
             pass
-        
-        await super().asyncTearDown()
     
-    def test_gcp_redis_websocket_readiness_validation_golden_path(self):
+    async def test_gcp_redis_websocket_readiness_validation_golden_path(self):
         """DESIGNED TO FAIL: Test WebSocket readiness validation with Redis on GCP.
         
         This test should FAIL showing that WebSocket readiness validation
