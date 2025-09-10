@@ -58,10 +58,28 @@ $500K+ ARR at risk - violations block:
 ## REMEDIATION PLAN STATUS
 - [x] Step 1: Discover and plan tests ✅
 - [x] Step 2: Execute test plan (20% new SSOT tests) ✅
-- [ ] Step 3: Plan SSOT remediation 🔄
-- [ ] Step 4: Execute remediation
+- [x] Step 3: Plan SSOT remediation ✅
+- [ ] Step 4: Execute remediation 🔄
 - [ ] Step 5: Test fix loop until all pass
 - [ ] Step 6: PR and closure
+
+## SSOT REMEDIATION STRATEGY PLANNED ✅
+**Canonical SSOT Choice:** `/netra_backend/app/services/user_execution_context.py` (1382 lines, MEGA CLASS)
+- Most complete functionality with audit trails, resource management
+- Production-ready with comprehensive user isolation
+- Supports enterprise features and compliance requirements
+
+**Migration Strategy:** 4-Phase Approach
+1. **Phase 1:** Analysis and preparation (safety nets, monitoring)
+2. **Phase 2:** Factory pattern consolidation (unified creation)
+3. **Phase 3:** Consumer migration (908 files, business-critical first)
+4. **Phase 4:** Cleanup and validation (remove duplicates)
+
+**Risk Mitigation:**
+- Golden path protection throughout ($500K+ ARR)
+- Phase-specific rollback procedures
+- Consumer categorization: HIGH risk (will break), MEDIUM (may break), LOW (should survive)
+- Comprehensive test monitoring (68 existing + 7 new SSOT tests)
 
 ## NEW SSOT TESTS CREATED ✅
 **7 SSOT Validation Tests (20% of effort):**
