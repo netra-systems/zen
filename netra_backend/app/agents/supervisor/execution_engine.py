@@ -16,6 +16,7 @@ Migration Guide:
 import asyncio
 import hashlib
 import time
+import warnings
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -656,11 +657,9 @@ class ExecutionEngine:
         await self._wait_for_retry(context.retry_count)
         return await self.execute_agent(context, user_context)
     
-    async def execute_pipeline(self, steps: List[PipelineStep],
-                              context: AgentExecutionContext,
-                              user_context: Optional['UserExecutionContext']) -> List[AgentExecutionResult]:
-        """Execute a pipeline of agents."""
-        return await self._execute_pipeline_steps(steps, context, user_context)
+    # SSOT COMPLIANCE: execute_pipeline method removed - use UserExecutionEngine directly
+    # This method has been removed to eliminate SSOT violations.
+    # Use UserExecutionEngine.execute_pipeline() for all pipeline execution.
     
     async def _execute_pipeline_steps(self, steps: List[PipelineStep],
                                      context: AgentExecutionContext,

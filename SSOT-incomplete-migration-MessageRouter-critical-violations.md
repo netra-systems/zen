@@ -45,7 +45,7 @@
 - [x] Step 1.1: TEST DISCOVERY - ✅ COMPLETED  
 - [x] Step 1.2: TEST PLANNING - ✅ COMPLETED
 - [x] Step 2: EXECUTE TEST PLAN (20% new SSOT tests) - ✅ COMPLETED
-- [ ] Step 3: PLAN REMEDIATION OF SSOT - IN PROGRESS
+- [x] Step 3: PLAN REMEDIATION OF SSOT - ✅ COMPLETED
 - [ ] Step 4: EXECUTE REMEDIATION SSOT PLAN
 - [ ] Step 5: ENTER TEST FIX LOOP
 - [ ] Step 6: PR AND CLOSURE
@@ -102,8 +102,33 @@
 - Expected transition: FAILING → PASSING after SSOT fixes
 - Comprehensive execution guide created: `/tests/MESSAGE_ROUTER_SSOT_TEST_EXECUTION_GUIDE.md`
 
+## Step 3: PLAN REMEDIATION OF SSOT - ✅ COMPLETED
+
+### COMPREHENSIVE REMEDIATION PLAN CREATED:
+
+#### **CANONICAL SSOT SELECTED:**
+- **MessageRouter** (`/netra_backend/app/websocket_core/handlers.py`) chosen as single source of truth
+- **Rationale:** Most complete, actively maintained, critical golden path usage
+- **Consolidation:** 14+ implementations → 1 canonical implementation
+
+#### **3-Phase Migration Strategy:**
+1. **Phase 1: Preparation (2 hours)** - Analysis, design, safety setup
+2. **Phase 2: Consolidation (5.5 hours)** - Atomic implementation with rollback points
+3. **Phase 3: Validation (4 hours)** - Test restoration, golden path verification
+
+#### **Risk Mitigation & Business Protection:**
+- ✅ **Automated rollback triggers** for chat/WebSocket performance drops
+- ✅ **Feature flags** for gradual deployment with monitoring
+- ✅ **Atomic steps** with independent rollback capability
+- ✅ **$500K+ ARR protection** through continuous golden path monitoring
+
+#### **Implementation Timeline:**
+- **Total Duration:** 11.5 hours across 2 days
+- **Emergency Rollback:** <5 minutes recovery capability
+- **Business Continuity:** Zero downtime requirement maintained
+
 ## Next Action:
-**SPAWN SUBAGENT TASK (SNST)** for Step 3: PLAN REMEDIATION OF SSOT
+**SPAWN SUBAGENT TASK (SNST)** for Step 4: EXECUTE REMEDIATION SSOT PLAN
 
 ## Key Metrics to Track:
 - REMOVED_SYNTAX_ERROR comments eliminated: 0/15+ 

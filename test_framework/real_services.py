@@ -441,7 +441,7 @@ class RealServicesManager:
     
     def __init__(self, config: Optional[ServiceEndpoints] = None):
         self.config = config or ServiceEndpoints.from_environment()
-        self.postgres = DatabaseManager(self.config)
+        self.postgres = DatabaseManager()  # SSOT DatabaseManager uses internal config
         self.redis = RedisManager(self.config)
         self.clickhouse = ClickHouseManager(self.config)
         self._http_client = None
