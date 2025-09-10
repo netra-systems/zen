@@ -1054,28 +1054,28 @@ def create_mock_critical_events(
             event_type=CriticalAgentEventType.AGENT_THINKING.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 1),
+            timestamp=base_time.replace(microsecond=100000),
             data={"agent": agent_name, "progress": "thinking"}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.TOOL_EXECUTING.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 2),
+            timestamp=base_time.replace(microsecond=200000),
             data={"tool": tool_name, "status": "executing"}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.TOOL_COMPLETED.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 3),
+            timestamp=base_time.replace(microsecond=300000),
             data={"tool": tool_name, "status": "completed", "result": "mock result"}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.AGENT_COMPLETED.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 4),
+            timestamp=base_time.replace(microsecond=400000),
             data={"agent": agent_name, "status": "completed", "result": "mock agent result"}
         )
     ]
