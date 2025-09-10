@@ -212,7 +212,7 @@ class TestOAuthDuplicationPrevention:
                     content = f.read()
                 
                 # Check if file uses OAuth but doesn't import from SSOT
-                uses_oauth = any(re.search(r"get_oauth|oauth.*validation", content, re.IGNORECASE))
+                uses_oauth = bool(re.search(r"get_oauth|oauth.*validation", content, re.IGNORECASE))
                 uses_ssot_import = any(pattern in content for pattern in ssot_import_patterns)
                 
                 if uses_oauth and not uses_ssot_import:

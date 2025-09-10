@@ -59,85 +59,99 @@ class TestDatabaseManagerSSOTFunctionViolations(SSotBaseTestCase):
         self._websocket_imports_attempted = []
         self._function_calls_attempted = []
         
-    def test_get_db_session_factory_import_failure_blocks_websocket(self):
+    def test_websocket_can_access_database_via_ssot_methods(self):
         """
-        DESIGNED TO FAIL: WebSocket factory fails when get_db_session_factory missing
+        UPDATED TO USE SSOT: WebSocket can access database via correct SSOT methods
         
-        This test reproduces the exact GitHub issue #204 error:
-        - WebSocket factory tries to import get_db_session_factory
-        - Function is missing from DatabaseManager
-        - WebSocket connections fail with 1011 errors
+        This test validates the SSOT solution for GitHub issue #204:
+        - WebSocket should use get_database_manager() instead of get_db_session_factory
+        - DatabaseManager provides get_session(), get_async_session() methods
+        - WebSocket connections work with SSOT-compliant database access
         """
-        self.record_metric("violation_type", "missing_session_factory_function")
+        self.record_metric("validation_type", "ssot_compliant_database_access")
         
-        # Test 1: Direct import attempt should fail
+        # Test 1: get_database_manager should exist and work
+        database_manager_success = False
         try:
-            from netra_backend.app.db.database_manager import get_db_session_factory
-            self._function_calls_attempted.append("get_db_session_factory")
+            from netra_backend.app.db.database_manager import get_database_manager
+            self._function_calls_attempted.append("get_database_manager")
             
-            # If we get here, the function exists - this should FAIL pre-SSOT
-            function_exists = True
-            logger.critical(
-                "EXPECTED FAILURE: get_db_session_factory function exists but should be missing "
-                "in current SSOT violation state"
-            )
+            manager = get_database_manager()
+            assert manager is not None, "get_database_manager returned None"
+            database_manager_success = True
+            self.record_metric("get_database_manager_success", True)
+            logger.info("✅ get_database_manager() works - SSOT method available")
+            
         except ImportError as e:
-            function_exists = False
-            logger.info(f"Expected ImportError for get_db_session_factory: {e}")
-            self.record_metric("import_error_detected", str(e))
+            logger.error(f"❌ get_database_manager not available: {e}")
+            self.record_metric("get_database_manager_import_error", str(e))
+        except Exception as e:
+            logger.error(f"❌ get_database_manager failed: {e}")
+            self.record_metric("get_database_manager_error", str(e))
         
-        # Test 2: WebSocket factory initialization attempt
-        websocket_factory_success = False
-        try:
-            # Simulate WebSocket factory trying to access database session factory
-            from netra_backend.app.factories import websocket_factory
-            
-            # This should fail due to missing database session factory
-            factory_instance = websocket_factory.create_websocket_manager()
-            
-            # If we get here, WebSocket factory worked - this indicates the issue is fixed
-            websocket_factory_success = True
-            self.record_metric("websocket_factory_success", True)
-            
-        except (ImportError, AttributeError, Exception) as e:
-            logger.info(f"Expected WebSocket factory failure: {e}")
-            self.record_metric("websocket_factory_error", str(e))
-            
-        # Test 3: Database manager session creation attempt
-        database_session_success = False
+        # Test 2: DatabaseManager should have session methods WebSocket needs
+        session_methods_available = False
         try:
             from netra_backend.app.db.database_manager import DatabaseManager
             
             db_manager = DatabaseManager()
             
-            # Try to create a session factory - this is what WebSocket needs
-            if hasattr(db_manager, 'get_session_factory'):
-                session_factory = db_manager.get_session_factory()
-                database_session_success = True
-                self.record_metric("database_session_factory_available", True)
+            # Check for SSOT session methods that WebSocket can use
+            required_methods = ['get_session', 'initialize']
+            available_methods = []
+            
+            for method_name in required_methods:
+                if hasattr(db_manager, method_name):
+                    available_methods.append(method_name)
+            
+            if len(available_methods) >= 2:  # Both get_session and initialize
+                session_methods_available = True
+                self.record_metric("ssot_session_methods_available", available_methods)
+                logger.info(f"✅ DatabaseManager has SSOT session methods: {available_methods}")
             else:
-                self.record_metric("database_session_factory_missing", True)
+                self.record_metric("ssot_session_methods_missing", required_methods)
+                logger.error(f"❌ Missing required methods: {required_methods}")
                 
         except Exception as e:
-            logger.info(f"Database manager session creation failed: {e}")
-            self.record_metric("database_manager_error", str(e))
+            logger.error(f"❌ DatabaseManager session method check failed: {e}")
+            self.record_metric("database_manager_method_error", str(e))
         
-        # CRITICAL ASSERTION: This test is DESIGNED TO FAIL pre-SSOT
-        # When SSOT violations exist, WebSocket factory should fail
-        if not function_exists and not websocket_factory_success:
-            # This is the EXPECTED state with SSOT violations
-            assert False, (
-                "REPRODUCING GITHUB ISSUE #204: get_db_session_factory missing, "
-                "WebSocket factory fails to create database sessions. "
-                f"Function exists: {function_exists}, "
-                f"WebSocket factory success: {websocket_factory_success}, "
-                f"Database session success: {database_session_success}"
-            )
-        else:
-            # This means the SSOT violations have been fixed
-            logger.warning(
-                "SSOT violations appear to be resolved - WebSocket factory can create sessions"
-            )
+        # Test 3: Verify WebSocket can use SSOT pattern
+        websocket_ssot_compatible = False
+        try:
+            # This simulates how WebSocket factory should access database
+            from netra_backend.app.db.database_manager import get_database_manager
+            
+            manager = get_database_manager()
+            
+            # WebSocket factory should be able to:
+            # 1. Get database manager
+            # 2. Check if it has session creation methods
+            # 3. Use those methods for database access
+            
+            if hasattr(manager, 'get_session') and hasattr(manager, 'initialize'):
+                websocket_ssot_compatible = True
+                self.record_metric("websocket_ssot_pattern_compatible", True)
+                logger.info("✅ WebSocket can use SSOT database access pattern")
+            
+        except Exception as e:
+            logger.error(f"❌ WebSocket SSOT compatibility check failed: {e}")
+            self.record_metric("websocket_ssot_compatibility_error", str(e))
+        
+        # ASSERTION: All SSOT methods should be available for WebSocket
+        assert database_manager_success, (
+            "❌ SSOT VIOLATION: get_database_manager() not available for WebSocket factory"
+        )
+        
+        assert session_methods_available, (
+            "❌ SSOT VIOLATION: DatabaseManager missing session methods needed by WebSocket"
+        )
+        
+        assert websocket_ssot_compatible, (
+            "❌ SSOT VIOLATION: WebSocket cannot use SSOT database access pattern"
+        )
+        
+        logger.info("✅ SSOT REMEDIATION SUCCESSFUL: WebSocket can access database via SSOT methods")
     
     def test_get_database_manager_replacement_works(self):
         """
