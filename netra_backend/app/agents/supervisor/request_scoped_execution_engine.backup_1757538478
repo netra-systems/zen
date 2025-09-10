@@ -1,16 +1,3 @@
-"""
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
-
-This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
-
-MIGRATION REQUIRED:
-- Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
-- This file will be REMOVED in the next release
-
-SECURITY FIX: Multiple ExecutionEngine implementations caused WebSocket user 
-isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH.
-"""
-
 """RequestScopedExecutionEngine for per-request isolated agent execution.
 
 This module provides the RequestScopedExecutionEngine class that handles agent execution
