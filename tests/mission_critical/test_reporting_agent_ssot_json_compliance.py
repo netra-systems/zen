@@ -135,10 +135,10 @@ class TestReportingAgentSSOTJSONCompliance(unittest.TestCase):
             ssot_violations = []
             
             if 'json.loads(' in get_cached_source:
-                ssot_violations.append("_get_cached_result uses json.loads() instead of SSOT UnifiedJSONSerializer.safe_loads()")
+                ssot_violations.append("_get_cached_report uses json.loads() instead of SSOT UnifiedJSONSerializer.safe_loads()")
             
             if 'json.dumps(' in cache_result_source:
-                ssot_violations.append("_cache_result uses json.dumps() instead of SSOT UnifiedJSONSerializer.safe_dumps()")
+                ssot_violations.append("_cache_report_result uses json.dumps() instead of SSOT UnifiedJSONSerializer.safe_dumps()")
             
             # THIS TEST MUST FAIL NOW - Direct json usage in cache methods
             self.assertEqual([], ssot_violations,
@@ -152,11 +152,11 @@ class TestReportingAgentSSOTJSONCompliance(unittest.TestCase):
         with open(self.unified_json_handler_path, 'r') as f:
             content = f.read()
         
-        # Check for required SSOT serializer methods
+        # Check for required SSOT serializer methods (actual methods in unified_json_handler)
         required_methods = [
-            'safe_loads',
-            'safe_dumps',
-            'class UnifiedJSONSerializer'
+            'safe_json_loads',
+            'safe_json_dumps', 
+            'class UnifiedJSONHandler'
         ]
         
         missing_methods = []
