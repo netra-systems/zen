@@ -67,16 +67,23 @@ Production incident pressure led to architectural compromises bypassing auth ser
 - ✅ Comprehensive violation inventory working
 - ❌ 1 test failed (some violations may be partially fixed)
 
-### Phase 4: SSOT Remediation Planning (Pending)
-- [ ] Design auth service API calls to replace local JWT logic
-- [ ] Plan WebSocket auth refactor to use auth service exclusively
-- [ ] Create migration strategy for backend JWT removal
+### Phase 4: SSOT Remediation Planning ✅
+- [x] Design auth service API calls to replace local JWT logic
+- [x] Plan WebSocket auth refactor to use auth service exclusively
+- [x] Create migration strategy for backend JWT removal
 
-### Phase 5: SSOT Remediation Execution (Pending)
-- [ ] Remove local JWT decoding from backend
-- [ ] Remove JWT secret management from backend config
-- [ ] Refactor WebSocket auth to use auth service only
-- [ ] Update all callers to use centralized auth
+**Key Plan Elements:**
+- **4-Phase Migration:** Auth API → Integration → Legacy Removal → Cleanup
+- **Circuit Breaker:** Graceful degradation with fallback mechanisms
+- **Performance Optimization:** Caching, connection pooling, rate limiting
+- **Golden Path Protection:** Comprehensive validation at each phase
+- **Zero-Downtime Strategy:** Dual-path validation during migration
+
+### Phase 5: SSOT Remediation Execution (In Progress)
+- [ ] Phase 1: Enhance auth service with JWT validation APIs
+- [ ] Phase 2: Add auth service client integration to backend  
+- [ ] Phase 3: Remove legacy JWT logic incrementally
+- [ ] Phase 4: Final cleanup and SSOT validation
 
 ### Phase 6: Test Fix Loop (Pending)
 - [ ] Run all SSOT validation tests
