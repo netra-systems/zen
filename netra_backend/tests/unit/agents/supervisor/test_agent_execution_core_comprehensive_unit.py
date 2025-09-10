@@ -66,10 +66,45 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
         return tracker
 
     @pytest.fixture
-    def execution_core(self, mock_registry, mock_websocket_bridge, mock_execution_tracker):
+    def mock_state_tracker(self):
+        """Mock agent state tracker for centralized phase tracking."""
+        tracker = AsyncMock()
+        tracker.start_execution = Mock(return_value="mock_state_exec_id")
+        
+        # Configure transition_phase to simulate WebSocket calls for COMPLETED phase
+        async def mock_transition_phase(execution_id, phase, metadata=None, websocket_manager=None):
+            """Mock transition_phase that simulates WebSocket notification behavior."""
+            # Import the enum to compare phases correctly
+            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            
+            # If transitioning to COMPLETED phase and websocket_manager provided,
+            # simulate the automatic notify_agent_completed call that happens in production
+            if phase == AgentExecutionPhase.COMPLETED and websocket_manager:
+                await websocket_manager.notify_agent_completed(
+                    run_id="test-run-id",  # This would be from the actual state in production
+                    agent_name="test_agent",
+                    result={
+                        "success": True,
+                        "total_duration_ms": 1500.0,  # Mock duration
+                        "phase_count": 5,
+                        "warnings": 0,
+                        "metadata": {}
+                    },
+                    execution_time_ms=1500
+                )
+            return True
+        
+        tracker.transition_phase = AsyncMock(side_effect=mock_transition_phase)
+        tracker.complete_execution = Mock()
+        return tracker
+
+    @pytest.fixture
+    def execution_core(self, mock_registry, mock_websocket_bridge, mock_execution_tracker, mock_state_tracker):
         """AgentExecutionCore instance with mocked dependencies."""
-        with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_execution_tracker') as mock_get_tracker:
+        with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_execution_tracker') as mock_get_tracker, \
+             patch('netra_backend.app.agents.supervisor.agent_execution_core.get_agent_state_tracker') as mock_get_state_tracker:
             mock_get_tracker.return_value = mock_execution_tracker
+            mock_get_state_tracker.return_value = mock_state_tracker
             core = AgentExecutionCore(mock_registry, mock_websocket_bridge)
             return core
 
@@ -187,6 +222,16 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             assert mock_websocket_bridge.notify_agent_started.call_count >= 1
             mock_websocket_bridge.notify_agent_completed.assert_called_once()
             
+            # Verify centralized state tracking integration (Issue #161)
+            # State tracker should have been called to transition to COMPLETED phase
+            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            execution_core.state_tracker.transition_phase.assert_any_call(
+                "mock_state_exec_id",  # execution_id returned by start_execution
+                AgentExecutionPhase.COMPLETED,
+                metadata={"result": "success"},  # Fixed: matches actual production code metadata
+                websocket_manager=mock_websocket_bridge
+            )
+            
             # Verify agent was executed with UserExecutionContext (security conversion)
             # NOTE: DeepAgentState gets converted to UserExecutionContext for security compliance
             mock_successful_agent.execute.assert_called_once()
@@ -202,7 +247,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_execute_agent_with_failure(
         self, execution_core, sample_context, sample_state, mock_failing_agent,
-        mock_execution_tracker, mock_websocket_bridge
+        mock_execution_tracker, mock_websocket_bridge, mock_state_tracker
     ):
         """Test agent execution handles failures gracefully."""
         # Setup mocks
@@ -228,8 +273,15 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             call_args = mock_execution_tracker.complete_execution.call_args
             assert "error" in call_args.kwargs or len(call_args.args) > 1
             
-            # Verify error notification sent
-            mock_websocket_bridge.notify_agent_error.assert_called_once()
+            # Verify centralized error notification through state tracker
+            # The state tracker should have transitioned to FAILED phase, which automatically sends error notification
+            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            mock_state_tracker.transition_phase.assert_any_call(
+                mock_state_tracker.start_execution.return_value,
+                AgentExecutionPhase.FAILED,
+                metadata={'error': result.error or 'Unknown error'},
+                websocket_manager=mock_websocket_bridge
+            )
 
     @pytest.mark.asyncio
     async def test_execute_agent_timeout_handling(
@@ -266,7 +318,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_execute_agent_not_found(
-        self, execution_core, sample_context, sample_state, mock_execution_tracker, mock_websocket_bridge
+        self, execution_core, sample_context, sample_state, mock_execution_tracker, mock_websocket_bridge, mock_state_tracker
     ):
         """Test behavior when agent is not found in registry."""
         # Setup registry to return None (agent not found)
@@ -286,8 +338,15 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             assert result.agent_name == "test_agent"
             assert "not found" in result.error.lower()
             
-            # Verify error notification sent
-            mock_websocket_bridge.notify_agent_error.assert_called_once()
+            # Verify centralized error notification through state tracker
+            # The state tracker should have transitioned to FAILED phase, which automatically sends error notification
+            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            mock_state_tracker.transition_phase.assert_any_call(
+                mock_state_tracker.start_execution.return_value,
+                AgentExecutionPhase.FAILED,
+                metadata={"error": "Agent not found"},
+                websocket_manager=mock_websocket_bridge
+            )
 
     @pytest.mark.asyncio
     async def test_execute_with_protection_result_validation(
@@ -386,7 +445,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
         assert combined_metrics["operations"] == 5
         assert combined_metrics["result_success"] is True
         assert combined_metrics["total_duration_seconds"] == 3.5
-        assert "state_size" in combined_metrics
+        assert "context_size" in combined_metrics
 
     def test_get_agent_or_error_success(self, execution_core):
         """Test successful agent retrieval from registry."""
