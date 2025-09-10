@@ -1333,3 +1333,13 @@ gantt
 - $500K+ MRR chat functionality fully operational
 
 **Result**: The Golden Path analysis has **systematically identified all infrastructure barriers** to revenue-protecting user journey functionality and provided a **comprehensive, prioritized remediation roadmap** with clear timelines and success metrics.
+
+---
+
+## Related Infrastructure Fixes
+
+### WebSocket Performance Fix (2025-09-09)
+**Issue Resolved**: WebSocket connections were extremely slow due to blocking `time.sleep()` calls in initialization path.
+**Solution**: Converted to async `await asyncio.sleep()` patterns to eliminate thread blocking.
+**Impact**: Up to 1.2 seconds of blocking eliminated, directly improving Golden Path user experience.
+**Learning Document**: [`SPEC/learnings/websocket_performance_blocking_fix_20250909.xml`](../SPEC/learnings/websocket_performance_blocking_fix_20250909.xml)
