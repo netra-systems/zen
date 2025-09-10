@@ -85,12 +85,40 @@ The codebase uses THREE different LLMManager instantiation patterns simultaneous
 - Need passing baseline before SSOT refactoring
 - WebSocket + multi-user isolation tests require preservation
 
+## New Test Plan (20% of work - 12 Tests)
+
+### Factory Pattern Enforcement Tests (3 tests)
+- `test_llm_manager_factory_pattern_only()` - Fails if direct instantiation found
+- `test_no_deprecated_get_llm_manager()` - Fails if deprecated pattern used  
+- `test_startup_factory_compliance()` - Validates startup uses factory only
+
+### User Isolation Validation Tests (3 tests)
+- `test_user_context_isolation()` - Validates separate instances per user
+- `test_concurrent_user_llm_isolation()` - Tests multi-user scenarios
+- `test_user_conversation_privacy()` - Ensures no conversation mixing
+
+### SSOT Violation Detection Tests (3 tests) 
+- `test_detect_llm_manager_violations()` - Scans for old patterns
+- `test_import_pattern_compliance()` - Validates factory imports only
+- `test_supervisor_factory_llm_ssot()` - Checks WebSocket integration
+
+### Golden Path Protection Tests (3 tests)
+- `test_golden_path_llm_reliability_e2e()` - E2E AI response validation
+- `test_websocket_llm_agent_flow()` - Complete agent execution flow
+- `test_staging_user_isolation_e2e()` - Real staging environment validation
+
+### Test Strategy
+- **Initial Behavior:** Tests FAIL (proving violations exist)
+- **Post-Remediation:** Tests PASS (proving SSOT compliance)
+- **No Docker:** Unit, integration (no Docker), E2E staging only
+- **Business Focus:** Protects $500K+ ARR chat functionality
+
 ## Progress Tracking
 
 **Discovery Phase:** ✅ COMPLETE - Comprehensive violation analysis  
 **Test Discovery Phase:** ✅ COMPLETE - 245 tests analyzed  
-**Test Planning Phase:** 🔄 IN PROGRESS  
-**Test Creation Phase:** ⏳ PENDING  
+**Test Planning Phase:** ✅ COMPLETE - 12 new SSOT tests planned  
+**Test Creation Phase:** 🔄 IN PROGRESS  
 **Remediation Planning:** ⏳ PENDING  
 **Remediation Execution:** ⏳ PENDING  
 **Test Fix Loop:** ⏳ PENDING  
