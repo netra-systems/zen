@@ -2475,10 +2475,8 @@ class WebSocketManagerFactory:
         Returns:
             True if user is connected, False otherwise
         """
-
-                except Exception:
-                    pass
-        return sent_count
+        with self._factory_lock:
+            return user_id in self._active_managers
     
     def get_connection_count(self) -> int:
         """Get connection count (alias for get_active_connections_count)."""
@@ -2509,12 +2507,10 @@ class WebSocketManagerFactory:
     
     def is_user_connected(self, user_id: str) -> bool:
         """Check if user is connected."""
-
         manager = self.get_manager_by_user(user_id)
         return manager is not None and getattr(manager, '_is_active', False)
     
     async def handle_connection(self, websocket: Any) -> str:
-
         """
         Handle a new WebSocket connection.
         
