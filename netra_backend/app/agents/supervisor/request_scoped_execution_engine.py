@@ -26,9 +26,9 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.execution_context_manager import (
-    ExecutionContextManager,
-    RequestExecutionScope
+from netra_backend.app.agents.supervisor.agent_execution_context_manager import (
+    AgentExecutionContextManager as ExecutionContextManager,
+    # RequestExecutionScope,  # This class doesn't exist, commenting out for now
 )
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,

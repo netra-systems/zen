@@ -2073,6 +2073,150 @@ class UnifiedWebSocketManager:
         else:
             logger.warning(f"Connection {validated_connection_id} not found for thread update")
             return False
+    
+    # ============================================================================
+    # SSOT INTERFACE STANDARDIZATION METHODS (Week 1 - Low Risk)
+    # ============================================================================
+    
+    async def broadcast_message(self, message: Dict[str, Any]) -> None:
+        """
+        Broadcast message to all connections.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            message: Message to broadcast to all connections
+        """
+        # Use existing broadcast method
+        await self.broadcast(message)
+    
+    def get_connection_count(self) -> int:
+        """
+        Get total number of connections managed by this instance.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Returns:
+            Total number of active connections
+        """
+        return len(self._connections)
+    
+    async def handle_connection(self, websocket: Any, user_id: Optional[str] = None) -> str:
+        """
+        Handle new WebSocket connection with proper isolation.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            websocket: WebSocket instance to handle
+            user_id: Optional user ID for the connection
+            
+        Returns:
+            Connection ID for the established connection
+        """
+        if not user_id:
+            # Generate a temporary user ID if none provided
+            id_manager = UnifiedIDManager()
+            user_id = id_manager.generate_id(
+                IDType.USER,
+                prefix="temp_user",
+                context={"component": "handle_connection"}
+            )
+        
+        # Use existing connect_user method
+        connection_id = await self.connect_user(user_id, websocket)
+        logger.info(f"🔗 SSOT INTERFACE: Handled connection for user {user_id[:8]}... → {connection_id}")
+        return connection_id
+    
+    async def handle_disconnection(self, user_id: str, websocket: Any = None) -> None:
+        """
+        Handle WebSocket disconnection with proper cleanup.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            user_id: User ID for the disconnecting connection
+            websocket: Optional WebSocket instance being disconnected
+        """
+        if websocket:
+            # Use existing disconnect_user method
+            await self.disconnect_user(user_id, websocket)
+        else:
+            # Disconnect all connections for the user
+            connection_ids = list(self.get_user_connections(user_id))
+            for conn_id in connection_ids:
+                await self.remove_connection(conn_id)
+        
+        logger.info(f"🔌 SSOT INTERFACE: Handled disconnection for user {user_id[:8]}...")
+    
+    async def send_agent_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
+        """
+        Send agent event to user connections.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            user_id: Target user ID (accepts both str and UserID)
+            event_type: Type of agent event
+            data: Event payload data
+        """
+        # Use existing emit_critical_event method
+        await self.emit_critical_event(user_id, event_type, data)
+    
+    async def add_connection_by_user(self, user_id: str, websocket: Any, connection_id: str = None) -> str:
+        """
+        Add connection for a user with optional connection ID.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by SSOT validation tests for connection management.
+        
+        Args:
+            user_id: User identifier
+            websocket: WebSocket instance
+            connection_id: Optional connection ID to use
+            
+        Returns:
+            Connection ID for the added connection
+        """
+        # Use existing connect_user method which handles connection_id properly
+        return await self.connect_user(user_id, websocket, connection_id)
+    
+    async def remove_connection_by_user(self, user_id: str) -> None:
+        """
+        Remove all connections for a specific user.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by SSOT validation tests for user cleanup.
+        
+        Args:
+            user_id: User ID to remove connections for
+        """
+        connection_ids = list(self.get_user_connections(user_id))
+        for conn_id in connection_ids:
+            await self.remove_connection(conn_id)
+        
+        logger.info(f"🗑️ SSOT INTERFACE: Removed all connections for user {user_id[:8]}...")
+    
+    def is_user_connected(self, user_id: Union[str, UserID]) -> bool:
+        """
+        Check if a user is currently connected.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            user_id: User ID to check (accepts both str and UserID)
+            
+        Returns:
+            True if user has active connections, False otherwise
+        """
+        # Use existing is_connection_active method
+        return self.is_connection_active(user_id)
 
 
 # SECURITY FIX: Replace singleton with factory pattern

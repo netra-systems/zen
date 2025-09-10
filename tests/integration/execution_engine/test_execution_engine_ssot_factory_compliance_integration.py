@@ -557,7 +557,7 @@ class TestExecutionEngineSSotFactoryComplianceIntegration(SSotAsyncTestCase):
                 
                 # 5. Engine should have proper metrics/stats capability
                 try:
-                    stats = await engine.get_user_execution_stats()
+                    stats = engine.get_user_execution_stats()
                     assert isinstance(stats, dict), (
                         f"SSOT VIOLATION: Engine stats should be dict, got {type(stats)}"
                     )

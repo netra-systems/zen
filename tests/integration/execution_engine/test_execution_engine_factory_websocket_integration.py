@@ -133,6 +133,13 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
         self.record_metric("websocket_integration_setup_complete", True)
         self.record_metric("websocket_bridge_configured", True)
     
+    @pytest.fixture(autouse=True)
+    async def auto_setup_async(self):
+        """Auto setup fixture to ensure async_setup_method is called."""
+        await self.async_setup_method()
+        yield
+        await self.async_teardown_method()
+    
     async def async_teardown_method(self, method=None):
         """Teardown test with factory cleanup."""
         try:

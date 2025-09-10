@@ -26,35 +26,31 @@ from fastapi.responses import JSONResponse
 
 # Import auth service isolated environment first to handle bootstrap
 from shared.isolated_environment import get_env
+from shared.environment_loading_ssot import StartupEnvironmentManager, AUTH_CONFIG
 
-# CRITICAL: Initialize environment and load .env files using proper environment management
+# CRITICAL: Initialize environment using SSOT implementation
 env = get_env()
+startup_manager = StartupEnvironmentManager(env)
+result = startup_manager.setup_service_environment(AUTH_CONFIG)
 
-# Get environment to decide on .env loading
-environment = env.get('ENVIRONMENT', '').lower()
-if environment in ['staging', 'production', 'prod']:
-    print(f"Running in {environment} - skipping .env file loading (using GSM)")
-else:
-    # Try parent directory first (where main .env is located)  
-    env_path = Path(__file__).parent.parent / ".env"
-    if env_path.exists():
-        load_dotenv(env_path, override=True)  # override=True ensures env vars are set
-        print(f"Loaded environment from: {env_path}")
-        # Verify critical variables are loaded using proper environment management
-        if env.get('SERVICE_SECRET'):
-            print("SERVICE_SECRET successfully loaded from .env")
-        else:
-            print("WARNING: SERVICE_SECRET not found in .env file")
-    else:
-        # Fallback to current directory
-        load_dotenv(override=True)
-        print("Loaded environment from current directory or system")
+# Enhanced verification with dev launcher detection capability
+if result.loaded and env.get('SERVICE_SECRET'):
+    print("SERVICE_SECRET successfully loaded from .env")
+elif not result.loaded and result.dev_launcher_detected:
+    print("Auth Service: Dev launcher environment detected - using pre-configured variables")
+elif not result.loaded and not env.get('SERVICE_SECRET'):
+    print("WARNING: SERVICE_SECRET not found - check environment configuration")
 
 # NOW import auth service modules after environment is properly initialized
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.routes.auth_routes import router as auth_router, oauth_router
 from shared.logging import get_logger, configure_service_logging
 from shared.cors_config_builder import CORSConfigurationBuilder
+
+# Import new JWT SSOT remediation APIs
+from auth_service.auth_core.api.jwt_validation import router as jwt_validation_router
+from auth_service.auth_core.api.websocket_auth import router as websocket_auth_router  
+from auth_service.auth_core.api.service_auth import router as service_auth_router
 
 # Configure unified logging for auth service
 configure_service_logging({
@@ -481,6 +477,11 @@ async def security_and_service_middleware(request: Request, call_next):
 # Include routers without API versioning
 app.include_router(auth_router, prefix="")
 app.include_router(oauth_router, prefix="")
+
+# Include new JWT SSOT remediation APIs
+app.include_router(jwt_validation_router, prefix="")
+app.include_router(websocket_auth_router, prefix="")
+app.include_router(service_auth_router, prefix="")
 
 # Root endpoint
 @app.get("/")

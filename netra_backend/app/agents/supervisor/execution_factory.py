@@ -463,6 +463,48 @@ class ExecutionEngineFactory:
         }
 
 
+class UserExecutionEngineWrapper:
+    """
+    Wrapper that delegates to UserExecutionEngine while maintaining IsolatedExecutionEngine interface.
+    
+    This is part of SSOT remediation Phase 1 - providing backward compatibility
+    while routing all operations through UserExecutionEngine.
+    
+    Business Value: Enables gradual migration to SSOT without breaking existing code
+    """
+    
+    def __init__(self, 
+                 user_engine: UserExecutionEngine,
+                 user_context: UserExecutionContext,
+                 agent_registry: 'AgentRegistry',
+                 websocket_emitter: 'UserWebSocketEmitter',
+                 execution_semaphore: asyncio.Semaphore,
+                 execution_timeout: float,
+                 factory: ExecutionEngineFactory):
+        """Initialize wrapper with UserExecutionEngine delegation."""
+        self.user_engine = user_engine  # Primary engine
+        self.user_context = user_context
+        self.agent_registry = agent_registry
+        self.websocket_emitter = websocket_emitter
+        self.execution_semaphore = execution_semaphore
+        self.execution_timeout = execution_timeout
+        self.factory = factory
+        
+        logger.debug(f"UserExecutionEngineWrapper initialized for user {user_context.user_id} - delegating to UserExecutionEngine")
+    
+    # Delegate all methods to UserExecutionEngine
+    def __getattr__(self, name):
+        """Delegate unknown methods to the wrapped UserExecutionEngine."""
+        return getattr(self.user_engine, name)
+    
+    async def cleanup(self):
+        """Cleanup delegation - call UserExecutionEngine cleanup."""
+        try:
+            await self.user_engine.cleanup()
+        except Exception as e:
+            logger.error(f"Error during UserExecutionEngine cleanup: {e}")
+
+
 class IsolatedExecutionEngine:
     """
     Per-request ExecutionEngine with complete user isolation.
