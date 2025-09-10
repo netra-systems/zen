@@ -1424,6 +1424,7 @@ __all__ = [
     
     # Compatibility aliases
     'RequestScopedToolDispatcher',
+    'WebSocketBridgeAdapter',
     
     # Data models
     'ToolDispatchRequest',
