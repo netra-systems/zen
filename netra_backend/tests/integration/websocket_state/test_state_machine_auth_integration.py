@@ -62,7 +62,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     UnifiedWebSocketAuthenticator,
     WebSocketAuthResult
 )
-from netra_backend.app.websocket_core.message_queue import WebSocketMessageQueue
+from netra_backend.app.websocket_core.utils import WebSocketMessageQueue
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper

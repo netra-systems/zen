@@ -197,8 +197,9 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         execution_core.websocket_bridge.notify_agent_completed.assert_called_once()
         
         # Verify agent was properly called with business context
+        # Note: DeepAgentState is migrated to UserExecutionContext for security, so we use ANY for the first parameter
         successful_agent.execute.assert_called_once_with(
-            business_state, business_context.run_id, True
+            ANY, business_context.run_id, True
         )
         
         # Verify execution tracking for monitoring

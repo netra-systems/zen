@@ -119,6 +119,16 @@ class DataAccessFactory(ABC, Generic[ContextType]):
         """
         pass
     
+    def _ensure_cleanup_task_started(self):
+        """Ensure cleanup task is started when event loop is available."""
+        if self._cleanup_task is None:
+            try:
+                asyncio.get_running_loop()
+                self._start_cleanup_task()
+            except RuntimeError:
+                # Still no event loop - will try again later
+                pass
+    
     async def create_user_context(self, user_context: UserExecutionContext) -> ContextType:
         """
         Create or reuse a user-scoped data context.
@@ -136,6 +146,9 @@ class DataAccessFactory(ABC, Generic[ContextType]):
             ValueError: If user_context is invalid or user exceeds context limit
             ConnectionError: If underlying service is unavailable
         """
+        # Ensure cleanup task is started (lazy initialization)
+        self._ensure_cleanup_task_started()
+        
         # Validate user context first
         if not isinstance(user_context, UserExecutionContext):
             raise ValueError(f"Expected UserExecutionContext, got {type(user_context)}")
@@ -267,9 +280,16 @@ class DataAccessFactory(ABC, Generic[ContextType]):
     
     def _start_cleanup_task(self):
         """Start background cleanup task."""
-        if self._cleanup_task is None or self._cleanup_task.done():
-            self._cleanup_task = asyncio.create_task(self._cleanup_loop())
-            logger.debug(f"[{self.factory_name}] Started cleanup task")
+        try:
+            # Only start task if we have a running event loop
+            asyncio.get_running_loop()
+            if self._cleanup_task is None or self._cleanup_task.done():
+                self._cleanup_task = asyncio.create_task(self._cleanup_loop())
+                logger.debug(f"[{self.factory_name}] Started cleanup task")
+        except RuntimeError:
+            # No event loop running - defer task creation for later
+            logger.debug(f"[{self.factory_name}] No event loop running - cleanup task deferred")
+            self._cleanup_task = None
     
     async def _cleanup_loop(self):
         """Background cleanup loop for expired contexts."""
