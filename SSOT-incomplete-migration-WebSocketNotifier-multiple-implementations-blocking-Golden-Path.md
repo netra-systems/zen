@@ -27,13 +27,18 @@
 - **FILES CREATED**: 4 test files + documentation in `/tests/unit/ssot_validation/` and `/tests/integration/ssot_validation/`
 - **FRAMEWORK**: All tests use proper SSOT test infrastructure, no Docker dependency
 
-### 📋 Step 3: PLAN REMEDIATION (Next)
-- **TODO**: Plan SSOT consolidation strategy based on test findings
-- **TODO**: Define remediation phases and risk mitigation
-- **TODO**: Plan import path standardization approach
-- **TODO**: Plan factory pattern enforcement strategy
+### ✅ Step 3: PLAN REMEDIATION COMPLETE
+- **STRATEGY**: 3-phase approach prioritizing Golden Path protection
+- **PHASE 1**: SSOT consolidation (keep AgentWebSocketBridge.WebSocketNotifier, remove deprecated)
+- **PHASE 2**: Factory pattern enforcement (100% UserWebSocketEmitter-created instances)
+- **PHASE 3**: Risk mitigation with gradual rollout and <30min rollback capability
+- **TARGET**: 214 files → 1 import path, 2 implementations → 1 SSOT, 100% user isolation
 
-### 📋 Step 4: EXECUTE REMEDIATION (Pending)
+### 📋 Step 4: EXECUTE REMEDIATION (Next)
+- **TODO**: Phase 1 - Update 214 import paths to canonical SSOT path
+- **TODO**: Phase 2 - Enforce factory pattern usage (100% UserWebSocketEmitter)
+- **TODO**: Phase 3 - Remove deprecated implementation safely
+- **TODO**: Validate with 70-test suite throughout execution
 
 ### 📋 Step 5: TEST FIX LOOP (Pending)
 

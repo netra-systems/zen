@@ -446,6 +446,7 @@ class TestFactoryPatternIssues(SSotAsyncTestCase):
             # Create and destroy many execution engines to test for leaks
             created_engines = []
             weak_refs = []
+            factory = create_test_factory()  # Use single factory instance
             
             for i in range(50):  # Create many engines to amplify leaks
                 user_id = str(uuid.uuid4())
@@ -456,7 +457,6 @@ class TestFactoryPatternIssues(SSotAsyncTestCase):
                 )
                 
                 # Create engine through factory
-                factory = create_test_factory()
                 engine = await factory.create_for_user(context)
                 created_engines.append(engine)
                 
@@ -467,6 +467,13 @@ class TestFactoryPatternIssues(SSotAsyncTestCase):
                 if hasattr(engine, 'initialize'):
                     await engine.initialize()
             
+            # Clean up engines properly before clearing references
+            for engine in created_engines:
+                try:
+                    await factory.cleanup_engine(engine)
+                except Exception as e:
+                    resource_leak_violations.append(f"Failed to cleanup engine: {e}")
+                    
             # Clear strong references
             created_engines.clear()
             
@@ -664,11 +671,18 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
             execution_success = False
             if execution_engine:
                 try:
-                    # Simulate agent execution
-                    if hasattr(execution_engine, 'execute'):
-                        # Can't actually execute without full setup, but test the interface
+                    # Simulate agent execution - check for actual UserExecutionEngine methods
+                    if hasattr(execution_engine, 'execute_agent'):
+                        # UserExecutionEngine has execute_agent method
+                        execution_success = True
+                    elif hasattr(execution_engine, 'execute_agent_pipeline'):
+                        # UserExecutionEngine also has pipeline execution
+                        execution_success = True
+                    elif hasattr(execution_engine, 'execute'):
+                        # Generic execution method
                         execution_success = True
                     elif hasattr(execution_engine, 'run'):
+                        # Alternative execution method
                         execution_success = True
                     else:
                         golden_path_violations.append(

@@ -614,8 +614,12 @@ class UserExecutionEngine:
             self.agent_core = AgentExecutionCore(registry, websocket_bridge) 
             # Use minimal fallback manager with user context
             self.fallback_manager = MinimalFallbackManager(self.context)
-            self.flow_logger = get_supervisor_flow_logger()
-            self.execution_tracker = get_execution_tracker()
+            
+            # Create NEW instances per user for complete isolation (no shared state)
+            from netra_backend.app.agents.supervisor.observability_flow import SupervisorObservabilityLogger
+            from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
+            self.flow_logger = SupervisorObservabilityLogger(enabled=True)
+            self.execution_tracker = AgentExecutionTracker()
             
             logger.debug(f"Initialized components for UserExecutionEngine {self.engine_id}")
             

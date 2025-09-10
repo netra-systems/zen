@@ -22,7 +22,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
 )
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine as ExecutionEngine
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
 # Import ExecutionEngine dependencies for _init_from_factory

@@ -119,13 +119,19 @@ class UnifiedConfigManager:
                         self._logger.info("Loaded SERVICE_SECRET through UnifiedConfigurationManager SSOT")
                 except Exception as e:
                     self._logger.error(f"SSOT configuration access failed: {e}")
-                    # Emergency fallback with critical logging
-                    from shared.isolated_environment import get_env
-                    env = get_env()
-                    service_secret = env.get('SERVICE_SECRET')
-                    if service_secret:
-                        config.service_secret = service_secret.strip()
-                        self._logger.warning("Used emergency fallback for SERVICE_SECRET - SSOT access failed")
+                    # SSOT COMPLIANT: Use UnifiedConfigurationManager even in fallback
+                    try:
+                        # Try alternative SSOT access method
+                        from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+                        fallback_manager = UnifiedConfigurationManager()
+                        service_secret = fallback_manager.get_str('SERVICE_SECRET')
+                        if service_secret:
+                            config.service_secret = service_secret.strip()
+                            self._logger.warning("Used SSOT fallback UnifiedConfigurationManager for SERVICE_SECRET")
+                    except Exception as fallback_error:
+                        self._logger.critical(f"Both primary and fallback SSOT access failed: {fallback_error}")
+                        # SSOT COMPLIANT: Log critical failure but don't bypass SSOT
+                        # This maintains SSOT compliance even if configuration is unavailable
                     
             # DEFENSIVE FIX: Ensure service_id is also sanitized from environment
             # This prevents header value issues from Windows line endings or whitespace

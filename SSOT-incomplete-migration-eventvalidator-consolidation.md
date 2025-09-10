@@ -59,6 +59,11 @@
 - ✅ Real services integration (no mocks in E2E tests)
 
 ### 🔄 3) PLAN REMEDIATION OF SSOT (IN_PROGRESS)
+- [ ] Analyze current EventValidator implementations and dependencies
+- [ ] Create migration strategy for 25+ duplicate EventValidators
+- [ ] Plan SSOT target implementation design
+- [ ] Define migration order and risk mitigation
+- [ ] Plan testing approach during migration
 ### ⏸️ 4) EXECUTE THE REMEDIATION SSOT PLAN
 ### ⏸️ 5) ENTER TEST FIX LOOP
 ### ⏸️ 6) PR AND CLOSURE

@@ -176,11 +176,9 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         
         # Log successful Golden Path completion
         total_duration = time.time() - auth_start_time
-        self.log_test_success(
-            "golden_path_auth_circuit_breaker_preservation",
-            f"Complete Golden Path flow succeeded in {total_duration:.2f}s: "
-            f"auth({auth_duration:.2f}s) + websocket({websocket_duration:.2f}s) + agent({agent_duration:.2f}s)"
-        )
+        # Success: Complete Golden Path flow preserved during SSOT migration
+        print(f"✅ GOLDEN PATH PRESERVED: Complete flow succeeded in {total_duration:.2f}s: "
+              f"auth({auth_duration:.2f}s) + websocket({websocket_duration:.2f}s) + agent({agent_duration:.2f}s)")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -239,11 +237,9 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         
         assert success_count >= 2, f"Should succeed consistently after recovery, got {success_count}/3"
         
-        self.log_test_success(
-            "auth_circuit_breaker_failure_recovery",
-            f"Auth circuit breaker properly handled {failures_caught} failures and recovered, "
-            f"allowing {success_count}/3 subsequent successful authentications"
-        )
+        # Success: Auth circuit breaker failure recovery preserved during SSOT migration
+        print(f"✅ FAILURE RECOVERY VERIFIED: Circuit breaker handled {failures_caught} failures and recovered, "
+              f"allowing {success_count}/3 subsequent successful authentications")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -292,11 +288,9 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         time_variance = max_time - min_time
         assert time_variance < 0.1, f"Time variance {time_variance:.3f}s should be < 0.1s (consistent performance)"
         
-        self.log_test_success(
-            "auth_circuit_breaker_performance_impact",
-            f"Auth circuit breaker adds minimal overhead: avg={avg_time:.3f}s, "
-            f"max={max_time:.3f}s, variance={time_variance:.3f}s over 10 calls"
-        )
+        # Success: Auth circuit breaker performance impact minimal after SSOT migration
+        print(f"✅ PERFORMANCE VERIFIED: Circuit breaker adds minimal overhead: avg={avg_time:.3f}s, "
+              f"max={max_time:.3f}s, variance={time_variance:.3f}s over 10 calls")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -361,8 +355,6 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         final_result = await state_breaker.call(intermittent_auth_service)
         assert final_result["valid"] is True, "Final call should succeed"
         
-        self.log_test_success(
-            "auth_circuit_breaker_state_transitions",
-            f"Circuit breaker handled intermittent pattern: {success_count} successes, "
-            f"{failure_count} handled failures, final state operational"
-        )
+        # Success: Auth circuit breaker state transitions preserved during SSOT migration
+        print(f"✅ STATE TRANSITIONS VERIFIED: Circuit breaker handled intermittent pattern: {success_count} successes, "
+              f"{failure_count} handled failures, final state operational")

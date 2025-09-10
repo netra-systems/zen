@@ -24,6 +24,7 @@ Business Value Justification (BVJ):
 import ast
 import asyncio
 import inspect
+import logging
 import os
 import re
 import uuid
@@ -70,6 +71,11 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
     # Security violation thresholds
     SINGLETON_VIOLATION_THRESHOLD = 100  # Current state tolerance
     TARGET_SINGLETON_VIOLATIONS = 0     # Final security goal
+    
+    @property
+    def logger(self):
+        """Get logger for this test class."""
+        return logging.getLogger(self.__class__.__name__)
     
     # Singleton patterns (SECURITY VIOLATIONS)
     SINGLETON_PATTERNS = [

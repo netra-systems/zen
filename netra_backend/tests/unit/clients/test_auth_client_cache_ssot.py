@@ -200,10 +200,8 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert expected_breaker_name in auth_cb_manager._breakers
         assert auth_cb_manager._breakers[expected_breaker_name] is mock_breaker_instance
         
-        self.log_test_success(
-            "auth_circuit_breaker_call_with_breaker_delegation",
-            f"call_with_breaker properly delegates to UnifiedCircuitBreaker.call() with breaker name: {expected_breaker_name}"
-        )
+        # Success: call_with_breaker properly delegates to UnifiedCircuitBreaker.call()
+        print(f"✅ CALL_WITH_BREAKER DELEGATION VERIFIED: Proper delegation with breaker name: {expected_breaker_name}")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -248,13 +246,9 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
             # Validate config name matches requested name
             assert config.name == "auth_config_test"
             
-            self.log_test_success(
-                "auth_circuit_breaker_config_mapping",
-                f"AuthCircuitBreakerManager properly maps config with "
-                f"failure_threshold={config.failure_threshold}, "
-                f"recovery_timeout={config.recovery_timeout}, "
-                f"timeout_seconds={config.timeout_seconds}"
-            )
+            # Success: AuthCircuitBreakerManager properly maps config to UnifiedCircuitConfig
+            print(f"✅ CONFIG MAPPING VERIFIED: failure_threshold={config.failure_threshold}, "
+                  f"recovery_timeout={config.recovery_timeout}, timeout_seconds={config.timeout_seconds}")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -281,7 +275,5 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
             # Verify the call was attempted on the breaker
             mock_breaker.call.assert_called_once_with(failing_auth_function)
             
-            self.log_test_success(
-                "auth_circuit_breaker_error_handling_delegation",
-                "AuthCircuitBreakerManager properly delegates error handling to UnifiedCircuitBreaker"
-            )
+            # Success: AuthCircuitBreakerManager properly delegates error handling to UnifiedCircuitBreaker
+            print(f"✅ ERROR HANDLING DELEGATION VERIFIED: Exception propagation through UnifiedCircuitBreaker works correctly")

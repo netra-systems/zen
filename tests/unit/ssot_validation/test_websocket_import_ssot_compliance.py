@@ -22,6 +22,7 @@ Business Value Justification (BVJ):
 import ast
 import os
 import re
+import logging
 from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
 from dataclasses import dataclass
@@ -64,6 +65,11 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
     # Expected violation thresholds (adjust as remediation progresses)
     CURRENT_VIOLATION_THRESHOLD = 593  # Start with current state
     TARGET_VIOLATION_THRESHOLD = 50   # Phase 1 goal
+    
+    @property
+    def logger(self):
+        """Get logger for this test class."""
+        return logging.getLogger(self.__class__.__name__)
     
     # Canonical import patterns (ALLOWED)
     CANONICAL_IMPORT_PATTERNS = [

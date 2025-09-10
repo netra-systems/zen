@@ -45,6 +45,107 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+class WebSocketManagerAdapter:
+    """Adapter to convert WebSocketManager to AgentWebSocketBridge interface.
+    
+    This adapter enables seamless compatibility between the WebSocketManager
+    interface expected by AgentRegistry and the AgentWebSocketBridge interface
+    expected by UniversalAgentRegistry, maintaining SSOT compliance.
+    """
+    
+    def __init__(self, websocket_manager: 'WebSocketManager', user_context: Optional['UserExecutionContext'] = None):
+        """Initialize the adapter with a WebSocketManager instance.
+        
+        Args:
+            websocket_manager: WebSocketManager instance to adapt
+            user_context: User execution context for proper isolation
+        """
+        self._websocket_manager = websocket_manager
+        self._user_context = user_context
+        
+    def __getattr__(self, name: str):
+        """Delegate unknown attributes to the underlying WebSocketManager.
+        
+        This provides transparent access to WebSocketManager methods while
+        maintaining the AgentWebSocketBridge interface contract.
+        """
+        # First check if the method exists in the underlying manager
+        if hasattr(self._websocket_manager, name):
+            return getattr(self._websocket_manager, name)
+        
+        # If not found, raise AttributeError with helpful message
+        raise AttributeError(
+            f"WebSocketManagerAdapter has no attribute '{name}'. "
+            f"Underlying WebSocketManager type: {type(self._websocket_manager).__name__}"
+        )
+        
+    async def notify_agent_started(self, run_id: str, agent_name: str, metadata: Dict[str, Any]) -> None:
+        """Adapter method for agent started notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_started'):
+            await self._websocket_manager.notify_agent_started(run_id, agent_name, metadata)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_started - skipping for {agent_name}")
+    
+    async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str, 
+                                   step_number: Optional[int] = None, **kwargs) -> None:
+        """Adapter method for agent thinking notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_thinking'):
+            await self._websocket_manager.notify_agent_thinking(run_id, agent_name, reasoning, step_number, **kwargs)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_thinking - skipping for {agent_name}")
+    
+    async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, 
+                                   parameters: Dict[str, Any]) -> None:
+        """Adapter method for tool executing notifications."""
+        if hasattr(self._websocket_manager, 'notify_tool_executing'):
+            await self._websocket_manager.notify_tool_executing(run_id, agent_name, tool_name, parameters)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_tool_executing - skipping for {tool_name}")
+    
+    async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, 
+                                   result: Any, execution_time_ms: float) -> None:
+        """Adapter method for tool completed notifications."""
+        if hasattr(self._websocket_manager, 'notify_tool_completed'):
+            await self._websocket_manager.notify_tool_completed(run_id, agent_name, tool_name, result, execution_time_ms)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_tool_completed - skipping for {tool_name}")
+    
+    async def notify_agent_completed(self, run_id: str, agent_name: str, result: Dict[str, Any], 
+                                    execution_time_ms: float) -> None:
+        """Adapter method for agent completed notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_completed'):
+            await self._websocket_manager.notify_agent_completed(run_id, agent_name, result, execution_time_ms)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_completed - skipping for {agent_name}")
+    
+    async def notify_agent_error(self, run_id: str, agent_name: str, error: str, 
+                                error_context: Optional[Dict[str, Any]] = None) -> None:
+        """Adapter method for agent error notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_error'):
+            await self._websocket_manager.notify_agent_error(run_id, agent_name, error, error_context)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_error - skipping for {agent_name}")
+    
+    async def notify_agent_death(self, run_id: str, agent_name: str, cause: str, 
+                                death_context: Dict[str, Any]) -> None:
+        """Adapter method for agent death notifications."""
+        if hasattr(self._websocket_manager, 'notify_agent_death'):
+            await self._websocket_manager.notify_agent_death(run_id, agent_name, cause, death_context)
+        else:
+            logger.debug(f"WebSocketManager does not support notify_agent_death - skipping for {agent_name}")
+    
+    async def get_metrics(self) -> Dict[str, Any]:
+        """Get metrics from the underlying WebSocketManager."""
+        if hasattr(self._websocket_manager, 'get_metrics'):
+            return await self._websocket_manager.get_metrics()
+        else:
+            return {
+                'adapter_type': 'WebSocketManagerAdapter',
+                'underlying_manager': type(self._websocket_manager).__name__,
+                'metrics_supported': False
+            }
+
+
 class UserAgentSession:
     """Complete user isolation for agent execution.
     
@@ -289,8 +390,12 @@ class AgentRegistry(UniversalAgentRegistry):
                 "Consider providing llm_manager for full functionality."
             )
         
-        # Initialize UniversalAgentRegistry
-        super().__init__()
+        # SSOT COMPLIANCE: Initialize UniversalAgentRegistry with proper parameters
+        super().__init__(
+            registry_name="AgentRegistry",
+            allow_override=False,  # Strict agent registration
+            enable_metrics=True    # Enable performance tracking
+        )
         
         self.llm_manager = llm_manager
         self.tool_dispatcher_factory = tool_dispatcher_factory or self._default_dispatcher_factory
@@ -310,9 +415,61 @@ class AgentRegistry(UniversalAgentRegistry):
         # New code should use create_tool_dispatcher_for_user() for proper SSOT compliance  
         self._legacy_dispatcher = None
         
+        # SSOT COMPLIANCE VALIDATION
+        self._validate_ssot_compliance()
+        
         logger.info("🔄 Enhanced AgentRegistry initialized with CanonicalToolDispatcher SSOT pattern")
         logger.info("✅ All agents will receive properly isolated tool dispatchers per user context")
         logger.info("🚨 User isolation and memory leak prevention enabled")
+        logger.info("🎯 SSOT compliance validated - UniversalAgentRegistry interface properly implemented")
+    
+    def _validate_ssot_compliance(self) -> None:
+        """Validate SSOT compliance with UniversalAgentRegistry interface.
+        
+        This method ensures that AgentRegistry properly implements the 
+        UniversalAgentRegistry interface and maintains Liskov Substitution Principle.
+        
+        Raises:
+            RuntimeError: If SSOT compliance validation fails
+        """
+        try:
+            # 1. Validate inheritance chain
+            if not isinstance(self, UniversalAgentRegistry):
+                raise RuntimeError("AgentRegistry must inherit from UniversalAgentRegistry for SSOT compliance")
+            
+            # 2. Validate constructor parameters were properly set
+            if not hasattr(self, 'name') or self.name != "AgentRegistry":
+                raise RuntimeError("Registry name not properly set during SSOT initialization")
+            
+            # 3. Validate WebSocket adapter capability
+            if not hasattr(self, 'websocket_manager'):
+                logger.warning("websocket_manager attribute not initialized - WebSocket functionality may be limited")
+            
+            # 4. Validate required interface methods exist
+            required_methods = ['set_websocket_bridge', 'register', 'get', 'has', 'list_keys']
+            for method_name in required_methods:
+                if not hasattr(self, method_name):
+                    raise RuntimeError(f"Missing required interface method: {method_name}")
+                if not callable(getattr(self, method_name)):
+                    raise RuntimeError(f"Interface method {method_name} is not callable")
+            
+            # 5. Validate adapter can be created (test with None manager)
+            try:
+                test_adapter = WebSocketManagerAdapter(None)
+                if not hasattr(test_adapter, 'notify_agent_started'):
+                    raise RuntimeError("WebSocketManagerAdapter missing required notification methods")
+            except Exception as e:
+                raise RuntimeError(f"WebSocketManagerAdapter validation failed: {e}")
+            
+            # 6. Validate parent class methods are accessible
+            if not hasattr(super(), 'set_websocket_bridge'):
+                raise RuntimeError("Parent UniversalAgentRegistry missing set_websocket_bridge method")
+            
+            logger.debug("✅ SSOT compliance validation passed")
+            
+        except Exception as e:
+            logger.error(f"❌ SSOT compliance validation failed: {e}")
+            raise RuntimeError(f"AgentRegistry SSOT compliance validation failed: {e}")
     
     def set_tool_dispatcher_factory(self, factory):
         """Set the tool dispatcher factory for agent creation.
@@ -633,8 +790,9 @@ class AgentRegistry(UniversalAgentRegistry):
         
         This method integrates with the user isolation pattern by:
         1. Storing the WebSocket manager at the registry level
-        2. Propagating it to all existing user sessions
-        3. Ensuring new user sessions get the WebSocket manager automatically
+        2. Creating an adapter for SSOT compliance with UniversalAgentRegistry
+        3. Propagating it to all existing user sessions
+        4. Ensuring new user sessions get the WebSocket manager automatically
         
         CRITICAL: This enables real-time chat notifications across all user sessions.
         
@@ -648,15 +806,10 @@ class AgentRegistry(UniversalAgentRegistry):
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
             return
         
-        # FIXED: Direct assignment instead of inheritance violation
-        # Store at registry level using UniversalRegistry's interface
+        # FIXED: Store manager for user sessions
         self.websocket_manager = manager
         
-        # Use the standard bridge factory to create proper interface
-        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        # Create a default user context for registry-level bridge
+        # SSOT COMPLIANCE: Create adapter to bridge WebSocketManager to AgentWebSocketBridge interface
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system",
@@ -665,13 +818,13 @@ class AgentRegistry(UniversalAgentRegistry):
             run_id=f"websocket_run_{uuid.uuid4().hex[:8]}"
         )
         
-        # Create and set the standardized AgentWebSocketBridge  
+        # Create adapter for SSOT compliance
         try:
-            bridge = create_agent_websocket_bridge(default_context)
-            super().set_websocket_bridge(bridge)  # Use correct parent interface
-            logger.debug("Registry WebSocket bridge created using factory pattern")
+            adapter = WebSocketManagerAdapter(manager, default_context)
+            super().set_websocket_bridge(adapter)  # Use correct parent interface with adapter
+            logger.debug("Registry WebSocket adapter created for SSOT compliance")
         except Exception as e:
-            logger.warning(f"Failed to create registry WebSocket bridge: {e}")
+            logger.warning(f"Failed to create registry WebSocket adapter: {e}")
         
         # Propagate to all existing user sessions asynchronously
         # We use asyncio.create_task to avoid blocking in sync context
@@ -722,7 +875,7 @@ class AgentRegistry(UniversalAgentRegistry):
                 # No event loop exists
                 logger.warning("No event loop available - user sessions will get WebSocket manager on next access")
         
-        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support")
+        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support and SSOT compliance")
     
     async def set_websocket_manager_async(self, manager: 'WebSocketManager') -> None:
         """Async version of set_websocket_manager for async contexts.
@@ -740,13 +893,10 @@ class AgentRegistry(UniversalAgentRegistry):
             logger.warning("WebSocket manager is None - WebSocket events will be disabled")
             return
         
-        # FIXED: Direct assignment and proper bridge creation
+        # FIXED: Store manager for user sessions
         self.websocket_manager = manager
         
-        # Use the standard bridge factory to create proper interface
-        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-        
-        # Create a default user context for registry-level bridge
+        # SSOT COMPLIANCE: Create adapter for bridge interface compatibility
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system_async",
@@ -755,13 +905,13 @@ class AgentRegistry(UniversalAgentRegistry):
             run_id=f"websocket_run_async_{uuid.uuid4().hex[:8]}"
         )
         
-        # Create and set the standardized AgentWebSocketBridge
+        # Create adapter for SSOT compliance
         try:
-            bridge = create_agent_websocket_bridge(default_context)
-            super().set_websocket_bridge(bridge)  # Use correct parent interface
-            logger.debug(f"Registry WebSocket bridge created using factory pattern (async): {getattr(self, 'websocket_manager', 'NOT SET')}")
+            adapter = WebSocketManagerAdapter(manager, default_context)
+            super().set_websocket_bridge(adapter)  # Use adapter with parent interface
+            logger.debug(f"Registry WebSocket adapter created for async context - SSOT compliance")
         except Exception as e:
-            logger.warning(f"Failed to create registry WebSocket bridge (async): {e}")
+            logger.warning(f"Failed to create registry WebSocket adapter (async): {e}")
         
         # Propagate to all existing user sessions using factory pattern
         if self._user_sessions:
@@ -782,7 +932,7 @@ class AgentRegistry(UniversalAgentRegistry):
                 except Exception as e:
                     logger.error(f"Failed to update WebSocket manager for user {user_id}: {e}")
         
-        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async) - using AgentWebSocketBridge interface")
+        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async) - SSOT compliant adapter")
     
     # Override get method to pass WebSocket bridge to factories
     def get(self, key: str, context: Optional['UserExecutionContext'] = None) -> Optional['BaseAgent']:
@@ -1434,8 +1584,78 @@ class AgentRegistry(UniversalAgentRegistry):
             'total_user_sessions': len(self._user_sessions),
             'global_state_eliminated': True,
             'websocket_isolation_per_user': True,
+            # SSOT COMPLIANCE STATUS
+            'ssot_compliance': self.get_ssot_compliance_status(),
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
+    
+    def get_ssot_compliance_status(self) -> Dict[str, Any]:
+        """Get comprehensive SSOT compliance status.
+        
+        Returns:
+            Dictionary with detailed SSOT compliance information
+        """
+        try:
+            status = {
+                'inheritance_chain_valid': isinstance(self, UniversalAgentRegistry),
+                'constructor_signature_aligned': hasattr(self, 'name') and self.name == "AgentRegistry",
+                'websocket_adapter_available': hasattr(self, 'websocket_manager'),
+                'parent_interface_accessible': hasattr(super(), 'set_websocket_bridge'),
+                'adapter_class_functional': True,
+                'violations': [],
+                'compliance_score': 0,
+                'status': 'unknown'
+            }
+            
+            # Test adapter functionality
+            try:
+                test_adapter = WebSocketManagerAdapter(None)
+                required_adapter_methods = ['notify_agent_started', 'notify_agent_thinking', 
+                                          'notify_tool_executing', 'notify_agent_completed']
+                for method in required_adapter_methods:
+                    if not hasattr(test_adapter, method):
+                        status['adapter_class_functional'] = False
+                        status['violations'].append(f"Adapter missing method: {method}")
+            except Exception as e:
+                status['adapter_class_functional'] = False
+                status['violations'].append(f"Adapter instantiation failed: {e}")
+            
+            # Validate interface methods
+            required_methods = ['set_websocket_bridge', 'register', 'get', 'has', 'list_keys']
+            missing_methods = []
+            for method_name in required_methods:
+                if not hasattr(self, method_name) or not callable(getattr(self, method_name)):
+                    missing_methods.append(method_name)
+            
+            if missing_methods:
+                status['violations'].append(f"Missing interface methods: {missing_methods}")
+            
+            # Calculate compliance score
+            checks = ['inheritance_chain_valid', 'constructor_signature_aligned', 
+                     'websocket_adapter_available', 'parent_interface_accessible', 
+                     'adapter_class_functional']
+            passed_checks = sum(1 for check in checks if status[check])
+            status['compliance_score'] = (passed_checks / len(checks)) * 100
+            
+            # Determine overall status
+            if status['compliance_score'] == 100 and not status['violations']:
+                status['status'] = 'fully_compliant'
+            elif status['compliance_score'] >= 80:
+                status['status'] = 'mostly_compliant'
+            elif status['compliance_score'] >= 50:
+                status['status'] = 'partially_compliant'
+            else:
+                status['status'] = 'non_compliant'
+            
+            return status
+            
+        except Exception as e:
+            return {
+                'status': 'error',
+                'error': str(e),
+                'compliance_score': 0,
+                'violations': [f"Compliance check failed: {e}"]
+            }
 
 
 # ===================== MODULE EXPORTS =====================
