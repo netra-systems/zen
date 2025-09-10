@@ -178,7 +178,7 @@ class TestMultiAgentCoordinationNeverFail(SSotBaseTestCase):
             
             # Use factory method for proper isolation
             from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcherFactory
-            self.tool_dispatcher = await UnifiedToolDispatcherFactory.create_for_request(user_context)
+            self.tool_dispatcher = UnifiedToolDispatcherFactory.create_for_request(user_context)
             
         except Exception as e:
             # If factory fails, this exposes a coordination setup issue

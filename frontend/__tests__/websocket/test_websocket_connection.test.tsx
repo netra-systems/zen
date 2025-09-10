@@ -626,6 +626,17 @@ describe('WebSocket Connection Tests - Mission Critical', () => {
         />
       );
 
+      // CRITICAL: Ensure WebSocket is disconnected first
+      const disconnectButton = screen.getByTestId('disconnect-button');
+      await act(async () => {
+        await userEvent.click(disconnectButton);
+      });
+
+      // Wait for disconnection to complete
+      await waitFor(() => {
+        expect(screen.getByTestId('connection-status')).toHaveTextContent('disconnected');
+      });
+
       const sendButton = screen.getByTestId('send-message-button');
 
       // Try to send message while disconnected

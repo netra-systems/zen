@@ -16,8 +16,8 @@ CRITICAL TESTING REQUIREMENTS:
 
 This test suite validates the WebSocket Connection State Machine business logic:
 - ApplicationConnectionState enum and state definitions
-- ConnectionStateTransition atomic operations
-- WebSocketConnectionStateMachine thread-safe state management
+- StateTransitionInfo atomic operations
+- ConnectionStateMachine thread-safe state management
 - State validation and transition rules enforcement
 - Error handling and rollback mechanisms
 - Performance metrics and state timing tracking
@@ -52,10 +52,8 @@ from unittest.mock import Mock, patch
 # SSOT Imports - Using absolute imports only
 from netra_backend.app.websocket_core.connection_state_machine import (
     ApplicationConnectionState,
-    ConnectionStateTransition,
-    WebSocketConnectionStateMachine,
-    ConnectionStateValidator,
-    StateTransitionError
+    StateTransitionInfo,
+    ConnectionStateMachine
 )
 from shared.types.core_types import ConnectionID, UserID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
@@ -241,7 +239,7 @@ class TestConnectionStateTransition(SSotBaseTestCase):
     def test_atomic_state_transition_execution(self):
         """Test atomic state transition execution prevents race conditions."""
         # Create state machine for testing
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -270,7 +268,7 @@ class TestConnectionStateTransition(SSotBaseTestCase):
     
     def test_concurrent_state_transition_thread_safety(self):
         """Test concurrent state transitions maintain thread safety."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -336,7 +334,7 @@ class TestConnectionStateTransition(SSotBaseTestCase):
     
     def test_state_transition_validation_rules(self):
         """Test state transition validation enforces business rules."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -370,7 +368,7 @@ class TestConnectionStateTransition(SSotBaseTestCase):
     
     def test_invalid_state_transition_rejection(self):
         """Test invalid state transitions are properly rejected."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -405,7 +403,7 @@ class TestConnectionStateTransition(SSotBaseTestCase):
     
     def test_state_transition_error_handling_and_rollback(self):
         """Test state transition error handling and rollback mechanisms."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -437,7 +435,7 @@ class TestConnectionStateTransition(SSotBaseTestCase):
     
     def test_state_transition_timing_and_performance_metrics(self):
         """Test state transition timing and performance metrics collection."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -471,9 +469,9 @@ class TestConnectionStateTransition(SSotBaseTestCase):
 
 
 @pytest.mark.unit
-class TestWebSocketConnectionStateMachine(SSotBaseTestCase):
+class TestConnectionStateMachine(SSotBaseTestCase):
     """
-    Unit tests for WebSocketConnectionStateMachine core business logic.
+    Unit tests for ConnectionStateMachine core business logic.
     
     CRITICAL: These tests validate the state machine maintains consistent state
     across concurrent operations and properly coordinates message queuing.
@@ -493,8 +491,8 @@ class TestWebSocketConnectionStateMachine(SSotBaseTestCase):
         self.user_id = ensure_user_id("test_user_state")
     
     def test_websocket_connection_state_machine_initialization(self):
-        """Test WebSocketConnectionStateMachine initializes correctly."""
-        state_machine = WebSocketConnectionStateMachine(
+        """Test ConnectionStateMachine initializes correctly."""
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -513,7 +511,7 @@ class TestWebSocketConnectionStateMachine(SSotBaseTestCase):
     
     def test_thread_safe_state_access_and_modification(self):
         """Test thread-safe state access and modification under concurrent load."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -570,7 +568,7 @@ class TestWebSocketConnectionStateMachine(SSotBaseTestCase):
     
     def test_message_queuing_coordination_during_state_changes(self):
         """Test message queuing coordination during state transitions."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -619,7 +617,7 @@ class TestWebSocketConnectionStateMachine(SSotBaseTestCase):
     
     def test_state_validation_and_consistency_checks(self):
         """Test state validation and consistency checking mechanisms."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -648,7 +646,7 @@ class TestWebSocketConnectionStateMachine(SSotBaseTestCase):
     
     def test_error_recovery_and_state_restoration(self):
         """Test error recovery and state restoration mechanisms."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         
@@ -688,7 +686,7 @@ class TestWebSocketConnectionStateMachine(SSotBaseTestCase):
     
     def test_state_machine_lifecycle_management(self):
         """Test state machine lifecycle management and cleanup."""
-        state_machine = WebSocketConnectionStateMachine(
+        state_machine = ConnectionStateMachine(
             connection_id=self.connection_id
         )
         

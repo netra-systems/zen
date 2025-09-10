@@ -1,43 +1,26 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-09 17:40:17
+**Generated:** 2025-09-09 17:41:19
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 6
-- **Passed:** 6 (100.0%)
+- **Total Tests:** 0
+- **Passed:** 0 (0.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 1.39 seconds
-- **Pass Rate:** 100.0%
+- **Duration:** 0.87 seconds
+- **Pass Rate:** 0.0%
 
 ## Test Results by Priority
-
-### NORMAL Priority Tests
-
-| Test Name | Status | Duration | File |
-|-----------|--------|----------|------|
-| test_basic_functionality | PASS passed | 0.147s | test_6_failure_recovery_staging.py |
-| test_failure_detection | PASS passed | 0.000s | test_6_failure_recovery_staging.py |
-| test_retry_strategies | PASS passed | 0.000s | test_6_failure_recovery_staging.py |
-| test_circuit_breaker | PASS passed | 0.000s | test_6_failure_recovery_staging.py |
-| test_graceful_degradation | PASS passed | 0.000s | test_6_failure_recovery_staging.py |
-| test_recovery_metrics | PASS passed | 0.000s | test_6_failure_recovery_staging.py |
 
 ## Pytest Output Format
 
 ```
-test_6_failure_recovery_staging.py::test_basic_functionality PASSED
-test_6_failure_recovery_staging.py::test_failure_detection PASSED
-test_6_failure_recovery_staging.py::test_retry_strategies PASSED
-test_6_failure_recovery_staging.py::test_circuit_breaker PASSED
-test_6_failure_recovery_staging.py::test_graceful_degradation PASSED
-test_6_failure_recovery_staging.py::test_recovery_metrics PASSED
 
 ==================================================
-6 passed, 0 failed in 1.39s
+0 passed, 0 failed in 0.87s
 ```
 
 ## Test Coverage Matrix
