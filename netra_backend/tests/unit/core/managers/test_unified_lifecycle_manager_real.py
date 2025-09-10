@@ -30,8 +30,8 @@ from test_framework.isolated_environment_fixtures import isolated_env, test_env
 
 # Import the REAL UnifiedLifecycleManager
 from netra_backend.app.core.managers.unified_lifecycle_manager import (
-    UnifiedLifecycleManager,
-    LifecycleManagerFactory,
+    SystemLifecycle as UnifiedLifecycleManager,  # Use new name with backward compatibility alias
+    SystemLifecycleFactory as LifecycleManagerFactory,  # Use new name with backward compatibility alias
     LifecyclePhase,
     ComponentType,
     ComponentStatus,

@@ -14,8 +14,8 @@ from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 from starlette.middleware.sessions import SessionMiddleware
 
-from netra_backend.app.core.app_factory import create_app, _install_auth_context_middleware
-from netra_backend.app.core.middleware_setup import setup_middleware as ssot_setup_middleware
+from netra_backend.app.core.app_factory import create_app
+from netra_backend.app.core.middleware_setup import setup_middleware as ssot_setup_middleware, setup_gcp_auth_context_middleware
 from netra_backend.app.middleware.gcp_auth_context_middleware import GCPAuthContextMiddleware
 
 

@@ -17,7 +17,7 @@ from .user_types import UserBase, UserInfo, UserCreate, UserUpdate, ExtendedUser
 # Core strongly-typed identifiers (prevents ID mixing bugs)
 from .core_types import (
     UserID, ThreadID, RunID, RequestID, WebSocketID, AgentID, ExecutionID,
-    SessionID, TokenString, ConnectionID, DatabaseSessionID, ContextID, MessageID,
+    SessionID, TokenString, ConnectionID, DatabaseSessionID, ContextID, MessageID, OrganizationID,
     # Validation utilities
     ensure_user_id, ensure_thread_id, ensure_run_id, ensure_request_id, ensure_websocket_id,
     # Authentication types
@@ -61,7 +61,7 @@ __all__ = [
     
     # Core typed identifiers - CRITICAL for type safety
     "UserID", "ThreadID", "RunID", "RequestID", "WebSocketID", "AgentID", "ExecutionID",
-    "SessionID", "TokenString", "ConnectionID", "DatabaseSessionID", "ContextID", "MessageID",
+    "SessionID", "TokenString", "ConnectionID", "DatabaseSessionID", "ContextID", "MessageID", "OrganizationID",
     
     # Validation utilities
     "ensure_user_id", "ensure_thread_id", "ensure_run_id", "ensure_request_id", "ensure_websocket_id",

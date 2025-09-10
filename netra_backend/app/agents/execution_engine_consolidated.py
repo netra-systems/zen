@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
 
@@ -51,8 +53,6 @@ Business Value:
 - Preserves all WebSocket notifications for chat UX
 - 60% reduction in duplicated execution logic
 """
-
-from __future__ import annotations
 
 import asyncio
 import time
