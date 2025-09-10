@@ -209,7 +209,7 @@ class GCPWebSocketInitializationValidator:
             self.logger.debug(f"Database readiness check failed: {e}")
             return False
     
-    def _validate_redis_readiness(self) -> bool:
+    async def _validate_redis_readiness(self) -> bool:
         """Validate Redis readiness using SSOT patterns with GOLDEN PATH graceful degradation.
         
         GOLDEN PATH FIX: Progressive validation allows basic WebSocket functionality 
@@ -246,7 +246,7 @@ class GCPWebSocketInitializationValidator:
                     # IDEAL CASE: Redis fully operational
                     if self.is_gcp_environment:
                         # Grace period for background task stabilization
-                        time.sleep(0.5)  # 500ms grace period for background task stability
+                        await asyncio.sleep(0.5)  # 500ms grace period for background task stability
                     self.logger.debug("Redis readiness: IDEAL - fully connected")
                     return True
                 else:

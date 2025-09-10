@@ -273,18 +273,21 @@ class AgentRegistry(UniversalAgentRegistry):
     adding backward compatibility methods while using the SSOT implementation.
     """
     
-    def __init__(self, llm_manager: 'LLMManager', tool_dispatcher_factory: Optional[callable] = None):
+    def __init__(self, llm_manager: Optional['LLMManager'] = None, tool_dispatcher_factory: Optional[callable] = None):
         """Initialize agent registry with CanonicalToolDispatcher SSOT pattern.
         
         Args:
-            llm_manager: LLM manager for agent creation (REQUIRED)
+            llm_manager: LLM manager for agent creation (optional for backward compatibility)
             tool_dispatcher_factory: Factory function to create CanonicalToolDispatcher per user
                                    Signature: async (user_context, websocket_bridge) -> CanonicalToolDispatcher
                                    If None, uses default factory
         """
-        # CRITICAL FIX: Validate required llm_manager parameter
+        # BACKWARD COMPATIBILITY: Allow None llm_manager but warn about it
         if llm_manager is None:
-            raise ValueError("llm_manager is required for AgentRegistry initialization - cannot be None")
+            logger.warning(
+                "AgentRegistry initialized without llm_manager - this may cause issues with agent creation. "
+                "Consider providing llm_manager for full functionality."
+            )
         
         # Initialize UniversalAgentRegistry
         super().__init__()

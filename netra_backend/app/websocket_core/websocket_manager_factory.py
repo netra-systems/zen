@@ -2105,6 +2105,45 @@ class WebSocketManagerFactory:
             # Don't set _cleanup_started = True here - we need to retry later
             self._cleanup_started = False  # Ensure we retry later
     
+    def get_health_status(self) -> Dict[str, Any]:
+        """
+        Get the health status of the WebSocket manager factory.
+        
+        Returns:
+            Dict containing factory health information
+        """
+        with self._factory_lock:
+            active_managers_count = len(self._active_managers)
+            user_count = len(self._user_manager_count)
+            
+            # Check for resource issues
+            max_user_managers = max(self._user_manager_count.values(), default=0)
+            is_healthy = (
+                active_managers_count < 100 and  # Reasonable manager limit
+                max_user_managers < self.max_managers_per_user * 0.8  # Not approaching user limit
+            )
+            
+            health_status = {
+                "healthy": is_healthy,
+                "active_managers": active_managers_count,
+                "unique_users": user_count,
+                "max_managers_per_user": self.max_managers_per_user,
+                "highest_user_manager_count": max_user_managers,
+                "background_cleanup_running": (
+                    self._cleanup_task is not None and 
+                    not self._cleanup_task.done() if self._cleanup_task else False
+                ),
+                "factory_metrics": {
+                    "managers_created": self._factory_metrics.managers_created,
+                    "managers_active": self._factory_metrics.managers_active,
+                    "emergency_cleanups": self._factory_metrics.emergency_cleanups,
+                    "failed_creations": self._factory_metrics.failed_creations
+                }
+            }
+            
+            logger.debug(f"Factory health check: {health_status}")
+            return health_status
+
     async def shutdown(self) -> None:
         """Shutdown the factory and clean up all managers."""
         logger.info("Shutting down WebSocketManagerFactory...")

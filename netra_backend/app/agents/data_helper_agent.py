@@ -94,10 +94,7 @@ class DataHelperAgent(BaseAgent):
             Enhanced UserExecutionContext with data request results
         """
         # Emit thinking event for reasoning visibility
-        await self.notify_event("agent_thinking", {
-            "message": "Analyzing user request to identify data gaps...",
-            "agent": self.name
-        })
+        await self.emit_thinking("Analyzing user request to identify data gaps...")
         
         try:
             # Extract data from secure context metadata
@@ -112,13 +109,10 @@ class DataHelperAgent(BaseAgent):
             previous_results = self._extract_previous_results_from_context(context)
             
             # Emit tool execution transparency
-            await self.notify_event("tool_executing", {
-                "tool": "data_helper",
-                "params": {
-                    "user_request_length": len(user_request),
-                    "triage_result_available": bool(triage_result),
-                    "previous_results_count": len(previous_results)
-                }
+            await self.emit_tool_executing("data_helper", {
+                "user_request_length": len(user_request),
+                "triage_result_available": bool(triage_result),
+                "previous_results_count": len(previous_results)
             })
             
             # Generate data request using the tool
@@ -129,14 +123,11 @@ class DataHelperAgent(BaseAgent):
             )
             
             # Emit tool completion with sanitized results
-            await self.notify_event("tool_completed", {
-                "tool": "data_helper",
-                "result": {
-                    "success": data_request_result.get('success', False),
-                    "data_request_generated": bool(data_request_result.get('data_request')),
-                    "instructions_count": len(data_request_result.get('data_request', {}).get('user_instructions', '')),
-                    "structured_items_count": len(data_request_result.get('data_request', {}).get('structured_items', []))
-                }
+            await self.emit_tool_completed("data_helper", {
+                "success": data_request_result.get('success', False),
+                "data_request_generated": bool(data_request_result.get('data_request')),
+                "instructions_count": len(data_request_result.get('data_request', {}).get('user_instructions', '')),
+                "structured_items_count": len(data_request_result.get('data_request', {}).get('structured_items', []))
             })
             
             # Store results using SSOT metadata storage (SECURE)
@@ -161,12 +152,7 @@ class DataHelperAgent(BaseAgent):
             logger.error(f"Error in DataHelperAgent: user_id={context.user_id}, run_id={context.run_id}, error={str(e)}")
             
             # Emit error event for WebSocket transparency
-            await self.notify_event("agent_error", {
-                "agent": self.name,
-                "error": str(e),
-                "error_type": type(e).__name__,
-                "fallback_available": True
-            })
+            await self.emit_error(f"Data helper error: {str(e)}", type(e).__name__)
             
             # Store error result using SSOT metadata storage (SECURE)
             self.store_metadata_result(context, 'data_helper_error', str(e))

@@ -619,11 +619,11 @@ class ServiceReadinessValidator:
                     if self.environment in ['staging', 'production']:
                         # 500ms grace period for background task stabilization
                         self.logger.info("Applying 500ms grace period for Redis background task stabilization (staging/production)")
-                        time.sleep(0.5)
+                        await asyncio.sleep(0.5)
                     elif self.environment in ['development', 'dev']:
                         # 200ms grace period for development environment coordination
                         self.logger.info("Applying 200ms grace period for Redis background task stabilization (development)")
-                        time.sleep(0.2)
+                        await asyncio.sleep(0.2)
                 
                 # Final validation result
                 self.logger.info(f"Redis validation result: {is_connected}")

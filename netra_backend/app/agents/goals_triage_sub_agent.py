@@ -362,10 +362,10 @@ class GoalsTriageSubAgent(BaseAgent):
             }
         }
         
-        # Store result in context metadata for proper isolation
-        if "goal_triage_results" not in context.metadata:
-            context.metadata["goal_triage_results"] = []
-        context.metadata["goal_triage_results"].append(goal_triage_result)
+        # Store result in context metadata using SSOT method for proper isolation
+        existing_results = context.metadata.get("goal_triage_results", [])
+        existing_results.append(goal_triage_result)
+        self.store_metadata_result(context, "goal_triage_results", existing_results)
         
         return {
             "goal_triage_result": goal_triage_result,
@@ -731,10 +731,10 @@ class GoalsTriageSubAgent(BaseAgent):
             }
         }
         
-        # Store result in context metadata for proper isolation
-        if "goal_triage_results" not in context.metadata:
-            context.metadata["goal_triage_results"] = []
-        context.metadata["goal_triage_results"].append(fallback_result)
+        # Store result in context metadata using SSOT method for proper isolation
+        existing_results = context.metadata.get("goal_triage_results", [])
+        existing_results.append(fallback_result)
+        self.store_metadata_result(context, "goal_triage_results", existing_results)
         
         await self.emit_agent_completed({
             "success": True,
