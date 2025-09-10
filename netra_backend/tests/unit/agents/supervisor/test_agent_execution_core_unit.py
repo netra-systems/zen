@@ -107,7 +107,7 @@ class TestAgentExecutionCore:
 
     def test_timeout_constants(self, execution_core):
         """Test timeout constants are properly configured."""
-        assert execution_core.DEFAULT_TIMEOUT == 30.0
+        assert execution_core.DEFAULT_TIMEOUT == 25.0  # Changed from 30.0 for faster user feedback (Issue #158)
         assert execution_core.HEARTBEAT_INTERVAL == 5.0
 
     @pytest.mark.asyncio

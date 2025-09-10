@@ -23,6 +23,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
@@ -525,6 +526,8 @@ class WebSocketEventManager:
         return min(1.0, engagement_indicators / max(1, max_possible_indicators))
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestWebSocketEventDeliveryBusinessLogic:
     """Test WebSocket event delivery business logic that drives user engagement."""
     

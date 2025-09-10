@@ -65,7 +65,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     WebSocketAuthResult
 )
 from netra_backend.app.websocket_core.message_queue import (
-    WebSocketMessageQueue,
+    MessageQueue,
     MessagePriority,
     MessageQueueState,
     QueuedMessage
@@ -91,31 +91,31 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
     5. Performance under stress with complex state + auth coordination
     """
     
-    def setUp(self) -> None:
+    def setup_method(self) -> None:
         """Set up test environment for advanced state transition testing."""
-        super().setUp()
+        super().setup_method()
         
-        # Create unique test identifiers
-        test_suffix = str(int(time.time() * 1000))
-        self.connection_id = f"test_conn_advanced_{test_suffix}"
-        self.user_id = ensure_user_id(f"test_user_advanced_{test_suffix}")
+        # Create unique test identifiers using proper UUID format
+        self.connection_id = str(uuid.uuid4())
+        self.user_id = ensure_user_id(str(uuid.uuid4()))
         
         # Initialize state machine for testing
         self.state_machine = WebSocketConnectionStateMachine(
-            connection_id=self.connection_id
+            connection_id=self.connection_id,
+            user_id=self.user_id
         )
         
         # Initialize authenticator for testing
         self.authenticator = UnifiedWebSocketAuthenticator()
         
         # Initialize message queue for coordination testing
-        self.message_queue = WebSocketMessageQueue(connection_id=self.connection_id)
+        self.message_queue = MessageQueue(connection_id=self.connection_id, user_id=self.user_id)
         
         # Track test state for cleanup
         self.created_connections = []
         self.created_users = []
     
-    def tearDown(self) -> None:
+    def teardown_method(self) -> None:
         """Clean up test resources."""
         # Cleanup connections and users created during testing
         for conn_id in self.created_connections:
@@ -125,7 +125,7 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             except Exception:
                 pass
         
-        super().tearDown()
+        super().teardown_method()
     
     def create_mock_auth_token(self, user_id: str, expires_in_seconds: int = 3600) -> str:
         """Create mock JWT token for testing authentication scenarios."""
@@ -172,8 +172,8 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
                 websocket.headers['authorization'] = f'Bearer {refreshed_token}'
                 
                 # Validate token refresh doesn't interrupt transition
-                self.assertIn('Bearer', websocket.headers['authorization'])
-                self.assertNotEqual(initial_token, refreshed_token.split('Bearer ')[0])
+                assert 'Bearer' in websocket.headers['authorization']
+                assert initial_token != refreshed_token
             
             # Create transition
             transition = ConnectionStateTransition(
@@ -198,19 +198,17 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
         
         # Validate all transitions succeeded
         for result in transition_results:
-            self.assertTrue(result['success'], 
-                          f"Transition step {result['step']} must succeed even during token refresh")
-            self.assertEqual(result['actual_state'], result['to_state'],
-                           f"State must match expected at step {result['step']}")
+            assert result['success'], f"Transition step {result['step']} must succeed even during token refresh"
+            assert result['actual_state'] == result['to_state'], f"State must match expected at step {result['step']}"
         
         # Final state should be PROCESSING
         final_state = self.state_machine.get_current_state()
-        self.assertEqual(final_state, ApplicationConnectionState.PROCESSING)
+        assert final_state == ApplicationConnectionState.PROCESSING
         
         # Validate authentication context preserved through refresh
         final_auth_header = websocket.headers.get('authorization')
-        self.assertIsNotNone(final_auth_header)
-        self.assertIn('Bearer', final_auth_header)
+        assert final_auth_header is not None
+        assert 'Bearer' in final_auth_header
     
     def test_state_transition_rollback_with_auth_context_preservation(self):
         """Test state transition rollback preserves authentication context."""
@@ -242,12 +240,12 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             transition_success = self.state_machine.execute_transition(failing_transition)
             
             # Transition should fail
-            self.assertFalse(transition_success, "Transition should fail due to validation")
+            assert not transition_success, "Transition should fail due to validation"
             
             # State should rollback to original
             current_state = self.state_machine.get_current_state()
-            self.assertEqual(current_state, original_state)
-            self.assertEqual(current_state, ApplicationConnectionState.SERVICES_READY)
+            assert current_state == original_state
+            assert current_state == ApplicationConnectionState.SERVICES_READY
         
         # Validate authentication context preserved after rollback
         current_auth_context = {
@@ -256,9 +254,9 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             'headers': dict(websocket.headers)
         }
         
-        self.assertEqual(current_auth_context['token'], original_auth_context['token'])
-        self.assertEqual(current_auth_context['user_id'], original_auth_context['user_id'])
-        self.assertEqual(current_auth_context['headers'], original_auth_context['headers'])
+        assert current_auth_context['token'] == original_auth_context['token']
+        assert current_auth_context['user_id'] == original_auth_context['user_id']
+        assert current_auth_context['headers'] == original_auth_context['headers']
     
     def test_concurrent_state_transitions_with_auth_validation_race(self):
         """Test concurrent state transitions with authentication validation race conditions."""
@@ -349,24 +347,21 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
                 future.result()  # Will raise any exceptions
         
         # Validate concurrent transition results
-        self.assertEqual(len(transition_results), concurrent_count)
+        assert len(transition_results) == concurrent_count
         
         # All transitions should succeed independently
         successful_transitions = [r for r in transition_results if r.get('success')]
-        self.assertEqual(len(successful_transitions), concurrent_count,
-                        "All concurrent auth transitions should succeed")
+        assert len(successful_transitions) == concurrent_count, "All concurrent auth transitions should succeed"
         
         # All should reach AUTHENTICATED state
         authenticated_results = [r for r in successful_transitions 
                                if r.get('final_state') == ApplicationConnectionState.AUTHENTICATED]
-        self.assertEqual(len(authenticated_results), concurrent_count,
-                        "All transitions should reach AUTHENTICATED state")
+        assert len(authenticated_results) == concurrent_count, "All transitions should reach AUTHENTICATED state"
         
         # Each should have unique connection ID (no state bleeding)
         connection_ids = [r.get('connection_id') for r in successful_transitions]
         unique_connections = set(connection_ids)
-        self.assertEqual(len(unique_connections), concurrent_count,
-                        "Each transition should have unique connection context")
+        assert len(unique_connections) == concurrent_count, "Each transition should have unique connection context"
     
     def test_state_machine_recovery_from_auth_service_timeout(self):
         """Test state machine recovery from authentication service timeout scenarios."""
@@ -402,19 +397,19 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
                 state_after_timeout = self.state_machine.get_current_state()
                 
                 # State should remain stable (not corrupted)
-                self.assertIn(state_after_timeout, [
+                assert state_after_timeout in [
                     ApplicationConnectionState.ACCEPTED,  # Stay in current state
                     ApplicationConnectionState.DEGRADED,  # Or move to degraded
                     ApplicationConnectionState.RECONNECTING  # Or attempt recovery
-                ])
+                ]
                 
                 # Should not advance to AUTHENTICATED on timeout
-                self.assertNotEqual(state_after_timeout, ApplicationConnectionState.AUTHENTICATED)
+                assert state_after_timeout != ApplicationConnectionState.AUTHENTICATED
                 
             except asyncio.TimeoutError:
                 # Timeout handled at transition level
                 state_after_timeout = self.state_machine.get_current_state()
-                self.assertEqual(state_after_timeout, state_before_timeout)
+                assert state_after_timeout == state_before_timeout
         
         # Test recovery mechanism after timeout
         # Mock successful authentication after recovery
@@ -439,16 +434,16 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             # Recovery should succeed
             if self.state_machine.get_current_state() != ApplicationConnectionState.AUTHENTICATED:
                 # If not direct transition, should at least make progress
-                self.assertIn(self.state_machine.get_current_state(), [
+                assert self.state_machine.get_current_state() in [
                     ApplicationConnectionState.AUTHENTICATED,
                     ApplicationConnectionState.SERVICES_READY,
                     ApplicationConnectionState.PROCESSING_READY
-                ])
+                ]
     
-    def test_message_queue_coordination_during_complex_auth_transitions(self):
+    async def test_message_queue_coordination_during_complex_auth_transitions(self):
         """Test message queue coordination during complex authentication state transitions."""
         # Initialize message queue with state machine coordination
-        queue = WebSocketMessageQueue(connection_id=self.connection_id)
+        queue = MessageQueue(connection_id=self.connection_id, user_id=self.user_id)
         
         # Create test messages for different priority levels
         test_messages = [
@@ -486,25 +481,21 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             current_state = self.state_machine.get_current_state()
             
             # Clear queue for clean testing
-            queue.clear_queue()
+            await queue.clear_queue()
             
             # Queue test messages
             queued_message_ids = []
             for msg in test_messages:
-                queued_msg = QueuedMessage(
+                success = await queue.enqueue_message(
                     message_data=msg,
                     message_type=msg['type'],
-                    priority=msg['priority'],
-                    connection_id=self.connection_id,
-                    user_id=str(self.user_id)
+                    priority=msg['priority']
                 )
-                
-                queue.queue_message(queued_msg)
-                queued_message_ids.append(id(queued_msg))
+                queued_message_ids.append(success)
             
             # Check queue behavior based on state
-            queued_messages = queue.get_queued_messages()
-            queue_state = queue.get_queue_state()
+            queue_stats = queue.get_queue_stats()
+            queue_state = queue.current_state
             
             # Determine expected behavior based on auth state
             should_buffer = current_state in [
@@ -520,31 +511,29 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             # Record queue behavior for this state
             queue_behavior_results.append({
                 'auth_state': current_state,
-                'queued_count': len(queued_messages),
+                'queued_count': queue_stats.get('total_size', 0),
                 'queue_state': queue_state,
                 'should_buffer': should_buffer,
                 'should_process': should_process,
-                'critical_messages_preserved': len([m for m in queued_messages 
-                                                  if m.priority == MessagePriority.CRITICAL])
+                'messages_queued': queue_stats.get('messages_queued', 0),
+                'enqueue_success_count': sum(1 for success in queued_message_ids if success)
             })
         
         # Validate queue coordination behavior
         for result in queue_behavior_results:
             if result['should_buffer']:
-                # Messages should be queued during setup phases
-                self.assertGreater(result['queued_count'], 0,
-                                 f"Messages should be queued in {result['auth_state']} state")
+                # Messages should be successfully enqueued during setup phases
+                assert result['enqueue_success_count'] > 0, f"Messages should be enqueued in {result['auth_state']} state"
                 
-                # Critical messages must always be preserved
-                self.assertGreater(result['critical_messages_preserved'], 0,
-                                 f"Critical messages must be preserved in {result['auth_state']}")
+                # Queue should be in buffering state during setup
+                assert result['queue_state'] == MessageQueueState.BUFFERING, f"Queue should be buffering in {result['auth_state']} state"
             
             elif result['should_process']:
                 # In processing state, queue should be in pass-through mode
-                self.assertIn(result['queue_state'], [
+                assert result['queue_state'] in [
                     MessageQueueState.PASS_THROUGH,
                     MessageQueueState.FLUSHING
-                ])
+                ]
     
     def test_auth_token_expiry_during_active_state_transitions(self):
         """Test state machine behavior when auth token expires during active transitions."""
@@ -576,7 +565,7 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
                     try:
                         expiry_timestamp = float(token_parts[-1])
                         token_expired = current_time > expiry_timestamp
-                        self.assertTrue(token_expired, "Token should be expired for this test")
+                        assert token_expired, "Token should be expired for this test"
                     except ValueError:
                         pass  # Mock token format, skip validation
             
@@ -605,8 +594,7 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
         for result in transition_results:
             if not result['token_expired']:
                 # First transition should succeed (token valid)
-                self.assertTrue(result['success'], 
-                              "Transition should succeed with valid token")
+                assert result['success'], "Transition should succeed with valid token"
             else:
                 # Second transition behavior depends on implementation
                 # Should either:
@@ -616,14 +604,14 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
                 
                 if not result['success']:
                     # Acceptable: transition failed, requires re-auth
-                    self.assertIn(result['actual_state'], [
+                    assert result['actual_state'] in [
                         ApplicationConnectionState.SERVICES_READY,  # Stayed in previous state
                         ApplicationConnectionState.DEGRADED,       # Moved to degraded
                         ApplicationConnectionState.RECONNECTING    # Attempting recovery
-                    ])
+                    ]
                 else:
                     # Acceptable: transition succeeded (token was refreshed)
-                    self.assertEqual(result['actual_state'], result['to_state'])
+                    assert result['actual_state'] == result['to_state']
     
     def test_state_machine_deadlock_prevention_during_auth_operations(self):
         """Test state machine deadlock prevention during concurrent authentication operations."""
@@ -725,24 +713,20 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
             total_time = end_time - start_time
         
         # Validate no deadlocks occurred
-        self.assertLess(total_time, timeout_seconds - 1,
-                       "Operations should complete well before timeout (no deadlocks)")
+        assert total_time < timeout_seconds - 1, "Operations should complete well before timeout (no deadlocks)"
         
         # All operations should complete
-        self.assertEqual(len(results), deadlock_test_count,
-                        "All operations should complete without deadlock")
+        assert len(results) == deadlock_test_count, "All operations should complete without deadlock"
         
         # No deadlock indicators in results
         deadlock_indicators = [r for r in results if r.get('deadlock_suspected')]
-        self.assertEqual(len(deadlock_indicators), 0,
-                        "No deadlock indicators should be present")
+        assert len(deadlock_indicators) == 0, "No deadlock indicators should be present"
         
         # Execution times should be reasonable (not hanging)
         successful_ops = [r for r in results if r.get('success') and 'execution_time_ms' in r]
         if successful_ops:
             max_execution_time = max(r['execution_time_ms'] for r in successful_ops)
-            self.assertLess(max_execution_time, 1000,
-                           "No operation should take more than 1 second")
+            assert max_execution_time < 1000, "No operation should take more than 1 second"
 
 
 if __name__ == "__main__":

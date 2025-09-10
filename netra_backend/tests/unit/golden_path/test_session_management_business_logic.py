@@ -24,6 +24,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Set
 from dataclasses import dataclass
@@ -534,6 +535,8 @@ class SessionManager:
             self.terminate_session(session_id, "expired")
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestSessionManagementBusinessLogic:
     """Test session management business logic for multi-user platform."""
     

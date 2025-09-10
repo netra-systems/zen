@@ -405,6 +405,14 @@ def _validate_user_permission(user: User, permission: str) -> None:
 # Compatibility aliases for deprecated dependencies
 ActiveUserWsDep = Annotated[User, Depends(get_current_user)]
 
+def get_auth_client() -> AuthServiceClient:
+    """Get the auth service client instance
+    
+    Returns:
+        AuthServiceClient instance for making auth service calls
+    """
+    return auth_client
+
 # NOTE: All JWT and password hashing logic has been moved to the auth service
 # This module ONLY handles FastAPI dependency injection
 # See auth_service for actual authentication implementation

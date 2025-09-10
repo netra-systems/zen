@@ -356,7 +356,8 @@ class UnifiedTriageAgent(BaseAgent):
                     "validation_error",
                     validation_result
                 )
-                return self._create_fallback_result(request, validation_result["reason"])
+                fallback_result = self._create_fallback_result(request, validation_result["reason"])
+                return self._triage_result_to_dict(fallback_result)
             
             # Generate cache key for similar requests
             cache_key = self._generate_request_hash(request, exec_context)
@@ -392,21 +393,7 @@ class UnifiedTriageAgent(BaseAgent):
             })
             
             # Return result
-            return {
-                "success": True,
-                "category": triage_result.category,
-                "sub_category": triage_result.sub_category,
-                "priority": triage_result.priority.value,
-                "complexity": triage_result.complexity.value,
-                "confidence_score": triage_result.confidence_score,
-                "data_sufficiency": triage_result.data_sufficiency,
-                "intent": triage_result.user_intent.__dict__,
-                "entities": triage_result.extracted_entities.__dict__,
-                "tools": triage_result.tool_recommendation.__dict__,
-                "next_steps": triage_result.next_steps,
-                "next_agents": next_agents,
-                "metadata": triage_result.metadata
-            }
+            return self._triage_result_to_dict(triage_result, next_agents)
             
         except Exception as e:
             logger.error(f"Triage execution failed: {e}", exc_info=True)
@@ -624,8 +611,13 @@ Focus on:
             if len(sorted_intents) > 1:
                 intent.secondary_intents = [name for name, _ in sorted_intents[1:3]]
             
-            # Determine if action is required
-            action_keywords = ['please', 'need', 'want', 'require', 'must', 'should', 'help', 'how to']
+            # Determine if action is required - expanded keyword list
+            action_keywords = [
+                'please', 'need', 'want', 'require', 'must', 'should', 'help', 'how to',
+                'can you', 'could you', 'would you', 'implement', 'configure', 'setup',
+                'fix', 'resolve', 'solve', 'deploy', 'install', 'create', 'build',
+                'optimize', 'improve', 'reduce', 'increase', 'then', 'and'
+            ]
             intent.action_required = any(keyword in text_lower for keyword in action_keywords)
         
         return intent
@@ -738,7 +730,7 @@ Focus on:
             priority=priority,
             complexity=Complexity.MEDIUM,
             confidence_score=0.3,  # Low confidence for fallback
-            data_sufficiency="unknown",
+            data_sufficiency="insufficient",
             extracted_entities=entities,
             user_intent=intent,
             tool_recommendation=tools,
@@ -752,6 +744,39 @@ Focus on:
         )
         
         return result
+    
+    def _triage_result_to_dict(
+        self, 
+        triage_result: TriageResult, 
+        next_agents: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """Convert TriageResult to dict format for consistent return type
+        
+        Args:
+            triage_result: TriageResult object to convert
+            next_agents: Optional list of next agents to include
+            
+        Returns:
+            Dict representation of triage result
+        """
+        if next_agents is None:
+            next_agents = self._determine_next_agents(triage_result)
+            
+        return {
+            "success": True,
+            "category": triage_result.category,
+            "sub_category": triage_result.sub_category,
+            "priority": triage_result.priority.value,
+            "complexity": triage_result.complexity.value,
+            "confidence_score": triage_result.confidence_score,
+            "data_sufficiency": triage_result.data_sufficiency,
+            "intent": triage_result.user_intent.__dict__,
+            "entities": triage_result.extracted_entities.__dict__,
+            "tools": triage_result.tool_recommendation.__dict__,
+            "next_steps": triage_result.next_steps,
+            "next_agents": next_agents,
+            "metadata": triage_result.metadata
+        }
     
     def _create_error_result(self, error: str) -> Dict[str, Any]:
         """Create error result for failed triage
@@ -788,14 +813,20 @@ Focus on:
         Returns:
             Request string or None
         """
-        if hasattr(state, 'original_request'):
+        # Try original_request first (highest priority) - but only if it has a value
+        if hasattr(state, 'original_request') and state.original_request:
             return state.original_request
-        elif hasattr(state, 'request'):
+        # Then try request field
+        elif hasattr(state, 'request') and state.request:
             return state.request
-        elif hasattr(state, 'user_request'):
+        # Then try user_request field
+        elif hasattr(state, 'user_request') and state.user_request:
             return state.user_request
+        # Handle dict state
         elif isinstance(state, dict):
-            return state.get('request') or state.get('original_request') or state.get('user_request')
+            return (state.get('original_request') or 
+                   state.get('request') or 
+                   state.get('user_request'))
         return None
     
     def _validate_request(self, request: str) -> Dict[str, Any]:

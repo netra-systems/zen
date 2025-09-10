@@ -110,6 +110,8 @@ class WebSocketAuthValidator:
         return "test-secret-key-unified-testing-32chars"
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
     """
     Golden Path Unit Tests for WebSocket Authentication Business Logic.

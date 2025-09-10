@@ -23,6 +23,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
@@ -775,6 +776,8 @@ class ConfigurationValidator:
             return 'HIGH'  # Complex issue
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestConfigurationValidationBusinessLogic:
     """Test configuration validation business logic for platform stability."""
     

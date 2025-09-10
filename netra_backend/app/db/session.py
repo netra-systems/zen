@@ -106,6 +106,5 @@ __all__ = [
     'init_database',
     'close_database',
     'validate_session',
-    'safe_session_context',
-    'handle_session_error'
+    'get_database_manager'
 ]

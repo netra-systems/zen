@@ -23,6 +23,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field
@@ -536,6 +537,8 @@ class UserExecutionContextFactory:
         pass
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestExecutionContextIsolationBusinessLogic:
     """Test execution context isolation business logic for multi-user platform."""
     
@@ -549,7 +552,7 @@ class TestExecutionContextIsolationBusinessLogic:
 
     # CONTEXT CREATION TESTS
 
-    def test_create_isolated_context_successful(self):
+    def test_create_isolated_context_business_rule_successful(self):
         """Test successful creation of isolated execution context."""
         context = self.factory.create_isolated_context(
             user_id=self.test_user_1,

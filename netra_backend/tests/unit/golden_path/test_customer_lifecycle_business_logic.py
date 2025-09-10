@@ -22,6 +22,7 @@ CRITICAL BUSINESS RULES:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from typing import Dict, List, Optional, Tuple
@@ -456,6 +457,8 @@ class CustomerLifecycleManager:
         return Decimal('0.00')
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestCustomerLifecycleBusinessLogic:
     """Test customer lifecycle business logic that drives revenue growth."""
     

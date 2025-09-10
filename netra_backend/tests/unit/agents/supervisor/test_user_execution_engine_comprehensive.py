@@ -1366,11 +1366,7 @@ class TestUserExecutionEngineComprehensive:
             )
             
             state = DeepAgentState(
-                user_request={
-                    "prompt": "Optimize my AI infrastructure costs",
-                    "monthly_ai_spend": 75000,
-                    "optimization_goal": "reduce_costs_maintain_performance"
-                },
+                user_request="Optimize my AI infrastructure costs with monthly spend of $75000, goal: reduce_costs_maintain_performance",
                 user_id=test_user_context.user_id,
                 chat_thread_id=test_user_context.thread_id,
                 run_id=test_user_context.run_id,
@@ -1378,7 +1374,7 @@ class TestUserExecutionEngineComprehensive:
             )
             
             # Mock agent-specific execution results that demonstrate business value
-            with patch.object(user_execution_engine, '_execute_with_error_handling') as mock_execute, \
+            with patch.object(user_execution_engine, 'agent_core') as mock_core, \
                  patch.object(user_execution_engine, 'execution_tracker') as mock_tracker:
                 
                 execution_id = str(uuid.uuid4())
@@ -1391,20 +1387,22 @@ class TestUserExecutionEngineComprehensive:
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=1.2,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=1.2,
                         metadata={
                             "orchestration_plan": ["data_analysis", "optimization", "report_generation"],
                             "estimated_savings_potential": "20-30%",
                             "analysis_scope": "infrastructure_optimization"
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 elif agent_name == "data_analysis_agent":
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=3.5,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=3.5,
                         metadata={
                             "current_monthly_spend": 75000,
                             "top_cost_drivers": ["gpt-4_api_calls", "vector_storage", "compute_instances"],
@@ -1414,12 +1412,14 @@ class TestUserExecutionEngineComprehensive:
                             }
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 elif agent_name == "optimization_agent":
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=2.8,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=2.8,
                         metadata={
                             "optimization_recommendations": [
                                 {
@@ -1442,12 +1442,14 @@ class TestUserExecutionEngineComprehensive:
                             "annual_savings_potential": 332400
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 elif agent_name == "report_generation_agent":
                     business_result = AgentExecutionResult(
                         success=True,
                         agent_name=agent_name,
-                        execution_time=1.8,
-                        state=state,
+                        user_context=test_user_context,
+                        duration=1.8,
                         metadata={
                             "executive_summary": "Identified $332K annual savings opportunity",
                             "action_items": [
@@ -1463,8 +1465,13 @@ class TestUserExecutionEngineComprehensive:
                             "report_generated": True
                         }
                     )
+                    # Add execution_time property to match UserExecutionEngine expectations
+                    business_result.execution_time = business_result.duration
                 
-                mock_execute.return_value = business_result
+                # Make the mock return awaitable since agent_core.execute_agent is async
+                async def mock_execute_agent(*args, **kwargs):
+                    return business_result
+                mock_core.execute_agent.side_effect = mock_execute_agent
                 
                 # Execute agent
                 result = await user_execution_engine.execute_agent(context, state)

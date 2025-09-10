@@ -21,6 +21,7 @@ CRITICAL BUSINESS LOGIC:
 """
 
 import pytest
+from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from typing import Dict, List, Optional
@@ -224,6 +225,8 @@ class RevenueCalculator:
         return validation_results
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestRevenueCalculationBusinessLogic:
     """Test revenue calculation business logic that protects $500K+ ARR."""
     
@@ -248,7 +251,7 @@ class TestRevenueCalculationBusinessLogic:
 
     # CRITICAL BUSINESS LOGIC TESTS
 
-    def test_free_tier_revenue_calculation_no_overage(self):
+    def test_free_tier_revenue_business_logic_calculation_no_overage(self):
         """Test Free tier revenue calculation - no overage charges."""
         usage_records = self._create_usage_records(8)  # Under 10 execution limit
         billing_period = BillingPeriod(

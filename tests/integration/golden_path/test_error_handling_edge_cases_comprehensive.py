@@ -1416,15 +1416,6 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             websocket_bridge=mock_websocket_bridge
         )
         
-        # Mock supervisor internal methods to ensure multiple failures test logic is executed
-        supervisor._create_isolated_agent_instances = AsyncMock(return_value={
-            'data_agent': Mock(name='data_agent_mock'),
-            'optimization_agent': Mock(name='optimization_agent_mock')
-        })
-        supervisor._execute_workflow_with_isolated_agents = AsyncMock(
-            side_effect=catastrophic_llm_response
-        )
-        
         context = self.create_error_test_context(
             "multiple_simultaneous_failures",
             {

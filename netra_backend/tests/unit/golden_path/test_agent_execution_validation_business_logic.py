@@ -28,6 +28,8 @@ from netra_backend.app.agents.base.agent_business_rules import AgentBusinessRule
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
     """
     Golden Path Unit Tests for Agent Execution Validation Business Logic.

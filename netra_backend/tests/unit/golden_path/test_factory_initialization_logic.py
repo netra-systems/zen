@@ -364,6 +364,8 @@ class MockFactoryValidator:
         return min(1.0, max(0.0, health_score))
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestFactoryInitializationLogic(SSotBaseTestCase):
     """Test factory initialization business logic validation."""
     

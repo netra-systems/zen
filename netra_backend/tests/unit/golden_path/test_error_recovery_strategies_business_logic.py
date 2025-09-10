@@ -702,6 +702,8 @@ class ErrorRecoveryManager:
         )
 
 
+@pytest.mark.golden_path
+@pytest.mark.unit
 class TestErrorRecoveryStrategiesBusinessLogic:
     """Test error recovery strategies business logic for platform reliability."""
     
