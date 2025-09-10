@@ -407,14 +407,8 @@ class AgentExecutionCore:
                     error=f"Unexpected error: {str(e)}"
                 )
                 
-                # Send error notification with trace context
-                if self.websocket_bridge:
-                    await self.websocket_bridge.notify_agent_error(
-                        run_id=context.run_id,
-                        agent_name=context.agent_name,
-                        error=str(e),
-                        trace_context=trace_context.to_websocket_context()
-                    )
+                # NOTE: Error notification is handled in the main success/failure path (lines 377-382)
+                # Removing duplicate notification call to prevent test failures
                 
                 return AgentExecutionResult(
                     success=False,
