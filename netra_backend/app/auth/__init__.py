@@ -19,9 +19,10 @@ try:
     from netra_backend.app.services.auth import *
     from netra_backend.app.services.unified_authentication_service import (
         UnifiedAuthenticationService,
-        AuthenticationResult,
-        AuthenticationError
+        AuthResult as AuthenticationResult,
     )
+    # Import AuthenticationError from auth client where it actually exists
+    from netra_backend.app.clients.auth_client_core import AuthServiceError as AuthenticationError
 except ImportError:
     # Fallback minimal implementations if services not available
     from typing import Dict, Optional, Any

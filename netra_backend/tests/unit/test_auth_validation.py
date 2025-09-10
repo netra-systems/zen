@@ -29,9 +29,9 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 from netra_backend.app.services.unified_authentication_service import (
     UnifiedAuthenticationService,
-    AuthenticationResult,
-    AuthenticationError
+    AuthResult as AuthenticationResult,
 )
+from netra_backend.app.clients.auth_client_core import AuthServiceError as AuthenticationError
 from netra_backend.app.routes.auth_routes.oauth_validation import (
     validate_oauth_credentials,
     build_redirect_uri,
