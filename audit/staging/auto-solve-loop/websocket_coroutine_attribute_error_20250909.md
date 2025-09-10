@@ -30,5 +30,38 @@
 - [ ] Fix implemented and tested
 - [ ] System stability validated
 
+## Five Whys Analysis Results
+
+### Why 1: Why is the coroutine object missing the 'get' attribute?
+**Direct cause**: The code is calling `.get()` on a coroutine object instead of an `IsolatedEnvironment` instance. Coroutines don't have a `.get()` method - they need to be awaited first.
+
+### Why 2: Why is the code trying to call .get() on a coroutine?
+**Immediate contributing factor**: The `get_env()` function is returning a coroutine instead of an `IsolatedEnvironment` instance. The WebSocket code expects synchronous object with `.get()` method.
+
+### Why 3: Why is a coroutine being passed where a dict/object was expected?
+**Underlying design issue**: Import conflict where async version of `get_env()` is being imported instead of synchronous one, OR `get_env()` function was changed to async without updating call sites.
+
+### Why 4: Why was the calling pattern changed?
+**Process/change that introduced it**: Recent SSOT consolidation efforts introduced async version of `get_env()` or caused import conflict during shared infrastructure changes.
+
+### Why 5: Why wasn't this caught in testing?
+**Root systemic cause**: Test suite lacks comprehensive WebSocket integration tests for staging environment. Error only manifests in E2E testing detection logic paths not covered by unit tests.
+
+## Code Analysis
+**Location**: `netra_backend/app/routes/websocket.py` lines 213-217  
+**Pattern**: Multiple calls to `get_env().get("KEY", "default")` in E2E testing detection  
+**Root Issue**: `get_env()` returning coroutine instead of `IsolatedEnvironment` instance
+
+## Recommended Fix Approach
+1. **Immediate**: Verify `shared.isolated_environment.get_env()` is synchronous
+2. **Check imports**: Ensure no async `get_env()` imported by mistake  
+3. **Add await**: If `get_env()` needs to be async, add `await` to all calls
+4. **Test coverage**: Add WebSocket integration tests for E2E detection logic
+
 ## Working Log
-*Updates will be added here as investigation progresses...*
+- [✓] Five Whys analysis completed
+- [ ] Code inspection at line 557 completed  
+- [ ] Test plan created
+- [ ] GitHub issue created
+- [ ] Fix implemented and tested
+- [ ] System stability validated
