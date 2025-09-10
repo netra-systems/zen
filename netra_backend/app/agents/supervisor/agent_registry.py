@@ -963,8 +963,12 @@ class AgentRegistry(BaseAgentRegistry):
             # For direct AgentWebSocketBridge instances, store and create backwards adapter if needed
             logger.info("✅ WebSocket bridge set directly - SSOT interface compliance maintained")
         
-        # Propagate to user sessions if they exist
-        asyncio.create_task(self._propagate_bridge_to_sessions(bridge))
+        # Propagate to user sessions if they exist (safely handle no event loop)
+        try:
+            asyncio.create_task(self._propagate_bridge_to_sessions(bridge))
+        except RuntimeError:
+            # No event loop running, sessions will get bridge on next access
+            logger.debug("No event loop available - bridge will be propagated on next session access")
     
     async def _propagate_bridge_to_sessions(self, bridge: 'AgentWebSocketBridge') -> None:
         """Propagate WebSocket bridge to existing user sessions."""

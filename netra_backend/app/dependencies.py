@@ -532,10 +532,11 @@ def get_service_user_context() -> str:
     """
     from netra_backend.app.core.configuration import get_configuration
     from shared.isolated_environment import get_env
+    from shared.constants.service_identifiers import SERVICE_ID
     
     # Get service ID from configuration or environment
     config = get_configuration()
-    service_id = config.service_id or "netra-backend"
+    service_id = config.service_id or SERVICE_ID
     
     # If configuration doesn't have service_id, try environment
     if not config.service_id:
@@ -544,8 +545,8 @@ def get_service_user_context() -> str:
         if env_service_id:
             service_id = env_service_id
         else:
-            logger.warning("SERVICE_ID not found in config or environment - using default: netra-backend")
-            service_id = "netra-backend"
+            logger.warning("SERVICE_ID not found in config or environment - using SSOT default")
+            service_id = SERVICE_ID
     
     # Return service context format
     service_context = f"service:{service_id}"
