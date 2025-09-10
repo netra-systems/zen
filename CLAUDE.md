@@ -150,86 +150,42 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 
 -----
 
-## 3\. The Development Process: Structured Analysis and Agent Utilization
+## 3. DEVELOPMENT PROCESS
 
-### 3.1. The AI-Augmented "Complete Team"
+### 3.1. AI Agent Roles
+- **Principal Engineer:** Strategy, architecture, coordination
+- **PM Agent:** Requirements, BVJ validation
+- **Design Agent:** UX, workflows, API design
+- **Implementation Agent:** Focused coding tasks
+- **QA/Security Agent:** Test strategy, regression analysis
 
-Leverage specialized AI agents for distinct roles to maximize parallelism and analytical depth.
-
-  * **Principal Engineer:** Strategy, architecture, final synthesis, and coordination.
-  * **Product Manager (PM) Agent:** Defines the "Why" and "What." Refines requirements and drafts the BVJ.
-  * **Design Agent:** Defines the user experience, workflows, and API ergonomics.
-  * **Implementation Agent:** Executes focused coding tasks against a defined interface.
-  * **QA/Security Agent:** Defines test strategy, analyzes regressions, and performs security audits.
-
-### 3.2. Structured Analysis Phases (Pre-Implementation)
-
-Before coding, conduct a rigorous analysis.
-
-  * **Phase 0: Product Definition (PM/Design Agent):** If requirements are ambiguous, spawn agents to define user scenarios, validate the BVJ, and design workflows.
-  * **Phase 1: Scenario Analysis (Principal/QA Agent):** Analyze happy paths, edge cases, security implications, and system impacts.
-  * **Phase 2: Interface Contract Verification (Principal):** Deconstruct and verify the proposed architecture, data structures, and API contracts.
-  * **Phase 3: Regression Impact Analysis (QA Agent):** Identify and analyze potential side effects on the unified system and define the testing scope.
+### 3.2. Pre-Implementation Analysis
+- **Phase 0:** Product definition and workflow design
+- **Phase 1:** Scenario analysis (happy paths, edge cases, security)
+- **Phase 2:** Interface contract verification
+- **Phase 3:** Regression impact analysis and test scope
 
 ### 3.3. Implementation Strategy
-
-  * **Modular Implementation:** Delegate tasks to Implementation Agents one module at a time.
-  * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
-  * **Testing Focus:** Focuse on as real tests as possible by default. Most tests must assume inter-service nature by default. **Real Everything (LLM, Services) E2E \> E2E \> Integration \> Unit.**
-  CRITICAL: Mocks in E2E or Integration = Abomination  (Allowed in Unit tests if needed and not cheating)
-  * **🚨 CRITICAL E2E AUTH REQUIREMENT:** ALL e2e tests MUST use authentication except for the small handful that directly test if auth is working itself. This ensures real-world multi-user scenarios are properly tested. See @test_auth_complete_flow.py for auth flow examples.
-  * **Test Architecture:** See @TEST_ARCHITECTURE_VISUAL_OVERVIEW.md for complete test infrastructure guide
-  * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
-
-ULTRA THINK DEEPLY ALL THE TIME.
-
-CRITICAL: ALWAYS SOLVE FOR THE GREATER GOOD OF THE OVERALL SYSTEM.
-NEVER "bypass" a greater good intention for narrow success like passing a single test.
+- **Modular:** One module per agent
+- **Isolation:** Provide interfaces only, prevent context bleed
+- **Testing Priority:** Real Services > E2E > Integration > Unit
+- **No Mocks:** Forbidden in E2E/Integration (Unit only if justified)
+- **E2E Auth Mandatory:** All tests use real auth except auth validation tests
+- **System-Wide Thinking:** Greater good > narrow test success
 
 ### 3.4. Multi-Environment Validation
+**Pipeline:** Local/CI → Development → Production-like
+- **Real Services Required:** No mocks in E2E, use real databases/LLMs
+- **E2E Auth Mandatory:** All tests use real auth (JWT/OAuth) except auth validation tests
+- **Fail Hard:** Tests designed to fail completely, no bypassing
+- **0-Second Rule:** E2E tests taking 0.00s automatically fail (indicates bypassing/mocking)
 
-Code is not "done" until it is validated in environments that mirror production. Local E2E tests MUST use real services (local databases, shared LLMs). Mocks are forbidden in E2E testing.
-
-**Mandatory Validation Pipeline:**
-
-1.  **Local/CI:** Fast feedback with unit and integration tests.
-2.  **Development:** Integration/E2E tests against deployed services.
-ALWAYS use real services for testing. If they appear to not be available start or restarting them. If that too fails then hard fail the entire test suite.
-
-**🚨 E2E AUTH MANDATE:** Every E2E test MUST authenticate properly with the system (using real JWT tokens, OAuth flows, etc.) EXCEPT for the specific tests that validate the auth system itself. This requirement ensures:
-- Real multi-user isolation is tested
-- WebSocket connections use proper auth context
-- Agent executions happen within authenticated user sessions
-- See @test_auth_complete_flow.py and @e2e_auth_helper.py
-
-CHEATING ON TESTS = ABOMINATION
-ALL TESTS MUST BE DESIGNED TO FAIL HARD IN EVERY WAY. ALL ATTEMPTS TO BYPASS THIS WITHIN THE TEST ITSELF ARE BAD.
-
-**🚨 CRITICAL: E2E TESTS WITH 0-SECOND EXECUTION = AUTOMATIC HARD FAILURE**
-Any e2e test that returns in 0.00s is automatically failed by the test runner. This indicates:
-- Tests are not actually executing (being skipped/mocked)
-- Missing async/await handling
-- Not connecting to real services
-- Authentication is being bypassed
-See @STAGING_100_TESTS_REPORT.md for context.
-The unified test runner enforces this with `_validate_e2e_test_timing()`.
-
-KEEP CORE SYSTEM AS IS
-NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS. (feature freeze includes "security" or "enterprise" features)
-
-### 3.5. MANDATORY BUG FIXING PROCESS:
-
-EACH AGENT MUST SAVE THEIR WORK TO A JOINT BUG FIX REPORT for each bug.
-The work is only complete when ALL DoD items are complete and the report is updated. SLOW DOWN. Think step by step.
-
-At every opportunity spawn new subagent with dedicated focus mission and context window.
-1.  **WHY:** Analyze why the code diverges from requirements. Why did existing tests miss this? MUST USE FIVE WHYS METHOD? Why? Why? Why!!!?
-2.  **Prove it:** Write out TWO Mermaid diagrams. One of the ideal working state and one of the current failure state. Save your work the .md file. Write a test that reproduces the bug.
-3.  **Plan system wide claude.md compaliant fix**  Think about ALL associated and related modules that must also be updated. Think about cross system impacts of bug. SLOWLY think DEEPLY about the implications. What is the spirit of the problem beyond the literal one-off problem? Plan the fix. Save to the bugfix .md.
-4.  **Verification and proof implementation worked** QA review and regression testing. Use fail fast, starting with proving that newly created test suite now passes, then rest of tests related to this issue. repeat until all tests pass or 100 times.
-
-YOU MUST WORK HARD AND COMPLETE ALL OF YOUR WORK. YOU MUST KEEP GOING UNTIL THE WORK IS COMPLETE AND BE PATIENT.
-DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
+### 3.5. Bug Fixing Process
+**Joint Bug Fix Report Required:**
+1. **WHY Analysis:** Five whys method, why tests missed it
+2. **Prove It:** Mermaid diagrams (ideal vs failure state) + reproduction test
+3. **System-Wide Fix:** Plan all module impacts, deep implications analysis
+4. **Verification:** QA review, regression testing until 100% pass 
 
 ### 3.6. MANDATORY COMPLEX REFACTORING PROCESS:
 
