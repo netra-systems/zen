@@ -953,8 +953,11 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             'data_agent': Mock(name='data_agent_mock'),
             'optimization_agent': Mock(name='optimization_agent_mock')
         })
+        async def mock_execute_workflow(*args, **kwargs):
+            return await network_interrupted_llm_response()
+        
         supervisor._execute_workflow_with_isolated_agents = AsyncMock(
-            side_effect=lambda context, agents: network_interrupted_llm_response()
+            side_effect=mock_execute_workflow
         )
         
         context = self.create_error_test_context(
