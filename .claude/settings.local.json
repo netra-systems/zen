@@ -29,7 +29,8 @@
       "Bash(git push:*)",
       "Bash(gh:*)",
       "Bash(pip show:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
