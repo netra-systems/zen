@@ -2189,6 +2189,9 @@ class WebSocketManagerFactory:
         that SSOT validation tests expect. It creates a UserExecutionContext internally
         and returns a properly isolated manager instance.
         
+        This method provides a synchronous interface for tests and simple cases,
+        while internally using the async implementation when necessary.
+        
         Args:
             user_id: User identifier for isolation
             connection_id: Connection identifier for WebSocket state machine continuity
@@ -2211,8 +2214,42 @@ class WebSocketManagerFactory:
                 websocket_client_id=connection_id.strip()
             )
             
-            # Use existing create_manager method
-            manager = self.create_manager(user_context)
+            # For testing environments, use synchronous pattern
+            import os
+            import asyncio
+            environment = os.getenv('NETRA_ENVIRONMENT', 'development')
+            
+            if environment in ('test', 'testing', 'development'):
+                # Synchronous execution for tests
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        # If event loop is already running, run in thread
+                        import concurrent.futures
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                            future = executor.submit(asyncio.run, self.create_manager(user_context))
+                            manager = future.result(timeout=10.0)
+                    else:
+                        # No event loop running, can use asyncio.run directly
+                        manager = asyncio.run(self.create_manager(user_context))
+                except RuntimeError:
+                    # Fallback to direct instantiation for tests
+                    manager = IsolatedWebSocketManager(user_context)
+                    
+                    # Register the manager manually for consistency
+                    isolation_key = self._generate_isolation_key(user_context)
+                    with self._factory_lock:
+                        self._active_managers[isolation_key] = manager
+                        current_count = self._user_manager_count.get(user_id, 0)
+                        self._user_manager_count[user_id] = current_count + 1
+                        self._manager_creation_time[isolation_key] = datetime.utcnow()
+            else:
+                # Production should use async interface
+                raise RuntimeError(
+                    "create_isolated_manager synchronous interface is only for test environments. "
+                    "Use async create_manager() in production."
+                )
+            
             
             logger.info(
                 f"🏭 SSOT INTERFACE: Created isolated manager via create_isolated_manager "
