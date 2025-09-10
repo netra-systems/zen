@@ -43,7 +43,7 @@ Incomplete singleton-to-factory pattern migration in ExecutionEngine causing cri
 
 ### ✅ Step 1: DISCOVER AND PLAN TESTS  
 - [x] 1.1: Discover existing tests protecting against breaking changes
-- [ ] 1.2: Plan new SSOT-focused tests (20% of effort)
+- [x] 1.2: Plan new SSOT-focused tests (20% of effort)
 
 #### 1.1 Test Discovery Results
 **GOLD STANDARD TEST:** `/tests/mission_critical/golden_path/test_agent_state_isolation_never_fail.py`
@@ -62,7 +62,35 @@ Incomplete singleton-to-factory pattern migration in ExecutionEngine causing cri
 
 **Coverage Assessment:** Strong user isolation foundation, weak factory pattern protection
 
-### ⏳ Remaining Steps
+#### 1.2 New SSOT Test Plan (5 Tests - 20% of effort)
+**NEW TESTS (Should FAIL before, PASS after factory implementation):**
+
+1. **`test_execution_engine_factory_user_isolation_unit.py`** - PRIORITY 1
+   - Factory creates unique instances per user (no shared state)
+   - Memory isolation between concurrent user engines
+   - Legal compliance: prevents user data leakage
+
+2. **`test_execution_engine_factory_websocket_integration.py`** - PRIORITY 2  
+   - Factory-created engines emit events to correct users only
+   - Per-user WebSocketNotifier from factory integration
+   - Chat functionality: 90% of platform value protection
+
+3. **`test_user_execution_context_factory_integration_unit.py`** - PRIORITY 1
+   - Factory validates UserExecutionContext before creation
+   - Factory cleanup when user sessions end
+   - Context immutability in factory-created engines
+
+4. **`test_execution_engine_ssot_factory_compliance_integration.py`** - PRIORITY 2
+   - Factory is ONLY source for ExecutionEngine instances
+   - No duplicate creation patterns exist
+   - SSOT compliance validation
+
+5. **`test_execution_engine_factory_resource_limits_unit.py`** - PRIORITY 2
+   - Factory enforces max engines per user
+   - Resource cleanup when limits exceeded
+   - Platform stability under load
+
+### 🔄 Current Step
 - [ ] Step 2: Execute new test creation
 - [ ] Step 3: Plan SSOT remediation  
 - [ ] Step 4: Execute SSOT remediation
