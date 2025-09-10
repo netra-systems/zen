@@ -94,7 +94,7 @@ ENTRYPOINT ["/sbin/tini", "--"]
 
 # Health check with shorter intervals for faster startup detection
 HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
 EXPOSE 8000
 
@@ -104,7 +104,7 @@ CMD ["sh", "-c", "\
     exec gunicorn netra_backend.app.main:app \
         -w ${WORKERS:-2} \
         -k uvicorn.workers.UvicornWorker \
-        --bind 0.0.0.0:8000 \
+        --bind 0.0.0.0:${PORT:-8000} \
         --timeout ${TIMEOUT:-60} \
         --graceful-timeout 10 \
         --keep-alive 5 \
