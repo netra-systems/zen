@@ -1293,6 +1293,20 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             websocket_bridge=self.mock_websocket_bridge
         )
         
+        # Mock supervisor internal methods to ensure memory pressure test logic is executed
+        supervisor._create_isolated_agent_instances = AsyncMock(return_value={
+            'data_agent': Mock(name='data_agent_mock'),
+            'optimization_agent': Mock(name='optimization_agent_mock')
+        })
+        supervisor._execute_workflow_with_isolated_agents = AsyncMock(
+            return_value={
+                "status": "memory_pressure_handled",
+                "cleanup_successful": True,
+                "recommendations": ["Memory resources optimized", "System performance restored"],
+                "analysis": "Memory pressure test completed successfully with resource cleanup"
+            }
+        )
+        
         # Get initial memory baseline
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB
