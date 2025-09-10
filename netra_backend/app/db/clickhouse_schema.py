@@ -9,8 +9,30 @@ from datetime import datetime
 import logging
 from pathlib import Path
 
-from clickhouse_driver import Client
-from clickhouse_driver.errors import ServerException, ErrorCodes
+# Try to import ClickHouse driver, use no-op if not available
+try:
+    from clickhouse_driver import Client
+    from clickhouse_driver.errors import ServerException, ErrorCodes
+    CLICKHOUSE_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    CLICKHOUSE_AVAILABLE = False
+    # Create dummy classes for when ClickHouse is not available
+    class Client:
+        def __init__(self, *args, **kwargs):
+            pass
+        def execute(self, *args, **kwargs):
+            raise RuntimeError("ClickHouse driver not available")
+        def disconnect(self):
+            pass
+    
+    class ServerException(Exception):
+        def __init__(self, *args, **kwargs):
+            super().__init__("ClickHouse driver not available")
+            self.code = None
+    
+    class ErrorCodes:
+        TABLE_ALREADY_EXISTS = 57
+        DATABASE_ALREADY_EXISTS = 81
 
 logger = logging.getLogger(__name__)
 
