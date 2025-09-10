@@ -595,6 +595,7 @@ class AgentStreamRequest(BaseModel):
     """Request model for agent streaming."""
     agent_type: str = Field("triage", description="Type of agent")
     message: str = Field(..., description="Message to process")
+    thread_id: Optional[str] = Field(None, description="Thread ID for conversation continuity")
     context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
     stream_updates: bool = Field(True, description="Enable streaming updates")
 
