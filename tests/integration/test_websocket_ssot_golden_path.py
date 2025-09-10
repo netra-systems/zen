@@ -270,9 +270,9 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         }
         
         # Validate failure handling
-        self.assertFalse(auth_failure_result["success"])
-        self.assertIn("error", auth_failure_result)
-        self.assertTrue(auth_failure_result["retry_allowed"])
+        assert not auth_failure_result["success"]
+        assert "error" in auth_failure_result
+        assert auth_failure_result["retry_allowed"]
         
     async def test_ssot_websocket_event_ordering_preservation(self):
         """
@@ -296,12 +296,10 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
             received_sequences.append(event["sequence"])
             
         # Validate ordering preservation
-        self.assertEqual(received_sequences, [1, 2, 3, 4, 5],
-                        "Event sequence must be preserved for optimal user experience")
+        assert received_sequences == [1, 2, 3, 4, 5], "Event sequence must be preserved for optimal user experience"
         
         # Validate no events were dropped
-        self.assertEqual(len(self.received_events), 5,
-                        "All events must be delivered without loss")
+        assert len(self.received_events) == 5, "All events must be delivered without loss"
                         
     async def test_ssot_websocket_user_isolation_validation(self):
         """
@@ -327,9 +325,9 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         }
         
         # Validate contexts are isolated
-        self.assertNotEqual(user_1_context["context_id"], user_2_context["context_id"])
-        self.assertTrue(user_1_context["isolated"])
-        self.assertTrue(user_2_context["isolated"])
+        assert user_1_context["context_id"] != user_2_context["context_id"]
+        assert user_1_context["isolated"]
+        assert user_2_context["isolated"]
         
         # Test events are delivered to correct user only
         user_1_events = []
@@ -346,12 +344,12 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         await route_event_to_user(user_2, {"type": "agent_started", "message": "User 2 agent started"})
         
         # Validate isolation
-        self.assertEqual(len(user_1_events), 1)
-        self.assertEqual(len(user_2_events), 1)
-        self.assertIn("User 1", user_1_events[0]["message"])
-        self.assertIn("User 2", user_2_events[0]["message"])
-        self.assertNotIn("User 2", str(user_1_events))
-        self.assertNotIn("User 1", str(user_2_events))
+        assert len(user_1_events) == 1
+        assert len(user_2_events) == 1
+        assert "User 1" in user_1_events[0]["message"]
+        assert "User 2" in user_2_events[0]["message"]
+        assert "User 2" not in str(user_1_events)
+        assert "User 1" not in str(user_2_events)
         
     async def test_ssot_websocket_error_recovery_patterns(self):
         """
@@ -379,8 +377,8 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
             
         # Validate all recoverable errors were handled
         for result in recovery_results:
-            self.assertTrue(result["recovered"])
-            self.assertTrue(result["service_restored"])
+            assert result["recovered"]
+            assert result["service_restored"]
             
         # Test non-recoverable error handling
         fatal_error = {
@@ -397,9 +395,9 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         }
         
         # Validate fatal error handling
-        self.assertFalse(fatal_recovery_result["recovered"])
-        self.assertTrue(fatal_recovery_result["user_notified"])
-        self.assertEqual(fatal_recovery_result["action_required"], "re-authenticate")
+        assert not fatal_recovery_result["recovered"]
+        assert fatal_recovery_result["user_notified"]
+        assert fatal_recovery_result["action_required"] == "re-authenticate"
 
 
 if __name__ == "__main__":

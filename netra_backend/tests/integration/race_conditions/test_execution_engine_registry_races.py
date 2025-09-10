@@ -29,7 +29,7 @@ import pytest
 
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, get_agent_registry
-from netra_backend.app.agents.agent_factory import AgentFactory, get_agent_factory
+from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory as AgentFactory, get_agent_instance_factory as get_agent_factory
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionTracker, get_execution_tracker
 from shared.isolated_environment import IsolatedEnvironment
