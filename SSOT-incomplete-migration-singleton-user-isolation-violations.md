@@ -30,15 +30,21 @@
 - [x] Business impact assessed
 - [x] GitHub issue created
 
-### Phase 1: Test Discovery & Planning
-- [ ] Find existing singleton removal tests
-- [ ] Plan new SSOT compliance tests
-- [ ] Design multi-user isolation tests
+### Phase 1: Test Discovery & Planning ✅ COMPLETE
+- [x] **Found existing protection tests** - 33 critical tests identified
+- [x] **Mission critical tests**: `test_websocket_agent_events_suite.py` (33K+ lines)
+- [x] **User isolation tests**: Factory pattern validation, multi-user isolation
+- [x] **Component tests**: EventValidator, EventRouter, ServiceLocator
+- [x] **Coverage gaps identified**: ServiceLocator transition, race conditions
+- [x] **Plan new SSOT compliance tests** - 30 new test files planned
+- [x] **Test strategy designed** - 60% failing initially, 100% pass after refactoring
+- [x] **Coverage designed**: Mission Critical (8), Integration (12), Unit (8), E2E (2)
 
-### Phase 2: Test Creation (20% new tests)
-- [ ] Create failing tests for singleton violations
-- [ ] Implement user isolation validation tests
-- [ ] Add WebSocket event contamination tests
+### Phase 2: Test Creation (20% new tests) 
+- [ ] **Create reproduction tests** - ServiceLocator, EventValidator, EventRouter violations
+- [ ] **Create factory validation tests** - Per-user isolation patterns  
+- [ ] **Create race condition tests** - Concurrent access validation
+- [ ] **Create business value tests** - Multi-user chat isolation scenarios
 
 ### Phase 3: SSOT Remediation Planning
 - [ ] Design UserExecutionContext factory patterns
