@@ -107,7 +107,7 @@ class TestWebSocketNotifierE2EAgentFlow(BaseTestCase):
         import warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier = AgentWebSocketBridge(real_websocket_manager)
+            notifier = WebSocketNotifier.create_for_user(real_websocket_manager)
             yield notifier
             await notifier.shutdown()
     

@@ -37,12 +37,12 @@ class BaseIntegrationTest(ABC):
     NO MOCKS ALLOWED - Use real_services fixtures for all database/cache operations.
     """
     
-    def setup_method(self, method=None):
+    def setup_method(self):
         """Set up method called before each test method."""
         self.setup_logging()
         self.setup_environment()
     
-    def teardown_method(self, method=None):
+    def teardown_method(self):
         """Tear down method called after each test method."""
         self.cleanup_resources()
     

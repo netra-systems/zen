@@ -1,5 +1,5 @@
 """
-Unit Tests for AgentWebSocketBridge (DEPRECATED)
+Unit Tests for WebSocketNotifier.create_for_user(DEPRECATED)
 
 Tests the deprecated WebSocketNotifier for backward compatibility and
 to ensure proper deprecation warnings are issued.
@@ -24,7 +24,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
 class TestWebSocketNotifier:
-    """Unit tests for AgentWebSocketBridge (deprecated functionality)."""
+    """Unit tests for WebSocketNotifier.create_for_user(deprecated functionality, None)  # MANUAL_REVIEW: Validate exec_context."""
 
     @pytest.fixture
     def mock_websocket_manager(self):
@@ -41,7 +41,7 @@ class TestWebSocketNotifier:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             # Use test_mode=True to prevent background task hanging
-            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(mock_websocket_manager, test_mode=True)
             
             # Verify deprecation warning was issued
             assert len(w) >= 1
@@ -69,7 +69,7 @@ class TestWebSocketNotifier:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
-            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(mock_websocket_manager, test_mode=True)
             
             # Verify warning was issued
             assert len(w) >= 1
@@ -323,7 +323,7 @@ class TestWebSocketNotifier:
         # Create notifier with None manager
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            notifier = AgentWebSocketBridge(None, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(None, test_mode=True)
         
         try:
             # All methods should handle None gracefully

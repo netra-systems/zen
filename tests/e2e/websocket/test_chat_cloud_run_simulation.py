@@ -26,7 +26,7 @@ from test_framework.ssot.base_test_case import BaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.real_websocket_connection_manager import RealWebSocketConnectionManager
 from test_framework.ssot.websocket_golden_path_helpers import WebSocketGoldenPathHelper
-from test_framework.ssot.agent_event_validators import AgentEventValidator
+from netra_backend.app.websocket_core.event_validator import AgentEventValidator
 
 # Import Docker orchestration for real services
 from test_framework.ssot.docker import DockerTestManager

@@ -117,26 +117,26 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
             logger.error(f"❌ WebSocketEventValidator test failed: {e}")
             print(f"DEBUG: WebSocketEventValidator exception: {e}")
             
-        # Test Import 3: SSOT Framework AgentEventValidator (now consolidated into Unified)
+        # Test Import 3: SSOT Framework AgentEventValidator (migrated to UnifiedEventValidator)
         try:
-            from netra_backend.app.websocket_core.event_validator import UnifiedEventValidator
-            ssot_validator = UnifiedEventValidator()
+            from netra_backend.app.websocket_core.event_validator import AgentEventValidator
+            ssot_validator = AgentEventValidator()
             ssot_validator.record_event(self.sample_valid_event)
             ssot_result = ssot_validator.perform_full_validation()
-            implementations_found.append("UnifiedEventValidator_SSOT")
+            implementations_found.append("AgentEventValidator")
             validation_results["ssot_framework"] = {
                 "is_valid": ssot_result.is_valid,
                 "error_message": ssot_result.error_message,
                 "business_value_score": ssot_result.business_value_score
             }
-            logger.info(f"✓ Unified AgentEventValidator found and tested")
-            print(f"DEBUG: Unified AgentEventValidator found - {ssot_result.is_valid}")
+            logger.info(f"✓ AgentEventValidator found and tested")
+            print(f"DEBUG: AgentEventValidator found - {ssot_result.is_valid}")
         except ImportError as e:
-            logger.error(f"❌ Cannot import Unified AgentEventValidator: {e}")
-            print(f"DEBUG: Unified AgentEventValidator import failed: {e}")
+            logger.error(f"❌ Cannot import AgentEventValidator: {e}")
+            print(f"DEBUG: AgentEventValidator import failed: {e}")
         except Exception as e:
-            logger.error(f"❌ Unified AgentEventValidator test failed: {e}")
-            print(f"DEBUG: Unified AgentEventValidator exception: {e}")
+            logger.error(f"❌ AgentEventValidator test failed: {e}")
+            print(f"DEBUG: AgentEventValidator exception: {e}")
             
         # Log findings
         logger.critical(f"🚨 SSOT VIOLATION ANALYSIS:")
@@ -280,9 +280,9 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
         except Exception as e:
             logger.error(f"UnifiedEventValidator critical events test failed: {e}")
             
-        # Test SSOT Framework support  
+        # Test SSOT Framework support (migrated to UnifiedEventValidator)
         try:
-            from test_framework.ssot.agent_event_validators import get_critical_event_types
+            from netra_backend.app.websocket_core.event_validator import get_critical_event_types
             ssot_critical = get_critical_event_types()
             validator_support["ssot_framework"] = ssot_critical
         except Exception as e:

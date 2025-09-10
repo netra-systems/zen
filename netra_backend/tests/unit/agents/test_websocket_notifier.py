@@ -27,7 +27,7 @@ from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestWebSocketNotifier(SSotAsyncTestCase):
+class TestWebSocketNotifier.create_for_user(SSotAsyncTestCase):
     """Unit tests for WebSocketNotifier - Real-time agent event notifications."""
 
     def setup_method(self, method=None):
@@ -39,9 +39,7 @@ class TestWebSocketNotifier(SSotAsyncTestCase):
         self.mock_websocket_manager.send_to_thread.return_value = True
         
         # Create WebSocketNotifier in test mode (disables background tasks)
-        self.notifier = AgentWebSocketBridge(
-            websocket_manager=self.mock_websocket_manager,
-            test_mode=True  # Prevents background queue processor from hanging tests
+        self.notifier = WebSocketNotifier.create_for_user(websocket_manager=self.mock_websocket_manager, test_mode=True  # Prevents background queue processor from hanging tests
         )
         
         # Create test context
@@ -310,9 +308,7 @@ class TestWebSocketNotifier(SSotAsyncTestCase):
         """
         # Capture deprecation warning during initialization
         with pytest.warns(DeprecationWarning, match="WebSocketNotifier is deprecated"):
-            deprecated_notifier = AgentWebSocketBridge(
-                websocket_manager=self.mock_websocket_manager,
-                test_mode=True
+            deprecated_notifier = WebSocketNotifier.create_for_user(websocket_manager=self.mock_websocket_manager, test_mode=True
             )
         
         # Verify notifier still works despite deprecation

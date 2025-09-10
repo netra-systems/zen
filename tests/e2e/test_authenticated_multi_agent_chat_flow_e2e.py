@@ -43,7 +43,7 @@ from test_framework.ssot.websocket_golden_path_helpers import (
     GoldenPathTestConfig
 )
 from netra_backend.app.websocket_core.event_validator import (
-    UnifiedEventValidator as AgentEventValidator,
+    AgentEventValidator,
     CriticalAgentEventType,
     WebSocketEventMessage
 )

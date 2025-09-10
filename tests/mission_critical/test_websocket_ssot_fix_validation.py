@@ -210,7 +210,7 @@
                                 # Removed problematic line: async def test_websocket_notifier_integration(self, manager, agent_context):
                                     # REMOVED_SYNTAX_ERROR: """CRITICAL: Verify WebSocketNotifier integration works."""
                                     # REMOVED_SYNTAX_ERROR: pass
-                                    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(manager)
+                                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(manager)
 
                                     # Test notifier initialization
                                     # REMOVED_SYNTAX_ERROR: assert notifier.websocket_manager is manager
@@ -228,7 +228,7 @@
                                         # REMOVED_SYNTAX_ERROR: conn_id = await manager.connect_user(agent_context.user_id, mock_websocket)
 
                                         # Create notifier
-                                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(manager)
+                                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(manager)
 
                                         # Test agent_started event
                                         # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(agent_context)

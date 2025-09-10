@@ -262,7 +262,7 @@ class RegistryCompat:
         return []
 
 
-class WebSocketManager:
+class UnifiedWebSocketManager:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
     
     🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
@@ -316,46 +316,6 @@ class WebSocketManager:
         self._health_check_failures = 0
         
         logger.info("UnifiedWebSocketManager initialized with connection-level thread safety and enhanced error handling")
-    
-    @classmethod
-    def from_user_context(cls, user_context: 'UserExecutionContext') -> 'WebSocketManager':
-        """
-        Factory method to create WebSocketManager from UserExecutionContext.
-        
-        PHASE 1 SSOT FIX: This factory method provides the standard interface
-        that WebSocketManagerFactory expects, bridging the constructor signature
-        mismatch between factory and manager.
-        
-        Args:
-            user_context: UserExecutionContext containing user isolation data
-            
-        Returns:
-            WebSocketManager instance with proper user context association
-            
-        Raises:
-            ValueError: If user_context is invalid or missing required fields
-        """
-        if not user_context:
-            raise ValueError("user_context is required for WebSocket manager creation")
-        
-        # Validate that user_context has required fields
-        if not hasattr(user_context, 'user_id') or not user_context.user_id:
-            raise ValueError("user_context must have valid user_id")
-        
-        # Create manager instance using standard constructor
-        manager = cls()
-        
-        # Associate user context with manager for isolation
-        manager._user_context = user_context
-        
-        # Initialize user-specific state based on context
-        manager._context_user_id = user_context.user_id
-        manager._context_thread_id = getattr(user_context, 'thread_id', None)
-        manager._context_run_id = getattr(user_context, 'run_id', None)
-        manager._context_websocket_client_id = getattr(user_context, 'websocket_client_id', None)
-        
-        logger.info(f"Created WebSocketManager from UserExecutionContext for user {user_context.user_id[:8]}...")
-        return manager
     
     async def _get_user_connection_lock(self, user_id: str) -> asyncio.Lock:
         """Get or create user-specific connection lock for thread safety.
@@ -2257,190 +2217,13 @@ class WebSocketManager:
         """
         # Use existing is_connection_active method
         return self.is_connection_active(user_id)
-    
-    # =========================================================================
-    # PHASE 1 SSOT ENHANCEMENT: Interface Standardization Methods
-    # =========================================================================
-    
-    def get_connection_count(self) -> int:
-        """
-        Get the total number of active connections.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Provides basic metrics method missing from SSOT implementation.
-        
-        Returns:
-            Total count of active connections across all users
-        """
-        return len(self._connections)
-    
-    def get_connection_info(self, connection_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Get connection information as a simple dictionary.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Provides dict-based access instead of complex WebSocketConnection object.
-        
-        Args:
-            connection_id: Connection identifier to query
-            
-        Returns:
-            Dictionary with connection info, or None if connection not found
-        """
-        connection = self.get_connection(connection_id)
-        if not connection:
-            return None
-        
-        return {
-            "connection_id": connection.connection_id,
-            "user_id": connection.user_id,
-            "websocket_id": getattr(connection, 'websocket_id', None),
-            "connected_at": getattr(connection, 'connected_at', None),
-            "state": getattr(connection, 'state', 'unknown'),
-            "is_active": True  # If it's in _connections, it's active
-        }
-    
-    async def send_message(self, connection_id: str, message: Dict[str, Any]) -> None:
-        """
-        Send a message directly to a specific connection.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Provides direct connection messaging capability.
-        
-        Args:
-            connection_id: Target connection identifier
-            message: Message dictionary to send
-        """
-        connection = self.get_connection(connection_id)
-        if not connection:
-            logger.warning(f"Cannot send message to connection {connection_id}: connection not found")
-            return
-        
-        try:
-            # Serialize message safely for WebSocket transmission
-            serialized_message = _serialize_message_safely(message)
-            message_json = json.dumps(serialized_message)
-            
-            # Send to the WebSocket connection
-            await connection.websocket.send_text(message_json)
-            logger.debug(f"Sent message to connection {connection_id}: {message.get('type', 'unknown')}")
-            
-        except Exception as e:
-            logger.error(f"Failed to send message to connection {connection_id}: {e}")
-            # Remove connection if it's broken
-            await self.remove_connection(connection_id)
-    
-    async def broadcast_to_room(self, room: str, message: Dict[str, Any]) -> None:
-        """
-        Broadcast a message to all connections in a specific room.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Implements room-based messaging functionality.
-        
-        Note: Current implementation treats all connections as in the same room.
-        Future enhancement could add proper room management.
-        
-        Args:
-            room: Room identifier (currently unused - broadcasts to all)
-            message: Message dictionary to broadcast
-        """
-        logger.debug(f"Broadcasting to room '{room}': {message.get('type', 'unknown')}")
-        # For now, broadcast to all connections (room management can be added later)
-        await self.broadcast(message)
-    
-    async def recv(self, timeout: Optional[float] = None) -> str:
-        """
-        Mock recv method for WebSocket interface compatibility.
-        
-        PHASE 1 SSOT FIX: Added for test compatibility with standard WebSocket interface.
-        Returns a mock message for testing purposes.
-        
-        Args:
-            timeout: Optional timeout (ignored in this implementation)
-            
-        Returns:
-            JSON-serialized mock message
-        """
-        # Return a mock message for testing compatibility
-        mock_message = {
-            "type": "connection_ready",
-            "data": "SSOT WebSocket manager ready",
-            "timestamp": datetime.utcnow().isoformat(),
-            "connection_count": self.get_connection_count(),
-            "source": "UnifiedWebSocketManager"
-        }
-        return json.dumps(mock_message)
-    
-    async def send(self, message: str) -> None:
-        """
-        Mock send method for WebSocket interface compatibility.
-        
-        PHASE 1 SSOT FIX: Added for test compatibility with standard WebSocket interface.
-        Parses string message and broadcasts to all connections.
-        
-        Args:
-            message: JSON string or plain text message to send
-        """
-        try:
-            # Try to parse as JSON
-            parsed_message = json.loads(message)
-        except json.JSONDecodeError:
-            # If not JSON, treat as plain text
-            parsed_message = {"type": "text", "data": message}
-        
-        # Broadcast the parsed message
-        await self.broadcast(parsed_message)
-        logger.debug(f"SSOT WebSocket manager sent: {parsed_message.get('type', 'text')}")
-    
-    # Alternative method names for enhanced compatibility
-    async def connect(self, connection_id: str, user_id: Optional[str] = None, **kwargs) -> None:
-        """
-        Compatibility method for MockWebSocketManager.connect() interface.
-        
-        PHASE 1 SSOT FIX: Alternative method name for add_connection().
-        Provides backward compatibility with mock interface.
-        
-        Args:
-            connection_id: Connection identifier
-            user_id: User identifier  
-            **kwargs: Additional connection parameters
-        """
-        # Create a WebSocketConnection object for the SSOT interface
-        # This is a simplified version for compatibility
-        connection_data = {
-            'connection_id': connection_id,
-            'user_id': user_id or "unknown_user",
-            'websocket': None,  # Mock websocket for compatibility
-            **kwargs
-        }
-        
-        # Create a minimal connection object
-        connection = type('MockConnection', (), connection_data)()
-        connection.websocket = type('MockWebSocket', (), {
-            'send_text': lambda msg: None,  # Mock send_text method
-            'state': 'OPEN'
-        })()
-        
-        await self.add_connection(connection)
-    
-    async def disconnect(self, connection_id: str) -> None:
-        """
-        Compatibility method for MockWebSocketManager.disconnect() interface.
-        
-        PHASE 1 SSOT FIX: Alternative method name for remove_connection().
-        Provides backward compatibility with mock interface.
-        
-        Args:
-            connection_id: Connection identifier to disconnect
-        """
-        await self.remove_connection(connection_id)
 
 
 # SECURITY FIX: Replace singleton with factory pattern
 # 🚨 SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
 # Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
-def get_websocket_manager() -> WebSocketManager:
+def get_websocket_manager() -> UnifiedWebSocketManager:
     """
     🚨 CRITICAL SECURITY ERROR: This function has been REMOVED.
     
@@ -2486,5 +2269,15 @@ def get_websocket_manager() -> WebSocketManager:
     raise RuntimeError(error_message)
 
 
-# Backward compatibility alias
-UnifiedWebSocketManager = WebSocketManager
+# CRITICAL: Export alias for backward compatibility with migration_adapter
+# This ensures migration_adapter can import WebSocketManager 
+WebSocketManager = UnifiedWebSocketManager
+
+# Export list for the module
+__all__ = [
+    'WebSocketConnection',
+    'UnifiedWebSocketManager', 
+    'WebSocketManager',  # Alias for UnifiedWebSocketManager
+    '_serialize_message_safely',
+    'get_websocket_manager'
+]

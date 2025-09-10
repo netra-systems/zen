@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.core.tools.unified_tool_dispatcher import RequestScopedToolDispatcher

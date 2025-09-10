@@ -161,7 +161,7 @@ class RealAgentExecutionIsolationTest:
         user_context = self.validator.create_isolated_user_context(user_id)
         
         # Setup isolated WebSocket notifier
-        websocket_notifier = AgentWebSocketBridge(user_context=user_context)
+        websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
         
         # Capture WebSocket events for isolation validation
         captured_events = []
@@ -629,7 +629,7 @@ class TestMultiUserAgentIsolation:
             user_context = user_contexts[user_id]
             
             # Create WebSocket notifier with validation
-            websocket_notifier = AgentWebSocketBridge(user_context=user_context)
+            websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
             
             events_sent = []
             

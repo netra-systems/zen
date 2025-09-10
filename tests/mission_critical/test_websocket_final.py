@@ -73,15 +73,14 @@
 
 
 # REMOVED_SYNTAX_ERROR: def test_1_websocket_notifier_required_methods():
-    # REMOVED_SYNTAX_ERROR: """CRITICAL: AgentWebSocketBridge has all required methods."""
-    # REMOVED_SYNTAX_ERROR: print("Test 1: AgentWebSocketBridge required methods...")
+    # REMOVED_SYNTAX_ERROR: """CRITICAL: WebSocketNotifier has all required methods."""
+    # REMOVED_SYNTAX_ERROR: print("Test 1: WebSocketNotifier required methods...")
 
     # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
-    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)
 
     # REMOVED_SYNTAX_ERROR: required_methods = [ )
-    # REMOVED_SYNTAX_ERROR: 'send_agent_started',
-    # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
+    # REMOVED_SYNTAX_ERROR: 'send_agent_started', # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
     # REMOVED_SYNTAX_ERROR: 'send_partial_result',
     # REMOVED_SYNTAX_ERROR: 'send_tool_executing',
     # REMOVED_SYNTAX_ERROR: 'send_tool_completed',
@@ -234,12 +233,11 @@
 
     # REMOVED_SYNTAX_ERROR: ws_manager.send_to_thread = AsyncMock(side_effect=capture_event)
 
-    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)
 
     # Create test context
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
-    # REMOVED_SYNTAX_ERROR: run_id="event-test",
-    # REMOVED_SYNTAX_ERROR: thread_id="event-thread",
+    # REMOVED_SYNTAX_ERROR: run_id="event-test", # REMOVED_SYNTAX_ERROR: thread_id="event-thread",
     # REMOVED_SYNTAX_ERROR: user_id="event-user",
     # REMOVED_SYNTAX_ERROR: agent_name="test_agent",
     # REMOVED_SYNTAX_ERROR: retry_count=0,

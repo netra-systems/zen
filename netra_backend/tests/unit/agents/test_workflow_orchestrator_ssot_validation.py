@@ -146,31 +146,16 @@ class TestWorkflowOrchestratorSSotValidation(SSotBaseTestCase, unittest.TestCase
         EXPECTED: This test should FAIL before remediation (no logging).
         AFTER REMEDIATION: Should PASS when compliance logging is added.
         """
-        # Test the functionality by checking that WorkflowOrchestrator initialization 
-        # completes successfully with a valid UserExecutionEngine (which triggers the logging)
-        # Instead of capturing logs (which is complex with loguru), we test that:
-        # 1. The initialization succeeds (proving validation passed)
-        # 2. The validation method works correctly
-        
-        # This should succeed without raising any exceptions
-        orchestrator = WorkflowOrchestrator(
-            agent_registry=self.mock_agent_registry,
-            execution_engine=self.valid_user_engine,
-            websocket_manager=self.mock_websocket_manager,
-            user_context=self.mock_user_context
-        )
-        
-        # Verify that the orchestrator was created successfully 
-        # (which means SSOT validation passed and logging occurred)
-        self.assertIsNotNone(orchestrator)
-        self.assertEqual(orchestrator.execution_engine, self.valid_user_engine)
-        
-        # Test the validation method directly to ensure it works
-        # This should not raise any exceptions for a valid UserExecutionEngine
-        try:
-            orchestrator._validate_execution_engine_ssot_compliance(self.valid_user_engine)
-        except Exception as e:
-            self.fail(f"SSOT validation should not raise exception for valid UserExecutionEngine: {e}")
+        with self.assertLogs("netra_backend.app.agents.supervisor.workflow_orchestrator", level="INFO") as log:
+            WorkflowOrchestrator(
+                agent_registry=self.mock_agent_registry,
+                execution_engine=self.valid_user_engine,
+                websocket_manager=self.mock_websocket_manager,
+                user_context=self.mock_user_context
+            )
+            
+        # Should log SSOT compliance validation
+        self.assertIn("SSOT UserExecutionEngine compliance validated", log.output[0])
         
     def test_workflow_orchestrator_provides_helpful_migration_message(self):
         """Test that WorkflowOrchestrator provides helpful migration guidance.

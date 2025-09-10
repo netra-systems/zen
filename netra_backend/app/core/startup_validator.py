@@ -178,7 +178,7 @@ class StartupValidator:
         """Validate WebSocket components can be imported and initialized."""
         try:
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             from netra_backend.app.core.unified_id_manager import UnifiedIDManager
             
             # Test bridge can use UnifiedIDManager

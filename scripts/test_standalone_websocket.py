@@ -67,12 +67,11 @@ async def test_websocket_events():
     await ws_manager.connect_user(user_id, mock_websocket, thread_id)
     
     # Create WebSocket notifier
-    notifier = AgentWebSocketBridge(ws_manager)
+    notifier = WebSocketNotifier.create_for_user(ws_manager)
     
     # Create execution context
     context = AgentExecutionContext(
-        run_id="test-run-123",
-        thread_id=thread_id,
+        run_id="test-run-123", thread_id=thread_id,
         user_id=user_id,
         agent_name="test_agent",
         retry_count=0,

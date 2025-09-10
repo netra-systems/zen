@@ -171,7 +171,7 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
             
         # Test 2: SSOT Framework import
         try:
-            from test_framework.ssot.agent_event_validators import (
+            from netra_backend.app.websocket_core.event_validator import (
                 AgentEventValidator as SSOTValidator,
                 AgentEventValidationResult as SSOTResult,
                 validate_agent_events as ssot_validate,
@@ -271,7 +271,7 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
             pass
             
         try:
-            from test_framework.ssot.agent_event_validators import AgentEventValidator
+            from netra_backend.app.websocket_core.event_validator import AgentEventValidator
             validators["ssot_framework"] = AgentEventValidator()
         except ImportError:
             pass

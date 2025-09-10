@@ -53,9 +53,7 @@ class TestWebSocketEventDeliveryRealServices:
         )
         
         # Create WebSocket notifier with real backend
-        notifier = AgentWebSocketBridge(
-            websocket_manager=websocket_manager,
-            test_mode=False  # Enable real operations
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=websocket_manager, test_mode=False  # Enable real operations
         )
         
         # Create test execution context
@@ -155,12 +153,11 @@ class TestWebSocketEventDeliveryRealServices:
             enable_isolation=True
         )
         
-        notifier = AgentWebSocketBridge(websocket_manager=websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=websocket_manager)
         
         # Create contexts for different users
         user1_context = AgentExecutionContext(
-            agent_name="isolation_agent_user1",
-            run_id=uuid.uuid4(),
+            agent_name="isolation_agent_user1", run_id=uuid.uuid4(),
             thread_id=f"user1-thread-{uuid.uuid4()}",
             user_id=f"user1-{uuid.uuid4()}"
         )
@@ -301,9 +298,7 @@ class TestWebSocketEventDeliveryRealServices:
             recovery_timeout=2.0
         )
         
-        notifier = AgentWebSocketBridge(
-            websocket_manager=websocket_manager,
-            enable_delivery_guarantees=True
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=websocket_manager, enable_delivery_guarantees=True
         )
         
         context = AgentExecutionContext(
@@ -425,9 +420,7 @@ class TestWebSocketEventDeliveryRealServices:
             batch_timeout=0.1
         )
         
-        notifier = AgentWebSocketBridge(
-            websocket_manager=websocket_manager,
-            max_queue_size=1000  # Allow high throughput
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=websocket_manager, max_queue_size=1000  # Allow high throughput
         )
         
         context = AgentExecutionContext(

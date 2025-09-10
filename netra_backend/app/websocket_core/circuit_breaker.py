@@ -25,9 +25,11 @@ import time
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, Callable, Any, Dict
-from netra_backend.app.core.unified_logging import get_logger
+import logging
 
-logger = get_logger(__name__)
+from netra_backend.app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
 
 
 class CircuitState(Enum):

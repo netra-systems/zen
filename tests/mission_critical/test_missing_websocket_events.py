@@ -139,7 +139,7 @@
     # REMOVED_SYNTAX_ERROR: ):
         # REMOVED_SYNTAX_ERROR: """Test that agent_stopped event is emitted when agent is cancelled."""
         # This event is MISSING - test should FAIL
-        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
         # Simulate agent cancellation
         # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(agent_context)
@@ -161,12 +161,11 @@
         # REMOVED_SYNTAX_ERROR: ):
             # REMOVED_SYNTAX_ERROR: """Test that agent_error event is emitted on agent failure."""
             # This event is MISSING - test should FAIL
-            # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
             # Simulate agent error
             # REMOVED_SYNTAX_ERROR: error_details = { )
-            # REMOVED_SYNTAX_ERROR: "error_type": "ExecutionError",
-            # REMOVED_SYNTAX_ERROR: "message": "Agent failed to process request",
+            # REMOVED_SYNTAX_ERROR: "error_type": "ExecutionError", # REMOVED_SYNTAX_ERROR: "message": "Agent failed to process request",
             # REMOVED_SYNTAX_ERROR: "traceback": "..."
             
 
@@ -192,12 +191,11 @@
             # REMOVED_SYNTAX_ERROR: ):
                 # REMOVED_SYNTAX_ERROR: """Test that agent_log events are emitted for debugging."""
                 # This event is MISSING - test should FAIL
-                # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+                # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
                 # Send agent_log - this method now exists!
                 # REMOVED_SYNTAX_ERROR: await notifier.send_agent_log( )
-                # REMOVED_SYNTAX_ERROR: agent_context,
-                # REMOVED_SYNTAX_ERROR: level="info",
+                # REMOVED_SYNTAX_ERROR: agent_context, # REMOVED_SYNTAX_ERROR: level="info",
                 # REMOVED_SYNTAX_ERROR: log_message="Processing step 1 of 5",
                 # REMOVED_SYNTAX_ERROR: metadata={"timestamp": datetime.now(timezone.utc).isoformat()}
                 
@@ -215,7 +213,7 @@
                 # REMOVED_SYNTAX_ERROR: ):
                     # REMOVED_SYNTAX_ERROR: """Test that both tool_started and tool_executing events are sent."""
                     # Currently only tool_executing is sent, tool_started is MISSING
-                    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
                     # Send tool_executing (this exists)
                     # REMOVED_SYNTAX_ERROR: await notifier.send_tool_executing(agent_context, "data_analyzer")
@@ -237,12 +235,11 @@
                     # REMOVED_SYNTAX_ERROR: ):
                         # REMOVED_SYNTAX_ERROR: """Test that stream_chunk events are sent for incremental content."""
                         # This event is MISSING - test should FAIL
-                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
                         # Simulate streaming content
                         # REMOVED_SYNTAX_ERROR: chunks = [ )
-                        # REMOVED_SYNTAX_ERROR: "Processing data...",
-                        # REMOVED_SYNTAX_ERROR: "Analyzing patterns...",
+                        # REMOVED_SYNTAX_ERROR: "Processing data...", # REMOVED_SYNTAX_ERROR: "Analyzing patterns...",
                         # REMOVED_SYNTAX_ERROR: "Generating insights..."
                         
 
@@ -267,12 +264,11 @@
                             # REMOVED_SYNTAX_ERROR: ):
                                 # REMOVED_SYNTAX_ERROR: """Test that stream_complete event is sent after streaming finishes."""
                                 # This event is MISSING - test should FAIL
-                                # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+                                # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
                                 # Send stream_complete - this method now exists!
                                 # REMOVED_SYNTAX_ERROR: await notifier.send_stream_complete( )
-                                # REMOVED_SYNTAX_ERROR: agent_context,
-                                # REMOVED_SYNTAX_ERROR: stream_id="stream_123",
+                                # REMOVED_SYNTAX_ERROR: agent_context, # REMOVED_SYNTAX_ERROR: stream_id="stream_123",
                                 # REMOVED_SYNTAX_ERROR: total_chunks=5,
                                 # REMOVED_SYNTAX_ERROR: metadata={"duration_ms": 1500}
                                 
@@ -290,11 +286,10 @@
                                 # REMOVED_SYNTAX_ERROR: ):
                                     # REMOVED_SYNTAX_ERROR: """Test that subagent_started and subagent_completed events are sent."""
                                     # These events are MISSING - test should FAIL
-                                    # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+                                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
                                     # REMOVED_SYNTAX_ERROR: subagent_context = AgentExecutionContext( )
-                                    # REMOVED_SYNTAX_ERROR: agent_name="data_sub_agent",
-                                    # REMOVED_SYNTAX_ERROR: thread_id=agent_context.thread_id,
+                                    # REMOVED_SYNTAX_ERROR: agent_name="data_sub_agent", # REMOVED_SYNTAX_ERROR: thread_id=agent_context.thread_id,
                                     # REMOVED_SYNTAX_ERROR: run_id="subagent_run_789",
                                     # REMOVED_SYNTAX_ERROR: user_id=agent_context.user_id,
                                     # REMOVED_SYNTAX_ERROR: metadata={"parent_agent": agent_context.agent_name, "prompt": "Analyze data"}
@@ -335,11 +330,11 @@
                                     # REMOVED_SYNTAX_ERROR: ):
                                         # REMOVED_SYNTAX_ERROR: """Test the complete event flow for agent execution."""
                                         # This test shows what SHOULD happen vs what ACTUALLY happens
-                                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+                                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
                                         # Expected event sequence (what frontend expects)
                                         # REMOVED_SYNTAX_ERROR: expected_events = [ )
-                                        # REMOVED_SYNTAX_ERROR: "agent_started",      # ✅ Exists
+                                        # REMOVED_SYNTAX_ERROR: "agent_started", # ✅ Exists
                                         # REMOVED_SYNTAX_ERROR: "agent_thinking",     # ✅ Exists
                                         # REMOVED_SYNTAX_ERROR: "tool_started",       # ❌ MISSING - should be before tool_executing
                                         # REMOVED_SYNTAX_ERROR: "tool_executing",     # ✅ Exists
@@ -399,7 +394,7 @@
                                                     # REMOVED_SYNTAX_ERROR: self, mock_websocket_manager, agent_context, event_capture
                                                     # REMOVED_SYNTAX_ERROR: ):
                                                         # REMOVED_SYNTAX_ERROR: """Test error handling event flow."""
-                                                        # REMOVED_SYNTAX_ERROR: notifier = AgentWebSocketBridge(mock_websocket_manager)
+                                                        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
 
                                                         # Start agent
                                                         # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(agent_context)
@@ -407,8 +402,7 @@
                                                         # Simulate error during execution
                                                         # Should send agent_error but method doesn't exist!
                                                         # REMOVED_SYNTAX_ERROR: error_info = { )
-                                                        # REMOVED_SYNTAX_ERROR: "error_type": "ToolExecutionError",
-                                                        # REMOVED_SYNTAX_ERROR: "message": "Failed to execute data analyzer",
+                                                        # REMOVED_SYNTAX_ERROR: "error_type": "ToolExecutionError", # REMOVED_SYNTAX_ERROR: "message": "Failed to execute data analyzer",
                                                         # REMOVED_SYNTAX_ERROR: "tool_name": "data_analyzer",
                                                         # REMOVED_SYNTAX_ERROR: "retry_count": 2,
                                                         # REMOVED_SYNTAX_ERROR: "max_retries": 3

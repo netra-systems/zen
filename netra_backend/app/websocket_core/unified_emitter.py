@@ -93,10 +93,12 @@ class UnifiedWebSocketEmitter:
     
     def __init__(
         self,
-        manager: 'UnifiedWebSocketManager',
-        user_id: str,
+        manager: 'UnifiedWebSocketManager' = None,
+        user_id: str = None,
         context: Optional['UserExecutionContext'] = None,
-        performance_mode: bool = False
+        performance_mode: bool = False,
+        # PHASE 1 BACKWARD COMPATIBILITY: Support legacy constructor parameters
+        websocket_manager: 'UnifiedWebSocketManager' = None
     ):
         """
         Initialize emitter for specific user.
@@ -106,7 +108,23 @@ class UnifiedWebSocketEmitter:
             user_id: User ID this emitter serves
             context: Optional execution context for additional metadata
             performance_mode: Enable high-throughput mode with minimal retries
+            websocket_manager: Legacy parameter alias for 'manager' (backward compatibility)
         """
+        # PHASE 1 BACKWARD COMPATIBILITY: Handle legacy parameter name
+        if websocket_manager is not None and manager is None:
+            manager = websocket_manager
+            logger.debug("Using legacy 'websocket_manager' parameter (redirected to 'manager')")
+        
+        if manager is None:
+            raise ValueError("Either 'manager' or 'websocket_manager' parameter is required")
+        
+        # Extract user_id from context if not provided directly
+        if user_id is None and context is not None:
+            user_id = getattr(context, 'user_id', None)
+        
+        if user_id is None:
+            raise ValueError("user_id is required (directly or via context.user_id)")
+        
         self.manager = manager
         self.user_id = user_id
         self.context = context

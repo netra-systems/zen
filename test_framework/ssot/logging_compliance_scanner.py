@@ -119,9 +119,6 @@ class LoggingComplianceScanner:
     3. Bypassing the centralized logging infrastructure
     
     CRITICAL: This scanner is used by failing tests to prove violation detection works.
-    
-    BOOTSTRAP EXCEPTION: The unified_logger_factory.py itself is EXEMPT from violations
-    because it IS the SSOT foundation that provides logging to everything else.
     """
     
     # Critical files that MUST be SSOT compliant (Golden Path components)
@@ -140,12 +137,6 @@ class LoggingComplianceScanner:
         # Backend Core (CRITICAL)
         "netra_backend/app/main.py",
         "netra_backend/app/auth_integration/auth.py",
-    }
-    
-    # Bootstrap exception - files allowed to use logging directly
-    BOOTSTRAP_EXEMPT_FILES = {
-        "shared/logging/unified_logger_factory.py",
-        "shared\\logging\\unified_logger_factory.py",  # Windows path variant
     }
     
     # Violation patterns to detect
@@ -176,24 +167,6 @@ class LoggingComplianceScanner:
         file_path = Path(file_path)
         
         if not file_path.exists() or not file_path.suffix == '.py':
-            return violations
-        
-        # Check if this file is bootstrap exempt
-        normalized_path = str(file_path).replace('\\', '/')
-        relative_path = None
-        try:
-            relative_path = str(file_path.relative_to(self.base_path)).replace('\\', '/')
-        except ValueError:
-            pass
-        
-        is_bootstrap_exempt = (
-            normalized_path in self.BOOTSTRAP_EXEMPT_FILES or
-            (relative_path and relative_path in self.BOOTSTRAP_EXEMPT_FILES) or
-            str(file_path).endswith('unified_logger_factory.py')
-        )
-        
-        if is_bootstrap_exempt:
-            # Skip scanning bootstrap exempt files
             return violations
         
         try:

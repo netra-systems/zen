@@ -66,12 +66,12 @@ class DataHelperAgent(BaseAgent):
         Returns:
             DataHelperAgent instance configured for the user context
         """
-        from netra_backend.app.llm.llm_manager import create_llm_manager
+        from netra_backend.app.llm.llm_manager import LLMManager
         # SSOT COMPLIANCE: Import from facade that redirects to SSOT
         from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
         
-        # Create dependencies with proper user isolation
-        llm_manager = create_llm_manager(user_context)
+        # Create dependencies (these will be injected later by the factory)
+        llm_manager = LLMManager()
         tool_dispatcher = UnifiedToolDispatcher.create_for_user(user_context)
         
         # Create agent with correct constructor signature

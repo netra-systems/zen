@@ -36,8 +36,7 @@ async def generate_stream(message: str, thread_id: Optional[str] = None) -> Asyn
 
 async def _execute_module_generate_stream(db, message: str, thread_id: Optional[str]) -> AsyncGenerator[Dict[str, Any], None]:
     """Execute module-level stream generation."""
-    from netra_backend.app.llm.llm_manager import create_llm_manager
-    llm_manager = create_llm_manager(None)  # Compatibility layer without user context
+    llm_manager = LLMManager()
     agent_service = get_agent_service(db, llm_manager)
     async for chunk in agent_service.generate_stream(message, thread_id):
         yield chunk

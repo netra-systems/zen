@@ -1,22 +1,16 @@
+from shared.isolated_environment import get_env
 """
 Unified Logger Factory - Single source of truth for all logging initialization
 Eliminates 489+ duplicate logging patterns across the codebase.
 
 This module provides the ONLY way to initialize loggers throughout the system.
 All services (netra_backend, auth_service, dev_launcher) must use this factory.
-
-CRITICAL: This factory avoids circular dependencies by using minimal standard library
-logging operations for bootstrap initialization. It does NOT import itself.
 """
 from typing import Optional, Dict, Any
+import logging
 import sys
 import os
 from pathlib import Path
-
-# Import logging LAST to minimize bootstrap dependencies
-import logging
-
-from shared.isolated_environment import get_env
 
 
 class UnifiedLoggerFactory:
@@ -154,10 +148,8 @@ class UnifiedLoggerFactory:
         if name in cls._loggers:
             return cls._loggers[name]
         
-        # Create new logger using standard library directly (bootstrap pattern)
-        # This is the ONLY place in the system allowed to use logging.getLogger()
-        # because this IS the SSOT factory that provides logging to everything else
-        logger = logging.getLogger(name)  # Bootstrap exception - this IS the SSOT
+        # Create new logger
+        logger = logging.getLogger(name)
         logger.setLevel(cls._base_config['level'])
         
         # Cache and return
@@ -202,16 +194,13 @@ def get_logger(name: Optional[str] = None) -> logging.Logger:
     Get a unified logger instance.
     
     This function replaces ALL instances of:
-    - import logging; logger = logging.getLogger(__name__)  # ❌ FORBIDDEN everywhere except this factory
+    - import logging; logger = logging.getLogger(__name__)
     - from netra_backend.app.logging_config import central_logger
     - Any other logging initialization patterns
     
     Usage:
         from shared.logging.unified_logger_factory import get_logger
         logger = get_logger(__name__)  # or just get_logger()
-        
-    BOOTSTRAP NOTE: This factory itself uses logging.getLogger() as the foundational
-    implementation - this is the ONLY permitted usage in the entire codebase.
     """
     return UnifiedLoggerFactory.get_logger(name)
 

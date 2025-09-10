@@ -21,11 +21,10 @@ def validate_websocket_integration():
         
         # Test WebSocketNotifier has required methods
         ws_manager = WebSocketManager()
-        notifier = AgentWebSocketBridge(ws_manager)
+        notifier = WebSocketNotifier.create_for_user(ws_manager)
         
         required_methods = [
-            'send_agent_started',
-            'send_agent_thinking',
+            'send_agent_started', 'send_agent_thinking',
             'send_tool_executing',
             'send_tool_completed',
             'send_agent_completed'

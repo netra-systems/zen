@@ -437,7 +437,7 @@ class TestWebSocketEventBufferRaceConditions(BaseIntegrationTest):
         mock_websocket.send_json = AsyncMock(side_effect=mock_send_json)
         
         # Create WebSocketNotifier
-        notifier = AgentWebSocketBridge(websocket_manager=None)
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=None)
         
         # CRITICAL: Set up race condition scenario
         start_time = time.time()

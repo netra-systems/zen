@@ -181,7 +181,7 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                     elif hasattr(backend_validator, 'environment'):
                         backend_env = backend_validator.environment
                     else:
-                        backend_env = get_env().get('ENVIRONMENT', 'unknown')
+                        backend_env = get_env('ENVIRONMENT', 'unknown')
                 except Exception:
                     backend_env = "unknown"
                 
@@ -274,7 +274,7 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
                 test_validator = TestFrameworkValidator()
                 try:
                     # Test framework may check for JWT_SECRET_KEY existence
-                    jwt_key = get_env().get('JWT_SECRET_KEY')
+                    jwt_key = get_env('JWT_SECRET_KEY')
                     scenario_results['test'] = jwt_key is not None and len(jwt_key) > 0
                 except Exception as e:
                     scenario_results['test'] = False

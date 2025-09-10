@@ -314,7 +314,7 @@
         # REMOVED_SYNTAX_ERROR: context.agent_name = "TestAgent"
 
         # Create WebSocket notifier (the deprecated one that might still be used)
-        # REMOVED_SYNTAX_ERROR: websocket_manager = Magic        notifier = AgentWebSocketBridge(websocket_manager)
+        # REMOVED_SYNTAX_ERROR: websocket_manager = Magic        notifier = WebSocketNotifier.create_for_user(websocket_manager)
 
         # Try to send notification - this should fail silently
         # REMOVED_SYNTAX_ERROR: with pytest.raises(AttributeError, match=".*bridge.*None.*"):

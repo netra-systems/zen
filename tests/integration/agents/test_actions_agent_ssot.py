@@ -457,7 +457,7 @@ class TestActionsAgentSupervisorIntegration:
         agent_registry = AgentRegistry()
         
         # Setup WebSocket notifier chain
-        notifier = AgentWebSocketBridge(self.websocket_capture)
+        notifier = WebSocketNotifier.create_for_user(self.websocket_capture)
         agent_registry.set_websocket_manager(self.websocket_capture)
         
         # Get ActionsAgent
@@ -465,8 +465,7 @@ class TestActionsAgentSupervisorIntegration:
         
         # Create comprehensive test scenario
         state = DeepAgentState(
-            user_request="Multi-faceted optimization with real-time feedback",
-            optimizations_result=RealisticDataGenerator.create_optimization_result("performance_optimization"),
+            user_request="Multi-faceted optimization with real-time feedback", optimizations_result=RealisticDataGenerator.create_optimization_result("performance_optimization"),
             data_result=RealisticDataGenerator.create_data_analysis_result("performance_analysis")
         )
         

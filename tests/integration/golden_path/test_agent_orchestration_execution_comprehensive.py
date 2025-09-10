@@ -70,9 +70,9 @@ from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolE
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
 # Database and configuration imports
-from netra_backend.app.db.models_user import User
-from netra_backend.app.db.models_agent import Thread, Message, Run
-from netra_backend.app.config import get_config
+from netra_backend.app.db.models_auth import User
+from netra_backend.app.db.models_corpus import Thread, Message, Run
+from netra_backend.app.core.configuration.base import get_config
 from shared.isolated_environment import get_env
 
 # Logging and monitoring
@@ -90,9 +90,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
     focusing on business value delivery through agent coordination.
     """
 
-    def setup_method(self, method=None):
+    def setUp(self):
         """Setup test environment with proper SSOT patterns."""
-        super().setup_method(method)
+        super().setUp()
         self.mock_factory = SSotMockFactory()
         self.websocket_utility = WebSocketTestUtility()
         self.db_utility = DatabaseTestUtility()
@@ -103,8 +103,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         self.test_run_id = str(uuid.uuid4())
         
         # Mock WebSocket for testing
-        self.mock_websocket = self.mock_factory.create_websocket_mock()
-        self.mock_emitter = self.mock_factory.create_websocket_manager_mock()
+        self.mock_websocket = self.mock_factory.create_mock_websocket()
+        self.mock_emitter = self.mock_factory.create_mock_websocket_emitter()
 
     async def asyncSetUp(self):
         """Async setup for database and service initialization."""

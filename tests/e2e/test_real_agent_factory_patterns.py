@@ -50,7 +50,7 @@ except ImportError:
 
 # WebSocket services
 try:
-    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
     WEBSOCKET_SERVICES_AVAILABLE = True
 except ImportError:
