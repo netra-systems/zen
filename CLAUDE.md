@@ -27,12 +27,14 @@ KEEP CORE SYSTEM AS IS
 NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
 
 IT's OKAY TO DISABLE features not in GOLDEN PATH
-DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK! 
+DO THE MINIMAL ACTION TO MAKE GOLDEN PATH on STAGING GCP WORK! 
 
 The #1 priority right now is that the users can login and complete getting a message back.
 The secondary items are database flows or other features.
 Even Auth can be more permissive for now (log issue in git for items temporarily bypassed)
 IT MUST allow allow the golden path through!!! (and keep logging errors for future work)
+
+IGNORE DOCKER ISSUES FOR NOW (just log them). ONLY GCP STAGING MATTERS FOR HOSTING.
 
 ## IMPORTANT: YOU ALWAYS AND **MUST** DO YOUR BEST WORK. 
 
