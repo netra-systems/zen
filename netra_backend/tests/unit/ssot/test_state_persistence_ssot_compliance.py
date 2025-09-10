@@ -169,7 +169,6 @@ class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
             # Should work after consolidation
             ("netra_backend.app.services.state_persistence", "state_persistence_service"),
             # This should either work OR not be referenced anywhere
-            ("netra_backend.app.services.state_persistence_optimized", "optimized_state_persistence"),
         ]
         
         successful_imports = []
@@ -214,18 +213,12 @@ class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
                 
                 # Check for references to modules
                 if "state_persistence_optimized" in content:
-                    # Verify the referenced module actually exists
-                    try:
-                        importlib.import_module("netra_backend.app.services.state_persistence_optimized")
-                    except ImportError:
-                        documentation_issues.append(f"{doc_file.name}: References non-existent state_persistence_optimized")
+                    # After SSOT consolidation, references to optimized module should be removed
+                    documentation_issues.append(f"{doc_file.name}: References deprecated state_persistence_optimized module")
                         
-                if "optimized_state_persistence" in content:
-                    # Verify the referenced service actually exists
-                    try:
-                        from netra_backend.app.services.state_persistence_optimized import optimized_state_persistence
-                    except ImportError:
-                        documentation_issues.append(f"{doc_file.name}: References non-existent optimized_state_persistence")
+                if "optimized_state_persistence" in content and "state_persistence_optimized" in content:
+                    # After SSOT consolidation, references to separate optimized service should be removed
+                    documentation_issues.append(f"{doc_file.name}: References deprecated optimized_state_persistence service")
                         
         # After SSOT consolidation, documentation should match implementation
         assert len(documentation_issues) == 0, (
@@ -299,7 +292,6 @@ class TestStatePersistenceSSotCompliance(SSotBaseTestCase):
         # Try to find the main persistence service
         persistence_candidates = [
             ("netra_backend.app.services.state_persistence", "state_persistence_service"),
-            ("netra_backend.app.services.state_persistence_optimized", "optimized_state_persistence"),
         ]
         
         for module_name, service_name in persistence_candidates:
