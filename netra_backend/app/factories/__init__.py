@@ -45,6 +45,16 @@ from netra_backend.app.factories.tool_dispatcher_factory import (
     create_isolated_tool_dispatcher,
     isolated_tool_dispatcher_scope,
 )
+from netra_backend.app.factories.websocket_bridge_factory import (
+    WebSocketBridgeProtocol,
+    StandardWebSocketBridge,
+    create_standard_websocket_bridge,
+    create_agent_bridge_adapter,
+    create_emitter_bridge_adapter,
+    create_manager_bridge_adapter,
+    # Backward compatibility (DEPRECATED)
+    WebSocketBridgeAdapter,
+)
 
 __all__ = [
     "DataAccessFactory",
@@ -62,7 +72,15 @@ __all__ = [
     "set_tool_dispatcher_factory_websocket_manager",
     "create_tool_dispatcher",
     "tool_dispatcher_scope",
+    # SSOT WebSocket Bridge Factory
+    "WebSocketBridgeProtocol",
+    "StandardWebSocketBridge",
+    "create_standard_websocket_bridge",
+    "create_agent_bridge_adapter",
+    "create_emitter_bridge_adapter",
+    "create_manager_bridge_adapter",
     # Backward Compatibility (DEPRECATED)
     "create_isolated_tool_dispatcher",
     "isolated_tool_dispatcher_scope",
+    "WebSocketBridgeAdapter",
 ]
