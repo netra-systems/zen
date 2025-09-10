@@ -35,9 +35,20 @@ class TestUnifiedWebSocketAuthBusinessLogic:
     @pytest.fixture
     def mock_websocket(self):
         """Create mock WebSocket with configurable headers."""
+        from fastapi.websockets import WebSocketState
+        
         websocket = Mock()
         websocket.headers = {}
         websocket.state = Mock()
+        websocket.client_state = WebSocketState.CONNECTED
+        websocket.application_state = WebSocketState.CONNECTED
+        
+        # Make client serializable for JSON logging
+        mock_client = Mock()
+        mock_client.host = "127.0.0.1"
+        mock_client.port = 8080
+        websocket.client = mock_client
+        
         return websocket
     
     @pytest.fixture
@@ -298,7 +309,7 @@ class TestUnifiedWebSocketAuthBusinessLogic:
     @pytest.mark.unit
     def test_websocket_user_context_isolation_validation(self):
         """Test user context isolation validation for multi-tenant security."""
-        from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
         
         # Given: Multiple users with overlapping data
         user1_id = str(uuid.uuid4())
@@ -312,7 +323,7 @@ class TestUnifiedWebSocketAuthBusinessLogic:
             user_id=user1_id,
             thread_id=shared_thread_id,
             run_id=id_manager.generate_run_id(shared_thread_id),
-            request_id=id_manager.generate_id("request", prefix="req", context={"test": True}),
+            request_id=id_manager.generate_id(IDType.REQUEST, prefix="req", context={"test": True}),
             agent_context={
                 "email": "user1@tenant1.com",
                 "permissions": ["read_basic"]
@@ -323,7 +334,7 @@ class TestUnifiedWebSocketAuthBusinessLogic:
             user_id=user2_id, 
             thread_id=shared_thread_id,
             run_id=id_manager.generate_run_id(shared_thread_id),
-            request_id=id_manager.generate_id("request", prefix="req", context={"test": True}),
+            request_id=id_manager.generate_id(IDType.REQUEST, prefix="req", context={"test": True}),
             agent_context={
                 "email": "user2@tenant2.com",
                 "permissions": ["read_premium", "execute_agents"]
