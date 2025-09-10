@@ -708,8 +708,12 @@ class ConnectionStateMachineRegistry:
             connection_key = str(connection_id)
             
             if connection_key in self._machines:
-                logger.warning(f"Connection {connection_key} already registered, returning existing")
-                return self._machines[connection_key]
+                existing_machine = self._machines[connection_key]
+                logger.critical(f"DUPLICATE CONNECTION REGISTRATION DETECTED: Connection {connection_key} already registered. "
+                               f"Existing state: {existing_machine.current_state}, User: {existing_machine.user_id}, "
+                               f"Requested User: {user_id}. This indicates a race condition in connection setup. "
+                               f"Returning existing machine to prevent state corruption.")
+                return existing_machine
             
             machine = ConnectionStateMachine(connection_id, user_id, state_change_callbacks)
             self._machines[connection_key] = machine
@@ -809,11 +813,15 @@ def is_connection_ready_for_messages(connection_id: ConnectionID) -> bool:
     
     This function provides the enhanced readiness check that considers
     application-level state in addition to WebSocket transport state.
+    
+    PHASE 1 SAFETY FIX: Non-existent connections now return False instead of True
+    to prevent race conditions where messages are sent before state machine setup.
     """
     machine = get_connection_state_machine(connection_id)
     if machine is None:
-        # If no state machine registered, fall back to basic connectivity
-        return True
+        # SAFETY FIX: Return False for non-existent connections to prevent race conditions
+        logger.warning(f"No state machine found for connection {connection_id}, returning False for safety")
+        return False
     
     return machine.can_process_messages()
 
