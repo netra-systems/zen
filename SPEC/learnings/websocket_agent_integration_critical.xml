@@ -194,5 +194,9 @@
             Critical learning about WebSocket handler scope - handlers must be per-connection 
             not global. Relates to bridge pattern ensuring proper isolation.
         </reference>
+        <reference file="websocket_performance_blocking_fix_20250909.xml">
+            Critical performance fix for WebSocket initialization blocking - time.sleep() to asyncio.sleep()
+            conversion. Directly relates to WebSocket agent integration performance and user experience.
+        </reference>
     </cross_references>
 </learnings>

@@ -274,11 +274,11 @@ sequenceDiagram
 
 **CRITICAL UPDATE (2025-09-09)**: Despite implementing multiple rounds of fixes, **GOLDEN PATH REMAINS BROKEN**. Five comprehensive Five Whys analyses have identified the following critical infrastructure failures:
 
-### Critical Issue #1: WebSocket 1011 Internal Errors - PERSISTENT FAILURE
+### Critical Issue #1: WebSocket 1011 Internal Errors - DEPLOYMENT MISMATCH IDENTIFIED
 
 **Problem**: ALL WebSocket connections failing with 1011 internal error despite implementing authentication fixes, E2E detection enhancements, and race condition mitigations.
 
-**Latest Analysis (2025-09-10)**: The 1011 error **PERSISTS** after all proposed fixes, indicating the root cause analysis was incomplete. The issue has moved deeper into the WebSocket initialization pipeline.
+**Latest Analysis (2025-09-10)**: The 1011 error root cause identified as **DEPLOYMENT/CACHING ISSUE**. Frontend code is correct with protocol format `['jwt-auth', 'jwt.${encodedToken}']` but staging environment is running outdated code. The issue requires infrastructure deployment, not code fixes.
 
 ```mermaid
 sequenceDiagram
@@ -918,6 +918,38 @@ graph TD
 
 ## Critical Fix Recommendations
 
+### Priority 0: Deploy Frontend with Correct WebSocket Protocol (IMMEDIATE)
+
+**CRITICAL DEPLOYMENT FIX REQUIRED**
+
+```mermaid
+graph TD
+    subgraph "Deployment Fix Requirements"
+        CODE[Frontend Code Already Correct]
+        STAGING[Staging Running Old Code]
+        DEPLOY[Force Redeploy Frontend]
+        CACHE[Clear CDN/Browser Caches]
+        VERIFY[Verify Protocol Format]
+        
+        CODE --> STAGING
+        STAGING --> DEPLOY
+        DEPLOY --> CACHE
+        CACHE --> VERIFY
+        
+        style CODE fill:#4caf50
+        style STAGING fill:#f44336
+        style DEPLOY fill:#ff9800
+        style VERIFY fill:#4caf50
+    end
+```
+
+**Implementation Required**:
+1. Force redeploy frontend to staging: `npm run build && npm run deploy:staging`
+2. Clear all CDN caches for staging environment
+3. Invalidate browser caches for staging users
+4. Verify WebSocket protocol array in deployed bundle
+5. Monitor staging logs for successful authentication
+
 ### Priority 1: Fix GCP Load Balancer Infrastructure Configuration
 
 **CRITICAL INFRASTRUCTURE FIX REQUIRED**
@@ -1333,3 +1365,21 @@ gantt
 - $500K+ MRR chat functionality fully operational
 
 **Result**: The Golden Path analysis has **systematically identified all infrastructure barriers** to revenue-protecting user journey functionality and provided a **comprehensive, prioritized remediation roadmap** with clear timelines and success metrics.
+
+---
+
+## Related Infrastructure Fixes
+
+### WebSocket Authentication Protocol Fix (2025-09-10)
+**Issue Identified**: WebSocket authentication failures in staging causing message routing cascade failures.
+**Root Cause**: Deployment/caching issue - frontend code already has correct protocol format `['jwt-auth', 'jwt.${encodedToken}']`.
+**Solution Required**: Force redeploy frontend to staging with cache invalidation.
+**Impact**: $500K+ ARR Golden Path user flow blocked until deployment synchronized.
+**GitHub Issue**: [#171](https://github.com/netra-systems/netra-apex/issues/171)
+**Learning Document**: [`audit/staging/auto-solve-loop/websocket-auth-routing-failure-20250910.md`](../audit/staging/auto-solve-loop/websocket-auth-routing-failure-20250910.md)
+
+### WebSocket Performance Fix (2025-09-09)
+**Issue Resolved**: WebSocket connections were extremely slow due to blocking `time.sleep()` calls in initialization path.
+**Solution**: Converted to async `await asyncio.sleep()` patterns to eliminate thread blocking.
+**Impact**: Up to 1.2 seconds of blocking eliminated, directly improving Golden Path user experience.
+**Learning Document**: [`SPEC/learnings/websocket_performance_blocking_fix_20250909.xml`](../SPEC/learnings/websocket_performance_blocking_fix_20250909.xml)

@@ -941,7 +941,7 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
             snapshot = {
                 "checkpoint": checkpoint,
                 "timestamp": datetime.now(timezone.utc),
-                "state_size": len(json.dumps(retrieved_state)),
+                "context_size": len(json.dumps(retrieved_state)),
                 "consistency_hash": retrieved_state.get("execution_data", {}).get("consistency_hash"),
                 "expected_hash": consistency_hash,
                 "memory_usage": psutil.Process().memory_info().rss / 1024 / 1024

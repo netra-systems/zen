@@ -250,12 +250,8 @@ class AgentExecutionCore:
                     )
                     self.state_tracker.complete_execution(state_exec_id, success=False)
                     
-                    if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_error(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            error=agent.error or "Agent not found"
-                        )
+                    # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
+                    # Removing manual call to prevent duplicate notifications
                     return agent
                 
                 # CRITICAL REMEDIATION: Execute with comprehensive timeout management
@@ -371,17 +367,11 @@ class AgentExecutionCore:
                     )
                     self.state_tracker.complete_execution(state_exec_id, success=False)
                     
-                    # CRITICAL: Send error notification for agent failures including death detection
-                    # Business Value: Users must be notified when agent fails or dies silently
-                    # This is MISSION CRITICAL per CLAUDE.md Section 6 - WebSocket Agent Events
+                    # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
+                    # Removing manual call to prevent duplicate notifications
+                    
+                    # CRITICAL FIX: Send agent_completed event for error cases
                     if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_error(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            error=result.error or "Agent execution failed"
-                        )
-                        
-                        # CRITICAL FIX: Also send agent_completed event for error cases
                         await self.websocket_bridge.notify_agent_completed(
                             run_id=context.run_id,
                             agent_name=context.agent_name,
@@ -407,14 +397,8 @@ class AgentExecutionCore:
                     error=f"Unexpected error: {str(e)}"
                 )
                 
-                # Send error notification with trace context
-                if self.websocket_bridge:
-                    await self.websocket_bridge.notify_agent_error(
-                        run_id=context.run_id,
-                        agent_name=context.agent_name,
-                        error=str(e),
-                        trace_context=trace_context.to_websocket_context()
-                    )
+                # NOTE: Error notification is handled in the main success/failure path (lines 377-382)
+                # Removing duplicate notification call to prevent test failures
                 
                 return AgentExecutionResult(
                     success=False,

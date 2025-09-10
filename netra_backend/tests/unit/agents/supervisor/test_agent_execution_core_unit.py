@@ -345,7 +345,7 @@ class TestAgentExecutionCore:
         # Verify metrics combination
         assert 'tracker_metric' in metrics
         assert 'custom_metric' in metrics
-        assert 'state_size' in metrics
+        assert 'context_size' in metrics
         assert 'result_success' in metrics
         assert 'total_duration_seconds' in metrics
         assert metrics['result_success'] is True

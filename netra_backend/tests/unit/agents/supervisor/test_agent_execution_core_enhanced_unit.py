@@ -473,7 +473,7 @@ class TestAgentExecutionCoreEnhancedBusinessLogic:
         assert 'memory_peak_mb' in combined_metrics  # Efficiency metric
         
         # Standard execution metrics
-        assert 'state_size' in combined_metrics
+        assert 'context_size' in combined_metrics
         assert 'result_success' in combined_metrics
         assert 'total_duration_seconds' in combined_metrics
         

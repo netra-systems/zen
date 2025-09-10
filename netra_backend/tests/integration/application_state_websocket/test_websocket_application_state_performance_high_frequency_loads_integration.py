@@ -501,7 +501,7 @@ class TestWebSocketApplicationStatePerformanceHighFrequencyLoads(BaseIntegration
                 if ws_state:
                     ws_state_count += 1
                     # Estimate size based on data complexity
-                    state_size = len(json.dumps(ws_state).encode('utf-8'))
+                    context_size = len(json.dumps(ws_state).encode('utf-8'))
                     redis_key_count += 1
             
             # Rough memory estimation (in KB)

@@ -427,7 +427,8 @@ class UnifiedAuthenticationService:
     async def authenticate_websocket(
         self, 
         websocket: WebSocket, 
-        e2e_context: Optional[Dict[str, Any]] = None
+        e2e_context: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None
     ) -> Tuple[AuthResult, Optional[UserExecutionContext]]:
         """
         Authenticate WebSocket connection using SSOT authentication with E2E support.
@@ -440,6 +441,7 @@ class UnifiedAuthenticationService:
         Args:
             websocket: WebSocket connection object
             e2e_context: Optional E2E testing context for bypass support
+            preliminary_connection_id: Optional preliminary connection ID to preserve state machine continuity
             
         Returns:
             Tuple of (AuthResult, UserExecutionContext if successful)
@@ -502,7 +504,8 @@ class UnifiedAuthenticationService:
                 return auth_result, None
             
             # Create UserExecutionContext for successful authentication
-            user_context = self._create_user_execution_context(auth_result, websocket)
+            # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
+            user_context = self._create_user_execution_context(auth_result, websocket, preliminary_connection_id)
             
             logger.info(f"UNIFIED AUTH: WebSocket authentication successful for user {auth_result.user_id[:8]}...")
             return auth_result, user_context
@@ -586,7 +589,7 @@ class UnifiedAuthenticationService:
             logger.error(f"UNIFIED AUTH: Error extracting WebSocket token: {e}")
             return None
     
-    def _create_user_execution_context(self, auth_result: AuthResult, websocket: WebSocket) -> UserExecutionContext:
+    def _create_user_execution_context(self, auth_result: AuthResult, websocket: WebSocket, preliminary_connection_id: Optional[str] = None) -> UserExecutionContext:
         """
         CRITICAL FIX: Create UserExecutionContext with enhanced validation and defensive measures.
         
@@ -609,10 +612,23 @@ class UnifiedAuthenticationService:
             # CRITICAL FIX: Use defensive UserExecutionContext creation
             from netra_backend.app.websocket_core.websocket_manager_factory import create_defensive_user_execution_context
             
-            # Generate WebSocket client ID using consistent format
-            connection_timestamp = int(datetime.now(timezone.utc).timestamp())
-            unique_id = str(uuid.uuid4())[:8]
-            websocket_client_id = f"ws_{user_id[:8]}_{connection_timestamp}_{unique_id}"
+            # PASS-THROUGH FIX: Use preliminary connection ID if provided
+            if preliminary_connection_id:
+                # Use provided preliminary connection ID to preserve state machine continuity
+                websocket_client_id = preliminary_connection_id
+                logger.info(f"PASS-THROUGH FIX: Using preliminary_connection_id {preliminary_connection_id} for UserExecutionContext creation")
+            else:
+                # Generate WebSocket client ID using consistent format (fallback)
+                connection_timestamp = int(datetime.now(timezone.utc).timestamp())
+                unique_id = str(uuid.uuid4())[:8]
+                websocket_client_id = f"ws_{user_id[:8]}_{connection_timestamp}_{unique_id}"
+                logger.debug(f"Generated new websocket_client_id: {websocket_client_id}")
+            
+            # CRITICAL FIX: Ensure connection_timestamp is available for metadata
+            if preliminary_connection_id:
+                # For preliminary connection ID, use current timestamp for metadata
+                connection_timestamp = int(datetime.now(timezone.utc).timestamp())
+            # If not using preliminary ID, connection_timestamp was set above
             
             logger.debug(f"UNIFIED AUTH: Creating defensive UserExecutionContext for user {user_id[:8]}... with client_id {websocket_client_id}")
             
