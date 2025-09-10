@@ -1403,7 +1403,16 @@ async def websocket_endpoint(websocket: WebSocket):
             # With connection_id pass-through, IDs should always match - no migration needed  
             try:
                 # Get the existing state machine created during initialization
-                from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine
+                from netra_backend.app.websocket_core.connection_state_machine import get_connection_state_machine, get_connection_state_registry
+                
+                # CRITICAL SCOPE FIX: Re-initialize state_registry to prevent NameError at lines 1433, 1452
+                # This fixes the scope bug where state_registry is out of scope in nested exception handlers
+                try:
+                    state_registry = get_connection_state_registry()
+                    logger.debug(f"✅ SCOPE FIX: state_registry re-initialized successfully in try block scope")
+                except Exception as registry_init_error:
+                    logger.error(f"❌ SCOPE FIX FAILED: Could not re-initialize state_registry: {registry_init_error}")
+                    state_registry = None  # Defensive handling for graceful degradation
                 
                 # PASS-THROUGH VALIDATION: Ensure connection IDs match (they should with our fix)
                 if connection_id != preliminary_connection_id:
@@ -1430,7 +1439,13 @@ async def websocket_endpoint(websocket: WebSocket):
                         logger.warning(f"⚠️ EMERGENCY RECOVERY: Using existing state machine {preliminary_connection_id} despite ID mismatch")
                     else:
                         logger.critical(f"❌ EMERGENCY RECOVERY FAILED: No state machine found for {preliminary_connection_id}")
-                        final_state_machine = state_registry.register_connection(preliminary_connection_id, user_id)
+                        # CRITICAL SCOPE FIX: Defensive handling for state_registry scope issue
+                        if state_registry:
+                            final_state_machine = state_registry.register_connection(preliminary_connection_id, user_id)
+                            logger.debug(f"✅ SCOPE FIX: Successfully used state_registry at line 1442")
+                        else:
+                            logger.error(f"❌ SCOPE FIX FAILED: state_registry is None, cannot register connection {preliminary_connection_id}")
+                            final_state_machine = None  # Graceful degradation
                 else:
                     # SUCCESS: Pass-through strategy worked correctly
                     logger.info(f"✅ PASS-THROUGH SUCCESS: connection_id '{connection_id}' == preliminary_connection_id '{preliminary_connection_id}'")
@@ -1449,8 +1464,14 @@ async def websocket_endpoint(websocket: WebSocket):
                     else:
                         # This should not happen but handle gracefully
                         logger.warning(f"⚠️ UNEXPECTED: No existing state machine found for {preliminary_connection_id} despite pass-through success")
-                        final_state_machine = state_registry.register_connection(connection_id, user_id)
-                        websocket.connection_id = connection_id
+                        # CRITICAL SCOPE FIX: Defensive handling for state_registry scope issue
+                        if state_registry:
+                            final_state_machine = state_registry.register_connection(connection_id, user_id)
+                            websocket.connection_id = connection_id
+                            logger.debug(f"✅ SCOPE FIX: Successfully used state_registry at line 1461")
+                        else:
+                            logger.error(f"❌ SCOPE FIX FAILED: state_registry is None, cannot register connection {connection_id}")
+                            final_state_machine = None  # Graceful degradation
                 
                 # Transition to AUTHENTICATED state
                 if final_state_machine:
