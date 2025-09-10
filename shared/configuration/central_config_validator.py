@@ -1155,6 +1155,60 @@ class CentralConfigurationValidator:
         
         return validation_result
     
+    def validate_oauth_configuration(self) -> bool:
+        """
+        SSOT: Validate OAuth configuration for the current environment.
+        
+        Returns:
+            bool: True if OAuth configuration is valid
+        """
+        try:
+            # Use existing OAuth provider validation
+            return self.validate_oauth_provider_configuration('google')
+        except Exception:
+            return False
+    
+    def validate_jwt_configuration(self) -> bool:
+        """
+        SSOT: Validate JWT configuration for the current environment.
+        
+        Returns:
+            bool: True if JWT configuration is valid
+        """
+        try:
+            # Use existing JWT secret validation
+            jwt_secret = self.get_jwt_secret()
+            return bool(jwt_secret and len(jwt_secret) >= 32)
+        except Exception:
+            return False
+    
+    def validate_database_configuration(self) -> bool:
+        """
+        SSOT: Validate database configuration for the current environment.
+        
+        Returns:
+            bool: True if database configuration is valid
+        """
+        try:
+            # Use existing database credential validation
+            db_creds = self.get_database_credentials()
+            return bool(db_creds and db_creds.get('host'))
+        except Exception:
+            return False
+    
+    def get_current_environment(self) -> str:
+        """
+        SSOT: Get current environment string.
+        
+        Returns:
+            str: Current environment name
+        """
+        try:
+            environment = self.get_environment()
+            return environment.value
+        except Exception:
+            return "unknown"
+    
     def validate_oauth_configs_for_environment(self, environment: str) -> Dict[str, Any]:
         """
         SSOT: Validate OAuth configuration for a specific environment.
