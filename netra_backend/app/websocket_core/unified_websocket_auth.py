@@ -878,13 +878,16 @@ def create_authenticated_user_context(
     if hasattr(auth_result, 'subscription_tier'):
         agent_context['subscription_tier'] = auth_result.subscription_tier
     
+    # Import IDType for proper enum usage
+    from netra_backend.app.core.unified_id_manager import IDType
+    
     # Create user context with SSOT pattern matching UserExecutionContext signature
     user_context = UserExecutionContext(
         user_id=getattr(auth_result, 'user_id', str(uuid.uuid4())),
         thread_id=resolved_thread_id,
         run_id=id_manager.generate_run_id(resolved_thread_id),
-        websocket_client_id=id_manager.generate_id("websocket", prefix="ws", context={"test": True}),
-        request_id=id_manager.generate_id("request", prefix="req", context={"test": True}),
+        websocket_client_id=id_manager.generate_id(IDType.WEBSOCKET, prefix="ws", context={"test": True}),
+        request_id=id_manager.generate_id(IDType.REQUEST, prefix="req", context={"test": True}),
         agent_context=agent_context,
         **{k: v for k, v in kwargs.items() if k not in ['agent_context', 'email', 'permissions']}
     )

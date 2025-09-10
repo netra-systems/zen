@@ -232,17 +232,17 @@ class SupervisorAgent(BaseAgent):
                     self.tool_dispatcher.set_websocket_manager(websocket_manager)
                     logger.info(f"✅ Enhanced tool dispatcher with WebSocket for user {context.user_id}")
                 
-                # Create session manager for database operations
-                logger.info(f"📂 Creating managed session for user {context.user_id}")
-                async with managed_session(context) as session_manager:
-                    logger.info(f"✅ Managed session created, starting agent orchestration")
-                    
-                    # Execute supervisor orchestration
-                    result = await self._orchestrate_agents(context, session_manager, stream_updates)
-                    
-                    logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
-                    logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
-                    return result
+                # Use database session from context
+                logger.info(f"📂 Using database session for user {context.user_id}")
+                session_manager = context.db_session
+                logger.info(f"✅ Database session ready, starting agent orchestration")
+                
+                # Execute supervisor orchestration
+                result = await self._orchestrate_agents(context, session_manager, stream_updates)
+                
+                logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
+                logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
+                return result
                     
             except Exception as e:
                 logger.error(f"SupervisorAgent.execute() failed for user {context.user_id}: {e}")
