@@ -65,11 +65,11 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     WebSocketAuthResult
 )
 from netra_backend.app.websocket_core.message_queue import (
+    MessageQueue,
     MessagePriority,
     MessageQueueState,
     QueuedMessage
 )
-from netra_backend.app.websocket_core.utils import WebSocketMessageQueue
 from shared.types.core_types import UserID, ConnectionID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -109,7 +109,7 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
         self.authenticator = UnifiedWebSocketAuthenticator()
         
         # Initialize message queue for coordination testing
-        self.message_queue = WebSocketMessageQueue(connection_id=self.connection_id)
+        self.message_queue = MessageQueue(connection_id=self.connection_id, user_id=self.user_id)
         
         # Track test state for cleanup
         self.created_connections = []
@@ -448,7 +448,7 @@ class TestAdvancedStateTransitionsAuth(SSotBaseTestCase):
     def test_message_queue_coordination_during_complex_auth_transitions(self):
         """Test message queue coordination during complex authentication state transitions."""
         # Initialize message queue with state machine coordination
-        queue = WebSocketMessageQueue(connection_id=self.connection_id)
+        queue = MessageQueue(connection_id=self.connection_id, user_id=self.user_id)
         
         # Create test messages for different priority levels
         test_messages = [
