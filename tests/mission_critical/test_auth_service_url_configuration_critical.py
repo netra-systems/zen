@@ -43,9 +43,9 @@ class TestAuthServiceUrlConfigurationCritical(SSotAsyncTestCase):
     outages when AUTH_SERVICE_URL is not properly configured in deployment.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with isolated configuration."""
-        super().setUp()
+        super().setup_method(method)
         self.test_env = IsolatedEnvironment(test_mode=True)
         
         # Base environment config (minimal required for auth validator)

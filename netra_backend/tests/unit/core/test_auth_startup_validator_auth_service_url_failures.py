@@ -38,9 +38,9 @@ class TestAuthStartupValidatorAuthServiceUrlFailures(SSotAsyncTestCase):
     specific error conditions and edge cases.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with isolated configuration."""
-        super().setUp()
+        super().setup_method(method)
         self.test_env = IsolatedEnvironment(test_mode=True)
 
     def create_validator_with_environment(self, env_vars: Dict[str, Optional[str]], environment: str = "staging"):

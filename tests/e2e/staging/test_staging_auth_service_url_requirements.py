@@ -40,9 +40,9 @@ class TestStagingAuthServiceUrlRequirements(SSotAsyncTestCase):
     with real network conditions and service dependencies.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for staging E2E tests."""
-        super().setUp()
+        super().setup_method(method)
         self.test_env = IsolatedEnvironment(test_mode=True)
         
         # Staging environment configuration

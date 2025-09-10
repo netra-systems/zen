@@ -43,9 +43,9 @@ class TestAuthServiceUrlStartupIntegration(SSotAsyncTestCase):
     with the overall system startup process and fails appropriately.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment with isolated configuration."""
-        super().setUp()
+        super().setup_method(method)
         self.test_env = IsolatedEnvironment(test_mode=True)
         
         # Complete environment config for startup integration
