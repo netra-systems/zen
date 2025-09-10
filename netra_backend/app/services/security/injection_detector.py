@@ -88,7 +88,15 @@ class InjectionDetector:
             r"(?i)(on\w+\s*=)",
             r"(?i)(<iframe[^>]*>)",
             r"(?i)(<object[^>]*>)",
-            r"(?i)(<embed[^>]*>)"
+            r"(?i)(<embed[^>]*>)",
+            # HTML entity encoded patterns
+            r"(?i)(&#60;script&#62;|&lt;script&gt;)",
+            r"(?i)(&#60;/script&#62;|&lt;/script&gt;)",
+            r"(?i)(&#(\d+);.*script)",
+            r"(?i)(&lt;.*&gt;.*script)",
+            # Other encoded variations
+            r"(?i)(%3Cscript%3E|%3C/script%3E)",
+            r"(?i)(\\u003Cscript\\u003E)"
         ]
         
         self._command_patterns = [
@@ -240,7 +248,11 @@ class InjectionDetector:
                 matched_patterns.append(pattern)
         
         is_injection = len(matched_patterns) > 0
-        confidence_score = min(len(matched_patterns) * 0.3, 1.0) if is_injection else 0.0
+        if is_injection:
+            # High confidence for obvious SQL injection patterns
+            confidence_score = 0.8 + min(len(matched_patterns) * 0.1, 0.2)
+        else:
+            confidence_score = 0.0
         
         return SpecificInjectionResult(
             is_injection=is_injection,
@@ -270,7 +282,11 @@ class InjectionDetector:
                 matched_patterns.append(pattern)
         
         is_injection = len(matched_patterns) > 0
-        confidence_score = min(len(matched_patterns) * 0.25, 1.0) if is_injection else 0.0
+        if is_injection:
+            # High confidence for XSS patterns
+            confidence_score = 0.7 + min(len(matched_patterns) * 0.1, 0.3)
+        else:
+            confidence_score = 0.0
         
         return SpecificInjectionResult(
             is_injection=is_injection,
@@ -300,7 +316,11 @@ class InjectionDetector:
                 matched_patterns.append(pattern)
         
         is_injection = len(matched_patterns) > 0
-        confidence_score = min(len(matched_patterns) * 0.4, 1.0) if is_injection else 0.0
+        if is_injection:
+            # High confidence for command injection patterns
+            confidence_score = 0.8 + min(len(matched_patterns) * 0.1, 0.2)
+        else:
+            confidence_score = 0.0
         
         return SpecificInjectionResult(
             is_injection=is_injection,
