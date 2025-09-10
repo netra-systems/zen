@@ -195,7 +195,6 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             thread_id=user_context.thread_id,
             user_id=user_context.user_id,
             agent_name="test_websocket_agent",
-            prompt="Test WebSocket integration",
             metadata={"test": True, "websocket_integration": True}
         )
     

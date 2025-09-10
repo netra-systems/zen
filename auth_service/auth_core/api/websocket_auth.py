@@ -239,7 +239,7 @@ async def extract_websocket_token(request: WebSocketTokenExtractionRequest) -> D
             
             for subprotocol in subprotocols:
                 # Check if subprotocol looks like a JWT token
-                if self._is_jwt_like_token(subprotocol):
+                if _is_jwt_like_token(subprotocol):
                     return {
                         "token_found": True,
                         "token": subprotocol,
@@ -250,7 +250,7 @@ async def extract_websocket_token(request: WebSocketTokenExtractionRequest) -> D
         # Try request.subprotocols if provided
         if request.subprotocols:
             for subprotocol in request.subprotocols:
-                if self._is_jwt_like_token(subprotocol):
+                if _is_jwt_like_token(subprotocol):
                     return {
                         "token_found": True,
                         "token": subprotocol,

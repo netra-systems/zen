@@ -128,8 +128,8 @@ class TestReportingAgentSSOTJSONCompliance(unittest.TestCase):
             from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
             
             # Get source code of cache methods
-            get_cached_source = inspect.getsource(ReportingSubAgent._get_cached_result)
-            cache_result_source = inspect.getsource(ReportingSubAgent._cache_result)
+            get_cached_source = inspect.getsource(ReportingSubAgent._get_cached_report)
+            cache_result_source = inspect.getsource(ReportingSubAgent._cache_report_result)
             
             # Check for SSOT violations in caching methods
             ssot_violations = []

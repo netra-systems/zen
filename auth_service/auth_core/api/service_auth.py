@@ -289,7 +289,7 @@ async def validate_service_request(request: ServiceValidationRequest) -> Dict[st
             }
         
         # Recreate signature data
-        signature_data = self._create_signature_data(
+        signature_data = _create_signature_data(
             request.service_id,
             request.request_method,
             request.request_path,
