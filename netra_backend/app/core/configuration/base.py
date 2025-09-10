@@ -110,13 +110,22 @@ class UnifiedConfigManager:
             # CRITICAL FIX: Ensure service_secret is loaded from environment if not set
             # This handles cases where the config class doesn't properly load it
             if not config.service_secret:
-                from shared.isolated_environment import get_env
-                env = get_env()
-                service_secret = env.get('SERVICE_SECRET')
-                if service_secret:
-                    # DEFENSIVE FIX: Strip whitespace from environment variable to prevent header issues
-                    config.service_secret = service_secret.strip()
-                    self._logger.info("Loaded SERVICE_SECRET from environment as fallback")
+                try:
+                    from netra_backend.app.core.managers.unified_configuration_manager import ConfigurationManagerFactory
+                    config_manager = ConfigurationManagerFactory.get_global_manager()
+                    service_secret = config_manager.get_str('security.jwt_secret')
+                    if service_secret:
+                        config.service_secret = service_secret.strip()
+                        self._logger.info("Loaded SERVICE_SECRET through UnifiedConfigurationManager SSOT")
+                except Exception as e:
+                    self._logger.error(f"SSOT configuration access failed: {e}")
+                    # Emergency fallback with critical logging
+                    from shared.isolated_environment import get_env
+                    env = get_env()
+                    service_secret = env.get('SERVICE_SECRET')
+                    if service_secret:
+                        config.service_secret = service_secret.strip()
+                        self._logger.warning("Used emergency fallback for SERVICE_SECRET - SSOT access failed")
                     
             # DEFENSIVE FIX: Ensure service_id is also sanitized from environment
             # This prevents header value issues from Windows line endings or whitespace

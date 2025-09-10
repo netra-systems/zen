@@ -44,6 +44,7 @@ from netra_backend.app.core.agent_execution_tracker import (
     ExecutionState
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
 
 logger = central_logger.get_logger(__name__)
 
@@ -354,7 +355,7 @@ class WebSocketExtension(ExecutionExtension):
 # UNIFIED EXECUTION ENGINE
 # ============================================================================
 
-class ExecutionEngine:
+class ExecutionEngine(IExecutionEngine):
     """Unified execution engine with composition pattern.
     
     This is the SSOT for all agent execution, consolidating functionality
@@ -364,6 +365,8 @@ class ExecutionEngine:
     - WebSocket event integration
     - Performance optimization
     - Fallback mechanisms
+    
+    Implements IExecutionEngine interface for SSOT compliance.
     """
     
     def __init__(
@@ -599,6 +602,95 @@ class ExecutionEngine:
     def with_request_scope(self, request_id: str) -> 'RequestScopedExecutionEngine':
         """Create request-scoped execution engine."""
         return RequestScopedExecutionEngine(self, request_id)
+    
+    # ============================================================================
+    # IEXECUTIONENGINE INTERFACE IMPLEMENTATION
+    # ============================================================================
+    
+    async def execute_agent(
+        self,
+        context: AgentExecutionContext,
+        user_context: Optional['UserExecutionContext'] = None
+    ) -> AgentExecutionResult:
+        """Execute agent - interface method delegates to execute().
+        
+        Args:
+            context: Agent execution context
+            user_context: Optional user context for isolation
+            
+        Returns:
+            AgentExecutionResult: Results of agent execution
+        """
+        # Convert AgentExecutionContext to the format expected by execute()
+        return await self.execute(
+            context.agent_name,
+            context,  # Pass full context as task
+            user_context,
+            context  # context_override
+        )
+    
+    async def execute_pipeline(
+        self,
+        steps: List['PipelineStep'],
+        context: AgentExecutionContext,
+        user_context: Optional['UserExecutionContext'] = None
+    ) -> List[AgentExecutionResult]:
+        """Execute pipeline - sequential execution of steps.
+        
+        Args:
+            steps: List of pipeline steps to execute
+            context: Base execution context
+            user_context: Optional user context for isolation
+            
+        Returns:
+            List[AgentExecutionResult]: Results from each step
+        """
+        results = []
+        
+        for step in steps:
+            # Create context for this step
+            step_context = AgentExecutionContext(
+                agent_name=step.agent_name,
+                run_id=context.run_id,
+                thread_id=context.thread_id,
+                user_id=context.user_id,
+                prompt=context.prompt,
+                user_input=context.user_input,
+                metadata={**(context.metadata or {}), **(step.metadata or {})}
+            )
+            
+            # Execute step
+            result = await self.execute_agent(step_context, user_context)
+            results.append(result)
+            
+            # Stop on failure unless continue_on_error is set
+            if not result.success and not step.metadata.get('continue_on_error', False):
+                break
+        
+        return results
+    
+    async def get_execution_stats(self) -> Dict[str, Any]:
+        """Get execution statistics - interface method delegates to get_metrics().
+        
+        Returns:
+            Dict containing execution metrics and performance data
+        """
+        return self.get_metrics()
+    
+    async def shutdown(self) -> None:
+        """Shutdown engine - interface method delegates to cleanup().
+        
+        Performs cleanup and resource release.
+        """
+        await self.cleanup()
+    
+    def get_engine_type(self) -> str:
+        """Get engine type identifier."""
+        return "ConsolidatedExecutionEngine"
+    
+    def has_user_context_support(self) -> bool:
+        """Check if engine supports UserExecutionContext."""
+        return True  # ConsolidatedExecutionEngine supports user context
 
 
 # ============================================================================

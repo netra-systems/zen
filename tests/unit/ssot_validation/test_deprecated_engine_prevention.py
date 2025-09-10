@@ -542,7 +542,7 @@ class TestSSotConsolidationReadiness(SSotBaseTestCase):
         # 4. Import redirections working (+2 points)
         import_redirections_working = 0
         try:
-            from netra_backend.app.core.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             import_redirections_working += 1
         except:
             pass

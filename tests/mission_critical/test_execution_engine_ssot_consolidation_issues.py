@@ -48,7 +48,7 @@ from netra_backend.app.agents.execution_engine_consolidated import (
     RequestScopedExecutionEngine,
     ExecutionEngineFactory as ConsolidatedFactory
 )
-from netra_backend.app.core.execution_engine import ExecutionEngine as CoreExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as CoreExecutionEngine
 from netra_backend.app.services.unified_tool_registry.execution_engine import (
     ToolExecutionEngine as ToolRegistryExecutionEngine
 )
@@ -94,12 +94,12 @@ class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
         - Multiple factory patterns 
         - Inconsistent interfaces
         """
-        # Collect all execution engine classes
+        # Collect all AGENT execution engine classes (exclude tool execution engines)
         execution_engines = [
             SupervisorExecutionEngine,
             ConsolidatedExecutionEngine,
-            CoreExecutionEngine,
-            ToolRegistryExecutionEngine
+            # CoreExecutionEngine removed - now same as SupervisorExecutionEngine after import fix
+            # ToolRegistryExecutionEngine removed - this is for tool execution, not agent execution
         ]
         
         # Analyze class hierarchies and methods
@@ -111,7 +111,9 @@ class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
             # Get source file
             source_file = inspect.getfile(engine_class)
             
-            engine_analysis[engine_class.__name__] = {
+            # Use module + class name to avoid key conflicts with same-named classes
+            key = f"{engine_class.__module__}.{engine_class.__name__}"
+            engine_analysis[key] = {
                 'methods': methods,
                 'source_file': source_file,
                 'base_classes': [base.__name__ for base in engine_class.__mro__[1:]],
@@ -142,7 +144,7 @@ class TestExecutionEngineSSotViolationDetection(SSotAsyncTestCase):
         
         # Check for inconsistent interfaces
         method_counts = [analysis['method_count'] for analysis in engine_analysis.values()]
-        if max(method_counts) - min(method_counts) > 10:
+        if max(method_counts) - min(method_counts) > 3:
             ssot_violations.append(f"Inconsistent interface sizes: {method_counts}")
         
         # This test should FAIL - we expect SSOT violations

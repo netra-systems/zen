@@ -40,8 +40,18 @@ WebSocket connections fail completely due to missing `get_db_session_factory` fu
   - [x] Identified gaps in SSOT validation testing
   - [x] Created comprehensive test strategy for ~20% new tests
 
-- [ ] **Step 2: Execute Test Plan** 
-- [ ] **Step 3: Plan Remediation**
+- [x] **Step 2: Execute Test Plan** - COMPLETED
+  - [x] Created 4 new mission-critical test files reproducing SSOT violations
+  - [x] All tests inherit from SSOT framework (SSotBaseTestCase)
+  - [x] Tests validate GitHub Issue #204 exact error reproduction
+  - [x] Test execution verified - properly detect SSOT violations
+
+- [x] **Step 3: Plan Remediation** - COMPLETED
+  - [x] Created comprehensive 3-phase remediation strategy
+  - [x] Prioritized business impact: WebSocket → Duplicates → Circular imports
+  - [x] Planned minimal changes to restore golden path functionality
+  - [x] Identified safety measures and validation steps
+
 - [ ] **Step 4: Execute Remediation**  
 - [ ] **Step 5: Test Fix Loop**
 - [ ] **Step 6: PR and Closure**
@@ -104,8 +114,77 @@ WebSocket connections fail completely due to missing `get_db_session_factory` fu
 - WebSocket factory creates database sessions successfully ✅
 - Golden path: user login → database session → AI responses works ✅
 
+## Test Files Created (Step 2)
+
+**4 New Mission-Critical Test Files:**
+1. **`test_database_ssot_function_violations.py`** - Missing function detection  
+   - Reproduces exact GitHub Issue #204 error
+   - Tests WebSocket factory failures with missing `get_db_session_factory`
+   - Validates replacement function `get_database_manager` works
+
+2. **`test_database_manager_ssot_consolidation.py`** - SSOT consolidation validation
+   - Detects duplicate DatabaseManager implementations across 3 locations
+   - AST-based codebase scanning for import consistency
+   - Validates single source after SSOT remediation
+
+3. **`test_database_import_dependency_resolution.py`** - Import/dependency resolution
+   - Custom directed graph implementation for circular dependency detection
+   - WebSocket factory import resolution validation
+   - Startup sequence database initialization order testing
+
+4. **`test_database_golden_path_session_factory.py`** - Golden path validation
+   - Async WebSocket manager database session creation tests
+   - User login database session flow validation
+   - Agent execution database access testing
+
+**Test Execution Commands:**
+```bash
+# Run all DatabaseManager SSOT tests
+python -m pytest tests/mission_critical/test_database_* -v
+
+# Run specific violation reproduction
+python -m pytest tests/mission_critical/test_database_ssot_function_violations.py
+```
+
+**Status:** All tests pass collection and reproduce SSOT violations as designed ✅
+
+## SSOT Remediation Strategy (Step 3)
+
+**Business Impact:** $500K+ ARR at risk - WebSocket connections failing due to database SSOT violations
+
+### 3-Phase Remediation Plan
+
+**Phase 1: CRITICAL - Restore WebSocket Functionality** (Priority 1)
+- **Analysis:** `get_db_session_factory` is test artifact, not production function  
+- **Action:** Update tests to use correct SSOT approach (`get_database_manager`)
+- **Target:** Fix missing function blocking golden path WebSocket connections
+- **Risk:** LOW (test-only changes)
+
+**Phase 2: HIGH - Consolidate Duplicate DatabaseManager Classes** (Priority 2)  
+- **Keep:** `/netra_backend/app/db/database_manager.py` as canonical SSOT
+- **Migrate:** Update `/netra_backend/app/database/__init__.py` to import from SSOT
+- **Preserve:** `AuthDatabaseManager` (different service boundary)
+- **Update:** 15+ files importing from duplicate locations
+
+**Phase 3: MEDIUM - Resolve Circular Import Dependencies** (Priority 3)
+- **Audit:** Map database-related import dependencies
+- **Restructure:** Move shared interfaces, implement lazy imports
+- **Validate:** Clean startup sequence without import failures
+
+### Safety Measures
+- Atomic changes (reversible at each step)
+- Maintain service boundaries (don't break auth isolation)
+- Test existing functionality before/after each phase
+- Preserve backward compatibility during transition
+
+### Success Metrics
+- Phase 1: All SSOT tests pass, no missing function errors
+- Phase 2: Single DatabaseManager implementation, imports work
+- Phase 3: Clean startup, no circular imports
+- Overall: Golden path functional, 458+ tests continue passing
+
 ## Next Actions
 
-1. **CURRENT STEP:** Execute test plan (~20% new SSOT tests)
-2. Focus on failing tests that reproduce SSOT violations
-3. Build new tests using existing SSOT framework patterns
+1. **CURRENT STEP:** Execute remediation plan (Phase 1: Fix test expectations)
+2. Start with lowest risk changes (test updates)
+3. Progress through phases maintaining system stability

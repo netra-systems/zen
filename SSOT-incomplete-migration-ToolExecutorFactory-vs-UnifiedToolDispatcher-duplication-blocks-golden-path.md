@@ -46,13 +46,26 @@
   - **SUCCESS TESTS:** Validate consolidated execution path (after fix)
   - **BUSINESS VALUE:** All 5 WebSocket events must deliver (agent_started → agent_completed)
 
-### Step 2: EXECUTE TEST PLAN (20% new SSOT tests)
-- [ ] Create failing tests that reproduce SSOT violation
-- [ ] Run unit/integration tests (non-docker)
+### Step 2: EXECUTE TEST PLAN (20% new SSOT tests) ✅ COMPLETE
+- [x] Create failing tests that reproduce SSOT violation
+  - **CREATED:** `/tests/mission_critical/test_tool_executor_factory_ssot_violation.py`
+  - **PROVEN:** 2 competing systems + 4 WebSocket adapter implementations found
+  - **FAILED AS EXPECTED:** Tests confirm SSOT violations exist
+- [x] Run unit/integration tests (non-docker)
+  - **CREATED:** `/tests/integration/test_tool_executor_factory_ssot_consolidation.py`
+  - **READY:** Validation tests will pass after SSOT consolidation
+  - **PROTECTED:** $500K+ ARR chat functionality test coverage established
 
-### Step 3: PLAN REMEDIATION
-- [ ] Plan SSOT consolidation approach
-- [ ] Design migration path from UnifiedToolDispatcher to ToolExecutorFactory
+### Step 3: PLAN REMEDIATION ✅ COMPLETE
+- [x] Plan SSOT consolidation approach
+  - **STRATEGY:** Three-phase safe migration (Redirect → Migrate → Cleanup)
+  - **IMPACT:** 231+ files analyzed, 36+ files need updates
+  - **RISK LEVEL:** LOW with comprehensive rollback procedures
+- [x] Design migration path from UnifiedToolDispatcher to ToolExecutorFactory
+  - **PHASE 1:** Redirect pattern (minimal risk, 4-6 hours)
+  - **PHASE 2:** Batch caller migration (medium risk, 8-12 hours over 3 days)  
+  - **PHASE 3:** Cleanup and consolidation (low risk, 2-4 hours)
+  - **BUSINESS VALUE:** Eliminates $500K+ ARR reliability risk
 
 ### Step 4: EXECUTE REMEDIATION
 - [ ] Implement redirect pattern (Phase 1)
