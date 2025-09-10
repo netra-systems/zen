@@ -51,58 +51,29 @@
 - SSOT refactoring only, no new features
 
 
-## 🏗️ CRITICAL ARCHITECTURE DOCUMENTATION
+## 🏗️ ARCHITECTURE RULES
 
-> **⚠️ MANDATORY READING**: The **User Context Architecture** @USER_CONTEXT_ARCHITECTURE.md is the authoritative guide to our Factory-based isolation patterns. This document explains how we ensure complete user isolation, eliminate shared state, and enable reliable concurrent execution for 10+ users. **READ THIS FIRST** before making any changes to execution engines, WebSocket events, or tool dispatchers.
+**MANDATORY READING:** @USER_CONTEXT_ARCHITECTURE.md - Factory-based isolation for multi-user execution.
 
-Recent issues to be extra aware of:
-1. Race conditions. Plan ahead and think about race conditions in all aspects of your code and refactors.
-The system has a lot of async, websockets, and other patterns that require heavy awarness of this.
-2. Solve for the 95% of cases first. Always make sure the breadth and coverage of those expected cases is ironclad before the 5%.
-3. Limit volume of code and new features. Rather delete an ugly or overbearing test then add a ton of code just to satisfy it. Always think of the whole system.
-4. This is a multi-user system.
-5. Update tests to SSOT methods. NEVER re-create legacy code to pass old tests!
-6. **CONFIG/ENV REGRESSION PREVENTION:** See @OAUTH_REGRESSION_ANALYSIS_20250905.md and @CONFIG_REGRESSION_PREVENTION_PLAN.md
-Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) **IF named as such** are NOT duplicates
-   - **NEVER delete config without dependency checking** - Missing OAuth credentials caused 503 errors
-   - **Each environment needs INDEPENDENT config** - Test/staging/prod MUST have separate OAuth credentials  
-   - **SILENT FAILURES = ABOMINATION** - Hard failures are better than wrong environment configs leaking
-   - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
-   - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
-7. **MULTI-USER** The system is MULTI-USER.
-8. **WEBSOCKET v2 MIGRATION:** See @websocket_v2_migration_critical_miss_20250905.xml
-9. **PARAMOUNT IMPORTANCE** Always look for the "error behind the error". Example: AUTH_CIRCUIT_BREAKER_BUG_FIX_REPORT_20250905.md
-Often the face value error message is masking other errors, sometimes the real root.
-Look for the "error behind the error" up to 10 times until true true root cause.
-Especially when dealing with apparent regression issues.
-10. The point of the system is to provide business value. Keep the scope as small as reasonable for startup team.
-11. NEVER ADD "extra" things. bad: [fallback, 'reliability', etc.] without express direction. ALL "mixin" type features or "enterprise" type must be requested directly, be SSOT compliant. 
-12. On Windows use UTF-8 encoding for encoding issues.
-13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
-14. TESTS MUST RAISE ERRORS. DO NOT USE try accept blocks in tests.
-15. **🚨 E2E AUTH IS MANDATORY:** ALL e2e tests MUST use authentication (JWT/OAuth) EXCEPT tests that directly validate auth itself. See @e2e_auth_helper.py
-16. Use Getters and Setters()
-17. Be careful about test code vs system code. Don't let testing needs and concept pollute actual code.
-Use the test decorator when a function has to be in system code.
+**CRITICAL AWARENESS:**
+1. **Race Conditions:** System has async/websockets - plan for concurrency
+2. **95% First:** Nail common cases before edge cases
+3. **Multi-User System:** Complete user isolation required
+4. **Config Independence:** Each environment (TEST/DEV/STAGING/PROD) needs separate configs
+5. **Error Investigation:** Find "error behind the error" - dig 10 levels deep
+6. **Business Value Focus:** Minimal scope for startup efficiency
+7. **No "Enterprise" Features:** No fallbacks/reliability without explicit request
+8. **Real Tests:** E2E auth mandatory, no try/except blocks in tests
+9. **SSOT Updates:** Never recreate legacy code to pass old tests
 
-KEEP CORE SYSTEM AS IS
-NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
+**KEY ARCHITECTURE DOCS:**
+- @USER_CONTEXT_ARCHITECTURE.md - Factory isolation patterns
+- @MIGRATION_PATHS_CONSOLIDATED.md - Migration coordination
+- @AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md - Agent workflows
+- @naming_conventions_business_focused.xml - Business naming
+- @index.md - Documentation index
 
-### Related Architecture Documents:
-- **User Context Architecture** @USER_CONTEXT_ARCHITECTURE.md - Factory patterns and execution isolation (START HERE)
-- **Migration Paths Consolidated** @MIGRATION_PATHS_CONSOLIDATED.md - Master guide for all migration tracks with dependencies and validation
-- **Agent Architecture Guide** @AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md - Clarifies complex agent workflow architecture and relationships
-- **Manager Renaming Plan** @MANAGER_RENAMING_PLAN_20250908.md - Business-focused naming to replace confusing "Manager" terminology
-- **Manager Renaming Implementation** @MANAGER_RENAMING_IMPLEMENTATION_PLAN.md - Detailed implementation plan with risk mitigation
-- **Business-Focused Naming Conventions** @naming_conventions_business_focused.xml - Comprehensive naming guidelines for future development
-- @TOOL_DISPATCHER_MIGRATION_GUIDE.md - Migration from singleton to request-scoped
-- @WEBSOCKET_MODERNIZATION_REPORT.md - WebSocket isolation implementation
-- @index.md - Central documentation index
-
-Expect everything to fail. Add conditional error logging by default whenever possible.
-Success is "quiet" and summarized. ANTHING that's not what's expected must be super obvious in logs.
-CRITICAL: Make all errors loud.
-Protect against silent errors. NEVER MAKE "fallbacks" unless expressly part of named design and class.
+**ERROR HANDLING:** Expect failures, log everything loud, no silent errors or undocumented fallbacks.
 
 -----
 
