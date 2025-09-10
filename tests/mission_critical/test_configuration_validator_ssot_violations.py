@@ -31,7 +31,7 @@ from netra_backend.app.core.configuration.validator import ConfigurationValidato
 logger = logging.getLogger(__name__)
 
 
-class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase):
+class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestCase):
     """
     SSOT Violation Reproduction Tests
     

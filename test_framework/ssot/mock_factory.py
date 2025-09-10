@@ -211,6 +211,53 @@ class SSotMockFactory:
                 
         return mock_config
 
+    @staticmethod
+    def create_websocket_manager_mock(
+        manager_type: str = "unified",
+        user_isolation: bool = True
+    ) -> AsyncMock:
+        """
+        Create a standardized WebSocket manager mock for testing.
+        
+        This creates a mock that follows SSOT patterns and can be used to validate
+        proper integration between test and production WebSocket manager patterns.
+        
+        Args:
+            manager_type: Type of WebSocket manager to mock
+            user_isolation: Whether to enable user isolation features
+            
+        Returns:
+            AsyncMock configured for WebSocket manager testing
+        """
+        mock_manager = AsyncMock()
+        mock_manager.manager_type = manager_type
+        
+        # SSOT compliance attributes
+        mock_manager._ssot_compliant = True
+        mock_manager._ssot_mock_registry = {}
+        
+        # Standard WebSocket manager interface
+        mock_manager.add_connection = AsyncMock()
+        mock_manager.remove_connection = AsyncMock()
+        mock_manager.send_message = AsyncMock()
+        mock_manager.broadcast_message = AsyncMock()
+        mock_manager.get_connection_count = AsyncMock(return_value=0)
+        mock_manager.get_user_connections = AsyncMock(return_value=[])
+        
+        # Agent event support (Golden Path requirement)
+        mock_manager.send_agent_event = AsyncMock()
+        
+        # User isolation support
+        if user_isolation:
+            mock_manager.get_connections_for_user = AsyncMock(return_value=[])
+            mock_manager._user_context = MagicMock()
+        
+        # Connection management
+        mock_manager._active_connections = {}
+        mock_manager._connection_registry = MagicMock()
+        
+        return mock_manager
+
     @classmethod
     def create_mock_suite(cls, mock_types: List[str]) -> Dict[str, Any]:
         """

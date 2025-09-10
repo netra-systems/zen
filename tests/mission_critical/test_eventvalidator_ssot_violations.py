@@ -85,10 +85,13 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
                 "criticality": unified_result.criticality.value if hasattr(unified_result.criticality, 'value') else str(unified_result.criticality)
             }
             logger.info(f"✓ UnifiedEventValidator found and tested")
+            print(f"DEBUG: UnifiedEventValidator found - {unified_result.is_valid}")
         except ImportError as e:
             logger.error(f"❌ Cannot import UnifiedEventValidator: {e}")
+            print(f"DEBUG: UnifiedEventValidator import failed: {e}")
         except Exception as e:
             logger.error(f"❌ UnifiedEventValidator test failed: {e}")
+            print(f"DEBUG: UnifiedEventValidator exception: {e}")
             
         # Test Import 2: Production WebSocketEventValidator
         try:
@@ -106,10 +109,13 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
                 "criticality": production_result.criticality.value if hasattr(production_result.criticality, 'value') else str(production_result.criticality)
             }
             logger.info(f"✓ WebSocketEventValidator found and tested")
+            print(f"DEBUG: WebSocketEventValidator found - {production_result.is_valid}")
         except ImportError as e:
             logger.error(f"❌ Cannot import WebSocketEventValidator: {e}")
+            print(f"DEBUG: WebSocketEventValidator import failed: {e}")
         except Exception as e:
             logger.error(f"❌ WebSocketEventValidator test failed: {e}")
+            print(f"DEBUG: WebSocketEventValidator exception: {e}")
             
         # Test Import 3: SSOT Framework AgentEventValidator
         try:
@@ -124,16 +130,22 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
                 "business_value_score": ssot_result.business_value_score
             }
             logger.info(f"✓ AgentEventValidator found and tested")
+            print(f"DEBUG: AgentEventValidator found - {ssot_result.is_valid}")
         except ImportError as e:
             logger.error(f"❌ Cannot import AgentEventValidator: {e}")
+            print(f"DEBUG: AgentEventValidator import failed: {e}")
         except Exception as e:
             logger.error(f"❌ AgentEventValidator test failed: {e}")
+            print(f"DEBUG: AgentEventValidator exception: {e}")
             
         # Log findings
         logger.critical(f"🚨 SSOT VIOLATION ANALYSIS:")
         logger.critical(f"🚨 Total EventValidator implementations found: {len(implementations_found)}")
         logger.critical(f"🚨 Implementations: {implementations_found}")
         logger.critical(f"🚨 Validation results: {validation_results}")
+        
+        print(f"DEBUG: Found {len(implementations_found)} implementations: {implementations_found}")
+        print(f"DEBUG: Validation results: {validation_results}")
         
         # CRITICAL ASSERTION: This SHOULD FAIL initially, proving SSOT violation
         if len(implementations_found) > 1:
@@ -163,11 +175,11 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
                     logger.critical("🚨 This is a clear SSOT violation requiring consolidation")
                 
         # FAIL THE TEST TO PROVE VIOLATION EXISTS
-        self.assertLessEqual(
-            len(implementations_found), 1,
-            f"SSOT VIOLATION: Found {len(implementations_found)} EventValidator implementations: {implementations_found}. "
-            f"Should be exactly 1 unified implementation. This failure PROVES Issue #231 exists and needs fixing."
-        )
+        if len(implementations_found) > 1:
+            self.fail(
+                f"SSOT VIOLATION: Found {len(implementations_found)} EventValidator implementations: {implementations_found}. "
+                f"Should be exactly 1 unified implementation. This failure PROVES Issue #231 exists and needs fixing."
+            )
         
     def test_eventvalidator_result_inconsistency(self):
         """
