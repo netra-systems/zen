@@ -93,17 +93,17 @@ def _get_environment_backend_url() -> str:
     env = get_env()
     
     # Check for service orchestrator environment variables first
-    test_backend_url = env.get('TEST_BACKEND_URL', None, 'auto_detect')
+    test_backend_url = env.get('TEST_BACKEND_URL', None)
     if test_backend_url:
         return test_backend_url
     
     # Check for E2E environment variables
-    e2e_backend_url = env.get('E2E_BACKEND_URL', None, 'auto_detect')
+    e2e_backend_url = env.get('E2E_BACKEND_URL', None)
     if e2e_backend_url:
         return e2e_backend_url
     
     # Check for staging environment
-    backend_staging_url = env.get('BACKEND_STAGING_URL', None, 'auto_detect')
+    backend_staging_url = env.get('BACKEND_STAGING_URL', None)
     if backend_staging_url:
         return backend_staging_url
     
@@ -116,12 +116,12 @@ def _get_environment_websocket_url() -> str:
     env = get_env()
     
     # Check for service orchestrator environment variables first
-    test_websocket_url = env.get('TEST_WEBSOCKET_URL', None, 'auto_detect')
+    test_websocket_url = env.get('TEST_WEBSOCKET_URL', None)
     if test_websocket_url:
         return test_websocket_url
     
     # Check for E2E environment variables
-    e2e_websocket_url = env.get('E2E_WEBSOCKET_URL', None, 'auto_detect')
+    e2e_websocket_url = env.get('E2E_WEBSOCKET_URL', None)
     if e2e_websocket_url:
         return e2e_websocket_url
     
