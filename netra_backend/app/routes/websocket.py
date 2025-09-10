@@ -2109,10 +2109,25 @@ async def _handle_websocket_messages(
                 
                 # CRITICAL FIX: Check if the error is related to WebSocket connection state
                 error_message = str(e)
-                if "Need to call 'accept' first" in error_message or "WebSocket is not connected" in error_message:
-                    logger.error(f"WebSocket connection state error for {connection_id}: {error_message}")
-                    logger.error("This indicates a race condition between accept() and message handling")
-                    # Break immediately - don't retry connection state errors
+                
+                # Case 1: WebSocket not accepted yet (race condition in handshake)
+                if "Need to call 'accept' first" in error_message:
+                    logger.error(f"🚨 WEBSOCKET NOT ACCEPTED ERROR for {connection_id}: {error_message}")
+                    logger.error(f"DIAGNOSTIC: This indicates websocket.accept() was never called or failed")
+                    logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
+                    logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
+                    logger.error("ROOT_CAUSE: Race condition - message handler started before accept() completed")
+                    # Break immediately - this is unrecoverable
+                    break
+                
+                # Case 2: WebSocket disconnected (connection lost)
+                elif "WebSocket is not connected" in error_message:
+                    logger.error(f"🔌 WEBSOCKET DISCONNECTED ERROR for {connection_id}: {error_message}")
+                    logger.error(f"DIAGNOSTIC: WebSocket was connected but is now disconnected")
+                    logger.error(f"CONNECTION_ID: {connection_id}, USER_ID: {user_id}")
+                    logger.error(f"ERROR_COUNT: {error_count}/{max_errors}")
+                    logger.error("ROOT_CAUSE: Connection dropped - client disconnect, network issue, or server close")
+                    # Break immediately - connection is gone
                     break
                 else:
                     logger.error(f"Message handling error for {connection_id}: {e}", exc_info=True)
