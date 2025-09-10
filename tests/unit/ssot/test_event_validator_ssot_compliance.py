@@ -32,6 +32,13 @@ class TestEventValidatorSsotCompliance(SSotBaseTestCase):
         self.project_root = Path("/Users/anthony/Desktop/netra-apex")
         self.expected_ssot_path = "netra_backend/app/websocket_core/event_validator.py"
     
+    @classmethod
+    def setUpClass(cls):
+        """Set up class-level test environment."""
+        super().setUpClass()
+        cls.project_root = Path("/Users/anthony/Desktop/netra-apex")
+        cls.expected_ssot_path = "netra_backend/app/websocket_core/event_validator.py"
+    
     def test_only_one_event_validator_class_exists(self):
         """
         Test: Only ONE EventValidator class should exist in entire codebase.

@@ -99,10 +99,11 @@ class ExecutionEngine:
             websocket_bridge: WebSocket bridge for event emission
             user_context: Optional UserExecutionContext for per-request isolation
         """
-        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of ConsolidatedExecutionEngine
         import warnings
         warnings.warn(
-            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            "SupervisorExecutionEngine is deprecated. "
+            "Use ConsolidatedExecutionEngine via UnifiedExecutionEngineFactory instead.",
             DeprecationWarning,
             stacklevel=2
         )

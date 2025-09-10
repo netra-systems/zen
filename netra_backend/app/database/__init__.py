@@ -170,40 +170,11 @@ async def get_system_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
             logger.debug("Closed SYSTEM database session")
 
-class DatabaseManager:
-    """
-    Database Manager class for backward compatibility.
-    
-    This class provides the DatabaseManager interface that other modules expect.
-    """
-    
-    def __init__(self):
-        self._engine = None
-        self._sessionmaker = None
-    
-    @property
-    def engine(self):
-        """Get database engine."""
-        return get_engine()
-    
-    @property
-    def sessionmaker(self):
-        """Get session maker."""
-        return get_sessionmaker()
-    
-    async def get_session(self) -> AsyncSession:
-        """Get a new database session."""
-        sessionmaker = get_sessionmaker()
-        return sessionmaker()
-    
-    @asynccontextmanager
-    async def session_scope(self) -> AsyncGenerator[AsyncSession, None]:
-        """Context manager for database sessions."""
-        async with get_db() as session:
-            yield session
+# Import the canonical DatabaseManager from SSOT location
+from netra_backend.app.db.database_manager import DatabaseManager, get_database_manager
 
 # Default instance for backward compatibility
-database_manager = DatabaseManager()
+database_manager = get_database_manager()
 
 # Import ClickHouse utilities from db module
 from netra_backend.app.db.clickhouse import get_clickhouse_client

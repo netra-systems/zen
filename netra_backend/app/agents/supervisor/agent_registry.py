@@ -289,8 +289,12 @@ class AgentRegistry(UniversalAgentRegistry):
                 "Consider providing llm_manager for full functionality."
             )
         
-        # Initialize UniversalAgentRegistry
-        super().__init__()
+        # SSOT COMPLIANCE: Initialize UniversalAgentRegistry with proper parameters
+        super().__init__(
+            registry_name="AgentRegistry",
+            allow_override=False,  # Strict agent registration
+            enable_metrics=True    # Enable performance tracking
+        )
         
         self.llm_manager = llm_manager
         self.tool_dispatcher_factory = tool_dispatcher_factory or self._default_dispatcher_factory

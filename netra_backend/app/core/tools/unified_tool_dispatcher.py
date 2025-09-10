@@ -107,6 +107,18 @@ class UnifiedToolDispatcher:
     _max_dispatchers_per_user = 10
     _security_violations = 0  # Track security violations globally
     
+    # Enhanced metrics tracking (consolidated from competing implementations)
+    _global_metrics = {
+        'total_dispatchers_created': 0,
+        'total_tools_executed': 0,
+        'total_successful_executions': 0,
+        'total_failed_executions': 0,
+        'total_security_violations': 0,
+        'average_execution_time_ms': 0.0,
+        'peak_concurrent_dispatchers': 0,
+        'websocket_events_sent': 0
+    }
+    
     def __init__(self):
         """Private initializer - raises error to enforce factory usage."""
         raise RuntimeError(
@@ -237,8 +249,9 @@ class UnifiedToolDispatcher:
         instance.created_at = datetime.now(timezone.utc)
         instance._is_active = True
         
-        # Track dispatcher for cleanup
+        # Track dispatcher for cleanup and global metrics
         cls._register_dispatcher(instance)
+        cls._update_global_metrics('dispatcher_created')
         
         # Initialize components
         instance._init_components(tools, **kwargs)
@@ -557,6 +570,8 @@ class UnifiedToolDispatcher:
             # Update metrics
             execution_time = (time.time() - start_time) * 1000
             self._update_metrics(success=True, execution_time=execution_time)
+            self.__class__._update_global_metrics('successful_execution')
+            self.__class__._update_global_metrics('execution_time', execution_time)
             
             # Emit tool_completed event
             if self.has_websocket_support:
@@ -578,6 +593,8 @@ class UnifiedToolDispatcher:
             # Update metrics
             execution_time = (time.time() - start_time) * 1000
             self._update_metrics(success=False, execution_time=execution_time)
+            self.__class__._update_global_metrics('failed_execution')
+            self.__class__._update_global_metrics('execution_time', execution_time)
             
             # Emit tool_completed with error
             if self.has_websocket_support:
@@ -651,6 +668,7 @@ class UnifiedToolDispatcher:
                 }
             )
             self._metrics['websocket_events_sent'] += 1
+            self.__class__._update_global_metrics('websocket_event')
         except Exception as e:
             logger.warning(f"Failed to emit tool_executing event: {e}")
     
@@ -878,6 +896,47 @@ class UnifiedToolDispatcher:
             await dispatcher.cleanup()
         
         logger.info(f"Cleaned up {len(user_dispatchers)} dispatchers for user {user_id}")
+    
+    @classmethod
+    def _update_global_metrics(cls, metric_type: str, value: float = 1.0):
+        """Update global metrics for monitoring dispatcher health."""
+        if metric_type == 'dispatcher_created':
+            cls._global_metrics['total_dispatchers_created'] += 1
+            current_active = len(cls._active_dispatchers)
+            if current_active > cls._global_metrics['peak_concurrent_dispatchers']:
+                cls._global_metrics['peak_concurrent_dispatchers'] = current_active
+        elif metric_type == 'tool_executed':
+            cls._global_metrics['total_tools_executed'] += 1
+        elif metric_type == 'successful_execution':
+            cls._global_metrics['total_successful_executions'] += 1
+        elif metric_type == 'failed_execution':
+            cls._global_metrics['total_failed_executions'] += 1
+        elif metric_type == 'security_violation':
+            cls._global_metrics['total_security_violations'] += 1
+        elif metric_type == 'websocket_event':
+            cls._global_metrics['websocket_events_sent'] += 1
+        elif metric_type == 'execution_time':
+            # Update average execution time using running average
+            total_executions = (cls._global_metrics['total_successful_executions'] + 
+                              cls._global_metrics['total_failed_executions'])
+            if total_executions > 0:
+                current_avg = cls._global_metrics['average_execution_time_ms']
+                cls._global_metrics['average_execution_time_ms'] = (
+                    (current_avg * (total_executions - 1) + value) / total_executions
+                )
+    
+    @classmethod
+    def get_global_metrics(cls) -> Dict[str, Any]:
+        """Get global metrics for monitoring and diagnostics."""
+        return {
+            **cls._global_metrics.copy(),
+            'active_dispatchers': len(cls._active_dispatchers),
+            'security_violations': cls._security_violations,
+            'active_dispatcher_users': len(set(
+                d.user_context.user_id for d in cls._active_dispatchers.values()
+                if d._is_active
+            ))
+        }
 
 
 # ============================================================================
