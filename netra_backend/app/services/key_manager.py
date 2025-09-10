@@ -8,7 +8,7 @@ Manages API keys, encryption keys, and other sensitive data.
 import logging
 import os
 import secrets
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List
 from dataclasses import dataclass
 from enum import Enum
 
@@ -325,6 +325,84 @@ class KeyManager:
             'expired_keys': expired_count,
             'key_types': key_types
         }
+    
+    # ====== JWT Interface Bridge Methods ======
+    # These methods provide the interface expected by Golden Path Validator
+    # ALL JWT operations delegate to UnifiedJWTValidator (SSOT preservation)
+    
+    async def create_access_token(
+        self,
+        user_id: str,
+        email: Optional[str] = None,
+        permissions: Optional[List[str]] = None,
+        expire_minutes: Optional[int] = None
+    ) -> str:
+        """
+        Create JWT access token via UnifiedJWTValidator.
+        
+        Golden Path Validator compatibility method - delegates to SSOT.
+        ALL JWT operations go through auth service via UnifiedJWTValidator.
+        """
+        try:
+            from netra_backend.app.core.unified.jwt_validator import jwt_validator
+            logger.info("KeyManager.create_access_token delegating to UnifiedJWTValidator (SSOT)")
+            return await jwt_validator.create_access_token(user_id, email, permissions, expire_minutes)
+        except Exception as e:
+            logger.error(f"JWT access token creation failed in KeyManager bridge: {e}")
+            raise
+    
+    async def verify_token(
+        self,
+        token: str,
+        token_type: Optional[str] = None,
+        verify_exp: bool = True
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Verify JWT token via UnifiedJWTValidator.
+        
+        Golden Path Validator compatibility method - delegates to SSOT.
+        ALL JWT operations go through auth service via UnifiedJWTValidator.
+        """
+        try:
+            from netra_backend.app.core.unified.jwt_validator import jwt_validator
+            logger.info("KeyManager.verify_token delegating to UnifiedJWTValidator (SSOT)")
+            result = await jwt_validator.verify_token(token, token_type, verify_exp)
+            
+            # Golden Path expects dict return format, not TokenValidationResult
+            if result and result.valid:
+                return {
+                    "user_id": result.user_id,
+                    "email": result.email,
+                    "permissions": result.permissions or [],
+                    "valid": True
+                }
+            else:
+                return None
+                
+        except Exception as e:
+            logger.error(f"JWT token verification failed in KeyManager bridge: {e}")
+            return None
+    
+    async def create_refresh_token(
+        self,
+        user_id: str,
+        email: Optional[str] = None,
+        permissions: Optional[List[str]] = None,
+        expire_days: Optional[int] = None
+    ) -> str:
+        """
+        Create JWT refresh token via UnifiedJWTValidator.
+        
+        Golden Path Validator compatibility method - delegates to SSOT.
+        ALL JWT operations go through auth service via UnifiedJWTValidator.
+        """
+        try:
+            from netra_backend.app.core.unified.jwt_validator import jwt_validator
+            logger.info("KeyManager.create_refresh_token delegating to UnifiedJWTValidator (SSOT)")
+            return await jwt_validator.create_refresh_token(user_id, expire_days)
+        except Exception as e:
+            logger.error(f"JWT refresh token creation failed in KeyManager bridge: {e}")
+            raise
 
 
 # Global key manager instance

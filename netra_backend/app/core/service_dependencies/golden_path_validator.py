@@ -349,40 +349,69 @@ class GoldenPathValidator:
     async def _validate_jwt_capabilities(self, app: Any) -> Dict[str, Any]:
         """Validate JWT token creation and validation capabilities."""
         try:
-            # Check for key manager
-            if not hasattr(app.state, 'key_manager') or app.state.key_manager is None:
+            # Check for unified JWT validator first (preferred pattern)
+            if hasattr(app.state, 'unified_jwt_validator') and app.state.unified_jwt_validator is not None:
+                unified_validator = app.state.unified_jwt_validator
+                capabilities = {}
+                
+                # Check for JWT methods on unified validator
+                capabilities["create_access_token"] = hasattr(unified_validator, 'create_access_token') and callable(getattr(unified_validator, 'create_access_token'))
+                capabilities["verify_token"] = hasattr(unified_validator, 'verify_token') and callable(getattr(unified_validator, 'verify_token'))
+                capabilities["create_refresh_token"] = hasattr(unified_validator, 'create_refresh_token') and callable(getattr(unified_validator, 'create_refresh_token'))
+                
+                jwt_ready = capabilities["create_access_token"] and capabilities["verify_token"]
+                
+                if jwt_ready:
+                    return {
+                        "requirement": "jwt_validation_ready",
+                        "success": True,
+                        "message": "JWT capabilities confirmed via UnifiedJWTValidator",
+                        "details": {**capabilities, "validator_type": "unified_jwt_validator"}
+                    }
+                else:
+                    missing_capabilities = [cap for cap, available in capabilities.items() if not available]
+                    return {
+                        "requirement": "jwt_validation_ready",
+                        "success": False,
+                        "message": f"UnifiedJWTValidator missing JWT capabilities: {missing_capabilities}",
+                        "details": {**capabilities, "validator_type": "unified_jwt_validator"}
+                    }
+            
+            # Check for legacy key manager pattern
+            elif hasattr(app.state, 'key_manager') and app.state.key_manager is not None:
+                key_manager = app.state.key_manager
+                capabilities = {}
+                
+                # Check for JWT creation capability with callable verification
+                capabilities["create_access_token"] = hasattr(key_manager, 'create_access_token') and callable(getattr(key_manager, 'create_access_token', None))
+                capabilities["verify_token"] = hasattr(key_manager, 'verify_token') and callable(getattr(key_manager, 'verify_token', None))
+                capabilities["create_refresh_token"] = hasattr(key_manager, 'create_refresh_token') and callable(getattr(key_manager, 'create_refresh_token', None))
+                
+                jwt_ready = capabilities["create_access_token"] and capabilities["verify_token"]
+                
+                if jwt_ready:
+                    return {
+                        "requirement": "jwt_validation_ready",
+                        "success": True,
+                        "message": "JWT capabilities confirmed via key manager",
+                        "details": {**capabilities, "validator_type": "key_manager"}
+                    }
+                else:
+                    missing_capabilities = [cap for cap, available in capabilities.items() if not available]
+                    return {
+                        "requirement": "jwt_validation_ready",
+                        "success": False,
+                        "message": f"Key manager missing JWT capabilities: {missing_capabilities}",
+                        "details": {**capabilities, "validator_type": "key_manager"}
+                    }
+            
+            # No JWT validation capability found
+            else:
                 return {
                     "requirement": "jwt_validation_ready",
                     "success": False,
                     "message": "Key manager not available for JWT operations",
-                    "details": {"key_manager": False}
-                }
-            
-            key_manager = app.state.key_manager
-            capabilities = {}
-            
-            # Check for JWT creation capability
-            capabilities["create_access_token"] = hasattr(key_manager, 'create_access_token')
-            capabilities["verify_token"] = hasattr(key_manager, 'verify_token')
-            capabilities["create_refresh_token"] = hasattr(key_manager, 'create_refresh_token')
-            
-            # Test token creation if possible (without actually creating a real token)
-            jwt_ready = capabilities["create_access_token"] and capabilities["verify_token"]
-            
-            if jwt_ready:
-                return {
-                    "requirement": "jwt_validation_ready",
-                    "success": True,
-                    "message": "JWT creation and validation capabilities confirmed",
-                    "details": capabilities
-                }
-            else:
-                missing_capabilities = [cap for cap, available in capabilities.items() if not available]
-                return {
-                    "requirement": "jwt_validation_ready",
-                    "success": False,
-                    "message": f"Missing JWT capabilities: {missing_capabilities}",
-                    "details": capabilities
+                    "details": {"key_manager": False, "unified_jwt_validator": False}
                 }
                 
         except Exception as e:
