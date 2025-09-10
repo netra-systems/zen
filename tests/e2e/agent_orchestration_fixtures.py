@@ -270,3 +270,68 @@ def performance_metrics_data():
             "queue_length": 2
         }
     }
+
+
+class WorkflowTestFixtures:
+    """Test fixtures for workflow orchestration testing
+    
+    Provides unified access to workflow test fixtures and utilities.
+    COMPLIANCE: REAL services only, no mocks per CLAUDE.md
+    """
+    
+    def __init__(self):
+        """Initialize workflow test fixtures"""
+        pass
+    
+    @staticmethod
+    def create_workflow_context(workflow_type: str, user_id: str = None) -> Dict[str, Any]:
+        """Create a workflow context for testing
+        
+        Args:
+            workflow_type: Type of workflow to create
+            user_id: Optional user ID for context
+            
+        Returns:
+            Dictionary containing workflow context
+        """
+        if user_id is None:
+            user_id = str(uuid.uuid4())
+            
+        return {
+            "workflow_type": workflow_type,
+            "user_id": user_id,
+            "run_id": str(uuid.uuid4()),
+            "thread_id": str(uuid.uuid4()),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "status": "initialized"
+        }
+    
+    @staticmethod
+    def create_dependency_chain(steps: list) -> Dict[str, Any]:
+        """Create a dependency chain for workflow testing
+        
+        Args:
+            steps: List of workflow steps
+            
+        Returns:
+            Dictionary containing dependency chain configuration
+        """
+        return {
+            "chain_id": str(uuid.uuid4()),
+            "steps": steps,
+            "dependencies": {step: steps[i-1] if i > 0 else None for i, step in enumerate(steps)},
+            "execution_order": steps
+        }
+    
+    @staticmethod
+    def get_sample_workflow_data() -> Dict[str, Any]:
+        """Get sample workflow data for testing
+        
+        Returns:
+            Dictionary containing sample workflow data
+        """
+        return {
+            "data_analysis": {"query": "Analyze Q4 costs", "filters": {"department": "engineering"}},
+            "optimization": {"target": "cost_reduction", "threshold": 0.15},
+            "reporting": {"format": "executive_summary", "recipients": ["management"]}
+        }

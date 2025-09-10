@@ -1256,8 +1256,60 @@ __all__ = [
     "validate_jwt_token",               # New SSOT function for JWT validation
     "create_authenticated_user",
     "create_authenticated_user_context",
-    "get_test_jwt_token"
+    "get_test_jwt_token",
+    # Compatibility functions for legacy tests
+    "create_test_user",
+    "get_authenticated_headers", 
+    "cleanup_test_user",
+    "E2EAuthenticatedTestCase"
 ]
 
 # Backwards compatibility alias - some tests import E2EAuthenticationHelper
 E2EAuthenticationHelper = E2EAuthHelper
+
+
+# Compatibility functions for legacy test imports
+def create_test_user(*args, **kwargs):
+    """Compatibility function for legacy tests - redirects to create_authenticated_user"""
+    return create_authenticated_user(*args, **kwargs)
+
+
+def get_authenticated_headers(user_id: str = "test-user-123", environment: str = "test") -> Dict[str, str]:
+    """Get authenticated headers for legacy test compatibility"""
+    auth_helper = E2EAuthHelper(environment=environment)
+    token = auth_helper.create_test_jwt_token(user_id=user_id)
+    return auth_helper.get_auth_headers(token)
+
+
+async def cleanup_test_user(user: AuthenticatedUser) -> None:
+    """Cleanup test user - compatibility function"""
+    # In testing context, no actual cleanup needed for test users
+    logger.info(f"Test user cleanup requested for {user.email} (test context - no action needed)")
+    pass
+
+
+class E2EAuthenticatedTestCase(SSotBaseTestCase):
+    """Base class for E2E authenticated test cases - compatibility for legacy tests"""
+    
+    def setUp(self):
+        """Setup authenticated test case"""
+        super().setUp()
+        self.auth_helper = E2EAuthHelper()
+        self.test_user = None
+    
+    async def create_authenticated_user(self, **kwargs):
+        """Create authenticated user for testing"""
+        self.test_user = await create_authenticated_user(**kwargs)
+        return self.test_user
+    
+    def get_auth_headers(self, token: str = None):
+        """Get authentication headers"""
+        if token is None and self.test_user:
+            token = self.test_user.jwt_token
+        return self.auth_helper.get_auth_headers(token)
+    
+    async def tearDown(self):
+        """Cleanup after test"""
+        if self.test_user:
+            await cleanup_test_user(self.test_user)
+        await super().tearDown() if hasattr(super(), 'tearDown') else None
