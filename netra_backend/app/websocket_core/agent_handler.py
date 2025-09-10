@@ -121,8 +121,8 @@ class AgentMessageHandler(BaseMessageHandler):
                 connection_id=connection_id
             )
             
-            # Get database session using async context manager pattern
-            async with get_request_scoped_db_session() as db_session:
+            # Get database session using async generator pattern
+            async for db_session in get_request_scoped_db_session():
                 try:
                     # Get app_state from WebSocket connection for bridge access
                     app_state = None
