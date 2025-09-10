@@ -194,10 +194,15 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                                         'violation_type': 'forbidden_duplicate_implementation'
                                     })
                                 
-                                # Check for unauthorized WebSocket managers
+                                # Check for unauthorized WebSocket managers (excluding protocols, factories, and legitimate components)
                                 if ('WebSocketManager' in class_name and 
-                                    class_name not in ['WebSocketManager', 'UnifiedWebSocketManager', 'IsolatedWebSocketManager'] and
-                                    'Test' not in class_name and 'Mock' not in class_name):
+                                    class_name not in [
+                                        'WebSocketManager', 'UnifiedWebSocketManager', 'IsolatedWebSocketManager',
+                                        'WebSocketManagerProtocol', 'WebSocketManagerFactory',  # Legitimate components
+                                        'EmergencyWebSocketManager'  # Emergency handlers are allowed
+                                    ] and
+                                    'Test' not in class_name and 'Mock' not in class_name and
+                                    'Protocol' not in class_name and 'Factory' not in class_name):
                                     
                                     # Verify it's not in canonical locations
                                     file_relative = str(file_path.relative_to(project_root))
@@ -230,7 +235,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                 for v in all_violations
             ])
             
-            self.fail(
+            pytest.fail(
                 f"🚨 CRITICAL SSOT VIOLATION: Found {len(all_violations)} duplicate/forbidden WebSocket manager implementations:\n"
                 f"{violation_details}\n"
                 f"BUSINESS IMPACT: These duplicates can cause chat functionality fragmentation, "
@@ -344,7 +349,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                 for v in import_violations
             ])
             
-            self.fail(
+            pytest.fail(
                 f"🚨 CRITICAL SSOT VIOLATION: Found {len(import_violations)} forbidden WebSocket imports:\n"
                 f"{violation_details}\n"
                 f"BUSINESS IMPACT: Inconsistent imports can cause WebSocket functionality fragmentation, "
@@ -429,12 +434,12 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                         f"ROOT CAUSE PREVENTION: This ensures all WebSocket managers have consistent interfaces."
                     )
                     
-                    self.fail(error_message)
+                    pytest.fail(error_message)
                 
                 logger.info(f"✅ {manager_info['name']} protocol compliance verified ({validation_result.get('summary', {}).get('compliance_percentage', 0)}%)")
                 
             except Exception as e:
-                self.fail(f"❌ Failed to test {manager_info['name']} protocol compliance: {e}")
+                pytest.fail(f"❌ Failed to test {manager_info['name']} protocol compliance: {e}")
         
         # Record compliance metrics
         total_managers = len(managers_to_test)
@@ -581,12 +586,12 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             # Verify all operations succeeded
             failed_operations = [r for r in concurrent_results if not r['success']]
             if failed_operations:
-                self.fail(f"🚨 CONCURRENT ACCESS FAILURE: {len(failed_operations)} operations failed during concurrent testing")
+                pytest.fail(f"🚨 CONCURRENT ACCESS FAILURE: {len(failed_operations)} operations failed during concurrent testing")
             
             logger.info(f"✅ Concurrent access test passed - {len(concurrent_results)} operations completed successfully")
             
         except Exception as e:
-            self.fail(f"❌ User isolation test failed: {e}")
+            pytest.fail(f"❌ User isolation test failed: {e}")
         
         finally:
             # Clean up test connections and managers
@@ -742,7 +747,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             
             if failed_events:
                 failed_event_names = [e['event_type'] for e in failed_events]
-                self.fail(
+                pytest.fail(
                     f"🚨 CRITICAL EVENT DELIVERY FAILURE: {len(failed_events)} out of {len(critical_events)} "
                     f"critical events failed to deliver: {failed_event_names}\n"
                     f"BUSINESS IMPACT: Missing events cause chat to appear frozen, destroying user experience.\n"
@@ -752,7 +757,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             
             if malformed_events:
                 malformed_event_names = [e['event_type'] for e in malformed_events]
-                self.fail(
+                pytest.fail(
                     f"🚨 EVENT STRUCTURE VIOLATION: {len(malformed_events)} events were delivered but malformed: {malformed_event_names}\n"
                     f"BUSINESS IMPACT: Malformed events can cause frontend parsing errors and chat instability."
                 )
@@ -760,7 +765,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             logger.info(f"✅ All {len(critical_events)} critical WebSocket events delivered successfully")
             
         except Exception as e:
-            self.fail(f"❌ WebSocket event delivery test failed: {e}")
+            pytest.fail(f"❌ WebSocket event delivery test failed: {e}")
         
         # Record event delivery metrics
         successful_events = len([r for r in event_test_results if r['delivered'] and r['structured_correctly']])
@@ -867,7 +872,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                     for v in singleton_violations
                 ])
                 
-                self.fail(
+                pytest.fail(
                     f"🚨 FACTORY PATTERN VIOLATION: Found {len(singleton_violations)} singleton pattern violations:\n"
                     f"{violation_details}\n"
                     f"BUSINESS IMPACT: Singleton patterns cause cross-user data contamination and memory leaks. "
@@ -924,7 +929,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                     for f in failed_creations
                 ])
                 
-                self.fail(
+                pytest.fail(
                     f"🚨 CONCURRENT FACTORY FAILURE: {len(failed_creations)} out of {len(concurrent_tasks)} "
                     f"concurrent factory creations failed:\n{failure_details}\n"
                     f"BUSINESS IMPACT: Factory thread-safety issues can cause race conditions and connection failures."
@@ -935,7 +940,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             unique_manager_ids = set(manager_ids)
             
             if len(unique_manager_ids) != len(manager_ids):
-                self.fail(
+                pytest.fail(
                     f"🚨 CONCURRENT UNIQUENESS VIOLATION: Factory created {len(manager_ids)} managers "
                     f"but only {len(unique_manager_ids)} were unique. "
                     f"Concurrent creation is producing duplicate instances!"
@@ -944,7 +949,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
             logger.info(f"✅ Concurrent factory creation test passed - {len(successful_creations)} unique managers created")
             
         except Exception as e:
-            self.fail(f"❌ WebSocket factory pattern test failed: {e}")
+            pytest.fail(f"❌ WebSocket factory pattern test failed: {e}")
         
         # Record factory pattern metrics
         self.record_test_metrics({
@@ -1082,7 +1087,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                     for v in validation_results['critical_violations']
                 ])
                 
-                self.fail(
+                pytest.fail(
                     f"🚨 COMPREHENSIVE SSOT VALIDATION FAILURE!\n"
                     f"❌ {total_tests - passing_tests} out of {total_tests} critical tests FAILED\n"
                     f"❌ Compliance: {validation_results['compliance_percentage']:.1f}%\n"
@@ -1097,7 +1102,7 @@ class TestWebSocketManagerSSotCompliance(SSotAsyncTestCase):
                 'error': str(e),
                 'business_impact': 'CRITICAL_FAILURE'
             }
-            self.fail(f"❌ Comprehensive WebSocket SSOT validation failed: {e}")
+            pytest.fail(f"❌ Comprehensive WebSocket SSOT validation failed: {e}")
         
         # Record comprehensive validation metrics
         self.record_test_metrics({

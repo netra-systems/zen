@@ -124,9 +124,9 @@ class TestBaseExecutionPhase(SSotAsyncTestCase):
 class TestExecutionStrategyHandlers(SSotAsyncTestCase):
     """Test execution strategy handler implementations."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test fixtures."""
-        super().setup_method()
+        super().setup_method(method)
         self.mock_context = ExecutionContext(
             request_id="test_request",
             run_id="test_run",
@@ -158,9 +158,21 @@ class TestExecutionStrategyHandlers(SSotAsyncTestCase):
             "phase2": {"result": "phase2_result"}
         }
         
-        # Verify phases were called in order with correct parameters
-        phase1.execute.assert_called_once_with(self.mock_context, {})
-        phase2.execute.assert_called_once_with(self.mock_context, {"phase1": {"result": "phase1_result"}})
+        # Verify phases were called with correct parameters
+        assert phase1.execute.call_count == 1
+        assert phase2.execute.call_count == 1
+        
+        # Check the actual call arguments
+        phase1_call_args = phase1.execute.call_args
+        phase2_call_args = phase2.execute.call_args
+        
+        # Verify phase1 was called with empty results
+        assert phase1_call_args[0][0] == self.mock_context  # First arg is context
+        assert phase1_call_args[0][1] == {}  # Second arg should be empty results
+        
+        # Verify phase2 was called with phase1 results
+        assert phase2_call_args[0][0] == self.mock_context  # First arg is context
+        assert phase2_call_args[0][1] == {"phase1": {"result": "phase1_result"}}  # Second arg has phase1 results
         
         # Verify WebSocket notifications
         assert self.mock_context.websocket_manager.send_tool_executing.call_count == 2
@@ -321,9 +333,9 @@ class TestExecutionStrategyHandlers(SSotAsyncTestCase):
 class TestBaseExecutionEngine(SSotAsyncTestCase):
     """Test BaseExecutionEngine functionality."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test fixtures."""
-        super().setup_method()
+        super().setup_method(method)
         
         # Mock dependencies
         self.mock_reliability_manager = Mock(spec=ReliabilityManager)
