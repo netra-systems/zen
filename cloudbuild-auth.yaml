@@ -3,7 +3,7 @@ options:
   machineType: E2_HIGHCPU_8
 steps:
 - args:
-  - --dockerfile=docker/auth.staging.alpine.Dockerfile
+  - --dockerfile=dockerfiles/auth.staging.alpine.Dockerfile
   - --destination=gcr.io/netra-staging/netra-auth-service:latest
   - --cache=true
   - --cache-ttl=24h
