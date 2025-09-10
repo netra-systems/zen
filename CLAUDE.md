@@ -151,7 +151,7 @@ Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING
    - **Examples** Good: FuncStaging() or Func(env=staging). Bad: Func() #staging Func() #prod (Bad because same name with no vars)
    - **Config changes = CASCADE FAILURES** - One missing env var can break entire flow 
 7. **MULTI-USER** The system is MULTI-USER.
-8. **WEBSOCKET v2 MIGRATION:** See [WebSocket v2 Critical Miss](./SPEC/learnings/websocket_v2_migration_critical_miss_20250905.xml)
+8. **WEBSOCKET v2 MIGRATION:** See @websocket_v2_migration_critical_miss_20250905.xml
 9. **PARAMOUNT IMPORTANCE** Always look for the "error behind the error". Example: AUTH_CIRCUIT_BREAKER_BUG_FIX_REPORT_20250905.md
 Often the face value error message is masking other errors, sometimes the real root.
 Look for the "error behind the error" up to 10 times until true true root cause.
@@ -161,7 +161,7 @@ Especially when dealing with apparent regression issues.
 12. On Windows use UTF-8 encoding for encoding issues.
 13. NEVER create random "fixer" python scripts because these tend to break things and cause more harm then good. Do the work yourself, using your existing tools directly reading and editing files. Use well documented named concepts (like unified test runner, deploy etc.)
 14. TESTS MUST RAISE ERRORS. DO NOT USE try accept blocks in tests.
-15. **🚨 E2E AUTH IS MANDATORY:** ALL e2e tests MUST use authentication (JWT/OAuth) EXCEPT tests that directly validate auth itself. See [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
+15. **🚨 E2E AUTH IS MANDATORY:** ALL e2e tests MUST use authentication (JWT/OAuth) EXCEPT tests that directly validate auth itself. See @e2e_auth_helper.py
 16. Use Getters and Setters()
 17. Be careful about test code vs system code. Don't let testing needs and concept pollute actual code.
 Use the test decorator when a function has to be in system code.
@@ -170,15 +170,15 @@ KEEP CORE SYSTEM AS IS
 NO NEW FEATURES, ONLY CRITICAL FIXES and REFACTORS
 
 ### Related Architecture Documents:
-- **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and execution isolation (START HERE)
-- **[Migration Paths Consolidated](./docs/MIGRATION_PATHS_CONSOLIDATED.md)** - Master guide for all migration tracks with dependencies and validation
-- **[Agent Architecture Guide](./docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md)** - Clarifies complex agent workflow architecture and relationships
-- **[Manager Renaming Plan](./reports/architecture/MANAGER_RENAMING_PLAN_20250908.md)** - Business-focused naming to replace confusing "Manager" terminology
-- **[Manager Renaming Implementation](./reports/architecture/MANAGER_RENAMING_IMPLEMENTATION_PLAN.md)** - Detailed implementation plan with risk mitigation
-- **[Business-Focused Naming Conventions](./SPEC/naming_conventions_business_focused.xml)** - Comprehensive naming guidelines for future development
-- [Tool Dispatcher Migration Guide](./reports/archived/TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migration from singleton to request-scoped
-- [WebSocket Modernization Report](./reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation implementation
-- [Documentation Hub](./docs/index.md) - Central documentation index
+- **User Context Architecture** @USER_CONTEXT_ARCHITECTURE.md - Factory patterns and execution isolation (START HERE)
+- **Migration Paths Consolidated** @MIGRATION_PATHS_CONSOLIDATED.md - Master guide for all migration tracks with dependencies and validation
+- **Agent Architecture Guide** @AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md - Clarifies complex agent workflow architecture and relationships
+- **Manager Renaming Plan** @MANAGER_RENAMING_PLAN_20250908.md - Business-focused naming to replace confusing "Manager" terminology
+- **Manager Renaming Implementation** @MANAGER_RENAMING_IMPLEMENTATION_PLAN.md - Detailed implementation plan with risk mitigation
+- **Business-Focused Naming Conventions** @naming_conventions_business_focused.xml - Comprehensive naming guidelines for future development
+- @TOOL_DISPATCHER_MIGRATION_GUIDE.md - Migration from singleton to request-scoped
+- @WEBSOCKET_MODERNIZATION_REPORT.md - WebSocket isolation implementation
+- @index.md - Central documentation index
 
 Expect everything to fail. Add conditional error logging by default whenever possible.
 Success is "quiet" and summarized. ANTHING that's not what's expected must be super obvious in logs.
@@ -234,11 +234,11 @@ CRITICAL: Develop a globally coherent and modular architecture.
 
   * **Single Responsibility Principle (SRP):** Each module, function, and agent task must have one clear purpose.
   * **Single Source of Truth (SSOT):** **CRITICAL:** A concept must have ONE canonical implementation per service. Avoid multiple variations of the same logic; extend existing functions with parameters instead. (Cross-service duplication may be acceptable for independence; see `SPEC/acceptable_duplicates.xml`).
-    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See [Config Regression Prevention](./reports/config/CONFIG_REGRESSION_PREVENTION_PLAN.md)
+    - **⚠️ CONFIG SSOT WARNING:** SSOT for config is DIFFERENT! See @CONFIG_REGRESSION_PREVENTION_PLAN.md
     - **NEVER blindly consolidate "duplicate" configs** - They may serve different environments/services
     - **Check ConfigDependencyMap BEFORE deleting** - One deletion can break multiple services
     - **Environment isolation is CRITICAL** - Test configs must NOT leak to staging/production
-    - **🚨 AUTH VALIDATION REGRESSION PREVENTION:** See [5-Whys Analysis](./reports/staging/FIVE_WHYS_BACKEND_500_ERROR_20250907.md) - Auth validation MUST NOT be overly strict for hex strings or staging environments. **HEX STRINGS ARE VALID SECRETS** (e.g. SERVICE_SECRET from `openssl rand -hex 32`). OAuth redirect mismatches should be warnings in non-prod, not failures.
+    - **🚨 AUTH VALIDATION REGRESSION PREVENTION:** See @FIVE_WHYS_BACKEND_500_ERROR_20250907.md - Auth validation MUST NOT be overly strict for hex strings or staging environments. **HEX STRINGS ARE VALID SECRETS** (e.g. SERVICE_SECRET from `openssl rand -hex 32`). OAuth redirect mismatches should be warnings in non-prod, not failures.
   * **"Search First, Create Second":** Always check for existing implementations before writing new code.
   * **ATOMIC SCOPE:** Edits must be complete, functional updates. Delegate tasks to sub-agents with scopes you are certain they can handle. Split and divide work appropriately.
   * **Complete Work:** An update is complete only when all relevant parts of the system are updated, integrated, tested, validated, and documented, and all legacy code has been removed.
@@ -259,23 +259,23 @@ Use Test Runner to discover tests e.g. `python tests/unified_test_runner.py` (ab
 ### 2.2. Complexity Management
 
   * **Architectural Simplicity (Anti-Over-Engineering):** Assume a finite complexity budget. Every new service, queue, or abstraction must provide more value than the complexity it adds. Strive for the fewest possible steps between a request's entry point and the business logic.
-    - **⚠️ OVER-ENGINEERING AUDIT:** See [Over-Engineering Audit](./reports/architecture/OVER_ENGINEERING_AUDIT_20250908.md) - System currently has 18,264 violations requiring consolidation
+    - **⚠️ OVER-ENGINEERING AUDIT:** See @OVER_ENGINEERING_AUDIT_20250908.md - System currently has 18,264 violations requiring consolidation
     - **Current Issues:** 154 manager classes, 78 factory classes, 110 duplicate types - many represent unnecessary abstraction layers
     - **Success Patterns:** Unified managers (Configuration, State, Lifecycle) represent correct SSOT consolidation approach
   * **"Rule of Two":** Do not abstract or generalize a pattern until you have implemented it at least twice.
   * **Code Clarity:** Aim for concise functions (\<25 lines) and focused modules (\<750 lines). Exceeding these is a signal to re-evaluate for SRP adherence.
-  * **Mega Class Exceptions:** Central SSOT classes defined in [`SPEC/mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) may extend to 2000 lines with explicit justification. These must be true integration points that cannot be split without violating SSOT principles.
-    - **Naming Clarity Initiative:** See [Manager Renaming Plan](./reports/architecture/MANAGER_RENAMING_PLAN_20250908.md) for business-focused naming of unified SSOT classes
+  * **Mega Class Exceptions:** Central SSOT classes defined in @mega_class_exceptions.xml may extend to 2000 lines with explicit justification. These must be true integration points that cannot be split without violating SSOT principles.
+    - **Naming Clarity Initiative:** See @MANAGER_RENAMING_PLAN_20250908.md for business-focused naming of unified SSOT classes
   * **Task Decomposition:** If a task is too large or complex, decompose and delegate it to specialized sub-agents with fresh contexts. ALWAYS carefully manage your own context use and agents context use.
 
 ### 2.3. Code Quality Standards
 
   * **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
-  * **Environment:** All environment access MUST go through `IsolatedEnvironment` as defined in [`SPEC/unified_environment_management.xml`](SPEC/unified_environment_management.xml).
-  * **Configuration Architecture:** Follow the comprehensive configuration system documented in [`docs/configuration_architecture.md`](docs/configuration_architecture.md).
+  * **Environment:** All environment access MUST go through `IsolatedEnvironment` as defined in @unified_environment_management.xml.
+  * **Configuration Architecture:** Follow the comprehensive configuration system documented in @configuration_architecture.md.
   * **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
-    - **Over-Engineering Monitoring:** Track progress on reducing 18,264 violations identified in [Over-Engineering Audit](./reports/architecture/OVER_ENGINEERING_AUDIT_20250908.md)
-    - **Naming Convention Validation:** Follow [Business-Focused Naming Conventions](./SPEC/naming_conventions_business_focused.xml) for all new classes
+    - **Over-Engineering Monitoring:** Track progress on reducing 18,264 violations identified in @OVER_ENGINEERING_AUDIT_20250908.md
+    - **Naming Convention Validation:** Follow @naming_conventions_business_focused.xml for all new classes
 
 ### 2.4. Strategic Trade-offs
 
@@ -322,8 +322,8 @@ Before coding, conduct a rigorous analysis.
   * **Isolation (The "Firewall" Technique):** **CRITICAL:** When delegating, provide agents ONLY with the necessary interfaces of dependencies, not their full implementation context. This enforces contracts and prevents context bleed.
   * **Testing Focus:** Focuse on as real tests as possible by default. Most tests must assume inter-service nature by default. **Real Everything (LLM, Services) E2E \> E2E \> Integration \> Unit.**
   CRITICAL: Mocks in E2E or Integration = Abomination  (Allowed in Unit tests if needed and not cheating)
-  * **🚨 CRITICAL E2E AUTH REQUIREMENT:** ALL e2e tests MUST use authentication except for the small handful that directly test if auth is working itself. This ensures real-world multi-user scenarios are properly tested. See [`tests/e2e/test_auth_complete_flow.py`](tests/e2e/test_auth_complete_flow.py) for auth flow examples.
-  * **Test Architecture:** See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete test infrastructure guide
+  * **🚨 CRITICAL E2E AUTH REQUIREMENT:** ALL e2e tests MUST use authentication except for the small handful that directly test if auth is working itself. This ensures real-world multi-user scenarios are properly tested. See @test_auth_complete_flow.py for auth flow examples.
+  * **Test Architecture:** See @TEST_ARCHITECTURE_VISUAL_OVERVIEW.md for complete test infrastructure guide
   * **Integration and Reporting:** You are responsible for integrating all artifacts and reporting on overall success.
 
 ULTRA THINK DEEPLY ALL THE TIME.
@@ -345,7 +345,7 @@ ALWAYS use real services for testing. If they appear to not be available start o
 - Real multi-user isolation is tested
 - WebSocket connections use proper auth context
 - Agent executions happen within authenticated user sessions
-- See [`tests/e2e/test_auth_complete_flow.py`](tests/e2e/test_auth_complete_flow.py) and [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py)
+- See @test_auth_complete_flow.py and @e2e_auth_helper.py
 
 CHEATING ON TESTS = ABOMINATION
 ALL TESTS MUST BE DESIGNED TO FAIL HARD IN EVERY WAY. ALL ATTEMPTS TO BYPASS THIS WITHIN THE TEST ITSELF ARE BAD.
@@ -356,7 +356,7 @@ Any e2e test that returns in 0.00s is automatically failed by the test runner. T
 - Missing async/await handling
 - Not connecting to real services
 - Authentication is being bypassed
-See [`reports/staging/STAGING_100_TESTS_REPORT.md`](reports/staging/STAGING_100_TESTS_REPORT.md) for context.
+See @STAGING_100_TESTS_REPORT.md for context.
 The unified test runner enforces this with `_validate_e2e_test_timing()`.
 
 KEEP CORE SYSTEM AS IS
@@ -382,8 +382,8 @@ DO THE MINIMAL ACTION TO MAKE GOLDEN PATH WORK!
 CHEATING ON TESTS = ABOMINATION
 
 **See Also:** 
-- [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) for comprehensive agent implementation patterns and migration guidance.
-- [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) for clarification on agent components and relationships.
+- @GOLDEN_AGENT_INDEX.md for comprehensive agent implementation patterns and migration guidance.
+- @AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md for clarification on agent components and relationships.
 
 1.  **MRO (Method Resolution Order) Analysis:** Generate a comprehensive MRO report BEFORE refactoring
 
@@ -391,13 +391,13 @@ CHEATING ON TESTS = ABOMINATION
     - Trace all consumers of classes being refactored
     - Document which methods/attributes each consumer uses
     - Identify breaking changes and required adaptations
-    - Cross-reference with [`SPEC/learnings/ssot_consolidation_20250825.xml`](SPEC/learnings/ssot_consolidation_20250825.xml)
+    - Cross-reference with @ssot_consolidation_20250825.xml
 
 3.  **Agent-Based Decomposition:** For complex refactors spanning 5+ files:
     - Spawn specialized refactoring agents with focused scope
     - Each agent handles ONE inheritance chain or module
     - Provide agents with MRO report and interface contracts only
-    - See examples in [`SPEC/learnings/unified_agent_testing_implementation.xml`](SPEC/learnings/unified_agent_testing_implementation.xml)
+    - See examples in @unified_agent_testing_implementation.xml
 
 4.  **Validation Checklist:**
     - [ ] All MRO paths documented and preserved or intentionally modified
@@ -420,7 +420,7 @@ IT MUST allow allow the golden path through!!! (and keep logging errors for futu
 
 The `SPEC/*.xml` files are the **living source of truth** for system architecture and learnings.
 
-  * **Navigation:** Read [`LLM_MASTER_INDEX.md`](reports/LLM_MASTER_INDEX.md) before searching for files or functionality.
+  * **Navigation:** Read @LLM_MASTER_INDEX.md before searching for files or functionality.
   * **Iterative Discovery:** Specs must evolve. If analysis reveals a better solution, propose a spec improvement.
   * **Learnings vs. Reports:** Learnings in `SPEC/*.xml` are permanent knowledge. Reports (`*.md`) are ephemeral work logs.
 
@@ -429,7 +429,7 @@ The `SPEC/*.xml` files are the **living source of truth** for system architectur
 This index is the SSOT for all platform-specific constants, paths, and identifiers to prevent LLM errors.
 
   * **Index File:** `SPEC/generated/string_literals.json`
-  * **📚 Complete Documentation:** [`docs/string_literals_index.md`](docs/string_literals_index.md)
+  * **📚 Complete Documentation:** @string_literals_index.md
 
 **🚨 CRITICAL PROTECTION: mission-critical environment variables + domain configurations cause CASCADE FAILURES if modified incorrectly!**
 
@@ -446,7 +446,7 @@ This index is the SSOT for all platform-specific constants, paths, and identifie
 
 ### 5.1. Microservice Independence
 
-All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`](SPEC/independent_services.xml).
+All microservices MUST be 100% independent. See @independent_services.xml.
 
   * Main Backend (`/netra_backend/app`)
   * Auth Service (`/auth_service`)
@@ -455,7 +455,7 @@ All microservices MUST be 100% independent. See [`SPEC/independent_services.xml`
 **CRITICAL CLARIFICATION - Shared Libraries Pattern:**
 Services MAY import from `/shared` for infrastructure libraries (like `shared.isolated_environment`).
 These are NOT service boundary violations because they're pure utilities with no business logic - 
-think of them as internal pip packages. See [`docs/shared_library_pattern.md`](docs/shared_library_pattern.md) 
+think of them as internal pip packages. See @shared_library_pattern.md 
 for the simple "pip package test" to determine what belongs in `/shared`.
 
 ### 5.2. Naming Conventions
@@ -469,12 +469,12 @@ for the simple "pip package test" to determine what belongs in `/shared`.
   * **Service-Specific Tests:** Each service has its own `tests/` directory (e.g., `/netra_backend/tests/`). **NEVER mix tests between services.**
   * **E2E Tests:** End-to-end tests go in `/tests/e2e/`.
   * **Test Framework:** Shared utilities go in `/test_framework/`.
-  * **See [`SPEC/folder_structure_rules.md`](SPEC/folder_structure_rules.md) for full guidelines.**
+  * **See @folder_structure_rules.md for full guidelines.**
 
 ### 5.4. Import Rules
 
 **ABSOLUTE IMPORTS ONLY.**
-  * **ALL Python files  use absolute imports** starting from the package root. **NEVER use relative imports (`.` or `..`)** in any Python file, including tests. See [`SPEC/import_management_architecture.xml`](SPEC/import_management_architecture.xml) for details.
+  * **ALL Python files  use absolute imports** starting from the package root. **NEVER use relative imports (`.` or `..`)** in any Python file, including tests. See @import_management_architecture.xml for details.
 
 -----
 
@@ -509,12 +509,12 @@ The following events MUST be sent during agent execution to enable meaningful AI
 - `AgentRegistry.set_websocket_manager()` MUST enhance tool dispatcher
 - `ExecutionEngine` MUST have AgentWebSocketBridge initialized
 - `EnhancedToolExecutionEngine` MUST wrap tool execution
-- See [`SPEC/learnings/websocket_agent_integration_critical.xml`](SPEC/learnings/websocket_agent_integration_critical.xml)
+- See @websocket_agent_integration_critical.xml
 
 **For Complete Agent Implementation Patterns:**
-- See [`docs/GOLDEN_AGENT_INDEX.md`](docs/GOLDEN_AGENT_INDEX.md) - The definitive guide to agent implementation
-- See [`docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md`](docs/AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md) - Comprehensive clarification of agent architecture
-- See [`SPEC/learnings/agent_execution_order_fix_20250904.xml`](SPEC/learnings/agent_execution_order_fix_20250904.xml) - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
+- See @GOLDEN_AGENT_INDEX.md - The definitive guide to agent implementation
+- See @AGENT_ARCHITECTURE_DISAMBIGUATION_GUIDE.md - Comprehensive clarification of agent architecture
+- See @agent_execution_order_fix_20250904.xml - CRITICAL: Correct agent execution order (Data BEFORE Optimization)
 
 -----
 CHEATING ON TESTS = ABOMINATION
@@ -523,7 +523,7 @@ CHEATING ON TESTS = ABOMINATION
 
 ### 7.1. Docker
 
-**CRITICAL: All Docker operations go through the central UnifiedDockerManager.** **See [`docs/docker_orchestration.md`](docs/docker_orchestration.md) for complete architecture and usage.**
+**CRITICAL: All Docker operations go through the central UnifiedDockerManager.** **See @docker_orchestration.md for complete architecture and usage.**
 
 #### Automatic Docker Management is integrated with testing
 ```bash
@@ -569,10 +569,10 @@ IMPORTANT: Use real services, real llm, docker compose etc. whenever possible fo
 MOCKS are FORBIDDEN in dev, staging or production.  (Except limited cases for unit tests if you can prove it's needed)
 FAKE TESTS ARE BAD
 
-**🚨 E2E AUTH ENFORCEMENT:** ALL e2e tests MUST authenticate with the system using real auth flows (JWT, OAuth, etc.). The ONLY exceptions are tests specifically validating the auth system itself. This is NON-NEGOTIABLE for ensuring proper multi-user isolation and real-world scenarios. Use [`test_framework/ssot/e2e_auth_helper.py`](test_framework/ssot/e2e_auth_helper.py) for SSOT auth patterns.
+**🚨 E2E AUTH ENFORCEMENT:** ALL e2e tests MUST authenticate with the system using real auth flows (JWT, OAuth, etc.). The ONLY exceptions are tests specifically validating the auth system itself. This is NON-NEGOTIABLE for ensuring proper multi-user isolation and real-world scenarios. Use @e2e_auth_helper.py for SSOT auth patterns.
 
-**See [`TEST_CREATION_GUIDE.md`](reports/testing/TEST_CREATION_GUIDE.md) for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
-**See [`tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md`](tests/TEST_ARCHITECTURE_VISUAL_OVERVIEW.md) for complete visual guide to test infrastructure, layers, and execution flows.**
+**See @TEST_CREATION_GUIDE.md for the AUTHORITATIVE guide on creating tests with SSOT patterns.**
+**See @TEST_ARCHITECTURE_VISUAL_OVERVIEW.md for complete visual guide to test infrastructure, layers, and execution flows.**
 
 **The test runner automatically starts Docker when needed:**
 
@@ -600,15 +600,15 @@ DO THE RIGHT THING - NOT JUST THE FASTEST THING.
 This is a non-exhaustive list of mission-critical specs.
 | Spec | Purpose |
 | :--- | :--- |
-| [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) | ** CRITICAL:** Master index of ALL values that cause cascade failures. CHECK FIRST! |
-| [`learnings/index.xml`](SPEC/learnings/index.xml) | Index of all learnings. **Check first.** |
-| [`core.xml`](SPEC/core.xml) | Core system architecture. |
-| [`type_safety.xml`](SPEC/type_safety.xml) | Type safety and duplication rules. |
-| [`conventions.xml`](SPEC/conventions.xml) | Standards and guidelines. |
-| [`mega_class_exceptions.xml`](SPEC/mega_class_exceptions.xml) | **CRITICAL:** Approved exceptions for central SSOT classes up to 2000 lines. |
-| [`git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml) | **CRITICAL:** Git commit standards. |
-| [`import_management_architecture.xml`](SPEC/import_management_architecture.xml) | **CRITICAL:** Absolute import rules. |
-| [`configuration_architecture.md`](docs/configuration_architecture.md) | **CRITICAL:** Configuration and environment management architecture with complete diagrams and flows. |
+| @MISSION_CRITICAL_NAMED_VALUES_INDEX.xml | ** CRITICAL:** Master index of ALL values that cause cascade failures. CHECK FIRST! |
+| @index.xml | Index of all learnings. **Check first.** |
+| @core.xml | Core system architecture. |
+| @type_safety.xml | Type safety and duplication rules. |
+| @conventions.xml | Standards and guidelines. |
+| @mega_class_exceptions.xml | **CRITICAL:** Approved exceptions for central SSOT classes up to 2000 lines. |
+| @git_commit_atomic_units.xml | **CRITICAL:** Git commit standards. |
+| @import_management_architecture.xml | **CRITICAL:** Absolute import rules. |
+| @configuration_architecture.md | **CRITICAL:** Configuration and environment management architecture with complete diagrams and flows. |
 
 Direct OS.env access is FORBIDDEN except in each services canonical env config SSOT. Applies to ALL tests too. EACH SERVICE MUST MAINTAIN INDEPENDENCE. Import ONLY from the env of the service.
 
@@ -633,31 +633,31 @@ YOU ARE VERY SMART AND PRACTICAL.
 ### For Every Code Change:
 
 1.  **Assess Scope:** Determine if specialized agents (PM, Design, QA, etc.) are required.
-2.  **🚨 CHECK CRITICAL VALUES:** Open [`MISSION_CRITICAL_NAMED_VALUES_INDEX.xml`](SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml) - validate ALL named values!
-    - **ATTENTION:** OAuth credentials, JWT keys, database URLs - see [OAuth Regression](./OAUTH_REGRESSION_ANALYSIS_20250905.md)
+2.  **🚨 CHECK CRITICAL VALUES:** Open @MISSION_CRITICAL_NAMED_VALUES_INDEX.xml - validate ALL named values!
+    - **ATTENTION:** OAuth credentials, JWT keys, database URLs - see @OAUTH_REGRESSION_ANALYSIS_20250905.md
 3.  **🔍 TYPE SAFETY VALIDATION:** **CRITICAL** - Check for type drift issues before any changes:
     - **Run Type Audit:** `python scripts/type_drift_migration_utility.py --scan` for affected files
     - **Use SSOT Strongly Typed IDs:** Import from `shared.types` - `UserID`, `ThreadID`, `RunID`, `RequestID`, etc.
-    - **See:** [Type Drift Audit Report](./reports/type_safety/TYPE_DRIFT_AUDIT_REPORT.md) for complete remediation guide
-4.  **Review DoD Checklist:** Open [`DEFINITION_OF_DONE_CHECKLIST.md`](reports/DEFINITION_OF_DONE_CHECKLIST.md) and identify your module's section.
-5.  **Check Learnings:** Search recent [`learnings/index.xml`](SPEC/learnings/index.xml) and recent commit changes.
-6.  **Verify Strings:** **MANDATORY STRING LITERAL VALIDATION** - See [`docs/STRING_LITERALS_USAGE_GUIDE.md`](docs/STRING_LITERALS_USAGE_GUIDE.md):
+    - **See:** @TYPE_DRIFT_AUDIT_REPORT.md for complete remediation guide
+4.  **Review DoD Checklist:** Open @DEFINITION_OF_DONE_CHECKLIST.md and identify your module's section.
+5.  **Check Learnings:** Search recent @index.xml and recent commit changes.
+6.  **Verify Strings:** **MANDATORY STRING LITERAL VALIDATION** - See @STRING_LITERALS_USAGE_GUIDE.md:
     - **NEVER guess string literals** - Always validate: `python scripts/query_string_literals.py validate "your_string"`
     - **Search for existing:** `python scripts/query_string_literals.py search "keyword" --category critical_config`
     - **Check environment health:** `python scripts/query_string_literals.py check-env staging`
     - **🚨 CRITICAL CONFIGS:** 11 env vars + 12 domains cause CASCADE FAILURES - use `show-critical`
-7.  **Review Core Specs:** Re-read [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
+7.  **Review Core Specs:** Re-read @type_safety.xml and @conventions.xml.
 8.  **Create New Test Suite:** Create a new real test suite of difficult tests idealy failing tests.
 9.  **Run Local Tests:** Run relevant tests for the scope of work done. Real services > mock.
 10. **Complete DoD Checklist:** Go through EVERY item in your module's checklist section.
 11. **Update Documentation:** Ensure specs reflect the implemented reality.
 12. **Refresh Indexes:** Update the string literal index if new constants were added.
 13. **Update Status:** Regenerate and refresh reports .mds and learnings.
-14. **Save new Learnings:** [`learnings/index.xml`](SPEC/learnings/index.xml).
+14. **Save new Learnings:** @index.xml.
 
 ### 9.1 Git Commit Standards.
-**All commits follow [`SPEC/git_commit_atomic_units.xml`](SPEC/git_commit_atomic_units.xml).**
-**Windows Unicode/emoji issues: See [`SPEC/windows_unicode_handling.xml`](SPEC/windows_unicode_handling.xml).**
+**All commits follow @git_commit_atomic_units.xml.**
+**Windows Unicode/emoji issues: See @windows_unicode_handling.xml.**
 A user asking for "git commit" means: For EACH group of work that's related do a commit. e.g. 1-10 commits as per need.
   * **GROUP CONCEPTS - LIMIT COUNT OF FILES:** Commits must be small, focused, and conceptually similar units.
   * **CONCEPT-BASED:** NEVER bulk commit massive changes without express orders.
