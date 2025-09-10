@@ -62,7 +62,7 @@ class TestAgentExecutionCoreBusiness:
         assert self.execution_core.execution_tracker is not None
         assert hasattr(self.execution_core, 'DEFAULT_TIMEOUT')
         assert hasattr(self.execution_core, 'HEARTBEAT_INTERVAL')
-        assert self.execution_core.DEFAULT_TIMEOUT == 30.0
+        assert self.execution_core.DEFAULT_TIMEOUT == 25.0  # Changed from 30.0 for faster user feedback (Issue #158)
         assert self.execution_core.HEARTBEAT_INTERVAL == 5.0
     
     @pytest.mark.unit
