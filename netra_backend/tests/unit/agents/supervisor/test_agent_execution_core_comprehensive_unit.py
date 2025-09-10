@@ -70,7 +70,31 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
         """Mock agent state tracker for centralized phase tracking."""
         tracker = AsyncMock()
         tracker.start_execution = Mock(return_value="mock_state_exec_id")
-        tracker.transition_phase = AsyncMock()
+        
+        # Configure transition_phase to simulate WebSocket calls for COMPLETED phase
+        async def mock_transition_phase(execution_id, phase, metadata=None, websocket_manager=None):
+            """Mock transition_phase that simulates WebSocket notification behavior."""
+            # Import the enum to compare phases correctly
+            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            
+            # If transitioning to COMPLETED phase and websocket_manager provided,
+            # simulate the automatic notify_agent_completed call that happens in production
+            if phase == AgentExecutionPhase.COMPLETED and websocket_manager:
+                await websocket_manager.notify_agent_completed(
+                    run_id="test-run-id",  # This would be from the actual state in production
+                    agent_name="test_agent",
+                    result={
+                        "success": True,
+                        "total_duration_ms": 1500.0,  # Mock duration
+                        "phase_count": 5,
+                        "warnings": 0,
+                        "metadata": {}
+                    },
+                    execution_time_ms=1500
+                )
+            return True
+        
+        tracker.transition_phase = AsyncMock(side_effect=mock_transition_phase)
         tracker.complete_execution = Mock()
         return tracker
 
@@ -197,6 +221,16 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             # Note: notify_agent_started may be called multiple times during execution phases
             assert mock_websocket_bridge.notify_agent_started.call_count >= 1
             mock_websocket_bridge.notify_agent_completed.assert_called_once()
+            
+            # Verify centralized state tracking integration (Issue #161)
+            # State tracker should have been called to transition to COMPLETED phase
+            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            execution_core.state_tracker.transition_phase.assert_any_call(
+                "mock_state_exec_id",  # execution_id returned by start_execution
+                AgentExecutionPhase.COMPLETED,
+                metadata={"result": "success"},  # Fixed: matches actual production code metadata
+                websocket_manager=mock_websocket_bridge
+            )
             
             # Verify agent was executed with UserExecutionContext (security conversion)
             # NOTE: DeepAgentState gets converted to UserExecutionContext for security compliance
@@ -411,7 +445,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
         assert combined_metrics["operations"] == 5
         assert combined_metrics["result_success"] is True
         assert combined_metrics["total_duration_seconds"] == 3.5
-        assert "state_size" in combined_metrics
+        assert "context_size" in combined_metrics
 
     def test_get_agent_or_error_success(self, execution_core):
         """Test successful agent retrieval from registry."""

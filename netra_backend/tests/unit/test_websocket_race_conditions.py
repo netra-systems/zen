@@ -2431,7 +2431,7 @@ class TestPerformanceAndResourceManagement:
                     'object_size_bytes': sys.getsizeof(self),
                     'connection_id_size': sys.getsizeof(self.connection_id),
                     'user_id_size': sys.getsizeof(self.user_id),
-                    'state_size': sys.getsizeof(self.state),
+                    'context_size': sys.getsizeof(self.state),
                     'total_attributes': 5  # __slots__ attributes
                 }
         
