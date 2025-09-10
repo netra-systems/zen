@@ -384,6 +384,29 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
         tasks = [execute_single_agent(agent_name) for agent_name in agent_names]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
+        # Debug output to understand what happened
+        print(f"\nDEBUG: Results from concurrent execution:")
+        for i, result in enumerate(results):
+            if isinstance(result, ConcurrentTestResult):
+                print(f"  Agent {result.agent_id}: execution_result={result.execution_result}, errors={result.errors}")
+                if result.execution_result:
+                    print(f"    Success: {result.execution_result.success}")
+            else:
+                print(f"  Result {i}: {type(result)} = {result}")
+        
+        # Debug WebSocket bridge state
+        print(f"\nDEBUG: WebSocket bridge call counts:")
+        print(f"  notify_agent_started: {execution_core.websocket_bridge.notify_agent_started.call_count}")
+        print(f"  notify_agent_thinking: {execution_core.websocket_bridge.notify_agent_thinking.call_count}")
+        print(f"  notify_agent_completed: {execution_core.websocket_bridge.notify_agent_completed.call_count}")
+        print(f"  notify_agent_error: {execution_core.websocket_bridge.notify_agent_error.call_count}")
+        
+        # Debug state tracker state
+        print(f"\nDEBUG: State tracker executions:")
+        for state_id, state_data in execution_core.state_tracker._state_executions.items():
+            print(f"  {state_id}: phases={[p['phase'] for p in state_data['phases']]}")
+            print(f"    completed={state_data.get('completed', False)}, success={state_data.get('success', False)}")
+        
         # Validate isolation - no exceptions should propagate between executions
         successful_results = [r for r in results if isinstance(r, ConcurrentTestResult) and not r.errors]
         assert len(successful_results) == num_concurrent, f"Expected {num_concurrent} successful executions, got {len(successful_results)}"
