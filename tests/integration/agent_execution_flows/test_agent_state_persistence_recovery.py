@@ -24,7 +24,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
-from netra_backend.app.core.state_persistence_optimized import StatePersistenceManager
+from netra_backend.app.services.state_persistence import StatePersistenceService
 
 
 class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
@@ -42,16 +42,12 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             workspace_id="persistent_workspace_1000"
         )
         
-        persistence_manager = StatePersistenceManager(
-            redis_client=real_services_fixture.get("redis", MagicMock()),
-            postgres_client=real_services_fixture.get("postgres", MagicMock()),
-            clickhouse_client=real_services_fixture.get("clickhouse", MagicMock()),
-            tier_strategy="3tier"  # Redis -> PostgreSQL -> ClickHouse
-        )
+        persistence_service = StatePersistenceService()
+        # The service is already configured with Redis, PostgreSQL, and ClickHouse via dependency injection
         
         state_tracker = AgentStateTracker(
             user_context=user_context,
-            persistence_manager=persistence_manager
+            persistence_service=persistence_service
         )
         
         # Create complex agent state
@@ -124,7 +120,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             )
             
             # Create persistence snapshot
-            snapshot_id = await persistence_manager.create_state_snapshot(
+            snapshot_id = await persistence_service.create_state_snapshot(
                 agent_state=agent_state,
                 snapshot_type="phase_complete",
                 tier_preference="redis" if i == 0 else "postgres" if i == 1 else "clickhouse"
@@ -146,7 +142,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         # Create new state tracker (simulates restart)
         new_state_tracker = AgentStateTracker(
             user_context=user_context,
-            persistence_manager=persistence_manager
+            persistence_service=persistence_service
         )
         
         # Recover state
@@ -196,7 +192,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             workspace_id="continuity_workspace_1001"
         )
         
-        persistence_manager = StatePersistenceManager(
+        persistence_service = StatePersistenceService(
             redis_client=real_services_fixture.get("redis", MagicMock()),
             postgres_client=real_services_fixture.get("postgres", MagicMock()),
             cross_session_enabled=True
@@ -204,7 +200,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         
         state_tracker_session_1 = AgentStateTracker(
             user_context=session_1_context,
-            persistence_manager=persistence_manager
+            persistence_service=persistence_service
         )
         
         # Start long-running analysis in first session
@@ -242,7 +238,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         )
         
         # Persist state before "session ends"
-        await persistence_manager.persist_cross_session_state(
+        await persistence_service.persist_cross_session_state(
             agent_state=agent_state_session_1,
             session_end_type="user_disconnect",
             resumable=True
@@ -258,11 +254,11 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         
         state_tracker_session_2 = AgentStateTracker(
             user_context=session_2_context,
-            persistence_manager=persistence_manager
+            persistence_service=persistence_service
         )
         
         # Act - Resume work in second session
-        resumable_work = await persistence_manager.find_resumable_work(
+        resumable_work = await persistence_service.find_resumable_work(
             user_id=session_2_context.user_id,
             thread_id=session_2_context.thread_id
         )
@@ -329,7 +325,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             workspace_id="integrity_workspace_1002"
         )
         
-        persistence_manager = StatePersistenceManager(
+        persistence_service = StatePersistenceService(
             redis_client=real_services_fixture.get("redis", MagicMock()),
             postgres_client=real_services_fixture.get("postgres", MagicMock()),
             integrity_checking=True,
@@ -338,7 +334,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         
         state_tracker = AgentStateTracker(
             user_context=user_context,
-            persistence_manager=persistence_manager
+            persistence_service=persistence_service
         )
         
         # Create agent state with checksums
@@ -374,7 +370,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         )
         
         # Create persistence snapshot with integrity checks
-        snapshot_with_checksum = await persistence_manager.create_integrity_checked_snapshot(
+        snapshot_with_checksum = await persistence_service.create_integrity_checked_snapshot(
             agent_state=agent_state,
             checksum_algorithm="sha256",
             backup_redundancy=2
@@ -397,7 +393,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         corrupted_agent_state.update_state_data(corrupted_data)
         
         # Run integrity validation
-        integrity_report = await persistence_manager.validate_state_integrity(
+        integrity_report = await persistence_service.validate_state_integrity(
             agent_state=corrupted_agent_state,
             reference_checksum=snapshot_with_checksum["checksum"]
         )
@@ -407,7 +403,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         assert len(integrity_report["integrity_violations"]) > 0
         
         # Attempt automatic repair
-        repair_result = await persistence_manager.repair_corrupted_state(
+        repair_result = await persistence_service.repair_corrupted_state(
             corrupted_agent_state=corrupted_agent_state,
             integrity_snapshot=snapshot_with_checksum,
             repair_strategy="restore_from_backup"
@@ -424,7 +420,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         assert len(repaired_data["optimization_results"]["recommendations"]) == 2  # Restored missing data
         
         # Verify integrity after repair
-        post_repair_validation = await persistence_manager.validate_state_integrity(
+        post_repair_validation = await persistence_service.validate_state_integrity(
             agent_state=repair_result["repaired_state"],
             reference_checksum=snapshot_with_checksum["checksum"]
         )
@@ -454,7 +450,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             "retention_policy": "30_days"
         }
         
-        persistence_manager = StatePersistenceManager(
+        persistence_service = StatePersistenceService(
             redis_client=real_services_fixture.get("redis", MagicMock()),
             postgres_client=real_services_fixture.get("postgres", MagicMock()), 
             clickhouse_client=real_services_fixture.get("clickhouse", MagicMock()),
@@ -464,7 +460,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         
         state_tracker = AgentStateTracker(
             user_context=user_context,
-            persistence_manager=persistence_manager
+            persistence_service=persistence_service
         )
         
         # Create critical business state
@@ -504,7 +500,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         )
         
         # Create multi-tier backups
-        backup_results = await persistence_manager.create_disaster_recovery_backup(
+        backup_results = await persistence_service.create_disaster_recovery_backup(
             agent_state=agent_state,
             backup_tiers=["primary", "secondary", "disaster_recovery"],
             priority="critical_business_data"
@@ -534,14 +530,14 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         
         for scenario in disaster_scenarios:
             # Simulate disaster
-            await persistence_manager.simulate_storage_failure(
+            await persistence_service.simulate_storage_failure(
                 failed_tiers=scenario["failed_tiers"]
             )
             
             # Attempt recovery
             recovery_start_time = time.time()
             
-            recovered_state = await persistence_manager.execute_disaster_recovery(
+            recovered_state = await persistence_service.execute_disaster_recovery(
                 agent_id="disaster_recovery_agent",
                 user_context=user_context,
                 recovery_tier=scenario["recovery_tier"],
@@ -575,7 +571,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
                     )
             
             # Reset for next scenario
-            await persistence_manager.reset_storage_simulation()
+            await persistence_service.reset_storage_simulation()
         
         # Assert - Verify disaster recovery capabilities
         for scenario_name, result in recovery_results.items():
