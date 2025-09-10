@@ -2156,8 +2156,8 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
     This is the main factory function that applications should use to create
     WebSocket managers with proper user isolation.
     
-    CRITICAL FIX: Enhanced SSOT type validation and exception handling
-    to prevent 1011 WebSocket errors from factory validation failures.
+    ISSUE #135 FIX: Enhanced service initialization resilience with pre-checks and graceful degradation
+    to prevent 1011 WebSocket errors from Cloud Run environment service initialization failures.
     
     Args:
         user_context: User execution context for the manager
@@ -2168,21 +2168,82 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
     Raises:
         ValueError: If user_context is invalid
         RuntimeError: If resource limits are exceeded
-        FactoryInitializationError: If SSOT factory validation fails
+        FactoryInitializationError: If SSOT factory validation fails or service initialization fails
     """
+    # ISSUE #135 PRIMARY FIX: Service availability pre-checks before instantiation
+    logger.info(f"🔧 ISSUE #135 FIX: Starting WebSocket manager creation with service pre-checks for user {getattr(user_context, 'user_id', 'unknown')[:8]}...")
+    
     try:
-        # CRITICAL FIX: Comprehensive SSOT UserExecutionContext validation
-        # This prevents type inconsistencies that cause 1011 errors
-        # CYCLE 4 FIX: Use staging-safe validation for environment accommodation
-        _validate_ssot_user_context_staging_safe(user_context)
+        # Pre-check 1: Validate critical environment variables and service dependencies
+        service_health = await _perform_service_readiness_checks()
+        if not service_health["all_services_ready"]:
+            logger.warning(f"⚠️ SERVICE READINESS: Some services not ready - {service_health['failed_services']}")
+            if service_health["critical_failure"]:
+                raise FactoryInitializationError(
+                    f"Critical service dependencies not available: {service_health['failed_services']}. "
+                    f"Cannot create WebSocket manager in current environment state."
+                )
         
-        factory = get_websocket_manager_factory()
-        return await factory.create_manager(user_context)
+        # Pre-check 2: Comprehensive SSOT UserExecutionContext validation with enhanced error handling
+        # This prevents type inconsistencies that cause 1011 errors  
+        try:
+            _validate_ssot_user_context_staging_safe(user_context)
+            logger.debug(f"✅ User context validation passed for user {getattr(user_context, 'user_id', 'unknown')[:8]}...")
+        except Exception as validation_error:
+            logger.error(f"❌ VALIDATION ERROR: {validation_error}")
+            # Enhanced error context for debugging
+            await _log_validation_failure_context(user_context, validation_error)
+            raise
+        
+        # Pre-check 3: Factory instance health check
+        try:
+            factory = get_websocket_manager_factory()
+            if not factory:
+                raise FactoryInitializationError("WebSocket manager factory is None - factory system not initialized")
+            
+            # Validate factory is in healthy state
+            factory_health = factory.get_health_status()
+            if not factory_health.get("healthy", False):
+                logger.warning(f"⚠️ FACTORY HEALTH: Factory not in optimal health - {factory_health}")
+        except Exception as factory_error:
+            logger.error(f"❌ FACTORY ERROR: Failed to get healthy factory instance: {factory_error}")
+            raise FactoryInitializationError(f"Factory initialization error: {factory_error}") from factory_error
+        
+        # ISSUE #135 FIX: Robust manager creation with retry logic for Cloud Run environment
+        max_retries = 3
+        retry_delay = 0.5
+        
+        for attempt in range(max_retries):
+            try:
+                logger.debug(f"🔄 Creating WebSocket manager (attempt {attempt + 1}/{max_retries})")
+                manager = await factory.create_manager(user_context)
+                
+                # Validate created manager is functional
+                if not manager:
+                    raise RuntimeError("Factory returned None manager")
+                    
+                logger.info(f"✅ ISSUE #135 SUCCESS: WebSocket manager created successfully for user {getattr(user_context, 'user_id', 'unknown')[:8]}...")
+                return manager
+                
+            except Exception as creation_error:
+                logger.error(f"❌ ATTEMPT {attempt + 1}: Manager creation failed: {creation_error}")
+                
+                if attempt == max_retries - 1:
+                    # Final attempt failed
+                    raise FactoryInitializationError(
+                        f"WebSocket manager creation failed after {max_retries} attempts. "
+                        f"Final error: {creation_error}. This indicates persistent Cloud Run environment issues."
+                    ) from creation_error
+                else:
+                    # Wait before retry
+                    logger.info(f"⏳ Retrying manager creation in {retry_delay}s...")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 1.5  # Exponential backoff
         
     except ValueError as validation_error:
         # CRITICAL FIX: Handle SSOT validation failures gracefully
         if "SSOT" in str(validation_error) or "factory" in str(validation_error).lower():
-            logger.error(f"[U+1F6A8] SSOT FACTORY VALIDATION FAILURE: {validation_error}")
+            logger.error(f"🚨 SSOT FACTORY VALIDATION FAILURE: {validation_error}")
             raise FactoryInitializationError(
                 f"WebSocket factory SSOT validation failed: {validation_error}. "
                 f"This indicates UserExecutionContext type incompatibility."
@@ -2191,13 +2252,134 @@ async def create_websocket_manager(user_context: UserExecutionContext) -> Isolat
             # Re-raise other ValueError types
             raise
             
+    except FactoryInitializationError:
+        # Re-raise factory errors as-is
+        raise
+        
     except Exception as unexpected_error:
         # CRITICAL FIX: Catch any other factory creation errors
-        logger.critical(f"[ERROR] UNEXPECTED FACTORY ERROR: {unexpected_error}", exc_info=True)
+        logger.critical(f"🚨 UNEXPECTED FACTORY ERROR: {unexpected_error}", exc_info=True)
+        await _log_system_state_for_debugging()
         raise FactoryInitializationError(
             f"WebSocket factory initialization failed unexpectedly: {unexpected_error}. "
             f"This may indicate a system configuration issue."
         ) from unexpected_error
+
+
+async def _perform_service_readiness_checks() -> Dict[str, Any]:
+    """
+    ISSUE #135 PRIMARY FIX: Perform comprehensive service readiness checks before WebSocket manager creation.
+    
+    Returns:
+        Dictionary with service health status and failure details
+    """
+    health_result = {
+        "all_services_ready": True,
+        "critical_failure": False,
+        "failed_services": [],
+        "service_details": {},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Check 1: Environment configuration
+    try:
+        from shared.isolated_environment import get_env
+        env = get_env()
+        if not env:
+            raise Exception("Environment configuration not available")
+        health_result["service_details"]["environment"] = "healthy"
+    except Exception as e:
+        health_result["all_services_ready"] = False
+        health_result["critical_failure"] = True
+        health_result["failed_services"].append("environment")
+        health_result["service_details"]["environment"] = f"failed: {e}"
+        logger.error(f"❌ SERVICE CHECK: Environment configuration failed - {e}")
+    
+    # Check 2: ID generation service  
+    try:
+        from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+        test_id = UnifiedIdGenerator.generate_base_id("test", random_length=8)
+        if not test_id:
+            raise Exception("ID generator returned empty result")
+        health_result["service_details"]["id_generator"] = "healthy"
+    except Exception as e:
+        health_result["all_services_ready"] = False
+        health_result["failed_services"].append("id_generator")
+        health_result["service_details"]["id_generator"] = f"failed: {e}"
+        logger.error(f"❌ SERVICE CHECK: ID generator failed - {e}")
+    
+    # Check 3: Database session factory
+    try:
+        from netra_backend.app.db.session import get_db_session_factory
+        db_factory = get_db_session_factory()
+        if not db_factory:
+            raise Exception("Database session factory is None")
+        health_result["service_details"]["database"] = "healthy"
+    except Exception as e:
+        health_result["all_services_ready"] = False
+        health_result["failed_services"].append("database")
+        health_result["service_details"]["database"] = f"failed: {e}"
+        logger.warning(f"⚠️ SERVICE CHECK: Database session factory failed - {e}")
+        # Database issues are not critical for WebSocket creation
+    
+    # Check 4: Isolated environment availability
+    try:
+        from shared.isolated_environment import get_env
+        env_test = get_env().get("ENVIRONMENT", "unknown")
+        if not env_test:
+            raise Exception("Environment variable access failed")
+        health_result["service_details"]["isolated_env"] = "healthy"
+    except Exception as e:
+        health_result["all_services_ready"] = False
+        health_result["critical_failure"] = True
+        health_result["failed_services"].append("isolated_env")
+        health_result["service_details"]["isolated_env"] = f"failed: {e}"
+        logger.error(f"❌ SERVICE CHECK: Isolated environment failed - {e}")
+    
+    logger.info(f"🔍 SERVICE READINESS: {len(health_result['failed_services'])} failed services, critical={health_result['critical_failure']}")
+    return health_result
+
+
+async def _log_validation_failure_context(user_context: Any, validation_error: Exception) -> None:
+    """
+    ISSUE #135 FIX: Log detailed context for validation failures to aid debugging.
+    """
+    try:
+        context_debug = {
+            "validation_error": str(validation_error),
+            "error_type": type(validation_error).__name__,
+            "user_context_type": type(user_context).__name__,
+            "user_context_module": getattr(type(user_context), '__module__', 'unknown'),
+            "has_user_id": hasattr(user_context, 'user_id'),
+            "user_id_value": getattr(user_context, 'user_id', None) if hasattr(user_context, 'user_id') else None,
+            "context_attributes": [attr for attr in dir(user_context) if not attr.startswith('_')],
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        logger.error(f"🔍 VALIDATION FAILURE CONTEXT: {json.dumps(context_debug, indent=2, default=str)}")
+    except Exception as debug_error:
+        logger.error(f"Failed to log validation failure context: {debug_error}")
+
+
+async def _log_system_state_for_debugging() -> None:
+    """
+    ISSUE #135 FIX: Log system state for debugging unexpected errors.
+    """
+    try:
+        from shared.isolated_environment import get_env
+        env = get_env()
+        
+        system_debug = {
+            "environment": env.get("ENVIRONMENT", "unknown"),
+            "k_service": env.get("K_SERVICE", "not_set"),
+            "google_project": env.get("GOOGLE_CLOUD_PROJECT", "not_set"),
+            "python_version": __import__("sys").version,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        
+        logger.error(f"🔧 SYSTEM STATE DEBUG: {json.dumps(system_debug, indent=2)}")
+    except Exception as debug_error:
+        logger.error(f"Failed to log system state: {debug_error}")
 
 
 def validate_websocket_component_health(user_context: Optional[UserExecutionContext] = None) -> Dict[str, Any]:
