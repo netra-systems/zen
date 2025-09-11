@@ -42,13 +42,14 @@ from netra_backend.app.schemas.agent_models import AgentMetadata as SchemaAgentM
 class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
     """Unit tests for specific security violations in DeepAgentState implementation."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment with security violation tracking."""
-        super().setUp()
+        super().setup_method(method)
         self.security_violations = []
         self.vulnerability_evidence = {}
-        # Get logger from parent class
-        self.test_logger = getattr(self, 'logger', None) or self.get_logger()
+        # Get logger
+        import logging
+        self.test_logger = logging.getLogger(__name__)
         
     def test_mutable_default_argument_vulnerability(self):
         """
