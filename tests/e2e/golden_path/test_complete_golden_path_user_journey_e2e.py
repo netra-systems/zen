@@ -64,6 +64,18 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
     BUSINESS IMPACT: $500K+ ARR protection through complete journey validation.
     """
     
+    def setup_method(self, method):
+        """Setup method run before each test method."""
+        from shared.logging.unified_logging_ssot import get_logger
+        self.logger = get_logger(__name__)
+        
+        # Initialize auth helpers with proper environment
+        environment = "test"  # Using test environment for Docker services
+        self.auth_helper = E2EAuthHelper(environment=environment)
+        self.websocket_helper = E2EWebSocketAuthHelper(environment=environment)
+        
+        super().setup_method(method)
+    
     async def initialize_test_environment(self):
         """Initialize test environment with full Docker services."""
         await super().initialize_test_environment()
