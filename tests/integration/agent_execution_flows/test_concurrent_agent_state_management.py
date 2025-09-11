@@ -24,7 +24,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
@@ -43,7 +43,7 @@ class TestConcurrentAgentStateManagement(BaseIntegrationTest):
             workspace_id="concurrent_workspace_1100"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             concurrency_control=True,
             max_concurrent_operations=50,
@@ -193,7 +193,7 @@ class TestConcurrentAgentStateManagement(BaseIntegrationTest):
             workspace_id="deadlock_workspace_1101"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             deadlock_detection=True,
             deadlock_timeout_seconds=5,
@@ -327,7 +327,7 @@ class TestConcurrentAgentStateManagement(BaseIntegrationTest):
             workspace_id="mixed_ops_workspace_1102"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             consistency_level="strong",
             read_write_isolation=True
@@ -568,7 +568,7 @@ class TestConcurrentAgentStateManagement(BaseIntegrationTest):
             workspace_id="perf_workspace_1103"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             performance_optimization=True,
             caching_enabled=True,

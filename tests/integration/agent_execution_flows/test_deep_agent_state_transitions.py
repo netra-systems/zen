@@ -21,7 +21,7 @@ from enum import Enum
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.base.execution_context import ExecutionStatus
@@ -53,7 +53,7 @@ class TestDeepAgentStateTransitions(BaseIntegrationTest):
             workspace_id="state_workspace_900"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             persistence_enabled=True
         )
@@ -125,7 +125,7 @@ class TestDeepAgentStateTransitions(BaseIntegrationTest):
             workspace_id="concurrent_workspace_901"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             concurrency_control=True,
             locking_enabled=True
@@ -204,7 +204,7 @@ class TestDeepAgentStateTransitions(BaseIntegrationTest):
         )
         
         # First state tracker instance (before "restart")
-        state_tracker_1 = AgentStateTracker(
+        state_tracker_1 = AgentExecutionTracker(
             user_context=user_context,
             persistence_enabled=True,
             storage_backend=real_services_fixture.get("redis", MagicMock())
@@ -244,7 +244,7 @@ class TestDeepAgentStateTransitions(BaseIntegrationTest):
         }
         
         # Simulate system restart - create new state tracker instance
-        state_tracker_2 = AgentStateTracker(
+        state_tracker_2 = AgentExecutionTracker(
             user_context=user_context,
             persistence_enabled=True,
             storage_backend=real_services_fixture.get("redis", MagicMock())
@@ -288,7 +288,7 @@ class TestDeepAgentStateTransitions(BaseIntegrationTest):
             workspace_id="hierarchy_workspace_903"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             hierarchical_states=True
         )
@@ -385,7 +385,7 @@ class TestDeepAgentStateTransitions(BaseIntegrationTest):
             workspace_id="rollback_workspace_904"
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             checkpointing_enabled=True,
             rollback_enabled=True

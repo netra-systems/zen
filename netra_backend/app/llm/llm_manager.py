@@ -25,9 +25,9 @@ from netra_backend.app.schemas.llm_types import (
     TokenUsage,
 )
 
-# CRITICAL REMEDIATION: Import timeout management for LLM circuit breaker protection
-from netra_backend.app.agents.execution_timeout_manager import (
-    get_timeout_manager,
+# CRITICAL REMEDIATION: Import consolidated agent execution tracker for LLM circuit breaker protection
+from netra_backend.app.core.agent_execution_tracker import (
+    AgentExecutionTracker,
     CircuitBreakerOpenError
 )
 
@@ -68,8 +68,8 @@ class LLMManager:
         self._ever_initialized = False  # Track if manager has ever been successfully initialized
         self._user_context = user_context
         
-        # CRITICAL REMEDIATION: Initialize timeout manager for LLM circuit breaker protection
-        self._timeout_manager = get_timeout_manager()
+        # CRITICAL REMEDIATION: Initialize consolidated agent execution tracker for LLM circuit breaker protection
+        self._timeout_manager = AgentExecutionTracker()
         
         # Log the initialization with security context
         if user_context:

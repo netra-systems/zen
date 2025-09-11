@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 """Redis Connection Staging Issues - Failing Tests
 
