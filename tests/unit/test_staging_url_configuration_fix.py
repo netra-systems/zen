@@ -173,7 +173,8 @@ class TestStagingUrlConfigurationFix(SSotBaseTestCase):
         
         # Find the StagingEnvironmentConfig instantiation
         # Look for the pattern where staging_config is created
-        config_pattern = r'self\.staging_config\s*=\s*StagingEnvironmentConfig\(\s*([^)]+)\)'
+        # Use a more robust pattern that handles nested parentheses
+        config_pattern = r'self\.staging_config\s*=\s*StagingEnvironmentConfig\(\s*(.*?)\s*\)'
         match = re.search(config_pattern, content, re.DOTALL)
         
         if not match:

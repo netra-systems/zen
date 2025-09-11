@@ -44,25 +44,24 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
         This should PASS - validates the correct import path exists.
         """
         # SSOT import - this should work consistently
-        from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+        from shared.types.agent_types import AgentExecutionResult
         
         # Test basic instantiation with SSOT API
         result = AgentExecutionResult(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
             success=True,
-            agent_name="test_agent",
-            user_context=None,
-            error=None,
-            duration=1.5,
-            metadata={},
-            metrics=None,
-            data=None
+            result_data={"agent_name": "test_agent"},
+            execution_metadata={"duration": 1.5},
+            error_message=None
         )
         
         # Verify SSOT result structure
         self.assertTrue(result.success)
-        self.assertEqual(result.agent_name, "test_agent")
-        self.assertEqual(result.duration, 1.5)
-        self.assertIsInstance(result.metadata, dict)
+        self.assertEqual(result.result_data["agent_name"], "test_agent")
+        self.assertEqual(result.execution_metadata["duration"], 1.5)
+        self.assertIsInstance(result.execution_metadata, dict)
 
     @pytest.mark.unit
     def test_old_execution_result_api_compatibility_failure(self):
