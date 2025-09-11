@@ -71,7 +71,8 @@
       "Bash(do)",
       "Bash(git merge-base:*)",
       "Bash(git fsck:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git remote prune:*)"
     ],
     "deny": [],
     "ask": []
