@@ -125,11 +125,18 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | Retention | Ensures basic agent orchestration works
         Test basic SupervisorAgent orchestration with sub-agent coordination.
         """
-        # Setup user execution context
+        # Setup user execution context with mock database session
+        mock_db_session = self.mock_factory.create_database_session_mock()
+        
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
             thread_id=self.test_thread_id,
-            run_id=self.test_run_id
+            run_id=self.test_run_id,
+            db_session=mock_db_session,
+            agent_context={
+                "message": "Analyze my AI costs and suggest optimizations",
+                "request_type": "optimization_analysis"
+            }
         )
         
         # Create supervisor agent with real dependencies
@@ -139,16 +146,10 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
         supervisor.websocket_bridge = websocket_bridge
         
-        # Execute basic workflow
-        request_data = {
-            "message": "Analyze my AI costs and suggest optimizations",
-            "user_context": user_context.to_dict()
-        }
-        
         # Execute supervisor workflow
-        result = await supervisor.execute_workflow(
-            request_data=request_data,
-            context=user_context
+        result = await supervisor.execute(
+            context=user_context,
+            stream_updates=True
         )
         
         # Verify basic orchestration success
