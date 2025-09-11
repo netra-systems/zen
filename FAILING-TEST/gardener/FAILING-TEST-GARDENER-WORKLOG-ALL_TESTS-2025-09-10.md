@@ -88,7 +88,32 @@ UnicodeEncodeError: 'charmap' codec can't encode character '\u2705'
 **GitHub Issue:** #316 - Auth service test failures - OAuth/Redis interface mismatch
 **Status:** GitHub issue created - tracks critical OAuth/Redis interface issues
 
-### Issue #3: Test Execution Timeout  
+### Issue #3: Critical Agent Execution Core Test Architecture Mismatch
+**Severity:** CRITICAL
+**Category:** failing-test-agent-execution-critical-p0-security
+**Test File:** `netra_backend/tests/unit/test_agent_execution_core.py`
+**Description:** Agent execution core tests fail due to missing class attributes + P0 security vulnerability
+**Root Causes:**
+1. **Missing Core Attributes**: `AgentExecutionCore` missing `timeout_manager` and `state_tracker` attributes
+2. **P0 SECURITY ISSUE**: `DeepAgentState` usage creates user isolation risks - users may see each other's data
+3. **Async Mock Problems**: Coroutines never awaited - improper async testing patterns
+4. **Architecture Drift**: Test implementation out of sync with actual class structure
+**Business Impact:**
+- **P0 CRITICAL**: Multi-user data isolation at risk ($500K+ ARR affected)
+- **CRITICAL**: Agent execution business logic cannot be validated
+- **HIGH**: Timeout protection and circuit breaker functionality untested
+- **HIGH**: WebSocket event business requirements not validatable
+**Error Examples:**
+```
+AttributeError: 'AgentExecutionCore' object has no attribute 'timeout_manager'
+CRITICAL DEPRECATION: DeepAgentState usage creates user isolation risks
+RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+```
+**Test Stats:** 5 failed, 14 passed, 33 warnings (26% failure rate)
+**P0 Security Warning:** "Multiple users may see each other's data with this pattern"
+**Next Action:** Create URGENT GitHub issue for P0 security vulnerability
+
+### Issue #4: Test Execution Timeout  
 **Severity:** HIGH
 **Category:** infrastructure
 **Description:** Comprehensive test suite times out, preventing full analysis
