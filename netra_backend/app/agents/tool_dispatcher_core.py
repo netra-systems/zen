@@ -408,4 +408,11 @@ class ToolDispatcher:
         )
     
     # Legacy compatibility methods removed - use factory methods only
+
+# ============================================================================
+# BACKWARD COMPATIBILITY EXPORTS
+# ============================================================================
+
+# Compatibility alias for existing code that imports ToolDispatcherCore
+ToolDispatcherCore = ToolDispatcher
     
