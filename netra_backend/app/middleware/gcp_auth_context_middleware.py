@@ -142,8 +142,8 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
         
         This method implements multiple fallback strategies to prevent crashes
         when SessionMiddleware is not installed or configured properly:
-        1. Check for session attribute existence
-        2. Try-catch around session access to handle middleware order issues
+        1. Direct try-catch around session access (removes hasattr check)
+        2. Improved RuntimeError handling for middleware order issues  
         3. Fallback to request state and cookies if session unavailable
         
         Args:
@@ -155,27 +155,26 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
         session_data = {}
         
         try:
-            # First line of defense: Check if session attribute exists
-            if hasattr(request, 'session'):
-                try:
-                    # Second line of defense: Try to access session safely
-                    session = request.session
-                    if session:
-                        session_data.update({
-                            'session_id': session.get('session_id'),
-                            'user_id': session.get('user_id'),
-                            'user_email': session.get('user_email')
-                        })
-                        logger.debug(f"Successfully extracted session data: {list(session_data.keys())}")
-                        return session_data
-                except (AttributeError, RuntimeError) as e:
-                    # Session middleware not installed or session access failed
-                    logger.warning(f"Session access failed (middleware not installed?): {e}")
-            
-            # Third line of defense: Fallback to cookie-based session extraction
+            # First line of defense: Try to access session directly
+            # FIXED: Removed hasattr check that was causing RuntimeError issues
+            session = request.session
+            if session:
+                session_data.update({
+                    'session_id': session.get('session_id'),
+                    'user_id': session.get('user_id'),
+                    'user_email': session.get('user_email')
+                })
+                logger.debug(f"Successfully extracted session data: {list(session_data.keys())}")
+                return session_data
+        except (AttributeError, RuntimeError, AssertionError) as e:
+            # Session middleware not installed or session access failed
+            logger.warning(f"Session access failed (middleware not installed?): {e}")
+        
+        try:
+            # Second line of defense: Fallback to cookie-based session extraction
             session_data.update(self._extract_session_from_cookies(request))
             
-            # Fourth line of defense: Fallback to request state
+            # Third line of defense: Fallback to request state
             session_data.update(self._extract_session_from_request_state(request))
             
             if session_data:

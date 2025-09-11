@@ -436,7 +436,7 @@ class AgentExecutionTracker:
             logger.warning(f"Cannot update terminal execution {execution_id}")
             return False
         
-        # Capture old state before updating it (needed for logging)
+        # Capture old state for logging
         old_state = record.state
         
         now = datetime.now(timezone.utc)

@@ -1139,6 +1139,7 @@ def is_valid_id_format(id_value: str) -> bool:
         r'^[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z0-9]+$', # authenticated-user-12345, chat-request-abcdef (business test format)
         r'^e2e-[a-zA-Z0-9_-]+$',         # e2e-staging_pipeline, e2e-deployment-test
         r'^\d{18,21}$',                  # Google OAuth numeric user IDs (18-21 digits)
+        r'^defensive_auth_\w+_\w+$',     # CRITICAL FIX Issue #406: defensive_auth_105945141827451681156_prelim_4280fd7d patterns
     ]
     
     for pattern in test_patterns:

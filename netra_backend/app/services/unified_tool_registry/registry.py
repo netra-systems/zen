@@ -15,6 +15,14 @@ from netra_backend.app.services.unified_tool_registry.models import (
     UnifiedTool, 
     ToolExecutionResult
 )
+from netra_backend.app.core.exceptions_tools import (
+    ToolTypeValidationException,
+    ToolNameValidationException,
+    ToolHandlerValidationException,
+    ToolNotFoundException,
+    ToolExecutionException,
+    ToolPermissionException
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -67,18 +75,54 @@ class UnifiedToolRegistry(ToolRegistry):
         Args:
             tool: UnifiedTool instance to register
             handler: Optional async execution handler for the tool
+            
+        Raises:
+            ToolTypeValidationException: If tool is not a UnifiedTool instance
+            ToolNameValidationException: If tool name is invalid
+            ToolHandlerValidationException: If handler is not callable
         """
+        # Validate tool type
         if not isinstance(tool, UnifiedTool):
-            raise TypeError("tool must be a UnifiedTool instance")
+            raise ToolTypeValidationException(
+                message=f"Invalid tool type: {type(tool).__name__}",
+                tool_id=getattr(tool, 'id', None),
+                tool_name=getattr(tool, 'name', None),
+                expected_type="UnifiedTool",
+                actual_type=type(tool).__name__
+            )
+        
+        # Validate tool name
+        if not tool.name or not tool.name.strip():
+            raise ToolNameValidationException(
+                message="Tool name cannot be empty",
+                tool_id=tool.id,
+                tool_name=tool.name,
+                invalid_name=tool.name,
+                validation_rule="non_empty_name"
+            )
         
         # Store in both our local storage and parent registry
-        self._tools[tool.id] = tool
-        super().register(tool.id, tool)
+        try:
+            self._tools[tool.id] = tool
+            super().register(tool.id, tool)
+        except Exception as e:
+            raise ToolTypeValidationException(
+                message=f"Failed to register tool in parent registry: {str(e)}",
+                tool_id=tool.id,
+                tool_name=tool.name,
+                details={'parent_error': str(e)}
+            )
         
-        # Store handler if provided
+        # Validate and store handler if provided
         if handler is not None:
             if not callable(handler):
-                raise TypeError("handler must be callable")
+                raise ToolHandlerValidationException(
+                    message="Tool handler must be callable",
+                    tool_id=tool.id,
+                    tool_name=tool.name,
+                    handler_type=type(handler).__name__,
+                    validation_issue="not_callable"
+                )
             self._tool_handlers[tool.id] = handler
         
         logger.debug(f"Registered tool {tool.id} with handler: {handler is not None}")
@@ -166,6 +210,7 @@ class UnifiedToolRegistry(ToolRegistry):
         # Check if tool exists
         tool = self.get_tool(tool_id)
         if not tool:
+            # Could raise ToolNotFoundException in strict mode, but for now return result
             return ToolExecutionResult(
                 success=False,
                 error=f"Tool {tool_id} not found",
@@ -183,7 +228,7 @@ class UnifiedToolRegistry(ToolRegistry):
                 execution_time_ms=0
             )
         
-        # Execute the tool
+        # Execute the tool with enhanced exception handling
         try:
             result = await handler(parameters, context)
             
@@ -198,20 +243,68 @@ class UnifiedToolRegistry(ToolRegistry):
                 execution_time_ms=int(execution_time)
             )
             
-        except Exception as e:
+        except ToolExecutionException as e:
+            # Re-raise specific tool exceptions for proper handling
+            raise e
+            
+        except PermissionError as e:
+            # Convert permission errors to specific exceptions
             execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-            error_message = str(e)
-            
-            logger.error(f"Tool execution failed for {tool_id}: {error_message}")
-            
-            return ToolExecutionResult(
-                success=False,
-                error=error_message,
+            raise ToolPermissionException(
+                message=f"Permission denied executing tool {tool_id}",
+                tool_id=tool_id,
                 tool_name=tool.name,
                 user_id=context.get("user"),
-                status="error",
-                error_message=error_message,
-                execution_time_ms=int(execution_time)
+                details={
+                    'original_error': str(e),
+                    'execution_time': execution_time
+                }
+            )
+            
+        except TimeoutError as e:
+            # Convert timeout errors to execution exceptions
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+            raise ToolExecutionException(
+                message=f"Tool execution timed out for {tool_id}",
+                tool_id=tool_id,
+                tool_name=tool.name,
+                user_id=context.get("user"),
+                execution_error="timeout",
+                execution_time=execution_time,
+                input_args=parameters
+            )
+            
+        except ValueError as e:
+            # Convert validation errors to execution exceptions
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+            raise ToolExecutionException(
+                message=f"Invalid parameters for tool {tool_id}: {str(e)}",
+                tool_id=tool_id,
+                tool_name=tool.name,
+                user_id=context.get("user"),
+                execution_error="invalid_parameters",
+                execution_time=execution_time,
+                input_args=parameters
+            )
+            
+        except Exception as e:
+            # Convert all other exceptions to ToolExecutionException
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+            
+            logger.error(f"Tool execution failed for {tool_id}: {str(e)}")
+            
+            raise ToolExecutionException(
+                message=f"Tool execution failed for {tool_id}: {str(e)}",
+                tool_id=tool_id,
+                tool_name=tool.name,
+                user_id=context.get("user"),
+                execution_error=str(e),
+                execution_time=execution_time,
+                input_args=parameters,
+                details={
+                    'exception_type': type(e).__name__,
+                    'original_error': str(e)
+                }
             )
     
     def check_permission(self, 
@@ -228,14 +321,62 @@ class UnifiedToolRegistry(ToolRegistry):
             
         Returns:
             True if permission granted, False otherwise
+            
+        Raises:
+            ToolNotFoundException: If tool doesn't exist (in strict mode)
         """
         # Check if tool exists
         tool = self.get_tool(tool_id)
         if not tool:
+            # For compatibility, return False instead of raising exception
+            # In strict mode, we could raise ToolNotFoundException
             return False
         
         # For now, always return True for existing tools
         # This can be extended with actual permission logic later
+        return True
+    
+    def check_permission_strict(self, 
+                               tool_id: str, 
+                               user_id: str, 
+                               action: str = "execute") -> bool:
+        """
+        Check if user has permission to perform action on tool (strict mode).
+        
+        Args:
+            tool_id: Tool identifier
+            user_id: User identifier
+            action: Action to check permission for (e.g., "execute")
+            
+        Returns:
+            True if permission granted
+            
+        Raises:
+            ToolNotFoundException: If tool doesn't exist
+            ToolPermissionException: If permission is denied
+        """
+        # Check if tool exists
+        tool = self.get_tool(tool_id)
+        if not tool:
+            raise ToolNotFoundException(
+                message=f"Tool {tool_id} not found",
+                tool_id=tool_id,
+                user_id=user_id,
+                registry_name=self.name
+            )
+        
+        # For now, always grant permission for existing tools
+        # This can be extended with actual permission logic later
+        # Example permission check that would raise exception:
+        # if some_permission_check_fails:
+        #     raise ToolPermissionException(
+        #         message=f"User {user_id} lacks permission to {action} tool {tool_id}",
+        #         tool_id=tool_id,
+        #         tool_name=tool.name,
+        #         user_id=user_id,
+        #         required_permission=action
+        #     )
+        
         return True
     
     def clear(self) -> None:
