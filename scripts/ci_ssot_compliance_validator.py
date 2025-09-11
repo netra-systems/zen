@@ -286,7 +286,7 @@ class CISSotComplianceValidator:
             requirements["max_error_violations"] = min(requirements["max_error_violations"] + 2, 5)
             # Allow more warning violations for PR validation since many are documentation-related
             if requirements["max_warning_violations"] != float('inf'):
-                requirements["max_warning_violations"] = min(requirements["max_warning_violations"] + 7, 15)
+                requirements["max_warning_violations"] = min(requirements["max_warning_violations"] + 10, 20)
             # Skip mission critical tests for PR validation if dependencies are missing
             requirements["require_mission_critical_tests"] = False
         

@@ -16,6 +16,7 @@ from netra_backend.app.services.corpus.base import ContentSource, CorpusStatus
 from netra_backend.app.services.corpus.core_unified import (
     CorpusService as ModularCorpusService,
 )
+from netra_backend.app.services.secure_background_task_manager import get_secure_background_task_manager
 
 # NOTE: Singleton corpus_service removed to support user context isolation.
 # Create ModularCorpusService instances with user_context for WebSocket notifications
@@ -521,15 +522,27 @@ class CorpusService:
         except asyncio.TimeoutError:
             # If table creation times out, log it but don't block
             # This allows the method to return quickly as expected by tests
-            logger.warning(f"Table creation for {table_name} timed out, running in background")
+            logger.warning(f"Table creation for {table_name} timed out, using managed background task")
             
-            # Start table creation in background with proper exception handling
-            task = asyncio.create_task(_perform_table_creation())
-            # Add done callback to retrieve exceptions and prevent "Task exception was never retrieved"
-            task.add_done_callback(
-                lambda t: logger.error(f"Background table creation failed: {t.exception()}") 
-                if t.exception() else logger.info(f"Background table creation completed for {table_name}")
-            )
+            # Use SecureBackgroundTaskManager for proper async lifecycle management
+            try:
+                task_manager = await get_secure_background_task_manager()
+                task_id = f"create_table_{table_name}_{corpus_id}"
+                
+                # Start managed background task instead of fire-and-forget
+                bg_task = await task_manager.start_task(
+                    task_id=task_id,
+                    name=f"create_clickhouse_table_{table_name}",
+                    coro=_perform_table_creation,
+                    require_user_context=False  # System-level infrastructure task
+                )
+                
+                logger.info(f"Started managed background task {task_id} for table {table_name}")
+                
+            except Exception as e:
+                logger.error(f"Failed to start managed background task for table {table_name}: {e}")
+                # Fallback: Log the issue but don't block the operation
+                logger.warning(f"Table creation for {table_name} will be retried on next access")
             
         except Exception as e:
             logger.error(f"Error during table creation timeout handling: {e}")

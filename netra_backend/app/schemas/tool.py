@@ -7,7 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:
-    from netra_backend.app.schemas.agent_models import DeepAgentState
+    # DeepAgentState deprecated - use UserExecutionContext pattern instead
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 class ToolStatus(str, enum.Enum):
     SUCCESS = "success"

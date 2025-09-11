@@ -148,6 +148,11 @@ class UserExecutionContext:
         
         for field_name, value in required_fields.items():
             if not value or not isinstance(value, str) or not value.strip():
+                logger.error(
+                    f"❌ VALIDATION FAILURE: Required field '{field_name}' validation failed. "
+                    f"Expected non-empty string, got: {value!r} (type: {type(value).__name__}). "
+                    f"Context: user_id={getattr(self, 'user_id', 'unknown')[:8]}..."
+                )
                 raise InvalidContextError(
                     f"Required field '{field_name}' must be a non-empty string, "
                     f"got: {value!r}"
@@ -198,6 +203,11 @@ class UserExecutionContext:
             
             # Check forbidden exact values
             if value_lower in forbidden_exact_values:
+                logger.error(
+                    f"❌ VALIDATION FAILURE: Field '{field_name}' contains forbidden placeholder value. "
+                    f"Value: {value!r}, User: {getattr(self, 'user_id', 'unknown')[:8]}..., "
+                    f"This prevents proper request isolation and indicates improper context initialization."
+                )
                 raise InvalidContextError(
                     f"Field '{field_name}' contains forbidden placeholder value: "
                     f"{value!r}. This prevents proper request isolation."
@@ -207,6 +217,11 @@ class UserExecutionContext:
             if len(value) < 20:
                 for pattern in forbidden_patterns:
                     if value_lower.startswith(pattern):
+                        logger.error(
+                            f"❌ VALIDATION FAILURE: Field '{field_name}' contains forbidden placeholder pattern. "
+                            f"Pattern: '{pattern}', Value: {value!r}, User: {getattr(self, 'user_id', 'unknown')[:8]}..., "
+                            f"This indicates improper context initialization and risks request isolation."
+                        )
                         raise InvalidContextError(
                             f"Field '{field_name}' appears to contain placeholder pattern: "
                             f"{value!r}. This indicates improper context initialization."
@@ -285,11 +300,21 @@ class UserExecutionContext:
         """Ensure metadata dictionaries are properly isolated."""
         # Validate agent_context structure
         if not isinstance(self.agent_context, dict):
+            logger.error(
+                f"❌ VALIDATION FAILURE: agent_context must be a dictionary. "
+                f"Got: {type(self.agent_context).__name__}, Value: {self.agent_context!r}, "
+                f"User: {getattr(self, 'user_id', 'unknown')[:8]}..."
+            )
             raise InvalidContextError(
                 f"agent_context must be a dictionary, got: {type(self.agent_context)}"
             )
         
         if not isinstance(self.audit_metadata, dict):
+            logger.error(
+                f"❌ VALIDATION FAILURE: audit_metadata must be a dictionary. "
+                f"Got: {type(self.audit_metadata).__name__}, Value: {self.audit_metadata!r}, "
+                f"User: {getattr(self, 'user_id', 'unknown')[:8]}..."
+            )
             raise InvalidContextError(
                 f"audit_metadata must be a dictionary, got: {type(self.audit_metadata)}"
             )
@@ -306,6 +331,12 @@ class UserExecutionContext:
         ]:
             conflicting_keys = set(metadata_dict.keys()) & reserved_keys
             if conflicting_keys:
+                logger.error(
+                    f"❌ VALIDATION FAILURE: {dict_name} contains reserved keys that would cause conflicts. "
+                    f"Conflicting keys: {conflicting_keys}, Reserved keys: {reserved_keys}, "
+                    f"User: {getattr(self, 'user_id', 'unknown')[:8]}..., "
+                    f"This prevents proper context isolation."
+                )
                 raise InvalidContextError(
                     f"{dict_name} contains reserved keys: {conflicting_keys}"
                 )

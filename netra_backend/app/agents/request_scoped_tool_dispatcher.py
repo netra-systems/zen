@@ -31,7 +31,8 @@ from contextlib import asynccontextmanager
 if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.state import DeepAgentState
+# DeepAgentState removed - using UserExecutionContext pattern
+# from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
@@ -260,7 +261,7 @@ class RequestScopedToolDispatcher:
         self,
         tool_name: str,
         parameters: Dict[str, Any],
-        state: DeepAgentState,
+        state: UserExecutionContext,
         run_id: str
     ) -> Dict[str, Any]:
         """Dispatch tool with state - method expected by sub-agents."""

@@ -26,7 +26,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import desc, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.app.db.models_agent_state import (
     AgentStateSnapshot,
@@ -314,7 +314,7 @@ class StatePersistenceService:
             logger.warning(f"Failed to cache state in Redis for run {request.run_id}: {e}")
     
     async def load_agent_state(self, run_id: str, snapshot_id: Optional[str] = None,
-                              db_session: Optional[AsyncSession] = None) -> Optional[DeepAgentState]:
+                              db_session: Optional[AsyncSession] = None) -> Optional[UserExecutionContext]:
         """Load agent state using optimal 3-tier architecture.
         
         Load order:
@@ -326,7 +326,7 @@ class StatePersistenceService:
         return await self._execute_new_load_workflow(run_id, snapshot_id, db_session)
 
     async def _execute_new_load_workflow(self, run_id: str, snapshot_id: Optional[str],
-                                        db_session: Optional[AsyncSession]) -> Optional[DeepAgentState]:
+                                        db_session: Optional[AsyncSession]) -> Optional[UserExecutionContext]:
         """Execute new 3-tier load workflow with fallback chain."""
         try:
             # Step 1: Try Redis (PRIMARY) - fastest for active states
@@ -350,14 +350,14 @@ class StatePersistenceService:
         except Exception as e:
             return self._handle_load_error(run_id, e)
 
-    async def _attempt_cache_load(self, run_id: str, snapshot_id: Optional[str]) -> Optional[DeepAgentState]:
+    async def _attempt_cache_load(self, run_id: str, snapshot_id: Optional[str]) -> Optional[UserExecutionContext]:
         """Try loading state from Redis cache first."""
         if not snapshot_id:
             return await self.load_from_redis_cache(run_id)
         return None
 
     async def _attempt_database_load(self, run_id: str, snapshot_id: Optional[str], 
-                                    db_session: Optional[AsyncSession]) -> Optional[DeepAgentState]:
+                                    db_session: Optional[AsyncSession]) -> Optional[UserExecutionContext]:
         """Load state from database snapshots."""
         if not db_session:
             return self._handle_no_session_warning(run_id)
@@ -369,21 +369,21 @@ class StatePersistenceService:
         logger.warning(f"No state found for run {run_id}")
         return None
 
-    async def _process_snapshot_result(self, run_id: str, snapshot) -> Optional[DeepAgentState]:
+    async def _process_snapshot_result(self, run_id: str, snapshot) -> Optional[UserExecutionContext]:
         """Process snapshot result or handle missing snapshot."""
         if not snapshot:
             logger.warning(f"No state found for run {run_id}")
             return None
         return await self._process_database_snapshot(run_id, snapshot)
 
-    async def _process_database_snapshot(self, run_id: str, snapshot) -> DeepAgentState:
+    async def _process_database_snapshot(self, run_id: str, snapshot) -> UserExecutionContext:
         """Process database snapshot and return state."""
         state_data = await self._deserialize_state_data(
             snapshot.state_data, snapshot.serialization_format
         )
         await self.cache_deserialized_state(run_id, state_data)
         logger.info(f"Loaded state from snapshot {snapshot.id}")
-        return DeepAgentState(**state_data)
+        return UserExecutionContext(**state_data)
     
     async def recover_agent_state(self, request: StateRecoveryRequest,
                                  db_session: AsyncSession) -> Tuple[bool, Optional[str]]:
@@ -848,7 +848,7 @@ class StatePersistenceService:
             return False, None
     
     async def _attempt_checkpoint_load(self, run_id: str, snapshot_id: Optional[str], 
-                                     db_session: Optional[AsyncSession]) -> Optional[DeepAgentState]:
+                                     db_session: Optional[AsyncSession]) -> Optional[UserExecutionContext]:
         """Attempt to load from PostgreSQL recovery checkpoints."""
         if not db_session:
             return None
@@ -870,7 +870,7 @@ class StatePersistenceService:
             
             if checkpoint and checkpoint.essential_state:
                 logger.info(f"Loaded state for {run_id} from PostgreSQL checkpoint {checkpoint.id}")
-                return DeepAgentState(**checkpoint.essential_state)
+                return UserExecutionContext(**checkpoint.essential_state)
                 
         except Exception as e:
             logger.error(f"Failed to load from checkpoints for {run_id}: {e}")
@@ -878,7 +878,7 @@ class StatePersistenceService:
         return None
     
     async def _attempt_legacy_database_load(self, run_id: str, snapshot_id: Optional[str],
-                                          db_session: Optional[AsyncSession]) -> Optional[DeepAgentState]:
+                                          db_session: Optional[AsyncSession]) -> Optional[UserExecutionContext]:
         """Attempt to load from legacy PostgreSQL snapshots (backward compatibility)."""
         if not db_session:
             return None
@@ -894,7 +894,7 @@ class StatePersistenceService:
                 await self.cache_legacy_state(run_id, state_data)
                 
                 logger.info(f"Loaded state for {run_id} from legacy PostgreSQL snapshot {snapshot.id}")
-                return DeepAgentState(**state_data)
+                return UserExecutionContext(**state_data)
                 
         except Exception as e:
             logger.error(f"Failed to load from legacy snapshots for {run_id}: {e}")

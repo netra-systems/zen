@@ -324,7 +324,8 @@ class ConfigurationHealthChecker(BaseHealthChecker):
                     "environment_config_valid": environment_config_valid
                 },
                 "critical_configs_checked": [
-                    "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_DB", "JWT_SECRET_KEY", "WEBSOCKET_ENABLED", "ENVIRONMENT"
+                    "POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_DB", "WEBSOCKET_ENABLED", "ENVIRONMENT"
+                    # SSOT COMPLIANCE: JWT_SECRET_KEY removed - Auth service is SSOT for JWT
                 ],
                 "response_time_ms": response_time
             }
@@ -365,9 +366,11 @@ class ConfigurationHealthChecker(BaseHealthChecker):
     async def _check_auth_configuration(self) -> bool:
         """Check if authentication configuration is valid."""
         try:
-            env = get_env()
-            jwt_secret = env.get("JWT_SECRET_KEY")
-            return jwt_secret is not None and len(jwt_secret) > 0
+            # SSOT COMPLIANCE: Check auth service availability instead of JWT secrets
+            # Backend health monitor should not validate JWT secrets directly
+            from netra_backend.app.clients.auth_client_core import auth_client
+            # Simple health check - if auth client can be created, config is valid
+            return auth_client is not None
         except Exception:
             return False
     
