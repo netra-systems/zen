@@ -82,13 +82,13 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         )
         
         # This should fail with "No agent registry configured" error
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as exc_info:
             await factory.create_agent_instance("supervisor_orchestration", user_context)
         
-        error_message = str(cm.exception)
+        error_message = str(exc_info.value)
         
         # Verify we get the exact error that's blocking Golden Path tests
-        self.assertIn("No agent registry configured", error_message)
+        assert "No agent registry configured" in error_message
         logger.info(f"✅ Successfully reproduced Golden Path error: {error_message}")
 
     async def test_agent_instance_factory_empty_registry_error(self):
@@ -114,13 +114,13 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         )
         
         # This should fail because the registry is empty
-        with self.assertRaises(ValueError) as cm:
+        with pytest.raises(ValueError) as exc_info:
             await factory.create_agent_instance("supervisor_orchestration", user_context)
         
-        error_message = str(cm.exception)
+        error_message = str(exc_info.value)
         
         # Verify we get an agent not found error
-        self.assertIn("not found", error_message.lower())
+        assert "not found" in error_message.lower()
         logger.info(f"✅ Successfully reproduced empty registry error: {error_message}")
 
     async def test_configure_agent_instance_factory_fixes_registry(self):
@@ -174,8 +174,8 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         agent = await factory.create_agent_instance("supervisor_orchestration", user_context)
         
         # Verify agent creation succeeded
-        self.assertIsNotNone(agent)
-        self.assertIsInstance(agent, TestSupervisorAgent)
+        assert agent is not None
+        assert isinstance(agent, TestSupervisorAgent)
         logger.info("✅ Agent creation succeeded after proper factory configuration")
 
     async def test_global_configure_agent_instance_factory_integration(self):
@@ -204,11 +204,11 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         )
         
         # Verify factory is configured
-        self.assertIsNotNone(configured_factory)
+        assert configured_factory is not None
         
         # Verify global factory is also configured
         global_factory = get_agent_instance_factory()
-        self.assertEqual(configured_factory, global_factory)
+        assert configured_factory == global_factory
         
         # Verify agent creation works through global factory
         user_context = UserExecutionContext.from_request_supervisor(
@@ -218,7 +218,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         )
         
         agent = await global_factory.create_agent_instance("test_agent", user_context)
-        self.assertIsNotNone(agent)
+        assert agent is not None
         logger.info("✅ Global factory configuration pattern validated")
 
     async def test_agent_class_registry_population_patterns(self):
