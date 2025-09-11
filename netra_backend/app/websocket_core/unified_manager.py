@@ -2424,6 +2424,23 @@ class UnifiedWebSocketManager:
         # Use existing broadcast method
         await self.broadcast(message)
     
+    async def broadcast_system_message(self, message: Dict[str, Any]) -> None:
+        """
+        Broadcast system-level message to all connections.
+        
+        This method is specifically used for system events like lifecycle changes,
+        state changes, and administrative messages. It's functionally equivalent
+        to broadcast_message but provides semantic clarity for system events.
+        
+        INTEGRATION COMPLIANCE: This method is required by integration tests and
+        manager classes (UnifiedStateManager, UnifiedLifecycleManager, etc.)
+        
+        Args:
+            message: System message to broadcast to all connections
+        """
+        # Use existing broadcast method - same functionality as broadcast_message
+        await self.broadcast(message)
+    
     def get_connection_count(self) -> int:
         """
         Get total number of connections managed by this instance.
@@ -2550,6 +2567,102 @@ class UnifiedWebSocketManager:
         """
         # Use existing is_connection_active method
         return self.is_connection_active(user_id)
+
+    async def handle_event_confirmation(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> bool:
+        """Handle event confirmation messages from WebSocket clients.
+        
+        This method processes confirmation messages sent by clients to acknowledge
+        receipt of critical events (tool_executing, tool_completed, etc.).
+        
+        Args:
+            user_id: User ID sending the confirmation
+            message: Confirmation message with event_id and status
+            
+        Returns:
+            bool: True if confirmation was processed successfully
+        """
+        try:
+            # Validate message structure
+            if not isinstance(message, dict):
+                logger.warning(f"Invalid confirmation message format from user {user_id}: {type(message)}")
+                return False
+            
+            event_id = message.get('event_id')
+            confirmation_type = message.get('type', 'confirmation')
+            status = message.get('status', 'confirmed')
+            
+            if not event_id:
+                logger.warning(f"Confirmation message missing event_id from user {user_id}")
+                return False
+            
+            # Get event delivery tracker
+            from netra_backend.app.services.event_delivery_tracker import get_event_delivery_tracker
+            tracker = get_event_delivery_tracker()
+            
+            if confirmation_type == 'confirmation' and status == 'confirmed':
+                # Confirm successful delivery
+                success = tracker.confirm_event(event_id)
+                if success:
+                    logger.debug(f"Confirmed event {event_id} for user {user_id}")
+                    return True
+                else:
+                    logger.warning(f"Failed to confirm unknown event {event_id} for user {user_id}")
+                    return False
+                    
+            elif confirmation_type == 'confirmation' and status == 'failed':
+                # Event failed on client side
+                error_msg = message.get('error', 'Client-side event processing failed')
+                tracker.fail_event(event_id, f"Client failure: {error_msg}")
+                logger.warning(f"Client reported failure for event {event_id} from user {user_id}: {error_msg}")
+                return True
+                
+            else:
+                logger.warning(f"Unknown confirmation type/status: {confirmation_type}/{status} from user {user_id}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error processing event confirmation from user {user_id}: {e}")
+            return False
+    
+    async def process_incoming_message(self, user_id: Union[str, UserID], message: Any) -> bool:
+        """Process incoming WebSocket messages including confirmations.
+        
+        This method handles both regular messages and event confirmations.
+        
+        Args:
+            user_id: User ID sending the message
+            message: Raw WebSocket message
+            
+        Returns:
+            bool: True if message was processed successfully
+        """
+        try:
+            # Parse message if it's a string
+            if isinstance(message, str):
+                import json
+                try:
+                    parsed_message = json.loads(message)
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid JSON message from user {user_id}: {message[:100]}")
+                    return False
+            elif isinstance(message, dict):
+                parsed_message = message
+            else:
+                logger.warning(f"Unsupported message type from user {user_id}: {type(message)}")
+                return False
+            
+            # Check if this is an event confirmation
+            message_type = parsed_message.get('type', '')
+            if message_type == 'event_confirmation':
+                return await self.handle_event_confirmation(user_id, parsed_message)
+            
+            # Handle other message types here if needed
+            logger.debug(f"Received message type '{message_type}' from user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error processing incoming message from user {user_id}: {e}")
+            return False
 
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status for current operational mode."""

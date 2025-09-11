@@ -259,6 +259,55 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._last_broadcasted_state = None
         logger.debug("Monitor observer system initialized")
     
+    async def _send_with_retry(self, user_id: str, notification: Dict[str, Any], event_type: str, run_id: str, max_retries: int = 3) -> bool:
+        """Send WebSocket notification with retry logic for critical events.
+        
+        PHASE 4 FIX: Centralized retry logic for all critical WebSocket events.
+        
+        Args:
+            user_id: Target user ID for notification
+            notification: WebSocket notification payload
+            event_type: Type of event (for logging)
+            run_id: Run ID (for logging)
+            max_retries: Maximum retry attempts
+            
+        Returns:
+            bool: True if successfully sent
+            
+        Raises:
+            RuntimeError: If all retry attempts fail for critical events
+        """
+        retry_delay = 1.0  # Start with 1 second
+        success = False
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                success = await self._websocket_manager.send_to_user(user_id, notification)
+                if success:
+                    break  # Success! Exit retry loop
+                else:
+                    last_error = "WebSocket send_to_user returned False"
+                    if attempt < max_retries - 1:  # Don't delay after last attempt
+                        logger.warning(f"⚠️ RETRY: {event_type} delivery failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s")
+                        await asyncio.sleep(retry_delay)
+                        retry_delay *= 2  # Exponential backoff
+                    
+            except Exception as e:
+                last_error = str(e)
+                if attempt < max_retries - 1:
+                    logger.warning(f"⚠️ RETRY: {event_type} exception (attempt {attempt + 1}/{max_retries}): {e}, retrying in {retry_delay}s")
+                    await asyncio.sleep(retry_delay)
+                    retry_delay *= 2
+        
+        if not success:
+            # PHASE 4 FIX: Stop silent failures - raise exception for critical events
+            error_msg = f"🚨 CRITICAL: {event_type} delivery failed after {max_retries} attempts (run_id={run_id})"
+            logger.critical(error_msg)
+            raise RuntimeError(f"CRITICAL event delivery failure: {error_msg}. Last error: {last_error}")
+        
+        return success
+    
     async def ensure_integration(
         self, 
         supervisor=None, 
@@ -1149,6 +1198,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             run_id: Unique execution identifier for routing
             agent_name: Name of the agent starting execution
             context: Optional context (user_query, metadata, etc.)
+            user_context: REQUIRED for multi-user isolation. If None, falls back to self.user_context
             
         Returns:
             bool: True if notification queued/sent successfully
@@ -1156,11 +1206,18 @@ class AgentWebSocketBridge(MonitorableComponent):
         Business Value: Users see immediate feedback that AI is working on their problem
         """
         try:
-            # PHASE 1 FIX: Use UserExecutionContext for proper user_id routing
+            # PHASE 3 FIX: Proper user context resolution for concurrent user isolation
             effective_user_context = user_context or self.user_context
             if not effective_user_context:
                 logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for agent_started (run_id={run_id}, agent={agent_name})")
                 return False
+            
+            # PHASE 3 FIX: Validate user context matches run_id for proper routing
+            if hasattr(effective_user_context, 'run_id') and effective_user_context.run_id != run_id:
+                logger.warning(
+                    f"⚠️ USER_CONTEXT_MISMATCH: Context run_id={effective_user_context.run_id} != event run_id={run_id}. "
+                    f"This may indicate concurrent user routing issues. Using event run_id for routing."
+                )
             
             # CRITICAL VALIDATION: Check run_id context before emission
             if not self._validate_event_context(run_id, "agent_started", agent_name):
@@ -1188,9 +1245,16 @@ class AgentWebSocketBridge(MonitorableComponent):
             if trace_context:
                 notification["trace"] = trace_context
             
-            # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
+            # PHASE 3 FIX: Use user_id directly for WebSocket routing with concurrent user support
             user_id = effective_user_context.user_id
             print(f"DEBUG: notify_agent_started - run_id={run_id}, user_id={user_id}")
+            
+            # PHASE 3 FIX: Log routing decision for concurrent user debugging
+            if user_context and self.user_context and user_context != self.user_context:
+                logger.debug(
+                    f"🔄 CONCURRENT_USER_ROUTING: Using provided user_context (user={user_id}) instead of "
+                    f"bridge default (user={self.user_context.user_id}) for run_id={run_id}"
+                )
             
             # PHASE 2 FIX: Track event delivery with retry capability (if available)
             event_id = None
@@ -1211,10 +1275,34 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.warning(f"Event tracking failed: {e}")
                     event_id = None
             
-            # PHASE 1 FIX: Direct WebSocket emission using user_id
-            success = await self._websocket_manager.send_to_user(user_id, notification)
-            print(f"DEBUG: notify_agent_started - send_to_user success={success}")
+            # PHASE 4 FIX: Implement retry logic for critical events
+            max_retries = 3
+            retry_delay = 1.0  # Start with 1 second
             
+            success = False
+            last_error = None
+            
+            for attempt in range(max_retries):
+                try:
+                    success = await self._websocket_manager.send_to_user(user_id, notification)
+                    print(f"DEBUG: notify_agent_started - send_to_user success={success} (attempt {attempt + 1}/{max_retries})")
+                    
+                    if success:
+                        break  # Success! Exit retry loop
+                    else:
+                        last_error = "WebSocket send_to_user returned False"
+                        if attempt < max_retries - 1:  # Don't delay after last attempt
+                            logger.warning(f"⚠️ RETRY: agent_started delivery failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s")
+                            await asyncio.sleep(retry_delay)
+                            retry_delay *= 2  # Exponential backoff
+                        
+                except Exception as e:
+                    last_error = str(e)
+                    if attempt < max_retries - 1:
+                        logger.warning(f"⚠️ RETRY: agent_started exception (attempt {attempt + 1}/{max_retries}): {e}, retrying in {retry_delay}s")
+                        await asyncio.sleep(retry_delay)
+                        retry_delay *= 2
+                    
             # PHASE 2 FIX: Update tracker with delivery result (if available)
             if event_id and EVENT_TRACKER_AVAILABLE:
                 try:
@@ -1223,7 +1311,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                         tracker.mark_event_sent(event_id)
                         # Note: Confirmation would be handled by client WebSocket response
                     else:
-                        tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False")
+                        tracker.mark_event_failed(event_id, last_error or "All retry attempts failed")
                 except Exception as e:
                     logger.warning(f"Event tracking update failed: {e}")
             
@@ -1233,17 +1321,28 @@ class AgentWebSocketBridge(MonitorableComponent):
                 if hasattr(self, '_track_event_delivery'):
                     await self._track_event_delivery("agent_started", run_id, True)
             else:
-                logger.error(f"🚨 EMISSION FAILED: agent_started send failed (run_id={run_id}, agent={agent_name})")
+                # PHASE 4 FIX: Stop silent failures - raise exception for critical events
+                error_msg = f"🚨 CRITICAL: agent_started delivery failed after {max_retries} attempts (run_id={run_id}, agent={agent_name})"
+                logger.critical(error_msg)
                 if hasattr(self, '_track_event_delivery'):
                     await self._track_event_delivery("agent_started", run_id, False)
+                
+                # PHASE 4 FIX: Raise exception to stop silent execution
+                raise RuntimeError(f"CRITICAL event delivery failure: {error_msg}. Last error: {last_error}")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_started failed (run_id={run_id}, agent={agent_name}): {e}")
-            # PHASE 4 FIX: Propagate critical errors instead of silent failure
+            # PHASE 4 FIX: Enhanced error logging for debugging concurrent user issues
+            effective_user_context = user_context or self.user_context
+            user_id_info = effective_user_context.user_id if effective_user_context else 'unknown'
+            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_started failed (run_id={run_id}, agent={agent_name}, user_id={user_id_info}): {e}")
+            
+            # PHASE 4 FIX: Propagate critical errors instead of silent failure  
             if "CRITICAL" in str(e) or "user_id" in str(e).lower():
+                logger.critical(f"🚨 CRITICAL WebSocket routing error for run_id={run_id}, agent={agent_name}: {e}")
                 raise  # Don't allow critical routing errors to fail silently
+            
             return False
     
     async def notify_agent_thinking(
@@ -1326,8 +1425,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
             user_id = effective_user_context.user_id
             
-            # PHASE 1 FIX: Direct WebSocket emission using user_id
-            success = await self._websocket_manager.send_to_user(user_id, notification)
+            # PHASE 4 FIX: Use centralized retry logic for critical events
+            success = await self._send_with_retry(user_id, notification, "agent_thinking", run_id)
             
             # PHASE 2 FIX: Update delivery tracking
             if event_id:
@@ -1440,8 +1539,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
             user_id = effective_user_context.user_id
             
-            # PHASE 1 FIX: Direct WebSocket emission using user_id
-            success = await self._websocket_manager.send_to_user(user_id, notification)
+            # PHASE 4 FIX: Use centralized retry logic for critical events
+            success = await self._send_with_retry(user_id, notification, "tool_executing", run_id)
             
             # PHASE 2 FIX: Update delivery tracking
             if tracker_event_id:
@@ -1573,8 +1672,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
             user_id = effective_user_context.user_id
             
-            # PHASE 1 FIX: Direct WebSocket emission using user_id
-            success = await self._websocket_manager.send_to_user(user_id, notification)
+            # PHASE 4 FIX: Use centralized retry logic for critical events
+            success = await self._send_with_retry(user_id, notification, "tool_completed", run_id)
             
             # PHASE 2 FIX: Update delivery tracking
             if tracker_event_id:
@@ -1696,8 +1795,8 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
             user_id = effective_user_context.user_id
             
-            # PHASE 1 FIX: Direct WebSocket emission using user_id - CRITICAL EVENT
-            success = await self._websocket_manager.send_to_user(user_id, notification)
+            # PHASE 4 FIX: Use centralized retry logic for critical events - CRITICAL EVENT
+            success = await self._send_with_retry(user_id, notification, "agent_completed", run_id)
             
             # PHASE 2 FIX: Update delivery tracking
             if event_id:
