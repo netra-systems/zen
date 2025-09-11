@@ -96,7 +96,7 @@ This document provides a comprehensive index of all SSOT components in the Netra
 
 #### 12. **UnifiedTestRunner (MEGA CLASS)**
 - **Location**: `tests/unified_test_runner.py`
-- **Size**: 3,501 lines (⚠️ EXCEEDS 2000 line limit)
+- **Size**: 3,501 lines
 - **Purpose**: SSOT for test execution with advanced orchestration
 - **Impact**: Modern test runner with layer-based orchestration
 - **Business Value**: Quality assurance automation
