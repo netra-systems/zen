@@ -715,3 +715,21 @@ async def user_execution_engine(context: UserExecutionContext) -> AsyncGenerator
     factory = await get_execution_engine_factory()
     async with factory.user_execution_scope(context) as engine:
         yield engine
+
+
+# COMPATIBILITY ALIAS: Provide create_request_scoped_engine for backward compatibility
+async def create_request_scoped_engine(context: UserExecutionContext) -> UserExecutionEngine:
+    """Create request-scoped execution engine - compatibility alias for create_for_user.
+    
+    Args:
+        context: User execution context
+        
+    Returns:
+        UserExecutionEngine: Isolated engine for the user
+        
+    Note:
+        This is a compatibility alias. Use create_for_user() or user_execution_scope() 
+        context manager for new code.
+    """
+    factory = await get_execution_engine_factory()
+    return await factory.create_for_user(context)
