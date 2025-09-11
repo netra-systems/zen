@@ -12,6 +12,7 @@ from typing import Optional
 
 from sqlalchemy import JSON, Boolean, DateTime, Integer, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 class Base(DeclarativeBase):
     """Declarative base class for auth service models using SQLAlchemy 2.0 patterns."""
@@ -22,7 +23,7 @@ class AuthUser(Base):
     __tablename__ = "auth_users"
     
     # Primary key
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: UnifiedIdGenerator.generate_base_id("auth_user"))
     
     # Core user fields
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
@@ -51,7 +52,7 @@ class AuthUser(Base):
         """Initialize with proper defaults for testing compatibility."""
         # Set Python-level defaults before calling super().__init__
         if 'id' not in kwargs:
-            kwargs['id'] = str(uuid.uuid4())
+            kwargs['id'] = UnifiedIdGenerator.generate_base_id("auth_user")
         if 'auth_provider' not in kwargs:
             kwargs['auth_provider'] = "local"
         if 'is_active' not in kwargs:
@@ -67,7 +68,7 @@ class AuthSession(Base):
     """Active session tracking"""
     __tablename__ = "auth_sessions"
     
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: UnifiedIdGenerator.generate_base_id("auth_session"))
     user_id: Mapped[str] = mapped_column(String, index=True)
     refresh_token_hash: Mapped[Optional[str]] = mapped_column(String)
     
@@ -88,7 +89,7 @@ class AuthSession(Base):
     def __init__(self, **kwargs):
         """Initialize with proper defaults for testing compatibility."""
         if 'id' not in kwargs:
-            kwargs['id'] = str(uuid.uuid4())
+            kwargs['id'] = UnifiedIdGenerator.generate_base_id("auth_session")
         if 'is_active' not in kwargs:
             kwargs['is_active'] = True
         
@@ -98,7 +99,7 @@ class AuthAuditLog(Base):
     """Audit log for authentication events"""
     __tablename__ = "auth_audit_logs"
     
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: UnifiedIdGenerator.generate_base_id("auth_audit_log"))
     event_type: Mapped[str] = mapped_column(String, index=True)
     user_id: Mapped[Optional[str]] = mapped_column(String, index=True)
     
@@ -117,7 +118,7 @@ class AuthAuditLog(Base):
     def __init__(self, **kwargs):
         """Initialize with proper defaults for testing compatibility."""
         if 'id' not in kwargs:
-            kwargs['id'] = str(uuid.uuid4())
+            kwargs['id'] = UnifiedIdGenerator.generate_base_id("auth_audit_log")
         
         super().__init__(**kwargs)
 
@@ -125,7 +126,7 @@ class PasswordResetToken(Base):
     """Password reset token tracking"""
     __tablename__ = "password_reset_tokens"
     
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: UnifiedIdGenerator.generate_base_id("password_reset_token"))
     user_id: Mapped[str] = mapped_column(String, index=True)
     token_hash: Mapped[str] = mapped_column(String, unique=True)
     email: Mapped[str] = mapped_column(String, index=True)
@@ -141,7 +142,7 @@ class PasswordResetToken(Base):
     def __init__(self, **kwargs):
         """Initialize with proper defaults for testing compatibility."""
         if 'id' not in kwargs:
-            kwargs['id'] = str(uuid.uuid4())
+            kwargs['id'] = UnifiedIdGenerator.generate_base_id("password_reset_token")
         if 'is_used' not in kwargs:
             kwargs['is_used'] = False
         

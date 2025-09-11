@@ -17,7 +17,7 @@ import pytest
 from typing import Dict, List
 from unittest.mock import MagicMock, AsyncMock, Mock, patch
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.database_connector import DatabaseConnector, ConnectionStatus, DatabaseType

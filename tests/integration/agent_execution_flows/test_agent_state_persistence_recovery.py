@@ -23,7 +23,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 from netra_backend.app.services.state_persistence import StatePersistenceService
 
 
@@ -45,7 +45,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         persistence_service = StatePersistenceService()
         # The service is already configured with Redis, PostgreSQL, and ClickHouse via dependency injection
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             persistence_service=persistence_service
         )
@@ -140,7 +140,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
         }
         
         # Create new state tracker (simulates restart)
-        new_state_tracker = AgentStateTracker(
+        new_state_tracker = AgentExecutionTracker(
             user_context=user_context,
             persistence_service=persistence_service
         )
@@ -198,7 +198,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             cross_session_enabled=True
         )
         
-        state_tracker_session_1 = AgentStateTracker(
+        state_tracker_session_1 = AgentExecutionTracker(
             user_context=session_1_context,
             persistence_service=persistence_service
         )
@@ -252,7 +252,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             workspace_id="continuity_workspace_1001"  # Same workspace
         )
         
-        state_tracker_session_2 = AgentStateTracker(
+        state_tracker_session_2 = AgentExecutionTracker(
             user_context=session_2_context,
             persistence_service=persistence_service
         )
@@ -332,7 +332,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             auto_repair=True
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             persistence_service=persistence_service
         )
@@ -458,7 +458,7 @@ class TestAgentStatePersistenceRecovery(BaseIntegrationTest):
             disaster_recovery_enabled=True
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             persistence_service=persistence_service
         )

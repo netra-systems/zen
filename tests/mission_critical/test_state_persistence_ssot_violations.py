@@ -183,7 +183,7 @@ class TestStatePersistenceModuleStructure(SSotBaseTestCase):
             pass
             
         try:
-            from netra_backend.app.services.state_cache_manager import state_cache_manager  
+            from netra_backend.app.services.state_persistence import state_cache_manager  
             existing_services.append("state_cache_manager")
         except ImportError:
             pass

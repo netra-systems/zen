@@ -4,7 +4,7 @@ import pytest
 from decimal import Decimal
 from unittest.mock import AsyncMock, Mock, patch
 from netra_backend.app.services.analytics.cost_tracker import CostTracker
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 
 

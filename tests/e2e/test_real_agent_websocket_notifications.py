@@ -298,8 +298,16 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
         user_id = user_id or self.test_user_id
         
         if WEBSOCKET_SERVICES_AVAILABLE and not simulate_failures:
+            # Create mock emitter and execution context for WebSocketNotifier
+            from unittest.mock import AsyncMock, MagicMock
+            mock_emitter = AsyncMock()
+            mock_exec_context = MagicMock()
+            mock_exec_context.user_id = "test-user-123"
+            mock_exec_context.thread_id = "test-thread-456"
+            mock_exec_context.run_id = "test-run-789"
+            
             # Use real WebSocketNotifier
-            notifier = WebSocketNotifier.create_for_user()
+            notifier = WebSocketNotifier.create_for_user(mock_emitter, mock_exec_context)
             # Hook into notifier to capture events
             original_send = notifier.send_to_user
             

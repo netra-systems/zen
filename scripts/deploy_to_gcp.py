@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
-DEPRECATION WARNING: This deployment script is deprecated in favor of UnifiedTestRunner SSOT.
+DEPRECATION WARNING: This deployment script is deprecated.
 
-This GCP deployment script now redirects to the unified test runner's deployment mode
-to maintain SSOT compliance while preserving all existing deployment functionality.
-
-CRITICAL: Please migrate to using the unified test runner directly:
-    python tests/unified_test_runner.py --execution-mode deploy --project netra-staging --build-local
+CRITICAL: The OFFICIAL deployment script is now scripts/deploy_to_gcp_actual.py
 
 Migration Path:
     OLD: python scripts/deploy_to_gcp.py --project netra-staging --build-local
-    NEW: python tests/unified_test_runner.py --execution-mode deploy --project netra-staging --build-local
+    NEW: python scripts/deploy_to_gcp_actual.py --project netra-staging --build-local
 
-All original flags and options are preserved and forwarded to the SSOT implementation.
+All original flags and options are preserved in the new script.
+
+WARNING: The UnifiedTestRunner does NOT have deployment functionality.
+This script will redirect to the actual deployment script for compatibility.
 """
 
 import sys
@@ -24,12 +23,12 @@ import os
 
 def show_deprecation_warning():
     """Show deprecation warning to users."""
-    print("WARNING: DEPRECATION WARNING")
+    print("WARNING: DEPLOYMENT SCRIPT DEPRECATED")
     print("=" * 70)
     print("This GCP deployment script is deprecated.")
-    print("Please migrate to UnifiedTestRunner SSOT:")
+    print("Please migrate to the official deployment script:")
     print()
-    print("  NEW: python tests/unified_test_runner.py --execution-mode deploy")
+    print("  NEW: python scripts/deploy_to_gcp_actual.py")
     print()
     print("All deployment functionality preserved. Redirecting...")
     print("=" * 70)
@@ -67,19 +66,16 @@ def main():
     
     # Get project root
     project_root = Path(__file__).parent.parent
-    unified_runner = project_root / "tests" / "unified_test_runner.py"
+    actual_deploy_script = project_root / "scripts" / "deploy_to_gcp_actual.py"
     
-    if not unified_runner.exists():
-        print(f"ERROR: UnifiedTestRunner not found at {unified_runner}")
-        print("Falling back to original deployment script...")
-        return execute_fallback_deployment()
+    if not actual_deploy_script.exists():
+        print(f"ERROR: Official deployment script not found at {actual_deploy_script}")
+        print("Please check that scripts/deploy_to_gcp_actual.py exists")
+        sys.exit(1)
     
     try:
-        # Build unified test runner command with deployment mode
-        cmd = [
-            sys.executable, str(unified_runner),
-            "--execution-mode", "deploy"
-        ]
+        # Build command for actual deployment script
+        cmd = [sys.executable, str(actual_deploy_script)]
         
         # Forward all deployment arguments
         if args.project:
@@ -108,57 +104,23 @@ def main():
         # Add any unknown arguments
         cmd.extend(unknown_args)
         
-        print(f"Executing deployment via UnifiedTestRunner:")
+        print(f"Redirecting to official deployment script:")
         print(f"   {' '.join(cmd)}")
         print()
         
-        # Execute unified test runner in deployment mode
+        # Execute actual deployment script
         result = subprocess.run(cmd, cwd=project_root)
         
         # Preserve original exit code behavior
         sys.exit(result.returncode)
         
     except Exception as e:
-        print(f"ERROR: Failed to execute UnifiedTestRunner deployment: {e}")
-        print("Falling back to original deployment script...")
-        return execute_fallback_deployment()
-
-
-def execute_fallback_deployment():
-    """Execute original deployment script as fallback."""
-    try:
-        # Import and execute original functionality as fallback
-        project_root = Path(__file__).parent.parent
-        
-        # Import the backed up original implementation
-        backup_file = Path(__file__).parent / "deploy_to_gcp.py.backup"
-        if backup_file.exists():
-            print("Using backup deployment implementation...")
-            
-            # Add project root to path
-            sys.path.insert(0, str(project_root))
-            
-            import importlib.util
-            spec = importlib.util.spec_from_file_location("deploy_backup", backup_file)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            
-            # Execute main from backup with original arguments
-            # Reset sys.argv to original arguments for the backup script
-            original_argv = sys.argv[:]
-            original_argv[0] = str(backup_file)  # Update script name
-            sys.argv = original_argv
-            
-            module.main()
-        else:
-            print("CRITICAL: No backup available for deployment script")
-            print("Please restore original deploy_to_gcp.py or use manual deployment")
-            sys.exit(1)
-            
-    except Exception as fallback_error:
-        print(f"CRITICAL: Fallback deployment failed: {fallback_error}")
-        print("Manual deployment required. Check GCP console.")
+        print(f"ERROR: Failed to execute official deployment script: {e}")
+        print("Please run the deployment script directly:")
+        print(f"   python scripts/deploy_to_gcp_actual.py {' '.join(sys.argv[1:])}")
         sys.exit(1)
+
+
 
 
 if __name__ == "__main__":

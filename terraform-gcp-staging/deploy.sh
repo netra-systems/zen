@@ -108,7 +108,7 @@ python3 migrate.py \
 # Step 7: Update application deployment
 echo -e "\n${YELLOW}Step 7: Updating application deployment...${NC}"
 cd ..
-python3 scripts/deploy_to_gcp.py --project ${PROJECT_ID} --build-local --run-checks
+python3 scripts/deploy_to_gcp_actual.py --project ${PROJECT_ID} --build-local --run-checks
 
 # Step 8: Run tests
 echo -e "\n${YELLOW}Step 8: Running integration tests...${NC}"

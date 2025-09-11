@@ -19,6 +19,7 @@ import jwt
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.core.jwt_cache import jwt_validation_cache
 from shared.isolated_environment import get_env
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 # Disable Redis dependency for microservice independence
 # from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 auth_redis_manager = None  # Temporarily disabled
@@ -379,7 +380,7 @@ class JWTHandler:
             "type": token_type,        # Add new field for tests that expect it
             "iss": "netra-auth-service",  # Issuer claim
             "aud": self._get_audience_for_token_type(token_type),  # Enhanced audience
-            "jti": str(uuid.uuid4()),     # JWT ID for replay protection
+            "jti": UnifiedIdGenerator.generate_base_id("jti"),     # JWT ID for replay protection
             "env": AuthConfig.get_environment(),  # Environment binding
             "svc_id": self.service_id      # Service instance ID
         }

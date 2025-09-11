@@ -35,7 +35,7 @@ from netra_backend.app.services.startup_fixes_validator import (
 )
 
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from shared.isolated_environment import IsolatedEnvironment
 
 

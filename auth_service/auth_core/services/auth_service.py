@@ -18,6 +18,7 @@ from argon2.exceptions import VerifyMismatchError
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from shared.isolated_environment import get_env
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 # SSOT: Import SERVICE_ID constant
 from shared.constants.service_identifiers import SERVICE_ID
 # Session manager module was deleted - using direct functionality
@@ -89,8 +90,7 @@ class AuthService:
         
     def create_session(self, user_id: str, user_data: Dict) -> str:
         """Create a new user session."""
-        import uuid
-        session_id = str(uuid.uuid4())
+        session_id = UnifiedIdGenerator.generate_base_id("session")
         self._sessions[session_id] = {
             'user_id': user_id,
             'user_data': user_data,
@@ -229,8 +229,7 @@ class AuthService:
                 if email in self._test_users:
                     return None
                 
-                import uuid
-                user_id = str(uuid.uuid4())
+                user_id = UnifiedIdGenerator.generate_base_id("user")
                 password_hash = self.password_hasher.hash(password)
                 
                 self._test_users[email] = {
@@ -385,13 +384,11 @@ class AuthService:
     
     def register_test_user(self, email: str, password: str) -> Dict:
         """Register a test user in memory"""
-        import uuid
-        
         # Check if user already exists - follow business rules and raise error for duplicates
         if email in self._test_users:
             raise ValueError("User with this email already registered")
         
-        user_id = str(uuid.uuid4())
+        user_id = UnifiedIdGenerator.generate_base_id("user")
         
         # Hash password using existing password_hasher for consistency with authenticate_user
         password_hash = self.password_hasher.hash(password)

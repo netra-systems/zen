@@ -136,7 +136,8 @@ class ExecutionEngine:
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
-    AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
+    # SSOT COMPLIANCE: Timeout logic moved to AgentExecutionTracker
+    # AGENT_EXECUTION_TIMEOUT = 30.0  # DEPRECATED - Use AgentExecutionTracker.get_timeout_config()
     
     def __init__(self, registry: 'AgentRegistry', websocket_bridge, 
                  user_context: Optional['UserExecutionContext'] = None):
@@ -420,7 +421,7 @@ class ExecutionEngine:
             agent_name=context.agent_name,
             thread_id=context.thread_id,
             user_id=context.user_id,
-            timeout_seconds=int(self.AGENT_EXECUTION_TIMEOUT),
+            timeout_seconds=int(self.execution_tracker.get_default_timeout()),
             metadata={'run_id': context.run_id, 'context': context.metadata}
         )
         
@@ -489,9 +490,9 @@ class ExecutionEngine:
                 )
                 
                 # Execute with timeout and death monitoring
-                result = await asyncio.wait_for(
-                    self._execute_with_death_monitoring(context, effective_user_context, execution_id),
-                    timeout=self.AGENT_EXECUTION_TIMEOUT
+                # SSOT COMPLIANCE: Delegate timeout execution to AgentExecutionTracker
+                result = await self._execute_with_ssot_timeout(
+                    self._execute_with_death_monitoring(context, effective_user_context, execution_id)
                 )
                 
                 execution_time = time.time() - execution_start
@@ -522,9 +523,11 @@ class ExecutionEngine:
                 return result
                     
             except asyncio.TimeoutError:
+                # SSOT COMPLIANCE: Get timeout from AgentExecutionTracker
+                timeout_seconds = self.execution_tracker.get_default_timeout()
                 # LOUD ERROR: Agent timeout is critical for user experience
                 logger.critical(
-                    f"AGENT TIMEOUT CRITICAL: {context.agent_name} timed out after {self.AGENT_EXECUTION_TIMEOUT}s "
+                    f"AGENT TIMEOUT CRITICAL: {context.agent_name} timed out after {timeout_seconds}s "
                     f"for user {context.user_id} (run_id: {context.run_id}). "
                     f"User will experience failed request or blank screen."
                 )
@@ -533,12 +536,12 @@ class ExecutionEngine:
                 # Mark execution as timed out
                 self.execution_tracker.update_execution_state(
                     execution_id, ExecutionState.TIMEOUT,
-                    error=f"Execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s"
+                    error=f"Execution timed out after {timeout_seconds}s"
                 )
                 
                 # ENHANCED: Notify user of timeout with user-friendly message
                 try:
-                    await self._notify_user_of_timeout(context, self.AGENT_EXECUTION_TIMEOUT)
+                    await self._notify_user_of_timeout(context, timeout_seconds)
                 except Exception as notify_error:
                     logger.critical(
                         f"TIMEOUT NOTIFICATION FAILED: Could not notify user {context.user_id} "
@@ -550,7 +553,7 @@ class ExecutionEngine:
                     context.run_id,
                     context.agent_name,
                     'timeout',
-                    {'execution_id': execution_id, 'timeout': self.AGENT_EXECUTION_TIMEOUT}
+                    {'execution_id': execution_id, 'timeout': timeout_seconds}
                 )
                 timeout_result = self._create_timeout_result(context)
                 await self._send_completion_for_failed_execution(context, timeout_result, effective_user_context)
@@ -1262,18 +1265,41 @@ class ExecutionEngine:
         return getattr(context, 'flow_id', None)
     
     # ============================================================================
+    # SSOT COMPLIANCE: Timeout Delegation Methods
+    # ============================================================================
+    
+    async def _execute_with_ssot_timeout(self, coro):
+        """Execute coroutine with timeout managed by AgentExecutionTracker."""
+        # SSOT COMPLIANCE: All timeout logic delegated to AgentExecutionTracker
+        # Use the same timeout configuration as AgentExecutionTracker
+        default_timeout = self.execution_tracker.timeout_config.agent_execution_timeout
+        try:
+            import asyncio
+            return await asyncio.wait_for(coro, timeout=default_timeout)
+        except asyncio.TimeoutError:
+            # Re-raise as the same exception type for backward compatibility
+            raise asyncio.TimeoutError()
+    
+    def _get_ssot_timeout_duration(self):
+        """Get timeout duration from AgentExecutionTracker."""
+        # SSOT COMPLIANCE: Timeout values from AgentExecutionTracker only
+        return self.execution_tracker.timeout_config.agent_execution_timeout
+    
+    # ============================================================================
     # CONCURRENCY OPTIMIZATION: Error and Timeout Handling
     # ============================================================================
     
     def _create_timeout_result(self, context: AgentExecutionContext) -> AgentExecutionResult:
         """Create result for timed out execution."""
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
+        # SSOT COMPLIANCE: Get timeout from AgentExecutionTracker
+        timeout_seconds = self.execution_tracker.get_default_timeout()
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            duration=self.AGENT_EXECUTION_TIMEOUT,
-            error=f"Agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-            metadata={'timeout': True, 'timeout_duration': self.AGENT_EXECUTION_TIMEOUT}
+            duration=timeout_seconds,
+            error=f"Agent execution timed out after {timeout_seconds}s",
+            metadata={'timeout': True, 'timeout_duration': timeout_seconds}
         )
     
     def _create_error_result(self, context: AgentExecutionContext, error: Exception) -> AgentExecutionResult:
@@ -1563,7 +1589,7 @@ def create_request_scoped_engine(user_context: 'UserExecutionContext',
 def create_execution_context_manager(registry: 'AgentRegistry',
                                     websocket_bridge: 'AgentWebSocketBridge',
                                     max_concurrent_per_request: int = 3,
-                                    execution_timeout: float = 30.0) -> 'ExecutionContextManager':
+                                    execution_timeout: Optional[float] = None) -> 'ExecutionContextManager':
     """Factory method to create ExecutionContextManager for request-scoped management.
     
     RECOMMENDED: Use this for managing multiple agent executions within a request scope.
@@ -1572,7 +1598,7 @@ def create_execution_context_manager(registry: 'AgentRegistry',
         registry: Agent registry for agent lookup
         websocket_bridge: WebSocket bridge for event emission
         max_concurrent_per_request: Maximum concurrent executions per request
-        execution_timeout: Execution timeout in seconds
+        execution_timeout: Execution timeout in seconds (default: uses AgentExecutionTracker config)
         
     Returns:
         ExecutionContextManager: Context manager for request-scoped execution
@@ -1594,6 +1620,12 @@ def create_execution_context_manager(registry: 'AgentRegistry',
     )
     
     logger.info("Creating ExecutionContextManager for request-scoped execution management")
+    
+    # SSOT COMPLIANCE: Use AgentExecutionTracker for timeout management
+    # If no timeout specified, let AgentExecutionTracker provide the default
+    if execution_timeout is None:
+        from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
+        execution_timeout = get_execution_tracker().get_default_timeout()
     
     return ExecutionContextManager(
         registry=registry,
