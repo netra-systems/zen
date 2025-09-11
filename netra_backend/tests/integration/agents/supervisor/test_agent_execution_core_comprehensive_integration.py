@@ -359,7 +359,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         """Test multi-user isolation during concurrent agent execution."""
         # BUSINESS VALUE: Ensure user data isolation for enterprise security
         
-        # Setup: Multiple user contexts
+        # Setup: Multiple isolated user contexts
         user1_context = AgentExecutionContext(
             run_id=str(uuid4()),
             thread_id="thread_1",
@@ -367,10 +367,13 @@ class TestAgentExecutionCoreComprehensiveIntegration:
             agent_name="isolation_test_agent",
             correlation_id="user1_correlation"
         )
-        user1_state = DeepAgentState()
-        user1_state.user_id = "user_1"
-        user1_state.chat_thread_id = "thread_1" 
-        user1_state.context_tracking = {"user_data": "sensitive_user1_data"}
+        user1_execution_context = UserExecutionContext.from_request(
+            user_id="user_1",
+            thread_id="thread_1",
+            run_id=user1_context.run_id,
+            agent_context={"user_data": "sensitive_user1_data"},
+            audit_metadata={"isolation_test": "user1", "security_level": "strict"}
+        )
         
         user2_context = AgentExecutionContext(
             run_id=str(uuid4()),
@@ -379,34 +382,42 @@ class TestAgentExecutionCoreComprehensiveIntegration:
             agent_name="isolation_test_agent", 
             correlation_id="user2_correlation"
         )
-        user2_state = DeepAgentState()
-        user2_state.user_id = "user_2"
-        user2_state.chat_thread_id = "thread_2"
-        user2_state.context_tracking = {"user_data": "sensitive_user2_data"}
+        user2_execution_context = UserExecutionContext.from_request(
+            user_id="user_2",
+            thread_id="thread_2",
+            run_id=user2_context.run_id,
+            agent_context={"user_data": "sensitive_user2_data"},
+            audit_metadata={"isolation_test": "user2", "security_level": "strict"}
+        )
         
-        # Setup: Agent that tracks user contexts
+        # Setup: Agent that tracks user contexts and validates isolation
         class IsolationTestAgent(MockAgent):
             def __init__(self):
                 super().__init__("isolation_test_agent")
                 self.user_contexts_seen = []
                 
-            async def execute(self, state: DeepAgentState, run_id: str, should_return_result: bool = True):
+            async def execute(self, context: UserExecutionContext, run_id: str, should_return_result: bool = True):
+                # Validate context isolation before processing
+                validate_user_context(context)
+                context.verify_isolation()
+                
                 self.user_contexts_seen.append({
-                    "user_id": state.user_id,
-                    "thread_id": state.chat_thread_id,
+                    "user_id": context.user_id,
+                    "thread_id": context.thread_id,
                     "run_id": run_id,
-                    "user_data": state.context_tracking.get("user_data")
+                    "user_data": context.agent_context.get("user_data"),
+                    "request_id": context.request_id  # Additional isolation tracking
                 })
                 await asyncio.sleep(0.1)  # Small delay to test concurrency
-                return await super().execute(state, run_id, should_return_result)
+                return await super().execute(context, run_id, should_return_result)
         
         isolation_agent = IsolationTestAgent()
         mock_registry.register("isolation_test_agent", isolation_agent)
         
-        # Execute: Concurrent execution for multiple users
+        # Execute: Concurrent execution for multiple users with isolated contexts
         tasks = [
-            execution_core.execute_agent(user1_context, user1_state, timeout=5.0),
-            execution_core.execute_agent(user2_context, user2_state, timeout=5.0)
+            execution_core.execute_agent(user1_context, user1_execution_context, timeout=5.0),
+            execution_core.execute_agent(user2_context, user2_execution_context, timeout=5.0)
         ]
         results = await asyncio.gather(*tasks)
         
@@ -426,8 +437,9 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         assert user1_execution["user_data"] == "sensitive_user1_data"
         assert user2_execution["user_data"] == "sensitive_user2_data"
         assert user1_execution["thread_id"] != user2_execution["thread_id"]
+        assert user1_execution["request_id"] != user2_execution["request_id"]  # Additional isolation check
         
-        # Verify: Separate WebSocket events for each user
+        # Verify: Separate WebSocket events for each user (complete isolation)
         user1_events = [n for n in mock_websocket_bridge.notifications 
                        if n.get("run_id") == str(user1_context.run_id)]
         user2_events = [n for n in mock_websocket_bridge.notifications 
@@ -436,8 +448,14 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         assert len(user1_events) >= 2  # At least started and completed
         assert len(user2_events) >= 2  # At least started and completed
         
+        # Verify no event cross-contamination
+        for event in user1_events:
+            assert "user_2" not in str(event), f"User 1 event contains user 2 data: {event}"
+        for event in user2_events:
+            assert "user_1" not in str(event), f"User 2 event contains user 1 data: {event}"
+        
     async def test_timeout_protection_integration(
-        self, execution_core, mock_registry, agent_context, agent_state
+        self, execution_core, mock_registry, agent_context, enhanced_user_context
     ):
         """Test timeout protection prevents hung agents in integration scenario."""
         # BUSINESS VALUE: Prevent hung processes that degrade user experience  
@@ -451,7 +469,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         start_time = time.time()
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=agent_state,
+            state=enhanced_user_context,
             timeout=0.5  # Short timeout
         )
         end_time = time.time()
@@ -464,7 +482,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         
     async def test_error_boundary_integration(
         self, execution_core, mock_registry, mock_websocket_bridge,
-        agent_context, agent_state
+        agent_context, enhanced_user_context
     ):
         """Test error boundary integration handles agent failures gracefully."""
         # BUSINESS VALUE: Graceful error handling maintains user trust
@@ -477,7 +495,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run error-prone agent
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=agent_state,
+            state=enhanced_user_context,
             timeout=5.0
         )
         
@@ -493,17 +511,20 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         
     async def test_websocket_event_integration_complete_flow(
         self, execution_core, mock_registry, mock_websocket_bridge,
-        agent_context, agent_state
+        agent_context, enhanced_user_context
     ):
         """Test complete WebSocket event integration flow with all event types."""
         # BUSINESS VALUE: Real-time user feedback prevents abandonment
         
-        # Setup: Agent with realistic execution pattern
+        # Setup: Agent with realistic execution pattern and proper context isolation
         class WebSocketIntegrationAgent(MockAgent):
             def __init__(self):
                 super().__init__("websocket_agent")
                 
-            async def execute(self, state: DeepAgentState, run_id: str, should_return_result: bool = True):
+            async def execute(self, context: UserExecutionContext, run_id: str, should_return_result: bool = True):
+                # Validate context isolation at the start of execution
+                validate_user_context(context)
+                
                 # Simulate multi-step execution that would generate WebSocket events
                 await asyncio.sleep(0.05)  # Initial processing
                 
@@ -518,7 +539,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
                     )
                 
                 await asyncio.sleep(0.05)  # Tool execution simulation
-                return await super().execute(state, run_id, should_return_result)
+                return await super().execute(context, run_id, should_return_result)
         
         ws_agent = WebSocketIntegrationAgent()
         mock_registry.register("websocket_agent", ws_agent)
@@ -527,7 +548,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run agent with full WebSocket integration
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=agent_state,
+            state=enhanced_user_context,
             timeout=5.0
         )
         
@@ -561,7 +582,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
                 assert notification["trace_context"] is not None or notification["trace_context"] is None
     
     async def test_execution_tracker_integration(
-        self, execution_core, mock_registry, agent_context, agent_state
+        self, execution_core, mock_registry, agent_context, enhanced_user_context
     ):
         """Test execution tracker integration for monitoring and metrics.""" 
         # BUSINESS VALUE: Execution monitoring enables performance optimization
@@ -586,7 +607,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
             
             result = await execution_core.execute_agent(
                 context=agent_context,
-                state=agent_state,
+                state=enhanced_user_context,
                 timeout=5.0
             )
         
@@ -602,12 +623,12 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Verify: Registration included proper context
         register_call = mock_tracker.register_execution.call_args
         assert register_call[1]["agent_name"] == "tracked_agent"
-        assert register_call[1]["user_id"] == agent_state.user_id
-        assert register_call[1]["thread_id"] == agent_state.chat_thread_id
+        assert register_call[1]["user_id"] == enhanced_user_context.user_id
+        assert register_call[1]["thread_id"] == enhanced_user_context.thread_id
         assert register_call[1]["timeout_seconds"] == 5.0
         
     async def test_trace_context_propagation_integration(
-        self, execution_core, mock_registry, agent_context, agent_state
+        self, execution_core, mock_registry, agent_context, enhanced_user_context
     ):
         """Test trace context propagation across integration boundaries."""
         # BUSINESS VALUE: Distributed tracing enables debugging and monitoring
@@ -629,7 +650,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run with trace context propagation
         result = await execution_core.execute_agent(
             context=agent_context, 
-            state=agent_state,
+            state=enhanced_user_context,
             timeout=5.0
         )
         
@@ -639,13 +660,13 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Verify: Trace context was propagated to agent
         assert trace_agent.received_trace_context is not None
         assert isinstance(trace_agent.received_trace_context, UnifiedTraceContext)
-        assert trace_agent.received_trace_context.user_id == agent_state.user_id
-        assert trace_agent.received_trace_context.thread_id == agent_state.chat_thread_id
+        assert trace_agent.received_trace_context.user_id == enhanced_user_context.user_id
+        assert trace_agent.received_trace_context.thread_id == enhanced_user_context.thread_id
         assert trace_agent.received_trace_context.correlation_id == agent_context.correlation_id
         
     async def test_agent_not_found_integration(
         self, execution_core, mock_registry, mock_websocket_bridge,
-        agent_context, agent_state
+        agent_context, enhanced_user_context
     ):
         """Test integration behavior when agent is not found in registry."""
         # BUSINESS VALUE: Proper error handling when agents are misconfigured
@@ -656,7 +677,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Try to run non-existent agent
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=agent_state,
+            state=enhanced_user_context,
             timeout=5.0
         )
         
@@ -673,7 +694,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         assert "Agent nonexistent_agent not found" in error_events[0]["error"]
         
     async def test_performance_metrics_integration(
-        self, execution_core, mock_registry, agent_context, agent_state
+        self, execution_core, mock_registry, agent_context, enhanced_user_context
     ):
         """Test performance metrics collection integration."""
         # BUSINESS VALUE: Performance monitoring enables system optimization
@@ -686,7 +707,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run with performance monitoring
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=agent_state, 
+            state=enhanced_user_context, 
             timeout=5.0
         )
         
