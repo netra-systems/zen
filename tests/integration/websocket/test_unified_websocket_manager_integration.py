@@ -232,13 +232,13 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         conn_1 = self.create_mock_connection(self.test_user_id_1)
         conn_2 = self.create_mock_connection(self.test_user_id_2)
         
-        connection_info_1 = ConnectionInfo(
+        websocket_conn_1 = WebSocketConnection(
             connection_id=conn_1.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn_1,
             connected_at=datetime.now(timezone.utc)
         )
-        connection_info_2 = ConnectionInfo(
+        websocket_conn_2 = WebSocketConnection(
             connection_id=conn_2.connection_id,
             user_id=self.test_user_id_2,
             websocket=conn_2,
@@ -280,9 +280,9 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         user_ids = [ensure_user_id(f"concurrent_user_{i}") for i in range(num_concurrent_users)]
         connections = [self.create_mock_connection(user_id) for user_id in user_ids]
         
-        # Prepare connection info objects
-        connection_infos = [
-            ConnectionInfo(
+        # Prepare WebSocketConnection objects
+        websocket_connections = [
+            WebSocketConnection(
                 connection_id=conn.connection_id,
                 user_id=user_ids[i],
                 websocket=conn,
@@ -292,7 +292,7 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         ]
         
         # Add all connections concurrently (tests thread safety)
-        add_tasks = [manager.add_connection(info) for info in connection_infos]
+        add_tasks = [manager.add_connection(conn) for conn in websocket_connections]
         await asyncio.gather(*add_tasks)
         
         # Verify all connections were added successfully
@@ -331,14 +331,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Create connection for test user
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Get user connection lock
         lock = await manager._get_user_connection_lock(self.test_user_id_1)
@@ -375,18 +375,18 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Create connection for the isolated user
         conn_1 = self.create_mock_connection(self.test_user_id_1)
-        connection_info_1 = ConnectionInfo(
+        websocket_conn_1 = WebSocketConnection(
             connection_id=conn_1.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn_1,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info_1)
+        await manager.add_connection(websocket_conn_1)
         
         # Attempt to add connection for different user (should be isolated)
         conn_2 = self.create_mock_connection(self.test_user_id_2)
-        connection_info_2 = ConnectionInfo(
+        websocket_conn_2 = WebSocketConnection(
             connection_id=conn_2.connection_id,
             user_id=self.test_user_id_2,
             websocket=conn_2,
@@ -395,7 +395,7 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # In isolated mode, only the context user should be allowed
         try:
-            await manager.add_connection(connection_info_2)
+            await manager.add_connection(websocket_conn_2)
         except (ValueError, PermissionError):
             # Expected behavior - isolation prevents cross-user connections
             pass
@@ -431,14 +431,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up connection
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Send all 5 critical events in order
         critical_events = [
@@ -489,13 +489,13 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         # Set up all connections
         for user_id in user_ids:
             conn = self.create_mock_connection(user_id)
-            connection_info = ConnectionInfo(
+            websocket_conn = WebSocketConnection(
                 connection_id=conn.connection_id,
                 user_id=user_id,
                 websocket=conn,
                 connected_at=datetime.now(timezone.utc)
             )
-            await manager.add_connection(connection_info)
+            await manager.add_connection(websocket_conn)
             connections.append(conn)
             
         # Send high volume of events concurrently
@@ -540,14 +540,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up connection
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Send ordered sequence of events
         ordered_events = []
@@ -590,14 +590,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up initial connection
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Send initial events
         await manager.send_to_user(self.test_user_id_1, {
@@ -622,14 +622,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
             
         # Re-establish connection
         new_conn = self.create_mock_connection(self.test_user_id_1)
-        new_connection_info = ConnectionInfo(
+        new_websocket_conn = WebSocketConnection(
             connection_id=new_conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=new_conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(new_connection_info)
+        await manager.add_connection(new_websocket_conn)
         
         # Send recovery event
         await manager.send_to_user(self.test_user_id_1, {
@@ -663,21 +663,21 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         conn_1 = self.create_mock_connection(self.test_user_id_1) 
         conn_2 = self.create_mock_connection(self.test_user_id_2)
         
-        connection_info_1 = ConnectionInfo(
+        websocket_conn_1 = WebSocketConnection(
             connection_id=conn_1.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn_1,
             connected_at=datetime.now(timezone.utc)
         )
-        connection_info_2 = ConnectionInfo(
+        websocket_conn_2 = WebSocketConnection(
             connection_id=conn_2.connection_id,
             user_id=self.test_user_id_2,
             websocket=conn_2,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info_1)
-        await manager.add_connection(connection_info_2)
+        await manager.add_connection(websocket_conn_1)
+        await manager.add_connection(websocket_conn_2)
         
         # Send user-specific events
         await manager.send_to_user(self.test_user_id_1, {
@@ -721,14 +721,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Simulate Golden Path: User authentication and connection
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Simulate complete AI agent execution flow
         golden_path_events = [
@@ -820,7 +820,7 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
             conn = self.create_mock_connection(self.test_user_id_1)
             connections.append(conn)
             
-            connection_info = ConnectionInfo(
+            websocket_conn = WebSocketConnection(
                 connection_id=f"cloud_run_conn_{i}",
                 user_id=self.test_user_id_1,
                 websocket=conn,
@@ -870,14 +870,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up connection in emergency mode
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Send critical Golden Path events in emergency mode
         emergency_events = [
@@ -939,7 +939,7 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
             user_id = ensure_user_id(f"factory_test_user_{i}")
             conn = self.create_mock_connection(user_id)
             
-            connection_info = ConnectionInfo(
+            websocket_conn = WebSocketConnection(
                 connection_id=conn.connection_id,
                 user_id=user_id,
                 websocket=conn,
@@ -948,7 +948,7 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
             
             # This should not raise 1011 error or any validation errors
             try:
-                await manager.add_connection(connection_info)
+                await manager.add_connection(websocket_conn)
                 
                 # Send test event
                 await manager.send_to_user(user_id, {
@@ -982,14 +982,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up initial connection
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Send initial message successfully
         await manager.send_to_user(self.test_user_id_1, {
@@ -1018,14 +1018,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
             
         # Simulate connection recovery
         new_conn = self.create_mock_connection(self.test_user_id_1)
-        new_connection_info = ConnectionInfo(
+        new_websocket_conn = WebSocketConnection(
             connection_id=new_conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=new_conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(new_connection_info)
+        await manager.add_connection(new_websocket_conn)
         
         # Send recovery message
         await manager.send_to_user(self.test_user_id_1, {
@@ -1051,14 +1051,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up connection
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Simulate silent failure condition - connection appears open but doesn't receive messages
         original_send = conn.send
@@ -1113,14 +1113,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
             conn = self.create_mock_connection(ensure_user_id(f"circuit_test_user_{i}"))
             connections.append(conn)
             
-            connection_info = ConnectionInfo(
+            websocket_conn = WebSocketConnection(
                 connection_id=conn.connection_id,
                 user_id=conn.user_id,
                 websocket=conn,
                 connected_at=datetime.now(timezone.utc)
             )
             
-            await manager.add_connection(connection_info)
+            await manager.add_connection(websocket_conn)
             
         # Simulate failures on multiple connections to trigger circuit breaker
         for conn in connections[:2]:  # Fail first 2 connections
@@ -1174,7 +1174,7 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
             user_id = ensure_user_id(f"scale_user_{i}")
             conn = self.create_mock_connection(user_id)
             
-            connection_info = ConnectionInfo(
+            websocket_conn = WebSocketConnection(
                 connection_id=conn.connection_id,
                 user_id=user_id,
                 websocket=conn,
@@ -1235,14 +1235,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up test user
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Send high volume of events to measure latency
         num_events = 100
@@ -1300,14 +1300,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         
         # Set up connection
         conn = self.create_mock_connection(self.test_user_id_1)
-        connection_info = ConnectionInfo(
+        websocket_conn = WebSocketConnection(
             connection_id=conn.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn,
             connected_at=datetime.now(timezone.utc)
         )
         
-        await manager.add_connection(connection_info)
+        await manager.add_connection(websocket_conn)
         
         # Simulate extended AI chat session with many events
         initial_connection_count = len(manager._connections)

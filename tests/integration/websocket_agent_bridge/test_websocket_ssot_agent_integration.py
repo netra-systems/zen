@@ -19,12 +19,15 @@ Test should FAIL with broken imports, PASS after fix.
 import asyncio
 import json
 import uuid
+import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
 import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ThreadID
+
+logger = logging.getLogger(__name__)
 
 
 class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
@@ -45,7 +48,7 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
         
         try:
             # Import the websocket_ssot module which contains the broken imports
-            from netra_backend.app.routes.websocket_ssot import UnifiedWebSocketManager
+            from netra_backend.app.routes.websocket_ssot import EmergencyWebSocketManager
             
             # Create a mock user context
             mock_user_context = MagicMock()
@@ -53,7 +56,7 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
             mock_user_context.thread_id = self.thread_id
             
             # Create WebSocket manager instance
-            manager = UnifiedWebSocketManager()
+            manager = EmergencyWebSocketManager()
             
             # This should fail due to broken imports in the _setup_agent_handlers method
             with pytest.raises(ImportError) as exc_info:
@@ -64,12 +67,12 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
             assert "netra_backend.app.agents.agent_websocket_bridge" in error_msg, \
                 f"Expected import error for broken path, got: {error_msg}"
             
-            self.logger.critical(f"EXPECTED FAILURE: Agent handler setup failed due to broken import: {error_msg}")
+            logger.critical(f"EXPECTED FAILURE: Agent handler setup failed due to broken import: {error_msg}")
             
         except ImportError as e:
             if "netra_backend.app.agents.agent_websocket_bridge" in str(e):
                 # This is the expected failure we're testing for
-                self.logger.critical(f"GOLDEN PATH BLOCKED: WebSocket agent handler setup failed: {e}")
+                logger.critical(f"GOLDEN PATH BLOCKED: WebSocket agent handler setup failed: {e}")
                 # Re-raise to fail the test as expected
                 raise
             else:
@@ -81,14 +84,14 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
         
         try:
             # Import the websocket_ssot module 
-            from netra_backend.app.routes.websocket_ssot import UnifiedWebSocketManager
+            from netra_backend.app.routes.websocket_ssot import EmergencyWebSocketManager
             
             # Create a mock user context
             mock_user_context = MagicMock()
             mock_user_context.user_id = self.user_id
             
             # Create WebSocket manager instance
-            manager = UnifiedWebSocketManager()
+            manager = EmergencyWebSocketManager()
             
             # Test the _create_agent_websocket_bridge method (line 747 has broken import)
             with pytest.raises(ImportError) as exc_info:
@@ -99,12 +102,12 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
             assert "netra_backend.app.agents.agent_websocket_bridge" in error_msg, \
                 f"Expected import error for broken path at line 747, got: {error_msg}"
             
-            self.logger.critical(f"EXPECTED FAILURE: Agent bridge creation failed at line 747: {error_msg}")
+            logger.critical(f"EXPECTED FAILURE: Agent bridge creation failed at line 747: {error_msg}")
             
         except ImportError as e:
             if "netra_backend.app.agents.agent_websocket_bridge" in str(e):
                 # This is the expected failure we're testing for
-                self.logger.critical(f"STAGING ISSUE REPRODUCED: Agent bridge creation failed: {e}")
+                logger.critical(f"STAGING ISSUE REPRODUCED: Agent bridge creation failed: {e}")
                 # Re-raise to fail the test as expected
                 raise
             else:
@@ -126,7 +129,7 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
                 'netra_backend.app.agents.agent_websocket_bridge': 
                     __import__('netra_backend.app.services.agent_websocket_bridge')
             }):
-                from netra_backend.app.routes.websocket_ssot import UnifiedWebSocketManager
+                from netra_backend.app.routes.websocket_ssot import EmergencyWebSocketManager
                 
                 # Create a mock user context
                 mock_user_context = MagicMock()
@@ -134,7 +137,7 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
                 mock_user_context.thread_id = self.thread_id
                 
                 # Create WebSocket manager instance
-                manager = UnifiedWebSocketManager()
+                manager = EmergencyWebSocketManager()
                 
                 # This should succeed with patched imports
                 await manager._setup_agent_handlers(mock_user_context)
@@ -142,7 +145,7 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
                 # Verify bridge creation was called
                 mock_create_bridge.assert_called_once_with(mock_user_context)
                 
-                self.logger.info("SUCCESS: Agent handler setup succeeded with correct import path")
+                logger.info("SUCCESS: Agent handler setup succeeded with correct import path")
                 
         except Exception as e:
             pytest.fail(f"Agent integration failed unexpectedly with mocked correct imports: {e}")
@@ -151,7 +154,7 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
         """Test that agent message processing requires working bridge creation."""
         
         try:
-            from netra_backend.app.routes.websocket_ssot import UnifiedWebSocketManager
+            from netra_backend.app.routes.websocket_ssot import EmergencyWebSocketManager
             
             # Create a mock user context and message
             mock_user_context = MagicMock()
@@ -164,19 +167,19 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
             }
             
             # Create WebSocket manager instance
-            manager = UnifiedWebSocketManager()
+            manager = EmergencyWebSocketManager()
             
             # This should fail because agent bridge creation fails due to broken imports
             with pytest.raises(ImportError):
                 # First setup handlers (this will fail)
                 await manager._setup_agent_handlers(mock_user_context)
             
-            self.logger.critical("GOLDEN PATH BLOCKED: Agent message processing unavailable due to import issue")
+            logger.critical("GOLDEN PATH BLOCKED: Agent message processing unavailable due to import issue")
             
         except ImportError as e:
             if "netra_backend.app.agents.agent_websocket_bridge" in str(e):
                 # Expected failure
-                self.logger.critical(f"CHAT FUNCTIONALITY BROKEN: {e}")
+                logger.critical(f"CHAT FUNCTIONALITY BROKEN: {e}")
                 raise
             else:
                 pytest.fail(f"Unexpected import error: {e}")
@@ -185,10 +188,10 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
         """Test impact of broken imports on WebSocket manager initialization."""
         
         try:
-            from netra_backend.app.routes.websocket_ssot import UnifiedWebSocketManager
+            from netra_backend.app.routes.websocket_ssot import EmergencyWebSocketManager
             
             # WebSocket manager can be created but agent functionality will fail
-            manager = UnifiedWebSocketManager()
+            manager = EmergencyWebSocketManager()
             assert manager is not None, "WebSocket manager creation should succeed"
             
             # But any agent-related functionality will fail
@@ -204,12 +207,12 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
                 # Line 747 broken import (in _create_agent_websocket_bridge)
                 await manager._create_agent_websocket_bridge(mock_user_context)
             
-            self.logger.critical("BUSINESS IMPACT: WebSocket manager exists but agent functionality is broken")
-            self.logger.critical("REVENUE IMPACT: $500K+ ARR at risk due to non-functional chat")
+            logger.critical("BUSINESS IMPACT: WebSocket manager exists but agent functionality is broken")
+            logger.critical("REVENUE IMPACT: $500K+ ARR at risk due to non-functional chat")
             
         except ImportError as e:
             if "netra_backend.app.agents.agent_websocket_bridge" in str(e):
-                self.logger.critical(f"STAGING DEPLOYMENT FAILURE: {e}")
+                logger.critical(f"STAGING DEPLOYMENT FAILURE: {e}")
                 raise
             else:
                 pytest.fail(f"Unexpected import error: {e}")
@@ -217,23 +220,23 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
     async def test_import_fix_validation_requirements(self):
         """Test that validates the exact fix requirements."""
         
-        self.logger.info("=== WEBSOCKET SSOT INTEGRATION FIX REQUIREMENTS ===")
-        self.logger.info("FILE: netra_backend/app/routes/websocket_ssot.py")
-        self.logger.info("LINE 732: Change import in _setup_agent_handlers method")
-        self.logger.info("LINE 747: Change import in _create_agent_websocket_bridge method")
-        self.logger.info("")
-        self.logger.info("BROKEN:  from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge")
-        self.logger.info("CORRECT: from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge")
-        self.logger.info("")
-        self.logger.info("BUSINESS IMPACT: Restores Golden Path chat functionality")
-        self.logger.info("TECHNICAL IMPACT: Fixes agent handler setup and bridge creation")
-        self.logger.info("REVENUE IMPACT: Protects $500K+ ARR from chat functionality failure")
+        logger.info("=== WEBSOCKET SSOT INTEGRATION FIX REQUIREMENTS ===")
+        logger.info("FILE: netra_backend/app/routes/websocket_ssot.py")
+        logger.info("LINE 732: Change import in _setup_agent_handlers method")
+        logger.info("LINE 747: Change import in _create_agent_websocket_bridge method")
+        logger.info("")
+        logger.info("BROKEN:  from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge")
+        logger.info("CORRECT: from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge")
+        logger.info("")
+        logger.info("BUSINESS IMPACT: Restores Golden Path chat functionality")
+        logger.info("TECHNICAL IMPACT: Fixes agent handler setup and bridge creation")
+        logger.info("REVENUE IMPACT: Protects $500K+ ARR from chat functionality failure")
         
         # Verify the correct module exists and has the required function
         try:
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
             assert callable(create_agent_websocket_bridge), "create_agent_websocket_bridge must be callable"
-            self.logger.info("VERIFIED: Correct import path contains required function")
+            logger.info("VERIFIED: Correct import path contains required function")
         except ImportError as e:
             pytest.fail(f"Correct import path validation failed: {e}")
 
