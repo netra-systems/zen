@@ -115,6 +115,8 @@ Faker>=37.6.0
 # --- Performance Monitoring ---
 # Cross-platform library for process and system monitoring.
 psutil>=7.0.0
+# Memory profiler for performance testing and memory leak detection
+memory_profiler>=0.61.0
 # Docker API client for container resource monitoring and management
 docker>=7.1.0
 
