@@ -1470,3 +1470,25 @@ def _get_staging_optimized_timeouts(environment: Optional[str] = None) -> Dict[s
 
 # Heartbeat timeout constant for backward compatibility
 HEARTBEAT_TIMEOUT_SECONDS = 45  # Default heartbeat timeout
+
+
+# WebSocket Manager Factory Function - Compatibility Wrapper
+def create_websocket_manager(user_context=None, user_id=None):
+    """
+    Create WebSocket manager instance - Compatibility wrapper.
+    
+    COMPATIBILITY: This function provides backward compatibility for tests
+    that import create_websocket_manager from utils. New code should use
+    the function directly from websocket_manager_factory.
+    
+    Args:
+        user_context: User execution context (optional)
+        user_id: User ID for manager scoping (optional)
+        
+    Returns:
+        WebSocketManager instance configured for the user context
+    """
+    from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager as factory_create
+    
+    logger.debug(f"COMPATIBILITY: Creating WebSocket manager via utils.py wrapper (user_id: {user_id})")
+    return factory_create(user_context=user_context, user_id=user_id)
