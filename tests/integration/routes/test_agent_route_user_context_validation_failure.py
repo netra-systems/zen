@@ -43,7 +43,7 @@ from netra_backend.app.services.user_execution_context import (
     InvalidContextError,
     create_isolated_execution_context
 )
-from netra_backend.app.schemas.agent_schemas import RequestModel
+from netra_backend.app.schemas.request import RequestModel
 from shared.isolated_environment import IsolatedEnvironment
 
 

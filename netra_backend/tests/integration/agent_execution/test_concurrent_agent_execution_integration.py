@@ -385,7 +385,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
             )
             
             state = DeepAgentState(
-                user_request={"message": f"Concurrent execution {execution_id} for {agent_name}"},
+                user_request=f"Concurrent execution {execution_id} for {agent_name}",
                 user_id=user_context.user_id,
                 chat_thread_id=user_context.thread_id,
                 run_id=context.run_id,
@@ -495,7 +495,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
             )
             
             state = DeepAgentState(
-                user_request={"message": f"User {user_index} concurrent request"},
+                user_request=f"User {user_index} concurrent request",
                 user_id=context.user_id,
                 chat_thread_id=context.thread_id,
                 run_id=context.run_id,
@@ -606,7 +606,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
             )
             
             state = DeepAgentState(
-                user_request={"message": f"Resource contention test {execution_id}"},
+                user_request=f"Resource contention test {execution_id}",
                 user_id=user_context.user_id,
                 chat_thread_id=user_context.thread_id,
                 run_id=context.run_id,
@@ -719,7 +719,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
                 )
                 
                 state = DeepAgentState(
-                    user_request={"message": f"Deadlock test user {user_index} agent {j}"},
+                    user_request=f"Deadlock test user {user_index} agent {j}",
                     user_id=context.user_id,
                     chat_thread_id=context.thread_id,
                     run_id=exec_context.run_id,
@@ -930,7 +930,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
         )
         
         state = DeepAgentState(
-            user_request={"message": f"Workload test {execution_id}"},
+            user_request=f"Workload test {execution_id}",
             user_id=user_context.user_id,
             chat_thread_id=user_context.thread_id,
             run_id=context.run_id,

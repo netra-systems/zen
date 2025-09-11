@@ -41,6 +41,20 @@ from netra_backend.app.dependencies import get_request_scoped_db_session as get_
 
 # Note: Password hashing is handled by the auth service, not directly here
 
+# ISSUE #414 FIX: Authentication token reuse prevention
+import hashlib
+from collections import defaultdict
+import asyncio
+
+# Track active tokens to prevent reuse
+_active_token_sessions: Dict[str, Dict[str, Any]] = {}
+_token_usage_stats = {
+    'total_validations': 0,
+    'reuse_attempts_blocked': 0,
+    'concurrent_usage_detected': 0,
+    'tokens_expired_cleanup': 0
+}
+_token_cleanup_lock = asyncio.Lock()
 
 logger = logging.getLogger('auth_integration.auth')
 
@@ -63,12 +77,40 @@ async def get_current_user(
     return user
 
 async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
-    """Validate token with auth service and extract all claims with comprehensive service dependency logging."""
+    """Validate token with auth service and prevent token reuse (Issue #414 fix)."""
     start_time = time.time()
+    
+    # ISSUE #414 FIX: Token reuse prevention
+    token_hash = hashlib.sha256(token.encode()).hexdigest()[:16]
+    current_time = time.time()
+    
+    # Check for token reuse
+    if token_hash in _active_token_sessions:
+        session_info = _active_token_sessions[token_hash]
+        last_used = session_info.get('last_used', 0)
+        concurrent_threshold = 1.0  # 1 second between requests from same token
+        
+        if current_time - last_used < concurrent_threshold:
+            logger.error(
+                f"🚨 AUTHENTICATION TOKEN REUSE DETECTED: Token hash {token_hash} "
+                f"used {current_time - last_used:.3f}s ago (threshold: {concurrent_threshold}s). "
+                f"User: {session_info.get('user_id', 'unknown')[:8]}..., "
+                f"Previous session: {session_info.get('session_id', 'unknown')}"
+            )
+            _token_usage_stats['reuse_attempts_blocked'] += 1
+            
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token reuse detected - authentication failed",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    
+    _token_usage_stats['total_validations'] += 1
+    
     logger.critical(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
-                   f"(token_length: {len(token) if token else 0}, "
+                   f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
                    f"auth_service_endpoint: {auth_client.settings.base_url}, "
-                   f"service_timeout: 30s)")
+                   f"service_timeout: 30s, reuse_check: passed)")
     
     try:
         validation_result = await auth_client.validate_token_jwt(token)
@@ -111,6 +153,24 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
             f"with role: {validation_result.get('role', 'none')} "
             f"and permissions: {validation_result.get('permissions', [])}"
         )
+        
+        # ISSUE #414 FIX: Track token session to prevent reuse
+        import uuid
+        session_id = str(uuid.uuid4())
+        _active_token_sessions[token_hash] = {
+            'user_id': user_id,
+            'session_id': session_id,
+            'first_used': current_time,
+            'last_used': current_time,
+            'validation_count': 1,
+            'role': validation_result.get('role', 'none')
+        }
+        
+        # Schedule cleanup of expired tokens
+        if len(_active_token_sessions) > 1000:  # Prevent memory leak
+            asyncio.create_task(_cleanup_expired_tokens())
+        
+        logger.debug(f"✅ ISSUE #414 FIX: Token session {session_id[:8]}... tracked for user {user_id[:8]}...")
         
         return validation_result
         
@@ -306,6 +366,63 @@ async def validate_token_jwt(token: str) -> Optional[Dict[str, str]]:
     validation = await auth_client.validate_token(token)
     return validation if validation else None
 
+# ISSUE #414 FIX: Token cleanup and monitoring functions
+
+async def _cleanup_expired_tokens():
+    """Clean up expired token sessions to prevent memory leaks (Issue #414 fix)."""
+    async with _token_cleanup_lock:
+        current_time = time.time()
+        expired_tokens = []
+        
+        # Find tokens older than 1 hour
+        max_age = 3600  # 1 hour
+        
+        for token_hash, session_info in _active_token_sessions.items():
+            age = current_time - session_info.get('first_used', current_time)
+            if age > max_age:
+                expired_tokens.append(token_hash)
+        
+        # Remove expired tokens
+        for token_hash in expired_tokens:
+            del _active_token_sessions[token_hash]
+            _token_usage_stats['tokens_expired_cleanup'] += 1
+        
+        if expired_tokens:
+            logger.info(f"🧹 ISSUE #414 CLEANUP: Removed {len(expired_tokens)} expired token sessions")
+
+def get_token_usage_stats() -> Dict[str, Any]:
+    """Get current token usage statistics (Issue #414 monitoring)."""
+    current_time = time.time()
+    active_sessions_by_user = defaultdict(int)
+    
+    for session_info in _active_token_sessions.values():
+        user_id = session_info.get('user_id', 'unknown')
+        active_sessions_by_user[user_id] += 1
+    
+    return {
+        **_token_usage_stats,
+        'active_token_sessions': len(_active_token_sessions),
+        'active_sessions_by_user': dict(active_sessions_by_user),
+        'oldest_session_age_seconds': (
+            current_time - min((s.get('first_used', current_time) for s in _active_token_sessions.values()), default=current_time)
+            if _active_token_sessions else 0
+        )
+    }
+
+async def force_cleanup_user_tokens(user_id: str):
+    """Force cleanup of all token sessions for a specific user (Issue #414 isolation)."""
+    async with _token_cleanup_lock:
+        user_tokens = [
+            token_hash for token_hash, session_info in _active_token_sessions.items()
+            if session_info.get('user_id') == user_id
+        ]
+        
+        for token_hash in user_tokens:
+            del _active_token_sessions[token_hash]
+        
+        if user_tokens:
+            logger.info(f"🧹 ISSUE #414 ISOLATION: Force cleaned up {len(user_tokens)} token sessions for user {user_id[:8]}...")
+
 # Type annotations for dependency injection
 ActiveUserDep = Annotated[User, Depends(get_current_user)]
 OptionalUserDep = Annotated[Optional[User], Depends(get_current_user_optional)]
@@ -497,6 +614,165 @@ def _validate_user_permission(user: User, permission: str) -> None:
 # This module ONLY handles FastAPI dependency injection
 # See auth_service for actual authentication implementation
 
+
+class BackendAuthIntegration:
+    """
+    Backend authentication integration class for SSOT compliance.
+    
+    This class provides a unified interface for backend authentication operations,
+    wrapping the existing auth service client functionality in a testable interface.
+    
+    SSOT COMPLIANCE:
+    - Wraps existing AuthServiceClient functionality
+    - Provides integration testing interface
+    - Maintains service boundaries (auth service is external)
+    - Uses existing dependency injection patterns
+    """
+    
+    def __init__(self, auth_interface=None):
+        """
+        Initialize backend auth integration.
+        
+        Args:
+            auth_interface: Optional UnifiedAuthInterface for advanced testing scenarios.
+                           If not provided, uses the standard auth_client for production.
+        """
+        self.auth_interface = auth_interface
+        self.auth_client = auth_client  # Use existing SSOT auth client
+        
+        logger.info("🔧 BACKEND AUTH INTEGRATION: Initialized with auth service client")
+    
+    async def validate_request_token(self, authorization_header: str):
+        """
+        Validate a request token from Authorization header.
+        
+        Args:
+            authorization_header: Authorization header value (e.g., "Bearer <token>")
+            
+        Returns:
+            Validation result with user information
+        """
+        try:
+            # Extract token from header
+            if not authorization_header or not authorization_header.startswith("Bearer "):
+                return AuthValidationResult(
+                    valid=False,
+                    error="invalid_authorization_header",
+                    user_id=None,
+                    email=None
+                )
+            
+            token = authorization_header.split("Bearer ")[1].strip()
+            
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                verification = await self.auth_interface.verify_jwt_token(token)
+                if verification.valid:
+                    return AuthValidationResult(
+                        valid=True,
+                        user_id=verification.user_id,
+                        email=verification.claims.get("email"),
+                        claims=verification.claims
+                    )
+                else:
+                    return AuthValidationResult(
+                        valid=False,
+                        error=verification.error,
+                        user_id=None,
+                        email=None
+                    )
+            
+            # Use standard auth client (production path)
+            validation_result = await self.auth_client.validate_token_jwt(token)
+            
+            if validation_result and validation_result.get("valid"):
+                return AuthValidationResult(
+                    valid=True,
+                    user_id=validation_result.get("user_id"),
+                    email=validation_result.get("email"),
+                    claims=validation_result
+                )
+            else:
+                return AuthValidationResult(
+                    valid=False,
+                    error="token_validation_failed",
+                    user_id=None,
+                    email=None
+                )
+                
+        except Exception as e:
+            logger.error(f"Token validation error: {e}")
+            return AuthValidationResult(
+                valid=False,
+                error=f"validation_exception: {str(e)}",
+                user_id=None,
+                email=None
+            )
+    
+    async def refresh_user_token(self, refresh_token: str):
+        """
+        Refresh a user's access token using refresh token.
+        
+        Args:
+            refresh_token: The refresh token to use
+            
+        Returns:
+            Token refresh result with new tokens
+        """
+        try:
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                refresh_result = await self.auth_interface.refresh_access_token(refresh_token)
+                return TokenRefreshResult(
+                    success=refresh_result.success,
+                    new_access_token=refresh_result.new_access_token if refresh_result.success else None,
+                    new_refresh_token=refresh_result.new_refresh_token if refresh_result.success else None,
+                    error=refresh_result.error if not refresh_result.success else None
+                )
+            
+            # Use auth client for production
+            # Note: This would require implementing refresh_token method in AuthServiceClient
+            # For now, return a placeholder implementation
+            logger.warning("Token refresh not implemented in production auth client - this is a test integration feature")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error="refresh_not_implemented_in_production"
+            )
+            
+        except Exception as e:
+            logger.error(f"Token refresh error: {e}")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error=f"refresh_exception: {str(e)}"
+            )
+
+
+class AuthValidationResult:
+    """Result of authentication token validation"""
+    
+    def __init__(self, valid: bool, user_id: str = None, email: str = None, 
+                 claims: Dict = None, error: str = None):
+        self.valid = valid
+        self.user_id = user_id
+        self.email = email
+        self.claims = claims or {}
+        self.error = error
+
+
+class TokenRefreshResult:
+    """Result of token refresh operation"""
+    
+    def __init__(self, success: bool, new_access_token: str = None, 
+                 new_refresh_token: str = None, error: str = None):
+        self.success = success
+        self.new_access_token = new_access_token
+        self.new_refresh_token = new_refresh_token
+        self.error = error
+
 # Compatibility aliases for deprecated dependencies
 ActiveUserWsDep = Annotated[User, Depends(get_current_user)]
 
@@ -545,3 +821,162 @@ async def generate_access_token(user_id: str, email: str = None, **kwargs) -> st
 # NOTE: All JWT and password hashing logic has been moved to the auth service
 # This module ONLY handles FastAPI dependency injection
 # See auth_service for actual authentication implementation
+
+
+class BackendAuthIntegration:
+    """
+    Backend authentication integration class for SSOT compliance.
+    
+    This class provides a unified interface for backend authentication operations,
+    wrapping the existing auth service client functionality in a testable interface.
+    
+    SSOT COMPLIANCE:
+    - Wraps existing AuthServiceClient functionality
+    - Provides integration testing interface
+    - Maintains service boundaries (auth service is external)
+    - Uses existing dependency injection patterns
+    """
+    
+    def __init__(self, auth_interface=None):
+        """
+        Initialize backend auth integration.
+        
+        Args:
+            auth_interface: Optional UnifiedAuthInterface for advanced testing scenarios.
+                           If not provided, uses the standard auth_client for production.
+        """
+        self.auth_interface = auth_interface
+        self.auth_client = auth_client  # Use existing SSOT auth client
+        
+        logger.info("🔧 BACKEND AUTH INTEGRATION: Initialized with auth service client")
+    
+    async def validate_request_token(self, authorization_header: str):
+        """
+        Validate a request token from Authorization header.
+        
+        Args:
+            authorization_header: Authorization header value (e.g., "Bearer <token>")
+            
+        Returns:
+            Validation result with user information
+        """
+        try:
+            # Extract token from header
+            if not authorization_header or not authorization_header.startswith("Bearer "):
+                return AuthValidationResult(
+                    valid=False,
+                    error="invalid_authorization_header",
+                    user_id=None,
+                    email=None
+                )
+            
+            token = authorization_header.split("Bearer ")[1].strip()
+            
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                verification = await self.auth_interface.verify_jwt_token(token)
+                if verification.valid:
+                    return AuthValidationResult(
+                        valid=True,
+                        user_id=verification.user_id,
+                        email=verification.claims.get("email"),
+                        claims=verification.claims
+                    )
+                else:
+                    return AuthValidationResult(
+                        valid=False,
+                        error=verification.error,
+                        user_id=None,
+                        email=None
+                    )
+            
+            # Use standard auth client (production path)
+            validation_result = await self.auth_client.validate_token_jwt(token)
+            
+            if validation_result and validation_result.get("valid"):
+                return AuthValidationResult(
+                    valid=True,
+                    user_id=validation_result.get("user_id"),
+                    email=validation_result.get("email"),
+                    claims=validation_result
+                )
+            else:
+                return AuthValidationResult(
+                    valid=False,
+                    error="token_validation_failed",
+                    user_id=None,
+                    email=None
+                )
+                
+        except Exception as e:
+            logger.error(f"Token validation error: {e}")
+            return AuthValidationResult(
+                valid=False,
+                error=f"validation_exception: {str(e)}",
+                user_id=None,
+                email=None
+            )
+    
+    async def refresh_user_token(self, refresh_token: str):
+        """
+        Refresh a user's access token using refresh token.
+        
+        Args:
+            refresh_token: The refresh token to use
+            
+        Returns:
+            Token refresh result with new tokens
+        """
+        try:
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                refresh_result = await self.auth_interface.refresh_access_token(refresh_token)
+                return TokenRefreshResult(
+                    success=refresh_result.success,
+                    new_access_token=refresh_result.new_access_token if refresh_result.success else None,
+                    new_refresh_token=refresh_result.new_refresh_token if refresh_result.success else None,
+                    error=refresh_result.error if not refresh_result.success else None
+                )
+            
+            # Use auth client for production
+            # Note: This would require implementing refresh_token method in AuthServiceClient
+            # For now, return a placeholder implementation
+            logger.warning("Token refresh not implemented in production auth client - this is a test integration feature")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error="refresh_not_implemented_in_production"
+            )
+            
+        except Exception as e:
+            logger.error(f"Token refresh error: {e}")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error=f"refresh_exception: {str(e)}"
+            )
+
+
+class AuthValidationResult:
+    """Result of authentication token validation"""
+    
+    def __init__(self, valid: bool, user_id: str = None, email: str = None, 
+                 claims: Dict = None, error: str = None):
+        self.valid = valid
+        self.user_id = user_id
+        self.email = email
+        self.claims = claims or {}
+        self.error = error
+
+
+class TokenRefreshResult:
+    """Result of token refresh operation"""
+    
+    def __init__(self, success: bool, new_access_token: str = None, 
+                 new_refresh_token: str = None, error: str = None):
+        self.success = success
+        self.new_access_token = new_access_token
+        self.new_refresh_token = new_refresh_token
+        self.error = error

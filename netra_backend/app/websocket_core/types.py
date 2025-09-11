@@ -475,6 +475,11 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "system": MessageType.SYSTEM_MESSAGE,
     "system_message": MessageType.SYSTEM_MESSAGE,
     
+    # Connection establishment messages (websocket_ssot.py patterns)
+    "factory_connection_established": MessageType.CONNECT,
+    "isolated_connection_established": MessageType.CONNECT,  
+    "legacy_connection_established": MessageType.CONNECT,
+    
     # Broadcasting
     "broadcast": MessageType.BROADCAST,
     "broadcast_test": MessageType.BROADCAST_TEST,
@@ -658,17 +663,89 @@ def create_error_message(error_code: str,
     )
 
 
-def create_server_message(msg_type: Union[str, MessageType],
-                         data: Dict[str, Any],
-                         correlation_id: Optional[str] = None) -> ServerMessage:
-    """Create standardized server message."""
+def create_server_message(msg_type_or_dict: Union[str, MessageType, Dict[str, Any]],
+                         data: Optional[Dict[str, Any]] = None,
+                         correlation_id: Optional[str] = None,
+                         **kwargs) -> ServerMessage:
+    """
+    Create standardized server message with hybrid signature support.
+    
+    HYBRID COMPATIBILITY: Supports both legacy and standard calling patterns:
+    
+    Legacy Pattern (backward compatibility):
+        create_server_message({"type": "system", "status": "ok"})
+        
+    Standard Pattern (SSOT compliant):
+        create_server_message(MessageType.SYSTEM, {"status": "ok"})
+        create_server_message("system", {"status": "ok"})
+    
+    Args:
+        msg_type_or_dict: Either:
+            - MessageType enum or string (standard pattern)
+            - Dictionary containing message data (legacy pattern)
+        data: Message data dict (only used in standard pattern)
+        correlation_id: Optional correlation identifier
+        **kwargs: Additional arguments for backward compatibility
+        
+    Returns:
+        ServerMessage: Standardized server message object
+        
+    Raises:
+        ValueError: If arguments are invalid or ambiguous
+    """
     import time
     
-    normalized_type = normalize_message_type(msg_type)
+    # PATTERN DETECTION: Legacy vs Standard calling patterns
+    if isinstance(msg_type_or_dict, dict):
+        # LEGACY PATTERN: create_server_message({"type": "system", "status": "ok"})
+        legacy_dict = msg_type_or_dict
+        
+        if "type" not in legacy_dict:
+            raise ValueError(
+                "Legacy pattern requires 'type' field in dictionary. "
+                f"Got dictionary keys: {list(legacy_dict.keys())}"
+            )
+        
+        # Extract type and data from legacy dictionary
+        msg_type = legacy_dict["type"]
+        
+        # All other fields become the data payload
+        message_data = {k: v for k, v in legacy_dict.items() if k != "type"}
+        
+        # Handle any additional kwargs passed
+        if kwargs:
+            message_data.update(kwargs)
+            
+    else:
+        # STANDARD PATTERN: create_server_message(MessageType.SYSTEM, {"status": "ok"})
+        if data is None:
+            data = {}
+            
+        if not isinstance(data, dict):
+            raise TypeError(
+                f"Standard pattern requires data to be a dictionary. "
+                f"Got {type(data)}: {data}"
+            )
+        
+        msg_type = msg_type_or_dict
+        message_data = data.copy()  # Copy to avoid modifying original
+        
+        # Handle any additional kwargs
+        if kwargs:
+            message_data.update(kwargs)
+    
+    # Validate and normalize message type
+    try:
+        normalized_type = normalize_message_type(msg_type)
+    except ValueError as e:
+        raise ValueError(
+            f"Invalid message type '{msg_type}': {e}. "
+            f"Use MessageType enum values or valid string types."
+        ) from e
     
     return ServerMessage(
         type=normalized_type,
-        data=data,
+        data=message_data,
         timestamp=time.time(),
         correlation_id=correlation_id
     )

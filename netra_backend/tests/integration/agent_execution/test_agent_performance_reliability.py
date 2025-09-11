@@ -251,7 +251,7 @@ class TestAgentPerformanceReliability(BaseAgentExecutionTest):
                 # Create unique context for each execution to simulate different users
                 exec_context = context.create_child_context(
                     operation_name=f"load_execution_{batch_start + i}",
-                    additional_metadata={"execution_index": batch_start + i}
+                    additional_agent_context={"execution_index": batch_start + i}
                 )
                 
                 task = asyncio.create_task(load_agent.execute(exec_context, stream_updates=True))
@@ -373,7 +373,7 @@ class TestAgentPerformanceReliability(BaseAgentExecutionTest):
             # Execute agent
             cycle_context = context.create_child_context(
                 operation_name=f"memory_cycle_{cycle}",
-                additional_metadata={"cycle": cycle}
+                additional_agent_context={"cycle": cycle}
             )
             
             result = await memory_agent.execute(cycle_context, stream_updates=True)
@@ -698,7 +698,7 @@ class TestAgentPerformanceReliability(BaseAgentExecutionTest):
             try:
                 attempt_context = context.create_child_context(
                     operation_name=f"recovery_attempt_{attempt + 1}",
-                    additional_metadata={"recovery_attempt": attempt + 1}
+                    additional_agent_context={"recovery_attempt": attempt + 1}
                 )
                 
                 final_result = await recovery_agent.execute(attempt_context, stream_updates=True)
@@ -818,7 +818,7 @@ class TestAgentPerformanceReliability(BaseAgentExecutionTest):
             # Execute agent
             exec_context = context.create_child_context(
                 operation_name=f"degradation_execution_{execution_index}",
-                additional_metadata={
+                additional_agent_context={
                     "execution_index": execution_index,
                     "baseline_phase": execution_index < baseline_executions
                 }

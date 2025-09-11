@@ -19,10 +19,18 @@ NOTE: For circuit breaker classes, import from the main module directly:
 # Import from SSOT location
 from netra_backend.app.core.resilience.unified_circuit_breaker import (
     UnifiedCircuitBreaker as CircuitBreakerManager,
+    UnifiedCircuitBreaker as CircuitBreaker,  # Alias for backward compatibility
+    UnifiedCircuitConfig as CircuitBreakerConfig,  # Alias for backward compatibility
 )
 from netra_backend.app.services.circuit_breaker.failure_detector import FailureDetector
 from netra_backend.app.services.circuit_breaker.service_health_monitor import (
     ServiceHealthMonitor,
 )
 
-__all__ = ["CircuitBreakerManager", "ServiceHealthMonitor", "FailureDetector"]
+__all__ = [
+    "CircuitBreakerManager", 
+    "CircuitBreaker", 
+    "CircuitBreakerConfig",
+    "ServiceHealthMonitor", 
+    "FailureDetector"
+]

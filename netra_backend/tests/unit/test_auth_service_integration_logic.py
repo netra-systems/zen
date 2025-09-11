@@ -44,7 +44,7 @@ class TestAuthServiceIntegrationLogic(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup test environment."""
         super().setup_method(method)
-        self.validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        self.validator = GoldenPathValidator()
         
     async def test_auth_service_integration_should_use_service_client(self):
         """

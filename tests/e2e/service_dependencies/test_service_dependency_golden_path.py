@@ -50,7 +50,7 @@ class TestServiceDependencyGoldenPath:
         # BVJ: Validates $500K+ ARR chat functionality depends on proper service orchestration
         
         # Step 1: Validate service dependency resolution
-        golden_path_validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        golden_path_validator = GoldenPathValidator()
         
         # Create mock app with service state for testing
         from fastapi import FastAPI

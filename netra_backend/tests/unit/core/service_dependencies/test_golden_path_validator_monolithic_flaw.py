@@ -37,7 +37,7 @@ class TestGoldenPathValidatorMonolithicFlaw:
     @pytest.fixture
     def validator(self):
         """Create validator instance for testing."""
-        return GoldenPathValidator(environment=EnvironmentType.TESTING)
+        return GoldenPathValidator()
 
     @pytest.fixture
     def mock_backend_app_correct_boundaries(self):

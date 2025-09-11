@@ -44,7 +44,7 @@ class TestJWTValidationIntegration:
     @pytest.fixture  
     def golden_path_validator(self):
         """Golden Path Validator instance."""
-        return GoldenPathValidator(environment=EnvironmentType.DEVELOPMENT)
+        return GoldenPathValidator()
         
     @pytest.fixture
     def app_with_unified_jwt(self, unified_jwt_validator):

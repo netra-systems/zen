@@ -168,7 +168,7 @@ class TestUserExecutionEngineComprehensive:
     def sample_agent_state(self, test_user_context):
         """Sample DeepAgentState for agent execution."""
         return DeepAgentState(
-            user_request={"prompt": "Optimize my AI costs", "context": "test"},
+            user_request="Optimize my AI costs",
             user_id=test_user_context.user_id,
             chat_thread_id=test_user_context.thread_id,
             run_id=test_user_context.run_id,

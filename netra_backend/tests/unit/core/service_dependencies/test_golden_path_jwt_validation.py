@@ -95,7 +95,7 @@ class TestGoldenPathJWTValidationFailure:
     @pytest.fixture
     def golden_path_validator(self):
         """Golden Path Validator instance."""
-        return GoldenPathValidator(environment=EnvironmentType.DEVELOPMENT)
+        return GoldenPathValidator()
 
     @pytest.mark.asyncio
     async def test_jwt_validation_fails_when_no_key_manager(

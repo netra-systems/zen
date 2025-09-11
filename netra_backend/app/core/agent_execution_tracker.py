@@ -436,7 +436,7 @@ class AgentExecutionTracker:
             logger.warning(f"Cannot update terminal execution {execution_id}")
             return False
         
-        # Capture old state before updating it (needed for logging)
+        # Capture old state for logging
         old_state = record.state
         
         now = datetime.now(timezone.utc)
@@ -1225,6 +1225,15 @@ class AgentExecutionTracker:
             "consolidated": True,
             "created_with_ssot": True
         }
+    
+    def get_default_timeout(self) -> int:
+        """
+        Get the default execution timeout value.
+        
+        Returns:
+            int: Default timeout in seconds for agent execution
+        """
+        return self.execution_timeout
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get execution metrics"""

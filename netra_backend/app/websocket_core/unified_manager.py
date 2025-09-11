@@ -24,11 +24,18 @@ logger = central_logger.get_logger(__name__)
 
 
 class WebSocketManagerMode(Enum):
-    """Operational modes for WebSocket manager."""
-    UNIFIED = "unified"        # Default full-featured mode
-    ISOLATED = "isolated"      # User-isolated mode with private state
-    EMERGENCY = "emergency"    # Emergency fallback with minimal features
-    DEGRADED = "degraded"      # Degraded service mode for last resort
+    """DEPRECATED: WebSocket manager modes - CONSOLIDATING TO UNIFIED SSOT.
+    
+    ALL MODES NOW REDIRECT TO UNIFIED MODE FOR SSOT COMPLIANCE.
+    User isolation is handled through UserExecutionContext, not manager modes.
+    
+    MIGRATION NOTICE: This enum will be removed in v2.0. 
+    Use WebSocketManager directly without specifying mode.
+    """
+    UNIFIED = "unified"        # SSOT: Single unified mode with UserExecutionContext isolation
+    ISOLATED = "unified"       # DEPRECATED: Redirects to UNIFIED (isolation via UserExecutionContext)
+    EMERGENCY = "unified"      # DEPRECATED: Redirects to UNIFIED (graceful degradation built-in)
+    DEGRADED = "unified"       # DEPRECATED: Redirects to UNIFIED (auto-recovery built-in)
 
 
 def _get_enum_key_representation(enum_key: Enum) -> str:
@@ -288,14 +295,18 @@ class UnifiedWebSocketManager:
     """
     
     def __init__(self, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None):
-        """Initialize UnifiedWebSocketManager with operational mode support.
+        """Initialize UnifiedWebSocketManager - ALL MODES CONSOLIDATED TO UNIFIED.
+        
+        SSOT MIGRATION NOTICE: All WebSocket modes now use unified initialization.
+        User isolation is achieved through UserExecutionContext, not separate modes.
         
         Args:
-            mode: Operational mode for the manager (unified, isolated, emergency, degraded)
-            user_context: User execution context for isolated mode
-            config: Configuration dictionary for emergency/degraded modes
+            mode: DEPRECATED - All modes redirect to UNIFIED (kept for backward compatibility)
+            user_context: User execution context for proper user isolation
+            config: Configuration dictionary (optional)
         """
-        self.mode = mode
+        # DEPRECATED: Mode is ignored - all instances use unified behavior
+        self.mode = WebSocketManagerMode.UNIFIED  # Force unified mode
         self.user_context = user_context
         self.config = config or {}
         
@@ -308,17 +319,21 @@ class UnifiedWebSocketManager:
         self._user_connection_locks: Dict[str, asyncio.Lock] = {}
         self._connection_lock_creation_lock = asyncio.Lock()
         
-        # Mode-specific initialization
-        if mode == WebSocketManagerMode.ISOLATED:
-            if user_context is None:
-                raise ValueError("user_context is required for ISOLATED mode")
-            self._initialize_isolated_mode(user_context)
-        elif mode == WebSocketManagerMode.EMERGENCY:
-            self._initialize_emergency_mode(config or {})
-        elif mode == WebSocketManagerMode.DEGRADED:
-            self._initialize_degraded_mode(config or {})
-        else:  # UNIFIED mode
-            self._initialize_unified_mode()
+        # ISSUE #414 FIX: Event contamination prevention
+        self._event_isolation_tokens: Dict[str, str] = {}  # connection_id -> isolation_token
+        self._user_event_queues: Dict[str, asyncio.Queue] = {}  # user_id -> event_queue
+        self._event_delivery_tracking: Dict[str, Dict[str, Any]] = {}  # event_id -> metadata
+        self._cross_user_detection: Dict[str, int] = {}  # user_id -> violation_count
+        self._event_queue_stats = {
+            'total_events_sent': 0,
+            'events_delivered': 0,
+            'contamination_prevented': 0,
+            'queue_overflows': 0,
+            'auth_token_reuse_detected': 0
+        }
+        
+        # SSOT CONSOLIDATION: Always use unified initialization
+        self._initialize_unified_mode()
         
         # Add compatibility registry for legacy tests
         self.registry = RegistryCompat(self)
@@ -329,7 +344,7 @@ class UnifiedWebSocketManager:
         self.active_connections = {}  # Compatibility mapping
         self.connection_registry = {}  # Registry for connection objects
         
-        logger.info(f"UnifiedWebSocketManager initialized in {mode.value} mode")
+        logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
     
     def _initialize_unified_mode(self):
         """Initialize unified mode with full feature set."""
@@ -337,6 +352,12 @@ class UnifiedWebSocketManager:
         self._message_recovery_queue: Dict[str, List[Dict]] = {}  # user_id -> [messages]
         self._connection_error_count: Dict[str, int] = {}  # user_id -> error_count
         self._last_error_time: Dict[str, datetime] = {}  # user_id -> last_error_timestamp
+        
+        # Transaction coordination support
+        self._transaction_coordinator = None  # Will be set by DatabaseManager
+        self._coordination_enabled = False
+        
+        logger.debug("🔗 WebSocket manager initialized with transaction coordination support")
         self._error_recovery_enabled = True
         
         # Background task monitoring system
@@ -482,10 +503,41 @@ class UnifiedWebSocketManager:
         
         async with user_lock:
             async with self._lock:
+                # ISSUE #414 FIX: Event contamination prevention setup
+                import uuid
+                isolation_token = str(uuid.uuid4())
+                self._event_isolation_tokens[connection.connection_id] = isolation_token
+                
+                # Initialize user-specific event queue if not exists
+                if connection.user_id not in self._user_event_queues:
+                    self._user_event_queues[connection.user_id] = asyncio.Queue(maxsize=1000)  # Prevent overflow
+                    self._cross_user_detection[connection.user_id] = 0
+                
+                # Validate no cross-user contamination
+                for existing_conn_id, existing_token in self._event_isolation_tokens.items():
+                    if existing_conn_id in self._connections:
+                        existing_user = self._connections[existing_conn_id].user_id
+                        if existing_user != connection.user_id and existing_token == isolation_token:
+                            # This should never happen with UUID but check anyway
+                            logger.error(
+                                f"🚨 CRITICAL ISOLATION VIOLATION: Token collision detected! "
+                                f"User {connection.user_id} vs {existing_user}, "
+                                f"Connection {connection.connection_id} vs {existing_conn_id}"
+                            )
+                            self._cross_user_detection[connection.user_id] += 1
+                            self._event_queue_stats['contamination_prevented'] += 1
+                            
+                            # Generate new token to fix collision
+                            isolation_token = str(uuid.uuid4())
+                            self._event_isolation_tokens[connection.connection_id] = isolation_token
+                            break
+                
                 self._connections[connection.connection_id] = connection
                 if connection.user_id not in self._user_connections:
                     self._user_connections[connection.user_id] = set()
                 self._user_connections[connection.user_id].add(connection.connection_id)
+                
+                logger.debug(f"✅ ISSUE #414 FIX: Connection {connection.connection_id} isolated with token {isolation_token[:8]}... for user {connection.user_id[:8]}...")
                 
                 # Update compatibility mapping for legacy tests
                 if connection.user_id not in self.active_connections:
@@ -798,17 +850,40 @@ class UnifiedWebSocketManager:
     
     async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
         """Send a message to all connections for a user with thread safety and type validation."""
-        # Handle mode-specific behavior
-        if self.mode == WebSocketManagerMode.EMERGENCY:
-            return await self._send_emergency_message(user_id, message)
-        elif self.mode == WebSocketManagerMode.DEGRADED:
-            return await self._send_degraded_message(user_id, message)
-        elif self.mode == WebSocketManagerMode.ISOLATED:
-            return await self._send_isolated_message(user_id, message)
-        
-        # Unified mode (default) handling
+        # SSOT CONSOLIDATION: All modes use unified message handling
+        # (Mode-specific behavior has been consolidated for SSOT compliance)
         # Validate user_id
         validated_user_id = ensure_user_id(user_id)
+        
+        # ISSUE #414 FIX: Event contamination prevention and validation
+        import uuid
+        event_id = str(uuid.uuid4())
+        
+        # Validate message doesn't contain foreign user data
+        if isinstance(message, dict):
+            for key, value in message.items():
+                if key.endswith('_user_id') and value != validated_user_id:
+                    logger.error(
+                        f"🚨 CROSS-USER CONTAMINATION DETECTED: Message for user {validated_user_id} "
+                        f"contains foreign user_id in field '{key}': {value}"
+                    )
+                    self._event_queue_stats['contamination_prevented'] += 1
+                    self._cross_user_detection[validated_user_id] = self._cross_user_detection.get(validated_user_id, 0) + 1
+                    
+                    # Sanitize the message
+                    message = message.copy()
+                    message[key] = validated_user_id
+                    logger.warning(f"🧹 Sanitized contaminated field '{key}' for user {validated_user_id}")
+        
+        # Track event delivery
+        self._event_delivery_tracking[event_id] = {
+            'user_id': validated_user_id,
+            'message_type': message.get('type', 'unknown'),
+            'timestamp': datetime.now(timezone.utc),
+            'delivery_status': 'pending',
+            'contamination_checks': 'passed'
+        }
+        self._event_queue_stats['total_events_sent'] += 1
         
         # Use user-specific lock to prevent race conditions during message sending
         user_lock = await self._get_user_connection_lock(validated_user_id)
@@ -2481,6 +2556,100 @@ class UnifiedWebSocketManager:
         logger.info(f"🔗 SSOT INTERFACE: Handled connection for user {user_id[:8]}... → {connection_id}")
         return connection_id
     
+    # ISSUE #414 FIX: Event contamination monitoring and prevention methods
+    
+    def get_contamination_stats(self) -> Dict[str, Any]:
+        """Get current event contamination statistics (Issue #414 monitoring)."""
+        return {
+            **self._event_queue_stats,
+            'cross_user_violations': dict(self._cross_user_detection),
+            'active_isolation_tokens': len(self._event_isolation_tokens),
+            'user_event_queues': {
+                user_id: queue.qsize() 
+                for user_id, queue in self._user_event_queues.items()
+            },
+            'total_users_monitored': len(self._cross_user_detection)
+        }
+    
+    async def validate_event_isolation(self, user_id: str, connection_id: str) -> bool:
+        """Validate event isolation for user and connection (Issue #414 validation)."""
+        if connection_id not in self._event_isolation_tokens:
+            logger.warning(f"⚠️ Connection {connection_id} has no isolation token")
+            return False
+        
+        if connection_id not in self._connections:
+            logger.warning(f"⚠️ Connection {connection_id} not found in active connections")
+            return False
+        
+        connection = self._connections[connection_id]
+        if connection.user_id != user_id:
+            logger.error(
+                f"🚨 ISOLATION VIOLATION: Connection {connection_id} user mismatch. "
+                f"Expected: {user_id}, Actual: {connection.user_id}"
+            )
+            self._cross_user_detection[user_id] = self._cross_user_detection.get(user_id, 0) + 1
+            return False
+        
+        return True
+    
+    async def cleanup_expired_event_tracking(self, max_age_hours: int = 24):
+        """Clean up expired event tracking data (Issue #414 memory management)."""
+        current_time = datetime.now(timezone.utc)
+        expired_events = []
+        
+        for event_id, metadata in self._event_delivery_tracking.items():
+            event_age = (current_time - metadata['timestamp']).total_seconds() / 3600
+            if event_age > max_age_hours:
+                expired_events.append(event_id)
+        
+        for event_id in expired_events:
+            del self._event_delivery_tracking[event_id]
+        
+        if expired_events:
+            logger.info(f"🧹 Cleaned up {len(expired_events)} expired event tracking entries")
+    
+    async def force_cleanup_user_events(self, user_id: str):
+        """Force cleanup of all event tracking for a specific user (Issue #414 isolation)."""
+        # Clear user event queue
+        if user_id in self._user_event_queues:
+            queue = self._user_event_queues[user_id]
+            while not queue.empty():
+                try:
+                    queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+            del self._user_event_queues[user_id]
+        
+        # Clear cross-user detection tracking
+        if user_id in self._cross_user_detection:
+            del self._cross_user_detection[user_id]
+        
+        # Clear event delivery tracking for this user
+        user_events = [
+            event_id for event_id, metadata in self._event_delivery_tracking.items()
+            if metadata.get('user_id') == user_id
+        ]
+        
+        for event_id in user_events:
+            del self._event_delivery_tracking[event_id]
+        
+        logger.info(f"🧹 Force cleaned up all event tracking for user {user_id}")
+    
+    def detect_queue_overflow(self, user_id: str) -> bool:
+        """Detect if user's event queue is approaching overflow (Issue #414 monitoring)."""
+        if user_id not in self._user_event_queues:
+            return False
+        
+        queue = self._user_event_queues[user_id]
+        utilization = queue.qsize() / 1000.0  # Max size is 1000
+        
+        if utilization > 0.9:  # 90% full
+            logger.warning(f"🚨 Event queue near overflow for user {user_id}: {queue.qsize()}/1000")
+            self._event_queue_stats['queue_overflows'] += 1
+            return True
+        
+        return False
+    
     async def handle_disconnection(self, user_id: str, websocket: Any = None) -> None:
         """
         Handle WebSocket disconnection with proper cleanup.
@@ -2663,6 +2832,131 @@ class UnifiedWebSocketManager:
         except Exception as e:
             logger.error(f"Error processing incoming message from user {user_id}: {e}")
             return False
+
+    # Transaction Coordination Methods
+    def set_transaction_coordinator(self, coordinator):
+        """Set transaction coordinator for database-WebSocket coordination.
+        
+        Args:
+            coordinator: TransactionEventCoordinator instance from DatabaseManager
+        """
+        self._transaction_coordinator = coordinator
+        self._coordination_enabled = True
+        logger.info("🔗 Transaction coordinator linked to WebSocket manager")
+        
+    async def send_event_after_commit(self, transaction_id: str, event_type: str, event_data: Dict[str, Any],
+                                     connection_id: Optional[str] = None, user_id: Optional[str] = None,
+                                     thread_id: Optional[str] = None, priority: int = 0):
+        """Queue WebSocket event for sending after database transaction commit.
+        
+        This method ensures events are only sent AFTER database transactions commit,
+        preventing data inconsistency in the Golden Path user flow.
+        
+        Args:
+            transaction_id: Database transaction ID
+            event_type: Type of WebSocket event to send
+            event_data: Event data payload
+            connection_id: Optional specific connection ID
+            user_id: Optional user ID for targeting
+            thread_id: Optional thread ID for context
+            priority: Event priority (higher numbers sent first)
+        """
+        if not self._coordination_enabled or not self._transaction_coordinator:
+            # Fallback: send immediately if coordination not enabled
+            logger.warning(f"⚠️ Transaction coordination not enabled - sending WebSocket event '{event_type}' immediately")
+            return await self._send_event_immediate(event_type, event_data, connection_id, user_id)
+            
+        # Queue event for after transaction commit
+        await self._transaction_coordinator.add_pending_event(
+            transaction_id=transaction_id,
+            event_type=event_type,
+            event_data=event_data,
+            connection_id=connection_id,
+            user_id=user_id,
+            thread_id=thread_id,
+            priority=priority
+        )
+        
+        logger.debug(f"📤 Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+                    f"(user: {user_id}, priority: {priority})")
+        
+    async def _send_event_immediate(self, event_type: str, event_data: Dict[str, Any],
+                                   connection_id: Optional[str] = None, user_id: Optional[str] = None) -> bool:
+        """Send WebSocket event immediately (fallback when coordination disabled).
+        
+        Args:
+            event_type: Type of WebSocket event
+            event_data: Event data payload
+            connection_id: Optional specific connection ID
+            user_id: Optional user ID for targeting
+            
+        Returns:
+            True if sent successfully, False otherwise
+        """
+        try:
+            message = {
+                "type": event_type,
+                "data": event_data,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            if connection_id:
+                # Send to specific connection
+                if connection_id in self._connections:
+                    connection = self._connections[connection_id]
+                    await connection.websocket.send_json(_serialize_message_safely(message))
+                    logger.debug(f"📤 Sent WebSocket event '{event_type}' to connection {connection_id}")
+                    return True
+                else:
+                    logger.warning(f"⚠️ Connection {connection_id} not found for event '{event_type}'")
+                    return False
+                    
+            elif user_id:
+                # Send to all user connections
+                await self.send_to_user(user_id, message)
+                logger.debug(f"📤 Sent WebSocket event '{event_type}' to user {user_id}")
+                return True
+                
+            else:
+                logger.warning(f"⚠️ No connection_id or user_id specified for event '{event_type}'")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to send immediate WebSocket event '{event_type}': {type(e).__name__}: {e}")
+            return False
+            
+    def is_coordination_enabled(self) -> bool:
+        """Check if transaction coordination is enabled.
+        
+        Returns:
+            True if coordination is enabled, False otherwise
+        """
+        return self._coordination_enabled and self._transaction_coordinator is not None
+        
+    def get_coordination_status(self) -> Dict[str, Any]:
+        """Get current transaction coordination status.
+        
+        Returns:
+            Dictionary containing coordination status information
+        """
+        if not self._coordination_enabled:
+            return {
+                "enabled": False,
+                "reason": "Coordination not enabled"
+            }
+            
+        if not self._transaction_coordinator:
+            return {
+                "enabled": False,
+                "reason": "No transaction coordinator configured"
+            }
+            
+        return {
+            "enabled": True,
+            "coordinator_available": True,
+            "pending_events": self._transaction_coordinator.get_pending_events_count(),
+            "metrics": self._transaction_coordinator.get_coordination_metrics()
+        }
 
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status for current operational mode."""
