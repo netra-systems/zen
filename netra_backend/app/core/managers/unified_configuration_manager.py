@@ -586,16 +586,46 @@ class UnifiedConfigurationManager:
             return default
     
     def get_int(self, key: str, default: int = 0) -> int:
-        """Get integer configuration value."""
-        return self.get(key, default, int)
+        """Get integer configuration value with proper type conversion."""
+        value = self.get(key, default)
+        if isinstance(value, int):
+            return value
+        elif isinstance(value, float):
+            return int(value)
+        elif isinstance(value, str):
+            try:
+                # Try to convert to float first, then to int (handles "123.9" -> 123)
+                return int(float(value))
+            except (ValueError, TypeError):
+                return default
+        else:
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return default
     
     def get_float(self, key: str, default: float = 0.0) -> float:
         """Get float configuration value."""
         return self.get(key, default, float)
     
     def get_bool(self, key: str, default: bool = False) -> bool:
-        """Get boolean configuration value."""
-        return self.get(key, default, bool)
+        """Get boolean configuration value with comprehensive conversion."""
+        value = self.get(key, default)
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, str):
+            # Comprehensive boolean string conversion
+            normalized = value.lower().strip()
+            if normalized in ('true', '1', 'yes', 'on', 'y', 'enable', 'enabled'):
+                return True
+            elif normalized in ('false', '0', 'no', 'off', 'n', 'disable', 'disabled', ''):
+                return False
+            else:
+                return default
+        elif isinstance(value, (int, float)):
+            return bool(value)
+        else:
+            return default
     
     def get_str(self, key: str, default: str = "") -> str:
         """Get string configuration value.""" 
