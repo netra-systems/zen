@@ -51,10 +51,30 @@ Dual ID management systems (UnifiedIDManager vs UnifiedIdGenerator) creating sev
 - [ ] Standardize test ID generation patterns
 
 ## Test Plan Status
-- [ ] Discover existing tests protecting ID management
+- [x] Discover existing tests protecting ID management
 - [ ] Plan new SSOT validation tests  
 - [ ] Execute test plan for new SSOT tests
 - [ ] Run test fix loop until all pass
+
+## Existing Test Analysis (COMPLETED)
+
+### ✅ Discovered Existing Tests Protecting ID Management:
+
+**Core SSOT Tests (10 test files found):**
+- `test_unified_id_manager_comprehensive.py` - ✅ PASSES - Core UnifiedIDManager SSOT functionality
+- `test_unified_id_manager_validation.py` - ✅ PASSES - ID validation consistency
+- `test_id_generation_validation.py` - ✅ PASSES - Business logic validation
+- `test_websocket_id_generation_ssot_compliance.py` - ❌ DESIGNED TO FAIL - Exposes dual SSOT violations
+- `test_websocket_id_event_delivery.py` - ❌ DESIGNED TO FAIL - Event delivery with ID consistency
+- `test_auth_service_id_migration_validation.py` - ❌ DESIGNED TO FAIL - Auth service violations
+
+**Key Findings:**
+- 6 tests already validate SSOT functionality and PASS ✅
+- 4 tests are DESIGNED TO FAIL ❌ to expose exact violations we need to fix
+- Gap: Missing cross-component ID compatibility tests
+- Gap: Missing WebSocket resource cleanup validation tests
+
+**Validation Strategy:** Use "DESIGNED TO FAIL" tests as success criteria - they should PASS after SSOT remediation.
 
 ## Progress Log
 
@@ -62,7 +82,13 @@ Dual ID management systems (UnifiedIDManager vs UnifiedIdGenerator) creating sev
 - ✅ Comprehensive SSOT audit completed
 - ✅ GitHub issue #301 created
 - ✅ Local progress tracker established
-- 🔄 Next: Test discovery and planning
+
+### 2025-09-10 - Test Discovery Complete  
+- ✅ Existing test analysis completed
+- ✅ Found 10 existing tests protecting ID management
+- ✅ Identified 4 "DESIGNED TO FAIL" tests that expose exact violations
+- ✅ Identified critical gaps in test coverage
+- 🔄 Next: Plan new SSOT validation tests
 
 ## Notes
 - Recommend keeping UnifiedIDManager as primary SSOT (more comprehensive features)

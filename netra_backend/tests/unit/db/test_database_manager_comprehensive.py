@@ -46,6 +46,9 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.isolated_environment_fixtures import isolated_env
 
+# Get logger for testing logger interactions
+logger = logging.getLogger('netra_backend.app.db.database_manager')
+
 
 class TestDatabaseManagerComprehensive(BaseIntegrationTest):
     """Comprehensive test suite for DatabaseManager class covering all critical functionality."""
