@@ -113,6 +113,17 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         test_run_id = uuid4()
         test_agent_name = "test-agent"
         
+        # Create mock objects for this test
+        mock_registry = MagicMock()
+        mock_websocket_bridge = AsyncMock()
+        mock_agent = AsyncMock()
+        
+        # Create system under test
+        execution_core = AgentExecutionCore(
+            registry=mock_registry,
+            websocket_bridge=mock_websocket_bridge
+        )
+        
         # Create test contexts
         execution_context = AgentExecutionContext(
             agent_name=test_agent_name,
@@ -139,20 +150,20 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
             }
         )
         
-        self.mock_agent.run.return_value = expected_result
-        self.mock_registry.get_agent.return_value = self.mock_agent
+        mock_agent.run.return_value = expected_result
+        mock_registry.get_agent.return_value = mock_agent
         
         # Mock execution tracking
         mock_exec_id = uuid4()
-        with patch.object(self.execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
-            with patch.object(self.execution_core.execution_tracker, 'start_execution'):
-                with patch.object(self.execution_core.execution_tracker, 'complete_execution'):
-                    with patch.object(self.execution_core.agent_tracker, 'create_execution', return_value="state-exec-123"):
-                        with patch.object(self.execution_core.agent_tracker, 'start_execution', return_value=True):
-                            with patch.object(self.execution_core.agent_tracker, 'transition_state'):
+        with patch.object(execution_core.execution_tracker, 'register_execution', return_value=mock_exec_id):
+            with patch.object(execution_core.execution_tracker, 'start_execution'):
+                with patch.object(execution_core.execution_tracker, 'complete_execution'):
+                    with patch.object(execution_core.agent_tracker, 'create_execution', return_value="state-exec-123"):
+                        with patch.object(execution_core.agent_tracker, 'start_execution', return_value=True):
+                            with patch.object(execution_core.agent_tracker, 'transition_state'):
                                 
                                 # Act: Execute agent
-                                result = await self.execution_core.execute_agent(
+                                result = await execution_core.execute_agent(
                                     context=execution_context,
                                     state=user_context,
                                     timeout=30.0
