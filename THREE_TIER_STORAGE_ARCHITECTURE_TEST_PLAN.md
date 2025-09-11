@@ -88,7 +88,7 @@ Business Value Justification (BVJ):
 
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from netra_backend.app.services.state_cache_manager import StateCacheManager, state_cache_manager
+from netra_backend.app.services.state_persistence import StateCacheManager, state_cache_manager
 from netra_backend.app.redis_manager import redis_manager
 
 class TestStateCacheManagerRedisIntegration:

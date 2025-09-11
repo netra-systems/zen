@@ -144,7 +144,7 @@ class TestStatePersistenceSSOT:
     
     def test_state_managers_import(self):
         """Verify state manager modules can be imported."""
-        from netra_backend.app.services.state_cache_manager import state_cache_manager
+        from netra_backend.app.services.state_persistence import state_cache_manager
         from netra_backend.app.services.state_recovery_manager import state_recovery_manager
         
         assert state_cache_manager is not None
@@ -153,7 +153,7 @@ class TestStatePersistenceSSOT:
     @pytest.mark.asyncio
     async def test_state_cache_manager_operations(self):
         """Test state cache manager basic operations."""
-        from netra_backend.app.services.state_cache_manager import state_cache_manager
+        from netra_backend.app.services.state_persistence import state_cache_manager
         
         # Test save and load
         request = Mock(run_id="test_run", state_data={"test": "data"})

@@ -11,7 +11,7 @@ import pytest
 import time
 from unittest.mock import Mock, patch
 
-from netra_backend.app.services.state_cache_manager import StateCacheManager
+from netra_backend.app.services.state_persistence import StateCacheManager
 from shared.types import RunID, UserID
 
 
