@@ -344,7 +344,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
             thread_id=f"workflow_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"workflow_run_{uuid.uuid4().hex[:8]}",
             request_id=f"workflow_req_{uuid.uuid4().hex[:8]}",
-            metadata={
+            agent_context={
                 "user_request": "Help me optimize my AI costs and performance",
                 "workflow_type": "cost_optimization"
             }

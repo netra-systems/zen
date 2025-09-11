@@ -399,7 +399,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
             thread_id=f"chat_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"chat_run_{uuid.uuid4().hex[:8]}",
             request_id=f"chat_req_{uuid.uuid4().hex[:8]}",
-            metadata={
+            agent_context={
                 "user_request": "Help me optimize my AI costs and improve performance", 
                 "chat_session": True,
                 "real_time_updates": True

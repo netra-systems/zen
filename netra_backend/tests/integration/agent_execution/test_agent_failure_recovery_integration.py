@@ -220,7 +220,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
             thread_id=f"recovery_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"recovery_run_{uuid.uuid4().hex[:8]}",
             request_id=f"recovery_req_{uuid.uuid4().hex[:8]}",
-            metadata={"recovery_test": True}
+            agent_context={"recovery_test": True}
         )
         
     @pytest.fixture
