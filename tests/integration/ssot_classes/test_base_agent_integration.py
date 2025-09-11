@@ -124,13 +124,8 @@ class TestBaseAgentForIntegration(BaseAgent):
             # Emit WebSocket events if streaming enabled
             if stream_updates:
                 await self.emit_agent_started("Starting test agent execution")
-                self.track_websocket_event("agent_started", "Starting test agent execution")
-                
                 await self.emit_thinking("Analyzing user request", step_number=1)
-                self.track_websocket_event("thinking", "Analyzing user request")
-                
                 await self.emit_thinking("Generating response", step_number=2)
-                self.track_websocket_event("thinking", "Generating response")
             
             # Simulate LLM request processing
             user_request = context.agent_context.get("user_request", "test request")
@@ -173,7 +168,6 @@ class TestBaseAgentForIntegration(BaseAgent):
             # Emit completion event
             if stream_updates:
                 await self.emit_agent_completed({"result": result}, context)
-                self.track_websocket_event("agent_completed", {"result": result})
             
             # Update execution record
             execution_record.update({
@@ -197,7 +191,6 @@ class TestBaseAgentForIntegration(BaseAgent):
             # Emit error event if streaming
             if stream_updates:
                 await self.emit_error(str(e), type(e).__name__)
-                self.track_websocket_event("error", {"error": str(e), "error_type": type(e).__name__})
             
             raise
     
