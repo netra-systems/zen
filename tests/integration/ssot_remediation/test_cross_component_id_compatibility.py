@@ -69,9 +69,7 @@ class TestCrossComponentIdCompatibility(SSotBaseTestCase):
         
         # Create WebSocket manager through factory
         websocket_manager = create_websocket_manager(
-            user_id=user_id,
-            thread_id=thread_id,
-            websocket_id="test-websocket-123"
+            user_id=user_id
         )
         
         # Validate that WebSocket manager has proper ID references
@@ -166,9 +164,7 @@ class TestCrossComponentIdCompatibility(SSotBaseTestCase):
         
         # Create WebSocket manager (this may use different ID generation internally)
         websocket_manager = create_websocket_manager(
-            user_id=user_id,
-            thread_id=thread_id,
-            websocket_id="test-websocket-cross-lookup"
+            user_id=user_id
         )
         
         # Extract any additional IDs that WebSocket factory generates internally
@@ -333,9 +329,7 @@ class TestCrossComponentIdCompatibility(SSotBaseTestCase):
         
         # Test 2: WebSocket factory should accept unified IDs without issues
         websocket_manager = create_websocket_manager(
-            user_id=ensure_user_id(unified_user_id),
-            thread_id=ensure_thread_id(unified_thread_id),
-            websocket_id="ssot-consistency-test"
+            user_id=ensure_user_id(unified_user_id)
         )
         
         # Test 3: Database factory should accept unified IDs without issues

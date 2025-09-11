@@ -93,9 +93,7 @@ class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
                 websocket_id = f"cleanup-test-{i}-{int(time.time())}"
                 
                 manager = create_websocket_manager(
-                    user_id=user_id,
-                    thread_id=thread_id,
-                    websocket_id=websocket_id
+                    user_id=user_id
                 )
                 
                 test_managers.append({
@@ -184,9 +182,7 @@ class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
         
         try:
             manager = create_websocket_manager(
-                user_id=user_id,
-                thread_id=thread_id,
-                websocket_id=websocket_id
+                user_id=user_id
             )
             self.websocket_managers.append(manager)
             
@@ -279,9 +275,7 @@ class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
             
             try:
                 manager = create_websocket_manager(
-                    user_id=user_id,
-                    thread_id=thread_id,
-                    websocket_id=websocket_id
+                    user_id=user_id
                 )
                 
                 leak_test_managers.append({

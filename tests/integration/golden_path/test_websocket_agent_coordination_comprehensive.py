@@ -329,7 +329,7 @@ class TestWebSocketAgentCoordinationComprehensive(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.golden_path
-    @pytest.mark.concurrency
+    @pytest.mark.asyncio
     async def test_multi_user_websocket_agent_isolation(self):
         """
         BVJ: All segments | Multi-user Support | Ensures proper user isolation

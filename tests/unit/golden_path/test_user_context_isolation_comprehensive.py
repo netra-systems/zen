@@ -244,7 +244,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
 
     @pytest.mark.unit
     @pytest.mark.golden_path
-    @pytest.mark.concurrency
+    @pytest.mark.asyncio
     async def test_concurrent_user_execution_isolation(self):
         """
         BVJ: All segments | Concurrency | Ensures isolation under concurrent load

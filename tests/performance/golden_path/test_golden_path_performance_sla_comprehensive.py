@@ -281,7 +281,7 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
     @pytest.mark.performance
     @pytest.mark.golden_path
     @pytest.mark.sla
-    @pytest.mark.concurrency
+    @pytest.mark.asyncio
     async def test_concurrent_user_capacity_performance_sla(self):
         """
         BVJ: Mid/Enterprise | Scalability SLA | Ensures platform supports concurrent users
