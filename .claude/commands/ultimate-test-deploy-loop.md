@@ -74,11 +74,13 @@ do E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE-PUSH
 do UPDATE-COMMENT
 IF the change is false go back to step 3.
 
-6)  GITHUB PR INTEGRATION
-Use github python tools or local (gh) commands.
-Git commit in conceptual batches. Then make a NEW PR (Pull Request).
-Cross link the prior generated issue.
+6)  SNST : PR Creation
+do E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE-PUSH
+do UPDATE-COMMENT
+Then make a NEW PR (Pull Request).
+Cross link as needed.
 
 END PROCESS INSTRUCTIONS
 
-You MUST repeat the entire PROCESS until ALL 1000 e2e real staging tests pass. WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT. At least 8-20+ hours.
+
+Repeat PROCESS untill all E2E-TEST-FOCUS pass or 3 PRs are made.
