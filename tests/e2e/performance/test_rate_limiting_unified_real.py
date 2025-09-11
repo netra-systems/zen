@@ -44,7 +44,7 @@ from tests.e2e.rate_limiting_core import (
     RedisManager,
     UserManager,
 )
-from tests.e2e.real_services_manager import ServiceManager
+from tests.e2e.real_services_manager import RealServicesManager
 from tests.e2e.harness_utils import UnifiedTestHarnessComplete
 
 
@@ -53,7 +53,7 @@ class TestUnifiedRateLimiter:
     
     def __init__(self, harness: UnifiedTestHarnessComplete):
         self.harness = harness
-        self.service_manager = ServiceManager(harness)
+        self.service_manager = RealServicesManager()
         self.test_session_id = f"unified-rate-test-{uuid.uuid4().hex[:8]}"
         self.redis_client: Optional[redis.Redis] = None
         self.test_users: List[Dict[str, Any]] = []
