@@ -128,8 +128,16 @@ class RequestScopedExecutionEngine:
         self.user_context = validate_user_context(user_context)
         
         if not registry:
+            logger.error(
+                f"❌ VALIDATION FAILURE: AgentRegistry cannot be None for RequestScopedExecutionEngine. "
+                f"User: {user_context.user_id[:8]}..., Engine initialization failed."
+            )
             raise ValueError("AgentRegistry cannot be None")
         if not websocket_bridge:
+            logger.error(
+                f"❌ VALIDATION FAILURE: AgentWebSocketBridge cannot be None for RequestScopedExecutionEngine. "
+                f"User: {user_context.user_id[:8]}..., Engine initialization failed."
+            )
             raise ValueError("AgentWebSocketBridge cannot be None")
         
         self.registry = registry
@@ -192,6 +200,11 @@ class RequestScopedExecutionEngine:
             RuntimeError: If execution fails
         """
         if not self._is_active:
+            logger.error(
+                f"❌ VALIDATION FAILURE: Attempted to execute agent on inactive ExecutionEngine. "
+                f"Engine ID: {self.engine_id}, User: {self.user_context.user_id[:8]}..., "
+                f"Agent: {context.agent_name}, This indicates improper engine lifecycle management."
+            )
             raise ValueError("ExecutionEngine is no longer active")
         
         # Validate execution context
@@ -199,6 +212,12 @@ class RequestScopedExecutionEngine:
         
         # Ensure context matches our user context
         if context.user_id != self.user_context.user_id:
+            logger.error(
+                f"❌ VALIDATION FAILURE: Context user_id mismatch in agent execution. "
+                f"Expected: {self.user_context.user_id}, Got: {context.user_id}, "
+                f"Agent: {context.agent_name}, Engine: {self.engine_id}, "
+                f"This is a critical security violation - user context isolation compromised."
+            )
             raise ValueError(
                 f"Context user_id mismatch: expected {self.user_context.user_id}, "
                 f"got {context.user_id}"
