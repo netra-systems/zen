@@ -344,9 +344,23 @@ class WebSocketSSOTRouter:
             if hasattr(websocket, 'scope') and 'app' in websocket.scope:
                 app_state = websocket.scope['app'].state
             
+            # PERFORMANCE OPTIMIZATION: Environment-aware timeout configuration
+            # Reduced from 30s to optimize WebSocket connection speed while maintaining safety
+            current_env = get_current_environment()
+            if current_env in ['staging', 'development']:
+                # Optimized timeout for faster environments: 3s allows quick connection
+                # while still preventing race conditions in Cloud Run
+                readiness_timeout = 3.0
+            elif current_env == 'production':
+                # Conservative timeout for production: maintain reliability
+                readiness_timeout = 5.0
+            else:
+                # Local/test environments: very fast timeout
+                readiness_timeout = 1.0
+            
             if app_state:
                 try:
-                    async with gcp_websocket_readiness_guard(app_state, timeout=5.0) as readiness_result:
+                    async with gcp_websocket_readiness_guard(app_state, timeout=readiness_timeout) as readiness_result:
                         if not readiness_result.ready:
                             # Race condition detected - reject connection to prevent 1011 error
                             logger.error(
