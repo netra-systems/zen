@@ -482,16 +482,6 @@ def validate_websocket_message(message: Dict[str, Any]) -> List[str]:
     return errors
 
 
-<<<<<<< HEAD
-# Module exports
-__all__ = [
-    'WebSocketErrorValidator',  # Original compatibility class
-    'WebSocketEventValidator',  # SSOT consolidated import alias
-    'ValidationResult',
-    'EventCriticality', 
-    'get_websocket_validator',
-    'reset_websocket_validator'
-=======
 def is_valid_connection_state(state: str) -> bool:
     """
     COMPATIBILITY FUNCTION: Check if connection state is valid (simple version).
