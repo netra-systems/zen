@@ -123,7 +123,7 @@ class ServiceHealthClient:
                         }
                     }
                     
-        except aiohttp.ClientTimeout:
+        except asyncio.TimeoutError:
             return {
                 "requirement": "jwt_validation_ready",
                 "success": False,
@@ -205,7 +205,7 @@ class ServiceHealthClient:
                         }
                     }
                     
-        except aiohttp.ClientTimeout:
+        except asyncio.TimeoutError:
             return {
                 "requirement": "agent_execution_ready",
                 "success": False,
