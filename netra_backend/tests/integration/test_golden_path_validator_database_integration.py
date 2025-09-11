@@ -45,7 +45,7 @@ class TestGoldenPathValidatorDatabaseIntegration(BaseIntegrationTest):
         mock_app.state.key_manager = None         # Missing - causes validation failure
         
         # Initialize validator
-        validator = GoldenPathValidator(environment=EnvironmentType.DEVELOPMENT)
+        validator = GoldenPathValidator()
         
         # Test 1: Validate user authentication readiness (should fail)
         auth_result = await validator._validate_user_authentication_ready(mock_app)
@@ -113,7 +113,7 @@ class TestGoldenPathValidatorDatabaseIntegration(BaseIntegrationTest):
         mock_app.state.key_manager = mock_key_manager
         
         # Initialize validator
-        validator = GoldenPathValidator(environment=EnvironmentType.DEVELOPMENT)
+        validator = GoldenPathValidator()
         
         # Test 1: Validate user authentication readiness (should pass)
         auth_result = await validator._validate_user_authentication_ready(mock_app)
@@ -197,7 +197,7 @@ class TestGoldenPathValidatorDatabaseIntegration(BaseIntegrationTest):
         mock_app.state.db_session_factory = MockSessionFactory(db_info)
         
         # Initialize validator
-        validator = GoldenPathValidator(environment=EnvironmentType.DEVELOPMENT)
+        validator = GoldenPathValidator()
         
         # Test the specific table validation that's failing
         auth_result = await validator._validate_user_authentication_ready(mock_app)
