@@ -122,7 +122,7 @@ services:
           - auth
     build:
       context: .
-      dockerfile: ./docker/auth.Dockerfile
+      dockerfile: ./dockerfiles/auth.Dockerfile
       args:
         BUILD_ENV: development
     # No profile specified - runs by default
@@ -197,7 +197,7 @@ services:
           - backend
     build:
       context: .
-      dockerfile: ./docker/backend.Dockerfile
+      dockerfile: ./dockerfiles/backend.Dockerfile
       args:
         BUILD_ENV: development
     # No profile specified - runs by default

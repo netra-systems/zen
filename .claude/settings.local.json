@@ -67,13 +67,8 @@
       "Bash(sed:*)",
       "Bash(netra_backend/tests/unit/websocket_core/test_gcp_startup_phase_validation.py)",
       "Bash(git checkout:*)",
-      "Bash(git merge:*)",
-      "Bash(cat:*)",
-      "Bash(gcloud secrets versions list:*)",
-      "Bash(git restore:*)",
-      "Bash(git rev-parse:*)",
-      "Bash(grep:*)",
-      "Bash(git diff:*)"
+      "Bash(for i in {1..3})",
+      "Bash(do)"
     ],
     "deny": [],
     "ask": []
