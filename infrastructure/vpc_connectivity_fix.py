@@ -133,8 +133,9 @@ class VPCConnectivityValidator:
             self.logger.debug(f"Checking database access for {service_name}")
             
             # Get database connection configuration
-            db_host = get_env("DATABASE_HOST")
-            db_port = get_env("DATABASE_PORT", "5432")
+            env = get_env()
+            db_host = env.get("DATABASE_HOST")
+            db_port = env.get("DATABASE_PORT", "5432")
             
             if not db_host:
                 self.logger.warning("DATABASE_HOST not configured")
@@ -154,8 +155,9 @@ class VPCConnectivityValidator:
             self.logger.debug(f"Checking Redis access for {service_name}")
             
             # Get Redis connection configuration
-            redis_host = get_env("REDIS_HOST")
-            redis_port = get_env("REDIS_PORT", "6379")
+            env = get_env()
+            redis_host = env.get("REDIS_HOST")
+            redis_port = env.get("REDIS_PORT", "6379")
             
             if not redis_host:
                 self.logger.warning("REDIS_HOST not configured")
@@ -175,7 +177,8 @@ class VPCConnectivityValidator:
             self.logger.debug(f"Checking auth service access for {service_name}")
             
             # Get auth service URL
-            auth_service_url = get_env("AUTH_SERVICE_URL")
+            env = get_env()
+            auth_service_url = env.get("AUTH_SERVICE_URL")
             
             if not auth_service_url:
                 self.logger.warning("AUTH_SERVICE_URL not configured")
@@ -371,12 +374,14 @@ class VPCConnectivityFixer:
     def _get_database_private_ip(self) -> str:
         """Get database private IP address."""
         # TODO: Query Cloud SQL instance for private IP
-        return get_env("DATABASE_PRIVATE_IP", "10.0.0.100")  # Placeholder
+        env = get_env()
+        return env.get("DATABASE_PRIVATE_IP", "10.0.0.100")  # Placeholder
     
     def _get_redis_private_ip(self) -> str:
         """Get Redis private IP address."""
         # TODO: Query Redis instance for private IP
-        return get_env("REDIS_PRIVATE_IP", "10.0.0.101")  # Placeholder
+        env = get_env()
+        return env.get("REDIS_PRIVATE_IP", "10.0.0.101")  # Placeholder
     
     def _get_service_hash(self) -> str:
         """Get service hash for internal URL construction."""
