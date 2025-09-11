@@ -51,6 +51,33 @@ from netra_backend.app.core.agent_execution_tracker import (
 logger = central_logger.get_logger(__name__)
 
 
+def get_agent_state_tracker() -> AgentExecutionTracker:
+    """Factory function to get an instance of AgentExecutionTracker.
+    
+    This function provides the expected interface for creating agent state trackers
+    as required by the test suite and other components.
+    
+    Returns:
+        AgentExecutionTracker: A new instance of the agent execution tracker
+    """
+    return AgentExecutionTracker()
+
+
+def create_agent_execution_context(**kwargs) -> AgentExecutionContext:
+    """Factory function to create an AgentExecutionContext.
+    
+    This is a convenience wrapper around AgentExecutionContext constructor
+    to provide a consistent factory interface.
+    
+    Args:
+        **kwargs: Arguments passed to AgentExecutionContext constructor
+        
+    Returns:
+        AgentExecutionContext: A new execution context instance
+    """
+    return AgentExecutionContext(**kwargs)
+
+
 class AgentExecutionCore:
     """Enhanced agent execution with death detection and recovery.
     
