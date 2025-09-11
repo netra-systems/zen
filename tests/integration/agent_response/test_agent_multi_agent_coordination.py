@@ -113,13 +113,14 @@ class MockCoordinatorAgent(BaseAgent):
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestMultiAgentResponseCoordination(BaseIntegrationTest):
     """Test multi-agent response coordination scenarios."""
     
     def setup_method(self):
         """Set up test fixtures."""
         super().setup_method()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()  # Use SSOT environment from base class
         self.test_user_id = "test_user_coordination"
         self.test_thread_id = "thread_coordination_001"
         

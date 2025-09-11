@@ -74,13 +74,14 @@ class ErrorSimulationAgent(DataHelperAgent):
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestAgentResponseErrorHandling(BaseIntegrationTest):
     """Test agent response error handling scenarios."""
     
     def setup_method(self):
         """Set up test fixtures."""
         super().setup_method()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()  # Use SSOT environment from base class
         self.execution_tracker = get_execution_tracker()
         self.test_user_id = "test_user_errors"
         self.test_thread_id = "thread_errors_001"

@@ -78,13 +78,14 @@ class MockResponsePersistence:
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestAgentResponseTrackingPersistence(BaseIntegrationTest):
     """Test agent response tracking and persistence."""
     
     def setup_method(self):
         """Set up test fixtures."""
         super().setup_method()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()  # Use SSOT environment from base class
         self.execution_tracker = get_execution_tracker()
         self.mock_persistence = MockResponsePersistence()
         self.test_user_id = "test_user_tracking"

@@ -41,13 +41,14 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
     """Test agent response generation pipeline integration."""
     
     def setup_method(self):
         """Set up test fixtures."""
         super().setup_method()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()  # Use SSOT environment from base class
         self.execution_tracker = get_execution_tracker()
         self.user_context_manager = UserContextManager()
         self.test_user_id = "test_user_response_pipeline"
@@ -79,6 +80,10 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
             assert result is not None, "Agent must generate a response"
             assert execution_time < 30.0, "Response generation must complete within 30 seconds"
             
+            # Record performance metrics
+            self.record_metric("agent_response_time", execution_time)
+            self.record_metric("agent_response_success", 1)
+            
             # Validate response has business value
             if isinstance(result, TypedAgentResult):
                 assert result.success, "Agent execution must succeed"
@@ -89,8 +94,10 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
                 if isinstance(response_data, str):
                     assert len(response_data) > 10, "Response must be substantive"
                     assert "trend" in response_data.lower(), "Response should address the query topic"
+                    self.record_metric("response_length", len(response_data))
                 elif isinstance(response_data, dict):
                     assert response_data, "Response dictionary must not be empty"
+                    self.record_metric("response_fields", len(response_data))
                     
                 logger.info(f"✅ Agent generated valuable response in {execution_time:.2f}s")
             
@@ -285,6 +292,11 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
             # THEN: Performance meets SLA
             assert response_time < MAX_RESPONSE_TIME, \
                 f"Response time {response_time:.2f}s exceeds SLA maximum of {MAX_RESPONSE_TIME}s"
+            
+            # Record detailed performance metrics
+            self.record_metric("sla_response_time", response_time)
+            self.record_metric("sla_target_met", 1 if response_time < TARGET_RESPONSE_TIME else 0)
+            self.record_metric("sla_max_met", 1 if response_time < MAX_RESPONSE_TIME else 0)
             
             if response_time < TARGET_RESPONSE_TIME:
                 logger.info(f"✅ Agent response met target performance: {response_time:.2f}s")

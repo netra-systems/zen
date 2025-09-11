@@ -47,13 +47,14 @@ class ResponseFormatValidation:
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestAgentResponseFormattingValidation(BaseIntegrationTest):
     """Test agent response formatting and structure validation."""
     
     def setup_method(self):
         """Set up test fixtures."""
         super().setup_method()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()  # Use SSOT environment from base class
         self.test_user_id = "test_user_formatting"
         self.test_thread_id = "thread_formatting_001"
         
@@ -167,6 +168,11 @@ class TestAgentResponseFormattingValidation(BaseIntegrationTest):
                 # Business quality requirements
                 assert validation.quality_score >= 0.6, \
                     f"Response quality {validation.quality_score:.2f} below business threshold. Errors: {validation.validation_errors}"
+                
+                # Record quality metrics
+                self.record_metric("response_quality_score", validation.quality_score)
+                self.record_metric("response_format_valid", 1 if validation.is_valid else 0)
+                self.record_metric("response_format_errors", len(validation.validation_errors))
                 
                 if not validation.is_valid:
                     logger.warning(f"Response format issues: {validation.validation_errors}")

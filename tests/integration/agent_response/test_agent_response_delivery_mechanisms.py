@@ -62,13 +62,14 @@ class MockWebSocketConnection:
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
     """Test agent response delivery mechanisms."""
     
     def setup_method(self):
         """Set up test fixtures."""
         super().setup_method()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()  # Use SSOT environment from base class
         self.test_user_id = "test_user_delivery"
         self.test_thread_id = "thread_delivery_001"
         self.mock_connections = {}

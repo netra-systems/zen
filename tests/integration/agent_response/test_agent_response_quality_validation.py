@@ -333,6 +333,7 @@ class ResponseQualityValidator:
 
 
 @pytest.mark.integration
+@pytest.mark.real_services
 class TestAgentResponseQualityValidation(BaseIntegrationTest):
     """Test agent response quality validation scenarios."""
     
