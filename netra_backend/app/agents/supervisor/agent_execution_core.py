@@ -94,6 +94,9 @@ class AgentExecutionCore:
     # HEARTBEAT_INTERVAL: Send heartbeat every 5 seconds
     HEARTBEAT_INTERVAL = 5.0
     
+    # DEFAULT_TIMEOUT: Default execution timeout for agents - reduced for faster feedback  
+    DEFAULT_TIMEOUT = 25.0
+    
     def __init__(self, 
                  registry: 'AgentRegistry', 
                  websocket_bridge: Optional['AgentWebSocketBridge'] = None,
@@ -111,12 +114,21 @@ class AgentExecutionCore:
         self.default_tier = default_tier or TimeoutTier.FREE
         self._default_timeout = get_agent_execution_timeout(self.default_tier)
         
+        # Calculate registry agent count safely (handle Mocks in testing)
+        registry_count = 0
+        if registry:
+            try:
+                registry_dict = getattr(registry, '_registry', {})
+                registry_count = len(registry_dict) if hasattr(registry_dict, '__len__') else 0
+            except (TypeError, AttributeError):
+                registry_count = 0  # Handle Mock objects in tests
+        
         logger.info(
             f"🚀 AGENT_CORE_INIT: AgentExecutionCore initialized successfully. "
             f"Tier: {self.default_tier.value}, Default_timeout: {self._default_timeout}s, "
             f"Streaming_capable: {self.default_tier in [TimeoutTier.ENTERPRISE, TimeoutTier.PLATFORM]}, "
             f"WebSocket_bridge: {'configured' if websocket_bridge else 'missing'}, "
-            f"Registry_agents: {len(getattr(registry, '_registry', {})) if registry else 0}. "
+            f"Registry_agents: {registry_count}. "
             f"Ready for agent execution with comprehensive monitoring."
         )
     
