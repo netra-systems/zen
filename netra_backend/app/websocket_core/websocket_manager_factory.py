@@ -183,8 +183,9 @@ def create_websocket_manager(user_context=None, user_id: Optional[UserID] = None
         # Create minimal execution context for testing
         test_context = UserExecutionContext(
             user_id=typed_user_id,
-            request_id=f"golden_path_test_{typed_user_id}",
-            environment="test"
+            thread_id=f"thread_{typed_user_id}",
+            run_id=f"run_{typed_user_id}",
+            request_id=f"golden_path_test_{typed_user_id}"
         )
         
         return WebSocketManager(user_context=test_context)
