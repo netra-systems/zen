@@ -19,6 +19,21 @@
 - **[STAGING_OPTIMIZATION.md](deployment/STAGING_OPTIMIZATION.md)** - Performance optimizations for staging
 - **[DEPLOYMENT_OPERATIONS.md](deployment/DEPLOYMENT_OPERATIONS.md)** - Production deployment procedures
 
+### 🚨 CANONICAL DEPLOYMENT SOURCES (Updated)
+**Week 1 SSOT Remediation - GitHub Issue #245**
+
+**CANONICAL SOURCES:**
+- **GCP Staging/Production**: `scripts/deploy_to_gcp_actual.py --project netra-staging`
+- **Infrastructure**: `terraform-gcp-staging/` (All environments)
+- **Local Development**: `docker-compose --profile dev up`
+- **Local Testing**: `docker-compose --profile test up`
+
+**DEPRECATED (Week 1 Wrappers Only):**
+- ~~`scripts/deploy_to_gcp.py`~~ → Redirects to `scripts/deploy_to_gcp_actual.py`
+- ~~`scripts/build_staging.py`~~ → Redirects to `docker-compose --profile dev`
+- ~~`scripts/deploy-docker.sh/bat`~~ → Redirects to `docker-compose`
+- ~~`terraform-dev-postgres/`~~ → Use `terraform-gcp-staging/` or `docker-compose`
+
 ### Architecture & Design
 - **[ARCHITECTURE.md](architecture/ARCHITECTURE.md)** - System architecture overview
 - **[DATABASE_SCHEMA.md](architecture/DATABASE_SCHEMA.md)** - Database design and schema
@@ -82,7 +97,7 @@
 2. **[MONITORING_GUIDE.md](operations/MONITORING_GUIDE.md)** - Comprehensive monitoring and SLA compliance
 3. **[CONFIGURATION_GUIDE.md](configuration/CONFIGURATION_GUIDE.md)** - Environment configuration management
 4. **[STAGING_SECRETS_GUIDE.md](deployment/STAGING_SECRETS_GUIDE.md)** - Complete secrets architecture
-5. [STAGING_DEPLOYMENT_COMPLETE_GUIDE.md](deployment/STAGING_DEPLOYMENT_COMPLETE_GUIDE.md) - Staging deployment procedures
+5. **CANONICAL:** `scripts/deploy_to_gcp_actual.py --project netra-staging` - Staging deployment
 6. [GOOGLE_SECRET_MANAGER_SETUP.md](deployment/GOOGLE_SECRET_MANAGER_SETUP.md) - Secret Manager setup
 7. [STAGING_TROUBLESHOOTING.md](deployment/STAGING_TROUBLESHOOTING.md) - Troubleshooting guide
 

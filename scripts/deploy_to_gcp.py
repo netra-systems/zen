@@ -1,71 +1,92 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-DEPRECATION WARNING: This deployment script is deprecated.
+DEPRECATION WARNING: This deployment entry point is deprecated.
 
-CRITICAL: The OFFICIAL deployment script is now scripts/deploy_to_gcp_actual.py
+WEEK 1 SSOT REMEDIATION (GitHub Issue #245): 
+This script now redirects to the canonical deployment source while preserving 
+100% backward compatibility during the transition period.
+
+CANONICAL SOURCE: scripts/deploy_to_gcp_actual.py
 
 Migration Path:
     OLD: python scripts/deploy_to_gcp.py --project netra-staging --build-local
     NEW: python scripts/deploy_to_gcp_actual.py --project netra-staging --build-local
 
+<<<<<<< HEAD
+All original flags and options are preserved and forwarded to the canonical implementation.
+This wrapper will be removed in Week 2 after validation of the transition.
+=======
 All original flags and options are preserved in the new script.
 
 WARNING: The UnifiedTestRunner does NOT have deployment functionality.
 This script will redirect to the actual deployment script for compatibility.
+>>>>>>> aff87269fab4baa3d9e1197f91be90d4c7c0367d
 """
 
 import sys
 import subprocess
 from pathlib import Path
 import argparse
-import os
+
+# Handle Windows encoding issues
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 
 def show_deprecation_warning():
     """Show deprecation warning to users."""
+<<<<<<< HEAD
+    print("=" * 80)
+    print("WARNING: DEPRECATION WARNING - WEEK 1 SSOT REMEDIATION")
+    print("=" * 80)
+    print("GitHub Issue #245: Deployment canonical source conflicts")
+    print()
+    print("This deployment entry point is deprecated.")
+    print("Please migrate to the canonical deployment script:")
+=======
     print("WARNING: DEPLOYMENT SCRIPT DEPRECATED")
     print("=" * 70)
     print("This GCP deployment script is deprecated.")
     print("Please migrate to the official deployment script:")
     print()
     print("  NEW: python scripts/deploy_to_gcp_actual.py")
+>>>>>>> aff87269fab4baa3d9e1197f91be90d4c7c0367d
     print()
-    print("All deployment functionality preserved. Redirecting...")
-    print("=" * 70)
+    print("  CANONICAL: python scripts/deploy_to_gcp_actual.py")
     print()
-
-
-def parse_deployment_args():
-    """Parse all deployment arguments for compatibility."""
-    parser = argparse.ArgumentParser(
-        description="[DEPRECATED] Deploy Netra Apex Platform to Google Cloud Run"
-    )
-    
-    # Core deployment options
-    parser.add_argument("--project", required=True, help="GCP project ID")
-    parser.add_argument("--build-local", action="store_true", help="Build images locally")
-    parser.add_argument("--check-secrets", action="store_true", help="Validate secrets from Google Secret Manager")
-    parser.add_argument("--check-apis", action="store_true", help="Check GCP API availability")
-    parser.add_argument("--run-checks", action="store_true", help="Run all pre-deployment checks")
-    parser.add_argument("--rollback", action="store_true", help="Rollback to previous version")
-    parser.add_argument("--service", help="Deploy specific service only")
-    parser.add_argument("--env", help="Target environment")
-    parser.add_argument("--timeout", type=int, help="Deployment timeout in seconds")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
-    
-    return parser.parse_known_args()
+    print("All functionality preserved. Auto-redirecting to canonical source...")
+    print("=" * 80)
+    print()
 
 
 def main():
-    """Main entry point with deprecation wrapper."""
+    """Main entry point with deprecation wrapper and redirect."""
     show_deprecation_warning()
     
-    # Parse all deployment arguments
-    args, unknown_args = parse_deployment_args()
-    
-    # Get project root
+    # Get project root and canonical deployment script
     project_root = Path(__file__).parent.parent
+<<<<<<< HEAD
+    canonical_script = Path(__file__).parent / "deploy_to_gcp_actual.py"
+    
+    if not canonical_script.exists():
+        print(f"ERROR: Canonical deployment script not found at {canonical_script}")
+        print(f"CRITICAL: Deployment cannot proceed")
+        print(f"   Please restore scripts/deploy_to_gcp_actual.py")
+        sys.exit(1)
+    
+    try:
+        # Build command to execute canonical deployment script
+        cmd = [sys.executable, str(canonical_script)] + sys.argv[1:]
+        
+        print(f"Redirecting to canonical deployment script:")
+        print(f"   {' '.join(cmd)}")
+        print()
+        
+        # Execute canonical deployment script with all original arguments
+=======
     actual_deploy_script = project_root / "scripts" / "deploy_to_gcp_actual.py"
     
     if not actual_deploy_script.exists():
@@ -109,15 +130,24 @@ def main():
         print()
         
         # Execute actual deployment script
+>>>>>>> aff87269fab4baa3d9e1197f91be90d4c7c0367d
         result = subprocess.run(cmd, cwd=project_root)
         
         # Preserve original exit code behavior
         sys.exit(result.returncode)
         
+    except KeyboardInterrupt:
+        print("\nDeployment interrupted by user")
+        sys.exit(1)
     except Exception as e:
+<<<<<<< HEAD
+        print(f"ERROR: Failed to execute canonical deployment script: {e}")
+        print(f"Manual intervention required")
+=======
         print(f"ERROR: Failed to execute official deployment script: {e}")
         print("Please run the deployment script directly:")
         print(f"   python scripts/deploy_to_gcp_actual.py {' '.join(sys.argv[1:])}")
+>>>>>>> aff87269fab4baa3d9e1197f91be90d4c7c0367d
         sys.exit(1)
 
 
