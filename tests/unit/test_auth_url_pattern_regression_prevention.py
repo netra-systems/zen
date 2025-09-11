@@ -96,9 +96,12 @@ class AuthUrlPatternValidator:
             skip_incorrect_pattern_check = (
                 'test_auth_url_pattern_regression_prevention.py' in rel_path or
                 'test_service_token_url_patterns.py' in rel_path or
+                'ISSUE_296_AUTH_URL_PATTERN_REMEDIATION_PLAN.md' in rel_path or  # Skip remediation docs
+                'reports/auth/' in rel_path or  # Skip auth reports/documentation
                 'CRITICAL ISSUE REFERENCE' in ''.join(lines[:20]) or  # Skip files documenting the issue
                 '# Test incorrect patterns' in ''.join(lines) or
-                'INCORRECT PATTERNS' in ''.join(lines)
+                'INCORRECT PATTERNS' in ''.join(lines) or
+                'Issue #296' in ''.join(lines[:10])  # Skip issue documentation
             )
                 
             for line_num, line in enumerate(lines, 1):
