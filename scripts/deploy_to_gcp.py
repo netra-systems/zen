@@ -15,6 +15,9 @@ Migration Path:
 
 All original flags and options are preserved and forwarded to the canonical implementation.
 This wrapper will be removed in Week 2 after validation of the transition.
+
+WARNING: The UnifiedTestRunner does NOT have deployment functionality.
+This script will redirect to the actual deployment script for compatibility.
 """
 
 import sys
@@ -79,7 +82,8 @@ def main():
         sys.exit(1)
     except Exception as e:
         print(f"ERROR: Failed to execute canonical deployment script: {e}")
-        print(f"Manual intervention required")
+        print("Please run the deployment script directly:")
+        print(f"   python scripts/deploy_to_gcp_actual.py {' '.join(sys.argv[1:])}")
         sys.exit(1)
 
 
