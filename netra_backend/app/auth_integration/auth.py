@@ -614,6 +614,165 @@ def _validate_user_permission(user: User, permission: str) -> None:
 # This module ONLY handles FastAPI dependency injection
 # See auth_service for actual authentication implementation
 
+
+class BackendAuthIntegration:
+    """
+    Backend authentication integration class for SSOT compliance.
+    
+    This class provides a unified interface for backend authentication operations,
+    wrapping the existing auth service client functionality in a testable interface.
+    
+    SSOT COMPLIANCE:
+    - Wraps existing AuthServiceClient functionality
+    - Provides integration testing interface
+    - Maintains service boundaries (auth service is external)
+    - Uses existing dependency injection patterns
+    """
+    
+    def __init__(self, auth_interface=None):
+        """
+        Initialize backend auth integration.
+        
+        Args:
+            auth_interface: Optional UnifiedAuthInterface for advanced testing scenarios.
+                           If not provided, uses the standard auth_client for production.
+        """
+        self.auth_interface = auth_interface
+        self.auth_client = auth_client  # Use existing SSOT auth client
+        
+        logger.info("🔧 BACKEND AUTH INTEGRATION: Initialized with auth service client")
+    
+    async def validate_request_token(self, authorization_header: str):
+        """
+        Validate a request token from Authorization header.
+        
+        Args:
+            authorization_header: Authorization header value (e.g., "Bearer <token>")
+            
+        Returns:
+            Validation result with user information
+        """
+        try:
+            # Extract token from header
+            if not authorization_header or not authorization_header.startswith("Bearer "):
+                return AuthValidationResult(
+                    valid=False,
+                    error="invalid_authorization_header",
+                    user_id=None,
+                    email=None
+                )
+            
+            token = authorization_header.split("Bearer ")[1].strip()
+            
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                verification = await self.auth_interface.verify_jwt_token(token)
+                if verification.valid:
+                    return AuthValidationResult(
+                        valid=True,
+                        user_id=verification.user_id,
+                        email=verification.claims.get("email"),
+                        claims=verification.claims
+                    )
+                else:
+                    return AuthValidationResult(
+                        valid=False,
+                        error=verification.error,
+                        user_id=None,
+                        email=None
+                    )
+            
+            # Use standard auth client (production path)
+            validation_result = await self.auth_client.validate_token_jwt(token)
+            
+            if validation_result and validation_result.get("valid"):
+                return AuthValidationResult(
+                    valid=True,
+                    user_id=validation_result.get("user_id"),
+                    email=validation_result.get("email"),
+                    claims=validation_result
+                )
+            else:
+                return AuthValidationResult(
+                    valid=False,
+                    error="token_validation_failed",
+                    user_id=None,
+                    email=None
+                )
+                
+        except Exception as e:
+            logger.error(f"Token validation error: {e}")
+            return AuthValidationResult(
+                valid=False,
+                error=f"validation_exception: {str(e)}",
+                user_id=None,
+                email=None
+            )
+    
+    async def refresh_user_token(self, refresh_token: str):
+        """
+        Refresh a user's access token using refresh token.
+        
+        Args:
+            refresh_token: The refresh token to use
+            
+        Returns:
+            Token refresh result with new tokens
+        """
+        try:
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                refresh_result = await self.auth_interface.refresh_access_token(refresh_token)
+                return TokenRefreshResult(
+                    success=refresh_result.success,
+                    new_access_token=refresh_result.new_access_token if refresh_result.success else None,
+                    new_refresh_token=refresh_result.new_refresh_token if refresh_result.success else None,
+                    error=refresh_result.error if not refresh_result.success else None
+                )
+            
+            # Use auth client for production
+            # Note: This would require implementing refresh_token method in AuthServiceClient
+            # For now, return a placeholder implementation
+            logger.warning("Token refresh not implemented in production auth client - this is a test integration feature")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error="refresh_not_implemented_in_production"
+            )
+            
+        except Exception as e:
+            logger.error(f"Token refresh error: {e}")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error=f"refresh_exception: {str(e)}"
+            )
+
+
+class AuthValidationResult:
+    """Result of authentication token validation"""
+    
+    def __init__(self, valid: bool, user_id: str = None, email: str = None, 
+                 claims: Dict = None, error: str = None):
+        self.valid = valid
+        self.user_id = user_id
+        self.email = email
+        self.claims = claims or {}
+        self.error = error
+
+
+class TokenRefreshResult:
+    """Result of token refresh operation"""
+    
+    def __init__(self, success: bool, new_access_token: str = None, 
+                 new_refresh_token: str = None, error: str = None):
+        self.success = success
+        self.new_access_token = new_access_token
+        self.new_refresh_token = new_refresh_token
+        self.error = error
+
 # Compatibility aliases for deprecated dependencies
 ActiveUserWsDep = Annotated[User, Depends(get_current_user)]
 
@@ -662,3 +821,162 @@ async def generate_access_token(user_id: str, email: str = None, **kwargs) -> st
 # NOTE: All JWT and password hashing logic has been moved to the auth service
 # This module ONLY handles FastAPI dependency injection
 # See auth_service for actual authentication implementation
+
+
+class BackendAuthIntegration:
+    """
+    Backend authentication integration class for SSOT compliance.
+    
+    This class provides a unified interface for backend authentication operations,
+    wrapping the existing auth service client functionality in a testable interface.
+    
+    SSOT COMPLIANCE:
+    - Wraps existing AuthServiceClient functionality
+    - Provides integration testing interface
+    - Maintains service boundaries (auth service is external)
+    - Uses existing dependency injection patterns
+    """
+    
+    def __init__(self, auth_interface=None):
+        """
+        Initialize backend auth integration.
+        
+        Args:
+            auth_interface: Optional UnifiedAuthInterface for advanced testing scenarios.
+                           If not provided, uses the standard auth_client for production.
+        """
+        self.auth_interface = auth_interface
+        self.auth_client = auth_client  # Use existing SSOT auth client
+        
+        logger.info("🔧 BACKEND AUTH INTEGRATION: Initialized with auth service client")
+    
+    async def validate_request_token(self, authorization_header: str):
+        """
+        Validate a request token from Authorization header.
+        
+        Args:
+            authorization_header: Authorization header value (e.g., "Bearer <token>")
+            
+        Returns:
+            Validation result with user information
+        """
+        try:
+            # Extract token from header
+            if not authorization_header or not authorization_header.startswith("Bearer "):
+                return AuthValidationResult(
+                    valid=False,
+                    error="invalid_authorization_header",
+                    user_id=None,
+                    email=None
+                )
+            
+            token = authorization_header.split("Bearer ")[1].strip()
+            
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                verification = await self.auth_interface.verify_jwt_token(token)
+                if verification.valid:
+                    return AuthValidationResult(
+                        valid=True,
+                        user_id=verification.user_id,
+                        email=verification.claims.get("email"),
+                        claims=verification.claims
+                    )
+                else:
+                    return AuthValidationResult(
+                        valid=False,
+                        error=verification.error,
+                        user_id=None,
+                        email=None
+                    )
+            
+            # Use standard auth client (production path)
+            validation_result = await self.auth_client.validate_token_jwt(token)
+            
+            if validation_result and validation_result.get("valid"):
+                return AuthValidationResult(
+                    valid=True,
+                    user_id=validation_result.get("user_id"),
+                    email=validation_result.get("email"),
+                    claims=validation_result
+                )
+            else:
+                return AuthValidationResult(
+                    valid=False,
+                    error="token_validation_failed",
+                    user_id=None,
+                    email=None
+                )
+                
+        except Exception as e:
+            logger.error(f"Token validation error: {e}")
+            return AuthValidationResult(
+                valid=False,
+                error=f"validation_exception: {str(e)}",
+                user_id=None,
+                email=None
+            )
+    
+    async def refresh_user_token(self, refresh_token: str):
+        """
+        Refresh a user's access token using refresh token.
+        
+        Args:
+            refresh_token: The refresh token to use
+            
+        Returns:
+            Token refresh result with new tokens
+        """
+        try:
+            # Use auth interface if available (for advanced testing)
+            if self.auth_interface:
+                refresh_result = await self.auth_interface.refresh_access_token(refresh_token)
+                return TokenRefreshResult(
+                    success=refresh_result.success,
+                    new_access_token=refresh_result.new_access_token if refresh_result.success else None,
+                    new_refresh_token=refresh_result.new_refresh_token if refresh_result.success else None,
+                    error=refresh_result.error if not refresh_result.success else None
+                )
+            
+            # Use auth client for production
+            # Note: This would require implementing refresh_token method in AuthServiceClient
+            # For now, return a placeholder implementation
+            logger.warning("Token refresh not implemented in production auth client - this is a test integration feature")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error="refresh_not_implemented_in_production"
+            )
+            
+        except Exception as e:
+            logger.error(f"Token refresh error: {e}")
+            return TokenRefreshResult(
+                success=False,
+                new_access_token=None,
+                new_refresh_token=None,
+                error=f"refresh_exception: {str(e)}"
+            )
+
+
+class AuthValidationResult:
+    """Result of authentication token validation"""
+    
+    def __init__(self, valid: bool, user_id: str = None, email: str = None, 
+                 claims: Dict = None, error: str = None):
+        self.valid = valid
+        self.user_id = user_id
+        self.email = email
+        self.claims = claims or {}
+        self.error = error
+
+
+class TokenRefreshResult:
+    """Result of token refresh operation"""
+    
+    def __init__(self, success: bool, new_access_token: str = None, 
+                 new_refresh_token: str = None, error: str = None):
+        self.success = success
+        self.new_access_token = new_access_token
+        self.new_refresh_token = new_refresh_token
+        self.error = error
