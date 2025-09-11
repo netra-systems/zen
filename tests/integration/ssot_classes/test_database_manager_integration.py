@@ -648,36 +648,53 @@ class TestDatabaseManagerErrorHandlingAndRecovery(SSotAsyncTestCase):
     
     async def test_migration_url_sync_format(self):
         """Test static method for migration URL in sync format."""
-        with patch('shared.database_url_builder.DatabaseURLBuilder') as mock_builder_class:
-            # Mock URL builder instance
-            mock_builder = Mock()
-            mock_builder_class.return_value = mock_builder
-            mock_builder.get_url_for_environment.return_value = "postgresql+asyncpg://test_url"
-            
-            # Get migration URL
-            migration_url = DatabaseManager.get_migration_url_sync_format()
-            
-            # Verify sync format conversion
-            assert migration_url == "postgresql://test_url"
-            
-            # Verify URL builder was called with sync=True
-            mock_builder.get_url_for_environment.assert_called_with(sync=True)
-            
-            self.record_metric("migration_url_sync_format", True)
+        with patch('netra_backend.app.db.database_manager.get_env') as mock_get_env:
+            with patch('netra_backend.app.db.database_manager.DatabaseURLBuilder') as mock_builder_class:
+                # Mock environment
+                mock_env = Mock()
+                mock_env.as_dict.return_value = {
+                    'POSTGRES_HOST': 'test-host',
+                    'POSTGRES_USER': 'test-user',
+                    'POSTGRES_PASSWORD': 'test-pass',
+                    'POSTGRES_DB': 'test-db'
+                }
+                mock_get_env.return_value = mock_env
+                
+                # Mock URL builder instance
+                mock_builder = Mock()
+                mock_builder_class.return_value = mock_builder
+                mock_builder.get_url_for_environment.return_value = "postgresql+asyncpg://test_url"
+                
+                # Get migration URL
+                migration_url = DatabaseManager.get_migration_url_sync_format()
+                
+                # Verify sync format conversion
+                assert migration_url == "postgresql://test_url"
+                
+                # Verify URL builder was called with sync=True
+                mock_builder.get_url_for_environment.assert_called_with(sync=True)
+                
+                self.record_metric("migration_url_sync_format", True)
     
     async def test_migration_url_failure_handling(self):
         """Test migration URL method handles failures appropriately."""
         with patch('shared.database_url_builder.DatabaseURLBuilder') as mock_builder_class:
-            # Mock URL builder that returns None
-            mock_builder = Mock()
-            mock_builder_class.return_value = mock_builder
-            mock_builder.get_url_for_environment.return_value = None
-            
-            # Test migration URL failure
-            with self.expect_exception(ValueError, "Could not determine migration database URL"):
-                DatabaseManager.get_migration_url_sync_format()
-            
-            self.record_metric("migration_url_failure_handling", True)
+            with patch('shared.isolated_environment.get_env') as mock_get_env:
+                # Mock environment
+                mock_env = Mock()
+                mock_env.as_dict.return_value = {}
+                mock_get_env.return_value = mock_env
+                
+                # Mock URL builder that returns None
+                mock_builder = Mock()
+                mock_builder_class.return_value = mock_builder
+                mock_builder.get_url_for_environment.return_value = None
+                
+                # Test migration URL failure
+                with self.expect_exception(ValueError, "Could not determine migration database URL"):
+                    DatabaseManager.get_migration_url_sync_format()
+                
+                self.record_metric("migration_url_failure_handling", True)
 
 
 class TestDatabaseManagerResourceCleanup(SSotAsyncTestCase):
