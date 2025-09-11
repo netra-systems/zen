@@ -9,6 +9,10 @@ from enum import Enum
 from typing import Any, Dict, Generic, List, Literal, Optional, Protocol, TypeVar, Union
 
 from pydantic import BaseModel, ConfigDict, Field
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
+# SSOT ID Manager instance for consistent ID generation
+_id_manager = UnifiedIDManager()
 
 
 class ServiceStatus(str, Enum):
@@ -197,7 +201,7 @@ class ServiceDependency(BaseModel):
 
 class ServiceContext(BaseModel):
     """Context for service operations"""
-    request_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    request_id: str = Field(default_factory=lambda: _id_manager.generate_id(IDType.REQUEST))
     user_id: Optional[str] = None
     session_id: Optional[str] = None
     tenant_id: Optional[str] = None
@@ -212,7 +216,7 @@ class ServiceContext(BaseModel):
 
 class ServiceAuditLog(BaseModel):
     """Audit log entry for service operations"""
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=lambda: _id_manager.generate_id(IDType.METRIC))
     service_name: str
     operation: OperationType
     entity_type: str
@@ -262,7 +266,7 @@ class ServiceRegistry(BaseModel):
 
 class TransactionContext(BaseModel):
     """Context for transactional operations"""
-    transaction_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    transaction_id: str = Field(default_factory=lambda: _id_manager.generate_id(IDType.TRANSACTION))
     isolation_level: Literal["read_uncommitted", "read_committed", "repeatable_read", "serializable"] = "read_committed"
     timeout_seconds: int = Field(default=30)
     savepoints: List[str] = Field(default_factory=list)
