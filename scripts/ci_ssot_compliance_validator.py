@@ -184,7 +184,7 @@ class CISSotComplianceValidator:
         
         return ci_info
     
-    def run_ssot_compliance_scan(self) -> Optional[MonitoringReport]:
+    def run_ssot_compliance_scan(self) -> Optional[Any]:
         """Run SSOT compliance monitoring scan."""
         if not self.monitoring_available:
             logger.error("Monitoring system not available - cannot perform compliance scan")
