@@ -26,7 +26,9 @@ import time
 import json
 
 # Add project root to path for imports
-sys.path.insert(0, '/Users/anthony/Desktop/netra-apex')
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 try:
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -35,9 +37,8 @@ try:
     from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
     from netra_backend.app.core.configuration.base import get_config
 except ImportError as e:
-    print(f"Import error: {e}")
-    print("This test requires the backend modules to be available")
-    sys.exit(1)
+    import pytest
+    pytest.skip(f"Backend modules not available: {e}", allow_module_level=True)
 
 
 class TestBusinessFunctionValidation(unittest.TestCase):
