@@ -33,12 +33,11 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
-    # CRITICAL: Avoid circular import by skipping canonical SSOT for now
-    # The canonical SSOT itself imports from test_framework.runner, causing circular dependency
-    # For Phase 1, we'll use fallback mode to ensure business continuity
-    CANONICAL_AVAILABLE = False
-    print("PHASE 1 MODE: Using fallback implementation to avoid circular import")
-    print("BUSINESS PROTECTION: Golden Path testing will continue safely")
+    # CRITICAL: Import canonical SSOT now that circular dependency is resolved
+    from tests.unified_test_runner import UnifiedTestRunner as CanonicalUnifiedTestRunner
+    CANONICAL_AVAILABLE = True
+    print("SSOT MODE: Using canonical SSOT UnifiedTestRunner")
+    print("BUSINESS PROTECTION: Golden Path testing redirected to canonical SSOT")
 except Exception as e:
     CANONICAL_AVAILABLE = False
     print(f"FALLBACK MODE: {e}")
