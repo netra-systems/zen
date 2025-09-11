@@ -1673,28 +1673,56 @@ class AgentWebSocketBridge(MonitorableComponent):
             if trace_context:
                 notification["trace"] = trace_context
             
+            # PHASE 2 FIX: Track event delivery with confirmation and retry - CRITICAL EVENT
+            event_id = None
+            try:
+                from netra_backend.app.websocket_core.event_delivery_tracker import get_event_delivery_tracker, EventPriority
+                
+                tracker = get_event_delivery_tracker()
+                event_id = tracker.track_event(
+                    event_type="agent_completed",
+                    user_id=effective_user_context.user_id,
+                    run_id=run_id,
+                    thread_id=effective_user_context.thread_id,
+                    data=notification,
+                    priority=EventPriority.CRITICAL,  # Agent completion is CRITICAL
+                    timeout_s=60.0,  # Longer timeout for critical event
+                    max_retries=5    # More retries for critical event
+                )
+                tracker.mark_event_sent(event_id)
+            except ImportError:
+                logger.debug("Event delivery tracker not available, proceeding without tracking")
+            
             # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
             user_id = effective_user_context.user_id
             
             # PHASE 1 FIX: Direct WebSocket emission using user_id - CRITICAL EVENT
             success = await self._websocket_manager.send_to_user(user_id, notification)
             
-            if success:
-                logger.info(f"✅ EMISSION SUCCESS: agent_completed → user={user_id} (run_id={run_id}, agent={agent_name})")
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("agent_completed", run_id, True)
+            # PHASE 2 FIX: Update delivery tracking
+            if event_id:
+                try:
+                    if success:
+                        tracker.mark_event_confirmed(event_id)
+                        logger.info(f"✅ EMISSION SUCCESS: agent_completed → user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                    else:
+                        tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False - CRITICAL EVENT FAILURE")
+                        logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}] - CRITICAL EVENT")
+                except Exception as track_error:
+                    logger.warning(f"Event tracking update failed for critical event: {track_error}")
             else:
-                logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name})")
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("agent_completed", run_id, False)
-                # PHASE 2 FIX: Alert for critical event failure (to be implemented)
-                if hasattr(self, '_alert_critical_event_failure'):
-                    await self._alert_critical_event_failure("agent_completed", run_id, agent_name)
+                if success:
+                    logger.info(f"✅ EMISSION SUCCESS: agent_completed → user={user_id} (run_id={run_id}, agent={agent_name})")
+                else:
+                    logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) - CRITICAL EVENT")
             
             return success
             
         except Exception as e:
             logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_completed failed (run_id={run_id}, agent={agent_name}): {e}")
+            # PHASE 4 FIX: Propagate critical errors instead of silent failure
+            if "CRITICAL" in str(e) or "user_id" in str(e).lower():
+                raise  # Don't allow critical routing errors to fail silently
             return False
     
     async def notify_agent_error(
