@@ -11,10 +11,22 @@
 - No bypassing established patterns
 
 **GOLDEN PATH PRIORITY:**
-1. Users login and get AI message responses
+1. Users login and get real AI message responses
 2. All else is secondary
-3. Staging GCP deployment only
+3. Staging GCP deployment only (ignore docker)
 4. Minimal fixes, zero new features
+
+**BETA GOLDEN PATH**
+1. Focus on effective golden path or beta.
+2. Ignore smaller isues, like docker issues etc.
+3. No philosophical items, practical resolutions for golden path beta working.
+
+**Context Matters: Be accurate and naunced**
+1. This is NEW active development beta software for a startup.
+2. Rank importance of issue relative to impact and ease of fix (because of dev nature).
+3. Avoid making sweeping claims or catastrophizing.
+4. Play devils advocate. What is opposite view on spectrum? Then where is the middle ground?
+5. Don't be fooled by duplicate names, various classes do have real arhitecture meaning and differences.
 
 **MISSION:** Netra Apex AI Optimization Platform - balance engineering excellence with business goals through multi-agent AI collaboration.
 
