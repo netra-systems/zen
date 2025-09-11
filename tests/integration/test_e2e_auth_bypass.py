@@ -413,7 +413,7 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 self.assertIn(field, response_data, f"Response should include {field}")
             
             # Validate field types and formats
-            self.assertIsInstance(response_data["access_token"], str, "access_token should be string")
+            assert isinstance(response_data["access_token"], str), "access_token should be string"
             self.assertGreater(len(response_data["access_token"]), 20, "access_token should be substantial")
             
             # Validate user structure
