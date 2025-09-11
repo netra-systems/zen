@@ -232,17 +232,7 @@ class AgentExecutionCore:
         execution_timeout = timeout or self.get_execution_timeout(tier, streaming)
         selected_tier = tier or self.default_tier
         
-        logger.info(
-            f"🎯 AGENT_EXECUTION_START: Beginning agent execution with enterprise-grade isolation. "
-            f"Agent: {context.agent_name}, Tier: {selected_tier.value}, "
-            f"Timeout: {execution_timeout}s, Streaming: {streaming}, "
-            f"User: {user_execution_context.user_id[:8]}..., "
-            f"Thread: {user_execution_context.thread_id}, Run: {user_execution_context.run_id}, "
-            f"Correlation: {trace_context.correlation_id if trace_context else 'none'}, "
-            f"WebSocket_bridge: {'available' if self.websocket_bridge else 'unavailable'}"
-        )
-        
-        # Get or create trace context
+        # Get or create trace context BEFORE logging
         parent_trace = get_unified_trace_context()
         if parent_trace:
             # Create child context for this agent
@@ -254,6 +244,16 @@ class AgentExecutionCore:
                 thread_id=user_execution_context.thread_id,
                 correlation_id=getattr(context, 'correlation_id', None)
             )
+        
+        logger.info(
+            f"🎯 AGENT_EXECUTION_START: Beginning agent execution with enterprise-grade isolation. "
+            f"Agent: {context.agent_name}, Tier: {selected_tier.value}, "
+            f"Timeout: {execution_timeout}s, Streaming: {streaming}, "
+            f"User: {user_execution_context.user_id[:8]}..., "
+            f"Thread: {user_execution_context.thread_id}, Run: {user_execution_context.run_id}, "
+            f"Correlation: {trace_context.correlation_id if trace_context else 'none'}, "
+            f"WebSocket_bridge: {'available' if self.websocket_bridge else 'unavailable'}"
+        )
         
         # Start span for this agent execution
         span = trace_context.start_span(
