@@ -111,12 +111,13 @@ class UnifiedConfigManager:
             # This handles cases where the config class doesn't properly load it
             if not config.service_secret:
                 try:
-                    # Direct environment access to avoid circular import during startup
-                    import os
-                    service_secret = os.environ.get('SERVICE_SECRET') or os.environ.get('JWT_SECRET_KEY')
+                    # SSOT COMPLIANT: Use IsolatedEnvironment instead of direct os.environ access
+                    from shared.isolated_environment import IsolatedEnvironment
+                    env = IsolatedEnvironment()
+                    service_secret = env.get('SERVICE_SECRET') or env.get('JWT_SECRET_KEY')
                     if service_secret:
                         config.service_secret = service_secret.strip()
-                        self._logger.info("Loaded SERVICE_SECRET from environment (avoiding startup circular import)")
+                        self._logger.info("Loaded SERVICE_SECRET from IsolatedEnvironment (SSOT compliant)")
                     else:
                         self._logger.warning("SERVICE_SECRET not found in environment variables")
                 except Exception as e:

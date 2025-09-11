@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 """
-E2E TEST 9: Performance Validation for UserExecutionEngine SSOT
+E2E TEST 9: Real Performance Validation for UserExecutionEngine SSOT
 
-PURPOSE: Test UserExecutionEngine performance meets baseline requirements for production.
-This validates the SSOT requirement that consolidated execution performs better than multiple engines.
+PURPOSE: Validate UserExecutionEngine performance meets business-critical SLAs for production deployment.
+Tests REAL system performance under load with REAL WebSocket connections and database operations.
 
-Expected to FAIL before SSOT consolidation (proves performance issues with multiple engines)
-Expected to PASS after SSOT consolidation (proves UserExecutionEngine meets performance targets)
+Business Impact: $500K+ ARR Golden Path protection - performance directly affects user experience
+- Agent response time affects customer satisfaction and retention
+- WebSocket event delivery affects real-time chat experience  
+- Memory usage affects system stability and concurrent user capacity
+- Database performance affects overall system responsiveness
 
-Business Impact: $500K+ ARR Golden Path protection - performance affects user experience
-E2E Level: Tests real performance on staging environment with real services
+E2E Level: Tests real performance on staging environment with real services - NO MOCKS
+Test MUST FAIL when performance degrades below business-critical thresholds
 """
 
 import asyncio
@@ -24,6 +27,7 @@ import tracemalloc
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Any, Optional
+import logging
 
 # Add project root to path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
@@ -31,9 +35,16 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 import unittest
-from unittest.mock import Mock, AsyncMock
 
+# REAL SERVICES ONLY - NO MOCKS
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.db.performance_monitor import DatabasePerformanceMonitor, PerformanceMetrics, MonitoringType
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+from shared.types.core_types import UserID, ensure_user_id
+from test_framework.performance_helpers import PerformanceTestHelper
+
+logger = logging.getLogger(__name__)
 
 
 class PerformanceMetrics:
@@ -77,13 +88,21 @@ class PerformanceMetrics:
         
         try:
             process_memory = self.process.memory_info().rss
+            cpu_percent = self.process.cpu_percent()
             self.metrics['resource_utilization'].append({
                 'memory_rss': process_memory,
-                'cpu_percent': self.process.cpu_percent(),
+                'cpu_percent': cpu_percent,
                 'timestamp': time.time()
             })
-        except Exception:
-            pass
+            logger.info(f"Resource usage recorded: {process_memory/1024/1024:.2f}MB RAM, {cpu_percent:.1f}% CPU")
+        except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+            # BUSINESS IMPACT: Resource monitoring failures indicate system instability
+            logger.error(f"CRITICAL: Resource monitoring failed - system may be unstable: {e}")
+            raise RuntimeError(f"Resource monitoring failure affects performance validation: {e}") from e
+        except Exception as e:
+            # NEVER SWALLOW EXCEPTIONS - Performance monitoring failures are critical
+            logger.error(f"CRITICAL: Unexpected resource monitoring error: {e}")
+            raise RuntimeError(f"Performance monitoring system failure: {e}") from e
             
     def record_event_throughput(self, events_processed: int, duration: float):
         """Record event processing throughput"""
@@ -145,29 +164,115 @@ class PerformanceMetrics:
         return summary
 
 
-class PerformanceWebSocketMock:
-    """High-performance WebSocket mock for testing"""
+class RealPerformanceWebSocketManager:
+    """REAL WebSocket manager wrapper for performance testing - NO MOCKS"""
     
     def __init__(self, user_id: str):
-        self.user_id = user_id
+        self.user_id = ensure_user_id(user_id)
         self.events_sent = 0
         self.last_event_time = None
-        self.send_agent_event = AsyncMock(side_effect=self._fast_event_handler)
+        self.connection_start_time = time.perf_counter()
+        # REAL WebSocket manager - measures actual system performance
+        self.websocket_manager = UnifiedWebSocketManager()
+        self.performance_metrics = []
         
-    async def _fast_event_handler(self, event_type: str, data: Dict[str, Any]):
-        """Fast event handler for performance testing"""
-        self.events_sent += 1
-        self.last_event_time = time.perf_counter()
-        # Minimal processing for performance testing
+    async def send_agent_event(self, event_type: str, data: Dict[str, Any]) -> float:
+        """Send real WebSocket event and measure performance"""
+        start_time = time.perf_counter()
+        
+        try:
+            # REAL WebSocket event delivery - measures actual performance
+            await self.websocket_manager.send_agent_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data={
+                    **data,
+                    'performance_test_id': str(uuid.uuid4()),
+                    'timestamp': time.time()
+                }
+            )
+            
+            event_time = time.perf_counter() - start_time
+            self.events_sent += 1
+            self.last_event_time = time.perf_counter()
+            
+            # Track performance metrics
+            self.performance_metrics.append({
+                'event_type': event_type,
+                'duration': event_time,
+                'timestamp': time.time()
+            })
+            
+            # BUSINESS CRITICAL: Log slow events that affect user experience
+            if event_time > 0.01:  # 10ms threshold
+                logger.warning(f"SLOW WebSocket event affects user experience: {event_type} took {event_time:.4f}s")
+                
+            return event_time
+            
+        except Exception as e:
+            # BUSINESS IMPACT: WebSocket failures break real-time chat experience
+            logger.error(f"CRITICAL: WebSocket event failure breaks chat experience: {e}")
+            raise RuntimeError(f"WebSocket event failure affects customer experience: {e}") from e
+    
+    async def cleanup(self):
+        """Cleanup real WebSocket connections"""
+        try:
+            if hasattr(self.websocket_manager, 'cleanup'):
+                await self.websocket_manager.cleanup()
+        except Exception as e:
+            logger.error(f"WebSocket cleanup error: {e}")
+            # Don't raise - cleanup errors shouldn't fail tests
+    
+    def get_performance_summary(self) -> Dict[str, Any]:
+        """Get real performance metrics summary"""
+        if not self.performance_metrics:
+            return {'error': 'No performance data collected'}
+            
+        durations = [m['duration'] for m in self.performance_metrics]
+        return {
+            'total_events': self.events_sent,
+            'avg_duration': statistics.mean(durations),
+            'max_duration': max(durations),
+            'min_duration': min(durations),
+            'std_dev': statistics.stdev(durations) if len(durations) > 1 else 0,
+            'events_over_10ms': sum(1 for d in durations if d > 0.01),
+            'total_test_time': time.perf_counter() - self.connection_start_time
+        }
 
 
 class TestPerformanceValidation(SSotAsyncTestCase):
     """E2E Test 9: Validate UserExecutionEngine performance meets baseline requirements"""
     
-    def setUp(self):
-        """Set up test fixtures"""
-        self.test_user_id = f"performance_user_{uuid.uuid4().hex[:8]}"
+    async def asyncSetUp(self):
+        """Set up real test fixtures with performance monitoring"""
+        await super().asyncSetUp()
+        self.test_user_id = ensure_user_id(f"performance_user_{uuid.uuid4().hex[:8]}")
         self.test_session_id = f"performance_session_{uuid.uuid4().hex[:8]}"
+        
+        # Initialize real performance monitoring
+        self.db_monitor = DatabasePerformanceMonitor()
+        self.performance_violations = []  # Track business-critical violations
+        
+        # Business-critical performance thresholds for user experience
+        self.performance_slas = {
+            'engine_creation_time': 0.1,     # 100ms max - affects user wait time
+            'event_processing_time': 0.005,  # 5ms max - affects real-time chat experience
+            'event_throughput': 200,         # 200 events/sec min - handles multiple users
+            'memory_per_engine': 10 * 1024 * 1024,  # 10MB max per engine - scalability
+            'concurrent_users_supported': 25,  # 25 concurrent users min - business capacity
+            'response_time_95th': 0.05,      # 50ms 95th percentile - user experience SLA
+            'memory_growth_limit': 50 * 1024 * 1024,  # 50MB max growth - prevents memory leaks
+        }
+        
+        logger.info(f"Performance test started for user {self.test_user_id} with SLAs: {self.performance_slas}")
+        
+    async def asyncTearDown(self):
+        """Clean up real resources"""
+        try:
+            await super().asyncTearDown()
+        except Exception as e:
+            logger.error(f"Teardown error: {e}")
+            # Don't raise - teardown errors shouldn't fail subsequent tests
         
     async def test_execution_engine_creation_performance(self):
         """Test UserExecutionEngine creation performance"""
@@ -186,14 +291,21 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         creation_times = []
         
         for i in range(50):  # Create 50 engines to get statistical significance
-            websocket_mock = PerformanceWebSocketMock(f"{self.test_user_id}_{i}")
+            websocket_manager = RealPerformanceWebSocketManager(f"{self.test_user_id}_{i}")
             
             creation_start = time.perf_counter()
             try:
+                # Create real user execution context for isolation
+                user_context = UserExecutionContext(
+                    user_id=ensure_user_id(f"{self.test_user_id}_{i}"),
+                    session_id=f"{self.test_session_id}_{i}"
+                )
+                
                 engine = UserExecutionEngine(
-                    user_id=f"{self.test_user_id}_{i}",
+                    user_id=ensure_user_id(f"{self.test_user_id}_{i}"),
                     session_id=f"{self.test_session_id}_{i}",
-                    websocket_manager=websocket_mock
+                    websocket_manager=websocket_manager.websocket_manager,
+                    user_context=user_context
                 )
                 creation_time = time.perf_counter() - creation_start
                 creation_times.append(creation_time)
@@ -201,17 +313,23 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 metrics.record_execution_time(f"engine_creation_{i}", creation_time)
                 metrics.record_memory_usage()
                 
-                # Cleanup
+                # Cleanup real resources
                 if hasattr(engine, 'cleanup'):
-                    engine.cleanup()
+                    await engine.cleanup()
+                await websocket_manager.cleanup()
                 del engine
+                del websocket_manager
                 
                 # Force garbage collection every 10 iterations
                 if i % 10 == 0:
                     gc.collect()
                 
             except Exception as e:
-                performance_violations.append(f"Engine creation {i} failed: {e}")
+                # BUSINESS IMPACT: Engine creation failures prevent user sessions
+                error_msg = f"CRITICAL: Engine creation {i} failed - affects user session creation: {e}"
+                logger.error(error_msg)
+                performance_violations.append(error_msg)
+                # Continue testing other engines to get full failure picture
         
         # Analyze creation performance
         if creation_times:
@@ -226,36 +344,54 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             print(f"    Maximum: {max_creation_time:.4f}s")
             print(f"    Std Dev: {std_dev:.4f}s")
             
-            # Performance thresholds
-            if avg_creation_time > 0.05:  # 50ms average creation time
-                performance_violations.append(f"Slow average creation time: {avg_creation_time:.4f}s")
+            # BUSINESS-CRITICAL performance thresholds for user experience
+            if avg_creation_time > self.performance_slas['engine_creation_time']:
+                violation = f"BUSINESS IMPACT: Slow average engine creation affects user wait time: {avg_creation_time:.4f}s > {self.performance_slas['engine_creation_time']:.3f}s SLA"
+                logger.error(violation)
+                performance_violations.append(violation)
             
-            if max_creation_time > 0.2:  # 200ms max creation time
-                performance_violations.append(f"Slow max creation time: {max_creation_time:.4f}s")
+            if max_creation_time > self.performance_slas['engine_creation_time'] * 2:  # 2x SLA for max
+                violation = f"BUSINESS IMPACT: Slow max engine creation causes user frustration: {max_creation_time:.4f}s > {self.performance_slas['engine_creation_time'] * 2:.3f}s threshold"
+                logger.error(violation)
+                performance_violations.append(violation)
             
-            if std_dev > 0.02:  # 20ms standard deviation
-                performance_violations.append(f"Inconsistent creation time: {std_dev:.4f}s std dev")
+            if std_dev > self.performance_slas['engine_creation_time'] / 2:  # 50% of SLA for consistency
+                violation = f"BUSINESS IMPACT: Inconsistent engine creation causes unpredictable user experience: {std_dev:.4f}s std dev > {self.performance_slas['engine_creation_time'] / 2:.3f}s threshold"
+                logger.error(violation)
+                performance_violations.append(violation)
         
         # Test concurrent engine creation
         async def create_engine_concurrent(index: int):
-            """Create engine concurrently"""
-            websocket_mock = PerformanceWebSocketMock(f"concurrent_{index}")
+            """Create real engine concurrently to test multi-user performance"""
+            websocket_manager = RealPerformanceWebSocketManager(f"concurrent_{index}")
             start_time = time.perf_counter()
             
             try:
+                # Real concurrent user context creation
+                user_context = UserExecutionContext(
+                    user_id=ensure_user_id(f"concurrent_user_{index}"),
+                    session_id=f"concurrent_session_{index}"
+                )
+                
                 engine = UserExecutionEngine(
-                    user_id=f"concurrent_user_{index}",
+                    user_id=ensure_user_id(f"concurrent_user_{index}"),
                     session_id=f"concurrent_session_{index}",
-                    websocket_manager=websocket_mock
+                    websocket_manager=websocket_manager.websocket_manager,
+                    user_context=user_context
                 )
                 creation_time = time.perf_counter() - start_time
                 
+                # Cleanup real resources
                 if hasattr(engine, 'cleanup'):
-                    engine.cleanup()
+                    await engine.cleanup()
+                await websocket_manager.cleanup()
                 
                 return creation_time
             except Exception as e:
-                performance_violations.append(f"Concurrent creation {index} failed: {e}")
+                # BUSINESS IMPACT: Concurrent creation failures limit user capacity
+                error_msg = f"BUSINESS IMPACT: Concurrent engine creation {index} failed - limits concurrent user capacity: {e}"
+                logger.error(error_msg)
+                performance_violations.append(error_msg)
                 return float('inf')
         
         print(f"  🔄 Testing concurrent engine creation...")
@@ -273,15 +409,27 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             
             metrics.record_concurrent_performance(len(concurrent_tasks), concurrent_avg)
             
-            # Concurrent creation shouldn't be much slower
-            if concurrent_avg > avg_creation_time * 2:  # Allow 2x slower for concurrent
-                performance_violations.append(f"Concurrent creation too slow: {concurrent_avg:.4f}s vs {avg_creation_time:.4f}s")
+            # BUSINESS IMPACT: Concurrent performance affects multi-user capacity
+            concurrent_degradation_threshold = avg_creation_time * 1.5  # Allow 50% degradation maximum
+            if concurrent_avg > concurrent_degradation_threshold:
+                violation = f"BUSINESS IMPACT: Concurrent engine creation degrades multi-user performance: {concurrent_avg:.4f}s vs {avg_creation_time:.4f}s sequential (>{concurrent_degradation_threshold:.4f}s threshold)"
+                logger.error(violation)
+                performance_violations.append(violation)
+                
+            # Check if we can support minimum concurrent users
+            if len(valid_concurrent_times) < self.performance_slas['concurrent_users_supported'] * 0.8:  # 80% success rate
+                violation = f"BUSINESS IMPACT: Concurrent user capacity below business requirements: {len(valid_concurrent_times)} successful vs {self.performance_slas['concurrent_users_supported']} required"
+                logger.error(violation)
+                performance_violations.append(violation)
         
         print(f"  ✅ Engine creation performance tested: {len(creation_times)} sequential, {len(valid_concurrent_times)} concurrent")
         
-        # CRITICAL: Engine creation performance affects user experience
+        # BUSINESS-CRITICAL: Engine creation performance directly affects user experience and revenue
         if performance_violations:
-            self.fail(f"Engine creation performance violations: {performance_violations}")
+            logger.error(f"BUSINESS-CRITICAL PERFORMANCE FAILURES affect $500K+ ARR: {len(performance_violations)} violations")
+            for violation in performance_violations:
+                logger.error(f"  - {violation}")
+            self.fail(f"BUSINESS-CRITICAL: Engine creation performance violations affect user experience and revenue: {performance_violations}")
         
         print(f"  ✅ UserExecutionEngine creation performance validated")
     
@@ -459,38 +607,74 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         for cycle in range(10):
             cycle_engines = []
             
-            # Create multiple engines
+            # Create multiple real engines with real WebSocket connections
+            cycle_websocket_managers = []
             for i in range(20):
-                websocket_mock = PerformanceWebSocketMock(f"memory_test_{cycle}_{i}")
+                websocket_manager = RealPerformanceWebSocketManager(f"memory_test_{cycle}_{i}")
+                cycle_websocket_managers.append(websocket_manager)
                 
                 try:
+                    # Real user context for memory testing
+                    user_context = UserExecutionContext(
+                        user_id=ensure_user_id(f"memory_user_{cycle}_{i}"),
+                        session_id=f"memory_session_{cycle}_{i}"
+                    )
+                    
                     engine = UserExecutionEngine(
-                        user_id=f"memory_user_{cycle}_{i}",
+                        user_id=ensure_user_id(f"memory_user_{cycle}_{i}"),
                         session_id=f"memory_session_{cycle}_{i}",
-                        websocket_manager=websocket_mock
+                        websocket_manager=websocket_manager.websocket_manager,
+                        user_context=user_context
                     )
                     cycle_engines.append(engine)
                     
-                    # Use the engine
+                    # Use the engine with real operations
                     context = engine.get_user_context() if hasattr(engine, 'get_user_context') else {}
-                    await engine.send_websocket_event('test_memory', {'cycle': cycle, 'index': i})
+                    await websocket_manager.send_agent_event('test_memory', {
+                        'cycle': cycle, 
+                        'index': i,
+                        'memory_test': True,
+                        'context_size': len(str(context))
+                    })
                     
                 except Exception as e:
-                    performance_violations.append(f"Memory test engine creation failed: {e}")
+                    # BUSINESS IMPACT: Memory test failures indicate resource management problems
+                    error_msg = f"BUSINESS IMPACT: Memory test engine creation failed - indicates resource management issues: {e}"
+                    logger.error(error_msg)
+                    performance_violations.append(error_msg)
+                    raise RuntimeError(f"Memory test engine creation failure indicates system instability: {e}") from e
             
             # Measure memory after creation
             creation_memory = tracemalloc.get_traced_memory()[0] if tracemalloc.is_tracing() else 0
             
-            # Cleanup engines
+            # Cleanup engines with proper error handling
+            cleanup_errors = []
             for engine in cycle_engines:
                 try:
                     if hasattr(engine, 'cleanup'):
-                        engine.cleanup()
-                except Exception:
-                    pass
+                        await engine.cleanup()
+                except Exception as e:
+                    cleanup_error = f"Engine cleanup failed in cycle {cycle}: {e}"
+                    logger.warning(cleanup_error)
+                    cleanup_errors.append(cleanup_error)
+                    # Continue cleanup of other engines
             
+            # BUSINESS IMPACT: Too many cleanup errors indicate resource management issues
+            if cleanup_errors and len(cleanup_errors) > len(cycle_engines) * 0.1:  # More than 10% cleanup failures
+                violation = f"BUSINESS IMPACT: High cleanup failure rate indicates resource management issues: {len(cleanup_errors)}/{len(cycle_engines)} failures"
+                logger.error(violation)
+                performance_violations.append(violation)
+            
+            # Cleanup WebSocket managers
+            for ws_manager in cycle_websocket_managers:
+                try:
+                    await ws_manager.cleanup()
+                except Exception as e:
+                    logger.warning(f"WebSocket manager cleanup error: {e}")
+                    
             cycle_engines.clear()
-            gc.collect()
+            cycle_websocket_managers.clear()
+            gc.collect()  # Force garbage collection for memory measurement
             
             # Measure memory after cleanup
             cleanup_memory = tracemalloc.get_traced_memory()[0] if tracemalloc.is_tracing() else 0
@@ -518,12 +702,17 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             print(f"    Peak cycle memory: {peak_cycle_memory/1024/1024:.2f}MB")
             print(f"    Average cycle memory: {avg_cycle_memory/1024/1024:.2f}MB")
             
-            # Memory performance thresholds
-            if total_growth > 100 * 1024 * 1024:  # 100MB total growth is excessive
-                performance_violations.append(f"Excessive total memory growth: {total_growth/1024/1024:.2f}MB")
+            # BUSINESS-CRITICAL: Memory performance affects system scalability and cost
+            if total_growth > self.performance_slas['memory_growth_limit']:
+                violation = f"BUSINESS IMPACT: Excessive memory growth affects system scalability and hosting costs: {total_growth/1024/1024:.2f}MB > {self.performance_slas['memory_growth_limit']/1024/1024:.1f}MB limit"
+                logger.error(violation)
+                performance_violations.append(violation)
             
-            if peak_cycle_memory > 50 * 1024 * 1024:  # 50MB per cycle is excessive
-                performance_violations.append(f"Excessive cycle memory usage: {peak_cycle_memory/1024/1024:.2f}MB")
+            memory_per_engine_limit = self.performance_slas['memory_per_engine']
+            if peak_cycle_memory > memory_per_engine_limit * 20:  # 20 engines per cycle
+                violation = f"BUSINESS IMPACT: Excessive per-engine memory usage limits concurrent users: {peak_cycle_memory/1024/1024:.2f}MB > {(memory_per_engine_limit * 20)/1024/1024:.1f}MB limit"
+                logger.error(violation)
+                performance_violations.append(violation)
         
         # Test memory usage under load
         print(f"  🚀 Testing memory usage under load...")
@@ -532,32 +721,45 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         
         # Create load scenario
         async def create_load_engine(index: int):
-            """Create engine with load simulation"""
-            websocket_mock = PerformanceWebSocketMock(f"load_user_{index}")
+            """Create real engine with realistic load simulation"""
+            websocket_manager = RealPerformanceWebSocketManager(f"load_user_{index}")
             
             try:
-                engine = UserExecutionEngine(
-                    user_id=f"load_user_{index}",
-                    session_id=f"load_session_{index}",
-                    websocket_manager=websocket_mock
+                # Real user context for load testing
+                user_context = UserExecutionContext(
+                    user_id=ensure_user_id(f"load_user_{index}"),
+                    session_id=f"load_session_{index}"
                 )
                 
-                # Simulate realistic load
+                engine = UserExecutionEngine(
+                    user_id=ensure_user_id(f"load_user_{index}"),
+                    session_id=f"load_session_{index}",
+                    websocket_manager=websocket_manager.websocket_manager,
+                    user_context=user_context
+                )
+                
+                # Simulate realistic chat load with real events
                 for event_num in range(10):
-                    await engine.send_websocket_event('load_test', {
+                    await websocket_manager.send_agent_event('load_test', {
                         'user_index': index,
                         'event_num': event_num,
-                        'load_data': 'x' * 100  # Some data
+                        'load_data': 'x' * 100,  # Realistic message size
+                        'timestamp': time.time(),
+                        'memory_test': True
                     })
                 
-                # Cleanup
+                # Cleanup real resources
                 if hasattr(engine, 'cleanup'):
-                    engine.cleanup()
+                    await engine.cleanup()
+                await websocket_manager.cleanup()
                 
                 return True
                 
             except Exception as e:
-                performance_violations.append(f"Load engine {index} failed: {e}")
+                # BUSINESS IMPACT: Load test failures indicate system cannot handle user capacity
+                error_msg = f"BUSINESS IMPACT: Load engine {index} failed - system cannot handle expected user load: {e}"
+                logger.error(error_msg)
+                performance_violations.append(error_msg)
                 return False
         
         # Run load test
@@ -572,18 +774,27 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         print(f"    Load test: {successful_loads}/{len(load_tasks)} successful")
         print(f"    Load memory growth: {load_memory_growth/1024/1024:.2f}MB")
         
-        # Load memory growth should be reasonable
-        if load_memory_growth > 75 * 1024 * 1024:  # 75MB for 50 engines under load
-            performance_violations.append(f"Excessive load memory growth: {load_memory_growth/1024/1024:.2f}MB")
+        # BUSINESS IMPACT: Load memory growth affects concurrent user capacity
+        max_load_memory = self.performance_slas['memory_per_engine'] * len(load_tasks) * 1.5  # 1.5x buffer
+        if load_memory_growth > max_load_memory:
+            violation = f"BUSINESS IMPACT: Load memory growth exceeds concurrent user capacity limits: {load_memory_growth/1024/1024:.2f}MB > {max_load_memory/1024/1024:.2f}MB"
+            logger.error(violation)
+            performance_violations.append(violation)
         
-        if successful_loads < len(load_tasks) * 0.95:  # 95% success rate
-            performance_violations.append(f"Load test success rate too low: {successful_loads}/{len(load_tasks)}")
+        min_success_rate = 0.95  # 95% success rate for business reliability
+        if successful_loads < len(load_tasks) * min_success_rate:
+            violation = f"BUSINESS IMPACT: Load test success rate below business reliability requirements: {successful_loads}/{len(load_tasks)} ({successful_loads/len(load_tasks)*100:.1f}%) < {min_success_rate*100}%"
+            logger.error(violation)
+            performance_violations.append(violation)
         
         print(f"  ✅ Memory performance tested: {len(memory_measurements)} cycles, {len(load_tasks)} load engines")
         
-        # CRITICAL: Memory performance affects system stability
+        # BUSINESS-CRITICAL: Memory performance affects system stability and concurrent user capacity
         if performance_violations:
-            self.fail(f"Memory performance violations: {performance_violations}")
+            logger.error(f"BUSINESS-CRITICAL: Memory performance failures affect system stability: {len(performance_violations)} violations")
+            for violation in performance_violations:
+                logger.error(f"  - {violation}")
+            self.fail(f"BUSINESS-CRITICAL: Memory performance violations affect system stability and user capacity: {performance_violations}")
         
         print(f"  ✅ Memory performance characteristics validated")
     

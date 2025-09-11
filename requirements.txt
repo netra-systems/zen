@@ -130,6 +130,7 @@ opentelemetry-instrumentation-sqlalchemy==0.45b0
 opentelemetry-instrumentation-redis==0.45b0
 opentelemetry-exporter-otlp==1.24.0
 opentelemetry-exporter-jaeger==1.21.0
+opentelemetry-exporter-gcp-trace==1.9.0
 
 # --- Testing ---
 # The standard testing framework for Python.

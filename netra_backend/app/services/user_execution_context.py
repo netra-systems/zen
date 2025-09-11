@@ -1305,7 +1305,7 @@ async def create_isolated_execution_context(
         thread_id = id_manager.generate_thread_id()
         
     if not run_id:
-        run_id = id_manager.generate_run_id()
+        run_id = id_manager.generate_run_id(thread_id)
     
     # Validate user exists in database if requested and session available
     if validate_user and database_session:
