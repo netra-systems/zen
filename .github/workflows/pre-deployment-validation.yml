@@ -1,0 +1,314 @@
+name: Pre-Deployment Environment Validation
+
+# PURPOSE: Validate environment-specific configurations before deployment
+# CONTEXT: Process Improvement - Prevent localhost URLs in staging/production
+# BUSINESS IMPACT: Protects $500K+ ARR Golden Path functionality
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        required: true
+        type: string
+      strict_mode:
+        description: 'Enable strict validation (warnings fail)'
+        required: false
+        type: boolean
+        default: false
+  
+  # Allow manual triggering for testing
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+          - development
+        default: 'staging'
+      strict_mode:
+        description: 'Enable strict validation (warnings fail)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  environment-validation:
+    name: Environment Configuration Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r test-requirements.txt
+      
+      - name: Environment URL Validation
+        id: url_validation
+        run: |
+          echo "🔍 Validating service URLs for ${{ inputs.environment }} environment..."
+          
+          if [ "${{ inputs.strict_mode }}" = "true" ]; then
+            python scripts/validate_environment_urls.py --environment ${{ inputs.environment }} --strict
+          else
+            python scripts/validate_environment_urls.py --environment ${{ inputs.environment }}
+          fi
+          
+          echo "✅ Service URL validation passed"
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+      
+      - name: Environment Detection Tests
+        id: detection_tests
+        run: |
+          echo "🧪 Running environment detection tests..."
+          
+          # Run pre-deployment environment detection tests
+          python -m pytest tests/pre_deployment/test_environment_url_validation.py \
+            -v \
+            --tb=short \
+            -m "pre_deployment and environment_validation" \
+            --junit-xml=test-results/environment-detection.xml
+          
+          echo "✅ Environment detection tests passed"
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+      
+      - name: Service Health URL Tests
+        id: service_health_tests
+        run: |
+          echo "🏥 Running service health URL tests..."
+          
+          # Test ServiceHealthClient URL mappings
+          python -m pytest tests/pre_deployment/test_environment_url_validation.py::TestServiceHealthClientEnvironmentURLValidation \
+            -v \
+            --tb=short \
+            --junit-xml=test-results/service-health-urls.xml
+          
+          echo "✅ Service health URL tests passed"
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+      
+      - name: Golden Path Prerequisites Tests  
+        id: golden_path_tests
+        run: |
+          echo "🎯 Running Golden Path prerequisites tests..."
+          
+          # Test Golden Path environment integration
+          python -m pytest tests/pre_deployment/test_environment_url_validation.py::TestGoldenPathEnvironmentIntegration \
+            -v \
+            --tb=short \
+            --junit-xml=test-results/golden-path-prerequisites.xml
+          
+          echo "✅ Golden Path prerequisites tests passed"
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+      
+      - name: Critical Configuration Validation
+        id: config_validation
+        run: |
+          echo "⚙️ Running critical configuration validation..."
+          
+          # Run critical tests that would have caught localhost:8081 issue
+          python -m pytest tests/pre_deployment/test_environment_url_validation.py \
+            -v \
+            --tb=short \
+            -m "critical" \
+            --junit-xml=test-results/critical-config.xml
+          
+          echo "✅ Critical configuration validation passed"
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+      
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: pre-deployment-test-results-${{ inputs.environment }}
+          path: test-results/
+          retention-days: 30
+      
+      - name: Validation Summary
+        if: always()
+        run: |
+          echo "## 🔍 Pre-Deployment Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Strict Mode:** ${{ inputs.strict_mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "### ✅ All Validations Passed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Environment configuration is valid for deployment to **${{ inputs.environment }}**." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Validations Completed:**" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Service URL configuration" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Environment detection reliability" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Service health client URL mappings" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Golden Path prerequisites" >> $GITHUB_STEP_SUMMARY
+            echo "- ✅ Critical configuration validation" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Validation Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**DEPLOYMENT BLOCKED** - Environment configuration issues detected." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This validation prevents issues like localhost URLs being used in Cloud Run environments," >> $GITHUB_STEP_SUMMARY
+            echo "which would break Golden Path functionality and impact $500K+ ARR." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Action Required:** Fix configuration issues before deployment." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Additional job for staging-specific validations
+  staging-specific-validation:
+    name: Staging-Specific Validation
+    runs-on: ubuntu-latest
+    if: inputs.environment == 'staging'
+    needs: environment-validation
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r test-requirements.txt
+      
+      - name: Staging Domain Validation
+        run: |
+          echo "🌐 Validating staging domain configuration..."
+          
+          # Specific test for staging.netrasystems.ai domains
+          python -c "
+          import sys
+          sys.path.append('.')
+          
+          from scripts.validate_environment_urls import validate_environment_urls
+          import asyncio
+          
+          async def main():
+              report = await validate_environment_urls('staging', strict_mode=True)
+              
+              # Check for staging-specific issues
+              staging_issues = []
+              for issue in report.issues:
+                  if 'localhost' in issue.url and 'staging' in report.environment:
+                      staging_issues.append(f'CRITICAL: localhost found in staging URL: {issue.url}')
+                  if 'staging.netrasystems.ai' not in issue.url and 'staging' in report.environment and 'http' not in issue.url:
+                      staging_issues.append(f'WARNING: staging.netrasystems.ai domain missing: {issue.url}')
+              
+              if staging_issues:
+                  print('❌ Staging-specific validation issues:')
+                  for issue in staging_issues:
+                      print(f'   {issue}')
+                  sys.exit(1)
+              else:
+                  print('✅ Staging domain validation passed')
+          
+          asyncio.run(main())
+          "
+      
+      - name: Cloud Run Environment Simulation
+        run: |
+          echo "☁️ Simulating Cloud Run environment variables..."
+          
+          # Test with realistic Cloud Run staging environment variables
+          export K_SERVICE="netra-backend-staging"
+          export GOOGLE_CLOUD_PROJECT="netra-staging"
+          export K_REVISION="netra-backend-staging-00001-test"
+          
+          python -m pytest tests/pre_deployment/test_environment_url_validation.py::TestCloudRunEnvironmentDetection::test_cloud_run_staging_environment_never_defaults_to_development \
+            -v \
+            --tb=short
+
+  # Additional job for production-specific validations  
+  production-specific-validation:
+    name: Production-Specific Validation
+    runs-on: ubuntu-latest
+    if: inputs.environment == 'production'
+    needs: environment-validation
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r test-requirements.txt
+      
+      - name: Production Security Validation
+        run: |
+          echo "🔒 Running production security validation..."
+          
+          # Enhanced validation for production environment
+          python scripts/validate_environment_urls.py --environment production --strict
+          
+          # Additional production-specific tests
+          python -m pytest tests/pre_deployment/test_environment_url_validation.py::TestServiceHealthClientEnvironmentURLValidation::test_production_environment_never_uses_localhost_urls \
+            -v \
+            --tb=short
+      
+      - name: Production Domain Validation
+        run: |
+          echo "🌐 Validating production domain configuration..."
+          
+          # Ensure all production URLs use correct domains
+          python -c "
+          import sys
+          sys.path.append('.')
+          
+          from scripts.validate_environment_urls import validate_environment_urls
+          import asyncio
+          
+          async def main():
+              report = await validate_environment_urls('production', strict_mode=True)
+              
+              production_issues = []
+              for issue in report.issues:
+                  if 'localhost' in issue.url:
+                      production_issues.append(f'CRITICAL: localhost found in production URL: {issue.url}')
+                  if 'netrasystems.ai' not in issue.url and 'http' in issue.url:
+                      production_issues.append(f'CRITICAL: incorrect domain in production URL: {issue.url}')
+              
+              if production_issues:
+                  print('❌ Production-specific validation issues:')
+                  for issue in production_issues:
+                      print(f'   {issue}')
+                  sys.exit(1)
+              else:
+                  print('✅ Production domain validation passed')
+          
+          asyncio.run(main())
+          "

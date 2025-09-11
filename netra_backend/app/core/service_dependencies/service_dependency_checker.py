@@ -12,6 +12,10 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.environment_context import (
+    EnvironmentContextService,
+    get_environment_context_service
+)
 from .models import (
     DEFAULT_SERVICE_DEPENDENCIES,
     DependencyPhase,
@@ -39,23 +43,83 @@ class ServiceDependencyChecker:
     
     def __init__(
         self,
-        environment: EnvironmentType = EnvironmentType.DEVELOPMENT,
+        environment_context_service: Optional[EnvironmentContextService] = None,
         service_dependencies: Optional[List[ServiceDependency]] = None
     ):
-        """Initialize service dependency checker."""
+        """Initialize service dependency checker with environment context injection.
+        
+        Args:
+            environment_context_service: Service providing environment context.
+                                       If None, uses global singleton.
+            service_dependencies: Optional list of service dependencies.
+        
+        CRITICAL FIX: No longer accepts environment parameter with default!
+        Environment must be detected definitively by EnvironmentContextService.
+        """
         self.logger = central_logger.get_logger(__name__)
-        self.environment = environment
+        self.environment_context_service = environment_context_service or get_environment_context_service()
         self.service_dependencies = service_dependencies or DEFAULT_SERVICE_DEPENDENCIES
         
-        # Initialize component systems
-        self.health_validator = HealthCheckValidator(environment=environment)
-        self.retry_mechanism = RetryMechanism(environment=environment)
+        # Get definitive environment from detection service
+        self.environment = self._get_environment_type()
+        
+        # Initialize component systems with environment context
+        self.health_validator = HealthCheckValidator(environment=self.environment)
+        self.retry_mechanism = RetryMechanism(environment=self.environment)
         self.dependency_resolver = DependencyGraphResolver(self.service_dependencies)
-        self.golden_path_validator = GoldenPathValidator(environment=environment)
+        self.golden_path_validator = GoldenPathValidator(environment_context_service=self.environment_context_service)
         
         # Configuration cache
         self._service_configs: Dict[ServiceType, ServiceConfiguration] = {}
         self._initialize_service_configs()
+    
+    def _get_environment_type(self) -> EnvironmentType:
+        """Get definitive environment type from context service.
+        
+        Returns:
+            EnvironmentType detected by environment context service
+            
+        Raises:
+            RuntimeError: If environment context service not initialized
+        """
+        try:
+            if not self.environment_context_service.is_initialized():
+                # Note: This is a synchronous method but environment_context_service.initialize() is async
+                # The service should be initialized during application startup before this is called
+                raise RuntimeError(
+                    "EnvironmentContextService not initialized. "
+                    "Call initialize_environment_context() during application startup."
+                )
+            
+            context = self.environment_context_service.get_environment_context()
+            
+            # Convert EnvironmentContextService EnvironmentType to models EnvironmentType
+            if hasattr(context.environment_type, 'value'):
+                env_value = context.environment_type.value
+            else:
+                env_value = str(context.environment_type)
+            
+            # Map to models EnvironmentType
+            if env_value.lower() == 'testing':
+                return EnvironmentType.TESTING
+            elif env_value.lower() == 'development':
+                return EnvironmentType.DEVELOPMENT
+            elif env_value.lower() == 'staging':
+                return EnvironmentType.STAGING
+            elif env_value.lower() == 'production':
+                return EnvironmentType.PRODUCTION
+            else:
+                self.logger.warning(f"Unknown environment type: {env_value}, defaulting to DEVELOPMENT")
+                return EnvironmentType.DEVELOPMENT
+                
+        except Exception as e:
+            self.logger.error(
+                f"Failed to get environment from EnvironmentContextService: {e}. "
+                f"This indicates a critical configuration issue that will cause Golden Path validation to fail."
+            )
+            raise RuntimeError(
+                f"Cannot determine environment for service dependency validation: {e}"
+            ) from e
     
     def _initialize_service_configs(self) -> None:
         """Initialize service configurations for current environment."""
@@ -356,3 +420,66 @@ class ServiceDependencyChecker:
                 "healthy_count": 0,
                 "total_count": 0
             }
+
+
+# Compatibility factory functions for existing code
+def create_service_dependency_checker_with_environment(
+    environment: EnvironmentType,
+    service_dependencies: Optional[List[ServiceDependency]] = None
+) -> ServiceDependencyChecker:
+    """
+    DEPRECATED: Create ServiceDependencyChecker with environment parameter.
+    
+    This function provides backward compatibility for existing code that uses
+    the old environment-based constructor. New code should use the default
+    constructor which automatically detects environment.
+    
+    Args:
+        environment: Environment type (DEPRECATED - will be ignored)
+        service_dependencies: Optional service dependencies list
+        
+    Returns:
+        ServiceDependencyChecker with proper environment context injection
+        
+    Raises:
+        RuntimeError: If environment context service not initialized
+    """
+    import warnings
+    warnings.warn(
+        "create_service_dependency_checker_with_environment is deprecated. "
+        "Use ServiceDependencyChecker() directly - environment is auto-detected.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Ignore the passed environment parameter and use auto-detection
+    return ServiceDependencyChecker(service_dependencies=service_dependencies)
+
+
+async def create_service_dependency_checker_async(
+    service_dependencies: Optional[List[ServiceDependency]] = None
+) -> ServiceDependencyChecker:
+    """
+    Create ServiceDependencyChecker with async environment context initialization.
+    
+    This function ensures the environment context service is properly initialized
+    before creating the ServiceDependencyChecker.
+    
+    Args:
+        service_dependencies: Optional service dependencies list
+        
+    Returns:
+        ServiceDependencyChecker with initialized environment context
+        
+    Raises:
+        RuntimeError: If environment cannot be determined
+    """
+    from netra_backend.app.core.environment_context import initialize_environment_context
+    
+    # Ensure environment context is initialized
+    environment_context_service = await initialize_environment_context()
+    
+    return ServiceDependencyChecker(
+        environment_context_service=environment_context_service,
+        service_dependencies=service_dependencies
+    )

@@ -4,7 +4,9 @@ from typing import TYPE_CHECKING, Any, Dict, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.state import DeepAgentState
+# CRITICAL SECURITY MIGRATION: Issue #271 - DeepAgentState removed for user isolation
+# from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.db.session import get_session_from_factory
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -67,20 +69,22 @@ class PipelineExecutor:
         return state_persistence_service
     
     async def execute_pipeline(self, pipeline: List[PipelineStep],
-                              state: DeepAgentState, run_id: str,
+                              user_context: UserExecutionContext, run_id: str,
                               context: Dict[str, str], db_session) -> None:
         """Execute the agent pipeline.
         
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext for secure user isolation.
+        
         Args:
             pipeline: Pipeline steps to execute
-            state: Agent state
+            user_context: User execution context (replaces DeepAgentState for security)
             run_id: Run identifier
             context: Execution context
             db_session: Database session for persistence operations
         """
         flow_context = self._prepare_flow_context(pipeline)
         exec_context = self._build_execution_context(run_id, context)
-        await self._execute_pipeline_with_flow(pipeline, state, exec_context, flow_context, db_session)
+        await self._execute_pipeline_with_flow(pipeline, user_context, exec_context, flow_context, db_session)
         self.flow_logger.complete_flow(flow_context['flow_id'])
     
     def _build_execution_context(self, run_id: str, 
@@ -111,11 +115,14 @@ class PipelineExecutor:
         return {'flow_id': flow_id, 'correlation_id': correlation_id}
     
     async def _execute_pipeline_with_flow(self, pipeline: List[PipelineStep],
-                                         state: DeepAgentState,
+                                         user_context: UserExecutionContext,
                                          exec_context: AgentExecutionContext,
                                          flow_context: Dict[str, Any], db_session) -> None:
-        """Execute pipeline with flow context."""
-        await self._run_pipeline_with_hooks(pipeline, state, exec_context, flow_context['flow_id'], db_session)
+        """Execute pipeline with flow context.
+        
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext for secure user isolation.
+        """
+        await self._run_pipeline_with_hooks(pipeline, user_context, exec_context, flow_context['flow_id'], db_session)
     
     def _log_step_transitions_start(self, pipeline: List[PipelineStep], flow_id: str) -> None:
         """Log start of all step transitions."""
@@ -130,66 +137,108 @@ class PipelineExecutor:
             self.flow_logger.step_completed(flow_id, step_name, "agent")
     
     async def _run_pipeline_with_hooks(self, pipeline: List[PipelineStep],
-                                      state: DeepAgentState,
+                                      user_context: UserExecutionContext,
                                       context: AgentExecutionContext,
                                       flow_id: str, db_session) -> None:
-        """Run pipeline with error handling."""
+        """Run pipeline with error handling.
+        
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext for secure user isolation.
+        """
         try:
-            await self._execute_and_process(pipeline, state, context, flow_id, db_session)
+            await self._execute_and_process(pipeline, user_context, context, flow_id, db_session)
         except Exception as e:
-            await self._handle_pipeline_error(state, e)
+            await self._handle_pipeline_error(user_context, e)
     
     async def _execute_and_process(self, pipeline: List[PipelineStep],
-                                  state: DeepAgentState,
+                                  user_context: UserExecutionContext,
                                   context: AgentExecutionContext,
                                   flow_id: str, db_session) -> None:
-        """Execute pipeline and process results with batched state persistence."""
+        """Execute pipeline and process results with user context.
+        
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext for secure user isolation.
+        """
         self._log_pipeline_execution_type(flow_id, pipeline)
-        results = await self._execute_with_step_logging(pipeline, context, state, flow_id)
-        await self._process_results_with_batching(results, state, context, db_session)
+        results = await self._execute_with_step_logging(pipeline, context, user_context, flow_id)
+        await self._process_results_with_user_context(results, user_context, context, db_session)
     
-    async def _handle_pipeline_error(self, state: DeepAgentState, 
+    async def _handle_pipeline_error(self, user_context: UserExecutionContext, 
                                     error: Exception) -> None:
-        """Handle pipeline execution error."""
-        logger.error(f"Pipeline execution failed: {error}")
+        """Handle pipeline execution error.
+        
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext for secure user isolation.
+        """
+        logger.error(f"Pipeline execution failed for user {user_context.user_id}: {error}")
         raise
     
     def _process_results(self, results: List[AgentExecutionResult],
-                        state: DeepAgentState) -> None:
-        """Process execution results (legacy method for backward compatibility)."""
-        for result in results:
-            if result.success and result.state:
-                state.merge_from(result.state)
+                        user_context: UserExecutionContext) -> None:
+        """Process execution results (deprecated - replaced by user context pattern).
+        
+        DEPRECATED: Issue #271 - This method was using DeepAgentState.merge_from() 
+        which is insecure for multi-user environments. Use UserExecutionContext instead.
+        """
+        logger.warning(
+            "DEPRECATED: _process_results() using DeepAgentState pattern. "
+            "Migrate to UserExecutionContext for secure user isolation. "
+            f"Processing {len(results)} results for user {user_context.user_id}"
+        )
+        # Legacy state merging is not supported with UserExecutionContext for security
+        # Results should be processed through secure execution context patterns
     
-    async def _process_results_with_batching(self, results: List[AgentExecutionResult],
-                                           state: DeepAgentState,
-                                           context: AgentExecutionContext, db_session) -> None:
-        """Process execution results with optimized batched state merging and persistence."""
+    async def _process_results_with_user_context(self, results: List[AgentExecutionResult],
+                                               user_context: UserExecutionContext,
+                                               context: AgentExecutionContext, db_session) -> None:
+        """Process execution results with secure user context isolation.
+        
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext instead of DeepAgentState 
+        to prevent cross-user data contamination.
+        """
         # Send orchestration notification about combining results
         await self._send_orchestration_notification(
             context.thread_id, context.run_id, 
             "orchestration_combining", 
-            f"Combining results from {len(results)} agents..."
+            f"Combining results from {len(results)} agents for user {user_context.user_id}..."
         )
         
-        # Collect all successful state changes to merge in batch
-        state_changes = []
+        # Collect all successful results for secure processing
+        successful_results = []
         for result in results:
-            if result.success and result.state:
-                state_changes.append(result.state)
+            if result.success:
+                successful_results.append(result)
         
-        if not state_changes:
+        if not successful_results:
             return
         
-        # Perform batched state merge - more efficient than individual merges
-        await self._batch_merge_states(state, state_changes)
-        
-        # Persist the final merged state once instead of multiple times
-        await self._persist_batched_state(state, context)
+        # Process results through secure user context instead of state merging
+        await self._process_results_securely(successful_results, user_context, context, db_session)
     
-    async def _batch_merge_states(self, target_state: DeepAgentState,
-                                 state_changes: List[DeepAgentState]) -> None:
-        """Efficiently merge multiple state changes into target state."""
+    async def _process_results_securely(self, successful_results: List[AgentExecutionResult],
+                                       user_context: UserExecutionContext, 
+                                       context: AgentExecutionContext, db_session) -> None:
+        """Process successful results with secure user context isolation.
+        
+        SECURITY MIGRATION: Issue #271 - Secure alternative to state merging.
+        """
+        # Log processing for audit trail
+        logger.info(
+            f"Processing {len(successful_results)} successful results for user {user_context.user_id}, "
+            f"thread {user_context.thread_id}"
+        )
+        
+        # Store results in user's execution context instead of global state
+        for result in successful_results:
+            if result.data:
+                # Store result data securely within the user context
+                user_context.add_execution_result(result.agent_name, result.data)
+        
+        # Persist results securely through user context
+        await self._persist_user_results(user_context, context, db_session)
+    
+    async def _batch_merge_states_deprecated(self, target_state, state_changes) -> None:
+        """DEPRECATED: State merging replaced by secure user context processing.
+        
+        SECURITY MIGRATION: Issue #271 - This method performed unsafe state merging.
+        """
         # Batch merge all states in one operation instead of individual merges
         # This reduces object creation and serialization overhead
         for state_change in state_changes:
@@ -197,33 +246,41 @@ class PipelineExecutor:
         
         logger.debug(f"Batched merge of {len(state_changes)} state changes")
     
-    async def _persist_batched_state(self, state: DeepAgentState,
-                                   context: AgentExecutionContext) -> None:
-        """Persist state once after all batched changes instead of per-change."""
+    async def _persist_user_results(self, user_context: UserExecutionContext,
+                                   context: AgentExecutionContext, db_session) -> None:
+        """Persist user results securely through execution context.
+        
+        SECURITY MIGRATION: Issue #271 - Secure persistence replacing state batching.
+        """
         try:
-            # Create persistence request for the final merged state
+            # Create persistence request for secure user context data
             from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
+            
+            # Get user execution results securely from context
+            user_results = user_context.get_execution_results()
             
             persistence_request = StatePersistenceRequest(
                 run_id=context.run_id,
-                user_id=context.user_id,
-                state_data=state.to_dict() if hasattr(state, 'to_dict') else state.__dict__,
+                user_id=user_context.user_id,
+                state_data=user_results,  # Secure user-isolated data
                 checkpoint_type=CheckpointType.PIPELINE_COMPLETE,
-                agent_phase="pipeline_batch_persist"
+                agent_phase="pipeline_user_context_persist"
             )
             
-            # Use the optimized persistence service if available
+            # Use the optimized persistence service with secure user context
             success, snapshot_id = await self.state_persistence.save_agent_state(
                 persistence_request, db_session
             )
             
             if success:
-                logger.debug(f"Batched state persisted successfully: {snapshot_id}")
+                logger.debug(
+                    f"User context results persisted successfully for user {user_context.user_id}: {snapshot_id}"
+                )
             else:
-                logger.warning("Batched state persistence failed")
+                logger.warning(f"User context persistence failed for user {user_context.user_id}")
                 
         except Exception as e:
-            logger.error(f"Error in batched state persistence: {e}")
+            logger.error(f"Error in user context persistence for user {user_context.user_id}: {e}")
             # Don't re-raise to avoid breaking pipeline execution
 
     def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStep]) -> None:
@@ -240,11 +297,14 @@ class PipelineExecutor:
 
     async def _execute_with_step_logging(self, pipeline: List[PipelineStep],
                                         context: AgentExecutionContext,
-                                        state: DeepAgentState, 
+                                        user_context: UserExecutionContext, 
                                         flow_id: str) -> List[AgentExecutionResult]:
-        """Execute pipeline with step transition logging."""
+        """Execute pipeline with step transition logging.
+        
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext for secure user isolation.
+        """
         self._log_step_transitions_start(pipeline, flow_id)
-        results = await self.engine.execute_pipeline(pipeline, context, state)
+        results = await self.engine.execute_pipeline(pipeline, context, user_context)
         self._log_step_transitions_complete(pipeline, flow_id)
         return results
     
