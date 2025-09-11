@@ -729,7 +729,7 @@ class WebSocketSSOTRouter:
             message_router = get_message_router()
             if message_router:
                 # Create agent handler for the user
-                from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
                 agent_bridge = await create_agent_websocket_bridge(user_context)
                 
                 # Register handler with router
@@ -744,7 +744,7 @@ class WebSocketSSOTRouter:
     async def _create_agent_websocket_bridge(self, user_context):
         """Create agent WebSocket bridge for isolated mode."""
         try:
-            from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge
+            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
             return await create_agent_websocket_bridge(user_context)
         except Exception as e:
             logger.error(f"Agent bridge creation failed: {e}")

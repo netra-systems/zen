@@ -53,7 +53,7 @@ class TestExecutionStateConsistency(SSotBaseTestCase):
         
         # CRITICAL ASSERTION: This will FAIL before SSOT consolidation
         # execution_tracker has 6 states, agent_execution_tracker has 9 states
-        self.assertSetEqual(
+        self.assertEqual(
             execution_tracker_states, 
             agent_execution_tracker_states,
             msg="ExecutionState enums have inconsistent values - SSOT violation detected! "

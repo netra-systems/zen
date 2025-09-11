@@ -49,8 +49,10 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
         from netra_backend.app.core.agent_execution_tracker import ExecutionState
         
         # Create mock registry and websocket bridge
-        mock_registry = self.mock_factory.create_mock_registry()
-        mock_websocket_bridge = self.mock_factory.create_mock_websocket_bridge()
+        mock_registry = Mock()
+        mock_registry.get_agent = Mock(return_value=None)
+        
+        mock_websocket_bridge = self.mock_factory.create_websocket_mock()
         
         # Create execution core
         execution_core = AgentExecutionCore(mock_registry, mock_websocket_bridge)
@@ -126,8 +128,10 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
         
         # Setup mocks
-        mock_registry = self.mock_factory.create_mock_registry()
-        mock_websocket_bridge = self.mock_factory.create_mock_websocket_bridge()
+        mock_registry = Mock()
+        mock_registry.get_agent = Mock()
+        
+        mock_websocket_bridge = self.mock_factory.create_websocket_mock()
         
         # Create mock agent that returns success
         mock_agent = Mock()
@@ -206,8 +210,10 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
         
         # Setup mocks
-        mock_registry = self.mock_factory.create_mock_registry()
-        mock_websocket_bridge = self.mock_factory.create_mock_websocket_bridge()
+        mock_registry = Mock()
+        mock_registry.get_agent = Mock()
+        
+        mock_websocket_bridge = self.mock_factory.create_websocket_mock()
         
         # Create mock agent that returns failure
         mock_agent = Mock()
