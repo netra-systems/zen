@@ -85,8 +85,9 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         
         self.execution_context = AgentExecutionContext(
             agent_name=self.test_agent_name,
-            run_id=self.test_run_id,
+            run_id=str(self.test_run_id),
             thread_id=self.test_thread_id,
+            user_id=self.test_user_id,
             correlation_id="corr-789"
         )
         
@@ -139,7 +140,7 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         
         # Assert: Verify business value delivery
         self.assertTrue(result.success, "Agent execution must succeed for business value")
-        self.assertIn("valuable insights", result.result, "Agent must provide substantive value")
+        self.assertIn("valuable insights", result.data.get("message", ""), "Agent must provide substantive value")
         
         # Verify WebSocket events sent for user experience
         self.mock_websocket_bridge.notify_agent_started.assert_called_once()
