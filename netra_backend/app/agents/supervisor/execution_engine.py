@@ -136,7 +136,8 @@ class ExecutionEngine:
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
     MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
-    AGENT_EXECUTION_TIMEOUT = 30.0  # 30 seconds max per agent
+    # SSOT COMPLIANCE: Timeout logic moved to AgentExecutionTracker
+    # AGENT_EXECUTION_TIMEOUT = 30.0  # DEPRECATED - Use AgentExecutionTracker.get_timeout_config()
     
     def __init__(self, registry: 'AgentRegistry', websocket_bridge, 
                  user_context: Optional['UserExecutionContext'] = None):
@@ -420,7 +421,7 @@ class ExecutionEngine:
             agent_name=context.agent_name,
             thread_id=context.thread_id,
             user_id=context.user_id,
-            timeout_seconds=int(self.AGENT_EXECUTION_TIMEOUT),
+            timeout_seconds=int(self.execution_tracker.get_default_timeout()),
             metadata={'run_id': context.run_id, 'context': context.metadata}
         )
         
@@ -489,9 +490,11 @@ class ExecutionEngine:
                 )
                 
                 # Execute with timeout and death monitoring
+                # SSOT COMPLIANCE: Use AgentExecutionTracker for timeout management
+                timeout_seconds = self.execution_tracker.get_default_timeout()
                 result = await asyncio.wait_for(
                     self._execute_with_death_monitoring(context, effective_user_context, execution_id),
-                    timeout=self.AGENT_EXECUTION_TIMEOUT
+                    timeout=timeout_seconds
                 )
                 
                 execution_time = time.time() - execution_start
@@ -522,9 +525,11 @@ class ExecutionEngine:
                 return result
                     
             except asyncio.TimeoutError:
+                # SSOT COMPLIANCE: Get timeout from AgentExecutionTracker
+                timeout_seconds = self.execution_tracker.get_default_timeout()
                 # LOUD ERROR: Agent timeout is critical for user experience
                 logger.critical(
-                    f"AGENT TIMEOUT CRITICAL: {context.agent_name} timed out after {self.AGENT_EXECUTION_TIMEOUT}s "
+                    f"AGENT TIMEOUT CRITICAL: {context.agent_name} timed out after {timeout_seconds}s "
                     f"for user {context.user_id} (run_id: {context.run_id}). "
                     f"User will experience failed request or blank screen."
                 )
