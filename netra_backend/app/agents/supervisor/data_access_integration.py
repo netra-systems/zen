@@ -18,7 +18,6 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import logging
 from typing import Any, Dict, Optional, TYPE_CHECKING
 from contextlib import asynccontextmanager
 
@@ -37,8 +36,9 @@ from netra_backend.app.factories.data_access_factory import (
     get_user_redis_context
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.logging_config import central_logger
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 
 class DataAccessCapabilities:
