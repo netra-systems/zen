@@ -175,13 +175,16 @@ class AgentExecutionCore:
             }
         )
         
-        # Register execution with tracker
-        exec_id = await self.execution_tracker.register_execution(
+        # Create execution with tracker
+        exec_id = self.execution_tracker.create_execution(
             agent_name=context.agent_name,
-            correlation_id=trace_context.correlation_id,
             thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
-            timeout_seconds=timeout or self.DEFAULT_TIMEOUT
+            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
+            metadata={
+                'correlation_id': trace_context.correlation_id,
+                'run_id': str(context.run_id)
+            }
         )
         
         # CRITICAL REMEDIATION: Create and start execution tracking for comprehensive monitoring

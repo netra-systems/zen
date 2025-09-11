@@ -271,11 +271,10 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         mock_registry.register("test_optimization_agent", mock_agent)
         
         # Execute: Run agent through complete integration cycle
-        # Note: Passing enhanced_user_context as 'state' parameter for backward compatibility
-        # with existing AgentExecutionCore interface during migration period
+        # Using enhanced_user_context as 'user_context' parameter for UserExecutionContext security pattern
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=enhanced_user_context,
+            user_context=enhanced_user_context,
             timeout=5.0
         )
         
@@ -341,7 +340,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run with database context modifications
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=enhanced_user_context,
+            user_context=enhanced_user_context,
             timeout=5.0
         )
         
@@ -416,8 +415,8 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         
         # Execute: Concurrent execution for multiple users with isolated contexts
         tasks = [
-            execution_core.execute_agent(user1_context, user1_execution_context, timeout=5.0),
-            execution_core.execute_agent(user2_context, user2_execution_context, timeout=5.0)
+            execution_core.execute_agent(context=user1_context, user_context=user1_execution_context, timeout=5.0),
+            execution_core.execute_agent(context=user2_context, user_context=user2_execution_context, timeout=5.0)
         ]
         results = await asyncio.gather(*tasks)
         
@@ -469,7 +468,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         start_time = time.time()
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=enhanced_user_context,
+            user_context=enhanced_user_context,
             timeout=0.5  # Short timeout
         )
         end_time = time.time()
@@ -495,7 +494,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run error-prone agent
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=enhanced_user_context,
+            user_context=enhanced_user_context,
             timeout=5.0
         )
         
@@ -549,7 +548,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run agent with full WebSocket integration
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=enhanced_user_context,
+            user_context=enhanced_user_context,
             timeout=5.0
         )
         
@@ -612,7 +611,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         try:
             result = await execution_core.execute_agent(
                 context=agent_context,
-                state=enhanced_user_context,
+                user_context=enhanced_user_context,
                 timeout=5.0
             )
         finally:
@@ -658,7 +657,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run with trace context propagation
         result = await execution_core.execute_agent(
             context=agent_context, 
-            state=enhanced_user_context,
+            user_context=enhanced_user_context,
             timeout=5.0
         )
         
@@ -685,7 +684,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Try to run non-existent agent
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=enhanced_user_context,
+            user_context=enhanced_user_context,
             timeout=5.0
         )
         
@@ -716,7 +715,7 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         # Execute: Run with performance monitoring
         result = await execution_core.execute_agent(
             context=agent_context,
-            state=enhanced_user_context, 
+            user_context=enhanced_user_context, 
             timeout=5.0
         )
         
