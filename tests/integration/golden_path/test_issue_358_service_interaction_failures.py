@@ -42,7 +42,7 @@ try:
         get_user_session_context,
         create_user_execution_context, 
         RequestScopedContext,
-        get_request_scoped_context
+        get_request_scoped_user_context as get_request_scoped_context
     )
     from netra_backend.app.services.user_execution_context import (
         UserExecutionContext,

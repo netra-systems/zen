@@ -191,7 +191,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
                 
                 # Execute with UserExecutionContext (should work after migration)
                 result = await agent.execute_modern(
-                    context=context,
+                    user_context=context,
                     stream_updates=False
                 )
                 
@@ -230,8 +230,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
             
             # Execute with DeepAgentState (vulnerable to cross-contamination)
             result = await agent.execute_modern(
-                state=vulnerable_state,
-                run_id=f"vulnerable_run_{uuid.uuid4().hex[:8]}",
+                user_context=vulnerable_state,
                 stream_updates=False
             )
             
@@ -336,7 +335,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
             with patch.object(agent, 'emit_agent_started'), \
                  patch.object(agent, 'emit_agent_completed'):
                 
-                result = await agent.execute_modern(context=context, stream_updates=False)
+                result = await agent.execute_modern(user_context=context, stream_updates=False)
                 
                 # Track secure memory references
                 memory_refs[user_key] = {
@@ -367,8 +366,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
                  patch.object(agent, 'emit_agent_completed'):
                 
                 result = await agent.execute_modern(
-                    state=vulnerable_state,
-                    run_id=f"memory_run_{uuid.uuid4().hex[:8]}",
+                    user_context=vulnerable_state,
                     stream_updates=False
                 )
                 

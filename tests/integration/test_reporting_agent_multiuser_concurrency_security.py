@@ -227,7 +227,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
                     # Execute with UserExecutionContext (should work after migration)
                     start_time = time.time()
                     result = await reporting_agent.execute_modern(
-                        context=context,
+                        user_context=context,
                         stream_updates=False
                     )
                     execution_time = time.time() - start_time
@@ -255,8 +255,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
                         # Execute with DeepAgentState (vulnerable to contamination)
                         start_time = time.time()
                         result = await reporting_agent.execute_modern(
-                            state=vulnerable_state,
-                            run_id=f"concurrent_run_{iteration}_{uuid.uuid4().hex[:8]}",
+                            user_context=vulnerable_state,
                             stream_updates=False
                         )
                         execution_time = time.time() - start_time
@@ -374,7 +373,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
                      patch.object(reporting_agent, 'emit_agent_completed'):
                     
                     result = await reporting_agent.execute_modern(
-                        context=context,
+                        user_context=context,
                         stream_updates=False
                     )
                     
@@ -393,8 +392,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
                      patch.object(reporting_agent, 'emit_agent_completed'):
                     
                     result = await reporting_agent.execute_modern(
-                        state=vulnerable_state,
-                        run_id=f"memory_test_{uuid.uuid4().hex[:8]}",
+                        user_context=vulnerable_state,
                         stream_updates=False
                     )
                     
@@ -485,8 +483,8 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
                      patch.object(agent_b, 'emit_agent_completed'):
                     
                     # Start both executions simultaneously
-                    task_a = asyncio.create_task(agent_a.execute_modern(context=context_a, stream_updates=False))
-                    task_b = asyncio.create_task(agent_b.execute_modern(context=context_b, stream_updates=False))
+                    task_a = asyncio.create_task(agent_a.execute_modern(user_context=context_a, stream_updates=False))
+                    task_b = asyncio.create_task(agent_b.execute_modern(user_context=context_b, stream_updates=False))
                     
                     # Small delay to create race condition window
                     await asyncio.sleep(0.001)
@@ -564,7 +562,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
                     with patch.object(agent, 'emit_agent_started', side_effect=mock_started), \
                          patch.object(agent, 'emit_agent_completed', side_effect=mock_completed):
                         
-                        await agent.execute_modern(context=context, stream_updates=True)
+                        await agent.execute_modern(user_context=context, stream_updates=True)
                         
                 except TypeError:
                     # Fallback to vulnerable pattern
@@ -574,8 +572,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
                          patch.object(agent, 'emit_agent_completed', side_effect=mock_completed):
                         
                         await agent.execute_modern(
-                            state=vulnerable_state,
-                            run_id=f"ws_test_{uuid.uuid4().hex[:8]}",
+                            user_context=vulnerable_state,
                             stream_updates=True
                         )
             
