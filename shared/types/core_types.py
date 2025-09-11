@@ -48,6 +48,13 @@ RunID = NewType('RunID', str)
 RequestID = NewType('RequestID', str)
 """Strongly typed request identifier for tracing."""
 
+# Service and environment identifiers  
+ServiceName = NewType('ServiceName', str)
+"""Strongly typed service name identifier."""
+
+EnvironmentName = NewType('EnvironmentName', str)
+"""Strongly typed environment name identifier."""
+
 # WebSocket and connection identifiers
 WebSocketID = NewType('WebSocketID', str)
 """Strongly typed WebSocket connection identifier."""
