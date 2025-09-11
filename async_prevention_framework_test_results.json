@@ -1,0 +1,22 @@
+{
+  "level1": {
+    "success": true,
+    "violations_detected": 7,
+    "message": "Detected 7 async pattern violations"
+  },
+  "level3": {
+    "success": false,
+    "error": "Command '['/Users/rindhujajohnson/Netra/GitHub/netra-apex/venv/bin/python', 'scripts/ci_pipeline_enhancer.py', '--async-patterns-only', '--json']' timed out after 60 seconds"
+  },
+  "level4": {
+    "success": true,
+    "files_created": 3,
+    "total_expected": 3,
+    "message": "Created 3/3 training files"
+  },
+  "integration": {
+    "success": false,
+    "levels_working": 2,
+    "message": "Integration test: partial levels working"
+  }
+}
