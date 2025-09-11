@@ -397,6 +397,7 @@ class WebSocketSSOTRouter:
                 logger.warning("No app_state available for GCP readiness validation - proceeding")
             
             # Step 1: Negotiate subprotocol and accept WebSocket connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[MAIN MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -413,16 +414,17 @@ class WebSocketSSOTRouter:
             
             if not auth_result.success:
                 # ISSUE #342 FIX: Improved error messages with specific guidance
-                logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error}")
+                logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error_message}")
                 
                 # Provide specific error guidance based on the failure reason
                 error_message = "Authentication failed"
-                if "subprotocol" in str(auth_result.error).lower() or "no token" in str(auth_result.error).lower():
-                    error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error}"
-                elif "jwt" in str(auth_result.error).lower():
-                    error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error}"
+                error_msg_str = str(auth_result.error_message or "").lower()
+                if "subprotocol" in error_msg_str or "no token" in error_msg_str:
+                    error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error_message}"
+                elif "jwt" in error_msg_str:
+                    error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error_message}"
                 else:
-                    error_message = f"Authentication failed: {auth_result.error}"
+                    error_message = f"Authentication failed: {auth_result.error_message}"
                 
                 await safe_websocket_send(websocket, create_error_message("AUTH_FAILED", error_message))
                 await safe_websocket_close(websocket, 1008, "Authentication failed")
@@ -511,6 +513,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[FACTORY MODE] Pre-auth success: user={user_id[:8]}")
             
             # Step 2: Negotiate subprotocol and accept connection after authentication (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[FACTORY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -585,6 +588,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[ISOLATED MODE] Starting isolated connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[ISOLATED MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -597,16 +601,17 @@ class WebSocketSSOTRouter:
             auth_result = await authenticate_websocket_ssot(websocket)
             if not auth_result.success:
                 # ISSUE #342 FIX: Improved error messages with specific guidance
-                logger.error(f"[ISOLATED MODE] Authentication failed: {auth_result.error}")
+                logger.error(f"[ISOLATED MODE] Authentication failed: {auth_result.error_message}")
                 
                 # Provide specific error guidance based on the failure reason
                 error_message = "Authentication failed"
-                if "subprotocol" in str(auth_result.error).lower() or "no token" in str(auth_result.error).lower():
-                    error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error}"
-                elif "jwt" in str(auth_result.error).lower():
-                    error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error}"
+                error_msg_str = str(auth_result.error_message or "").lower()
+                if "subprotocol" in error_msg_str or "no token" in error_msg_str:
+                    error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error_message}"
+                elif "jwt" in error_msg_str:
+                    error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error_message}"
                 else:
-                    error_message = f"Authentication failed: {auth_result.error}"
+                    error_message = f"Authentication failed: {auth_result.error_message}"
                 
                 logger.error(f"[ISOLATED MODE] {error_message}")
                 await safe_websocket_close(websocket, 1008, error_message)
@@ -681,6 +686,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[LEGACY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")

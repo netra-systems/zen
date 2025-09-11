@@ -56,7 +56,8 @@ from netra_backend.app.schemas.agent import (
     TodoItem,
     TodoStatus,
 )
-from netra_backend.app.schemas.agent_models import AgentMetadata, AgentResult, DeepAgentState, ToolResultData
+from netra_backend.app.schemas.agent_models import AgentMetadata, AgentResult, ToolResultData
+# DeepAgentState deprecated - use UserExecutionContext pattern instead
 from netra_backend.app.schemas.agent_result_types import TypedAgentResult
 from netra_backend.app.schemas.agent_state import (
     AgentPhase,
