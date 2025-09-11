@@ -67,8 +67,8 @@ from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Authentication and session management
-from netra_backend.app.auth_integration.auth import get_authenticated_user_context
-from netra_backend.app.services.session_manager import SessionManager
+from netra_backend.app.dependencies import get_user_execution_context
+from netra_backend.app.services.database.session_manager import SessionManager
 
 # Real tools and services
 from netra_backend.app.tools.search_tool import SearchTool
@@ -122,9 +122,8 @@ class TestGoldenPathAgentExecution(SSotAsyncTestCase):
             self.assertIsNotNone(auth_token, "Golden Path requires valid authentication")
             
             # STEP 2: User Context Creation (Production context)
-            user_context = await get_authenticated_user_context(
-                auth_token, 
-                request_id=f"golden_path_req_{uuid.uuid4().hex[:8]}",
+            user_context = get_user_execution_context(
+                self.golden_path_user_id, 
                 thread_id=f"golden_path_thread_{uuid.uuid4().hex[:8]}",
                 run_id=f"golden_path_run_{uuid.uuid4().hex[:8]}"
             )
@@ -213,9 +212,8 @@ class TestGoldenPathAgentExecution(SSotAsyncTestCase):
             
             # Create authenticated user context
             auth_token = await self._create_production_auth_token(self.golden_path_user_id)
-            user_context = await get_authenticated_user_context(
-                auth_token,
-                request_id=f"ws_event_req_{uuid.uuid4().hex[:8]}",
+            user_context = get_user_execution_context(
+                self.golden_path_user_id,
                 thread_id=f"ws_event_thread_{uuid.uuid4().hex[:8]}",
                 run_id=f"ws_event_run_{uuid.uuid4().hex[:8]}"
             )
@@ -397,9 +395,8 @@ class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
                 
                 # Create enterprise user context with production authentication
                 auth_token = await self._create_enterprise_auth_token(customer_id)
-                user_context = await get_authenticated_user_context(
-                    auth_token,
-                    request_id=f"enterprise_req_{i}_{uuid.uuid4().hex[:8]}",
+                user_context = get_user_execution_context(
+                    customer_id,
                     thread_id=f"enterprise_thread_{customer_id}",
                     run_id=f"enterprise_run_{i}_{uuid.uuid4().hex[:8]}"
                 )
@@ -499,9 +496,8 @@ class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
                 
                 # Create authenticated enterprise user
                 auth_token = await self._create_enterprise_auth_token(user_id)
-                user_context = await get_authenticated_user_context(
-                    auth_token,
-                    request_id=f"load_req_{user_index}_{uuid.uuid4().hex[:8]}",
+                user_context = get_user_execution_context(
+                    user_id,
                     thread_id=f"load_thread_{user_id}",
                     run_id=f"load_run_{user_index}_{uuid.uuid4().hex[:8]}"
                 )
