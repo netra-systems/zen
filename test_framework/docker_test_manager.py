@@ -13,6 +13,9 @@ from enum import Enum
 from typing import Dict, List, Optional, Any, Set
 from pathlib import Path
 
+# Import UnifiedDockerManager for compatibility export
+from test_framework.unified_docker_manager import UnifiedDockerManager
+
 logger = logging.getLogger(__name__)
 
 

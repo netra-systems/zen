@@ -587,3 +587,7 @@ class AgentMessageHandler(BaseMessageHandler):
     def get_stats(self) -> Dict[str, Any]:
         """Get handler statistics."""
         return self.processing_stats.copy()
+
+
+# COMPATIBILITY ALIAS: Export AgentMessageHandler as AgentHandler for backward compatibility
+AgentHandler = AgentMessageHandler
