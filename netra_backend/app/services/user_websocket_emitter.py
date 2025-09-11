@@ -1,4 +1,4 @@
-"""
+"""DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
 UserWebSocketEmitter - Per-request WebSocket event emission with complete user isolation.
 
 Business Value Justification:
@@ -10,7 +10,7 @@ Business Value Justification:
 This emitter is created per-request with UserExecutionContext and ensures all events
 are sent only to the specific user making the request. It replaces the global singleton
 pattern with isolated per-user event emission.
-"""
+"""DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
 
 import asyncio
 import logging
@@ -26,23 +26,23 @@ logger = central_logger.get_logger(__name__)
 
 
 class UserWebSocketEmitter:
-    """Per-user WebSocket event emitter with guaranteed isolation.
+    """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterPer-user WebSocket event emitter with guaranteed isolation.
     
     This class is created per-request and ensures all events are sent only
     to the specific user associated with the UserExecutionContext. It provides
     the same event interface as the old singleton bridge but with complete
     user isolation.
-    """
+    """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
     
     def __init__(self, context: UserExecutionContext, router: WebSocketEventRouter, 
                  connection_id: Optional[str] = None):
-        """Initialize emitter for specific user context.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterInitialize emitter for specific user context.
         
         Args:
             context: User execution context with validated IDs
             router: WebSocket event router for infrastructure
             connection_id: Optional specific connection ID to target
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         self.user_id = context.user_id
         self.thread_id = context.thread_id
         self.run_id = context.run_id
@@ -59,7 +59,7 @@ class UserWebSocketEmitter:
                    f"(run_id: {self.run_id})")
     
     async def notify_agent_started(self, agent_name: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
-        """Send agent started event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend agent started event to this user only.
         
         Args:
             agent_name: Name of the agent starting
@@ -67,7 +67,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         event = {
             "type": "agent_started",
             "run_id": self.run_id,
@@ -85,7 +85,7 @@ class UserWebSocketEmitter:
     
     async def notify_agent_thinking(self, agent_name: str, thought: str, 
                                   step: Optional[str] = None) -> bool:
-        """Send thinking event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend thinking event to this user only.
         
         Args:
             agent_name: Name of the thinking agent
@@ -94,7 +94,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         event = {
             "type": "agent_thinking",
             "run_id": self.run_id,
@@ -112,7 +112,7 @@ class UserWebSocketEmitter:
     
     async def notify_tool_executing(self, agent_name: str, tool_name: str, 
                                   tool_input: Optional[Dict[str, Any]] = None) -> bool:
-        """Send tool execution event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend tool execution event to this user only.
         
         Args:
             agent_name: Name of the agent using the tool
@@ -121,7 +121,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         # Sanitize tool input for security
         safe_input = self._sanitize_tool_input(tool_input) if tool_input else {}
         
@@ -142,7 +142,7 @@ class UserWebSocketEmitter:
     
     async def notify_tool_completed(self, agent_name: str, tool_name: str, 
                                   success: bool, result_summary: Optional[str] = None) -> bool:
-        """Send tool completion event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend tool completion event to this user only.
         
         Args:
             agent_name: Name of the agent that used the tool
@@ -152,7 +152,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         event = {
             "type": "tool_completed",
             "run_id": self.run_id,
@@ -171,7 +171,7 @@ class UserWebSocketEmitter:
     
     async def notify_agent_completed(self, agent_name: str, result: Dict[str, Any], 
                                    success: bool = True) -> bool:
-        """Send agent completion event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend agent completion event to this user only.
         
         Args:
             agent_name: Name of the completed agent
@@ -180,7 +180,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         # Sanitize result for user consumption
         safe_result = self._sanitize_agent_result(result)
         
@@ -201,7 +201,7 @@ class UserWebSocketEmitter:
     
     async def notify_agent_error(self, agent_name: str, error_type: str, 
                                error_message: str, recoverable: bool = False) -> bool:
-        """Send agent error event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend agent error event to this user only.
         
         Args:
             agent_name: Name of the agent that encountered error
@@ -211,7 +211,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         event = {
             "type": "agent_error",
             "run_id": self.run_id,
@@ -230,7 +230,7 @@ class UserWebSocketEmitter:
     
     async def notify_progress_update(self, agent_name: str, progress_percentage: float, 
                                    current_step: str, estimated_completion: Optional[str] = None) -> bool:
-        """Send progress update event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend progress update event to this user only.
         
         Args:
             agent_name: Name of the agent reporting progress
@@ -240,7 +240,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         event = {
             "type": "progress_update",
             "run_id": self.run_id,
@@ -259,7 +259,7 @@ class UserWebSocketEmitter:
     
     async def notify_custom(self, event_type: str, payload: Dict[str, Any], 
                           agent_name: Optional[str] = None) -> bool:
-        """Send custom event to this user only.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend custom event to this user only.
         
         Args:
             event_type: Custom event type
@@ -268,7 +268,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if event sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         event = {
             "type": event_type,
             "run_id": self.run_id,
@@ -283,11 +283,11 @@ class UserWebSocketEmitter:
     # Statistics and debugging methods
     
     def get_stats(self) -> Dict[str, Any]:
-        """Get emitter statistics.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterGet emitter statistics.
         
         Returns:
             Dictionary with emitter statistics
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         uptime = (datetime.now(timezone.utc) - self.created_at).total_seconds()
         success_rate = (
             self.events_sent / (self.events_sent + self.events_failed) * 100
@@ -305,13 +305,13 @@ class UserWebSocketEmitter:
         }
     
     def __str__(self) -> str:
-        """String representation for debugging."""
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterString representation for debugging."""DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         return f"UserWebSocketEmitter(user={self.user_id[:8]}..., run_id={self.run_id})"
     
     # Private helper methods
     
     async def _send_event(self, event: Dict[str, Any], event_type: str) -> bool:
-        """Send event through the router with proper error handling.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSend event through the router with proper error handling.
         
         Args:
             event: Event data to send
@@ -319,7 +319,7 @@ class UserWebSocketEmitter:
             
         Returns:
             bool: True if sent successfully
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         try:
             # VALIDATION STEP 1: Validate event structure and content
             validator = get_websocket_validator()
@@ -401,10 +401,10 @@ class UserWebSocketEmitter:
             return False
     
     def _sanitize_tool_input(self, tool_input: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize tool input for user-facing events.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSanitize tool input for user-facing events.
         
         Removes sensitive information and truncates large inputs.
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         sensitive_keys = {'password', 'token', 'key', 'secret', 'api_key', 'auth'}
         sanitized = {}
         
@@ -421,10 +421,10 @@ class UserWebSocketEmitter:
         return sanitized
     
     def _sanitize_agent_result(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize agent results for user consumption.
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitterSanitize agent results for user consumption.
         
         Removes internal details and sensitive information.
-        """
+        """DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
         # Remove internal keys
         internal_keys = {'_internal', 'debug_info', 'system_context', 'raw_response'}
         
