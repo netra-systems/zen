@@ -47,11 +47,11 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
-from netra_backend.app.agents.execution_timeout_manager import (
+from netra_backend.app.core.agent_execution_tracker import (
     TimeoutConfig,
-    CircuitBreakerOpenError
+    CircuitBreakerOpenError,
+    AgentExecutionPhase
 )
-from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
 
 
 @dataclass

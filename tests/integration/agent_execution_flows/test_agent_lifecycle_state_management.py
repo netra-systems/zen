@@ -24,7 +24,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentLifecycleManager
-from netra_backend.app.agents.agent_state_tracker import AgentStateTracker
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 
 
 class AgentLifecyclePhase(Enum):
@@ -61,7 +61,7 @@ class TestAgentLifecycleStateManagement(BaseIntegrationTest):
             lifecycle_monitoring=True
         )
         
-        state_tracker = AgentStateTracker(
+        state_tracker = AgentExecutionTracker(
             user_context=user_context,
             lifecycle_integration=True
         )
