@@ -249,7 +249,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
         # CRITICAL GOLDEN PATH EVENTS - ALL 5 MUST BE TESTED
         golden_path_events = [
             {
-                "event": "agent_started",
+                "type": "agent_started",
                 "data": {
                     "agent_type": "supervisor",
                     "task_description": "Analyzing customer requirements",
@@ -257,7 +257,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
                 }
             },
             {
-                "event": "agent_thinking", 
+                "type": "agent_thinking", 
                 "data": {
                     "agent_type": "supervisor",
                     "thought_process": "Evaluating data requirements and sources",
@@ -265,7 +265,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
                 }
             },
             {
-                "event": "tool_executing",
+                "type": "tool_executing",
                 "data": {
                     "tool_name": "data_analyzer",
                     "parameters": {"dataset": "customer_metrics"},
@@ -273,7 +273,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
                 }
             },
             {
-                "event": "tool_completed",
+                "type": "tool_completed",
                 "data": {
                     "tool_name": "data_analyzer", 
                     "execution_id": "exec_123",
@@ -282,7 +282,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
                 }
             },
             {
-                "event": "agent_completed",
+                "type": "agent_completed",
                 "data": {
                     "agent_type": "supervisor",
                     "final_result": "Analysis complete with 15 actionable insights",
@@ -294,7 +294,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
         
         # PHASE 1: Send all Golden Path events
         for event_data in golden_path_events:
-            await manager.send_agent_event(user_id, event_data["event"], event_data["data"])
+            await manager.send_agent_event(user_id, event_data["type"], event_data["data"])
             # Small delay to ensure ordering
             await asyncio.sleep(0.01)
         
@@ -307,12 +307,12 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
             received_event = mock_ws.sent_messages[i]
             
             # Verify event structure
-            assert "event" in received_event
+            assert "type" in received_event
             assert "data" in received_event
             assert "timestamp" in received_event
             
             # Verify event content
-            assert received_event["event"] == expected_event["event"]
+            assert received_event["type"] == expected_event["type"]
             
             # Verify critical data fields
             for key, value in expected_event["data"].items():
@@ -324,7 +324,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
             import json
             json_str = json.dumps(message)  # Should not raise exception
             parsed = json.loads(json_str)   # Should round-trip correctly
-            assert parsed["event"] == message["event"]
+            assert parsed["type"] == message["type"]
         
         self.metrics.websocket_events = 5  # Record business metrics
         self.metrics.record_custom("golden_path_events_test", "passed")
@@ -362,9 +362,9 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
         
         # PHASE 2: Verify message routing isolation
         test_messages = {
-            "free_user": {"event": "free_tier_message", "data": {"plan": "free"}},
-            "enterprise_user": {"event": "enterprise_message", "data": {"plan": "enterprise"}},
-            "premium_user": {"event": "premium_message", "data": {"plan": "premium"}}
+            "free_user": {"type": "free_tier_message", "data": {"plan": "free"}},
+            "enterprise_user": {"type": "enterprise_message", "data": {"plan": "enterprise"}},
+            "premium_user": {"type": "premium_message", "data": {"plan": "premium"}}
         }
         
         # Send different messages to each user
@@ -379,7 +379,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
             
             received_message = mock_ws.sent_messages[0]
             expected_message = test_messages[profile]
-            assert received_message["event"] == expected_message["event"]
+            assert received_message["type"] == expected_message["type"]
             assert received_message["data"] == expected_message["data"]
         
         self.metrics.record_custom("user_isolation_test", "passed")

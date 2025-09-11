@@ -106,12 +106,12 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         ]
         
         for method_name in expected_methods:
-            self.assertTrue(hasattr(real_bridge, method_name), 
-                          f"AgentWebSocketBridge missing expected method: {method_name}")
+            assert hasattr(real_bridge, method_name), \
+                f"AgentWebSocketBridge missing expected method: {method_name}"
         
         # Document that 'send_event' is NOT part of the interface
-        self.assertFalse(hasattr(real_bridge, 'send_event'),
-                        "AgentWebSocketBridge should NOT have 'send_event' method")
+        assert not hasattr(real_bridge, 'send_event'), \
+            "AgentWebSocketBridge should NOT have 'send_event' method"
         
         logger.info("✅ AgentWebSocketBridge interface documented for Golden Path test correction")
 

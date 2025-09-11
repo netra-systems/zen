@@ -343,115 +343,111 @@ class RealServiceIntegrator:
         # E2E USER EXPERIENCE TESTS
         # ============================================================================
 
-# REMOVED_SYNTAX_ERROR: class TestActionsAgentCompleteUserFlow:
-    # REMOVED_SYNTAX_ERROR: """E2E tests for complete ActionsAgent user experience."""
+class TestActionsAgentCompleteUserFlow:
+    """E2E tests for complete ActionsAgent user experience."""
 
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: async def setup_complete_e2e_environment(self):
-    # REMOVED_SYNTAX_ERROR: """Setup complete real services environment for E2E testing."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Setting up complete E2E environment with REAL services...")
+    @pytest.fixture
+    async def setup_complete_e2e_environment(self):
+        """Setup complete real services environment for E2E testing."""
+        logger.info("🚀 Setting up complete E2E environment with REAL services...")
 
-    # Start real services
-    # REMOVED_SYNTAX_ERROR: self.docker_manager = UnifiedDockerManager()
-    # Removed problematic line: services_started = await self.docker_manager.ensure_services_running([ ))
-    # REMOVED_SYNTAX_ERROR: 'postgres', 'redis', 'backend', 'auth'
-    
+        # Start real services
+        self.docker_manager = UnifiedDockerManager()
+        services_started = await self.docker_manager.ensure_services_running([
+            'postgres', 'redis', 'backend', 'auth'
+        ])
 
-    # REMOVED_SYNTAX_ERROR: if not services_started:
-        # REMOVED_SYNTAX_ERROR: pytest.skip("Real services not available for E2E testing")
+        if not services_started:
+            pytest.skip("Real services not available for E2E testing")
 
         # Setup environment
-        # REMOVED_SYNTAX_ERROR: self.env = IsolatedEnvironment()
+        self.env = IsolatedEnvironment()
 
         # Initialize real service connections
-        # REMOVED_SYNTAX_ERROR: self.service_integrator = RealServiceIntegrator(self.env)
-        # REMOVED_SYNTAX_ERROR: await self.service_integrator.initialize_session()
+        self.service_integrator = RealServiceIntegrator(self.env)
+        await self.service_integrator.initialize_session()
 
         # Initialize database and Redis connections
-        # REMOVED_SYNTAX_ERROR: self.run_repository = RunRepository()
-        # REMOVED_SYNTAX_ERROR: self.redis_manager = RedisManager()
+        self.database_manager = DatabaseManager()
+        self.redis_manager = RedisManager()
 
         # Test session tracking
-        # REMOVED_SYNTAX_ERROR: self.test_sessions: List[E2ETestSession] = []
+        self.test_sessions: List[E2ETestSession] = []
 
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ E2E environment ready with real services")
+        logger.info("✅ E2E environment ready with real services")
 
-        # REMOVED_SYNTAX_ERROR: yield
+        yield
 
         # Cleanup
-        # REMOVED_SYNTAX_ERROR: logger.info("🧹 Cleaning up E2E environment...")
-        # REMOVED_SYNTAX_ERROR: for session in self.test_sessions:
-            # REMOVED_SYNTAX_ERROR: if session.websocket_connection:
-                # REMOVED_SYNTAX_ERROR: try:
-                    # REMOVED_SYNTAX_ERROR: await session.websocket_connection.disconnect()
-                    # REMOVED_SYNTAX_ERROR: except:
-                        # REMOVED_SYNTAX_ERROR: pass
+        logger.info("🧹 Cleaning up E2E environment...")
+        for session in self.test_sessions:
+            if session.websocket_connection:
+                try:
+                    await session.websocket_connection.disconnect()
+                except:
+                    pass
 
-                        # REMOVED_SYNTAX_ERROR: await self.service_integrator.cleanup()
-                        # REMOVED_SYNTAX_ERROR: await self.docker_manager.cleanup_if_needed()
+        await self.service_integrator.cleanup()
+        await self.docker_manager.cleanup_if_needed()
 
-                        # Removed problematic line: @pytest.mark.asyncio
-                        # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-                        # REMOVED_SYNTAX_ERROR: @pytest.fixture
-                        # Removed problematic line: async def test_complete_user_to_action_plan_journey(self):
-                            # REMOVED_SYNTAX_ERROR: """CRITICAL: Test complete user journey from request to action plan."""
-                            # REMOVED_SYNTAX_ERROR: pass
-                            # REMOVED_SYNTAX_ERROR: logger.info(" )
-                            # REMOVED_SYNTAX_ERROR: " + "🎯 STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_complete_user_to_action_plan_journey(self, setup_complete_e2e_environment):
+        """CRITICAL: Test complete user journey from request to action plan."""
+        logger.info("\n" + "🎯 STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
 
-                            # Create E2E test session
-                            # REMOVED_SYNTAX_ERROR: session = E2ETestSession( )
-                            # REMOVED_SYNTAX_ERROR: session_id="formatted_string",
-                            # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                            # REMOVED_SYNTAX_ERROR: thread_id=""  # Will be created
-                            
-                            # REMOVED_SYNTAX_ERROR: self.test_sessions.append(session)
+        # Create E2E test session
+        session = E2ETestSession(
+            session_id=f"e2e-test-{uuid.uuid4()}",
+            user_id=f"test-user-{uuid.uuid4()}",
+            thread_id=""  # Will be created
+        )
+        self.test_sessions.append(session)
 
-                            # REMOVED_SYNTAX_ERROR: metrics = UserExperienceMetrics()
-                            # REMOVED_SYNTAX_ERROR: journey_start_time = time.time()
+        metrics = UserExperienceMetrics()
+        journey_start_time = time.time()
 
-                            # REMOVED_SYNTAX_ERROR: try:
-                                # STEP 1: Create thread through real API
-                                # REMOVED_SYNTAX_ERROR: logger.info("📝 Step 1: Creating thread through real backend API...")
-                                # REMOVED_SYNTAX_ERROR: session.thread_id = await self.service_integrator.create_thread(session.user_id)
+        try:
+            # STEP 1: Create thread through real API
+            logger.info("📏 Step 1: Creating thread through real backend API...")
+            session.thread_id = await self.service_integrator.create_thread(session.user_id)
 
-                                # REMOVED_SYNTAX_ERROR: assert session.thread_id is not None, \
-                                # REMOVED_SYNTAX_ERROR: "Failed to create thread through real API - backend may be down"
+            assert session.thread_id is not None, \
+                "Failed to create thread through real API - backend may be down"
 
-                                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+            logger.info(f"✅ Thread created: {session.thread_id}")
 
-                                # STEP 2: Establish real WebSocket connection
-                                # REMOVED_SYNTAX_ERROR: logger.info("🔌 Step 2: Establishing real WebSocket connection...")
-                                # REMOVED_SYNTAX_ERROR: ws_client = RealWebSocketClient()
+            # STEP 2: Establish real WebSocket connection
+            logger.info("🔌 Step 2: Establishing real WebSocket connection...")
+            ws_client = RealWebSocketClient()
 
-                                # REMOVED_SYNTAX_ERROR: websocket_connected = await ws_client.connect(session.thread_id, session.user_id)
-                                # REMOVED_SYNTAX_ERROR: assert websocket_connected, \
-                                # REMOVED_SYNTAX_ERROR: "Failed to establish real WebSocket connection - WebSocket service may be down"
+            websocket_connected = await ws_client.connect(session.thread_id, session.user_id)
+            assert websocket_connected, \
+                "Failed to establish real WebSocket connection - WebSocket service may be down"
 
-                                # REMOVED_SYNTAX_ERROR: session.websocket_connection = ws_client
+            session.websocket_connection = ws_client
 
-                                # Setup WebSocket event tracking
-                                # REMOVED_SYNTAX_ERROR: agent_events_received = []
+            # Setup WebSocket event tracking
+            agent_events_received = []
 
-# REMOVED_SYNTAX_ERROR: async def track_agent_event(data):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: agent_events_received.append({ ))
-    # REMOVED_SYNTAX_ERROR: 'type': data.get('type'),
-    # REMOVED_SYNTAX_ERROR: 'timestamp': time.time(),
-    # REMOVED_SYNTAX_ERROR: 'data': data
-    
-    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+            async def track_agent_event(data):
+                agent_events_received.append({
+                    'type': data.get('type'),
+                    'timestamp': time.time(),
+                    'data': data
+                })
+                logger.info(f"📡 Event received: {data.get('type')}")
 
-    # Register for all critical agent events
-    # REMOVED_SYNTAX_ERROR: critical_events = [ )
-    # REMOVED_SYNTAX_ERROR: 'agent_started', 'agent_thinking', 'tool_executing',
-    # REMOVED_SYNTAX_ERROR: 'tool_completed', 'agent_completed', 'final_report'
-    
+            # Register for all critical agent events
+            critical_events = [
+                'agent_started', 'agent_thinking', 'tool_executing',
+                'tool_completed', 'agent_completed', 'final_report'
+            ]
 
-    # REMOVED_SYNTAX_ERROR: for event_type in critical_events:
-        # REMOVED_SYNTAX_ERROR: ws_client.on_message(event_type, track_agent_event)
+            for event_type in critical_events:
+                ws_client.on_message(event_type, track_agent_event)
 
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ Real WebSocket connection established")
+            logger.info("✅ Real WebSocket connection established")
 
         # STEP 3: Send realistic user message for action planning
         # REMOVED_SYNTAX_ERROR: logger.info("💬 Step 3: Sending realistic user request...")
