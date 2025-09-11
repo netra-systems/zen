@@ -19,9 +19,16 @@ import asyncio
 import time
 from typing import Dict, Optional
 
-import docker
 import httpx
 import pytest
+
+# Conditional docker import for graceful fallback
+try:
+    import docker
+    DOCKER_AVAILABLE = True
+except ImportError:
+    docker = None
+    DOCKER_AVAILABLE = False
 from shared.isolated_environment import get_env
 
 from shared.isolated_environment import get_env
