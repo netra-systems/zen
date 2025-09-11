@@ -590,10 +590,11 @@ class MockUnifiedAuthInterface:
     
     async def validate_session_request(self, session_token, request_ip, user_agent=None):
         """Validate session request and detect suspicious activity"""
-        # Extract session_id from token
+        # Extract session_id from token (format: session_token_{session_id}_{timestamp})
         session_id = None
         for sid, session_info in self.sessions.items():
-            if session_token.endswith(sid):
+            expected_token_prefix = f"session_token_{sid}_"
+            if session_token.startswith(expected_token_prefix):
                 session_id = sid
                 break
         
@@ -612,8 +613,14 @@ class MockUnifiedAuthInterface:
         ttl_seconds = session_info.get("ttl_seconds", 86400)
         
         if session_age > ttl_seconds:
-            # Remove expired session
+            # Remove expired session from internal storage
             del self.sessions[session_id]
+            
+            # Also remove from Redis if available
+            if self.redis_client:
+                redis_session_key = f"session:{session_id}"
+                self.redis_client.delete(redis_session_key)
+            
             class ValidationResult:
                 def __init__(self, valid, error):
                     self.valid = valid
@@ -641,18 +648,23 @@ class MockUnifiedAuthInterface:
             if user_id not in self.security_events:
                 self.security_events[user_id] = []
             
+            # Create details that includes risk factors directly for test compatibility
+            details = {
+                "original_ip": original_ip,
+                "request_ip": request_ip,
+                "original_user_agent": original_ua,
+                "request_user_agent": user_agent,
+            }
+            # Add risk factors directly to details for test compatibility
+            for risk_factor in risk_factors:
+                details[risk_factor] = True
+            
             self.security_events[user_id].append({
                 "event_type": "suspicious_session_activity",
                 "user_id": user_id,
                 "session_id": session_id,
                 "timestamp": current_time,
-                "details": {
-                    "original_ip": original_ip,
-                    "request_ip": request_ip,
-                    "original_user_agent": original_ua,
-                    "request_user_agent": user_agent,
-                    "risk_factors": risk_factors
-                }
+                "details": details
             })
         
         class ValidationResult:

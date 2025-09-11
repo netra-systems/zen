@@ -86,7 +86,7 @@ graph TB
 **Critical Behavior**:
 ```python
 # BEFORE (dangerous default):
-validator = GoldenPathValidator(environment=EnvironmentType.DEVELOPMENT)
+validator = GoldenPathValidator()
 
 # AFTER (definitive detection):
 context = await detector.detect_environment_context()

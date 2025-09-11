@@ -91,7 +91,7 @@ class TestServiceDependencyCore:
     
     async def test_golden_path_validator_with_available_services(self):
         """Test GoldenPathValidator with available services."""
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         
         # Create mock app with services
         app = FastAPI()
@@ -202,7 +202,7 @@ class TestServiceDependencyCore:
         """Integration test of multiple components working together."""
         # Test that all components can be created and work together
         checker = ServiceDependencyChecker(environment=EnvironmentType.TESTING)
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         health_validator = HealthCheckValidator(environment=EnvironmentType.TESTING)
         
         # Create comprehensive mock app

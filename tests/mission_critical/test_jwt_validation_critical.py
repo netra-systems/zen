@@ -67,7 +67,7 @@ class TestJWTValidationMissionCritical:
     @pytest.fixture
     def mission_critical_golden_path_validator(self):
         """Golden Path Validator for mission critical tests."""
-        return GoldenPathValidator(environment=EnvironmentType.PRODUCTION)
+        return GoldenPathValidator()
 
     def test_mission_critical_jwt_validator_initialization(
         self,

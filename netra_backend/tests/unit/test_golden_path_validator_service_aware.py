@@ -48,7 +48,7 @@ class TestGoldenPathValidatorServiceAware(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup test environment."""
         super().setup_method(method)
-        self.validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        self.validator = GoldenPathValidator()
         
     async def test_postgres_validation_should_not_check_auth_service_tables(self):
         """

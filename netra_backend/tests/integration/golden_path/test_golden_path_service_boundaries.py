@@ -41,7 +41,7 @@ class TestGoldenPathServiceBoundaries:
     @pytest.fixture
     def validator(self):
         """Create validator for integration testing."""
-        return GoldenPathValidator(environment=EnvironmentType.TESTING)
+        return GoldenPathValidator()
 
     @pytest.fixture
     def backend_service_app_mock(self):
