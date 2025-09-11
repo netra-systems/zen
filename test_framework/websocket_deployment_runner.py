@@ -31,7 +31,7 @@ from tests.websocket_deployment_validation.test_websocket_deployment_suite impor
 )
 
 # Import existing test framework components
-from test_framework.runner import UnifiedTestRunner as FrameworkRunner
+from tests.unified_test_runner import UnifiedTestRunner as FrameworkRunner
 from test_framework.progress_tracker import ProgressTracker, ProgressEvent
 
 
