@@ -70,22 +70,42 @@ No categories to run based on selection criteria - SUCCESS (empty selection is v
 - Mission critical test category not properly registered
 - Reduced confidence in business-critical functionality validation
 
+## GitHub Issues Created/Updated
+
+### Issue #1: test_framework Module → **Updated Issue #299**
+**Link:** https://github.com/netra-systems/netra-apex/issues/299  
+**Action:** Added detailed test_framework import failure evidence  
+**Status:** OPEN - SSOT TestRunner duplicate implementation blocking Golden Path validation  
+
+### Issue #2: Docker Dependency → **Updated Issue #291**  
+**Link:** https://github.com/netra-systems/netra-apex/issues/291  
+**Action:** Added agent value test execution evidence and business impact escalation  
+**Status:** OPEN - Docker daemon connectivity blocks integration tests  
+
+### Issue #3: Test Category Registration → **Created Issue #311**
+**Link:** https://github.com/netra-systems/netra-apex/issues/311  
+**Title:** failing-test-infrastructure-medium-test-category-discovery-mission-critical-not-found  
+**Status:** OPEN - Mission critical test category not discoverable  
+
 ## Next Steps by Issue
 
-### Issue #1: test_framework Module
-1. Investigate if test_framework module exists in codebase
-2. Check PYTHONPATH configuration 
+### Issue #299: test_framework Module (UPDATED)
+1. ✅ Documented import failures in GitHub issue
+2. Investigate test_framework module SSOT structure 
 3. Verify SSOT import registry has correct test_framework imports
-4. Create or fix module structure
+4. Resolve module import dependencies for agent value tests
 
-### Issue #2: Docker Dependency  
-1. Document Docker requirement for E2E agent value tests
-2. Investigate Docker-free alternatives for critical agent value validation
-3. Ensure staging environment can validate agent value without local Docker
+### Issue #291: Docker Dependency (UPDATED)
+1. ✅ Added agent value test impact analysis to GitHub issue  
+2. Restore Docker daemon connectivity
+3. Validate agent value tests with real services
+4. Ensure WebSocket event validation with Docker services
 
-### Issue #3: Test Category Registration
-1. Verify mission_critical test category configuration in unified_test_runner.py
-2. Update test discovery mechanism for proper category recognition
+### Issue #311: Test Category Registration (NEW)
+1. ✅ Created GitHub issue for category discovery problems
+2. Verify mission_critical test category configuration in unified_test_runner.py
+3. Update test discovery mechanism for proper category recognition
+4. Enable direct execution of mission-critical agent value tests
 
 ## Test Discovery Summary
 
