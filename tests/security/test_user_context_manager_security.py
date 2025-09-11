@@ -50,9 +50,9 @@ class TestUserContextManagerSecurity(SSotBaseTestCase):
     between different user contexts, preventing any form of data leakage.
     """
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test fixtures."""
-        super().setUp()
+        super().setup_method(method)
         
         # Skip tests if UserContextManager doesn't exist (TDD approach)
         if not USERCONTEXTMANAGER_EXISTS:
