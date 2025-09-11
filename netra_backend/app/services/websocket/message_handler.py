@@ -150,32 +150,76 @@ class StartAgentHandler(BaseMessageHandler):
         return request_data.get("query", "") or request_data.get("user_request", "")
     
     async def _setup_thread_and_run(self, user_id: str, user_request: str) -> tuple[str, str]:
-        """Setup thread and run for agent processing"""
+        """Setup thread and run for agent processing with comprehensive service dependency logging"""
+        start_time = time.time()
+        logger.info(f"🔍 WEBSOCKET SERVICE DEPENDENCIES: Starting thread setup "
+                   f"(user_id: {user_id[:8]}..., "
+                   f"required_services: ['database', 'unit_of_work', 'websocket_manager'])")
+        
         # CRITICAL FIX: Ensure database is initialized before using UnitOfWork
         try:
             from netra_backend.app.db.postgres import initialize_postgres, async_session_factory
             
             # Check if database is initialized, if not initialize it
             if async_session_factory is None:
-                logger.info("Database not initialized, initializing PostgreSQL...")
+                logger.warning("🔧 DATABASE SERVICE DEPENDENCY: Database not initialized, initializing PostgreSQL...")
                 initialize_postgres()
                 
+            db_init_time = time.time()
             async with get_unit_of_work() as uow:
+                uow_time = (time.time() - db_init_time) * 1000
+                logger.info(f"✅ DATABASE SERVICE SUCCESS: Unit of work created "
+                           f"(response_time: {uow_time:.2f}ms, "
+                           f"service_status: database_healthy)")
+                
                 thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
+                thread_time = (time.time() - db_init_time) * 1000
+                
                 if not thread:
+                    logger.critical(f"🚨 THREAD SERVICE FAILURE: Failed to create or retrieve thread "
+                                   f"(user_id: {user_id[:8]}..., "
+                                   f"response_time: {thread_time:.2f}ms, "
+                                   f"service_status: thread_service_failed, "
+                                   f"golden_path_impact: CRITICAL - User conversation cannot start, "
+                                   f"recovery_action: Check database connectivity and thread table schema)")
+                    
                     # Use session-based context for error handling
                     context = get_user_execution_context(user_id=user_id)
                     manager = await create_websocket_manager(context)
                     await manager.send_error(user_id, "Failed to create or retrieve thread")
                     return None, None
+                
+                logger.info(f"✅ THREAD SERVICE SUCCESS: Thread ready for user "
+                           f"(user_id: {user_id[:8]}..., "
+                           f"thread_id: {thread.id[:8]}..., "
+                           f"response_time: {thread_time:.2f}ms, "
+                           f"service_status: thread_service_healthy)")
+                
                 return await self._create_message_and_run(uow, thread, user_request, user_id)
                 
         except Exception as db_error:
-            logger.error(f"Database setup failed in WebSocket handler: {db_error}")
+            total_time = (time.time() - start_time) * 1000
+            logger.critical(f"🚨 DATABASE SERVICE EXCEPTION: Database setup failed in WebSocket handler "
+                           f"(user_id: {user_id[:8]}..., "
+                           f"exception_type: {type(db_error).__name__}, "
+                           f"exception_message: {str(db_error)}, "
+                           f"response_time: {total_time:.2f}ms, "
+                           f"service_status: database_unreachable, "
+                           f"golden_path_impact: CRITICAL - All WebSocket operations blocked, "
+                           f"dependent_services: ['websocket_service', 'thread_service', 'message_service'], "
+                           f"recovery_action: Check database connectivity, connection pool, and PostgreSQL health)")
+            
             # Use session-based context for error handling
             context = get_user_execution_context(user_id=user_id)
-            manager = await create_websocket_manager(context)
-            await manager.send_error(user_id, f"Database initialization failed: {str(db_error)}")
+            try:
+                manager = await create_websocket_manager(context)
+                await manager.send_error(user_id, f"Database initialization failed: {str(db_error)}")
+            except Exception as ws_error:
+                logger.critical(f"🚨 WEBSOCKET SERVICE FAILURE: Cannot send error to user after database failure "
+                               f"(user_id: {user_id[:8]}..., "
+                               f"websocket_error: {str(ws_error)}, "
+                               f"original_db_error: {str(db_error)}, "
+                               f"golden_path_impact: CRITICAL - User completely disconnected)")
             return None, None
     
     async def _create_message_and_run(self, uow, thread, user_request: str, user_id: str) -> tuple[str, str]:
@@ -195,14 +239,61 @@ class StartAgentHandler(BaseMessageHandler):
         )
     
     async def _execute_agent_workflow(self, user_request: str, thread_id: str, user_id: str, run_id: str):
-        """Execute agent workflow without holding database session"""
-        self._configure_supervisor(thread_id, user_id)
+        """Execute agent workflow without holding database session with comprehensive service dependency logging"""
+        start_time = time.time()
+        logger.info(f"🔍 SUPERVISOR SERVICE DEPENDENCY: Starting agent workflow execution "
+                   f"(user_id: {user_id[:8]}..., "
+                   f"thread_id: {thread_id[:8]}..., "
+                   f"run_id: {run_id[:8]}..., "
+                   f"required_services: ['supervisor_service', 'websocket_bridge'])")
         
-        # PHASE 4 FIX: Enhanced WebSocket bridge creation with retry logic for connection storms
-        if not hasattr(self.supervisor, 'websocket_bridge') or not self.supervisor.websocket_bridge:
-            await self._create_websocket_bridge_with_retry(user_id, thread_id, run_id)
-        
-        return await self.supervisor.run(user_request, thread_id, user_id, run_id)
+        try:
+            self._configure_supervisor(thread_id, user_id)
+            config_time = (time.time() - start_time) * 1000
+            
+            logger.info(f"✅ SUPERVISOR CONFIG SUCCESS: Supervisor configured "
+                       f"(response_time: {config_time:.2f}ms, "
+                       f"service_status: supervisor_configured)")
+            
+            # PHASE 4 FIX: Enhanced WebSocket bridge creation with retry logic for connection storms
+            if not hasattr(self.supervisor, 'websocket_bridge') or not self.supervisor.websocket_bridge:
+                logger.info(f"🔧 WEBSOCKET BRIDGE DEPENDENCY: Creating WebSocket bridge for supervisor "
+                           f"(user_id: {user_id[:8]}..., "
+                           f"required_for: real-time_agent_events)")
+                await self._create_websocket_bridge_with_retry(user_id, thread_id, run_id)
+            else:
+                logger.info(f"✅ WEBSOCKET BRIDGE EXISTS: Using existing WebSocket bridge "
+                           f"(service_status: websocket_bridge_ready)")
+            
+            # Execute supervisor with service monitoring
+            execution_start = time.time()
+            result = await self.supervisor.run(user_request, thread_id, user_id, run_id)
+            execution_time = (time.time() - execution_start) * 1000
+            total_time = (time.time() - start_time) * 1000
+            
+            logger.info(f"✅ SUPERVISOR SERVICE SUCCESS: Agent workflow completed "
+                       f"(user_id: {user_id[:8]}..., "
+                       f"execution_time: {execution_time:.2f}ms, "
+                       f"total_time: {total_time:.2f}ms, "
+                       f"service_status: supervisor_healthy, "
+                       f"golden_path_status: agent_response_generated)")
+            
+            return result
+            
+        except Exception as e:
+            total_time = (time.time() - start_time) * 1000
+            logger.critical(f"🚨 SUPERVISOR SERVICE EXCEPTION: Agent workflow execution failed "
+                           f"(user_id: {user_id[:8]}..., "
+                           f"thread_id: {thread_id[:8]}..., "
+                           f"run_id: {run_id[:8]}..., "
+                           f"exception_type: {type(e).__name__}, "
+                           f"exception_message: {str(e)}, "
+                           f"response_time: {total_time:.2f}ms, "
+                           f"service_status: supervisor_service_failed, "
+                           f"golden_path_impact: CRITICAL - User gets no AI response, "
+                           f"dependent_services: ['websocket_service', 'agent_execution'], "
+                           f"recovery_action: Check supervisor service health and agent registry)")
+            raise
     
     async def _create_websocket_bridge_with_retry(self, user_id: str, thread_id: str, run_id: str) -> None:
         """
