@@ -16,9 +16,21 @@ SNST = SPAWN NEW SUBAGENT TASK (EVERY STEP IN PROCESS)
 ALL Github output MUST follow @GITHUB_STYLE_GUIDE.md
 Stay on develop-long-lived branch as current branch.
 
+**CRITICAL BRANCH SAFETY POLICY:**
+- **NEVER change current working branch** during issue processing
+- **Current branch**: develop-long-lived (as per CLAUDE.md)
+- **All work performed on**: develop-long-lived
+- **PR target**: develop-long-lived (current working branch) - NEVER main
+- **Verification**: Check `git branch --show-current` at each major step
+
 PROCESS INSTRUCTIONS START:
 
-0) READ TARGET ISSUE : SNST: Use gh to read the TARGET ISSUE ${1 : latest open issue}.
+0) BRANCH SAFETY CHECK : SNST: 
+Verify current branch is develop-long-lived: `git branch --show-current`
+If not on develop-long-lived, STOP and switch: `git checkout develop-long-lived`
+Record branch state for safety monitoring throughout process.
+
+1) READ TARGET ISSUE : SNST: Use gh to read the TARGET ISSUE ${1 : latest open issue}.
 
 1) INTELLIGENT SIMILARITY ANALYSIS : SNST : 
 Analyze ALL open issues to find related ones using sophisticated similarity detection:
