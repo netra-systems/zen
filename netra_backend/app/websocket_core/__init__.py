@@ -168,12 +168,9 @@ except ImportError:
     WebSocketConfig = dict
     AuthInfo = dict
     
-    # Fallback functions
-    def create_server_message(msg_type, data=None, **kwargs):
-        return {"type": msg_type, "data": data, **kwargs}
-    
-    def create_error_message(error_code, message="Error", **kwargs):
-        return {"type": "error", "error_code": error_code, "message": message, **kwargs}
+    # REMOVED: Fallback functions eliminated to fix SSOT violation
+    # The fallback implementations were causing signature mismatches
+    # All imports should succeed from types.py after critical dependency fixes
 
 # Import JWT protocol handler functions for subprotocol negotiation (Issue #280 fix)
 try:

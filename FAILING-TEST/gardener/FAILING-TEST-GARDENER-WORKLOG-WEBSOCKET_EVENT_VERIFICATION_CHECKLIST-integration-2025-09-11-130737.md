@@ -15,10 +15,11 @@
 
 ## Issues Discovered
 
-### Issue 1: Docker Build Infrastructure Failure (CRITICAL)
+### Issue 1: Docker Build Infrastructure Failure (CRITICAL) - **GitHub Issue #443**
 **Category:** failing-test-infrastructure-P0-docker-build-failure  
 **Severity:** P0 (Critical/blocking - system down)  
 **Type:** Integration test infrastructure failure  
+**GitHub Issue:** [#443 - Missing docker directory causing Docker build infrastructure failures](https://github.com/netra-systems/netra-apex/issues/443)  
 
 **Error Details:**
 ```
@@ -38,10 +39,11 @@ Docker command failed (rc=1): docker-compose -f docker-compose.alpine-test.yml -
 - WebSocket integration tests requiring containerized services
 - Mission critical test suite dependent on Docker orchestration
 
-### Issue 2: Docker Image Repository Access Failure (HIGH)
+### Issue 2: Docker Image Repository Access Failure (HIGH) - **GitHub Issue #458**
 **Category:** failing-test-registry-P1-image-access-failure  
 **Severity:** P1 (High - major feature broken)  
 **Type:** Container registry authentication issue  
+**GitHub Issue:** [#458 - Alpine image access failure](https://github.com/netra-systems/netra-apex/issues/458)  
 
 **Error Details:**
 ```
@@ -58,10 +60,11 @@ alpine-test-backend Warning pull access denied for netra-alpine-test-backend, re
 - Blocks container-based WebSocket testing scenarios
 - Prevents validation of multi-service integration patterns
 
-### Issue 3: Mission Critical Test Import Chain Failure (MEDIUM)
+### Issue 3: Mission Critical Test Import Chain Failure (MEDIUM) - **GitHub Issue #460**
 **Category:** failing-test-imports-P2-mission-critical-import-failure  
 **Severity:** P2 (Medium - minor feature issues)  
 **Type:** Python import dependency issue  
+**GitHub Issue:** [#460 - Mission critical import failure](https://github.com/netra-systems/netra-apex/issues/460)  
 
 **Error Details:**
 ```
@@ -143,7 +146,47 @@ File "C:\GitHub\netra-apex\tests\mission_critical\test_websocket_agent_events_su
 3. **Link Dependencies:** Connect WebSocket testing issues to Golden Path concerns
 4. **Track Resolution:** Monitor Docker infrastructure restoration
 
+## GitHub Issues Created & Cross-Referenced
+
+### Primary Issues (Discovered by this worklog):
+- **[#443](https://github.com/netra-systems/netra-apex/issues/443)** - [P0 CRITICAL] Missing docker directory causing Docker build infrastructure failures
+- **[#458](https://github.com/netra-systems/netra-apex/issues/458)** - [P1] Alpine image access failure - Docker registry authentication
+- **[#460](https://github.com/netra-systems/netra-apex/issues/460)** - [P2] Mission critical test import chain failure
+
+### Related WebSocket Infrastructure Issues:
+- **[#411](https://github.com/netra-systems/netra-apex/issues/411)** - Mission critical WebSocket test suite hangs (P0)
+- **[#373](https://github.com/netra-systems/netra-apex/issues/373)** - Silent WebSocket event delivery failures (P0)
+- **[#372](https://github.com/netra-systems/netra-apex/issues/372)** - WebSocket handshake race conditions (P0)
+- **[#409](https://github.com/netra-systems/netra-apex/issues/409)** - WebSocket agent bridge integration failure (P1)
+- **[#445](https://github.com/netra-systems/netra-apex/issues/445)** - Bridge integration no events (P1)
+
+### Related Golden Path Issues:
+- **[#426](https://github.com/netra-systems/netra-apex/issues/426)** - E2E golden path tests failing (P0)
+- **[#414](https://github.com/netra-systems/netra-apex/issues/414)** - Golden path real services failure (P1)
+- **[#438](https://github.com/netra-systems/netra-apex/issues/438)** - Golden Path failure point logging infrastructure (P1)
+
+### Related Infrastructure Issues:
+- **[#444](https://github.com/netra-systems/netra-apex/issues/444)** - Test framework module missing (P0)
+- **[#457](https://github.com/netra-systems/netra-apex/issues/457)** - Docker Desktop service unavailable
+- **[#440](https://github.com/netra-systems/netra-apex/issues/440)** - Auth service dependency startup unknown endpoint (P0)
+
+## Documentation References
+
+### Business Impact Documentation:
+- 📋 [DEFINITION_OF_DONE_CHECKLIST.md - WebSocket Module](https://github.com/netraai/netra-apex/blob/develop-long-lived/reports/DEFINITION_OF_DONE_CHECKLIST.md#-websocket-module-critical-infrastructure-for-chat)
+- 🎯 [GOLDEN_PATH_USER_FLOW_COMPLETE.md](https://github.com/netraai/netra-apex/blob/develop-long-lived/docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)
+- 📊 [TEST_EXECUTION_GUIDE.md](https://github.com/netraai/netra-apex/blob/develop-long-lived/TEST_EXECUTION_GUIDE.md)
+
+### Technical References:
+- 🏗️ [SSOT_IMPORT_REGISTRY.md](https://github.com/netraai/netra-apex/blob/develop-long-lived/SSOT_IMPORT_REGISTRY.md)
+- 📈 [MASTER_WIP_STATUS.md](https://github.com/netraai/netra-apex/blob/develop-long-lived/reports/MASTER_WIP_STATUS.md)
+
+### Resolution Chain Documentation:
+**Resolution Order:** #443 (Docker directory) → #458 (Registry access) → #460 (Import chains)  
+**Business Priority:** $500K+ ARR Golden Path protection requires Docker infrastructure for WebSocket event verification
+
 ---
-**Worklog Status:** READY FOR ISSUE PROCESSING  
+**Worklog Status:** ✅ ISSUES CREATED & LINKED  
 **Priority Issues:** 3 identified (1 P0, 1 P1, 1 P2)  
-**Critical Blocker:** Docker infrastructure failure preventing all integration testing
+**Critical Blocker:** Docker infrastructure failure preventing all integration testing  
+**Cross-Reference Status:** ✅ COMPLETE - All issues linked with documentation references

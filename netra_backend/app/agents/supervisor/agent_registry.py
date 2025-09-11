@@ -40,11 +40,20 @@ if TYPE_CHECKING:
     from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
+    # CRITICAL ISSUE #387 REMEDIATION: Prerequisites validation types
+    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+    from netra_backend.app.agents.supervisor.agent_execution_prerequisites import PrerequisiteValidationResult
 else:
     # Import at runtime to avoid circular imports
     create_agent_websocket_bridge = None
 
 from netra_backend.app.logging_config import central_logger
+
+# CRITICAL ISSUE #387 REMEDIATION: Agent Execution Prerequisites Validation  
+from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
+    AgentExecutionPrerequisites,
+    PrerequisiteValidationLevel
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -381,7 +390,8 @@ class AgentRegistry(BaseAgentRegistry):
     adding enhanced functionality while maintaining SSOT compliance.
     """
     
-    def __init__(self, llm_manager: Optional['LLMManager'] = None, tool_dispatcher_factory: Optional[callable] = None):
+    def __init__(self, llm_manager: Optional['LLMManager'] = None, tool_dispatcher_factory: Optional[callable] = None,
+                 prerequisite_validation_level: Optional[PrerequisiteValidationLevel] = None):
         """Initialize agent registry with CanonicalToolDispatcher SSOT pattern.
         
         Args:
@@ -389,6 +399,7 @@ class AgentRegistry(BaseAgentRegistry):
             tool_dispatcher_factory: Factory function to create CanonicalToolDispatcher per user
                                    Signature: async (user_context, websocket_bridge) -> CanonicalToolDispatcher
                                    If None, uses default factory
+            prerequisite_validation_level: Level of prerequisite validation (defaults to STRICT)
         """
         # BACKWARD COMPATIBILITY: Allow None llm_manager but warn about it
         if llm_manager is None:
@@ -404,6 +415,10 @@ class AgentRegistry(BaseAgentRegistry):
         self.tool_dispatcher_factory = tool_dispatcher_factory or self._default_dispatcher_factory
         self._agents_registered = False
         self.registration_errors: Dict[str, str] = {}
+        
+        # CRITICAL ISSUE #387 REMEDIATION: Initialize prerequisites validation
+        self.prerequisite_validation_level = prerequisite_validation_level or PrerequisiteValidationLevel.STRICT
+        self.prerequisites_validator = AgentExecutionPrerequisites(self.prerequisite_validation_level)
         
         # HARDENING: User isolation features
         self._user_sessions: Dict[str, UserAgentSession] = {}
@@ -1724,6 +1739,59 @@ class AgentRegistry(BaseAgentRegistry):
                 'compliance_score': 0,
                 'violations': [f"Compliance check failed: {e}"]
             }
+    
+    # === CRITICAL ISSUE #387 REMEDIATION: Prerequisites Validation Methods ===
+    
+    async def validate_execution_prerequisites(
+        self,
+        execution_context: 'AgentExecutionContext',
+        user_context: 'UserExecutionContext'
+    ) -> 'PrerequisiteValidationResult':
+        """Validate execution prerequisites for system-wide access.
+        
+        This method provides system-wide access to prerequisite validation
+        functionality, allowing any component to validate prerequisites
+        before attempting agent execution.
+        
+        Args:
+            execution_context: Agent execution context
+            user_context: User execution context for isolation
+            
+        Returns:
+            PrerequisiteValidationResult: Comprehensive validation results
+        """
+        return await self.prerequisites_validator.validate_all_prerequisites(
+            execution_context, user_context
+        )
+    
+    def get_prerequisite_validation_level(self) -> PrerequisiteValidationLevel:
+        """Get current prerequisite validation level.
+        
+        Returns:
+            PrerequisiteValidationLevel: Current validation level
+        """
+        return self.prerequisite_validation_level
+    
+    def set_prerequisite_validation_level(self, level: PrerequisiteValidationLevel) -> None:
+        """Set prerequisite validation level.
+        
+        Args:
+            level: New validation level to apply
+        """
+        self.prerequisite_validation_level = level
+        self.prerequisites_validator = AgentExecutionPrerequisites(level)
+        logger.info(
+            f"🔍 PREREQUISITES_CONFIG: Validation level changed to {level.value}. "
+            f"Business_impact: {level.value} mode affects early validation behavior."
+        )
+    
+    def get_prerequisites_validator(self) -> AgentExecutionPrerequisites:
+        """Get direct access to prerequisites validator for advanced usage.
+        
+        Returns:
+            AgentExecutionPrerequisites: The prerequisites validator instance
+        """
+        return self.prerequisites_validator
 
 
 # ===================== MODULE EXPORTS =====================

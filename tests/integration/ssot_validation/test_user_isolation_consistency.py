@@ -306,7 +306,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
                     )
                     
                     state = DeepAgentState(
-                        user_request={"prompt": f"User {context.user_id} request"},
+                        user_request=f"User {context.user_id} request",
                         user_id=context.user_id,
                         chat_thread_id=context.thread_id,
                         run_id=context.run_id

@@ -600,7 +600,7 @@ class TestAgentExecutionOrchestration(BaseIntegrationTest):
             )
             
             state = DeepAgentState(
-                user_request={"message": f"Test {agent_name}"},
+                user_request=f"Test {agent_name}",
                 user_id=test_user_context.user_id,
                 chat_thread_id=test_user_context.thread_id,
                 run_id=context.run_id,
