@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from langchain_core.tools import BaseTool
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.services.user_execution_context import UserExecutionContext as DeepAgentState
 
 from pydantic import BaseModel, Field
 from netra_backend.app.logging_config import central_logger

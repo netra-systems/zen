@@ -826,13 +826,10 @@ class ReportingSubAgent(BaseAgent):
         Returns:
             Report generation result
         """
-        # Extract state from context metadata
-        state = context.metadata.get('state') if context.metadata else None
-        if not state:
-            raise ValueError("No state found in execution context")
-        
-        # Convert to UserExecutionContext for existing logic
-        user_context = self._convert_to_user_context(context, state)
+        # Extract user_context from context metadata
+        user_context = context.metadata.get('user_context') if context.metadata else None
+        if not user_context:
+            raise ValueError("No user_context found in execution context")
         
         # For golden pattern compliance, bypass UVS fallback logic and call LLM directly
         # This allows exceptions to propagate as expected by tests

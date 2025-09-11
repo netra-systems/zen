@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -174,7 +174,7 @@ class RequestScopedExecutionEngine:
     
     async def execute_agent(self, 
                            context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
+                           state: UserExecutionContext) -> AgentExecutionResult:
         """Execute a single agent with complete request isolation.
         
         This method provides the same interface as the original ExecutionEngine
@@ -355,7 +355,7 @@ class RequestScopedExecutionEngine:
     
     async def _execute_with_error_handling(self, 
                                           context: AgentExecutionContext,
-                                          state: DeepAgentState,
+                                          state: UserExecutionContext,
                                           execution_id: str) -> AgentExecutionResult:
         """Execute agent with error handling and fallback.
         
