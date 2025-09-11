@@ -179,6 +179,96 @@ class UnifiedWebSocketEmitter:
         if self._enable_batching:
             self._start_batch_processor()
     
+    def _start_batch_processor(self):
+        """Start background batch processor for non-critical events."""
+        if not self._enable_batching:
+            return
+            
+        # Start the batch processing task
+        self._batch_timer = asyncio.create_task(self._process_event_batches())
+        logger.debug(f"Batch processor started for user {self.user_id} (batch_size: {self._batch_size})")
+    
+    async def _process_event_batches(self):
+        """Background processor for batching non-critical events."""
+        try:
+            while True:
+                await asyncio.sleep(self._batch_timeout)
+                
+                async with self._buffer_lock:
+                    if not self._event_buffer:
+                        continue
+                    
+                    # Process batch if we have events or timeout reached
+                    batch_to_process = self._event_buffer.copy()
+                    self._event_buffer.clear()
+                
+                if batch_to_process:
+                    await self._send_event_batch(batch_to_process)
+                    
+        except asyncio.CancelledError:
+            logger.debug(f"Batch processor cancelled for user {self.user_id}")
+        except Exception as e:
+            logger.error(f"Batch processor error for user {self.user_id}: {e}")
+    
+    async def _send_event_batch(self, batch: List[Dict[str, Any]]):
+        """Send a batch of events together for better performance."""
+        try:
+            # Group events by type for better compression
+            grouped_events = {}
+            for event in batch:
+                event_type = event.get('type', 'unknown')
+                if event_type not in grouped_events:
+                    grouped_events[event_type] = []
+                grouped_events[event_type].append(event)
+            
+            # Send grouped batch
+            batch_data = {
+                'type': 'event_batch',
+                'user_id': self.user_id,
+                'batch_id': f"batch_{int(time.time() * 1000)}",
+                'events': grouped_events,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'batch_size': len(batch)
+            }
+            
+            if hasattr(self.manager, 'emit_event_batch'):
+                await self.manager.emit_event_batch(
+                    user_id=self.user_id,
+                    batch_data=batch_data
+                )
+            else:
+                # Fallback to individual events if manager doesn't support batching
+                for event in batch:
+                    await self._emit_individual_event(event)
+            
+            logger.debug(f"Sent event batch for user {self.user_id}: {len(batch)} events")
+            
+        except Exception as e:
+            logger.error(f"Failed to send event batch for user {self.user_id}: {e}")
+            # Fall back to individual event sending
+            for event in batch:
+                try:
+                    await self._emit_individual_event(event)
+                except Exception as fallback_error:
+                    logger.error(f"Fallback individual event failed: {fallback_error}")
+    
+    async def _emit_individual_event(self, event_data: Dict[str, Any]):
+        """Fallback method to emit individual events."""
+        event_type = event_data.get('type', 'unknown')
+        if hasattr(self.manager, 'emit_event'):
+            await self.manager.emit_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
+        else:
+            # Fallback to critical event method
+            await self.manager.emit_critical_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
+    
     def _validate_critical_events(self):
         """
         Ensure critical event methods are NEVER removed.
