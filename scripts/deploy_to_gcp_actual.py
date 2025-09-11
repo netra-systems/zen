@@ -103,6 +103,7 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_INTERNAL_URL": f"https://netra-auth-service-uc.a.run.app",  # Internal VPC communication
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
                     "FORCE_HTTPS": "true",  # REQUIREMENT 6: FORCE_HTTPS for load balancer
@@ -1053,10 +1054,24 @@ CMD ["npm", "start"]
             # Use --update-env-vars to avoid conflicts with existing secret-based env vars
             cmd.extend(["--update-env-vars", ",".join(env_vars)])
         
-        # Add VPC connector for services that need Redis/database access
+        # Add VPC connector and network annotations for all services (Infrastructure Remediation #395)
         if service.name in ["backend", "auth"]:
-            # CRITICAL: VPC connector required for Redis and Cloud SQL connectivity
-            cmd.extend(["--vpc-connector", "staging-connector"])
+            # CRITICAL: VPC connector required for Redis, Cloud SQL, and service-to-service connectivity
+            vpc_connector_name = f"projects/{self.project_id}/locations/{self.region}/connectors/staging-connector"
+            cmd.extend([
+                "--vpc-connector", "staging-connector",
+                "--vpc-egress", "private-ranges-only"  # Route only private traffic through VPC
+            ])
+            
+            # CRITICAL: Service annotations for enhanced VPC connectivity
+            vpc_annotations = [
+                f"run.googleapis.com/vpc-access-connector={vpc_connector_name}",
+                "run.googleapis.com/vpc-access-egress=private-ranges-only",
+                "run.googleapis.com/network-interfaces=[{\"network\":\"default\",\"subnetwork\":\"default\"}]"
+            ]
+            
+            # Add VPC label to Cloud Run service (once)
+            cmd.extend(["--labels", f"vpc-connectivity=enabled"])
             
             # CRITICAL: Cloud SQL proxy connection for database access
             # This fixes the database initialization timeout issue

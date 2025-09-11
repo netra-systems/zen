@@ -156,7 +156,8 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
             print(f"❌ Golden Path chat test failed: {e}")
             # Check if failure is due to service availability
             if self._is_service_unavailable_error(e):
-                self.skipTest(f"WebSocket service unavailable: {e}")
+                import pytest
+                pytest.skip(f"WebSocket service unavailable: {e}")
         
         # CRITICAL ASSERTIONS - Core business value validation
         self.assertTrue(
@@ -248,7 +249,8 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         except Exception as e:
             print(f"❌ Agent execution test failed: {e}")
             if self._is_service_unavailable_error(e):
-                self.skipTest(f"Agent execution service unavailable: {e}")
+                import pytest
+                pytest.skip(f"Agent execution service unavailable: {e}")
         
         # Assert agent execution delivered real-time updates
         self.assertTrue(
@@ -340,7 +342,8 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         except Exception as e:
             print(f"❌ Tool execution transparency test failed: {e}")
             if self._is_service_unavailable_error(e):
-                self.skipTest(f"Tool execution service unavailable: {e}")
+                import pytest
+                pytest.skip(f"Tool execution service unavailable: {e}")
         
         # Assert tool execution transparency is working
         self.assertTrue(
@@ -434,7 +437,8 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         except Exception as e:
             print(f"❌ Session persistence test failed: {e}")
             if self._is_service_unavailable_error(e):
-                self.skipTest(f"Session persistence service unavailable: {e}")
+                import pytest
+                pytest.skip(f"Session persistence service unavailable: {e}")
         
         # Assert session persistence is working
         self.assertGreater(
@@ -527,7 +531,8 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         except Exception as e:
             print(f"❌ Agent thinking events test failed: {e}")
             if self._is_service_unavailable_error(e):
-                self.skipTest(f"Thinking events service unavailable: {e}")
+                import pytest
+                pytest.skip(f"Thinking events service unavailable: {e}")
         
         # Assert user engagement features are working
         self.assertTrue(
@@ -542,14 +547,14 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
     
     # Helper methods for WebSocket testing
     
-    async def _connect_websocket(self, headers: Dict[str, str]):
+    def _connect_websocket(self, headers: Dict[str, str]):
         """Helper to establish WebSocket connection with proper error handling."""
         import websockets
         
         return websockets.connect(
             self.websocket_url,
             additional_headers=headers,
-            timeout=self.timeout,
+            open_timeout=self.timeout,
             ping_interval=20 if "staging" in self.websocket_url else None,
             ping_timeout=10 if "staging" in self.websocket_url else None
         )
@@ -661,7 +666,8 @@ class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
                 
                 # Check if failure is due to service unavailability
                 if self._is_service_unavailable_error(e):
-                    self.skipTest(f"Service unavailable for recovery test: {e}")
+                    import pytest
+                    pytest.skip(f"Service unavailable for recovery test: {e}")
         
         # Assert business continuity through recovery
         self.assertTrue(
@@ -671,13 +677,13 @@ class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
             f"Recovery attempts: {recovery_attempts}"
         )
     
-    async def _connect_websocket(self, headers: Dict[str, str]):
+    def _connect_websocket(self, headers: Dict[str, str]):
         """Helper to establish WebSocket connection."""
         import websockets
         return websockets.connect(
             self.websocket_url,
             additional_headers=headers,
-            timeout=10.0
+            open_timeout=10.0
         )
     
     def _is_service_unavailable_error(self, error: Exception) -> bool:

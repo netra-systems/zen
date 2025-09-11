@@ -797,3 +797,44 @@ def get_execution_engine_factory() -> ExecutionEngineFactory:
     if _execution_engine_factory is None:
         _execution_engine_factory = ExecutionEngineFactory()
     return _execution_engine_factory
+
+
+class ExecutionFactory:
+    """
+    Simplified interface to ExecutionEngineFactory for test compatibility.
+    
+    This class provides a simple interface that tests expect while delegating
+    all functionality to the comprehensive ExecutionEngineFactory implementation.
+    
+    Business Value: Maintains test compatibility while ensuring SSOT compliance
+    """
+    
+    def __init__(self, config: Optional[ExecutionFactoryConfig] = None):
+        """Initialize ExecutionFactory with optional configuration."""
+        self.engine_factory = ExecutionEngineFactory(config)
+        logger.debug("ExecutionFactory initialized - delegating to ExecutionEngineFactory")
+    
+    def configure(self, 
+                 agent_registry: Optional['AgentRegistry'],
+                 websocket_bridge_factory: 'WebSocketBridgeFactory',
+                 db_connection_pool: Any) -> None:
+        """Configure factory with infrastructure components."""
+        self.engine_factory.configure(agent_registry, websocket_bridge_factory, db_connection_pool)
+    
+    async def create_execution_engine(self, 
+                                    user_context: UserExecutionContext) -> 'IsolatedExecutionEngine':
+        """Create isolated execution engine for user context."""
+        return await self.engine_factory.create_execution_engine(user_context)
+    
+    async def cleanup_context(self, request_id: str) -> None:
+        """Clean up a specific user context."""
+        await self.engine_factory.cleanup_context(request_id)
+    
+    def get_factory_metrics(self) -> Dict[str, Any]:
+        """Get comprehensive factory metrics."""
+        return self.engine_factory.get_factory_metrics()
+    
+    # Delegate unknown attributes to engine_factory
+    def __getattr__(self, name):
+        """Delegate unknown attributes to ExecutionEngineFactory."""
+        return getattr(self.engine_factory, name)

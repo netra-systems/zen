@@ -65,10 +65,11 @@ e.g. if docker isn't starting on port 8083, 99% of the time that is something fo
 ```
 
 ### Labels
-Use **maximum 3 labels** per issue:
-- Priority: `critical`, `high`, `normal`
-- Type: `bug`, `feature`, `refactor`
-- Area: `auth`, `websocket`, `ui`
+Use **maximum 4 labels** per issue:
+- Priority (MANDATORY): `P0` (critical/blocking), `P1` (high), `P2` (medium), `P3` (low)
+- Type: `bug`, `feature`, `enhancement`, `refactor`
+- Area: `auth`, `websocket`, `ui`, `infrastructure-dependency`
+- Generated: `claude-code-generated-issue` (for automated issue creation)
 
 ---
 

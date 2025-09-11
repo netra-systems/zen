@@ -48,9 +48,24 @@ collector = TestResultCollector()
 # Pytest hooks
 def pytest_configure(config):
     """Configure pytest with custom markers"""
+    # Environment markers
     config.addinivalue_line(
         "markers", "staging: mark test to run against staging environment"
     )
+    config.addinivalue_line(
+        "markers", "staging_validation: mark test for staging environment validation"
+    )
+    config.addinivalue_line(
+        "markers", "staging_gcp: mark test for staging GCP environment testing"
+    )
+    config.addinivalue_line(
+        "markers", "staging_remote: mark test for remote staging environment testing"
+    )
+    config.addinivalue_line(
+        "markers", "staging_regression_prevention: mark test for preventing staging regressions"
+    )
+    
+    # Priority markers
     config.addinivalue_line(
         "markers", "critical: mark test as business critical"
     )
@@ -62,6 +77,67 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers", "low: mark test as low priority"
+    )
+    
+    # Business and functionality markers
+    config.addinivalue_line(
+        "markers", "business_critical: mark test as critical to business operations"
+    )
+    config.addinivalue_line(
+        "markers", "mission_critical: mark test as mission critical functionality"
+    )
+    config.addinivalue_line(
+        "markers", "golden_path: mark test as part of the golden path user journey"
+    )
+    config.addinivalue_line(
+        "markers", "performance: mark test as performance testing"
+    )
+    config.addinivalue_line(
+        "markers", "stress: mark test as stress testing"
+    )
+    config.addinivalue_line(
+        "markers", "regression: mark test for regression testing"
+    )
+    
+    # Test type markers
+    config.addinivalue_line(
+        "markers", "e2e: mark test as end-to-end test"
+    )
+    config.addinivalue_line(
+        "markers", "auth: mark test as authentication related"
+    )
+    config.addinivalue_line(
+        "markers", "auth_flow: mark test as authentication flow testing"
+    )
+    config.addinivalue_line(
+        "markers", "auth_resilience: mark test for authentication resilience testing"
+    )
+    config.addinivalue_line(
+        "markers", "websocket: mark test as WebSocket functionality testing"
+    )
+    
+    # Service markers
+    config.addinivalue_line(
+        "markers", "real_services: mark test to run against real services (not mocked)"
+    )
+    config.addinivalue_line(
+        "markers", "real_llm: mark test to run against real LLM services"
+    )
+    config.addinivalue_line(
+        "markers", "real_database: mark test to run against real database"
+    )
+    config.addinivalue_line(
+        "markers", "real: mark test to run against real services"
+    )
+    
+    # Circuit breaker and resilience markers
+    config.addinivalue_line(
+        "markers", "circuit_breaker_states: mark test for circuit breaker state testing"
+    )
+    
+    # Issue tracking markers
+    config.addinivalue_line(
+        "markers", "issue_395: mark test related to issue #395 (WebSocket auth golden path)"
     )
 
 def pytest_sessionstart(session):

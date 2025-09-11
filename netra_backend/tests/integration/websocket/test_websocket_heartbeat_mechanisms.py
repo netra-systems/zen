@@ -35,6 +35,7 @@ from collections import defaultdict
 
 import pytest
 import websockets
+from websockets.asyncio.client import ClientConnection
 from websockets.exceptions import ConnectionClosed, WebSocketException
 
 # SSOT imports following CLAUDE.md absolute import requirements  
@@ -76,7 +77,7 @@ class TestWebSocketHeartbeatMechanisms(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.heartbeat_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.heartbeat_connections: Dict[str, ClientConnection] = {}
         self.heartbeat_metrics: Dict[str, Dict[str, Any]] = defaultdict(lambda: {
             "pings_sent": 0,
             "pongs_received": 0,
@@ -106,7 +107,7 @@ class TestWebSocketHeartbeatMechanisms(BaseIntegrationTest):
         user_id: str,
         ping_interval: float = 5.0,
         ping_timeout: float = 10.0
-    ) -> websockets.WebSocketServerProtocol:
+    ) -> ClientConnection:
         """
         Create WebSocket connection with configured heartbeat parameters.
         
@@ -145,7 +146,7 @@ class TestWebSocketHeartbeatMechanisms(BaseIntegrationTest):
     async def monitor_heartbeat_activity(
         self,
         user_id: str,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         duration: float = 20.0
     ) -> Dict[str, Any]:
         """
@@ -232,7 +233,7 @@ class TestWebSocketHeartbeatMechanisms(BaseIntegrationTest):
     
     async def send_manual_ping(
         self,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         ping_id: str
     ) -> Tuple[bool, Optional[float]]:
         """
@@ -502,7 +503,7 @@ class TestWebSocketHeartbeatMechanisms(BaseIntegrationTest):
     async def _send_periodic_messages(
         self,
         user_id: str,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         duration: float,
         interval: float = 3.0
     ) -> List[Dict[str, Any]]:
@@ -617,7 +618,7 @@ class TestWebSocketHeartbeatMechanisms(BaseIntegrationTest):
     async def _generate_message_load(
         self,
         user_id: str,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         num_messages: int = 20,
         rate: float = 1.0  # messages per second
     ) -> Dict[str, Any]:

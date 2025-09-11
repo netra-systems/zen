@@ -34,26 +34,47 @@ class ServiceRegistry:
             self.fallbacks[name] = fallback
             
     def get_service(self, name: str) -> Any:
-        """Get service with graceful fallback handling."""
+        """Get service with graceful fallback handling and comprehensive degradation logging."""
         service_info = self.services.get(name)
         if not service_info:
             if self.graceful_mode:
-                logger.warning(f"Service '{name}' not registered, returning None")
+                logger.warning(f"🚨 SERVICE REGISTRY: Service '{name}' not registered "
+                              f"(graceful_mode: enabled, "
+                              f"action: returning_none, "
+                              f"golden_path_impact: {self._assess_service_impact(name)}, "
+                              f"recovery_action: Register service or check service name)")
                 return None
             raise ValueError(f"Service '{name}' not found")
             
         if service_info['available']:
+            logger.debug(f"✅ SERVICE AVAILABLE: Service '{name}' is healthy and available "
+                        f"(service_status: available)")
             return service_info['service']
             
         # Service unavailable, try fallback
         if name in self.fallbacks:
-            logger.info(f"Using fallback for unavailable service '{name}'")
+            logger.warning(f"🔧 GRACEFUL DEGRADATION: Using fallback for unavailable service '{name}' "
+                          f"(service_status: unavailable, "
+                          f"fallback_activated: true, "
+                          f"golden_path_impact: {self._assess_service_impact(name)}, "
+                          f"degraded_functionality: Service operates with limited features)")
             return self.fallbacks[name]
             
         if service_info['critical'] and not self.graceful_mode:
+            logger.critical(f"🚨 CRITICAL SERVICE FAILURE: Critical service '{name}' is unavailable "
+                           f"(critical: true, "
+                           f"graceful_mode: disabled, "
+                           f"fallback_available: false, "
+                           f"golden_path_impact: CRITICAL - System cannot function properly, "
+                           f"action: raising_exception)")
             raise RuntimeError(f"Critical service '{name}' is unavailable")
             
-        logger.warning(f"Service '{name}' unavailable and no fallback, returning None")
+        logger.warning(f"⚠️ SERVICE DEGRADATION: Service '{name}' unavailable with no fallback "
+                      f"(service_status: unavailable, "
+                      f"fallback_available: false, "
+                      f"graceful_mode: enabled, "
+                      f"golden_path_impact: {self._assess_service_impact(name)}, "
+                      f"action: returning_none)")
         return None
         
     def is_service_available(self, name: str) -> bool:
@@ -62,10 +83,51 @@ class ServiceRegistry:
         return service_info['available'] if service_info else False
         
     def mark_service_unavailable(self, name: str) -> None:
-        """Mark service as unavailable."""
+        """Mark service as unavailable with comprehensive circuit breaker logging."""
         if name in self.services:
+            service_info = self.services[name]
+            previous_status = service_info['available']
             self.services[name]['available'] = False
-            logger.warning(f"Service '{name}' marked as unavailable")
+            
+            # Log circuit breaker activation
+            if previous_status:  # Service was previously available
+                logger.critical(f"🚨 CIRCUIT BREAKER ACTIVATED: Service '{name}' marked as unavailable "
+                               f"(previous_status: available, "
+                               f"new_status: unavailable, "
+                               f"critical: {service_info['critical']}, "
+                               f"fallback_available: {service_info['fallback_available']}, "
+                               f"golden_path_impact: {self._assess_service_impact(name)}, "
+                               f"circuit_breaker_action: Service calls will be blocked or fallback activated)")
+            else:
+                logger.warning(f"⚠️ SERVICE STATUS UPDATE: Service '{name}' remains unavailable "
+                              f"(status: already_unavailable, "
+                              f"circuit_breaker_status: already_active)")
+        else:
+            logger.error(f"🚨 SERVICE REGISTRY ERROR: Cannot mark unknown service '{name}' as unavailable "
+                        f"(action: service_not_registered, "
+                        f"recovery_action: Register service before marking unavailable)")
+    
+    def _assess_service_impact(self, service_name: str) -> str:
+        """Assess the impact of service unavailability on Golden Path functionality."""
+        critical_services = {
+            "auth_service": "CRITICAL - Authentication blocked", 
+            "database": "CRITICAL - Data persistence blocked",
+            "websocket_manager": "CRITICAL - Real-time communication blocked",
+            "supervisor_service": "CRITICAL - AI responses blocked"
+        }
+        
+        high_impact_services = {
+            "redis": "HIGH - Caching and session management degraded",
+            "thread_service": "HIGH - Conversation management limited",
+            "message_service": "HIGH - Message persistence may fail"
+        }
+        
+        if service_name in critical_services:
+            return critical_services[service_name]
+        elif service_name in high_impact_services:
+            return high_impact_services[service_name]
+        else:
+            return "MEDIUM - Some functionality may be limited"
 
 
 # Global service registry
@@ -79,12 +141,22 @@ def optional_service(service_name: str, fallback_result: Any = None):
         async def async_wrapper(*args, **kwargs):
             service = service_registry.get_service(service_name)
             if service is None:
-                logger.info(f"Service '{service_name}' unavailable, using fallback result")
+                logger.warning(f"🔧 GRACEFUL DEGRADATION: Service '{service_name}' unavailable, using fallback "
+                              f"(function: {func.__name__}, "
+                              f"fallback_type: {type(fallback_result).__name__}, "
+                              f"degradation_mode: fallback_result)")
                 return fallback_result
             try:
-                return await func(*args, **kwargs)
+                result = await func(*args, **kwargs)
+                logger.debug(f"✅ SERVICE OPERATION SUCCESS: Function '{func.__name__}' completed with service '{service_name}'")
+                return result
             except Exception as e:
-                logger.warning(f"Function {func.__name__} failed with service '{service_name}': {e}")
+                logger.critical(f"🚨 SERVICE OPERATION FAILURE: Function '{func.__name__}' failed with service '{service_name}' "
+                               f"(exception_type: {type(e).__name__}, "
+                               f"exception_message: {str(e)}, "
+                               f"circuit_breaker_action: Marking service unavailable, "
+                               f"fallback_activated: true, "
+                               f"golden_path_impact: {service_registry._assess_service_impact(service_name)})")
                 service_registry.mark_service_unavailable(service_name)
                 return fallback_result
                 
@@ -92,12 +164,22 @@ def optional_service(service_name: str, fallback_result: Any = None):
         def sync_wrapper(*args, **kwargs):
             service = service_registry.get_service(service_name)
             if service is None:
-                logger.info(f"Service '{service_name}' unavailable, using fallback result")
+                logger.warning(f"🔧 GRACEFUL DEGRADATION: Service '{service_name}' unavailable, using fallback "
+                              f"(function: {func.__name__}, "
+                              f"fallback_type: {type(fallback_result).__name__}, "
+                              f"degradation_mode: fallback_result)")
                 return fallback_result
             try:
-                return func(*args, **kwargs)
+                result = func(*args, **kwargs)
+                logger.debug(f"✅ SERVICE OPERATION SUCCESS: Function '{func.__name__}' completed with service '{service_name}'")
+                return result
             except Exception as e:
-                logger.warning(f"Function {func.__name__} failed with service '{service_name}': {e}")
+                logger.critical(f"🚨 SERVICE OPERATION FAILURE: Function '{func.__name__}' failed with service '{service_name}' "
+                               f"(exception_type: {type(e).__name__}, "
+                               f"exception_message: {str(e)}, "
+                               f"circuit_breaker_action: Marking service unavailable, "
+                               f"fallback_activated: true, "
+                               f"golden_path_impact: {service_registry._assess_service_impact(service_name)})")
                 service_registry.mark_service_unavailable(service_name)
                 return fallback_result
                 

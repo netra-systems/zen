@@ -20,7 +20,7 @@ Key Type Safety Principles:
 from typing import NewType, Dict, Any, Optional, List
 from datetime import datetime, timezone
 from enum import Enum
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, field_serializer
 from dataclasses import dataclass
 
 
@@ -47,6 +47,13 @@ RunID = NewType('RunID', str)
 
 RequestID = NewType('RequestID', str)
 """Strongly typed request identifier for tracing."""
+
+# Service and environment identifiers  
+ServiceName = NewType('ServiceName', str)
+"""Strongly typed service name identifier."""
+
+EnvironmentName = NewType('EnvironmentName', str)
+"""Strongly typed environment name identifier."""
 
 # WebSocket and connection identifiers
 WebSocketID = NewType('WebSocketID', str)
@@ -221,6 +228,11 @@ class WebSocketMessage(BaseModel):
         if isinstance(v, str):
             return RequestID(v)
         return v
+    
+    @field_serializer('event_type')
+    def serialize_event_type(self, value: WebSocketEventType) -> str:
+        """Serialize WebSocketEventType enum to string value for frontend compatibility."""
+        return value.value
 
 
 class WebSocketAuthContext(BaseModel):

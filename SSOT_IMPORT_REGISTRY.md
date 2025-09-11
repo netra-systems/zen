@@ -30,12 +30,21 @@ from netra_backend.app.services.user_execution_context import create_isolated_ex
 # WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
+# WebSocket Manager (CRITICAL - VERIFIED 2025-09-11)
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
+
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
+
+# Execution Factory Pattern (VERIFIED 2025-09-11)
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory, ExecutionEngineFactory, ExecutionFactoryConfig
 
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
 from netra_backend.app.tools.result_aggregator import ToolResultAggregator
+
+# Redis Client (CRITICAL - VERIFIED 2025-09-11)
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 
 # Shared Types (Cross-Service)
 from shared.types.core_types import UserID, ThreadID, RunID
@@ -66,6 +75,10 @@ from netra_backend.app.agents.reporting_agents.uvs_reporting_agent import UVSRep
 # CRITICAL: Fixed 2025-09-10 - This was causing $500K+ ARR Golden Path failure
 from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge  # ❌ BROKEN PATH
 # USE INSTEAD: from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+
+# CRITICAL: Fixed 2025-09-11 - IsolatedEnvironment import path correction (E2E test collection blocker)
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # ❌ BROKEN PATH
+# USE INSTEAD: from shared.isolated_environment import IsolatedEnvironment, get_env
 ```
 
 ---

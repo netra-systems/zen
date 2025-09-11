@@ -37,6 +37,14 @@ use tools to search through codebase and find the most important SSOT violations
 0.2) Make or update github ISSUE.
 Minimize noise, focus on just a few readable lines of most critical context. Link to other docs for remaining context.
 Issue name style: SSOT-{context (one of: regression, incomplete-migration, recent-change, {custom})}-{brief human description}}
+
+PRIORITY TAG ASSIGNMENT (MANDATORY):
+Always assign a priority tag based on SSOT violation impact:
+- P0: Critical/blocking - system down, Golden Path broken, data loss, security vulnerability
+- P1: High - major feature broken, significant SSOT violations
+- P2: Medium - minor SSOT issues, moderate impact  
+- P3: Low - cleanup items, nice-to-have improvements
+
 Create a local md file (IND = {issue name}.md) with the same name ending in .md to record your work in progress
 OUTPUT the issue name, .md progress tracker name {issue name}.md, and github link.
 Action: IND; GCIFS

@@ -38,6 +38,13 @@ Else: make a new issue with this format:
 
 GCP-{choose one - regression, new, active-dev, or other category descriptor}-{severity level}-{human skimable name}
 
+PRIORITY TAG ASSIGNMENT (MANDATORY):
+Always assign a priority tag based on severity:
+- P0: Critical/blocking - system down, data loss, security vulnerability
+- P1: High - major feature broken, significant user impact
+- P2: Medium - minor feature issues, moderate user impact  
+- P3: Low - cosmetic issues, nice-to-have improvements
+
 1) Linking
 1.1 If other related (open or closed) issues are discovered that are relevant, link them to the issue.
 1.2 Link other relevant items, such as other related issues, other PRs, other related docs.

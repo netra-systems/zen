@@ -24,6 +24,7 @@ See: CRITICAL_AUTH_ARCHITECTURE.md for full details
 """
 # Create auth-specific logger
 import logging
+import time
 from datetime import timedelta
 from typing import Annotated, Dict, Optional, Any
 
@@ -40,6 +41,20 @@ from netra_backend.app.dependencies import get_request_scoped_db_session as get_
 
 # Note: Password hashing is handled by the auth service, not directly here
 
+# ISSUE #414 FIX: Authentication token reuse prevention
+import hashlib
+from collections import defaultdict
+import asyncio
+
+# Track active tokens to prevent reuse
+_active_token_sessions: Dict[str, Dict[str, Any]] = {}
+_token_usage_stats = {
+    'total_validations': 0,
+    'reuse_attempts_blocked': 0,
+    'concurrent_usage_detected': 0,
+    'tokens_expired_cleanup': 0
+}
+_token_cleanup_lock = asyncio.Lock()
 
 logger = logging.getLogger('auth_integration.auth')
 
@@ -62,59 +77,175 @@ async def get_current_user(
     return user
 
 async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
-    """Validate token with auth service and extract all claims."""
-    logger.critical(f"🔑 AUTH INTEGRATION: Validating token with auth service (token_length: {len(token) if token else 0})")
+    """Validate token with auth service and prevent token reuse (Issue #414 fix)."""
+    start_time = time.time()
     
-    validation_result = await auth_client.validate_token_jwt(token)
-    if not validation_result or not validation_result.get("valid"):
-        logger.critical(f"🚨 AUTH INTEGRATION FAILURE: Token validation failed - invalid or expired (result: {validation_result})")
-        logger.warning("Token validation failed - invalid or expired")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
+    # ISSUE #414 FIX: Token reuse prevention
+    token_hash = hashlib.sha256(token.encode()).hexdigest()[:16]
+    current_time = time.time()
+    
+    # Check for token reuse
+    if token_hash in _active_token_sessions:
+        session_info = _active_token_sessions[token_hash]
+        last_used = session_info.get('last_used', 0)
+        concurrent_threshold = 1.0  # 1 second between requests from same token
+        
+        if current_time - last_used < concurrent_threshold:
+            logger.error(
+                f"🚨 AUTHENTICATION TOKEN REUSE DETECTED: Token hash {token_hash} "
+                f"used {current_time - last_used:.3f}s ago (threshold: {concurrent_threshold}s). "
+                f"User: {session_info.get('user_id', 'unknown')[:8]}..., "
+                f"Previous session: {session_info.get('session_id', 'unknown')}"
+            )
+            _token_usage_stats['reuse_attempts_blocked'] += 1
+            
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token reuse detected - authentication failed",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    
+    _token_usage_stats['total_validations'] += 1
+    
+    logger.critical(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
+                   f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
+                   f"auth_service_endpoint: {auth_client.settings.base_url}, "
+                   f"service_timeout: 30s, reuse_check: passed)")
+    
+    try:
+        validation_result = await auth_client.validate_token_jwt(token)
+        response_time = (time.time() - start_time) * 1000
+        
+        if not validation_result or not validation_result.get("valid"):
+            logger.critical(f"🚨 AUTH SERVICE FAILURE: Token validation failed at auth service "
+                           f"(response_time: {response_time:.2f}ms, "
+                           f"result: {validation_result}, "
+                           f"service_status: auth_service_responded_but_invalid, "
+                           f"golden_path_impact: CRITICAL - User authentication blocked)")
+            logger.warning("Token validation failed - invalid or expired")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if not validation_result.get("user_id"):
+            logger.critical(f"🚨 AUTH SERVICE FAILURE: Token validation failed - no user_id in payload "
+                           f"(response_time: {response_time:.2f}ms, "
+                           f"payload_keys: {list(validation_result.keys()) if validation_result else 'none'}, "
+                           f"service_status: auth_service_invalid_response, "
+                           f"golden_path_impact: CRITICAL - User identification failed)")
+            logger.warning("Token validation failed - no user_id in payload")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token payload",
+            )
+        
+        # Log successful token validation with key claims info
+        user_id = validation_result.get('user_id', 'unknown')
+        logger.info(f"✅ AUTH SERVICE SUCCESS: Token validated successfully "
+                   f"(user_id: {user_id[:8]}..., "
+                   f"role: {validation_result.get('role', 'none')}, "
+                   f"response_time: {response_time:.2f}ms, "
+                   f"service_status: auth_service_healthy, "
+                   f"golden_path_status: user_authenticated)")
+        logger.debug(
+            f"Token validated successfully for user {validation_result.get('user_id', 'unknown')[:8]}... "
+            f"with role: {validation_result.get('role', 'none')} "
+            f"and permissions: {validation_result.get('permissions', [])}"
         )
-    if not validation_result.get("user_id"):
-        logger.critical(f"🚨 AUTH INTEGRATION FAILURE: Token validation failed - no user_id in payload (payload_keys: {list(validation_result.keys()) if validation_result else 'none'})")
-        logger.warning("Token validation failed - no user_id in payload")
+        
+        # ISSUE #414 FIX: Track token session to prevent reuse
+        import uuid
+        session_id = str(uuid.uuid4())
+        _active_token_sessions[token_hash] = {
+            'user_id': user_id,
+            'session_id': session_id,
+            'first_used': current_time,
+            'last_used': current_time,
+            'validation_count': 1,
+            'role': validation_result.get('role', 'none')
+        }
+        
+        # Schedule cleanup of expired tokens
+        if len(_active_token_sessions) > 1000:  # Prevent memory leak
+            asyncio.create_task(_cleanup_expired_tokens())
+        
+        logger.debug(f"✅ ISSUE #414 FIX: Token session {session_id[:8]}... tracked for user {user_id[:8]}...")
+        
+        return validation_result
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (these are expected auth failures)
+        raise
+    except Exception as e:
+        response_time = (time.time() - start_time) * 1000
+        logger.critical(f"🚨 AUTH SERVICE EXCEPTION: Auth service communication failed "
+                       f"(exception_type: {type(e).__name__}, "
+                       f"exception_message: {str(e)}, "
+                       f"response_time: {response_time:.2f}ms, "
+                       f"service_status: auth_service_unreachable, "
+                       f"golden_path_impact: CRITICAL - All authentication blocked, "
+                       f"dependent_services: ['websocket_service', 'supervisor_service', 'thread_service'], "
+                       f"recovery_action: Check auth service health and connectivity)")
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service temporarily unavailable",
         )
-    
-    # Log successful token validation with key claims info
-    user_id = validation_result.get('user_id', 'unknown')
-    logger.info(f"✅ AUTH INTEGRATION SUCCESS: Token validated for user {user_id[:8]}... with role: {validation_result.get('role', 'none')}")
-    logger.debug(
-        f"Token validated successfully for user {validation_result.get('user_id', 'unknown')[:8]}... "
-        f"with role: {validation_result.get('role', 'none')} "
-        f"and permissions: {validation_result.get('permissions', [])}"
-    )
-    
-    return validation_result
 
 
 async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str, str]) -> User:
-    """Get or create user from database with JWT claims synchronization."""
+    """Get or create user from database with JWT claims synchronization and comprehensive service dependency logging."""
     from sqlalchemy import select
     from shared.database.session_validation import validate_db_session
     
-    # Validate database session (handles both production and test scenarios)
-    validate_db_session(db, "get_user_from_database")
-    
+    start_time = time.time()
     user_id = validation_result.get("user_id")
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
     
-    if not user:
-        logger.warning(f"🔑 USER AUTO-CREATE: User {user_id[:8]}... not found in database, auto-creating from JWT claims")
-        user = await _auto_create_user_if_needed(db, validation_result)
-    else:
-        logger.info(f"🔑 USER FOUND: User {user_id[:8]}... exists in database, syncing JWT claims")
-        # SECURITY: Sync JWT role/permissions with database if needed
-        await _sync_jwt_claims_to_user_record(user, validation_result, db)
+    logger.info(f"🔍 DATABASE SERVICE DEPENDENCY: Starting user lookup "
+               f"(user_id: {user_id[:8]}..., "
+               f"db_session_type: {type(db).__name__}, "
+               f"dependent_service: database)")
     
-    return user
+    try:
+        # Validate database session (handles both production and test scenarios)
+        validate_db_session(db, "get_user_from_database")
+        
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        
+        db_response_time = (time.time() - start_time) * 1000
+        
+        if not user:
+            logger.warning(f"🔑 DATABASE USER AUTO-CREATE: User {user_id[:8]}... not found in database "
+                          f"(response_time: {db_response_time:.2f}ms, "
+                          f"service_status: database_healthy_but_user_missing, "
+                          f"action: auto-creating from JWT claims)")
+            user = await _auto_create_user_if_needed(db, validation_result)
+        else:
+            logger.info(f"✅ DATABASE USER FOUND: User {user_id[:8]}... exists in database "
+                       f"(response_time: {db_response_time:.2f}ms, "
+                       f"service_status: database_healthy, "
+                       f"action: syncing JWT claims)")
+            # SECURITY: Sync JWT role/permissions with database if needed
+            await _sync_jwt_claims_to_user_record(user, validation_result, db)
+        
+        return user
+        
+    except Exception as e:
+        db_response_time = (time.time() - start_time) * 1000
+        logger.critical(f"🚨 DATABASE SERVICE FAILURE: User database lookup failed "
+                       f"(user_id: {user_id[:8]}..., "
+                       f"exception_type: {type(e).__name__}, "
+                       f"exception_message: {str(e)}, "
+                       f"response_time: {db_response_time:.2f}ms, "
+                       f"service_status: database_unreachable, "
+                       f"golden_path_impact: CRITICAL - User authentication cannot complete, "
+                       f"dependent_services: ['auth_integration', 'websocket_service'], "
+                       f"recovery_action: Check database connectivity and session pool)")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service temporarily unavailable",
+        )
 
 async def _sync_jwt_claims_to_user_record(user: User, validation_result: Dict[str, str], db: AsyncSession) -> None:
     """Synchronize JWT claims with user database record for consistency.
@@ -234,6 +365,63 @@ async def validate_token_jwt(token: str) -> Optional[Dict[str, str]]:
     """Validate a JWT token through the auth service."""
     validation = await auth_client.validate_token(token)
     return validation if validation else None
+
+# ISSUE #414 FIX: Token cleanup and monitoring functions
+
+async def _cleanup_expired_tokens():
+    """Clean up expired token sessions to prevent memory leaks (Issue #414 fix)."""
+    async with _token_cleanup_lock:
+        current_time = time.time()
+        expired_tokens = []
+        
+        # Find tokens older than 1 hour
+        max_age = 3600  # 1 hour
+        
+        for token_hash, session_info in _active_token_sessions.items():
+            age = current_time - session_info.get('first_used', current_time)
+            if age > max_age:
+                expired_tokens.append(token_hash)
+        
+        # Remove expired tokens
+        for token_hash in expired_tokens:
+            del _active_token_sessions[token_hash]
+            _token_usage_stats['tokens_expired_cleanup'] += 1
+        
+        if expired_tokens:
+            logger.info(f"🧹 ISSUE #414 CLEANUP: Removed {len(expired_tokens)} expired token sessions")
+
+def get_token_usage_stats() -> Dict[str, Any]:
+    """Get current token usage statistics (Issue #414 monitoring)."""
+    current_time = time.time()
+    active_sessions_by_user = defaultdict(int)
+    
+    for session_info in _active_token_sessions.values():
+        user_id = session_info.get('user_id', 'unknown')
+        active_sessions_by_user[user_id] += 1
+    
+    return {
+        **_token_usage_stats,
+        'active_token_sessions': len(_active_token_sessions),
+        'active_sessions_by_user': dict(active_sessions_by_user),
+        'oldest_session_age_seconds': (
+            current_time - min((s.get('first_used', current_time) for s in _active_token_sessions.values()), default=current_time)
+            if _active_token_sessions else 0
+        )
+    }
+
+async def force_cleanup_user_tokens(user_id: str):
+    """Force cleanup of all token sessions for a specific user (Issue #414 isolation)."""
+    async with _token_cleanup_lock:
+        user_tokens = [
+            token_hash for token_hash, session_info in _active_token_sessions.items()
+            if session_info.get('user_id') == user_id
+        ]
+        
+        for token_hash in user_tokens:
+            del _active_token_sessions[token_hash]
+        
+        if user_tokens:
+            logger.info(f"🧹 ISSUE #414 ISOLATION: Force cleaned up {len(user_tokens)} token sessions for user {user_id[:8]}...")
 
 # Type annotations for dependency injection
 ActiveUserDep = Annotated[User, Depends(get_current_user)]

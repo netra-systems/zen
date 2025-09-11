@@ -41,11 +41,11 @@ class TestSupervisorAgentInitialization:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Verify base initialization
         assert supervisor.name == "Supervisor"
-        assert supervisor.description == "The supervisor agent that orchestrates sub-agents"
+        assert supervisor.description == "Orchestrates sub-agents with complete user isolation"
         assert supervisor.llm_manager == llm_manager
     
     def test_init_services(self):
@@ -59,7 +59,7 @@ class TestSupervisorAgentInitialization:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Verify services initialization
         assert supervisor.db_session == db_session
@@ -78,7 +78,7 @@ class TestSupervisorAgentInitialization:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Verify components initialization
         assert supervisor.registry is not None
@@ -98,7 +98,7 @@ class TestSupervisorAgentInitialization:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Verify hooks initialization
         expected_hooks = ["before_agent", "after_agent", "on_error", "on_retry", "on_complete"]
@@ -117,7 +117,7 @@ class TestSupervisorAgentInitialization:
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
         # Should not crash with valid mocks
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Verify basic setup completed
         assert supervisor is not None
@@ -139,7 +139,7 @@ class TestSupervisorAgentRegistration:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Create mock agent
         # Mock: Agent service isolation for testing without LLM agent execution
@@ -164,7 +164,7 @@ class TestSupervisorAgentRegistration:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Create mock handler
         # Mock: Generic component isolation for controlled unit testing
@@ -187,7 +187,7 @@ class TestSupervisorAgentRegistration:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Mock: Generic component isolation for controlled unit testing
         mock_handler = mock_handler_instance  # Initialize appropriate service
@@ -212,7 +212,7 @@ class TestSupervisorAgentProperties:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Test property returns registry agents
         agents = supervisor.agents
@@ -229,7 +229,7 @@ class TestSupervisorAgentProperties:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Mock registry method
         # Mock: Agent service isolation for testing without LLM agent execution
@@ -250,7 +250,7 @@ class TestSupervisorAgentProperties:
         # Mock: Tool dispatcher isolation for agent testing without real tool execution
         tool_dispatcher = Mock(spec = ToolDispatcher)
         
-        supervisor = SupervisorAgent(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        supervisor = SupervisorAgent(llm_manager, websocket_bridge=None, db_session_factory=None, user_context=None, tool_dispatcher=tool_dispatcher)
         
         # Create mock agents
         # Mock: Agent service isolation for testing without LLM agent execution

@@ -30,9 +30,11 @@ import pytest
 # Import websockets with fallback handling
 try:
     import websockets
-    WebSocketClientProtocol = websockets.ClientConnection
+    from websockets.asyncio.client import ClientConnection
+    WebSocketClientProtocol = ClientConnection
 except ImportError:
     websockets = None
+    ClientConnection = None
     WebSocketClientProtocol = None
 
 from test_framework.base_e2e_test import BaseE2ETest

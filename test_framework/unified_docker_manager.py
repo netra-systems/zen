@@ -111,8 +111,14 @@ def _get_safe_subprocess_env():
     return env
 
 
-def _run_subprocess_safe(cmd, **kwargs):
-    """Run subprocess with Windows-safe environment and error handling."""
+def _run_subprocess_safe(cmd, timeout=None, **kwargs):
+    """Run subprocess with Windows-safe environment and error handling.
+    
+    Args:
+        cmd: Command to run
+        timeout: Optional timeout in seconds (defaults to 30s for Docker ops)
+        **kwargs: Additional subprocess arguments
+    """
     import sys  # Import sys here for Windows error handling
     try:
         # Use safe environment for all subprocess calls
@@ -129,6 +135,12 @@ def _run_subprocess_safe(cmd, **kwargs):
         if sys.platform == "win32" and 'encoding' not in kwargs:
             kwargs['encoding'] = 'utf-8'
             kwargs['errors'] = 'replace'
+        
+        # Add timeout enforcement (default 30s for Docker operations)
+        if timeout is not None:
+            kwargs['timeout'] = timeout
+        elif 'timeout' not in kwargs:
+            kwargs['timeout'] = 30  # Default timeout for Docker operations
         
         return subprocess.run(cmd, **kwargs)
         
@@ -1823,7 +1835,7 @@ class UnifiedDockerManager:
         _get_logger().info(f"📍 Discovered ports: {ports}")
         return ports
     
-    def _get_actual_container_name(self, env_name: str, service_name: str) -> Optional[str]:
+    def _get_actual_container_name(self, env_name: str, service_name: str, timeout: int = 5) -> Optional[str]:
         """
         Get the actual container name for a service, handling different naming patterns.
         Enhanced to use the new pattern-based parsing.
@@ -1857,11 +1869,12 @@ class UnifiedDockerManager:
             f"netra_test_{service_name}_1"
         ]
         
-        # Method 1: Try exact name matches
+        # Method 1: Try exact name matches with timeout budget
+        per_call_timeout = max(1, timeout // (len(possible_names) + 1))  # Reserve time for Method 2
         for name in possible_names:
             try:
                 cmd = ["docker", "ps", "-a", "--filter", f"name=^{name}$", "--format", "{{.Names}}"]
-                result = _run_subprocess_safe(cmd, timeout=5)
+                result = _run_subprocess_safe(cmd, timeout=per_call_timeout)
                 if result.returncode == 0 and result.stdout.strip():
                     actual_name = result.stdout.strip().split('\n')[0]
                     if actual_name:
@@ -1873,7 +1886,7 @@ class UnifiedDockerManager:
         # Method 2: Search all containers and parse with new logic
         try:
             cmd = ["docker", "ps", "--format", "{{.Names}}"]
-            result = _run_subprocess_safe(cmd, timeout=5)
+            result = _run_subprocess_safe(cmd, timeout=max(1, timeout // 2))
             if result.returncode == 0 and result.stdout.strip():
                 container_names = result.stdout.strip().split('\n')
                 for container_name in container_names:
@@ -2097,9 +2110,10 @@ class UnifiedDockerManager:
                 if memory_snapshot and memory_snapshot.get_max_threshold_level() == ResourceThresholdLevel.EMERGENCY:
                     _get_logger().error("🚨 Emergency memory condition during health check - may cause failures")
             
-            # Check each service
+            # Check each service (use shorter timeout per service to respect overall timeout)
+            per_service_timeout = min(5, max(1, timeout // len(services)))
             for service in services:
-                is_healthy = self._is_service_healthy(env_name, service)
+                is_healthy = self._is_service_healthy(env_name, service, timeout=per_service_timeout)
                 
                 if not is_healthy:
                     all_healthy = False
@@ -2145,12 +2159,21 @@ class UnifiedDockerManager:
                             
                             if self.restart_service(service, force=True):
                                 restart_attempts[service] = restart_count + 1
-                                # Give service time to start
-                                time.sleep(5)
+                                # Give service time to start (but respect overall timeout)
+                                remaining_time = timeout - (time.time() - start_time)
+                                sleep_time = min(5, max(1, remaining_time - 1))
+                                if sleep_time > 0:
+                                    time.sleep(sleep_time)
                             else:
                                 _get_logger().error(f"❌ Failed to restart {service}")
             
-            time.sleep(2)
+            # Dynamic sleep to respect timeout
+            remaining_time = timeout - (time.time() - start_time)
+            if remaining_time <= 0:
+                break
+            sleep_time = min(2, remaining_time - 0.1)  # Leave 0.1s buffer
+            if sleep_time > 0:
+                time.sleep(sleep_time)
         
         # Health check timeout - perform memory analysis
         timeout_snapshot = self.monitor_memory_during_operations()
@@ -2163,17 +2186,17 @@ class UnifiedDockerManager:
         
         return False
     
-    def _is_service_healthy(self, env_name: str, service_name: str) -> bool:
-        """Check if service is healthy"""
-        # Get the actual container name
-        container_name = self._get_actual_container_name(env_name, service_name)
+    def _is_service_healthy(self, env_name: str, service_name: str, timeout: int = 5) -> bool:
+        """Check if service is healthy with timeout enforcement"""
+        # Get the actual container name with timeout budget
+        container_name = self._get_actual_container_name(env_name, service_name, timeout=timeout // 2)
         if not container_name:
             _get_logger().warning(f"Container for service {service_name} not found")
             return False
         
-        # Check container status
+        # Check container status with remaining timeout
         cmd = ["docker", "inspect", "--format='{{.State.Health.Status}}'", container_name]
-        result = _run_subprocess_safe(cmd)
+        result = _run_subprocess_safe(cmd, timeout=max(1, timeout // 2))
         
         if result.returncode == 0:
             status = result.stdout.strip().strip("'")
@@ -3207,6 +3230,26 @@ class UnifiedDockerManager:
             self._docker_available = False
             
         return self._docker_available
+    
+    def is_docker_available_fast(self) -> bool:
+        """Fast Docker availability check with aggressive 2-second timeout.
+        
+        Used for test graceful degradation - prefer speed over accuracy.
+        For production use, prefer is_docker_available().
+        
+        Returns:
+            True if Docker is available, False if unavailable or times out
+        """
+        try:
+            # Direct subprocess call with aggressive timeout
+            result = _run_subprocess_safe(
+                ["docker", "version", "--format", "{{.Server.Version}}"],
+                timeout=2
+            )
+            return result.returncode == 0 and bool(result.stdout.strip())
+        except Exception:
+            # Any exception = Docker unavailable for test purposes
+            return False
     
     def get_effective_mode(self, requested_mode: Optional[ServiceMode] = None) -> ServiceMode:
         """

@@ -95,24 +95,37 @@ class ConnectionHandler(BaseMessageHandler):
     
     async def handle_message(self, user_id: str, websocket: WebSocket,
                            message: WebSocketMessage) -> bool:
-        """Handle connection lifecycle messages."""
+        """Handle connection lifecycle messages with comprehensive service dependency logging."""
+        start_time = time.time()
+        logger.info(f"🔍 WEBSOCKET CONNECTION HANDLER: Processing {message.type} "
+                   f"(user_id: {user_id[:8]}..., "
+                   f"websocket_state: {websocket.client_state if hasattr(websocket, 'client_state') else 'unknown'}, "
+                   f"required_services: ['websocket_manager', 'message_routing'])")
+        
         try:
             if message.type == MessageType.CONNECT:
-                logger.info(f"Connection established for user {user_id}")
+                logger.info(f"✅ CONNECTION SERVICE: Connection established for user {user_id[:8]}... "
+                           f"(service_status: websocket_connected, "
+                           f"golden_path_status: user_ready_for_chat)")
                 # Connection already established, just acknowledge
                 response = create_server_message(
                     MessageType.SYSTEM_MESSAGE,
                     {"status": "connected", "user_id": user_id, "timestamp": time.time()}
                 )
             elif message.type == MessageType.DISCONNECT:
-                logger.info(f"Disconnect message received from user {user_id}")
+                logger.info(f"🔌 DISCONNECT SERVICE: Disconnect message received from user {user_id[:8]}... "
+                           f"(service_status: disconnect_acknowledged, "
+                           f"golden_path_status: user_leaving_chat)")
                 # Acknowledge disconnect - the actual disconnect will be handled by WebSocket infrastructure
                 response = create_server_message(
                     MessageType.SYSTEM_MESSAGE,
                     {"status": "disconnect_acknowledged", "user_id": user_id, "timestamp": time.time()}
                 )
             else:
-                logger.warning(f"Unexpected connection message type: {message.type}")
+                logger.warning(f"🚨 CONNECTION HANDLER ERROR: Unexpected connection message type "
+                              f"(message_type: {message.type}, "
+                              f"user_id: {user_id[:8]}..., "
+                              f"service_status: invalid_message_type)")
                 return False
             
             # CRITICAL FIX: Fail-fast response validation to prevent silent failures
@@ -121,18 +134,50 @@ class ConnectionHandler(BaseMessageHandler):
                 try:
                     # Use safe WebSocket send with retry logic for better reliability
                     from netra_backend.app.websocket_core.utils import safe_websocket_send
+                    send_start = time.time()
                     send_success = await safe_websocket_send(websocket, response.model_dump(mode='json'))
+                    send_time = (time.time() - send_start) * 1000
+                    total_time = (time.time() - start_time) * 1000
+                    
                     if not send_success:
-                        logger.warning(f"Failed to send connection response to user {user_id} - WebSocket send failed")
+                        logger.critical(f"🚨 WEBSOCKET SEND FAILURE: Failed to send connection response "
+                                       f"(user_id: {user_id[:8]}..., "
+                                       f"send_time: {send_time:.2f}ms, "
+                                       f"total_time: {total_time:.2f}ms, "
+                                       f"service_status: websocket_send_failed, "
+                                       f"golden_path_impact: HIGH - User may not receive connection confirmation, "
+                                       f"recovery_action: Check WebSocket connection state and message serialization)")
                         return False
                     
-                    logger.debug(f"Connection response sent successfully to user {user_id}")
+                    logger.info(f"✅ WEBSOCKET SEND SUCCESS: Connection response sent successfully "
+                               f"(user_id: {user_id[:8]}..., "
+                               f"send_time: {send_time:.2f}ms, "
+                               f"total_time: {total_time:.2f}ms, "
+                               f"service_status: websocket_healthy, "
+                               f"golden_path_status: connection_confirmed)")
                     return True
                 except Exception as send_error:
-                    logger.error(f"Exception during WebSocket send to user {user_id}: {send_error}")
+                    send_time = (time.time() - send_start if 'send_start' in locals() else start_time) * 1000
+                    total_time = (time.time() - start_time) * 1000
+                    logger.critical(f"🚨 WEBSOCKET SEND EXCEPTION: Exception during WebSocket send "
+                                   f"(user_id: {user_id[:8]}..., "
+                                   f"exception_type: {type(send_error).__name__}, "
+                                   f"exception_message: {str(send_error)}, "
+                                   f"send_time: {send_time:.2f}ms, "
+                                   f"total_time: {total_time:.2f}ms, "
+                                   f"service_status: websocket_exception, "
+                                   f"golden_path_impact: HIGH - Connection response failed, "
+                                   f"recovery_action: Check WebSocket connection health and message format)")
                     return False
             else:
-                logger.warning(f"Cannot send connection response to user {user_id} - WebSocket not connected")
+                total_time = (time.time() - start_time) * 1000
+                logger.critical(f"🚨 WEBSOCKET CONNECTION FAILURE: Cannot send connection response "
+                               f"(user_id: {user_id[:8]}..., "
+                               f"websocket_state: not_connected, "
+                               f"total_time: {total_time:.2f}ms, "
+                               f"service_status: websocket_disconnected, "
+                               f"golden_path_impact: CRITICAL - User connection lost, "
+                               f"recovery_action: Establish new WebSocket connection)")
                 return False
             
         except Exception as e:
