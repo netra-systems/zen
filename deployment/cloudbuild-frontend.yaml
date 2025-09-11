@@ -3,8 +3,8 @@ options:
   machineType: E2_HIGHCPU_8
 steps:
 - args:
-  - --dockerfile=dockerfiles/backend.staging.alpine.Dockerfile
-  - --destination=gcr.io/netra-staging/netra-backend-staging:latest
+  - --dockerfile=dockerfiles/frontend.staging.alpine.Dockerfile
+  - --destination=gcr.io/netra-staging/netra-frontend-staging:latest
   - --cache=true
   - --cache-ttl=24h
   - --cache-repo=gcr.io/netra-staging/cache
