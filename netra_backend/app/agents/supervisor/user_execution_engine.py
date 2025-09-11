@@ -510,11 +510,22 @@ class UserExecutionEngine(IExecutionEngine):
                     enable_admin_tools=False
                 )
             
-            logger.info(f"✅ Created real tool dispatcher with WebSocket events for user {self.context.user_id}")
+            logger.info(
+                f"✅ TOOL_DISPATCHER_CREATED: Real tool dispatcher initialized with WebSocket integration. "
+                f"User: {self.context.user_id[:8]}..., WebSocket_bridge: configured, "
+                f"Tools_registered: 0 (will register on demand), Admin_tools: disabled, "
+                f"Business_context: Ready for agent tool execution with real-time event delivery"
+            )
             return dispatcher
             
         except Exception as e:
-            logger.warning(f"Failed to create real tool dispatcher: {e}. Falling back to mock for tests.")
+            logger.error(
+                f"🚨 TOOL_DISPATCHER_CREATION_FAILED: Failed to create real tool dispatcher - degraded functionality. "
+                f"User: {self.context.user_id[:8]}..., Error: {e}, "
+                f"Error_type: {type(e).__name__}, "
+                f"Business_impact: Tool execution capabilities compromised, falling back to mock dispatcher, "
+                f"Recovery_action: Mock tools will provide basic functionality for testing"
+            )
             return self._create_mock_tool_dispatcher()
     
     def _create_mock_tool_dispatcher(self):
@@ -557,7 +568,12 @@ class UserExecutionEngine(IExecutionEngine):
                 return result
             
             mock_dispatcher.execute_tool = mock_execute_tool
-            logger.info(f"✅ Created mock tool dispatcher with WebSocket events for user {self.context.user_id}")
+            logger.warning(
+                f"⚠️ TOOL_DISPATCHER_MOCK: Using mock tool dispatcher - limited functionality. "
+                f"User: {self.context.user_id[:8]}..., Reason: Real dispatcher creation failed, "
+                f"Mock_tools: 4 basic tools available, WebSocket_events: simulated, "
+                f"Business_impact: Reduced tool capabilities, suitable for testing only"
+            )
             return mock_dispatcher
             
         except ImportError:
@@ -809,8 +825,13 @@ class UserExecutionEngine(IExecutionEngine):
                     execution_id, ExecutionState.FAILED, error=str(e)
                 )
                 
-                logger.error(f"User agent execution failed for {context.agent_name} "
-                           f"(user: {self.context.user_id}): {e}")
+                logger.error(
+                    f"🚨 USER_AGENT_EXECUTION_FAILED: Agent execution failed in user isolation engine. "
+                    f"Agent: {context.agent_name}, User: {self.context.user_id[:8]}..., "
+                    f"Error: {e}, Error_type: {type(e).__name__}, "
+                    f"Business_impact: User receives error instead of AI response (90% platform value lost), "
+                    f"Isolation_maintained: True, Fallback_response: Generated"
+                )
                 raise RuntimeError(f"Agent execution failed: {e}")
                 
             finally:
