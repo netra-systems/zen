@@ -3,6 +3,10 @@
 This module provides error validation utilities for WebSocket operations.
 Created for backward compatibility with test imports.
 
+IMPORTANT: During SSOT consolidation (PR #214), WebSocketEventValidator was moved to
+netra_backend.app.websocket_core.event_validator and renamed to UnifiedEventValidator.
+This module provides backward compatibility imports.
+
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Test infrastructure stability
@@ -12,6 +16,16 @@ Business Value Justification (BVJ):
 
 from typing import Dict, Any, List, Optional
 from netra_backend.app.logging_config import central_logger
+
+# Import from SSOT consolidated implementation
+from netra_backend.app.websocket_core.event_validator import (
+    UnifiedEventValidator as WebSocketEventValidator,
+    ValidationResult,
+    EventCriticality,
+    get_websocket_validator,
+    reset_websocket_validator,
+    CriticalAgentEventType
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -74,6 +88,13 @@ class WebSocketErrorValidator:
 
 
 # Module exports
-__all__ = ['WebSocketErrorValidator']
+__all__ = [
+    'WebSocketErrorValidator',  # Original compatibility class
+    'WebSocketEventValidator',  # SSOT consolidated import alias
+    'ValidationResult',
+    'EventCriticality', 
+    'get_websocket_validator',
+    'reset_websocket_validator'
+]
 
-logger.info("WebSocket Error Validator compatibility module loaded")
+logger.info("WebSocket Error Validator compatibility module loaded with SSOT imports")
