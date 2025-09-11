@@ -1196,6 +1196,41 @@ class AgentInstanceFactory:
             'summary_timestamp': datetime.now(timezone.utc).isoformat()
         }
     
+    async def create_agent(self, 
+                          agent_name: str,
+                          user_context: UserExecutionContext,
+                          agent_class: Optional[Type[BaseAgent]] = None) -> BaseAgent:
+        """
+        COMPATIBILITY METHOD: create_agent() wrapper for create_agent_instance().
+        
+        This method provides backward compatibility for tests and code that expect
+        a create_agent() method on the AgentInstanceFactory. It wraps the standard
+        create_agent_instance() method with appropriate logging and deprecation warning.
+        
+        Args:
+            agent_name: Name of the agent to create
+            user_context: User execution context for isolation
+            agent_class: Optional specific agent class (if not using registry)
+            
+        Returns:
+            BaseAgent: Fresh agent instance configured for the user context
+            
+        Raises:
+            ValueError: If agent not found or invalid parameters
+            RuntimeError: If agent creation fails
+        """
+        logger.warning(
+            f"🔄 COMPATIBILITY: create_agent() method called - redirecting to create_agent_instance(). "
+            f"Consider updating calling code to use create_agent_instance() directly for {agent_name}"
+        )
+        
+        # Use the standard create_agent_instance method
+        return await self.create_agent_instance(
+            agent_name=agent_name,
+            user_context=user_context,
+            agent_class=agent_class
+        )
+    
     async def cleanup_inactive_contexts(self, max_age_seconds: int = 3600) -> int:
         """
         Clean up inactive contexts older than specified age.

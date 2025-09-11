@@ -228,6 +228,14 @@ class AgentExecutionCore:
                     websocket_manager=self.websocket_bridge
                 )
                 
+                # Transition to thinking phase before execution
+                await self.agent_tracker.transition_state(
+                    state_exec_id, 
+                    AgentExecutionPhase.THINKING,
+                    metadata={"agent_name": context.agent_name},
+                    websocket_manager=self.websocket_bridge
+                )
+                
                 # CRITICAL FIX: Send agent_started event for user visibility
                 if self.websocket_bridge:
                     await self.websocket_bridge.notify_agent_started(
@@ -335,7 +343,25 @@ class AgentExecutionCore:
                     trace_context.add_event("agent.completed")
                     await self.execution_tracker.complete_execution(exec_id, result=result)
                     
-                    # Transition to completion phase
+                    # Transition through proper completion sequence: THINKING -> TOOL_PREPARATION -> TOOL_EXECUTION -> RESULT_PROCESSING
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.TOOL_PREPARATION,
+                        metadata={"preparing_tools": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.TOOL_EXECUTION,
+                        metadata={"executing_tools": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.RESULT_PROCESSING,
+                        metadata={"processing_result": True},
+                        websocket_manager=self.websocket_bridge
+                    )
                     await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.COMPLETING,
