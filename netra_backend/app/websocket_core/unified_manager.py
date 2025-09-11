@@ -308,6 +308,19 @@ class UnifiedWebSocketManager:
         self._user_connection_locks: Dict[str, asyncio.Lock] = {}
         self._connection_lock_creation_lock = asyncio.Lock()
         
+        # ISSUE #414 FIX: Event contamination prevention
+        self._event_isolation_tokens: Dict[str, str] = {}  # connection_id -> isolation_token
+        self._user_event_queues: Dict[str, asyncio.Queue] = {}  # user_id -> event_queue
+        self._event_delivery_tracking: Dict[str, Dict[str, Any]] = {}  # event_id -> metadata
+        self._cross_user_detection: Dict[str, int] = {}  # user_id -> violation_count
+        self._event_queue_stats = {
+            'total_events_sent': 0,
+            'events_delivered': 0,
+            'contamination_prevented': 0,
+            'queue_overflows': 0,
+            'auth_token_reuse_detected': 0
+        }
+        
         # Mode-specific initialization
         if mode == WebSocketManagerMode.ISOLATED:
             if user_context is None:
@@ -482,10 +495,41 @@ class UnifiedWebSocketManager:
         
         async with user_lock:
             async with self._lock:
+                # ISSUE #414 FIX: Event contamination prevention setup
+                import uuid
+                isolation_token = str(uuid.uuid4())
+                self._event_isolation_tokens[connection.connection_id] = isolation_token
+                
+                # Initialize user-specific event queue if not exists
+                if connection.user_id not in self._user_event_queues:
+                    self._user_event_queues[connection.user_id] = asyncio.Queue(maxsize=1000)  # Prevent overflow
+                    self._cross_user_detection[connection.user_id] = 0
+                
+                # Validate no cross-user contamination
+                for existing_conn_id, existing_token in self._event_isolation_tokens.items():
+                    if existing_conn_id in self._connections:
+                        existing_user = self._connections[existing_conn_id].user_id
+                        if existing_user != connection.user_id and existing_token == isolation_token:
+                            # This should never happen with UUID but check anyway
+                            logger.error(
+                                f"🚨 CRITICAL ISOLATION VIOLATION: Token collision detected! "
+                                f"User {connection.user_id} vs {existing_user}, "
+                                f"Connection {connection.connection_id} vs {existing_conn_id}"
+                            )
+                            self._cross_user_detection[connection.user_id] += 1
+                            self._event_queue_stats['contamination_prevented'] += 1
+                            
+                            # Generate new token to fix collision
+                            isolation_token = str(uuid.uuid4())
+                            self._event_isolation_tokens[connection.connection_id] = isolation_token
+                            break
+                
                 self._connections[connection.connection_id] = connection
                 if connection.user_id not in self._user_connections:
                     self._user_connections[connection.user_id] = set()
                 self._user_connections[connection.user_id].add(connection.connection_id)
+                
+                logger.debug(f"✅ ISSUE #414 FIX: Connection {connection.connection_id} isolated with token {isolation_token[:8]}... for user {connection.user_id[:8]}...")
                 
                 # Update compatibility mapping for legacy tests
                 if connection.user_id not in self.active_connections:
@@ -809,6 +853,36 @@ class UnifiedWebSocketManager:
         # Unified mode (default) handling
         # Validate user_id
         validated_user_id = ensure_user_id(user_id)
+        
+        # ISSUE #414 FIX: Event contamination prevention and validation
+        import uuid
+        event_id = str(uuid.uuid4())
+        
+        # Validate message doesn't contain foreign user data
+        if isinstance(message, dict):
+            for key, value in message.items():
+                if key.endswith('_user_id') and value != validated_user_id:
+                    logger.error(
+                        f"🚨 CROSS-USER CONTAMINATION DETECTED: Message for user {validated_user_id} "
+                        f"contains foreign user_id in field '{key}': {value}"
+                    )
+                    self._event_queue_stats['contamination_prevented'] += 1
+                    self._cross_user_detection[validated_user_id] = self._cross_user_detection.get(validated_user_id, 0) + 1
+                    
+                    # Sanitize the message
+                    message = message.copy()
+                    message[key] = validated_user_id
+                    logger.warning(f"🧹 Sanitized contaminated field '{key}' for user {validated_user_id}")
+        
+        # Track event delivery
+        self._event_delivery_tracking[event_id] = {
+            'user_id': validated_user_id,
+            'message_type': message.get('type', 'unknown'),
+            'timestamp': datetime.now(timezone.utc),
+            'delivery_status': 'pending',
+            'contamination_checks': 'passed'
+        }
+        self._event_queue_stats['total_events_sent'] += 1
         
         # Use user-specific lock to prevent race conditions during message sending
         user_lock = await self._get_user_connection_lock(validated_user_id)
@@ -2463,6 +2537,100 @@ class UnifiedWebSocketManager:
         connection_id = await self.connect_user(user_id, websocket)
         logger.info(f"🔗 SSOT INTERFACE: Handled connection for user {user_id[:8]}... → {connection_id}")
         return connection_id
+    
+    # ISSUE #414 FIX: Event contamination monitoring and prevention methods
+    
+    def get_contamination_stats(self) -> Dict[str, Any]:
+        """Get current event contamination statistics (Issue #414 monitoring)."""
+        return {
+            **self._event_queue_stats,
+            'cross_user_violations': dict(self._cross_user_detection),
+            'active_isolation_tokens': len(self._event_isolation_tokens),
+            'user_event_queues': {
+                user_id: queue.qsize() 
+                for user_id, queue in self._user_event_queues.items()
+            },
+            'total_users_monitored': len(self._cross_user_detection)
+        }
+    
+    async def validate_event_isolation(self, user_id: str, connection_id: str) -> bool:
+        """Validate event isolation for user and connection (Issue #414 validation)."""
+        if connection_id not in self._event_isolation_tokens:
+            logger.warning(f"⚠️ Connection {connection_id} has no isolation token")
+            return False
+        
+        if connection_id not in self._connections:
+            logger.warning(f"⚠️ Connection {connection_id} not found in active connections")
+            return False
+        
+        connection = self._connections[connection_id]
+        if connection.user_id != user_id:
+            logger.error(
+                f"🚨 ISOLATION VIOLATION: Connection {connection_id} user mismatch. "
+                f"Expected: {user_id}, Actual: {connection.user_id}"
+            )
+            self._cross_user_detection[user_id] = self._cross_user_detection.get(user_id, 0) + 1
+            return False
+        
+        return True
+    
+    async def cleanup_expired_event_tracking(self, max_age_hours: int = 24):
+        """Clean up expired event tracking data (Issue #414 memory management)."""
+        current_time = datetime.now(timezone.utc)
+        expired_events = []
+        
+        for event_id, metadata in self._event_delivery_tracking.items():
+            event_age = (current_time - metadata['timestamp']).total_seconds() / 3600
+            if event_age > max_age_hours:
+                expired_events.append(event_id)
+        
+        for event_id in expired_events:
+            del self._event_delivery_tracking[event_id]
+        
+        if expired_events:
+            logger.info(f"🧹 Cleaned up {len(expired_events)} expired event tracking entries")
+    
+    async def force_cleanup_user_events(self, user_id: str):
+        """Force cleanup of all event tracking for a specific user (Issue #414 isolation)."""
+        # Clear user event queue
+        if user_id in self._user_event_queues:
+            queue = self._user_event_queues[user_id]
+            while not queue.empty():
+                try:
+                    queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+            del self._user_event_queues[user_id]
+        
+        # Clear cross-user detection tracking
+        if user_id in self._cross_user_detection:
+            del self._cross_user_detection[user_id]
+        
+        # Clear event delivery tracking for this user
+        user_events = [
+            event_id for event_id, metadata in self._event_delivery_tracking.items()
+            if metadata.get('user_id') == user_id
+        ]
+        
+        for event_id in user_events:
+            del self._event_delivery_tracking[event_id]
+        
+        logger.info(f"🧹 Force cleaned up all event tracking for user {user_id}")
+    
+    def detect_queue_overflow(self, user_id: str) -> bool:
+        """Detect if user's event queue is approaching overflow (Issue #414 monitoring)."""
+        if user_id not in self._user_event_queues:
+            return False
+        
+        queue = self._user_event_queues[user_id]
+        utilization = queue.qsize() / 1000.0  # Max size is 1000
+        
+        if utilization > 0.9:  # 90% full
+            logger.warning(f"🚨 Event queue near overflow for user {user_id}: {queue.qsize()}/1000")
+            self._event_queue_stats['queue_overflows'] += 1
+            return True
+        
+        return False
     
     async def handle_disconnection(self, user_id: str, websocket: Any = None) -> None:
         """

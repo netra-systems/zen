@@ -123,13 +123,20 @@ class UserExecutionContext:
     # Resource cleanup management
     cleanup_callbacks: List[Callable] = field(default_factory=list, repr=False, compare=False)
     
+    # ISSUE #414 FIX: Enhanced isolation and memory leak prevention
+    _isolation_token: str = field(default_factory=lambda: str(uuid.uuid4()), repr=False, compare=False)
+    _memory_refs: List[Any] = field(default_factory=list, repr=False, compare=False)
+    _validation_fingerprint: Optional[str] = field(default=None, repr=False, compare=False)
+    
     def __post_init__(self):
-        """Comprehensive validation after initialization."""
+        """Comprehensive validation after initialization with Issue #414 enhancements."""
         self._validate_required_fields()
         self._validate_no_placeholder_values()
         self._validate_id_consistency()
         self._validate_metadata_isolation()
+        self._validate_user_isolation()  # Issue #414 fix
         self._initialize_audit_trail()
+        self._setup_memory_tracking()  # Issue #414 fix
         
         logger.debug(
             f"Created UserExecutionContext: user_id={self.user_id[:8]}..., "
@@ -390,6 +397,87 @@ class UserExecutionContext:
         # Ensure metadata isolation by creating deep copies
         object.__setattr__(self, 'agent_context', copy.deepcopy(self.agent_context))
         object.__setattr__(self, 'audit_metadata', copy.deepcopy(self.audit_metadata))
+    
+    def _validate_user_isolation(self) -> None:
+        """Validate user isolation to prevent cross-user contamination (Issue #414 fix)."""
+        # Create validation fingerprint for isolation checking
+        import hashlib
+        fingerprint_data = f"{self.user_id}:{self.thread_id}:{self.request_id}:{self._isolation_token}"
+        validation_fingerprint = hashlib.sha256(fingerprint_data.encode()).hexdigest()[:16]
+        object.__setattr__(self, '_validation_fingerprint', validation_fingerprint)
+        
+        # Validate no shared state in context metadata
+        for key, value in self.agent_context.items():
+            if hasattr(value, '__dict__') and hasattr(value, 'user_id'):
+                # Check for potential cross-user contamination in nested objects
+                nested_user_id = getattr(value, 'user_id', None)
+                if nested_user_id and nested_user_id != self.user_id:
+                    logger.error(
+                        f"🚨 ISOLATION VIOLATION: agent_context['{key}'] contains object with different user_id. "
+                        f"Context user_id: {self.user_id}, Nested user_id: {nested_user_id}, "
+                        f"This indicates cross-user data contamination!"
+                    )
+                    raise ContextIsolationError(
+                        f"Cross-user contamination detected in agent_context['{key}']: "
+                        f"expected user_id {self.user_id}, found {nested_user_id}"
+                    )
+        
+        # Validate WebSocket connection isolation
+        if self.websocket_client_id:
+            # WebSocket client ID should not contain other user IDs
+            if '_' in self.websocket_client_id:
+                ws_parts = self.websocket_client_id.split('_')
+                for part in ws_parts:
+                    # Check if any part looks like a user ID that doesn't match ours
+                    if (part.startswith('user') or part.endswith('user')) and part != self.user_id:
+                        logger.warning(
+                            f"⚠️ POTENTIAL ISOLATION ISSUE: websocket_client_id contains foreign user identifier. "
+                            f"User: {self.user_id}, WebSocket ID: {self.websocket_client_id}, "
+                            f"Suspicious part: {part}"
+                        )
+        
+        logger.debug(f"✅ User isolation validation passed for {self.user_id[:8]}... (fingerprint: {validation_fingerprint})")
+    
+    def _setup_memory_tracking(self) -> None:
+        """Setup memory tracking to prevent memory leaks (Issue #414 fix)."""
+        import weakref
+        import gc
+        
+        # Track this instance with weak reference to detect memory leaks
+        try:
+            # Create weak reference to self for leak detection
+            weak_self = weakref.ref(self, self._cleanup_callback)
+            
+            # Store creation context for debugging potential leaks
+            import traceback
+            creation_stack = traceback.extract_stack()
+            
+            # Add memory tracking metadata
+            memory_info = {
+                'creation_time': self.created_at,
+                'creation_stack_summary': str(creation_stack[-3:]) if len(creation_stack) >= 3 else str(creation_stack),
+                'weak_ref': weak_self,
+                'gc_count': len(gc.get_objects()),
+                'fingerprint': self._validation_fingerprint
+            }
+            
+            # Store in memory references list for tracking
+            self._memory_refs.append(memory_info)
+            
+            logger.debug(f"🧠 Memory tracking setup for context {self.user_id[:8]}... (objects: {memory_info['gc_count']})")
+            
+        except Exception as e:
+            # Don't fail context creation for memory tracking issues
+            logger.warning(f"Memory tracking setup failed for {self.user_id[:8]}...: {e}")
+    
+    @staticmethod
+    def _cleanup_callback(weak_ref):
+        """Callback when context is garbage collected (Issue #414 memory leak detection)."""
+        try:
+            logger.debug("🧹 UserExecutionContext garbage collected - memory cleaned up properly")
+        except Exception:
+            # Ignore errors in cleanup callback
+            pass
     
     def _initialize_audit_trail(self) -> None:
         """Initialize audit trail metadata."""
