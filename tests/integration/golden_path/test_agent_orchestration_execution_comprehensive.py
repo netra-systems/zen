@@ -173,7 +173,12 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | Platform Stability | Ensures users don't interfere with each other
         Test ExecutionEngineFactory creates properly isolated user execution engines.
         """
-        factory = ExecutionEngineFactory()
+        # Create mock WebSocket bridge required by ExecutionEngineFactory
+        mock_websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
+        mock_websocket_bridge.send_event = AsyncMock(return_value=True)
+        mock_websocket_bridge.create_user_emitter = AsyncMock()
+        
+        factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         
         # Create execution engines for different users
         user1_id = str(uuid.uuid4())
@@ -190,12 +195,12 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             run_id=str(uuid.uuid4())
         )
         
-        engine1 = await factory.create_user_execution_engine(user1_context)
-        engine2 = await factory.create_user_execution_engine(user2_context)
+        engine1 = await factory.create_for_user(user1_context)
+        engine2 = await factory.create_for_user(user2_context)
         
         # Verify engines are different instances
         self.assertIsNot(engine1, engine2)
-        self.assertNotEqual(engine1.user_context.user_id, engine2.user_context.user_id)
+        self.assertNotEqual(engine1.get_user_context().user_id, engine2.get_user_context().user_id)
         
         # Verify user isolation - state should not leak
         engine1.set_execution_state("test_key", "user1_value")
@@ -346,8 +351,12 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Create execution engine for context management
-        factory = ExecutionEngineFactory()
-        engine = await factory.create_user_execution_engine(user_context)
+        mock_websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
+        mock_websocket_bridge.send_event = AsyncMock(return_value=True)
+        mock_websocket_bridge.create_user_emitter = AsyncMock()
+        
+        factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
+        engine = await factory.create_for_user(user_context)
         
         # First execution - establish context
         execution1_data = {
@@ -671,8 +680,12 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Create execution engine for result aggregation
-        factory = ExecutionEngineFactory()
-        engine = await factory.create_user_execution_engine(user_context)
+        mock_websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
+        mock_websocket_bridge.send_event = AsyncMock(return_value=True)
+        mock_websocket_bridge.create_user_emitter = AsyncMock()
+        
+        factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
+        engine = await factory.create_for_user(user_context)
         
         # Mock multiple agent results
         agent_results = [
@@ -950,12 +963,16 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 run_id=str(uuid.uuid4())
             ))
         
-        factory = ExecutionEngineFactory()
+        mock_websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
+        mock_websocket_bridge.send_event = AsyncMock(return_value=True)
+        mock_websocket_bridge.create_user_emitter = AsyncMock()
+        
+        factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
         
         # Create execution engines for all users
         engines = []
         for context in user_contexts:
-            engine = await factory.create_user_execution_engine(context)
+            engine = await factory.create_for_user(context)
             engines.append(engine)
         
         # Execute agents concurrently
@@ -1157,8 +1174,12 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Create execution engine with state management
-        factory = ExecutionEngineFactory()
-        engine = await factory.create_user_execution_engine(user_context)
+        mock_websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
+        mock_websocket_bridge.send_event = AsyncMock(return_value=True)
+        mock_websocket_bridge.create_user_emitter = AsyncMock()
+        
+        factory = ExecutionEngineFactory(websocket_bridge=mock_websocket_bridge)
+        engine = await factory.create_for_user(user_context)
         
         # Mock execution that fails then succeeds
         execution_attempts = 0
