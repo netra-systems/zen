@@ -1154,8 +1154,10 @@ class AgentWebSocketBridge(MonitorableComponent):
             
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            print(f"DEBUG: notify_agent_started - run_id={run_id}, thread_id={thread_id}")
             if not thread_id:
                 logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                print(f"DEBUG: EMISSION FAILED - Cannot resolve thread_id for run_id={run_id}")
                 return False
             
             # PHASE 3 FIX: Enhanced event delivery with retry mechanism
@@ -1167,6 +1169,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 agent_name=agent_name,
                 max_retries=3
             )
+            print(f"DEBUG: notify_agent_started - emit_with_retry success={success}")
             
             if success:
                 logger.info(f"✅ EMISSION SUCCESS: agent_started → thread={thread_id} (run_id={run_id}, agent={agent_name})")
@@ -3017,15 +3020,20 @@ class WebSocketNotifier:
         last_error = None
         base_delay = 0.1 if critical_event else 0.05
         
+        print(f"DEBUG: _emit_with_retry starting for {event_type}, max_retries={max_retries}")
         for attempt in range(max_retries + 1):  # +1 for initial attempt
+            print(f"DEBUG: _emit_with_retry attempt {attempt}")
             try:
                 # Validate WebSocket manager is still available
                 if not self._websocket_manager:
                     logger.error(f"PHASE 3 FIX: WebSocket manager unavailable during {event_type} retry {attempt + 1}")
+                    print(f"DEBUG: WebSocket manager unavailable")
                     return False
                 
                 # Attempt event delivery
+                print(f"DEBUG: _emit_with_retry calling send_to_thread for {event_type}")
                 success = await self._websocket_manager.send_to_thread(thread_id, notification)
+                print(f"DEBUG: _emit_with_retry send_to_thread returned success={success}")
                 
                 if success:
                     if attempt > 0:

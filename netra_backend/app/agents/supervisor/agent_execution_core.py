@@ -9,7 +9,7 @@ to prevent agent execution pipeline blocking that prevents users from receiving 
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID
 
 if TYPE_CHECKING:
@@ -102,62 +102,55 @@ class AgentExecutionCore:
             f"for comprehensive monitoring"
         )
         
-    def _ensure_user_execution_context(
+    def _validate_user_execution_context(
         self, 
-        state: Union[Any, UserExecutionContext],
-        context: AgentExecutionContext
+        user_context: UserExecutionContext,
+        execution_context: AgentExecutionContext
     ) -> UserExecutionContext:
         """
-        CRITICAL SECURITY FIX: Ensure we have proper UserExecutionContext for user isolation.
+        CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation.
         
-        This method handles the migration from deprecated DeepAgentState to secure
-        UserExecutionContext pattern, preventing user data isolation vulnerabilities.
+        This method ensures we have a valid UserExecutionContext with proper user isolation,
+        preventing any cross-user data contamination vulnerabilities.
+        
+        Phase 1 Migration: Only UserExecutionContext accepted (DeepAgentState eliminated)
         """
-        if isinstance(state, UserExecutionContext):
-            # Already using secure UserExecutionContext
-            return state
+        if not isinstance(user_context, UserExecutionContext):
+            # Check if this is a DeepAgentState attempt for better error message
+            if hasattr(user_context, '__class__') and 'DeepAgentState' in user_context.__class__.__name__:
+                raise ValueError(
+                    f"🚨 SECURITY VULNERABILITY: DeepAgentState is FORBIDDEN due to user isolation risks. "
+                    f"Agent '{execution_context.agent_name}' (run_id: {execution_context.run_id}) "
+                    f"attempted to use DeepAgentState which can cause data leakage between users. "
+                    f"MIGRATION REQUIRED: Use UserExecutionContext pattern immediately. "
+                    f"See issue #271 remediation plan for migration guide."
+                )
+            else:
+                raise ValueError(
+                    f"Expected UserExecutionContext, got {type(user_context)}. "
+                    f"DeepAgentState is no longer supported due to security risks."
+                )
         
-        elif hasattr(state, '__class__') and 'DeepAgentState' in state.__class__.__name__:
-            # DEPRECATED: Issue warning and migrate to secure pattern
-            import warnings
-            warnings.warn(
-                f"🚨 SECURITY WARNING: DeepAgentState is deprecated due to USER ISOLATION RISKS. "
-                f"Agent '{context.agent_name}' (run_id: {context.run_id}) is using DeepAgentState "
-                f"which may cause data leakage between users. Migrate to UserExecutionContext pattern "
-                f"immediately. See EXECUTION_PATTERN_TECHNICAL_DESIGN.md for migration guide.",
-                DeprecationWarning,
-                stacklevel=3
-            )
+        # Validate context integrity
+        if not user_context.user_id:
+            raise ValueError("UserExecutionContext missing required user_id")
+        if not user_context.thread_id:
+            raise ValueError("UserExecutionContext missing required thread_id") 
+        if not user_context.run_id:
+            raise ValueError("UserExecutionContext missing required run_id")
             
-            # Convert to secure UserExecutionContext
-            return UserExecutionContext.from_agent_execution_context(
-                user_id=getattr(state, 'user_id', None) or 'unknown',
-                thread_id=getattr(state, 'thread_id', None) or context.thread_id or 'unknown',
-                run_id=getattr(state, 'run_id', None) or str(context.run_id),
-                agent_context={
-                    'agent_name': context.agent_name,
-                    'user_request': getattr(state, 'user_request', 'default_request'),
-                    'agent_input': getattr(state, 'agent_input', {}),
-                },
-                audit_metadata={
-                    'migration_source': 'DeepAgentState',
-                    'migration_timestamp': time.time(),
-                    'original_state_type': type(state).__name__
-                }
-            )
-        else:
-            raise ValueError(f"Unsupported state type: {type(state)}. Must be UserExecutionContext (DeepAgentState is deprecated for security reasons).")
+        return user_context
     
     async def execute_agent(
         self, 
         context: AgentExecutionContext,
-        state: Union[Any, UserExecutionContext],
+        user_context: UserExecutionContext,
         timeout: Optional[float] = None
     ) -> AgentExecutionResult:
         """Execute agent with full lifecycle tracking and death detection."""
         
-        # CRITICAL SECURITY FIX: Handle DeepAgentState deprecation and migration
-        user_execution_context = self._ensure_user_execution_context(state, context)
+        # CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation
+        user_execution_context = self._validate_user_execution_context(user_context, context)
         
         # Get or create trace context
         parent_trace = get_unified_trace_context()

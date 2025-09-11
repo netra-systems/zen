@@ -188,7 +188,7 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
                 logger.warning(f"Pydantic model_dump failed completely: {e2}, using string fallback")
                 # Fall through to the string fallback at the end of the function
     
-    # Handle objects with to_dict method (DeepAgentState, etc.)
+    # Handle objects with to_dict method (UserExecutionContext, etc.)
     if hasattr(message, 'to_dict'):
         return message.to_dict()
     

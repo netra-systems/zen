@@ -139,8 +139,7 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             success=True,
             data={"result": "test success"},
             agent_name="test_agent",
-            run_id="test-run-123",
-            execution_time_ms=1000
+            duration=1.0
         ))
         
         mock_registry.get_agent.return_value = mock_agent
@@ -169,8 +168,13 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             user_id="user-123"
         )
         
+        # Create mock user context
+        user_context = Mock()
+        user_context.user_id = "user-123"
+        user_context.thread_id = "thread-123"
+        
         # Execute agent successfully
-        result = await execution_core.execute_agent_safe(context)
+        result = await execution_core.execute_agent(context, user_context)
         
         # Verify success
         self.assertTrue(result.success, "Agent execution should succeed")
@@ -221,8 +225,7 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             success=False,
             error="Test agent failure",
             agent_name="test_agent",
-            run_id="test-run-123",
-            execution_time_ms=500
+            duration=0.5
         ))
         
         mock_registry.get_agent.return_value = mock_agent
@@ -251,8 +254,13 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             user_id="user-123"
         )
         
+        # Create mock user context
+        user_context = Mock()
+        user_context.user_id = "user-123"
+        user_context.thread_id = "thread-123"
+        
         # Execute agent (should fail)
-        result = await execution_core.execute_agent_safe(context)
+        result = await execution_core.execute_agent(context, user_context)
         
         # Verify failure
         self.assertFalse(result.success, "Agent execution should fail")

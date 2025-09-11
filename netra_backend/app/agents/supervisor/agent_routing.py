@@ -14,7 +14,7 @@ if TYPE_CHECKING:
         AgentExecutionResult,
     )
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class SupervisorAgentRouter:
@@ -23,7 +23,7 @@ class SupervisorAgentRouter:
     def __init__(self, supervisor_agent):
         self.supervisor = supervisor_agent
     
-    async def route_to_agent(self, state: DeepAgentState, 
+    async def route_to_agent(self, user_context: UserExecutionContext, 
                            context: 'AgentExecutionContext', 
                            agent_name: str) -> 'AgentExecutionResult':
         """Route request to specific agent with basic execution."""
@@ -31,9 +31,9 @@ class SupervisorAgentRouter:
             AgentExecutionContext,
         )
         exec_context = self._create_agent_execution_context(context, agent_name)
-        return await self.supervisor.engine.execute_agent(exec_context, state)
+        return await self.supervisor.engine.execute_agent(exec_context, user_context)
     
-    async def route_to_agent_with_retry(self, state: DeepAgentState,
+    async def route_to_agent_with_retry(self, user_context: UserExecutionContext,
                                       context: 'AgentExecutionContext',
                                       agent_name: str) -> 'AgentExecutionResult':
         """Route request to agent with retry logic."""
@@ -42,9 +42,9 @@ class SupervisorAgentRouter:
         )
         exec_context = self._create_agent_execution_context(context, agent_name)
         exec_context.max_retries = context.max_retries
-        return await self.supervisor.engine.execute_agent(exec_context, state)
+        return await self.supervisor.engine.execute_agent(exec_context, user_context)
     
-    async def route_to_agent_with_circuit_breaker(self, state: DeepAgentState,
+    async def route_to_agent_with_circuit_breaker(self, user_context: UserExecutionContext,
                                                  context: 'AgentExecutionContext',
                                                  agent_name: str) -> 'AgentExecutionResult':
         """Route request to agent with circuit breaker protection."""
@@ -52,7 +52,7 @@ class SupervisorAgentRouter:
             AgentExecutionContext,
         )
         exec_context = self._create_agent_execution_context(context, agent_name)
-        return await self.supervisor.engine._execute_with_fallback(exec_context, state)
+        return await self.supervisor.engine._execute_with_fallback(exec_context, user_context)
     
     def _create_agent_execution_context(self, base_context, agent_name: str):
         """Create AgentExecutionContext from base context."""
