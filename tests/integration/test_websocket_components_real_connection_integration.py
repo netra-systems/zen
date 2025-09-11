@@ -30,6 +30,7 @@ import pytest
 import time
 import uuid
 import websockets
+from websockets.asyncio.client import ClientConnection
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -84,7 +85,7 @@ class TestWebSocketComponentsRealConnectionIntegration(SSotBaseTestCase):
         self.golden_path_helper = WebSocketGoldenPathHelper(environment="test")
         
         # WebSocket connection state
-        self.active_websockets: List[websockets.WebSocketServerProtocol] = []
+        self.active_websockets: List[ClientConnection] = []
         self.user_contexts: List[StronglyTypedUserExecutionContext] = []
         
         # Test configuration
@@ -109,7 +110,7 @@ class TestWebSocketComponentsRealConnectionIntegration(SSotBaseTestCase):
     async def _create_authenticated_websocket(
         self, 
         user_email: Optional[str] = None
-    ) -> Tuple[websockets.WebSocketServerProtocol, StronglyTypedUserExecutionContext]:
+    ) -> Tuple[ClientConnection, StronglyTypedUserExecutionContext]:
         """
         Create an authenticated WebSocket connection.
         

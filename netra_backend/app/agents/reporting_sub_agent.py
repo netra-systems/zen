@@ -255,7 +255,10 @@ class ReportingSubAgent(BaseAgent):
             try:
                 await self.emit_agent_started("Generating your optimization report...")
             except Exception as e:
-                self.logger.warning(f"Failed to emit start event: {e}")
+                # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
+                self.logger.critical(f"🚨 CRITICAL: WebSocket agent_started event FAILED - user {context.user_id if context else 'unknown'}: {e}")
+                # Try to use modern retry infrastructure for recovery
+                await self._attempt_critical_agent_event_recovery("agent_started", "Generating your optimization report...", context, e)
         
         try:
             # UVS: Assess available data without throwing errors
@@ -271,7 +274,10 @@ class ReportingSubAgent(BaseAgent):
                     else:
                         await self.emit_thinking("Preparing guidance to help you get started...")
                 except Exception as e:
-                    self.logger.warning(f"Failed to emit thinking: {e}")
+                    # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
+                    self.logger.critical(f"🚨 CRITICAL: WebSocket agent_thinking event FAILED - user {context.user_id if context else 'unknown'}: {e}")
+                    # Try to use modern retry infrastructure for recovery
+                    await self._attempt_critical_agent_event_recovery("agent_thinking", "Processing data analysis...", context, e)
             
             # UVS: Three-tier report generation based on data availability
             if data_assessment['has_full_data']:
@@ -293,7 +299,10 @@ class ReportingSubAgent(BaseAgent):
                 try:
                     await self.emit_agent_completed(result)
                 except Exception as e:
-                    self.logger.warning(f"Failed to emit completion: {e}")
+                    # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
+                    self.logger.critical(f"🚨 CRITICAL: WebSocket agent_completed event FAILED - user {context.user_id if context else 'unknown'}: {e}")
+                    # Try to use modern retry infrastructure for recovery
+                    await self._attempt_critical_agent_event_recovery("agent_completed", result, context, e)
             
             self.logger.info(f"Report delivered successfully (type: {result.get('report_type')}) "
                            f"for run_id: {context.run_id if context else 'unknown'}")
@@ -1107,6 +1116,97 @@ class ReportingSubAgent(BaseAgent):
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "agent": "ReportingSubAgent"
         }
+    
+    async def _attempt_critical_agent_event_recovery(self, event_type: str, event_data: Any, context: UserExecutionContext, original_error: Exception):
+        """
+        Attempt to recover from WebSocket agent event failure using UnifiedWebSocketEmitter.
+        
+        This method implements the modern retry infrastructure pattern to prevent
+        silent failures that threaten chat functionality and $500K+ ARR.
+        
+        Args:
+            event_type: The event type that failed (agent_started/agent_thinking/agent_completed)
+            event_data: Event data to send (message or result)
+            context: User execution context
+            original_error: The original error that occurred
+        """
+        try:
+            # Try to get WebSocket manager from BaseAgent infrastructure
+            if not hasattr(self, '_websocket_adapter') or not self._websocket_adapter:
+                self.logger.warning(f"No WebSocket adapter available for event recovery - event: {event_type}")
+                return
+                
+            # Try to create UnifiedWebSocketEmitter for retry
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+            
+            # Get the underlying manager from the adapter if possible
+            websocket_manager = None
+            if hasattr(self._websocket_adapter, 'websocket_manager'):
+                websocket_manager = self._websocket_adapter.websocket_manager
+            elif hasattr(self._websocket_adapter, 'manager'):
+                websocket_manager = self._websocket_adapter.manager
+            else:
+                self.logger.warning(f"Cannot extract WebSocket manager from adapter for event recovery - event: {event_type}")
+                return
+                
+            # Create emitter with retry capabilities
+            emitter = UnifiedWebSocketEmitter(
+                manager=websocket_manager,
+                user_id=context.user_id,
+                context=context,
+                performance_mode=False  # Use full retry logic for reliability
+            )
+            
+            # Prepare recovery data
+            recovery_metadata = {
+                'recovery_attempt': True,
+                'original_error': str(original_error),
+                'user_id': context.user_id,
+                'run_id': context.run_id,
+                'thread_id': context.thread_id,
+                'agent_name': 'ReportingSubAgent'
+            }
+            
+            # Use modern retry infrastructure based on event type
+            success = False
+            if event_type == "agent_started":
+                success = await emitter.notify_agent_started(
+                    agent_name="ReportingSubAgent", 
+                    metadata=recovery_metadata,
+                    context={'message': str(event_data)}
+                )
+            elif event_type == "agent_thinking":
+                success = await emitter.notify_agent_thinking(
+                    agent_name="ReportingSubAgent",
+                    reasoning=str(event_data),
+                    metadata=recovery_metadata
+                )
+            elif event_type == "agent_completed":
+                success = await emitter.notify_agent_completed(
+                    agent_name="ReportingSubAgent",
+                    result=event_data if isinstance(event_data, dict) else {'report': str(event_data)},
+                    metadata=recovery_metadata
+                )
+            else:
+                # Fallback for any other event types
+                success = await emitter.notify_custom(event_type, {
+                    'data': event_data,
+                    **recovery_metadata
+                })
+            
+            if success:
+                self.logger.info(f"✅ RECOVERY SUCCESS: {event_type} event recovered for ReportingSubAgent - user {context.user_id}")
+            else:
+                self.logger.error(f"❌ RECOVERY FAILED: {event_type} event could not be recovered for ReportingSubAgent - user {context.user_id}")
+                
+        except Exception as recovery_error:
+            self.logger.error(f"💥 RECOVERY EXCEPTION: Agent event recovery system failed for {event_type}/ReportingSubAgent - user {context.user_id if context else 'unknown'}: {recovery_error}")
+            # At this point we've tried everything - log as critical business impact
+            self.logger.critical(
+                f"🚨 BUSINESS IMPACT: Complete WebSocket agent event failure for user {context.user_id if context else 'unknown'} "
+                f"- agent: ReportingSubAgent, event: {event_type}. Chat functionality compromised. "
+                f"Original error: {original_error}, Recovery error: {recovery_error}"
+            )
     
     # ========================================================================
     # COMPATIBILITY AND INFRASTRUCTURE METHODS

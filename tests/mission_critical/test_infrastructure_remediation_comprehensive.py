@@ -41,8 +41,8 @@ from netra_backend.app.infrastructure.remediation_validator import (
     ValidationPhase,
     RemediationValidationReport
 )
-from netra_backend.app.infrastructure.vpc_connectivity_fix import VPCConnectivityValidator
-from netra_backend.app.infrastructure.websocket_auth_remediation import WebSocketAuthManager
+from infrastructure.vpc_connectivity_fix import VPCConnectivityValidator
+from infrastructure.websocket_auth_remediation import WebSocketAuthManager
 from netra_backend.app.infrastructure.monitoring import InfrastructureHealthMonitor
 from netra_backend.app.infrastructure.drift_detection import ConfigurationDriftDetector
 
@@ -61,25 +61,19 @@ class TestInfrastructureRemediationComprehensive(SSotAsyncTestCase):
     connectivity issues blocking the Golden Path user workflow.
     """
 
-    @classmethod
-    async def asyncSetUpClass(cls):
+    async def async_setup_method(self, method=None):
         """Set up test infrastructure with real services"""
-        await super().asyncSetUpClass()
+        await super().async_setup_method(method)
         
         # Initialize database utilities for real service testing
-        cls.db_utilities = DatabaseTestUtilities()
-        await cls.db_utilities.setup_test_environment()
+        self.db_utilities = DatabaseTestUtilities()
         
         logger.info("🚀 INFRASTRUCTURE REMEDIATION TEST SUITE INITIALIZED")
         logger.info("🎯 MISSION: Validate $500K+ ARR Golden Path protection")
 
-    @classmethod
-    async def asyncTearDownClass(cls):
+    async def async_teardown_method(self, method=None):
         """Clean up test infrastructure"""
-        if hasattr(cls, 'db_utilities'):
-            await cls.db_utilities.cleanup_test_environment()
-        
-        await super().asyncTearDownClass()
+        await super().async_teardown_method(method)
         logger.info("🏁 INFRASTRUCTURE REMEDIATION TEST SUITE COMPLETE")
 
     async def test_unified_remediation_validator_creation(self):
@@ -499,7 +493,7 @@ async def run_mission_critical_infrastructure_remediation_test():
     logger.info("🚀 RUNNING MISSION CRITICAL INFRASTRUCTURE REMEDIATION TEST")
     
     test_suite = TestInfrastructureRemediationComprehensive()
-    await test_suite.asyncSetUpClass()
+    await test_suite.async_setup_method()
     
     try:
         # Run critical validation test
@@ -512,7 +506,7 @@ async def run_mission_critical_infrastructure_remediation_test():
         return False
         
     finally:
-        await test_suite.asyncTearDownClass()
+        await test_suite.async_teardown_method()
 
 
 if __name__ == "__main__":

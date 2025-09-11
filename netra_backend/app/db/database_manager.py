@@ -40,6 +40,12 @@ from netra_backend.app.core.config import get_config
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import get_env
 
+# Issue #374: Enhanced database exception handling
+from netra_backend.app.db.transaction_errors import (
+    DeadlockError, ConnectionError, TransactionError, TimeoutError, 
+    PermissionError, SchemaError, classify_error, is_retryable_error
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -480,18 +486,26 @@ class DatabaseManager:
     
     @asynccontextmanager
     async def get_session(self, engine_name: str = 'primary', user_context: Optional[Any] = None, operation_type: str = "unknown"):
-        """Get async database session with Issue #414 user isolation and enhanced lifecycle management.
+        """Get async database session with Issue #374 enhanced exception handling and Issue #414 user isolation.
         
-        ISSUE #414 REMEDIATION - Phase 1 (P0):
-        - User context isolation to prevent cross-user contamination
+        COMBINED ISSUE #374 + #414 REMEDIATION:
+        - Enhanced exception handling with specific error classification (Issue #374)
+        - User context isolation to prevent cross-user contamination (Issue #414)
         - Enhanced session lifecycle tracking and cleanup
         - Connection pool monitoring and exhaustion prevention
-        - Transaction rollback safety for context errors
+        - Transaction rollback safety with enhanced error diagnostics
         
         Args:
-            engine_name: Name of the engine to use
+            engine_name: Name of the engine to use (default: 'primary')
             user_context: UserExecutionContext for proper isolation (Issue #414 fix)
-            operation_type: Type of operation for logging context
+            operation_type: Type of operation for monitoring (e.g., "user_query", "admin_task")
+            
+        Yields:
+            AsyncSession: Database session with automatic transaction management
+            
+        Raises:
+            DeadlockError, ConnectionError, TransactionError: Enhanced database exceptions (Issue #374)
+            Exception: Other database errors, rollback errors (original exception preserved)
         """
         session_start_time = time.time()
         
@@ -564,12 +578,34 @@ class DatabaseManager:
                 logger.info(f"✅ Session {session_id} committed successfully - Operation: {operation_type}, "
                            f"User: {user_id or 'system'}, Duration: {session_duration:.3f}s, Commit: {commit_duration:.3f}s")
                 
-            except Exception as e:
-                original_exception = e
+            except (DeadlockError, ConnectionError) as e:
+                # ISSUE #374 FIX: Handle specific transaction errors with enhanced context
+                original_exception = classify_error(e)
                 rollback_start_time = time.time()
                 
-                logger.critical(f"💥 TRANSACTION FAILURE in session {session_id}")
-                logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, Error: {type(e).__name__}: {str(e)}")
+                logger.critical(f"💥 SPECIFIC TRANSACTION FAILURE ({type(original_exception).__name__}) in session {session_id}")
+                logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, Error: {str(original_exception)}")
+                
+                try:
+                    await session.rollback()
+                    rollback_duration = time.time() - rollback_start_time
+                    logger.warning(f"🔄 Rollback completed for session {session_id} in {rollback_duration:.3f}s")
+                except Exception as rollback_error:
+                    rollback_duration = time.time() - rollback_start_time
+                    logger.critical(f"💥 ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
+                    logger.critical(f"DATABASE INTEGRITY AT RISK - Manual intervention may be required")
+                
+                session_duration = time.time() - session_start_time
+                logger.error(f"❌ Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
+                raise original_exception
+                
+            except Exception as e:
+                # ISSUE #374 FIX: Handle general exceptions with enhanced error classification  
+                original_exception = classify_error(e)
+                rollback_start_time = time.time()
+                
+                logger.critical(f"💥 TRANSACTION FAILURE ({type(original_exception).__name__}) in session {session_id}")
+                logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, Error: {str(original_exception)}")
                 
                 try:
                     await session.rollback()

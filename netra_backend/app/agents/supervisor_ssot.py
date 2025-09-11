@@ -18,7 +18,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 
 # SSOT ExecutionResult imports
-from netra_backend.app.agents.base.interface import ExecutionResult
+from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionContext
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 # SSOT imports - use the proper service location
@@ -77,10 +77,64 @@ class SupervisorAgent(BaseAgent):
         # Use SSOT factory instead of maintaining own state
         self.agent_factory = get_agent_instance_factory()
         
+        # Initialize workflow executor for workflow orchestration
+        from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
+        self.workflow_executor = SupervisorWorkflowExecutor(self)
+        logger.info("✅ SSOT SupervisorAgent workflow_executor initialized")
+        
         # Validate no session storage (SSOT requirement)
         validate_agent_session_isolation(self)
         
         logger.info("✅ SSOT SupervisorAgent initialized using factory and execution engine patterns")
+
+    def _create_supervisor_execution_context(self, 
+                                           user_context: UserExecutionContext, 
+                                           agent_name: str = "Supervisor",
+                                           additional_metadata: Optional[Dict[str, Any]] = None) -> ExecutionContext:
+        """Create supervisor-specific execution context from UserExecutionContext.
+        
+        This method bridges the gap between UserExecutionContext (user isolation pattern)
+        and ExecutionContext (agent execution pattern) for supervisor operations.
+        
+        Args:
+            user_context: UserExecutionContext with user-specific data
+            agent_name: Name of the supervisor agent
+            additional_metadata: Optional additional metadata
+            
+        Returns:
+            ExecutionContext configured for supervisor execution
+        """
+        # Create execution context from user context
+        execution_context = ExecutionContext(
+            request_id=getattr(user_context, 'request_id', f"supervisor_{user_context.run_id}"),
+            user_id=str(user_context.user_id),
+            run_id=str(user_context.run_id),
+            agent_name=agent_name,
+            session_id=getattr(user_context, 'session_id', None),
+            correlation_id=getattr(user_context, 'correlation_id', None),
+            stream_updates=True,  # Supervisor always streams updates
+            parameters={
+                "user_request": user_context.metadata.get("user_request", ""),
+                "thread_id": str(user_context.thread_id),
+                "websocket_connection_id": getattr(user_context, 'websocket_connection_id', None)
+            },
+            metadata=user_context.metadata.copy() if user_context.metadata else {}
+        )
+        
+        # Add additional metadata if provided
+        if additional_metadata:
+            execution_context.metadata.update(additional_metadata)
+        
+        # Add supervisor-specific metadata
+        execution_context.metadata.update({
+            "supervisor_execution": True,
+            "user_isolation_enabled": True,
+            "execution_pattern": "UserExecutionContext"
+        })
+        
+        logger.debug(f"Created supervisor execution context for user {user_context.user_id}, run {user_context.run_id}")
+        
+        return execution_context
 
     async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> ExecutionResult:
         """Execute using SSOT UserExecutionEngine pattern.

@@ -28,12 +28,12 @@ from enum import Enum
 import time
 from datetime import datetime, timedelta
 
-from netra_backend.app.infrastructure.vpc_connectivity_fix import (
+from infrastructure.vpc_connectivity_fix import (
     VPCConnectivityValidator, 
     VPCConnectivityFixer,
     VPCConnectivityStatus
 )
-from netra_backend.app.infrastructure.websocket_auth_remediation import (
+from infrastructure.websocket_auth_remediation import (
     WebSocketAuthManager,
     WebSocketAuthHelpers
 )

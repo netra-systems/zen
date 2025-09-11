@@ -212,6 +212,110 @@ class SSotMockFactory:
         return mock_config
 
     @staticmethod
+    def create_mock_llm_manager(
+        model: str = "gpt-4",
+        config: Optional[Dict[str, Any]] = None
+    ) -> AsyncMock:
+        """
+        Create a standardized LLM manager mock for testing.
+        
+        Args:
+            model: Mock LLM model name
+            config: Additional LLM configuration
+            
+        Returns:
+            AsyncMock configured for LLM manager testing
+        """
+        mock_llm_manager = AsyncMock()
+        
+        # Mock LLM configuration
+        mock_config = MagicMock()
+        mock_config.model = model
+        mock_config.temperature = 0.7
+        mock_config.max_tokens = 4000
+        mock_config.timeout = 30
+        
+        if config:
+            for key, value in config.items():
+                setattr(mock_config, key, value)
+        
+        mock_llm_manager.llm_config = mock_config
+        
+        # Mock LLM operations
+        mock_llm_manager.generate_response = AsyncMock(return_value="Mock LLM response")
+        mock_llm_manager.get_embeddings = AsyncMock(return_value=[0.1, 0.2, 0.3])
+        mock_llm_manager.tokenize = AsyncMock(return_value=["token1", "token2"])
+        mock_llm_manager.validate_model = AsyncMock(return_value=True)
+        mock_llm_manager.get_model_info = AsyncMock(return_value={
+            "model": model,
+            "max_tokens": 4000,
+            "supports_streaming": True
+        })
+        
+        # Mock streaming support
+        async def mock_stream_response():
+            yield "Mock"
+            yield " streaming"
+            yield " response"
+        
+        mock_llm_manager.stream_response = AsyncMock(return_value=mock_stream_response())
+        
+        return mock_llm_manager
+
+    @staticmethod
+    def create_mock_agent_websocket_bridge(
+        user_id: str = "test-user",
+        run_id: str = "test-run"
+    ) -> AsyncMock:
+        """
+        Create a standardized agent WebSocket bridge mock for testing.
+        
+        Args:
+            user_id: Mock user identifier
+            run_id: Mock run identifier
+            
+        Returns:
+            AsyncMock configured for agent WebSocket bridge testing
+        """
+        mock_bridge = AsyncMock()
+        
+        # Mock bridge configuration
+        mock_bridge.user_id = user_id
+        mock_bridge.run_id = run_id
+        mock_bridge.is_connected = True
+        
+        # Mock agent event notifications (Golden Path requirements)
+        mock_bridge.notify_agent_started = AsyncMock()
+        mock_bridge.notify_agent_thinking = AsyncMock()
+        mock_bridge.notify_agent_completed = AsyncMock()
+        mock_bridge.notify_tool_executing = AsyncMock()
+        mock_bridge.notify_tool_completed = AsyncMock()
+        
+        # Mock connection management
+        mock_bridge.connect = AsyncMock()
+        mock_bridge.disconnect = AsyncMock()
+        mock_bridge.is_connection_active = MagicMock(return_value=True)
+        mock_bridge.get_connection_status = MagicMock(return_value={
+            "connected": True,
+            "user_id": user_id,
+            "run_id": run_id
+        })
+        
+        # Mock event emission
+        mock_bridge.emit_event = AsyncMock()
+        mock_bridge.emit_critical_event = AsyncMock()
+        mock_bridge.send_message = AsyncMock()
+        
+        # Mock context management
+        mock_bridge.get_user_context = MagicMock(return_value={
+            "user_id": user_id,
+            "run_id": run_id,
+            "session_active": True
+        })
+        
+        return mock_bridge
+
+    @staticmethod
     def create_websocket_manager_mock(
         manager_type: str = "unified",
         user_isolation: bool = True
@@ -315,6 +419,8 @@ class SSotMockFactory:
             "tool": cls.create_tool_mock,
             "llm_client": cls.create_llm_client_mock,
             "configuration": cls.create_configuration_mock,
+            "llm_manager": cls.create_mock_llm_manager,
+            "agent_websocket_bridge": cls.create_mock_agent_websocket_bridge,
         }
         
         for mock_type in mock_types:
@@ -322,3 +428,33 @@ class SSotMockFactory:
                 mock_suite[mock_type] = mock_creators[mock_type]()
         
         return mock_suite
+
+    @classmethod
+    def create_mock(cls, mock_type: str, **kwargs) -> Any:
+        """
+        Generic mock creation method for ad-hoc mock needs.
+        
+        Args:
+            mock_type: Type of mock to create (can be any string identifier)
+            **kwargs: Additional arguments for mock configuration
+            
+        Returns:
+            Appropriate mock object based on type
+        """
+        # Handle common mock types
+        if mock_type == "AsyncSession":
+            return cls.create_database_session_mock()
+        elif mock_type == "UserExecutionEngine":
+            mock_engine = AsyncMock()
+            mock_engine.execute_agent_pipeline = AsyncMock()
+            mock_engine.cleanup = AsyncMock()
+            return mock_engine
+        elif mock_type == "WebSocketManager":
+            return cls.create_websocket_manager_mock(**kwargs)
+        elif mock_type == "LLMManager":
+            return cls.create_mock_llm_manager(**kwargs)
+        elif mock_type == "AgentWebSocketBridge":
+            return cls.create_mock_agent_websocket_bridge(**kwargs)
+        else:
+            # Generic mock for unknown types
+            return AsyncMock(**kwargs)

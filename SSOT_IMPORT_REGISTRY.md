@@ -36,9 +36,15 @@ from netra_backend.app.websocket_core.websocket_manager import get_websocket_man
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
 
+# Execution Factory Pattern (VERIFIED 2025-09-11)
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory, ExecutionEngineFactory, ExecutionFactoryConfig
+
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
 from netra_backend.app.tools.result_aggregator import ToolResultAggregator
+
+# Redis Client (CRITICAL - VERIFIED 2025-09-11)
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 
 # Shared Types (Cross-Service)
 from shared.types.core_types import UserID, ThreadID, RunID

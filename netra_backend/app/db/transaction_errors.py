@@ -2,6 +2,8 @@
 
 Handles error detection, classification, and retry logic for database transactions.
 Focused module adhering to 25-line function limit and modular architecture.
+
+Enhanced for Issue #374: Database Exception Remediation
 """
 
 from sqlalchemy.exc import DisconnectionError, OperationalError
@@ -22,6 +24,21 @@ class ConnectionError(TransactionError):
     pass
 
 
+class TimeoutError(TransactionError):
+    """Raised when database operations timeout."""
+    pass
+
+
+class PermissionError(TransactionError):
+    """Raised when database permission issues occur."""
+    pass
+
+
+class SchemaError(TransactionError):
+    """Raised when database schema issues occur."""
+    pass
+
+
 def _has_deadlock_keywords(error_msg: str) -> bool:
     """Check if error message contains deadlock keywords."""
     deadlock_keywords = ['deadlock', 'lock timeout', 'lock wait timeout']
@@ -32,6 +49,24 @@ def _has_connection_keywords(error_msg: str) -> bool:
     """Check if error message contains connection keywords."""
     connection_keywords = ['connection', 'network', 'timeout', 'broken pipe']
     return any(keyword in error_msg for keyword in connection_keywords)
+
+
+def _has_timeout_keywords(error_msg: str) -> bool:
+    """Check if error message contains timeout keywords."""
+    timeout_keywords = ['timeout', 'timed out', 'time limit exceeded']
+    return any(keyword in error_msg for keyword in timeout_keywords)
+
+
+def _has_permission_keywords(error_msg: str) -> bool:
+    """Check if error message contains permission keywords."""
+    permission_keywords = ['permission denied', 'access denied', 'insufficient privileges', 'authentication failed']
+    return any(keyword in error_msg for keyword in permission_keywords)
+
+
+def _has_schema_keywords(error_msg: str) -> bool:
+    """Check if error message contains schema keywords."""
+    schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column']
+    return any(keyword in error_msg for keyword in schema_keywords)
 
 
 def _is_disconnection_retryable(error: Exception, enable_connection_retry: bool) -> bool:
@@ -93,12 +128,47 @@ def _classify_connection_error(error: OperationalError, error_msg: str) -> Excep
     return error
 
 
+def _classify_timeout_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify timeout-related operational errors."""
+    if _has_timeout_keywords(error_msg):
+        return TimeoutError(f"Timeout error: {error}")
+    return error
+
+
+def _classify_permission_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify permission-related operational errors."""
+    if _has_permission_keywords(error_msg):
+        return PermissionError(f"Permission error: {error}")
+    return error
+
+
+def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify schema-related operational errors."""
+    if _has_schema_keywords(error_msg):
+        return SchemaError(f"Schema error: {error}")
+    return error
+
+
 def _attempt_error_classification(error: OperationalError, error_msg: str) -> Exception:
     """Attempt to classify error, returning original if no match."""
+    # Try each classification in priority order
     classified = _classify_deadlock_error(error, error_msg)
     if classified != error:
         return classified
-    return _classify_connection_error(error, error_msg)
+    
+    classified = _classify_connection_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_timeout_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_permission_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    return _classify_schema_error(error, error_msg)
 
 
 def _classify_operational_error(error: OperationalError) -> Exception:

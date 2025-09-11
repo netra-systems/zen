@@ -41,6 +41,11 @@ from netra_backend.app.schemas.tool import (
     ToolStatus,
 )
 from netra_backend.app.services.unified_tool_registry.models import ToolExecutionResult
+from netra_backend.app.services.event_delivery_tracker import (
+    get_event_delivery_tracker,
+    EventPriority,
+    EventDeliveryStatus
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -582,11 +587,16 @@ class UnifiedToolDispatcher:
                 try:
                     if event_type == "tool_executing":
                         # Use AgentWebSocketBridge's notify_tool_executing method
+                        # Include event_id in parameters for confirmation tracking
+                        params = data.get("parameters", {}).copy()
+                        if "event_id" in data:
+                            params["event_id"] = data["event_id"]
+                        
                         success = await self.bridge.notify_tool_executing(
                             run_id=data.get("run_id", self.context.run_id),
                             agent_name=data.get("agent_name", "ToolDispatcher"),
                             tool_name=data["tool_name"],
-                            parameters=data.get("parameters", {})
+                            parameters=params
                         )
                         if success:
                             logger.debug(f"🔧 TOOL EXECUTING: {data['tool_name']} → user {self.context.user_id}")
@@ -599,6 +609,12 @@ class UnifiedToolDispatcher:
                             result_dict = {"output": str(data["result"])}
                         elif data.get("error"):
                             result_dict = {"error": str(data["error"])}
+                        
+                        # Include event_id in result for confirmation tracking
+                        if result_dict is None:
+                            result_dict = {}
+                        if "event_id" in data:
+                            result_dict["event_id"] = data["event_id"]
                             
                         success = await self.bridge.notify_tool_completed(
                             run_id=data.get("run_id", self.context.run_id), 
@@ -809,9 +825,10 @@ class UnifiedToolDispatcher:
         if require_permission_check:
             await self._validate_tool_permissions(tool_name)
         
-        # Emit tool_executing event
+        # Emit tool_executing event and track it
+        executing_event_id = None
         if self.has_websocket_support:
-            await self._emit_tool_executing(tool_name, parameters)
+            executing_event_id = await self._emit_tool_executing(tool_name, parameters)
         
         try:
             # Validate tool exists
@@ -849,9 +866,16 @@ class UnifiedToolDispatcher:
             self.__class__._update_global_metrics('successful_execution')
             self.__class__._update_global_metrics('execution_time', execution_time)
             
-            # Emit tool_completed event
+            # Emit tool_completed event and track it
+            completed_event_id = None
             if self.has_websocket_support:
-                await self._emit_tool_completed(tool_name, result, execution_time)
+                completed_event_id = await self._emit_tool_completed(tool_name, result, execution_time)
+                
+                # Wait for event confirmation (with short timeout to avoid blocking)
+                await self._wait_for_event_confirmations(
+                    [executing_event_id, completed_event_id], 
+                    timeout_s=2.0  # Short timeout - don't block tool execution
+                )
             
             # Extract actual result from ToolResult wrapper
             actual_result = result.payload.result if hasattr(result, 'payload') and hasattr(result.payload, 'result') else result
@@ -872,9 +896,16 @@ class UnifiedToolDispatcher:
             self.__class__._update_global_metrics('failed_execution')
             self.__class__._update_global_metrics('execution_time', execution_time)
             
-            # Emit tool_completed with error
+            # Emit tool_completed with error and track it
+            completed_event_id = None
             if self.has_websocket_support:
-                await self._emit_tool_completed(tool_name, error=str(e), execution_time=execution_time)
+                completed_event_id = await self._emit_tool_completed(tool_name, error=str(e), execution_time=execution_time)
+                
+                # Wait for event confirmation (with short timeout to avoid blocking)
+                await self._wait_for_event_confirmations(
+                    [executing_event_id, completed_event_id], 
+                    timeout_s=2.0  # Short timeout - don't block tool execution
+                )
             
             logger.error(f"Tool {tool_name} failed in dispatcher {self.dispatcher_id}: {e}")
             
@@ -914,12 +945,19 @@ class UnifiedToolDispatcher:
     
     # ===================== WEBSOCKET EVENT METHODS =====================
     
-    async def _emit_tool_executing(self, tool_name: str, parameters: Dict[str, Any]):
-        """Emit tool_executing WebSocket event."""
+    async def _emit_tool_executing(self, tool_name: str, parameters: Dict[str, Any]) -> Optional[str]:
+        """Emit tool_executing WebSocket event with delivery tracking.
+        
+        Returns:
+            Optional[str]: Event ID for tracking, None if event wasn't sent
+        """
         if not self.websocket_manager:
-            return
+            return None
         
         try:
+            # Get event delivery tracker
+            tracker = get_event_delivery_tracker()
+            
             # Make parameters JSON-serializable by converting non-serializable values to strings
             serializable_params = {}
             for key, value in (parameters or {}).items():
@@ -932,21 +970,80 @@ class UnifiedToolDispatcher:
                     # Convert non-serializable objects to string representation
                     serializable_params[key] = str(value)
             
-            await self.websocket_manager.send_event(
-                "tool_executing",
-                {
-                    "tool_name": tool_name,
-                    "parameters": serializable_params,
-                    "run_id": self.user_context.run_id,
-                    "user_id": self.user_context.user_id,
-                    "thread_id": self.user_context.thread_id,
-                    "timestamp": datetime.now(timezone.utc).isoformat()
-                }
+            event_data = {
+                "tool_name": tool_name,
+                "parameters": serializable_params,
+                "run_id": self.user_context.run_id,
+                "user_id": self.user_context.user_id,
+                "thread_id": self.user_context.thread_id,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Create retry callback for this event
+            async def retry_callback(event_id: str, event_type: str, data: Dict[str, Any]) -> bool:
+                """Retry callback to re-emit failed tool_executing events."""
+                try:
+                    # Use the correct WebSocket manager method
+                    if hasattr(self.websocket_manager, 'emit_critical_event'):
+                        await self.websocket_manager.emit_critical_event(
+                            user_id=self.user_context.user_id,
+                            event_type="tool_executing",
+                            data=data
+                        )
+                    elif hasattr(self.websocket_manager, 'send_event'):
+                        await self.websocket_manager.send_event("tool_executing", data)
+                    else:
+                        logger.error(f"WebSocket manager lacks send_event/emit_critical_event method")
+                        return False
+                    
+                    logger.info(f"Successfully retried tool_executing event {event_id}")
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to retry tool_executing event {event_id}: {e}")
+                    return False
+            
+            # Track the event with critical priority and retry callback
+            event_id = tracker.track_event(
+                event_type="tool_executing",
+                user_id=self.user_context.user_id,
+                run_id=self.user_context.run_id,
+                thread_id=self.user_context.thread_id,
+                data=event_data,
+                priority=EventPriority.CRITICAL,
+                timeout_s=30.0,  # 30 second timeout for tool_executing events
+                retry_callback=retry_callback
             )
+            
+            # Add event ID to the payload for confirmation tracking
+            event_data["event_id"] = event_id
+            
+            # Send the event using the correct method
+            if hasattr(self.websocket_manager, 'emit_critical_event'):
+                await self.websocket_manager.emit_critical_event(
+                    user_id=self.user_context.user_id,
+                    event_type="tool_executing",
+                    data=event_data
+                )
+            elif hasattr(self.websocket_manager, 'send_event'):
+                await self.websocket_manager.send_event("tool_executing", event_data)
+            else:
+                raise RuntimeError("WebSocket manager lacks send_event/emit_critical_event method")
+            
+            # Mark event as sent
+            tracker.mark_event_sent(event_id)
+            
             self._metrics['websocket_events_sent'] += 1
             self.__class__._update_global_metrics('websocket_event')
+            
+            logger.debug(f"Sent tool_executing event {event_id} for tool {tool_name}")
+            return event_id
+            
         except Exception as e:
-            logger.warning(f"Failed to emit tool_executing event: {e}")
+            # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
+            logger.critical(f"🚨 CRITICAL: WebSocket tool_executing event FAILED for tool {tool_name} - user {self.user_context.user_id}: {e}")
+            # Try to use UnifiedWebSocketEmitter for retry if available
+            await self._attempt_critical_event_recovery("tool_executing", tool_name, parameters, e)
+            return None
     
     async def _emit_tool_completed(
         self,
@@ -954,12 +1051,19 @@ class UnifiedToolDispatcher:
         result: Any = None,
         error: str = None,
         execution_time: float = None
-    ):
-        """Emit tool_completed WebSocket event."""
+    ) -> Optional[str]:
+        """Emit tool_completed WebSocket event with delivery tracking.
+        
+        Returns:
+            Optional[str]: Event ID for tracking, None if event wasn't sent
+        """
         if not self.websocket_manager:
-            return
+            return None
         
         try:
+            # Get event delivery tracker
+            tracker = get_event_delivery_tracker()
+            
             event_data = {
                 "tool_name": tool_name,
                 "run_id": self.user_context.run_id,
@@ -978,17 +1082,194 @@ class UnifiedToolDispatcher:
             if execution_time:
                 event_data["execution_time_ms"] = execution_time
             
-            await self.websocket_manager.send_event("tool_completed", event_data)
+            # Create retry callback for this event
+            async def retry_callback(event_id: str, event_type: str, data: Dict[str, Any]) -> bool:
+                """Retry callback to re-emit failed tool_completed events."""
+                try:
+                    # Use the correct WebSocket manager method
+                    if hasattr(self.websocket_manager, 'emit_critical_event'):
+                        await self.websocket_manager.emit_critical_event(
+                            user_id=self.user_context.user_id,
+                            event_type="tool_completed",
+                            data=data
+                        )
+                    elif hasattr(self.websocket_manager, 'send_event'):
+                        await self.websocket_manager.send_event("tool_completed", data)
+                    else:
+                        logger.error(f"WebSocket manager lacks send_event/emit_critical_event method")
+                        return False
+                    
+                    logger.info(f"Successfully retried tool_completed event {event_id}")
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to retry tool_completed event {event_id}: {e}")
+                    return False
+            
+            # Track the event with critical priority and retry callback
+            event_id = tracker.track_event(
+                event_type="tool_completed",
+                user_id=self.user_context.user_id,
+                run_id=self.user_context.run_id,
+                thread_id=self.user_context.thread_id,
+                data=event_data,
+                priority=EventPriority.CRITICAL,
+                timeout_s=30.0,  # 30 second timeout for tool_completed events
+                retry_callback=retry_callback
+            )
+            
+            # Add event ID to the payload for confirmation tracking
+            event_data["event_id"] = event_id
+            
+            # Send the event using the correct method
+            if hasattr(self.websocket_manager, 'emit_critical_event'):
+                await self.websocket_manager.emit_critical_event(
+                    user_id=self.user_context.user_id,
+                    event_type="tool_completed",
+                    data=event_data
+                )
+            elif hasattr(self.websocket_manager, 'send_event'):
+                await self.websocket_manager.send_event("tool_completed", event_data)
+            else:
+                raise RuntimeError("WebSocket manager lacks send_event/emit_critical_event method")
+            
+            # Mark event as sent
+            tracker.mark_event_sent(event_id)
+            
             self._metrics['websocket_events_sent'] += 1
             self.__class__._update_global_metrics('websocket_event')
+            
+            logger.debug(f"Sent tool_completed event {event_id} for tool {tool_name}")
+            return event_id
+            
         except Exception as e:
-            logger.warning(f"Failed to emit tool_completed event: {e}")
+            # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
+            logger.critical(f"🚨 CRITICAL: WebSocket tool_completed event FAILED for tool {tool_name} - user {self.user_context.user_id}: {e}")
+            # Try to use UnifiedWebSocketEmitter for retry if available
+            await self._attempt_critical_event_recovery("tool_completed", tool_name, {"error": error} if error else {"result": result}, e)
+            return None
+    
+    async def _wait_for_event_confirmations(
+        self, 
+        event_ids: List[Optional[str]], 
+        timeout_s: float = 2.0
+    ):
+        """Wait for event confirmations with timeout.
+        
+        Args:
+            event_ids: List of event IDs to wait for (None values are ignored)
+            timeout_s: Maximum time to wait for confirmations
+        """
+        if not event_ids:
+            return
+        
+        # Filter out None values
+        valid_event_ids = [eid for eid in event_ids if eid is not None]
+        if not valid_event_ids:
+            return
+        
+        try:
+            tracker = get_event_delivery_tracker()
+            start_time = time.time()
+            
+            while time.time() - start_time < timeout_s:
+                # Check if all events are confirmed
+                all_confirmed = True
+                for event_id in valid_event_ids:
+                    status = tracker.get_event_status(event_id)
+                    if status != EventDeliveryStatus.CONFIRMED:
+                        all_confirmed = False
+                        break
+                
+                if all_confirmed:
+                    logger.debug(f"All events confirmed: {valid_event_ids}")
+                    return
+                
+                # Short sleep to avoid busy waiting
+                await asyncio.sleep(0.1)
+            
+            # Timeout reached - log warning but don't fail
+            unconfirmed = []
+            for event_id in valid_event_ids:
+                status = tracker.get_event_status(event_id)
+                if status != EventDeliveryStatus.CONFIRMED:
+                    unconfirmed.append(event_id)
+            
+            if unconfirmed:
+                logger.warning(
+                    f"Event confirmation timeout after {timeout_s}s. "
+                    f"Unconfirmed events: {unconfirmed}"
+                )
+        
+        except Exception as e:
+            logger.warning(f"Error waiting for event confirmations: {e}")
     
     def set_websocket_manager(self, manager: 'WebSocketManager'):
         """Set or update WebSocket manager for event emission."""
         self.websocket_manager = manager
         self._setup_websocket_events()
         logger.info(f"WebSocket manager set for dispatcher {self.dispatcher_id}")
+    
+    async def _attempt_critical_event_recovery(self, event_type: str, tool_name: str, event_data: Dict[str, Any], original_error: Exception):
+        """
+        Attempt to recover from WebSocket event failure using UnifiedWebSocketEmitter.
+        
+        This method implements the modern retry infrastructure pattern to prevent
+        silent failures that threaten chat functionality.
+        
+        Args:
+            event_type: The event type that failed (tool_executing/tool_completed)
+            tool_name: Name of the tool
+            event_data: Event data to send
+            original_error: The original error that occurred
+        """
+        try:
+            # Try to create UnifiedWebSocketEmitter for retry
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+            
+            if not self.websocket_manager:
+                logger.warning(f"No WebSocket manager available for event recovery - tool: {tool_name}, event: {event_type}")
+                return
+                
+            # Create emitter with retry capabilities
+            emitter = UnifiedWebSocketEmitter(
+                manager=self.websocket_manager,
+                user_id=self.user_context.user_id,
+                context=self.user_context,
+                performance_mode=False  # Use full retry logic for reliability
+            )
+            
+            # Prepare event data
+            recovery_data = {
+                'tool_name': tool_name,
+                'recovery_attempt': True,
+                'original_error': str(original_error),
+                'user_id': self.user_context.user_id,
+                'run_id': self.user_context.run_id,
+                'thread_id': self.user_context.thread_id,
+                **event_data
+            }
+            
+            # Use modern retry infrastructure
+            if event_type == "tool_executing":
+                success = await emitter.notify_tool_executing(tool_name, metadata=recovery_data)
+            elif event_type == "tool_completed":
+                success = await emitter.notify_tool_completed(tool_name, metadata=recovery_data)
+            else:
+                success = await emitter.notify_custom(event_type, recovery_data)
+            
+            if success:
+                logger.info(f"✅ RECOVERY SUCCESS: {event_type} event recovered for tool {tool_name} - user {self.user_context.user_id}")
+            else:
+                logger.error(f"❌ RECOVERY FAILED: {event_type} event could not be recovered for tool {tool_name} - user {self.user_context.user_id}")
+                
+        except Exception as recovery_error:
+            logger.error(f"💥 RECOVERY EXCEPTION: Event recovery system failed for {event_type}/{tool_name} - user {self.user_context.user_id}: {recovery_error}")
+            # At this point we've tried everything - log as critical business impact
+            logger.critical(
+                f"🚨 BUSINESS IMPACT: Complete WebSocket event failure for user {self.user_context.user_id} "
+                f"- tool: {tool_name}, event: {event_type}. Chat functionality compromised. "
+                f"Original error: {original_error}, Recovery error: {recovery_error}"
+            )
     
     # ===================== ADMIN METHODS =====================
     

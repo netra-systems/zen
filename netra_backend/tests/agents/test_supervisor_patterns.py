@@ -39,7 +39,7 @@ class TestResourceManagement(BaseTestCase):
             user_id="test-user-resource",
             thread_id="test-thread-resource",
             run_id="test-run-resource",
-            metadata={"user_request": "resource management test"}
+            agent_context={"user_request": "resource management test"}
         ).with_db_session(AsyncMock())
         
         # Mock registries
@@ -136,14 +136,14 @@ class TestResourceManagement(BaseTestCase):
             user_id="user-1",
             thread_id="thread-1",
             run_id="run-1",
-            metadata={"data": "context1"}
+            agent_context={"data": "context1"}
         ).with_db_session(AsyncMock())
         
         context2 = UserExecutionContext(
             user_id="user-2", 
             thread_id="thread-2",
             run_id="run-2",
-            metadata={"data": "context2"}
+            agent_context={"data": "context2"}
         ).with_db_session(AsyncMock())
         
         # Verify contexts are isolated
@@ -171,7 +171,7 @@ class TestWorkflowPatterns(BaseTestCase):
             user_id="test-user-workflow",
             thread_id="test-thread-workflow", 
             run_id="test-run-workflow",
-            metadata={"user_request": "workflow pattern test"}
+            agent_context={"user_request": "workflow pattern test"}
         ).with_db_session(AsyncMock())
         
         # Mock registries
