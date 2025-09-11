@@ -62,10 +62,10 @@ SERVICE_ID contained whitespace - sanitized from 'netra-backend\n' to 'netra-bac
 
 ---
 
-## ISSUE 4: Docker Unavailability in Cloud Run (WARNING)
+## ISSUE 4: Cloud Run Health Check Optimization (WARNING)
 
-**Severity:** WARNING  
-**Pattern:** Docker not available for ClickHouse container status checks  
+**Severity:** WARNING (LOW priority operational issue)  
+**Pattern:** Application logs expected Docker unavailability as WARNING in Cloud Run  
 **First Seen:** 2025-09-11T17:46:37.294153Z  
 **Frequency:** Consistent across all deployment instances
 
@@ -74,8 +74,11 @@ SERVICE_ID contained whitespace - sanitized from 'netra-backend\n' to 'netra-bac
 Docker not available - cannot check ClickHouse container status
 ```
 
-**Impact:** LOW - Expected in Cloud Run environment, but may indicate suboptimal health checking
-**Suggested Labels:** `gcp-active-dev-low-docker-availability`
+**Impact:** LOW - Creates operational noise; Docker unavailability is expected in Cloud Run but logged as WARNING
+**Root Issue:** Application not fully Cloud Run-aware in health checking logic
+**Suggested Labels:** `gcp-active-dev-low-cloud-run-health-check-optimization`
+
+**Recommended Fix:** Either skip Docker health checks entirely in Cloud Run OR log expected conditions at INFO level rather than WARNING
 
 ---
 
@@ -153,7 +156,7 @@ None identified
 5. **REDIS_URL Deprecation** - Technical debt
 
 ### P3 LOW (1 issue)
-1. **Docker Unavailability** - Expected Cloud Run limitation
+1. **Cloud Run Health Check Optimization** - WARNING logs for expected Docker unavailability
 
 ---
 
