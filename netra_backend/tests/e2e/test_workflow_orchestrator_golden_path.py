@@ -124,7 +124,7 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
             # Execute the agent
             if agent and hasattr(agent, 'execute'):
                 result = await agent.execute()
-                self.agent_responses[agent_name] = result.result
+                self.agent_responses[agent_name] = result.data
                 return result
             else:
                 # Fallback if agent not properly configured
@@ -195,6 +195,7 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         orchestrator._get_user_emitter_from_context = AsyncMock(return_value=mock_emitter)
         
         # Create execution context representing user's AI request
+        # CRITICAL FIX: Add missing thread_id to ExecutionContext via metadata
         golden_context = ExecutionContext(
             request_id=self.golden_user_context.request_id,
             run_id=self.golden_user_context.run_id,
@@ -205,16 +206,19 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
             metadata={
                 "user_request": "Help me optimize my cloud costs to reduce spending",
                 "expected_business_value": "cost_reduction",
-                "priority": "high"
+                "priority": "high",
+                "thread_id": self.golden_user_context.thread_id  # Add thread_id via metadata
             }
         )
+        # Add thread_id as direct property for compatibility
+        golden_context.thread_id = self.golden_user_context.thread_id
         
         # Execute golden path workflow
         results = await orchestrator.execute_standard_workflow(golden_context)
         
         # GOLDEN PATH VALIDATION: Complete flow should succeed
         assert len(results) > 0, "Golden path should produce results"
-        assert all(r.success for r in results), f"All agents should succeed in golden path: {[r.error for r in results if not r.success]}"
+        assert all(r.is_success for r in results), f"All agents should succeed in golden path: {[r.error_message for r in results if not r.is_success]}"
         
         # Validate business value delivered
         assert len(self.agent_responses) >= 2, "Should have responses from multiple agents"
@@ -253,14 +257,18 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         mock_emitter = await self._create_websocket_event_tracker()
         orchestrator._get_user_emitter_from_context = AsyncMock(return_value=mock_emitter)
         
+        # CRITICAL FIX: Add missing thread_id to ExecutionContext
         context = ExecutionContext(
             request_id=self.golden_user_context.request_id,
             run_id=self.golden_user_context.run_id,
             agent_name="triage",
             state=DeepAgentState(),
             stream_updates=True,
-            user_id=self.golden_user_context.user_id
+            user_id=self.golden_user_context.user_id,
+            metadata={"thread_id": self.golden_user_context.thread_id}
         )
+        # Add thread_id as direct property for compatibility
+        context.thread_id = self.golden_user_context.thread_id
         
         await orchestrator.execute_standard_workflow(context)
         
@@ -335,14 +343,18 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         orchestrator2._get_user_emitter_from_context = AsyncMock(return_value=create_user_emitter(user2_events))
         
         # Execute golden paths concurrently
+        # CRITICAL FIX: Add missing thread_id to ExecutionContext instances
         context1 = ExecutionContext(
             request_id=user1_context.request_id,
             run_id=user1_context.run_id,
             agent_name="triage",
             state=DeepAgentState(),
             stream_updates=True,
-            user_id=user1_context.user_id
+            user_id=user1_context.user_id,
+            metadata={"thread_id": user1_context.thread_id}
         )
+        # Add thread_id as direct property for compatibility
+        context1.thread_id = user1_context.thread_id
         
         context2 = ExecutionContext(
             request_id=user2_context.request_id,
@@ -350,8 +362,11 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
             agent_name="triage",
             state=DeepAgentState(),
             stream_updates=True,
-            user_id=user2_context.user_id
+            user_id=user2_context.user_id,
+            metadata={"thread_id": user2_context.thread_id}
         )
+        # Add thread_id as direct property for compatibility
+        context2.thread_id = user2_context.thread_id
         
         results1, results2 = await asyncio.gather(
             orchestrator1.execute_standard_workflow(context1),
@@ -409,6 +424,7 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         orchestrator._get_user_emitter_from_context = AsyncMock(return_value=mock_emitter)
         
         # Execute golden path with business value tracking
+        # CRITICAL FIX: Add missing thread_id to ExecutionContext
         context = ExecutionContext(
             request_id=self.golden_user_context.request_id,
             run_id=self.golden_user_context.run_id,
@@ -419,9 +435,12 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
             metadata={
                 "business_context": "cost_optimization",
                 "expected_roi": 0.24,  # 24% cost reduction
-                "urgency": "high"
+                "urgency": "high",
+                "thread_id": self.golden_user_context.thread_id  # Add thread_id via metadata
             }
         )
+        # Add thread_id as direct property for compatibility
+        context.thread_id = self.golden_user_context.thread_id
         
         results = await orchestrator.execute_standard_workflow(context)
         
@@ -429,7 +448,7 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         # Golden path should deliver measurable business value
         business_metrics = {
             'total_execution_time': sum(r.execution_time_ms for r in results if r.execution_time_ms),
-            'success_rate': len([r for r in results if r.success]) / len(results) if results else 0,
+            'success_rate': len([r for r in results if r.is_success]) / len(results) if results else 0,
             'agent_count': len(results),
             'websocket_events': len(self.websocket_events)
         }
@@ -440,7 +459,7 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         assert business_metrics['websocket_events'] >= 2, "Should provide real-time feedback"
         
         # Business value should be quantified in responses
-        final_response = results[-1].result if results else {}
+        final_response = results[-1].data if results else {}
         if isinstance(final_response, dict):
             # Should contain business-relevant information
             business_fields = ['summary', 'recommendations', 'action_items', 'business_value', 'cost_analysis']

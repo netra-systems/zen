@@ -4,6 +4,10 @@ COMPREHENSIVE COMPATIBILITY MODULE: This module provides advanced error validati
 functionality for WebSocket tests that expect structured error handling validation,
 while maintaining backward compatibility with simple validation patterns.
 
+IMPORTANT: During SSOT consolidation (PR #214), WebSocketEventValidator was moved to
+netra_backend.app.websocket_core.event_validator and renamed to UnifiedEventValidator.
+This module provides backward compatibility imports.
+
 Business Value Justification (BVJ):
 - Segment: Platform/Internal (Test Infrastructure + Production Monitoring)
 - Business Goal: Enable comprehensive WebSocket error testing and production monitoring
@@ -23,6 +27,16 @@ from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timezone
 from netra_backend.app.logging_config import central_logger
+
+# Import from SSOT consolidated implementation
+from netra_backend.app.websocket_core.event_validator import (
+    UnifiedEventValidator as WebSocketEventValidator,
+    ValidationResult,
+    EventCriticality,
+    get_websocket_validator,
+    reset_websocket_validator,
+    CriticalAgentEventType
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -510,4 +524,4 @@ __all__ = [
     'is_valid_connection_state'
 ]
 
-logger.info("WebSocket Error Validator compatibility module loaded")
+logger.info("WebSocket Error Validator compatibility module loaded with SSOT imports")

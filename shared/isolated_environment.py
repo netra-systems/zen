@@ -22,6 +22,7 @@ REQUIREMENTS per SPEC/unified_environment_management.xml:
 """
 import os
 import re
+import secrets
 import threading
 import subprocess
 from dataclasses import dataclass
@@ -422,7 +423,18 @@ class IsolatedEnvironment:
             'SERVER_PORT': '8000',
             'AUTH_PORT': '8081',
             'FRONTEND_PORT': '3000',
-            'LOG_LEVEL': 'DEBUG'
+            'LOG_LEVEL': 'DEBUG',
+            
+            # Staging environment test defaults - FIXES GitHub Issue #259
+            'JWT_SECRET_STAGING': 'test_jwt_secret_staging_' + secrets.token_urlsafe(32),
+            'REDIS_PASSWORD': 'test_redis_password_' + secrets.token_urlsafe(16),
+            'GOOGLE_OAUTH_CLIENT_ID_STAGING': 'test_oauth_client_id_staging.apps.googleusercontent.com',
+            'GOOGLE_OAUTH_CLIENT_SECRET_STAGING': 'test_oauth_client_secret_staging_' + secrets.token_urlsafe(24),
+
+            # Production environment test defaults (comprehensive coverage)
+            'JWT_SECRET_PRODUCTION': 'test_jwt_secret_production_' + secrets.token_urlsafe(32),
+            'GOOGLE_OAUTH_CLIENT_ID_PRODUCTION': 'test_oauth_client_id_production.apps.googleusercontent.com',
+            'GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION': 'test_oauth_client_secret_production_' + secrets.token_urlsafe(24)
         }
     
     def _sync_with_os_environ(self) -> None:
