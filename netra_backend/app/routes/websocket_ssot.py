@@ -397,6 +397,7 @@ class WebSocketSSOTRouter:
                 logger.warning("No app_state available for GCP readiness validation - proceeding")
             
             # Step 1: Negotiate subprotocol and accept WebSocket connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[MAIN MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -511,6 +512,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[FACTORY MODE] Pre-auth success: user={user_id[:8]}")
             
             # Step 2: Negotiate subprotocol and accept connection after authentication (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[FACTORY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -585,6 +587,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[ISOLATED MODE] Starting isolated connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[ISOLATED MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -681,6 +684,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[LEGACY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
