@@ -86,6 +86,7 @@ class RealWebSocketTestConfig:
     connection_timeout: float = 15.0
     event_timeout: float = 10.0
     max_retries: int = 5
+    docker_startup_timeout: float = 120.0
 
 
 def _get_environment_backend_url() -> str:
