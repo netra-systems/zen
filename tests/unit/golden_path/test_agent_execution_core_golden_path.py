@@ -56,7 +56,7 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 
 # Execution results and schemas
 from shared.types.agent_types import AgentExecutionResult
-from netra_backend.app.schemas.agent_schemas import AgentExecutionResult as LegacyAgentExecutionResult
+from netra_backend.app.schemas.agent_result_types import AgentExecutionResult as LegacyAgentExecutionResult
 
 # Logging and monitoring
 from netra_backend.app.logging_config import central_logger
