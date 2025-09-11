@@ -37,9 +37,49 @@ Docker Desktop/daemon is not running on the system.
 
 ## Additional Issues Discovered
 
-### 2. Test Collection Analysis Needed
-**Status:** To be investigated
-**Next Step:** Need to examine e2e test files for syntax/import issues using pytest collection
+### 2. Import Error in Golden Path WebSocket Test - HIGH PRIORITY  
+**Type:** Import/Collection Error
+**Severity:** High
+**Status:** Test collection blocked
+**File:** `tests/e2e/test_golden_path_websocket_auth_staging.py:28`
+
+**Error Details:**
+```
+ImportError: cannot import name 'StagingConfig' from 'tests.e2e.staging_config'
+```
+
+**Root Cause:**
+Test file trying to import `StagingConfig` but actual class name is `StagingTestConfig`
+
+**Business Impact:**
+- Golden Path WebSocket tests cannot run
+- Staging environment validation blocked
+- $500K+ ARR Golden Path flow cannot be tested
+
+### 3. Redis Libraries Not Available - MEDIUM PRIORITY
+**Type:** Dependency/Warning
+**Severity:** Medium  
+**Status:** Warning during test collection
+
+**Error Details:**
+```
+Redis libraries not available - Redis fixtures will fail
+```
+
+**Impact:**
+- Redis-dependent E2E tests will fail
+- Caching functionality cannot be tested
+- Session persistence tests blocked
+
+### 4. Empty E2E Test Files - LOW PRIORITY
+**Type:** Test Coverage Gap
+**Severity:** Low
+**Files:** Multiple e2e test files
+
+**Issue:**
+- Some e2e test files exist but collect 0 tests
+- May be placeholder files or incomplete implementations
+- Examples: `test_primary_chat_websocket_flow.py`, `test_real_agent_data_helper_flow.py`
 
 ## Action Items
 
