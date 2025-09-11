@@ -91,12 +91,12 @@ class TestExecutionStateConsistency(SSotBaseTestCase):
         
         # Verify all values are strings
         for state in ExecutionTrackerState:
-            assert isinstance(state.value, str), 
-                f"ExecutionTrackerState.{state.name} value is not string: {type(state.value)}")
+            assert isinstance(state.value, str), \
+                f"ExecutionTrackerState.{state.name} value is not string: {type(state.value)}"
         
         for state in AgentExecutionTrackerState:
-            assert isinstance(state.value, str), 
-                f"AgentExecutionTrackerState.{state.name} value is not string: {type(state.value)}")
+            assert isinstance(state.value, str), \
+                f"AgentExecutionTrackerState.{state.name} value is not string: {type(state.value)}"
     
     def test_execution_state_import_consistency(self):
         """
