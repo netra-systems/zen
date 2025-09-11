@@ -13,6 +13,7 @@ Context:
 3. Focus areas (output this to console) of SSOT: ${1 : latest}
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
+Use label: "claude-code-generated-issue"
 6. FIRST DO NO HARM. Your mandate is to SAFELY see IF the PR can be merged.
 7. E2E-DEPLOY-REMEDIATE-WORKLOG = E2E-DEPLOY-REMEDIATE-WORKLOG-${1 : latest}-{date-time}.md
 8. E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE = Update E2E-DEPLOY-REMEDIATE-WORKLOG.
@@ -23,17 +24,16 @@ Context:
 that improve SSOT coverage while keeping system state.
 
 
-
 PROCESS INSTRUCTIONS START:
 
 0) Check recent backend service revisions.
 If it hasn't been deployed in last few minutes do a fresh deploy with scripts\deploy_to_gcp.py
 WAIT for service revision success.
 
-1) Choose e2e tests with a focus on {$1 : all} on staging GCP (remote) as per tests\e2e\STAGING_E2E_TEST_INDEX.md
-Read recent logs in e2e/test_results/ for tests with ongoing issues or recently passed tests to do last.
-Save the choice of tests a fresh LOG = e2e testing log. in e2e/test_results/ folder (or create it)
-Literally output the named of the LOG.
+1) 
+1.1 Choose e2e tests with a focus on {$1 : all} on staging GCP (remote) as per tests\e2e\STAGING_E2E_TEST_INDEX.md
+1.2 Read recent git issues and logs in e2e/test_results/ for tests with ongoing issues or recently passed tests to do last.
+Save the choice of tests a fresh E2E-DEPLOY-REMEDIATE-WORKLOG in e2e/test_results/ folder (or create it)
 
 1.1) GITHUB ISSUE INTEGRATION
 Update existing issue or create new GITHUB ISSUE 
