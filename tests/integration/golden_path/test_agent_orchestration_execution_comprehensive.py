@@ -35,7 +35,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from test_framework.ssot.websocket import WebSocketTestUtility
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.real_services_test_fixtures import (
     real_services_fixture,
     real_redis_fixture
@@ -98,7 +98,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         super().setup_method(method)
         self.mock_factory = SSotMockFactory()
         self.websocket_utility = WebSocketTestUtility()
-        self.db_utility = DatabaseTestUtility()
+        self.db_utility = DatabaseTestUtilities()
         
         # Test user context for all tests
         self.test_user_id = str(uuid.uuid4())
