@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-11 09:42:56
+**Generated:** 2025-09-11 09:54:07
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 2 (40.0%)
 - **Failed:** 3 (60.0%)
 - **Skipped:** 0
-- **Duration:** 0.39 seconds
+- **Duration:** 0.27 seconds
 - **Pass Rate:** 40.0%
 
 ## Test Results by Priority
@@ -19,17 +19,17 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_enterprise_financial_analysis_timeout_on_staging | PASS passed | 0.128s | test_enterprise_streaming_timeouts.py |
-| test_websocket_streaming_coordination_timeout_staging | FAIL failed | 0.007s | test_enterprise_streaming_timeouts.py |
+| test_enterprise_financial_analysis_timeout_on_staging | PASS passed | 0.023s | test_enterprise_streaming_timeouts.py |
+| test_websocket_streaming_coordination_timeout_staging | FAIL failed | 0.006s | test_enterprise_streaming_timeouts.py |
 | test_enterprise_multi_phase_analytical_workflow_staging | FAIL failed | 0.006s | test_enterprise_streaming_timeouts.py |
-| test_concurrent_enterprise_workflows_timeout_isolation_staging | FAIL failed | 0.008s | test_enterprise_streaming_timeouts.py |
+| test_concurrent_enterprise_workflows_timeout_isolation_staging | FAIL failed | 0.007s | test_enterprise_streaming_timeouts.py |
 | test_staging_environment_timeout_configuration_validation | PASS passed | 0.000s | test_enterprise_streaming_timeouts.py |
 
 ## Failed Tests Details
 
 ### FAILED: test_websocket_streaming_coordination_timeout_staging
 - **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_enterprise_streaming_timeouts.py
-- **Duration:** 0.007s
+- **Duration:** 0.006s
 - **Error:** tests/e2e/staging/test_enterprise_streaming_timeouts.py:276: in test_websocket_streaming_coordination_timeout_staging
     assert connection_established, "Failed to establish WebSocket connection to staging"
 E   AssertionError: Failed to establish WebSocket connection to staging
@@ -49,7 +49,7 @@ E   assert False...
 
 ### FAILED: test_concurrent_enterprise_workflows_timeout_isolation_staging
 - **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_enterprise_streaming_timeouts.py
-- **Duration:** 0.008s
+- **Duration:** 0.007s
 - **Error:** tests/e2e/staging/test_enterprise_streaming_timeouts.py:467: in test_concurrent_enterprise_workflows_timeout_isolation_staging
     assert "financial_dashboard" in successful_scenarios, (
 E   AssertionError: Quick enterprise scenario should succeed within timeout limits
@@ -65,7 +65,7 @@ test_enterprise_streaming_timeouts.py::test_concurrent_enterprise_workflows_time
 test_enterprise_streaming_timeouts.py::test_staging_environment_timeout_configuration_validation PASSED
 
 ==================================================
-2 passed, 3 failed in 0.39s
+2 passed, 3 failed in 0.27s
 ```
 
 ## Test Coverage Matrix
