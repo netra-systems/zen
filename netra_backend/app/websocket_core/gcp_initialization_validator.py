@@ -373,7 +373,7 @@ class GCPWebSocketInitializationValidator:
             
             # GOLDEN PATH PROGRESSIVE VALIDATION
             if hasattr(redis_manager, 'is_connected'):
-                is_connected = redis_manager.is_connected()
+                is_connected = redis_manager.is_connected
                 
                 if is_connected:
                     # IDEAL CASE: Redis fully operational
