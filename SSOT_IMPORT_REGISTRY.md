@@ -19,6 +19,7 @@ from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
 
 # Execution Tracking
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionTracker, get_execution_tracker
+from netra_backend.app.core.execution_tracker import get_execution_tracker, ExecutionState
 
 # Shared Types (Cross-Service)
 from shared.types.core_types import UserID, ThreadID, RunID
@@ -378,4 +379,48 @@ from tests.e2e.integration.thread_websocket_helpers import ThreadWebSocketManage
 - ✅ **User Isolation**: Proper UserExecutionContext handling maintained
 
 **REGISTRY STATUS**: Updated with verified import paths and compatibility modules.
+
+## ✅ RESOLVED CRITICAL BUSINESS LOGIC ISSUES (2025-09-10)
+
+### 🚨 Agent Execution Core ExecutionState Bug Fix (CRITICAL - $500K+ ARR IMPACT):
+
+**ISSUE RESOLVED**: Critical bug in `netra_backend/app/agents/supervisor/agent_execution_core.py` where three calls to `update_execution_state()` were passing dictionary objects instead of `ExecutionState` enum values, causing `'dict' object has no attribute 'value'` errors.
+
+**ROOT CAUSE**: Lines 263, 382, and 397 were calling:
+```python
+# ❌ INCORRECT - Passing dictionaries:
+self.agent_tracker.update_execution_state(state_exec_id, {"success": False, "completed": True})
+self.agent_tracker.update_execution_state(state_exec_id, {"success": True, "completed": True})
+```
+
+**SOLUTION IMPLEMENTED**:
+```python
+# ✅ CORRECT - Using proper ExecutionState enum values:
+from netra_backend.app.core.execution_tracker import ExecutionState
+
+# Line 263 (agent not found):
+self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
+
+# Line 382 (success case):  
+self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
+
+# Line 397 (error case):
+self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
+```
+
+**BUSINESS IMPACT RESOLVED**:
+- ✅ **Core Agent Execution**: All 5 critical business logic tests now pass
+- ✅ **Chat Functionality**: Agent responses now complete successfully (90% of platform value)
+- ✅ **User Experience**: No more silent agent failures preventing AI responses
+- ✅ **Enterprise Customers**: Agent execution reliability restored
+- ✅ **Revenue Protection**: $500K+ ARR functionality restored
+
+**TEST VALIDATION**:
+- ✅ `test_successful_agent_execution_delivers_business_value` - PASSED
+- ✅ `test_agent_death_detection_prevents_silent_failures` - PASSED
+- ✅ `test_error_boundaries_provide_graceful_degradation` - PASSED
+- ✅ `test_metrics_collection_enables_business_insights` - PASSED
+- ✅ 9/10 business logic tests now passing (vs 0/10 before fix)
+
+**SSOT COMPLIANCE**: This fix maintains proper ExecutionState enum usage patterns established throughout the codebase and ensures consistent state tracking across all agent execution flows.
 

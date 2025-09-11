@@ -288,20 +288,20 @@ class TestGCPRedisConnectivityGoldenPath:
     @pytest.mark.critical
     async def test_golden_path_chat_functionality_requires_redis(
         self, 
-        e2e_auth_helper
+        e2e_auth_helper,
+        real_redis_client
     ):
         """
         TEST: Golden path chat functionality requires Redis connectivity.
         
-        CRITICAL: This test validates that the core business value (AI chat)
-        completely breaks when Redis infrastructure is unavailable.
+        REAL TEST: This test validates that chat functionality depends on Redis.
+        Test FAILS when Redis is broken and chat cannot work.
         
-        Expected Behavior When Redis Unavailable:
-        - Chat API endpoints should fail or return errors
-        - WebSocket connections for real-time chat should be rejected
-        - Agent execution should fail without Redis state management
-        
-        Business Impact: 90% of business value (AI chat) is unavailable
+        Business Impact: 90% of business value (AI chat) depends on Redis for:
+        - Thread state management
+        - Message persistence and routing
+        - Agent execution context
+        - Real-time communication coordination
         """
         logger.info("💬 Testing golden path chat functionality Redis dependency")
         
@@ -315,15 +315,52 @@ class TestGCPRedisConnectivityGoldenPath:
         logger.info(f"Testing chat API with user: {user_id}")
         logger.info(f"Backend URL: {config.backend_url}")
         
-        # Test chat API endpoint that requires Redis
+        # Test 1: Validate Redis operations that chat functionality requires
+        try:
+            # Test thread state management in Redis
+            thread_id = f"test_thread_{user_id}_{int(time.time())}"
+            thread_state_key = f"thread_state:{thread_id}"
+            thread_state = json.dumps({
+                "thread_id": thread_id,
+                "user_id": user_id,
+                "title": "E2E Redis Chat Test",
+                "status": "active",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            })
+            
+            # Chat REQUIRES Redis for thread state management
+            await real_redis_client.set(thread_state_key, thread_state, ex=3600)
+            retrieved_state = await real_redis_client.get(thread_state_key)
+            assert retrieved_state == thread_state, f"Thread state corruption in Redis: {retrieved_state}"
+            
+            # Test message routing keys that chat uses
+            message_routing_key = f"chat_routing:{user_id}"
+            routing_data = json.dumps({"active_thread": thread_id, "websocket_session": "active"})
+            
+            await real_redis_client.set(message_routing_key, routing_data, ex=1800)
+            retrieved_routing = await real_redis_client.get(message_routing_key)
+            assert retrieved_routing == routing_data, f"Message routing corruption in Redis: {retrieved_routing}"
+            
+            # Cleanup test data
+            await real_redis_client.delete(thread_state_key)
+            await real_redis_client.delete(message_routing_key)
+            
+            logger.info("✅ Redis operations for chat functionality successful")
+            
+        except Exception as e:
+            logger.error(f"❌ REDIS CHAT OPERATIONS FAILURE: {e}")
+            # Test FAILS when Redis operations required by chat are broken
+            raise AssertionError(f"Chat Redis operations test FAILED - chat functionality unavailable: {e}")
+        
+        # Test 2: Chat API endpoints that depend on Redis
         headers = e2e_auth_helper.get_auth_headers(token)
         
         async with aiohttp.ClientSession() as session:
-            # Test thread creation (may require Redis for state management)
+            # Test thread creation API (requires Redis for state management)
             thread_create_url = f"{config.backend_url}/api/v1/threads"
             thread_data = {
-                "title": "E2E Redis Connectivity Test Thread",
-                "description": "Testing chat functionality with Redis dependency"
+                "title": "E2E Redis Chat Functionality Test",
+                "description": "Testing chat API with Redis dependency validation"
             }
             
             try:
@@ -333,60 +370,47 @@ class TestGCPRedisConnectivityGoldenPath:
                     headers=headers,
                     timeout=10.0
                 ) as resp:
-                    if resp.status == 200:
-                        thread_result = await resp.json()
-                        thread_id = thread_result.get("thread_id")
-                        
-                        logger.info(f"✅ Thread created successfully: {thread_id}")
-                        logger.info("   Redis connectivity appears to be working for chat API")
-                        
-                        # Test message sending (definitely requires Redis for real-time features)
-                        if thread_id:
-                            message_url = f"{config.backend_url}/api/v1/threads/{thread_id}/messages"
-                            message_data = {
-                                "content": "Test message to validate Redis connectivity",
-                                "message_type": "user"
-                            }
-                            
-                            async with session.post(
-                                message_url,
-                                json=message_data,
-                                headers=headers,
-                                timeout=10.0
-                            ) as msg_resp:
-                                if msg_resp.status == 200:
-                                    logger.info("✅ Message sent successfully - Redis supporting chat functionality")
-                                    assert True, "Chat functionality working - Redis infrastructure operational"
-                                else:
-                                    error_text = await msg_resp.text()
-                                    logger.error(f"⚠️  Message sending failed: {msg_resp.status} - {error_text}")
-                                    assert False, f"Message sending failed despite thread creation: {error_text}"
-                    
-                    elif resp.status in [500, 503, 504]:
-                        # Expected failure when Redis is unavailable
+                    if resp.status != 200:
                         error_text = await resp.text()
-                        logger.error(f"✅ EXPECTED FAILURE: Chat API unavailable - {resp.status}")
-                        logger.error(f"   Error: {error_text}")
-                        logger.error("   This confirms Redis dependency for chat functionality")
-                        
-                        assert True, (
-                            f"Chat API correctly fails when Redis unavailable: {resp.status} - {error_text}"
-                        )
+                        logger.error(f"❌ CHAT API FAILURE: Thread creation failed: {resp.status} - {error_text}")
+                        # Test FAILS when chat API cannot create threads (likely Redis unavailable)
+                        raise AssertionError(f"Chat API thread creation FAILED - Redis dependency not met: {resp.status} - {error_text}")
                     
-                    else:
-                        # Unexpected response
-                        error_text = await resp.text()
-                        logger.warning(f"⚠️  Unexpected response: {resp.status} - {error_text}")
-                        assert False, f"Unexpected chat API response: {resp.status} - {error_text}"
+                    thread_result = await resp.json()
+                    thread_id = thread_result.get("thread_id")
+                    
+                    assert thread_id, f"Thread creation returned no thread_id: {thread_result}"
+                    logger.info(f"✅ Thread created successfully: {thread_id}")
+                    
+                    # Test message sending (requires Redis for message routing)
+                    message_url = f"{config.backend_url}/api/v1/threads/{thread_id}/messages"
+                    message_data = {
+                        "content": "Test message requiring Redis for state management and routing",
+                        "message_type": "user"
+                    }
+                    
+                    async with session.post(
+                        message_url,
+                        json=message_data,
+                        headers=headers,
+                        timeout=10.0
+                    ) as msg_resp:
+                        if msg_resp.status != 200:
+                            error_text = await msg_resp.text()
+                            logger.error(f"❌ CHAT MESSAGE FAILURE: Message sending failed: {msg_resp.status} - {error_text}")
+                            # Test FAILS when message sending fails (Redis required for routing)
+                            raise AssertionError(f"Chat message sending FAILED - Redis routing unavailable: {msg_resp.status} - {error_text}")
+                        
+                        message_result = await msg_resp.json()
+                        logger.info(f"✅ Message sent successfully: {message_result}")
                         
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                # Network-level failure - may indicate Redis infrastructure issue
-                logger.error(f"✅ EXPECTED FAILURE: Chat API connection failed - {type(e).__name__}: {e}")
-                logger.error("   This may indicate Redis infrastructure connectivity issue")
-                
-                assert True, (
-                    f"Chat API connection failure indicates Redis infrastructure issue: {e}"
-                )
+                logger.error(f"❌ CHAT API CONNECTION FAILURE: {type(e).__name__}: {e}")
+                # Test FAILS when chat API is unreachable (possibly due to Redis dependency failure)
+                raise AssertionError(f"Chat API connection test FAILED - Redis infrastructure may be unavailable: {e}")
+        
+        # Test passes ONLY when both Redis operations AND chat API functionality work
+        logger.info("✅ Golden path chat functionality with Redis dependency validated")
 
     @pytest.mark.e2e
     @pytest.mark.infrastructure
