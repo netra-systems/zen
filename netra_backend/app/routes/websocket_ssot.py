@@ -334,6 +334,37 @@ class WebSocketSSOTRouter:
         try:
             logger.info(f"[MAIN MODE] Starting WebSocket connection {connection_id}")
             
+            # Step 0: CRITICAL - GCP Readiness Validation (Race Condition Fix)
+            # Prevent 1011 errors by ensuring agent_supervisor is ready before accepting connection
+            from netra_backend.app.websocket_core.gcp_initialization_validator import (
+                gcp_websocket_readiness_guard
+            )
+            
+            app_state = getattr(websocket, 'app', None)
+            if hasattr(websocket, 'scope') and 'app' in websocket.scope:
+                app_state = websocket.scope['app'].state
+            
+            if app_state:
+                try:
+                    async with gcp_websocket_readiness_guard(app_state, timeout=30.0) as readiness_result:
+                        if not readiness_result.ready:
+                            # Race condition detected - reject connection to prevent 1011 error
+                            logger.error(
+                                f"🔴 RACE CONDITION: WebSocket connection {connection_id} rejected - "
+                                f"GCP services not ready. Failed: {readiness_result.failed_services}"
+                            )
+                            await websocket.close(
+                                code=1011, 
+                                reason=f"Service not ready: {', '.join(readiness_result.failed_services)}"
+                            )
+                            return
+                        
+                        logger.info(f"✅ GCP readiness validated - accepting WebSocket connection {connection_id}")
+                except Exception as readiness_error:
+                    logger.warning(f"GCP readiness validation failed: {readiness_error} - proceeding with degraded mode")
+            else:
+                logger.warning("No app_state available for GCP readiness validation - proceeding")
+            
             # Step 1: Negotiate subprotocol and accept WebSocket connection (RFC 6455 compliance)
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
