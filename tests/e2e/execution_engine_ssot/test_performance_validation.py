@@ -929,19 +929,29 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         print(f"    Total events: {total_events}")
         
         if throughput < baselines['event_throughput']:
-            performance_violations.append(f"Event throughput below baseline: {throughput:.1f} < {baselines['event_throughput']}")
+            violation = f"BUSINESS IMPACT: Event throughput below production baseline - limits concurrent user capacity: {throughput:.1f} < {baselines['event_throughput']} events/sec"
+            logger.error(violation)
+            performance_violations.append(violation)
         
-        # Cleanup
-        if hasattr(engine, 'cleanup'):
-            engine.cleanup()
+        # Cleanup real baseline test resources
+        try:
+            if hasattr(engine, 'cleanup'):
+                await engine.cleanup()
+            await baseline_websocket_manager.cleanup()
+        except Exception as e:
+            logger.error(f"Baseline test cleanup error: {e}")
+            # Don't raise cleanup errors
         
         print(f"  ✅ Baseline performance comparison completed")
         
-        # CRITICAL: Baseline performance ensures production readiness
+        # BUSINESS-CRITICAL: Baseline performance ensures production readiness and customer experience
         if performance_violations:
-            self.fail(f"Baseline performance violations: {performance_violations}")
+            logger.error(f"BUSINESS-CRITICAL: Baseline performance failures affect production readiness: {len(performance_violations)} violations")
+            for violation in performance_violations:
+                logger.error(f"  - {violation}")
+            self.fail(f"BUSINESS-CRITICAL: Baseline performance violations affect production readiness and customer experience: {performance_violations}")
         
-        print(f"  ✅ All performance baselines met")
+        print(f"  ✅ All performance baselines met - system ready for production")
 
 
 if __name__ == '__main__':
