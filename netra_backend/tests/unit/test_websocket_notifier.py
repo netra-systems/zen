@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
-class TestWebSocketNotifier.create_for_user(BaseIntegrationTest):
+class TestWebSocketNotifier(BaseIntegrationTest):
     """Test WebSocketNotifier pure business logic."""
 
     def setUp(self):
