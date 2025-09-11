@@ -153,7 +153,7 @@ class StatePersistenceService:
         """Cache state in Redis (SSOT: formerly StateCacheManager method)."""
         return await self.save_primary_state(request)
     
-    async def load_primary_state(self, run_id: str) -> Optional[Dict[str, Any]]:
+    async def load_primary_state(self, run_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Load primary state from cache or Redis (SSOT: formerly StateCacheManager method)."""
         # Try local cache first
         if run_id in self._local_cache:
