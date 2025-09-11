@@ -599,28 +599,27 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         )
         
         await bridge.notify_agent_thinking(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
-            thought="Testing bridge integration"
+            run_id=self.test_run_id,
+            agent_name="test_agent",
+            reasoning="Testing bridge integration"
         )
         
         await bridge.notify_tool_executing(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
+            agent_name="test_agent",
             tool_name="test_tool",
-            action="Testing tool integration"
+            parameters={"action": "Testing tool integration"}
         )
         
         await bridge.notify_tool_completed(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
+            agent_name="test_agent",
             tool_name="test_tool",
             result={"status": "success", "data": "test_result"}
         )
         
         await bridge.notify_agent_completed(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
             agent_name="test_agent",
             result={"completed": True, "success": True}
         )
