@@ -159,7 +159,7 @@ class TestWebSocketManagerIntegration(SSotAsyncTestCase):
         
         for profile, user_id in test_users:
             thread_id = generate_id(IDType.THREAD)
-            run_id = generate_id(IDType.RUN)
+            run_id = f"run_{uuid.uuid4().hex[:12]}"
             
             contexts[profile] = UserExecutionContext(
                 user_id=ensure_user_id(user_id),

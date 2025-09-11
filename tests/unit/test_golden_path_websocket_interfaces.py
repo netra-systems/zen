@@ -70,12 +70,12 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
         
         # Golden Path test expectation that FAILS
-        with self.assertRaises(AttributeError) as cm:
+        with pytest.raises(AttributeError) as exc_info:
             websocket_bridge.send_event.assert_called()
         
-        error_message = str(cm.exception)
-        self.assertIn("send_event", error_message)
-        self.assertIn("Mock object has no attribute", error_message)
+        error_message = str(exc_info.value)
+        assert "send_event" in error_message
+        assert "Mock object has no attribute" in error_message
         
         logger.info(f"✅ Successfully reproduced Golden Path WebSocket mock error: {error_message}")
 
