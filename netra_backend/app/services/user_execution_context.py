@@ -187,7 +187,8 @@ class UserExecutionContext:
         # Specific placeholder patterns that indicate improper initialization
         forbidden_patterns = [
             'placeholder_', 'registry_', 'temp_',
-            'example_', 'demo_', 'sample_', 'template_', 'mock_', 'fake_'
+            'example_', 'demo_', 'sample_', 'template_', 'mock_', 'fake_',
+            'default_'  # Block all default_ patterns, except specific legitimate ones below
         ]
         
         # Legitimate patterns that should be ALLOWED (not blocked)

@@ -23,6 +23,7 @@ Business Value Justification (BVJ):
 import asyncio
 import logging
 import re
+import time
 from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
@@ -49,16 +50,23 @@ class DatabaseManager:
     async def initialize(self):
         """Initialize database connections using DatabaseURLBuilder."""
         if self._initialized:
+            logger.debug("DatabaseManager already initialized, skipping")
             return
+        
+        init_start_time = time.time()
+        logger.info("🔗 Starting DatabaseManager initialization...")
         
         try:
             # Get database URL using DatabaseURLBuilder as SSOT
+            logger.debug("Constructing database URL using DatabaseURLBuilder SSOT")
             database_url = self._get_database_url()
             
             # Handle different config attribute names gracefully
             echo = getattr(self.config, 'database_echo', False)
             pool_size = getattr(self.config, 'database_pool_size', 5)
             max_overflow = getattr(self.config, 'database_max_overflow', 10)
+            
+            logger.info(f"🔧 Database configuration: echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}")
             
             # Use appropriate pool class for async engines
             engine_kwargs = {
@@ -71,22 +79,34 @@ class DatabaseManager:
             if pool_size <= 0 or "sqlite" in database_url.lower():
                 # Use NullPool for SQLite or disabled pooling
                 engine_kwargs["poolclass"] = NullPool
+                logger.info("🏊 Using NullPool for SQLite or disabled pooling")
             else:
                 # Use StaticPool for async engines - it doesn't support pool_size/max_overflow
                 engine_kwargs["poolclass"] = StaticPool
+                logger.info("🏊 Using StaticPool for async engine connection pooling")
             
+            logger.debug("Creating async database engine...")
             primary_engine = create_async_engine(
                 database_url,
                 **engine_kwargs
             )
             
+            # Test initial connection
+            logger.debug("Testing initial database connection...")
+            async with primary_engine.begin() as conn:
+                await conn.execute(text("SELECT 1"))
+            
             self._engines['primary'] = primary_engine
             self._initialized = True
             
-            logger.info("DatabaseManager initialized successfully")
+            init_duration = time.time() - init_start_time
+            logger.info(f"✅ DatabaseManager initialized successfully in {init_duration:.3f}s")
             
         except Exception as e:
-            logger.error(f"Failed to initialize DatabaseManager: {e}")
+            init_duration = time.time() - init_start_time
+            logger.critical(f"💥 CRITICAL: DatabaseManager initialization failed after {init_duration:.3f}s: {e}")
+            logger.error(f"Database connection failure details: {type(e).__name__}: {str(e)}")
+            logger.error(f"This will prevent all database operations including user data persistence")
             raise
     
     def get_engine(self, name: str = 'primary') -> AsyncEngine:
@@ -125,80 +145,153 @@ class DatabaseManager:
         return self._engines[name]
     
     @asynccontextmanager
-    async def get_session(self, engine_name: str = 'primary'):
-        """Get async database session with automatic cleanup and initialization safety.
+    async def get_session(self, engine_name: str = 'primary', user_id: Optional[str] = None, operation_type: str = "unknown"):
+        """Get async database session with automatic cleanup and comprehensive logging.
         
         CRITICAL FIX: Auto-initializes if needed to prevent "not initialized" errors.
+        Enhanced with detailed transaction logging for Golden Path debugging.
+        
+        Args:
+            engine_name: Name of the engine to use
+            user_id: User ID for session tracking (Golden Path context)
+            operation_type: Type of operation for logging context
         """
+        session_start_time = time.time()
+        session_id = f"sess_{int(session_start_time * 1000)}_{hash(user_id or 'system') % 10000}"
+        
+        logger.debug(f"🔄 Starting database session {session_id} for {operation_type} (user: {user_id or 'system'})")
+        
         # CRITICAL FIX: Enhanced initialization safety
         if not self._initialized:
-            logger.info("Auto-initializing DatabaseManager for session access")
+            logger.info(f"🔧 Auto-initializing DatabaseManager for session access (operation: {operation_type})")
             await self.initialize()
         
         engine = self.get_engine(engine_name)
         async with AsyncSession(engine) as session:
             original_exception = None
+            transaction_start_time = time.time()
+            logger.debug(f"📝 Transaction started for session {session_id}")
+            
             try:
                 yield session
+                
+                # Log successful commit
+                commit_start_time = time.time()
                 await session.commit()
+                commit_duration = time.time() - commit_start_time
+                session_duration = time.time() - session_start_time
+                
+                logger.info(f"✅ Session {session_id} committed successfully - Operation: {operation_type}, "
+                           f"User: {user_id or 'system'}, Duration: {session_duration:.3f}s, Commit: {commit_duration:.3f}s")
+                
             except Exception as e:
                 original_exception = e
+                rollback_start_time = time.time()
+                
+                logger.critical(f"💥 TRANSACTION FAILURE in session {session_id}")
+                logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, Error: {type(e).__name__}: {str(e)}")
+                
                 try:
                     await session.rollback()
+                    rollback_duration = time.time() - rollback_start_time
+                    logger.warning(f"🔄 Rollback completed for session {session_id} in {rollback_duration:.3f}s")
                 except Exception as rollback_error:
-                    logger.error(f"Rollback failed: {rollback_error}")
+                    rollback_duration = time.time() - rollback_start_time
+                    logger.critical(f"💥 ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
+                    logger.critical(f"DATABASE INTEGRITY AT RISK - Manual intervention may be required")
                     # Continue with original exception
-                logger.error(f"Database session error: {e}")
+                
+                session_duration = time.time() - session_start_time
+                logger.error(f"❌ Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
                 raise original_exception
+                
             finally:
+                close_start_time = time.time()
                 try:
                     await session.close()
+                    close_duration = time.time() - close_start_time
+                    logger.debug(f"🔒 Session {session_id} closed in {close_duration:.3f}s")
                 except Exception as close_error:
-                    logger.error(f"Session close failed: {close_error}")
+                    close_duration = time.time() - close_start_time
+                    logger.error(f"⚠️ Session close failed for {session_id} after {close_duration:.3f}s: {close_error}")
                     # Don't raise close errors - they shouldn't prevent completion
     
     async def health_check(self, engine_name: str = 'primary') -> Dict[str, Any]:
-        """Perform health check on database connection with initialization safety.
+        """Perform health check on database connection with comprehensive logging.
         
         CRITICAL FIX: Ensures database manager is initialized before health check.
+        Enhanced with detailed health monitoring for Golden Path operations.
         """
+        health_check_start = time.time()
+        logger.debug(f"🏥 Starting database health check for engine: {engine_name}")
+        
         try:
             # CRITICAL FIX: Ensure initialization before health check
             if not self._initialized:
-                logger.info("Initializing DatabaseManager for health check")
+                logger.info(f"🔧 Initializing DatabaseManager for health check (engine: {engine_name})")
                 await self.initialize()
             
             engine = self.get_engine(engine_name)
             
+            # Test connection with timeout
+            query_start = time.time()
             async with AsyncSession(engine) as session:
-                result = await session.execute(text("SELECT 1"))
-                result.fetchone()  # fetchone() is not awaitable
+                result = await session.execute(text("SELECT 1 as health_check"))
+                health_result = result.fetchone()  # fetchone() is not awaitable
+            
+            query_duration = time.time() - query_start
+            total_duration = time.time() - health_check_start
+            
+            logger.info(f"✅ Database health check PASSED for {engine_name} - "
+                       f"Query: {query_duration:.3f}s, Total: {total_duration:.3f}s")
             
             return {
                 "status": "healthy",
                 "engine": engine_name,
-                "connection": "ok"
+                "connection": "ok",
+                "query_duration_ms": round(query_duration * 1000, 2),
+                "total_duration_ms": round(total_duration * 1000, 2),
+                "timestamp": time.time()
             }
             
         except Exception as e:
-            logger.error(f"Database health check failed for {engine_name}: {e}")
+            total_duration = time.time() - health_check_start
+            logger.critical(f"💥 Database health check FAILED for {engine_name} after {total_duration:.3f}s")
+            logger.error(f"Health check error details: {type(e).__name__}: {str(e)}")
+            logger.error(f"This indicates database connectivity issues that will affect user operations")
+            
             return {
                 "status": "unhealthy",
                 "engine": engine_name,
-                "error": str(e)
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "duration_ms": round(total_duration * 1000, 2),
+                "timestamp": time.time()
             }
     
     async def close_all(self):
-        """Close all database engines."""
+        """Close all database engines with comprehensive logging."""
+        if not self._engines:
+            logger.debug("No database engines to close")
+            return
+            
+        logger.info(f"🔒 Closing {len(self._engines)} database engines...")
+        
         for name, engine in self._engines.items():
+            close_start = time.time()
             try:
                 await engine.dispose()
-                logger.info(f"Closed database engine: {name}")
+                close_duration = time.time() - close_start
+                logger.info(f"✅ Closed database engine '{name}' in {close_duration:.3f}s")
             except Exception as e:
-                logger.error(f"Error closing engine {name}: {e}")
+                close_duration = time.time() - close_start
+                logger.error(f"❌ Error closing engine '{name}' after {close_duration:.3f}s: {e}")
+                logger.warning(f"Engine '{name}' may have active connections that were forcibly closed")
         
+        engines_count = len(self._engines)
         self._engines.clear()
         self._initialized = False
+        logger.info(f"🔒 DatabaseManager shutdown complete - {engines_count} engines closed")
     
     def _get_database_url(self) -> str:
         """Get database URL using DatabaseURLBuilder as SSOT.
@@ -258,17 +351,20 @@ class DatabaseManager:
     
     @classmethod
     @asynccontextmanager
-    async def get_async_session(cls, name: str = 'primary'):
+    async def get_async_session(cls, name: str = 'primary', user_id: Optional[str] = None, operation_type: str = "legacy_access"):
         """
         Class method for backward compatibility with code expecting DatabaseManager.get_async_session().
         
         CRITICAL FIX: Enhanced with auto-initialization safety for staging environment.
+        Enhanced with user context tracking for Golden Path operations.
         
         This method provides the expected static/class method interface while using
         the instance method internally for proper session management.
         
         Args:
             name: Engine name (default: 'primary')
+            user_id: User ID for session tracking (Golden Path context)
+            operation_type: Type of operation for logging context
             
         Yields:
             AsyncSession: Database session with automatic cleanup
@@ -278,13 +374,15 @@ class DatabaseManager:
             - netra_backend.app.database.get_db() for dependency injection
             - instance.get_session() for direct usage
         """
+        logger.debug(f"📞 Legacy database session access: {operation_type} (user: {user_id or 'system'})")
+        
         manager = get_database_manager()
         # CRITICAL FIX: Ensure initialization - manager should auto-initialize, but double-check
         if not manager._initialized:
-            logger.info("Ensuring DatabaseManager initialization for class method access")
+            logger.info(f"🔧 Ensuring DatabaseManager initialization for class method access ({operation_type})")
             await manager.initialize()
         
-        async with manager.get_session(name) as session:
+        async with manager.get_session(name, user_id=user_id, operation_type=operation_type) as session:
             yield session
     
     @staticmethod
