@@ -36,7 +36,7 @@ from typing import Dict, Any
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 
 # SSOT imports using absolute paths
-from netra_backend.app.services.state_cache_manager import StateCacheManager, state_cache_manager
+from netra_backend.app.services.state_persistence import StateCacheManager, state_cache_manager
 from netra_backend.app.redis_manager import redis_manager
 
 
