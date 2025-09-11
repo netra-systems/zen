@@ -352,16 +352,36 @@ class RequestScopedExecutionEngine:
             ValueError: If context contains invalid values
         """
         if not context.user_id or not context.user_id.strip():
+            logger.error(
+                f"❌ VALIDATION FAILURE: Invalid execution context - user_id must be non-empty. "
+                f"Got: {context.user_id!r}, Agent: {getattr(context, 'agent_name', 'unknown')}"
+            )
             raise ValueError("Invalid execution context: user_id must be non-empty")
         
         if not context.run_id or not context.run_id.strip():
+            logger.error(
+                f"❌ VALIDATION FAILURE: Invalid execution context - run_id must be non-empty. "
+                f"Got: {context.run_id!r}, User: {context.user_id[:8]}..., "
+                f"Agent: {getattr(context, 'agent_name', 'unknown')}"
+            )
             raise ValueError("Invalid execution context: run_id must be non-empty")
         
         if context.run_id == 'registry':
+            logger.error(
+                f"❌ VALIDATION FAILURE: Invalid execution context - run_id cannot be 'registry' placeholder. "
+                f"User: {context.user_id[:8]}..., Agent: {getattr(context, 'agent_name', 'unknown')}, "
+                f"This indicates improper context initialization."
+            )
             raise ValueError("Invalid execution context: run_id cannot be 'registry' placeholder")
         
         # Validate consistency with user context
         if context.user_id != self.user_context.user_id:
+            logger.error(
+                f"❌ VALIDATION FAILURE: Context user_id mismatch during validation. "
+                f"Expected: {self.user_context.user_id}, Got: {context.user_id}, "
+                f"Agent: {getattr(context, 'agent_name', 'unknown')}, "
+                f"This is a critical security violation - user isolation compromised."
+            )
             raise ValueError(
                 f"Context user_id mismatch: expected {self.user_context.user_id}, got {context.user_id}"
             )
