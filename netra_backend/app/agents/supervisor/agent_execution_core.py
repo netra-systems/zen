@@ -51,6 +51,27 @@ from netra_backend.app.core.agent_execution_tracker import (
 logger = central_logger.get_logger(__name__)
 
 
+def get_agent_state_tracker():
+    """Compatibility function for legacy imports.
+    
+    DEPRECATED: This function is provided for backward compatibility only.
+    Use get_execution_tracker() directly from netra_backend.app.core.execution_tracker.
+    
+    Returns:
+        ExecutionTracker: The global execution tracker instance
+    """
+    import warnings
+    warnings.warn(
+        "get_agent_state_tracker() is deprecated. Use get_execution_tracker() directly.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Return the same execution tracker instance
+    from netra_backend.app.core.execution_tracker import get_execution_tracker
+    return get_execution_tracker()
+
+
 class AgentExecutionCore:
     """Enhanced agent execution with death detection and recovery.
     
@@ -316,8 +337,14 @@ class AgentExecutionCore:
                     )
                     
                 except TimeoutError as e:
-                    # Agent execution timed out
-                    logger.error(f"⏰ Agent {context.agent_name} timed out: {e}")
+                    # Agent execution timed out - provide detailed context
+                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
+                    logger.error(
+                        f"⏰ TIMEOUT: Agent '{context.agent_name}' exceeded timeout limit of {timeout_duration}s. "
+                        f"User: {user_execution_context.user_id}, Thread: {user_execution_context.thread_id}, "
+                        f"Run ID: {context.run_id}. This may indicate the agent is stuck or processing "
+                        f"a complex request. Original error: {e}"
+                    )
                     
                     # Transition to timeout phase
                     await self.agent_tracker.transition_state(
@@ -327,10 +354,15 @@ class AgentExecutionCore:
                         websocket_manager=self.websocket_bridge
                     )
                     
+                    # Create detailed timeout result with enhanced context
+                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
                     result = AgentExecutionResult(
                         success=False,
                         agent_name=context.agent_name,
-                        error=str(e),
+                        error=f"Agent '{context.agent_name}' timed out after {timeout_duration}s. "
+                              f"Execution exceeded maximum allowed time, possibly due to complex processing "
+                              f"or external resource delays. User: {user_execution_context.user_id}, "
+                              f"Run ID: {context.run_id}.",
                         duration=0.0
                     )
             
@@ -483,11 +515,19 @@ class AgentExecutionCore:
                     
         except asyncio.TimeoutError:
             duration = time.time() - start_time
-            logger.error(f"Agent {context.agent_name} timed out after {timeout_seconds}s")
+            logger.error(
+                f"⏰ EXECUTION TIMEOUT: Agent '{context.agent_name}' exceeded execution timeout "
+                f"of {timeout_seconds}s (duration: {duration:.2f}s). User: {user_execution_context.user_id}, "
+                f"Thread: {user_execution_context.thread_id}, Run ID: {context.run_id}. "
+                f"This indicates the agent may be stuck in processing or waiting for external resources."
+            )
             return AgentExecutionResult(
                 success=False,
                 agent_name=context.agent_name,
-                error=f"Agent execution timeout after {timeout_seconds}s",
+                error=f"Agent '{context.agent_name}' execution timeout after {timeout_seconds}s. "
+                      f"The agent exceeded the maximum allowed execution time, possibly due to "
+                      f"complex processing or external resource delays. User: {user_execution_context.user_id}, "
+                      f"Run ID: {context.run_id}.",
                 duration=duration,
                 metrics=self._calculate_performance_metrics(start_time, heartbeat)
             )
