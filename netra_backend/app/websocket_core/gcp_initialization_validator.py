@@ -709,8 +709,8 @@ class GCPWebSocketInitializationValidator:
             
             # CRITICAL FIX: Wait for startup to reach services phase before validation
             # This prevents race condition where validation runs before Phase 5 completion
-            # PERFORMANCE OPTIMIZATION: Reduced from 3.0s max to 1.5s max for faster validation
-            wait_timeout = min(timeout_seconds * 0.3, 1.5)  # Use 30% of total timeout, max 1.5s for faster connections
+            # PERFORMANCE OPTIMIZATION: Use environment-optimized timeout for startup wait
+            wait_timeout = self._get_optimized_timeout(optimized_timeout * 0.3)  # Use 30% of optimized timeout
             startup_ready = await self._wait_for_startup_phase_completion(
                 minimum_phase='services', 
                 timeout_seconds=wait_timeout
