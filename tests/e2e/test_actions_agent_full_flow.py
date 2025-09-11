@@ -422,7 +422,7 @@ class TestActionsAgentCompleteUserFlow:
             ws_client = RealWebSocketClient()
 
             websocket_connected = await ws_client.connect(session.thread_id, session.user_id)
-            assert websocket_connected, \\
+            assert websocket_connected, \
                 "Failed to establish real WebSocket connection - WebSocket service may be down"
 
             session.websocket_connection = ws_client
@@ -556,16 +556,16 @@ class TestActionsAgentCompleteUserFlow:
             overall_ux_score = metrics.calculate_overall_score()
 
             # CRITICAL VALIDATIONS
-            assert total_events > 0, \\
+            assert total_events > 0, \
                 f"No WebSocket events received - agent pipeline may be broken. Expected at least agent_started event."
 
-            assert metrics.websocket_responsiveness_score > 0.3, \\
+            assert metrics.websocket_responsiveness_score > 0.3, \
                 f"WebSocket responsiveness too low: {metrics.websocket_responsiveness_score:.2f} (min 0.3). Real-time feedback is failing."
 
-            assert metrics.request_to_response_time < 150.0, \\
+            assert metrics.request_to_response_time < 150.0, \
                 f"Request to response time too slow: {metrics.request_to_response_time:.2f}s (max 150s). Performance is unacceptable."
 
-            assert overall_ux_score >= 0.6, \\
+            assert overall_ux_score >= 0.6, \
                 f"Overall user experience score too low: {overall_ux_score:.2f} (min 0.6). System is not delivering business value."
 
             # SUCCESS REPORT
@@ -661,10 +661,10 @@ class TestActionsAgentCompleteUserFlow:
         success_rate = len(successful_sessions) / concurrent_users
 
         # Validate concurrent performance
-        assert success_rate >= 0.67, \\
+        assert success_rate >= 0.67, \
             f"Concurrent session success rate too low: {success_rate:.2f} (min 0.67). System cannot handle multiple users."
 
-        assert total_time < 90.0, \\
+        assert total_time < 90.0, \
             f"Concurrent execution too slow: {total_time:.2f}s (max 90s). Performance degrades under load."
 
         # Log results
@@ -746,7 +746,7 @@ class TestActionsAgentCompleteUserFlow:
             # Overall error recovery assessment
             avg_recovery_score = sum(recovery_scores) / len(recovery_scores)
 
-            assert avg_recovery_score >= 0.5, \\
+            assert avg_recovery_score >= 0.5, \
                 f"Error recovery score too low: {avg_recovery_score:.2f} (min 0.5). System does not handle errors gracefully."
 
             logger.info(f"✅ Error recovery test passed: {avg_recovery_score:.2f} average score")

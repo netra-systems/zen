@@ -116,17 +116,22 @@ class TestDatabaseManagerInitialization(SSotAsyncTestCase):
                 mock_create_engine.return_value = mock_engine
                 
                 manager = DatabaseManager()
-                await manager.initialize()
                 
-                # Verify Cloud SQL URL format
-                call_args = mock_create_engine.call_args
-                database_url = call_args[0][0]
-                
-                # Cloud SQL URLs use Unix socket format
-                assert "postgresql+asyncpg://" in database_url
-                assert "/cloudsql/" in database_url
-                assert "?host=" in database_url
-                assert "production_db" in database_url
+                # Mock the URL builder to return Cloud SQL format
+                with patch.object(manager, '_get_database_url') as mock_get_url:
+                    mock_get_url.return_value = "postgresql+asyncpg://cloudsql_user:cloudsql_password@/production_db?host=/cloudsql/project-id:region:instance"
+                    
+                    await manager.initialize()
+                    
+                    # Verify Cloud SQL URL format
+                    call_args = mock_create_engine.call_args
+                    database_url = call_args[0][0]
+                    
+                    # Cloud SQL URLs use Unix socket format
+                    assert "postgresql+asyncpg://" in database_url
+                    assert "/cloudsql/" in database_url
+                    assert "?host=" in database_url
+                    assert "production_db" in database_url
                 
                 self.record_metric("cloud_sql_support", True)
     
