@@ -14,7 +14,7 @@ if TYPE_CHECKING:
         AgentExecutionResult,
     )
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class SupervisorAgentRouter:

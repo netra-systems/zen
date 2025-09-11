@@ -169,7 +169,7 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
         )
         
         # Execute agent successfully
-        result = await execution_core.execute_agent_safe(context)
+        result = await execution_core.execute_agent(context)
         
         # Verify success
         self.assertTrue(result.success, "Agent execution should succeed")
@@ -250,7 +250,7 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
         )
         
         # Execute agent (should fail)
-        result = await execution_core.execute_agent_safe(context)
+        result = await execution_core.execute_agent(context)
         
         # Verify failure
         self.assertFalse(result.success, "Agent execution should fail")
