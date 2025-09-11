@@ -322,25 +322,31 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
             # Step 2: Create test user context
             logger.info("👤 Step 2: Creating test user context...")
             
-            user_id = f"test_user_{uuid.uuid4().hex[:8]}"
-            thread_id = f"test_thread_{uuid.uuid4().hex[:8]}"
-            connection_id = f"test_conn_{uuid.uuid4().hex[:8]}"
+            # Use proper UUID format for user_id (required by ensure_user_id validation)
+            user_id = str(uuid.uuid4())
+            thread_id = str(uuid.uuid4())
+            connection_id = str(uuid.uuid4())
             
-            # Step 3: Create WebSocket manager and connection
-            logger.info("🔌 Step 3: Setting up WebSocket connection...")
+            # Step 3: Create agent execution context
+            logger.info("🤖 Step 3: Setting up agent execution context...")
             
-            # Use the factory for Golden Path compatibility
-            ws_manager = create_websocket_manager(user_id=user_id)
+            user_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=str(uuid.uuid4()),
+                websocket_client_id=connection_id
+            )
+            
+            # Step 4: Create WebSocket manager and connection
+            logger.info("🔌 Step 4: Setting up WebSocket connection...")
+            
+            # Use the factory with proper user_context (not just user_id)
+            ws_manager = create_websocket_manager(user_context=user_context)
             mock_websocket = MockWebSocketConnection(self.event_validator)
             
             # Connect user to WebSocket
             await ws_manager.connect_user(user_id, mock_websocket, connection_id)
             logger.success(f"✅ WebSocket connected for user {user_id}")
-            
-            # Step 4: Create agent execution context
-            logger.info("🤖 Step 4: Setting up agent execution context...")
-            
-            user_context = UserExecutionContext(user_id=user_id)
             
             # Step 5: Send test message through chat flow
             logger.info("💬 Step 5: Sending test message through chat system...")
