@@ -120,7 +120,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_supervisor_agent_orchestration_basic_flow(self, real_services_fixture):
+    async def test_supervisor_agent_orchestration_basic_flow(self):
         """
         BVJ: All segments | Retention | Ensures basic agent orchestration works
         Test basic SupervisorAgent orchestration with sub-agent coordination.
@@ -168,7 +168,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_execution_engine_factory_user_isolation(self, real_services_fixture):
+    async def test_execution_engine_factory_user_isolation(self):
         """
         BVJ: All segments | Platform Stability | Ensures users don't interfere with each other
         Test ExecutionEngineFactory creates properly isolated user execution engines.
@@ -206,7 +206,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_sub_agent_execution_pipeline_sequencing(self, real_services_fixture):
+    async def test_sub_agent_execution_pipeline_sequencing(self):
         """
         BVJ: Early/Mid/Enterprise | Value Delivery | Ensures agents execute in correct order
         Test sub-agent pipeline execution with proper sequencing and coordination.
@@ -281,7 +281,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_tool_execution_integration(self, real_services_fixture):
+    async def test_agent_tool_execution_integration(self):
         """
         BVJ: All segments | User Experience | Ensures tools execute properly with monitoring
         Test agent integration with tool execution and monitoring.
@@ -334,7 +334,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_context_management_persistence(self, real_services_fixture):
+    async def test_agent_context_management_persistence(self):
         """
         BVJ: Mid/Enterprise | Conversation Continuity | Ensures context persists across executions
         Test agent context management and state persistence across multiple executions.
@@ -396,7 +396,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_websocket_event_integration_comprehensive(self, real_services_fixture):
+    async def test_websocket_event_integration_comprehensive(self):
         """
         BVJ: All segments | User Experience | Critical WebSocket events deliver transparency
         Test comprehensive WebSocket event integration across the agent execution pipeline.
@@ -465,7 +465,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services 
-    async def test_agent_error_handling_recovery(self, real_services_fixture):
+    async def test_agent_error_handling_recovery(self):
         """
         BVJ: All segments | System Reliability | Ensures graceful error handling
         Test agent error handling and recovery mechanisms during execution failures.
@@ -518,7 +518,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_timeout_performance_management(self, real_services_fixture):
+    async def test_agent_timeout_performance_management(self):
         """
         BVJ: All segments | Performance SLA | Ensures agents complete within time limits
         Test agent timeout and performance management for SLA compliance.
@@ -570,7 +570,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration 
     @pytest.mark.real_services
-    async def test_multi_agent_coordination_communication(self, real_services_fixture):
+    async def test_multi_agent_coordination_communication(self):
         """
         BVJ: Mid/Enterprise | Complex Workflows | Enables sophisticated agent cooperation
         Test multi-agent coordination and communication in complex workflows.
@@ -659,7 +659,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_result_compilation_aggregation(self, real_services_fixture):
+    async def test_agent_result_compilation_aggregation(self):
         """
         BVJ: All segments | Result Quality | Ensures comprehensive result aggregation
         Test agent result compilation and aggregation from multiple execution steps.
@@ -718,7 +718,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_execution_monitoring_logging(self, real_services_fixture):
+    async def test_agent_execution_monitoring_logging(self):
         """
         BVJ: Platform/Internal | Observability | Enables system monitoring and debugging
         Test agent execution monitoring and logging for observability.
@@ -799,7 +799,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_memory_management_cleanup(self, real_services_fixture):
+    async def test_agent_memory_management_cleanup(self):
         """
         BVJ: Platform/Internal | System Stability | Prevents memory leaks in production
         Test agent memory management and proper resource cleanup.
@@ -871,7 +871,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_permission_access_control(self, real_services_fixture):
+    async def test_agent_permission_access_control(self):
         """
         BVJ: Enterprise | Security | Ensures proper access control and permissions
         Test agent permission and access control for secure execution.
@@ -936,7 +936,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_load_balancing_scaling(self, real_services_fixture):
+    async def test_agent_load_balancing_scaling(self):
         """
         BVJ: Mid/Enterprise | Performance | Ensures system scales with concurrent users
         Test agent load balancing and scaling under concurrent execution.
@@ -1006,7 +1006,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_dependency_management(self, real_services_fixture):
+    async def test_agent_dependency_management(self):
         """
         BVJ: All segments | System Reliability | Ensures proper service dependency handling
         Test agent dependency management and service availability handling.
@@ -1072,7 +1072,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services  
-    async def test_agent_execution_metrics_analytics(self, real_services_fixture):
+    async def test_agent_execution_metrics_analytics(self):
         """
         BVJ: Platform/Internal | Business Intelligence | Provides execution analytics
         Test agent execution metrics and analytics collection.
@@ -1145,7 +1145,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_rollback_retry_mechanisms(self, real_services_fixture):
+    async def test_agent_rollback_retry_mechanisms(self):
         """
         BVJ: All segments | System Reliability | Ensures robust error recovery
         Test agent rollback and retry mechanisms for reliable execution.
@@ -1222,7 +1222,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_configuration_customization(self, real_services_fixture):
+    async def test_agent_configuration_customization(self):
         """
         BVJ: Mid/Enterprise | Customization | Enables tailored agent behavior
         Test agent configuration and customization capabilities.
@@ -1314,7 +1314,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_agent_integration_external_services(self, real_services_fixture):
+    async def test_agent_integration_external_services(self):
         """
         BVJ: All segments | Platform Integration | Ensures external service connectivity
         Test agent integration with external services and APIs.
