@@ -37,13 +37,13 @@ from netra_backend.app.websocket_core.unified_emitter import (
     WebSocketEmitterPool,
 )
 
-# CRITICAL SECURITY MIGRATION: Import factory pattern components
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
-    get_websocket_manager_factory,
-    create_websocket_manager
-)
+# SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
+# from netra_backend.app.websocket_core.websocket_manager_factory import (
+#     WebSocketManagerFactory,
+#     IsolatedWebSocketManager,
+#     get_websocket_manager_factory,
+#     create_websocket_manager
+# )
 
 # Backward compatibility function using factory pattern
 async def get_websocket_manager(user_context=None):
@@ -75,7 +75,7 @@ async def get_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
     
-    return await create_websocket_manager(user_context)
+    return WebSocketManager(user_context=user_context)
 
 from netra_backend.app.websocket_core.migration_adapter import (
     get_legacy_websocket_manager,
@@ -251,11 +251,11 @@ __all__ = [
     "WebSocketEmitterFactory",
     "WebSocketEmitterPool",
     
-    # CRITICAL SECURITY MIGRATION: Factory pattern exports
-    "WebSocketManagerFactory",
-    "IsolatedWebSocketManager",
-    "get_websocket_manager_factory",
-    "create_websocket_manager",
+    # SSOT COMPLIANCE: Factory pattern eliminated
+    # "WebSocketManagerFactory",
+    # "IsolatedWebSocketManager", 
+    # "get_websocket_manager_factory",
+    # "create_websocket_manager",
     "get_websocket_manager",  # Backward compatibility
     
     # Migration support

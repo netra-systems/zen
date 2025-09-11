@@ -5,7 +5,7 @@ argument-hint: "[focus area]"
 
 Your goals are to:
 1. Run E2E tests. 
-2. If needed: Remediate issues & create a PR.
+2. If needed: Remediate issues & create a PR (Pull Request).
 
 Context:
 1. You must keep going until all work is fully completed.
@@ -14,15 +14,15 @@ Context:
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
 6. FIRST DO NO HARM. Your mandate is to SAFELY see IF the PR can be merged.
-7. PR-WORKLOG = PR-WORKLOG-${1 : latest}-{date-time}.md
-8. PR-WORKLOG-UPDATE = Update PR-WORKLOG.
-9. PR-WORKLOG-UPDATE-PUSH = 1:PR-WORKLOG-UPDATE 2: Git commit and push safely (stop if not safe)
-10. UPDATE-PR-COMMENT = UPDATE a comment on the PR with the human readable noise-free updates (per @GITHUB_STYLE_GUIDE.md)
+7. E2E-DEPLOY-REMEDIATE-WORKLOG = E2E-DEPLOY-REMEDIATE-WORKLOG-${1 : latest}-{date-time}.md
+8. E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE = Update E2E-DEPLOY-REMEDIATE-WORKLOG.
+9. E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE-PUSH = 1:E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE 2: Git commit and push safely (stop if not safe)
+10. UPDATE-COMMENT = UPDATE a comment on one of (Issue, PR) with the human readable noise-free updates.
 11. -
 12. LIMIT SCOPE. Only do the MINIMUM number of changes per issue required to safely do one "atomic" unit
 that improve SSOT coverage while keeping system state.
-13. -
-14. PR = Pull Request
+
+
 
 PROCESS INSTRUCTIONS START:
 
