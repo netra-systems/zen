@@ -216,10 +216,10 @@ class UnifiedTriageAgent(BaseAgent):
             This overrides the BaseAgent.create_agent_with_context method to use
             the correct constructor signature for UnifiedTriageAgent.
         """
-        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.llm.llm_manager import create_llm_manager
         
-        # Create LLM manager (this will be injected later by the factory)
-        llm_manager = LLMManager()
+        # Create LLM manager with proper user isolation
+        llm_manager = create_llm_manager(user_context)
         
         # Create agent with correct constructor signature
         agent = cls(
