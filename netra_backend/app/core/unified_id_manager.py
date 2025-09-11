@@ -5,15 +5,15 @@ Provides centralized ID generation and management across the Netra platform.
 Ensures unique, consistent ID generation for all system components.
 """
 
-import logging
 import uuid
 import time
 import threading
 from typing import Dict, Optional, Any, Set
 from dataclasses import dataclass
 from enum import Enum
+from netra_backend.app.logging_config import central_logger
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 
 class IDType(Enum):

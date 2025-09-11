@@ -17,7 +17,6 @@ Extends the pattern from id_generation_contracts.py to provide:
 """
 
 import inspect
-import logging
 from typing import Dict, List, Set, Any, Type, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
@@ -29,8 +28,9 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory as ExecutionEngineFactory
 from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 
 class AppStateContractViolation(Exception):
