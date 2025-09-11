@@ -55,8 +55,9 @@ class TestWebSocketEventDeliveryIntegration(BaseIntegrationTest):
         )
         user_id = UserID(user_context["id"])
         
-        # Create real WebSocket manager and bridge
-        websocket_manager = await create_websocket_manager()
+        # Create real WebSocket manager and bridge with user context
+        # Note: Will be updated with proper execution context below
+        websocket_manager = await create_websocket_manager(user_id=user_id)
         bridge = AgentWebSocketBridge()
         
         # Track events delivered

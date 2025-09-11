@@ -405,6 +405,7 @@ class AgentExecuteV2Request(BaseModel):
     thread_id: Optional[str] = Field(None, description="Thread ID for conversation continuity")
     agent_type: Optional[str] = Field("supervisor", description="Agent type to execute")
     context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
+    request_id: Optional[str] = Field(None, description="Frontend request ID for tracking")
 
 
 class AgentExecuteV2Response(BaseModel):

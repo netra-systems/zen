@@ -1387,3 +1387,6 @@ async def send_system_message(websocket: WebSocket, content: str,
 
 # Legacy aliases for backward compatibility
 WebSocketHandler = BaseMessageHandler
+
+# Compatibility aliases for integration tests (Issue #308)
+WebSocketMessageHandler = BaseMessageHandler  # Primary handler compatibility alias

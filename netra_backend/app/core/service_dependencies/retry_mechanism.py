@@ -188,7 +188,24 @@ class RetryMechanism:
                 f"{operation_name} failed for {service_type.value} after "
                 f"{config.max_retries + 1} attempts. Last error: {str(last_exception)}"
             )
-            raise type(last_exception)(error_message) from last_exception
+            
+            # Safe exception construction with Python 3.11+ compatibility
+            try:
+                # Attempt dynamic construction for simple cases
+                enhanced_exception = type(last_exception)(error_message)
+            except (TypeError, ValueError) as construction_error:
+                # Fallback for complex exception constructors (UnicodeDecodeError, etc.)
+                self.logger.debug(
+                    f"Failed to construct {type(last_exception).__name__} with message: {construction_error}. "
+                    f"Using RuntimeError wrapper."
+                )
+                # Create a RuntimeError with detailed information
+                enhanced_exception = RuntimeError(
+                    f"{error_message} (Original exception: {type(last_exception).__name__}: {str(last_exception)})"
+                )
+            
+            # Preserve exception chain for debugging
+            raise enhanced_exception from last_exception
         else:
             raise Exception(f"{operation_name} failed for {service_type.value} - no error details")
     

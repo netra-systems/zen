@@ -414,7 +414,8 @@ class FactoryAdapter:
             
             # CRITICAL: Use factory method with user context for proper isolation
             # Pass the user_context to ensure complete isolation
-            bridge = await create_agent_websocket_bridge(user_context)
+            # Fix: create_agent_websocket_bridge is synchronous, not async
+            bridge = create_agent_websocket_bridge(user_context)
             
             creation_time_ms = (time.time() - start_time) * 1000
             

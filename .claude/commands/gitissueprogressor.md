@@ -15,9 +15,21 @@ SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 ALL Github output MUST follow @GITHUB_STYLE_GUIDE.md
 Stay on develop-long-lived branch as current branch.
 
+**CRITICAL BRANCH SAFETY POLICY:**
+- **NEVER change current working branch** during issue processing
+- **Current branch**: develop-long-lived (as per CLAUDE.md)
+- **All work performed on**: develop-long-lived
+- **PR target**: develop-long-lived (current working branch) - NEVER main
+- **Verification**: Check `git branch --show-current` at each major step
+
 PROCESS INSTRUCTIONS START:
 
-0) READ ISSUE : SNST: Use gh to read the ISSUE ${1 : latest open issue} in question.
+0) BRANCH SAFETY CHECK : SNST: 
+Verify current branch is develop-long-lived: `git branch --show-current`
+If not on develop-long-lived, STOP and switch: `git checkout develop-long-lived`
+Record branch state for safety monitoring throughout process.
+
+1) READ ISSUE : SNST: Use gh to read the ISSUE ${1 : latest open issue} in question.
 
 1) STATUS UPDATE : SNST : AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
 1.1) Make or UPDATE a comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md .
@@ -68,9 +80,16 @@ if it hasn't been deployed last 3 minutes.
 
 9) PR AND CLOSURE: SNST:
 9.1) Git commit remaining related work in conceptual batches. 
-9.2) Make a NEW PR (Pull Request).
+9.2) **SAFE PR CREATION**: Create PR WITHOUT changing current branch:
+    - Record current branch (should be develop-long-lived): `git branch --show-current`
+    - Create feature branch remotely: `git push origin HEAD:feature/issue-${ISSUE_NUMBER}-$(date +%s)`
+    - Create PR from feature branch to current branch: `gh pr create --base develop-long-lived --head feature/issue-${ISSUE_NUMBER}-$(date +%s) --title "Fix: Issue #${ISSUE_NUMBER}" --body "Closes #${ISSUE_NUMBER}"`
+    - VERIFY current branch unchanged: `git branch --show-current`
+    - **CRITICAL**: Never checkout different branches - work stays on develop-long-lived
+    - **PR MERGES TO**: Current working branch (develop-long-lived) - NEVER main
 9.3) Cross link the prior generated issue so it will close on PR merge.
-9.4) Do a final update for this loop  following @GITHUB_STYLE_GUIDE.md  .
+9.4) **PR TARGET VALIDATION**: Ensure PR merges back to current working branch (develop-long-lived)
+9.5) Do a final update for this loop following @GITHUB_STYLE_GUIDE.md.
 
 END PROCESS INSTRUCTIONS
 

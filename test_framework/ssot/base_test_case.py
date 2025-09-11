@@ -632,6 +632,9 @@ BaseIntegrationTest = SSotBaseTestCase  # Legacy alias for integration tests
 
 # Legacy compatibility classes removed - use SSotBaseTestCase directly
 
+# Compatibility aliases for integration tests (Issue #308)
+SSotAsyncBaseTestCase = SSotAsyncTestCase  # Alias for integration test compatibility
+
 
 # === EXPORT CONTROL ===
 

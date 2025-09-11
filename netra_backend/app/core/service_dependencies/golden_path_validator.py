@@ -4,6 +4,10 @@ Golden Path Validator - Business logic validation for critical user flows.
 Validates that service dependencies support the critical business flows
 that generate revenue, particularly the "Golden Path" user experience
 that represents the core business value of the chat functionality.
+
+ROOT CAUSE FIX: Eliminates EnvironmentType.DEVELOPMENT default that caused
+staging services to connect to localhost:8081 instead of proper staging URLs.
+Now uses environment context injection for definitive environment detection.
 """
 
 import asyncio
@@ -12,6 +16,12 @@ from typing import Any, Dict, List, Optional
 from sqlalchemy import text
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.environment_context import (
+    EnvironmentContextService,
+    get_environment_context_service,
+    EnvironmentType as ContextEnvironmentType,
+    EnvironmentContext
+)
 from .models import (
     EnvironmentType,
     GoldenPathRequirement,
@@ -41,13 +51,76 @@ class GoldenPathValidator:
     Ensures that service dependencies support the complete golden path
     user experience: authentication -> chat interaction -> real-time
     agent execution -> meaningful AI responses.
+    
+    ROOT CAUSE FIX: NO MORE ENVIRONMENT DEFAULTS! This validator now
+    requires definitive environment context and fails fast if environment
+    cannot be determined. This prevents the localhost:8081 staging failure.
     """
     
-    def __init__(self, environment: EnvironmentType = EnvironmentType.DEVELOPMENT):
-        """Initialize golden path validator."""
+    def __init__(self, environment_context_service: Optional[EnvironmentContextService] = None):
+        """
+        Initialize golden path validator with environment context injection.
+        
+        Args:
+            environment_context_service: Service providing environment context.
+                                       If None, uses global singleton.
+        
+        CRITICAL: No longer accepts environment parameter with default!
+        Environment must be detected definitively by EnvironmentContextService.
+        """
         self.logger = central_logger.get_logger(__name__)
-        self.environment = environment
+        self.environment_context_service = environment_context_service or get_environment_context_service()
         self.requirements = GOLDEN_PATH_REQUIREMENTS
+        self._environment_context: Optional[EnvironmentContext] = None
+    
+    async def _ensure_environment_context(self) -> EnvironmentContext:
+        """
+        Ensure environment context is available.
+        
+        Returns:
+            Definitive environment context
+            
+        Raises:
+            RuntimeError: If environment cannot be determined
+        """
+        if self._environment_context is None:
+            # Ensure environment context service is initialized
+            if not self.environment_context_service.is_initialized():
+                self.logger.info("Initializing environment context service for Golden Path validation")
+                await self.environment_context_service.initialize()
+            
+            # Get definitive environment context
+            self._environment_context = self.environment_context_service.get_environment_context()
+            
+            self.logger.info(
+                f"Golden Path validation will use environment: {self._environment_context.environment_type.value} "
+                f"(platform: {self._environment_context.cloud_platform.value}, "
+                f"confidence: {self._environment_context.confidence_score:.2f})"
+            )
+        
+        return self._environment_context
+    
+    def _convert_environment_type(self, context_env_type: ContextEnvironmentType) -> EnvironmentType:
+        """
+        Convert EnvironmentContextService environment type to models EnvironmentType.
+        
+        Args:
+            context_env_type: Environment type from context service
+            
+        Returns:
+            EnvironmentType for models compatibility
+        """
+        if context_env_type == ContextEnvironmentType.TESTING:
+            return EnvironmentType.TESTING
+        elif context_env_type == ContextEnvironmentType.DEVELOPMENT:
+            return EnvironmentType.DEVELOPMENT
+        elif context_env_type == ContextEnvironmentType.STAGING:
+            return EnvironmentType.STAGING
+        elif context_env_type == ContextEnvironmentType.PRODUCTION:
+            return EnvironmentType.PRODUCTION
+        else:
+            self.logger.warning(f"Unknown environment type: {context_env_type}, defaulting to DEVELOPMENT")
+            return EnvironmentType.DEVELOPMENT
     
     async def validate_golden_path_services(
         self,
@@ -63,9 +136,22 @@ class GoldenPathValidator:
             
         Returns:
             Comprehensive business validation result
+            
+        Raises:
+            RuntimeError: If environment cannot be determined with confidence
         """
+        # CRITICAL: Get definitive environment context first
+        environment_context = await self._ensure_environment_context()
+        environment_type = self._convert_environment_type(environment_context.environment_type)
+        
         self.logger.info("=" * 80)
         self.logger.info("GOLDEN PATH BUSINESS VALIDATION - CHAT FUNCTIONALITY")
+        self.logger.info("=" * 80)
+        self.logger.info(f"🌍 Environment: {environment_context.environment_type.value}")
+        self.logger.info(f"☁️ Platform: {environment_context.cloud_platform.value}")
+        self.logger.info(f"🎯 Confidence: {environment_context.confidence_score:.2f}")
+        if environment_context.service_name:
+            self.logger.info(f"🚀 Service: {environment_context.service_name}")
         self.logger.info("=" * 80)
         
         result = GoldenPathValidationResult()
@@ -135,10 +221,14 @@ class GoldenPathValidator:
         service_type = requirement.service_type
         validation_function = requirement.validation_function
         
+        # CRITICAL FIX: Use definitive environment context instead of default
+        environment_context = await self._ensure_environment_context()
+        environment_type = self._convert_environment_type(environment_context.environment_type)
+        
         # Use HTTP client for service-aware validation instead of direct database access
         from .service_health_client import ServiceHealthClient
         
-        async with ServiceHealthClient(self.environment) as health_client:
+        async with ServiceHealthClient(environment_context_service=self.environment_context_service) as health_client:
             # Dispatch to HTTP-based validation for services
             if service_type == ServiceType.AUTH_SERVICE:
                 return await health_client.validate_auth_service_health()

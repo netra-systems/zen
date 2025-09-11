@@ -1,82 +1,82 @@
 {
-  "netra_backend\\app\\websocket_core\\service_initialization_manager.py": [
+  "netra_backend/app/websocket_core/ssot_service_initializer.py": [
     {
       "line": 7,
       "type": "auth_fallback_logic",
-      "content_hash": 7493675628025176857
+      "content_hash": 3675121593180354192
     }
   ],
-  "netra_backend\\app\\websocket_core\\ssot_service_initializer.py": [
-    {
-      "line": 7,
-      "type": "auth_fallback_logic",
-      "content_hash": 6279403366795969860
-    }
-  ],
-  "netra_backend\\app\\websocket_core\\unified_emitter.py": [
-    {
-      "line": 820,
-      "type": "auth_fallback_logic",
-      "content_hash": -4432654215478351922
-    },
-    {
-      "line": 828,
-      "type": "auth_fallback_logic",
-      "content_hash": 4803677076653088474
-    },
-    {
-      "line": 1115,
-      "type": "auth_fallback_logic",
-      "content_hash": -4791765010388294283
-    },
-    {
-      "line": 1137,
-      "type": "auth_fallback_logic",
-      "content_hash": -1938403728592426297
-    },
-    {
-      "line": 1148,
-      "type": "auth_fallback_logic",
-      "content_hash": -3387928588087513602
-    },
-    {
-      "line": 1159,
-      "type": "auth_fallback_logic",
-      "content_hash": 3840543727685530321
-    }
-  ],
-  "netra_backend\\app\\websocket_core\\unified_websocket_auth.py": [
-    {
-      "line": 58,
-      "type": "websocket_auth_bypass",
-      "content_hash": 4172581419598455057
-    },
-    {
-      "line": 136,
-      "type": "websocket_auth_bypass",
-      "content_hash": -7530580270470326318
-    },
-    {
-      "line": 1407,
-      "type": "legacy_auth_patterns",
-      "content_hash": 7243316185875207825
-    },
-    {
-      "line": 1408,
-      "type": "legacy_auth_patterns",
-      "content_hash": 3686357096911500560
-    }
-  ],
-  "netra_backend\\app\\websocket_core\\user_context_extractor.py": [
+  "netra_backend/app/websocket_core/user_context_extractor.py": [
     {
       "line": 223,
       "type": "auth_fallback_logic",
-      "content_hash": -2938985095470799926
+      "content_hash": 3125625282857620132
     },
     {
       "line": 251,
       "type": "auth_fallback_logic",
-      "content_hash": 3506641951691288802
+      "content_hash": -4416702747825439054
+    }
+  ],
+  "netra_backend/app/websocket_core/unified_emitter.py": [
+    {
+      "line": 820,
+      "type": "auth_fallback_logic",
+      "content_hash": -1006963561310398200
+    },
+    {
+      "line": 828,
+      "type": "auth_fallback_logic",
+      "content_hash": 261621803457225496
+    },
+    {
+      "line": 1115,
+      "type": "auth_fallback_logic",
+      "content_hash": 5428549931871459615
+    },
+    {
+      "line": 1137,
+      "type": "auth_fallback_logic",
+      "content_hash": 1722344421182861682
+    },
+    {
+      "line": 1148,
+      "type": "auth_fallback_logic",
+      "content_hash": -3539303220406351587
+    },
+    {
+      "line": 1159,
+      "type": "auth_fallback_logic",
+      "content_hash": -6316515053602687234
+    }
+  ],
+  "netra_backend/app/websocket_core/unified_websocket_auth.py": [
+    {
+      "line": 58,
+      "type": "websocket_auth_bypass",
+      "content_hash": -2998863734545267454
+    },
+    {
+      "line": 136,
+      "type": "websocket_auth_bypass",
+      "content_hash": 528363863744962794
+    },
+    {
+      "line": 1407,
+      "type": "legacy_auth_patterns",
+      "content_hash": 6249981053464029738
+    },
+    {
+      "line": 1408,
+      "type": "legacy_auth_patterns",
+      "content_hash": -3754679948366102457
+    }
+  ],
+  "netra_backend/app/websocket_core/service_initialization_manager.py": [
+    {
+      "line": 7,
+      "type": "auth_fallback_logic",
+      "content_hash": -2136889175824264472
     }
   ]
 }

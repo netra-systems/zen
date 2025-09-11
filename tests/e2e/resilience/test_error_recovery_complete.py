@@ -341,7 +341,7 @@ class TestCompleteErrorRecovery:
     @pytest.fixture
     def circuit_breaker_tester(self):
         """Initialize circuit breaker tester."""
-        return RealCircuitBreakerTester()
+        return TestRealCircuitBreakerer()
     
     @pytest.fixture
     def isolation_validator(self, orchestrator):
@@ -439,7 +439,7 @@ class TestCompleteErrorRecovery:
         else:
             logger.warning("Backend service kill failed - may already be stopped")
     
-    async def _test_circuit_breaker_activation(self, tester: RealCircuitBreakerTester,
+    async def _test_circuit_breaker_activation(self, tester: TestRealCircuitBreakerer,
                                              ws_client: RealWebSocketClient) -> Dict[str, Any]:
         """Test circuit breaker activation with failing operations."""
         async def failing_operation():
@@ -464,7 +464,7 @@ class TestCompleteErrorRecovery:
         else:
             logger.warning("Backend service restart failed")
     
-    async def _test_automatic_recovery(self, tester: RealCircuitBreakerTester,
+    async def _test_automatic_recovery(self, tester: TestRealCircuitBreakerer,
                                      ws_client: RealWebSocketClient) -> Dict[str, Any]:
         """Test automatic recovery after service restoration."""
         async def working_operation():

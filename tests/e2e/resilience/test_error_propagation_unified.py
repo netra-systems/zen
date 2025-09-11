@@ -85,7 +85,7 @@ class TestErrorPropagationer:
 class AuthErrorPropagationValidator:
     """Validates auth error propagation to frontend with proper context."""
     
-    def __init__(self, tester: ErrorPropagationTester):
+    def __init__(self, tester: TestErrorPropagationer):
         self.tester = tester
         self.auth_errors: List[Dict[str, Any]] = []
     
@@ -202,7 +202,7 @@ class AuthErrorPropagationValidator:
 class BackendErrorStatusValidator:
     """Validates backend errors include proper HTTP status codes."""
     
-    def __init__(self, tester: ErrorPropagationTester):
+    def __init__(self, tester: TestErrorPropagationer):
         self.tester = tester
         self.status_code_tests: List[Dict[str, Any]] = []
     
@@ -296,7 +296,7 @@ class BackendErrorStatusValidator:
 class WebSocketErrorRecoveryValidator:
     """Validates WebSocket errors trigger proper reconnection logic."""
     
-    def __init__(self, tester: ErrorPropagationTester):
+    def __init__(self, tester: TestErrorPropagationer):
         self.tester = tester
         self.reconnection_tests: List[Dict[str, Any]] = []
     
@@ -420,7 +420,7 @@ class WebSocketErrorRecoveryValidator:
 class DatabaseErrorGracefulHandler:
     """Validates database errors are handled gracefully without system crash."""
     
-    def __init__(self, tester: ErrorPropagationTester):
+    def __init__(self, tester: TestErrorPropagationer):
         self.tester = tester
         self.db_error_tests: List[Dict[str, Any]] = []
     
@@ -467,7 +467,7 @@ class DatabaseErrorGracefulHandler:
 class NetworkErrorAutoRecovery:
     """Validates network errors are recovered automatically with retry logic."""
     
-    def __init__(self, tester: ErrorPropagationTester):
+    def __init__(self, tester: TestErrorPropagationer):
         self.tester = tester
         self.network_tests: List[Dict[str, Any]] = []
     
@@ -511,7 +511,7 @@ class NetworkErrorAutoRecovery:
 class UserFriendlyMessageValidator:
     """Validates users see actionable, user-friendly error messages."""
     
-    def __init__(self, tester: ErrorPropagationTester):
+    def __init__(self, tester: TestErrorPropagationer):
         self.tester = tester
         self.user_message_tests: List[Dict[str, Any]] = []
     
@@ -610,7 +610,7 @@ class TestErrorPropagationUnified:
     @pytest.fixture
     async def error_tester(self):
         """Setup error propagation tester with real services."""
-        tester = ErrorPropagationTester()
+        tester = TestErrorPropagationer()
         
         # Setup test environment
         setup_success = await tester.setup_test_environment()
@@ -787,7 +787,7 @@ class TestErrorPropagationUnified:
 # Test execution utilities
 async def run_error_propagation_validation() -> Dict[str, Any]:
     """Run complete error propagation validation suite."""
-    tester = ErrorPropagationTester()
+    tester = TestErrorPropagationer()
     
     try:
         setup_success = await tester.setup_test_environment()

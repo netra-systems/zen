@@ -369,12 +369,60 @@ class AgentExecutionTracker:
         """
         Update execution state.
         
+        CRITICAL VALIDATION (Issue #305): Only ExecutionState enum values accepted.
+        Rejects dict objects that were causing "'dict' object has no attribute 'value'" errors.
+        
+        Args:
+            execution_id: The execution ID to update
+            state: ExecutionState enum value (NOT dict objects)
+            error: Optional error message
+            result: Optional execution result
+        
         Returns:
             True if successful, False if execution not found
+            
+        Raises:
+            TypeError: If state is not an ExecutionState enum value
+            ValueError: If state is a dict object (Issue #305 root cause)
         """
+        # CRITICAL VALIDATION: Issue #305 - Prevent dict objects being passed as state
+        if not isinstance(state, ExecutionState):
+            if isinstance(state, dict):
+                # Specific error for the exact Issue #305 pattern
+                raise ValueError(
+                    f"🚨 Issue #305 CRITICAL: Dict object passed as ExecutionState: {state}. "
+                    f"This was causing \"'dict' object has no attribute 'value'\" errors. "
+                    f"Use ExecutionState enum instead: ExecutionState.COMPLETED, ExecutionState.FAILED, etc. "
+                    f"Agent execution ID: {execution_id}"
+                )
+            else:
+                # General type error for other invalid types
+                raise TypeError(
+                    f"Expected ExecutionState enum, got {type(state).__name__}: {state}. "
+                    f"Valid ExecutionState values: {[s.value for s in ExecutionState]}. "
+                    f"Agent execution ID: {execution_id}"
+                )
+        
         record = self._executions.get(execution_id)
         if not record:
-            return False
+            # BACKWARD COMPATIBILITY: Auto-create execution record if it doesn't exist
+            # This maintains compatibility with legacy code patterns where update_execution_state
+            # could be called without explicitly creating the execution first
+            logger.warning(f"Auto-creating execution record for {execution_id} (backward compatibility)")
+            now = datetime.now(timezone.utc)
+            self._executions[execution_id] = ExecutionRecord(
+                execution_id=execution_id,
+                agent_name="unknown",  # Default when auto-created
+                thread_id="unknown",
+                user_id="unknown",
+                state=ExecutionState.PENDING,
+                started_at=now,
+                last_heartbeat=now,
+                updated_at=now,
+                timeout_seconds=int(self.timeout_config.agent_execution_timeout)
+            )
+            record = self._executions[execution_id]
+            self._active_executions.add(execution_id)
         
         # Don't update terminal states
         if record.is_terminal:
@@ -410,6 +458,19 @@ class AgentExecutionTracker:
         
         logger.info(f"Updated execution {execution_id} to state {state.value}")
         return True
+    
+    def get_execution_state(self, execution_id: str) -> Optional[ExecutionState]:
+        """
+        Get current execution state.
+        
+        Args:
+            execution_id: The execution ID to query
+            
+        Returns:
+            ExecutionState enum value if execution exists, None otherwise
+        """
+        record = self._executions.get(execution_id)
+        return record.state if record else None
     
     def heartbeat(self, execution_id: str) -> bool:
         """

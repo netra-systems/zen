@@ -12,6 +12,10 @@ from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.environment_context import (
+    EnvironmentContextService,
+    get_environment_context_service
+)
 from .models import ServiceType, EnvironmentType
 
 
@@ -23,17 +27,74 @@ class ServiceHealthClient:
     direct database access, maintaining microservice independence.
     """
     
-    def __init__(self, environment: EnvironmentType = EnvironmentType.DEVELOPMENT):
-        """Initialize service health client."""
+    def __init__(self, environment_context_service: Optional[EnvironmentContextService] = None):
+        """Initialize service health client with environment context injection.
+        
+        Args:
+            environment_context_service: Service providing environment context.
+                                       If None, uses global singleton.
+        
+        CRITICAL FIX: No longer accepts environment parameter with default!
+        Environment must be detected definitively by EnvironmentContextService.
+        """
         self.logger = central_logger.get_logger(__name__)
-        self.environment = environment
+        self.environment_context_service = environment_context_service or get_environment_context_service()
         self.session: Optional[aiohttp.ClientSession] = None
         
-        # Service base URLs by environment
-        self.service_urls = self._get_service_urls(environment)
+        # Get definitive environment from detection service
+        self.environment = self._get_environment_type()
+        
+        # Service base URLs by detected environment
+        self.service_urls = self._get_service_urls(self.environment)
         
         # HTTP timeouts for health checks
         self.timeout = aiohttp.ClientTimeout(total=10.0, connect=3.0)
+    
+    def _get_environment_type(self) -> EnvironmentType:
+        """Get definitive environment type from context service.
+        
+        Returns:
+            EnvironmentType detected by environment context service
+            
+        Raises:
+            RuntimeError: If environment context service not initialized
+        """
+        try:
+            if not self.environment_context_service.is_initialized():
+                raise RuntimeError(
+                    "EnvironmentContextService not initialized. "
+                    "Call initialize_environment_context() during application startup."
+                )
+            
+            context = self.environment_context_service.get_environment_context()
+            
+            # Convert EnvironmentContextService EnvironmentType to models EnvironmentType
+            if hasattr(context.environment_type, 'value'):
+                env_value = context.environment_type.value
+            else:
+                env_value = str(context.environment_type)
+            
+            # Map to models EnvironmentType
+            if env_value.lower() == 'testing':
+                return EnvironmentType.TESTING
+            elif env_value.lower() == 'development':
+                return EnvironmentType.DEVELOPMENT
+            elif env_value.lower() == 'staging':
+                return EnvironmentType.STAGING
+            elif env_value.lower() == 'production':
+                return EnvironmentType.PRODUCTION
+            else:
+                self.logger.warning(f"Unknown environment type: {env_value}, defaulting to DEVELOPMENT")
+                return EnvironmentType.DEVELOPMENT
+                
+        except Exception as e:
+            self.logger.error(
+                f"Failed to get environment from EnvironmentContextService: {e}. "
+                f"This will cause service health checks to use wrong URLs (e.g., localhost in staging)."
+            )
+            raise RuntimeError(
+                f"Cannot determine environment for service health client: {e}"
+            ) from e
     
     def _get_service_urls(self, environment: EnvironmentType) -> Dict[ServiceType, str]:
         """Get service base URLs for the given environment."""
@@ -123,7 +184,7 @@ class ServiceHealthClient:
                         }
                     }
                     
-        except aiohttp.ClientTimeout:
+        except asyncio.TimeoutError:
             return {
                 "requirement": "jwt_validation_ready",
                 "success": False,
@@ -205,7 +266,7 @@ class ServiceHealthClient:
                         }
                     }
                     
-        except aiohttp.ClientTimeout:
+        except asyncio.TimeoutError:
             return {
                 "requirement": "agent_execution_ready",
                 "success": False,
@@ -244,3 +305,54 @@ class ServiceHealthClient:
         if self.session:
             await self.session.close()
             self.session = None
+
+
+# Compatibility factory functions for existing code
+def create_service_health_client_with_environment(environment: EnvironmentType) -> 'ServiceHealthClient':
+    """
+    DEPRECATED: Create ServiceHealthClient with environment parameter.
+    
+    This function provides backward compatibility for existing code that uses
+    the old environment-based constructor. New code should use the default
+    constructor which automatically detects environment.
+    
+    Args:
+        environment: Environment type (DEPRECATED - will be ignored)
+        
+    Returns:
+        ServiceHealthClient with proper environment context injection
+        
+    Raises:
+        RuntimeError: If environment context service not initialized
+    """
+    import warnings
+    warnings.warn(
+        "create_service_health_client_with_environment is deprecated. "
+        "Use ServiceHealthClient() directly - environment is auto-detected.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Ignore the passed environment parameter and use auto-detection
+    return ServiceHealthClient()
+
+
+async def create_service_health_client_async() -> 'ServiceHealthClient':
+    """
+    Create ServiceHealthClient with async environment context initialization.
+    
+    This function ensures the environment context service is properly initialized
+    before creating the ServiceHealthClient.
+    
+    Returns:
+        ServiceHealthClient with initialized environment context
+        
+    Raises:
+        RuntimeError: If environment cannot be determined
+    """
+    from netra_backend.app.core.environment_context import initialize_environment_context
+    
+    # Ensure environment context is initialized
+    environment_context_service = await initialize_environment_context()
+    
+    return ServiceHealthClient(environment_context_service=environment_context_service)

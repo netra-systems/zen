@@ -683,7 +683,7 @@ class WebSocketSSOTRouter:
         """Create WebSocket manager with emergency fallback."""
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            return await create_websocket_manager(user_context)
+            return create_websocket_manager(user_context)
         except Exception as e:
             logger.error(f"WebSocket manager creation failed: {e}")
             return self._create_emergency_websocket_manager(user_context)
@@ -730,7 +730,8 @@ class WebSocketSSOTRouter:
             if message_router:
                 # Create agent handler for the user
                 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-                agent_bridge = await create_agent_websocket_bridge(user_context)
+                # Fix: create_agent_websocket_bridge is synchronous, not async
+                agent_bridge = create_agent_websocket_bridge(user_context)
                 
                 # Register handler with router
                 async def agent_handler(user_id: str, websocket: WebSocket, message: Dict[str, Any]):
@@ -745,7 +746,8 @@ class WebSocketSSOTRouter:
         """Create agent WebSocket bridge for isolated mode."""
         try:
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-            return await create_agent_websocket_bridge(user_context)
+            # Fix: create_agent_websocket_bridge is synchronous, not async
+            return create_agent_websocket_bridge(user_context)
         except Exception as e:
             logger.error(f"Agent bridge creation failed: {e}")
             return None
@@ -917,7 +919,20 @@ class WebSocketSSOTRouter:
         
         try:
             if is_websocket_connected(websocket):
-                error_message = create_error_message("CONNECTION_ERROR", f"Connection error in {mode.value} mode")
+                # FIVE WHYS FIX: Convert ErrorMessage to ServerMessage for proper WebSocket sending
+                # Root Cause: Organizational culture prioritizing velocity over architectural discipline
+                # WHY #1: ErrorMessage passed directly to safe_websocket_send() which expects ServerMessage
+                # WHY #2: No type conversion layer between message types
+                # WHY #3: Architecture violates interface design principles  
+                # WHY #4: Missing quality validation in development process
+                # WHY #5: Organization values feature velocity over engineering excellence
+                error_data = {
+                    "error_code": "CONNECTION_ERROR",
+                    "error_message": f"Connection error in {mode.value} mode",
+                    "details": {"error_type": str(type(error).__name__), "mode": mode.value},
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                error_message = create_server_message("error", error_data)
                 await safe_websocket_send(websocket, error_message)
                 await safe_websocket_close(websocket, 1011, f"{mode.value} mode error")
         except Exception as cleanup_error:

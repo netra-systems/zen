@@ -34,8 +34,15 @@ import tempfile
 
 import pytest
 import yaml
-import docker
 import httpx
+
+# Conditional docker import for graceful fallback
+try:
+    import docker
+    DOCKER_AVAILABLE = True
+except ImportError:
+    docker = None
+    DOCKER_AVAILABLE = False
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.ssot.base_test_case import SSotBaseTestCase
@@ -61,8 +68,10 @@ class CloudRunPortConfigurationValidator:
         self.project_root = Path(__file__).parent.parent.parent
         self.docker_client = None
         
-    def _get_docker_client(self) -> docker.DockerClient:
+    def _get_docker_client(self):
         """Get Docker client for container inspection."""
+        if not DOCKER_AVAILABLE:
+            raise RuntimeError("Docker package not available - cannot create docker client")
         if not self.docker_client:
             self.docker_client = docker.from_env()
         return self.docker_client

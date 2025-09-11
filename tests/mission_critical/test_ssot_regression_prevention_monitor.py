@@ -64,7 +64,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 
-class SSOTRegressionPreventionTester(SSotBaseTestCase):
+class TestSSOTRegressionPrevention(SSotBaseTestCase):
     """
     Enhanced mission critical tests that serve as regression monitors.
     
