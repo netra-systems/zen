@@ -19,41 +19,6 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-<<<<<<< Updated upstream
-| test_ssot_validator_with_real_agent_execution | FAIL failed | 0.000s | test_ssot_event_validator_staging.py |
-| test_ssot_validator_performance_under_load | FAIL failed | 0.000s | test_ssot_event_validator_staging.py |
-| test_ssot_validator_staging_environment_integration | FAIL failed | 0.000s | test_ssot_event_validator_staging.py |
-
-## Failed Tests Details
-
-### FAILED: test_ssot_validator_with_real_agent_execution
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_ssot_event_validator_staging.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_ssot_event_validator_staging.py:146: in test_ssot_validator_with_real_agent_execution
-    self.assertEqual(
-test_framework\ssot\base_test_case.py:430: in assertEqual
-    assert first == second, msg or f"Expected {first} == {second}"
-           ^^^^^^^^^^^^^^^
-E   AssertionError: STAGING INTEGRATION FAILURE: 3 scenarios failed: [{'scenario': 'data_optimization_task', 'exception': "'llm_interaction_time'"}, {'scenario': 'cost_analysis_task', 'exception': "'llm_interaction_ti...
-
-### FAILED: test_ssot_validator_performance_under_load
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_ssot_event_validator_staging.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_ssot_event_validator_staging.py:249: in test_ssot_validator_performance_under_load
-    self.assertEqual(
-test_framework\ssot\base_test_case.py:430: in assertEqual
-    assert first == second, msg or f"Expected {first} == {second}"
-           ^^^^^^^^^^^^^^^
-E   AssertionError: PERFORMANCE FAILURE: 4 load levels failed performance requirements: [{'user_count': 5, 'issue': 'load_test_exception', 'exception': "'TestSsotEventValidatorStaging' object has no attribute 'test_durat...
-
-### FAILED: test_ssot_validator_staging_environment_integration
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_ssot_event_validator_staging.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_ssot_event_validator_staging.py:280: in test_ssot_validator_staging_environment_integration
-    'endpoint': f"{self.staging_base_url}/health"
-                   ^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestSsotEventValidatorStaging' object has no attribute 'staging_base_url'...
-=======
 | test_001_unified_data_agent_real_execution | PASS passed | 0.745s | test_real_agent_execution_staging.py |
 | test_002_optimization_agent_real_execution | PASS passed | 0.743s | test_real_agent_execution_staging.py |
 | test_003_multi_agent_coordination_real | PASS passed | 0.728s | test_real_agent_execution_staging.py |
@@ -76,7 +41,6 @@ C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\
     await self.connection.handshake(
 C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:114: in handshake
  ...
->>>>>>> Stashed changes
 
 ## Pytest Output Format
 
