@@ -295,7 +295,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[MAIN MODE] Starting WebSocket connection {connection_id}")
             
             # Step 1: Accept WebSocket connection
-            await websocket.accept()
+            await websocket.accept(subprotocol="jwt-auth")
             
             # Step 2: SSOT Authentication (preserves full auth pipeline)
             auth_result = await authenticate_websocket_ssot(
@@ -390,7 +390,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[FACTORY MODE] Pre-auth success: user={user_id[:8]}")
             
             # Step 2: Accept connection after authentication
-            await websocket.accept()
+            await websocket.accept(subprotocol="jwt-auth")
             
             # Step 3: Create isolated WebSocket manager via factory pattern
             websocket_manager = await self._create_websocket_manager(user_context)
@@ -458,7 +458,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[ISOLATED MODE] Starting isolated connection {connection_id}")
             
             # Step 1: Accept connection
-            await websocket.accept()
+            await websocket.accept(subprotocol="jwt-auth")
             
             # Step 2: SSOT Authentication with audit logging
             auth_result = await authenticate_websocket_ssot(websocket)
@@ -536,7 +536,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
             
             # Step 1: Accept connection
-            await websocket.accept()
+            await websocket.accept(subprotocol="jwt-auth")
             
             # Step 2: Send legacy compatibility confirmation
             success_message = create_server_message({
