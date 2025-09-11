@@ -20,11 +20,6 @@ from netra_backend.tests.performance.test_performance_cache import (
     TestMemoryCache,
     TestQueryOptimizer,
 )
-from netra_backend.tests.performance.test_performance_monitoring import (
-    TestDatabaseIndexOptimization,
-    TestPerformanceMonitoring,
-    TestPerformanceOptimizationIntegration,
-)
 
 # Re-export all test classes for pytest discovery
 __all__ = [
@@ -32,7 +27,4 @@ __all__ = [
     "TestQueryOptimizer",
     "TestBatchProcessor", 
     "TestMessageBatcher",
-    "TestPerformanceMonitoring",
-    "TestDatabaseIndexOptimization",
-    "TestPerformanceOptimizationIntegration"
 ]

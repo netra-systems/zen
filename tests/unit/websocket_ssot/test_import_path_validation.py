@@ -18,10 +18,13 @@ Business Impact: Golden Path protection - $500K+ ARR depends on WebSocket agent 
 
 import sys
 import importlib
+import logging
 from unittest.mock import patch, MagicMock
 import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
+
+logger = logging.getLogger(__name__)
 
 
 class TestWebSocketSSotImportPathValidation(SSotBaseTestCase):
@@ -47,7 +50,7 @@ class TestWebSocketSSotImportPathValidation(SSotBaseTestCase):
         assert "No module named 'netra_backend.app.agents.agent_websocket_bridge'" in str(exc_info.value)
         
         # Log the expected failure for Golden Path protection
-        self.logger.critical(f"EXPECTED FAILURE: Broken import path {broken_import_path} correctly fails")
+        logger.critical(f"EXPECTED FAILURE: Broken import path {broken_import_path} correctly fails")
     
     def test_correct_import_path_succeeds(self):
         """Test that correct import path succeeds."""
@@ -63,7 +66,7 @@ class TestWebSocketSSotImportPathValidation(SSotBaseTestCase):
             assert hasattr(module, 'create_agent_websocket_bridge'), \
                 "create_agent_websocket_bridge function not found in module"
             
-            self.logger.info(f"SUCCESS: Correct import path {correct_import_path} works")
+            logger.info(f"SUCCESS: Correct import path {correct_import_path} works")
             
         except ImportError as e:
             pytest.fail(f"Correct import path failed unexpectedly: {e}")
@@ -93,11 +96,11 @@ class TestWebSocketSSotImportPathValidation(SSotBaseTestCase):
         
         if broken_import_line in content:
             # File contains broken imports - this demonstrates the issue
-            self.logger.error(f"BROKEN IMPORT DETECTED in websocket_ssot.py: {broken_import_line}")
+            logger.error(f"BROKEN IMPORT DETECTED in websocket_ssot.py: {broken_import_line}")
             
             # Count occurrences
             import_count = content.count(broken_import_line)
-            self.logger.error(f"Found {import_count} occurrences of broken import")
+            logger.error(f"Found {import_count} occurrences of broken import")
             
             # This test should fail when broken imports exist
             pytest.fail(f"websocket_ssot.py contains {import_count} broken import statements")
@@ -107,7 +110,7 @@ class TestWebSocketSSotImportPathValidation(SSotBaseTestCase):
             assert correct_import_line in content, \
                 "Neither broken nor correct import found in websocket_ssot.py"
             
-            self.logger.info("SUCCESS: websocket_ssot.py has correct import paths")
+            logger.info("SUCCESS: websocket_ssot.py has correct import paths")
     
     def test_websocket_ssot_import_line_numbers(self):
         """Test specific line numbers where broken imports should be fixed."""
@@ -135,15 +138,15 @@ class TestWebSocketSSotImportPathValidation(SSotBaseTestCase):
                 
                 if "from netra_backend.app.agents.agent_websocket_bridge" in line_content:
                     broken_imports_found.append((line_num, line_content))
-                    self.logger.error(f"BROKEN IMPORT at line {line_num}: {line_content}")
+                    logger.error(f"BROKEN IMPORT at line {line_num}: {line_content}")
         
         if broken_imports_found:
             # This test should fail when broken imports exist at specific lines
             error_msg = f"Found broken imports at lines: {[line[0] for line in broken_imports_found]}"
-            self.logger.critical(f"GOLDEN PATH FAILURE: {error_msg}")
+            logger.critical(f"GOLDEN PATH FAILURE: {error_msg}")
             pytest.fail(error_msg)
         else:
-            self.logger.info("SUCCESS: No broken imports found at target line numbers")
+            logger.info("SUCCESS: No broken imports found at target line numbers")
     
     def test_import_replacement_suggestion(self):
         """Test that provides the exact replacement needed for the fix."""
@@ -152,18 +155,18 @@ class TestWebSocketSSotImportPathValidation(SSotBaseTestCase):
         correct_import = "from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge"
         
         # Log the exact fix needed
-        self.logger.info("=== WEBSOCKET SSOT IMPORT FIX REQUIRED ===")
-        self.logger.info(f"REPLACE: {broken_import}")
-        self.logger.info(f"WITH:    {correct_import}")
-        self.logger.info("LOCATIONS: websocket_ssot.py lines 732 and 747")
-        self.logger.info("IMPACT: Golden Path restoration, $500K+ ARR protection")
+        logger.info("=== WEBSOCKET SSOT IMPORT FIX REQUIRED ===")
+        logger.info(f"REPLACE: {broken_import}")
+        logger.info(f"WITH:    {correct_import}")
+        logger.info("LOCATIONS: websocket_ssot.py lines 732 and 747")
+        logger.info("IMPACT: Golden Path restoration, $500K+ ARR protection")
         
         # Verify the replacement would work
         try:
             # Test that we can import from the correct location
             module = importlib.import_module("netra_backend.app.services.agent_websocket_bridge")
             assert hasattr(module, 'create_agent_websocket_bridge')
-            self.logger.info("VERIFIED: Correct import path is functional")
+            logger.info("VERIFIED: Correct import path is functional")
         except ImportError as e:
             pytest.fail(f"Correct import path validation failed: {e}")
 
