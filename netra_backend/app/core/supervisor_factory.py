@@ -162,11 +162,12 @@ async def create_supervisor_core(
         # Create supervisor with UserContext pattern
         supervisor = SupervisorAgent.create(
             llm_manager=llm_manager,
-            websocket_bridge=websocket_bridge
+            websocket_bridge=websocket_bridge,
+            tool_dispatcher=tool_dispatcher
         )
         
         # Store the user context for later use in execute()
-        # The supervisor will create its own tool_dispatcher during execute()
+        # The supervisor will create its own tool_dispatcher during execute() if not provided
         supervisor._pending_user_context = user_context
         supervisor._tool_classes = tool_classes  # Store for UserContext-based creation
         
