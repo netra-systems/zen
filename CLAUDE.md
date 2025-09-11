@@ -122,6 +122,7 @@ Every task needs:
 
 **TEST DISCOVERY:** `python tests/unified_test_runner.py`
 Use the test gardner command if test collection issues.
+**COMPREHENSIVE TEST GUIDE:** See `TEST_EXECUTION_GUIDE.md` for complete test execution methodology, including how to run all tests without fast-fail and separate collection errors from test failures.
 **COMPLIANCE:** Save checklist after every session.
 
 ### 2.2. Complexity Management
