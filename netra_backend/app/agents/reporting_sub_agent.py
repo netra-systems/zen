@@ -13,7 +13,9 @@ from netra_backend.app.agents.prompts import reporting_prompt_template
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.state import DeepAgentState, ReportResult
+# SECURITY: DeepAgentState import REMOVED due to user isolation vulnerability (Issue #271)
+# DeepAgentState can cause cross-user data contamination - only UserExecutionContext is safe
+from netra_backend.app.agents.state import ReportResult
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
     JSONErrorFixer,
@@ -60,6 +62,40 @@ class ReportingSubAgent(BaseAgent):
         
         # Cache TTL for test compliance
         self.cache_ttl = 3600  # 1 hour default
+    
+    def _validate_user_execution_context(self, user_context: UserExecutionContext) -> UserExecutionContext:
+        """
+        CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation.
+        
+        This method ensures we have a valid UserExecutionContext with proper user isolation,
+        preventing any cross-user data contamination vulnerabilities.
+        
+        Issue #354 Migration: ReportingSubAgent no longer accepts DeepAgentState
+        """
+        if not isinstance(user_context, UserExecutionContext):
+            # Check if this is a DeepAgentState attempt for better error message
+            if hasattr(user_context, '__class__') and 'DeepAgentState' in user_context.__class__.__name__:
+                raise ValueError(
+                    f"🚨 SECURITY VULNERABILITY: DeepAgentState is FORBIDDEN due to user isolation risks. "
+                    f"ReportingSubAgent.execute_modern() attempted to use DeepAgentState which can cause "
+                    f"data leakage between users. MIGRATION REQUIRED: Use UserExecutionContext pattern immediately. "
+                    f"See issue #271 remediation plan for migration guide."
+                )
+            else:
+                raise ValueError(
+                    f"Expected UserExecutionContext, got {type(user_context)}. "
+                    f"DeepAgentState is no longer supported due to security risks."
+                )
+        
+        # Validate context integrity
+        if not user_context.user_id:
+            raise ValueError("UserExecutionContext missing required user_id")
+        if not user_context.thread_id:
+            raise ValueError("UserExecutionContext missing required thread_id") 
+        if not user_context.run_id:
+            raise ValueError("UserExecutionContext missing required run_id")
+            
+        return user_context
     
     async def validate_preconditions(self, context) -> bool:
         """Validate that we have sufficient data to generate a meaningful report.
@@ -844,12 +880,14 @@ class ReportingSubAgent(BaseAgent):
         
         return result
     
-    async def execute_modern(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> ExecutionResult:
+    async def execute_modern(self, user_context: UserExecutionContext, stream_updates: bool = False) -> ExecutionResult:
         """Modern execution pattern for BaseAgent integration
         
+        SECURITY MIGRATION: Updated to use UserExecutionContext for proper user isolation.
+        DeepAgentState eliminated due to cross-user data contamination vulnerability (Issue #271).
+        
         Args:
-            state: Deep agent state with analysis results
-            run_id: Unique execution run ID
+            user_context: User execution context with proper isolation
             stream_updates: Whether to emit WebSocket updates
             
         Returns:
@@ -858,8 +896,11 @@ class ReportingSubAgent(BaseAgent):
         start_time = time.time()
         
         try:
-            # Create execution context
-            context = self._create_execution_context(state, run_id, stream_updates)
+            # CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation
+            validated_user_context = self._validate_user_execution_context(user_context)
+            
+            # Create execution context from user context
+            context = self._create_execution_context(validated_user_context, stream_updates)
             
             # Validate preconditions
             if not await self.validate_preconditions(context):
@@ -875,12 +916,9 @@ class ReportingSubAgent(BaseAgent):
             
             await self.emit_agent_completed(result)
             
-            # Store result in state using SSOT method
+            # Store result in context metadata using SSOT method
             if hasattr(self, 'store_metadata_result'):
                 self.store_metadata_result(context, 'report_result', self._create_report_result(result))
-            else:
-                # Fallback for direct state update
-                state.report_result = self._create_report_result(result)
             
             execution_time = (time.time() - start_time) * 1000
             return self._create_success_execution_result(result, execution_time)
@@ -890,29 +928,30 @@ class ReportingSubAgent(BaseAgent):
             await self.emit_error(f"Report generation failed: {str(e)}", "execution_error")
             return self._create_error_execution_result(str(e), execution_time)
     
-    def _create_execution_context(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> ExecutionContext:
-        """Create execution context from agent state
+    def _create_execution_context(self, user_context: UserExecutionContext, stream_updates: bool) -> ExecutionContext:
+        """Create execution context from user context
+        
+        SECURITY MIGRATION: Updated to use UserExecutionContext for proper user isolation.
         
         Args:
-            state: Agent state
-            run_id: Execution run ID
+            user_context: User execution context with proper isolation
             stream_updates: Stream updates flag
             
         Returns:
             ExecutionContext for execution
         """
         return ExecutionContext(
-            request_id=run_id,
-            user_id=getattr(state, 'user_id', 'unknown'),
-            session_id=getattr(state, 'chat_thread_id', run_id),
-            correlation_id=f"report_{run_id}",
-            run_id=run_id,
+            request_id=user_context.run_id,
+            user_id=user_context.user_id,
+            session_id=user_context.thread_id,
+            correlation_id=f"report_{user_context.run_id}",
+            run_id=user_context.run_id,
             agent_name="ReportingSubAgent",
-            state=state,
+            state=None,  # No state object needed - data is in user_context.metadata
             stream_updates=stream_updates,
             metadata={
                 "agent_name": "ReportingSubAgent",
-                "state": state,
+                "user_context": user_context,
                 "stream_updates": stream_updates
             },
             created_at=datetime.now(timezone.utc)
@@ -1032,19 +1071,20 @@ class ReportingSubAgent(BaseAgent):
     # FALLBACK OPERATION METHODS - Required by Tests
     # ========================================================================
     
-    def _create_fallback_reporting_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+    def _create_fallback_reporting_operation(self, user_context: UserExecutionContext, stream_updates: bool):
         """Create fallback reporting operation
         
+        SECURITY MIGRATION: Updated to use UserExecutionContext for proper user isolation.
+        
         Args:
-            state: Agent state
-            run_id: Run ID
+            user_context: User execution context with proper isolation
             stream_updates: Stream updates flag
             
         Returns:
             Async operation for fallback reporting
         """
         async def fallback_operation():
-            fallback_summary = self._create_fallback_summary(state)
+            fallback_summary = self._create_fallback_summary(user_context)
             fallback_metadata = self._create_fallback_metadata()
             
             return {
@@ -1062,20 +1102,24 @@ class ReportingSubAgent(BaseAgent):
         
         return fallback_operation
     
-    def _create_fallback_summary(self, state: DeepAgentState) -> Dict[str, Any]:
-        """Create fallback summary from state
+    def _create_fallback_summary(self, user_context: UserExecutionContext) -> Dict[str, Any]:
+        """Create fallback summary from user context
+        
+        SECURITY MIGRATION: Updated to use UserExecutionContext for proper user isolation.
         
         Args:
-            state: Agent state
+            user_context: User execution context with proper isolation
             
         Returns:
             Summary dictionary
         """
+        metadata = user_context.metadata if user_context and user_context.metadata else {}
+        
         return {
-            "data_analyzed": bool(getattr(state, 'data_result', None)),
-            "optimizations_provided": bool(getattr(state, 'optimizations_result', None)),
-            "action_plan_created": bool(getattr(state, 'action_plan_result', None)),
-            "triage_completed": bool(getattr(state, 'triage_result', None)),
+            "data_analyzed": bool(metadata.get('data_result')),
+            "optimizations_provided": bool(metadata.get('optimizations_result')),
+            "action_plan_created": bool(metadata.get('action_plan_result')),
+            "triage_completed": bool(metadata.get('triage_result')),
             "fallback_used": True
         }
     
