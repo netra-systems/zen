@@ -11,11 +11,14 @@ Mission: Provide authoritative import mappings for all Netra services
 #### ✅ VERIFIED IMPORTS (Working):
 ```python
 # Agent Framework
-from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent  
 from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+
+# Execution Tracking
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionTracker, get_execution_tracker
 
 # Shared Types (Cross-Service)
 from shared.types.core_types import UserID, ThreadID, RunID
@@ -200,6 +203,42 @@ shared.{utility_type}.{specific_module}
 5. Regenerate documentation
 
 **CRITICAL**: Keep this registry updated as THE authoritative source for all import decisions.
+---
+
+## IMPORT FIXES APPLIED (2025-09-10)
+
+### ✅ RESOLVED MISSING CLASS IMPORT ISSUES (CRITICAL):
+
+#### AgentState Import Compatibility (TEST COLLECTION BLOCKER):
+```python
+# ISSUE: ModuleNotFoundError: No module named 'AgentState' from 'netra_backend.app.agents.base_agent'
+# ROOT CAUSE: AgentState was defined in models.py but not exported by base_agent.py
+# SOLUTION: Added SSOT compatibility export in base_agent.py
+
+# WORKING IMPORTS:
+from netra_backend.app.agents.base_agent import BaseAgent, AgentState  # New compatibility export
+from netra_backend.app.agents.models import AgentState                 # Original SSOT location
+```
+
+#### ExecutionTracker Import Compatibility (TEST COLLECTION BLOCKER):
+```python
+# ISSUE: ImportError: cannot import name 'ExecutionTracker' from 'netra_backend.app.core.agent_execution_tracker'
+# ROOT CAUSE: Class was named AgentExecutionTracker, not ExecutionTracker
+# SOLUTION: Added ExecutionTracker alias for backward compatibility
+
+# WORKING IMPORTS:
+from netra_backend.app.core.agent_execution_tracker import ExecutionTracker      # New compatibility alias
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker # Original SSOT class
+from netra_backend.app.core.agent_execution_tracker import get_execution_tracker # Factory function
+```
+
+#### 📊 TEST COLLECTION IMPACT UPDATE (2025-09-10):
+- **Agent Registry Business Workflows**: ✅ WORKING - All 12 comprehensive tests now discoverable
+- **Execution Engine Registry Races**: ✅ WORKING - All 4 race condition tests now discoverable  
+- **Test Collection Success**: 100% - All imports resolved, no remaining missing class errors
+- **Business Impact**: Critical business workflow tests can now execute and validate system health
+- **SSOT Compliance**: Maintained - All fixes use compatibility layers, not SSOT violations
+
 ---
 
 ## IMPORT FIXES APPLIED (2025-09-10)

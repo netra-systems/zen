@@ -47,9 +47,9 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         
         # Setup execution tracker mock
         self.mock_execution_tracker.collect_metrics = AsyncMock(return_value={})
-        self.mock_execution_tracker.register_execution = Mock()
-        self.mock_execution_tracker.start_execution = Mock()
-        self.mock_execution_tracker.complete_execution = Mock()
+        self.mock_execution_tracker.register_execution = AsyncMock()
+        self.mock_execution_tracker.start_execution = AsyncMock()
+        self.mock_execution_tracker.complete_execution = AsyncMock()
         
         with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_execution_tracker') as mock_get_tracker:
             mock_get_tracker.return_value = self.mock_execution_tracker
