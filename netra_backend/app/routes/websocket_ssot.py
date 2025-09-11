@@ -382,7 +382,7 @@ class WebSocketSSOTRouter:
             
             if not auth_result.success:
                 logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error}")
-                await safe_websocket_send(websocket, create_error_message("Authentication failed"))
+                await safe_websocket_send(websocket, create_error_message("AUTH_FAILED", "Authentication failed"))
                 await safe_websocket_close(websocket, 1008, "Authentication failed")
                 return
             
@@ -395,7 +395,7 @@ class WebSocketSSOTRouter:
             ws_manager = await self._create_websocket_manager(user_context)
             if not ws_manager:
                 logger.error("[MAIN MODE] Failed to create WebSocket manager")
-                await safe_websocket_send(websocket, create_error_message("Service initialization failed"))
+                await safe_websocket_send(websocket, create_error_message("SERVICE_INIT_FAILED", "Service initialization failed"))
                 await safe_websocket_close(websocket, 1011, "Service initialization failed")
                 return
             
@@ -762,7 +762,7 @@ class WebSocketSSOTRouter:
                     await safe_websocket_send(websocket, heartbeat_msg)
                 except json.JSONDecodeError as e:
                     logger.error(f"[MAIN MODE] JSON decode error: {e}")
-                    error_msg = create_error_message("Invalid JSON format")
+                    error_msg = create_error_message("JSON_PARSE_ERROR", "Invalid JSON format")
                     await safe_websocket_send(websocket, error_msg)
                     
         except WebSocketDisconnect:
@@ -894,7 +894,7 @@ class WebSocketSSOTRouter:
         
         try:
             if is_websocket_connected(websocket):
-                error_message = create_error_message(f"Connection error in {mode.value} mode")
+                error_message = create_error_message("CONNECTION_ERROR", f"Connection error in {mode.value} mode")
                 await safe_websocket_send(websocket, error_message)
                 await safe_websocket_close(websocket, 1011, f"{mode.value} mode error")
         except Exception as cleanup_error:
