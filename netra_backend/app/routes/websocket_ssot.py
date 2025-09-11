@@ -176,6 +176,46 @@ class WebSocketSSOTRouter:
         self.router.get("/ws/isolated/stats")(self.isolated_stats_endpoint)
         self.router.get("/ws/isolated/config")(self.isolated_config_endpoint)
         
+    def _negotiate_websocket_subprotocol(self, websocket: WebSocket) -> Optional[str]:
+        """
+        Negotiate WebSocket subprotocol for JWT authentication (RFC 6455 compliance).
+        
+        Implements proper subprotocol negotiation to fix issue #280.
+        
+        Args:
+            websocket: WebSocket connection object
+            
+        Returns:
+            Optional[str]: Accepted subprotocol for response header
+        """
+        try:
+            # Import the negotiation function from the JWT protocol handler
+            from netra_backend.app.websocket_core.unified_jwt_protocol_handler import negotiate_websocket_subprotocol
+            
+            # Extract client-requested subprotocols from header
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if not subprotocol_header:
+                logger.debug("No subprotocol header found in WebSocket request")
+                return None
+            
+            # Parse comma-separated subprotocols
+            client_protocols = [p.strip() for p in subprotocol_header.split(",")]
+            logger.debug(f"Client requested subprotocols: {client_protocols}")
+            
+            # Negotiate supported subprotocol
+            accepted_protocol = negotiate_websocket_subprotocol(client_protocols)
+            
+            if accepted_protocol:
+                logger.info(f"WebSocket subprotocol negotiated: {accepted_protocol}")
+                return accepted_protocol
+            else:
+                logger.warning(f"No supported subprotocol found in client request: {client_protocols}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error during WebSocket subprotocol negotiation: {e}")
+            return None
+
     def _get_connection_mode(
         self, 
         websocket: WebSocket,
@@ -294,8 +334,14 @@ class WebSocketSSOTRouter:
         try:
             logger.info(f"[MAIN MODE] Starting WebSocket connection {connection_id}")
             
-            # Step 1: Accept WebSocket connection
-            await websocket.accept()
+            # Step 1: Negotiate subprotocol and accept WebSocket connection (RFC 6455 compliance)
+            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+            if accepted_subprotocol:
+                logger.info(f"[MAIN MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
+                await websocket.accept(subprotocol=accepted_subprotocol)
+            else:
+                logger.debug("[MAIN MODE] Accepting WebSocket without subprotocol")
+                await websocket.accept()
             
             # Step 2: SSOT Authentication (preserves full auth pipeline)
             auth_result = await authenticate_websocket_ssot(
@@ -389,8 +435,14 @@ class WebSocketSSOTRouter:
             user_id = user_context.user_id
             logger.info(f"[FACTORY MODE] Pre-auth success: user={user_id[:8]}")
             
-            # Step 2: Accept connection after authentication
-            await websocket.accept()
+            # Step 2: Negotiate subprotocol and accept connection after authentication (RFC 6455 compliance)
+            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+            if accepted_subprotocol:
+                logger.info(f"[FACTORY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
+                await websocket.accept(subprotocol=accepted_subprotocol)
+            else:
+                logger.debug("[FACTORY MODE] Accepting WebSocket without subprotocol")
+                await websocket.accept()
             
             # Step 3: Create isolated WebSocket manager via factory pattern
             websocket_manager = await self._create_websocket_manager(user_context)
@@ -457,8 +509,14 @@ class WebSocketSSOTRouter:
         try:
             logger.info(f"[ISOLATED MODE] Starting isolated connection {connection_id}")
             
-            # Step 1: Accept connection
-            await websocket.accept()
+            # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+            if accepted_subprotocol:
+                logger.info(f"[ISOLATED MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
+                await websocket.accept(subprotocol=accepted_subprotocol)
+            else:
+                logger.debug("[ISOLATED MODE] Accepting WebSocket without subprotocol")
+                await websocket.accept()
             
             # Step 2: SSOT Authentication with audit logging
             auth_result = await authenticate_websocket_ssot(websocket)
@@ -535,8 +593,14 @@ class WebSocketSSOTRouter:
         try:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
             
-            # Step 1: Accept connection
-            await websocket.accept()
+            # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+            if accepted_subprotocol:
+                logger.info(f"[LEGACY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
+                await websocket.accept(subprotocol=accepted_subprotocol)
+            else:
+                logger.debug("[LEGACY MODE] Accepting WebSocket without subprotocol")
+                await websocket.accept()
             
             # Step 2: Send legacy compatibility confirmation
             success_message = create_server_message({
