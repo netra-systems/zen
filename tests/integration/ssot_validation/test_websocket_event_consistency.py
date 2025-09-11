@@ -180,7 +180,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
             
             # Create agent state
             state = DeepAgentState(
-                user_request={"prompt": "Test AI optimization request"},
+                user_request="Test AI optimization request",
                 user_id=self.user_context.user_id,
                 chat_thread_id=self.user_context.thread_id,
                 run_id=self.user_context.run_id

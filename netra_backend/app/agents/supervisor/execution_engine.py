@@ -391,10 +391,14 @@ class ExecutionEngine:
         """
         # NEW: Use UserExecutionContext - prefer passed context over instance context
         effective_user_context = user_context or self.user_context
-        if effective_user_context:
+        # CRITICAL FIX: Prevent delegation loops that cause duplicate WebSocket events
+        # Only delegate if not already in a delegated context
+        if effective_user_context and not getattr(self, '_is_user_delegated', False):
             logger.info(f"Delegating execution to UserExecutionEngine for user {effective_user_context.user_id}")
             try:
                 user_engine = await self.create_user_engine(effective_user_context)
+                # Mark as delegated to prevent recursion
+                user_engine._execution_engine._is_user_delegated = True
                 result = await user_engine.execute_agent(context, effective_user_context)
                 await user_engine.cleanup()
                 return result

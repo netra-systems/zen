@@ -344,7 +344,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
             thread_id=f"workflow_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"workflow_run_{uuid.uuid4().hex[:8]}",
             request_id=f"workflow_req_{uuid.uuid4().hex[:8]}",
-            metadata={
+            agent_context={
                 "user_request": "Help me optimize my AI costs and performance",
                 "workflow_type": "cost_optimization"
             }
@@ -500,7 +500,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         
         # Create shared agent state for data handoff
         shared_state = DeepAgentState(
-            user_request={"message": "Optimize my $45k monthly AI spend"},
+            user_request="Optimize my $45k monthly AI spend",
             user_id=workflow_user_context.user_id,
             chat_thread_id=workflow_user_context.thread_id,
             run_id=workflow_user_context.run_id,
@@ -598,7 +598,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         
         # Create shared state
         shared_state = DeepAgentState(
-            user_request={"message": "Parallel workflow test"},
+            user_request="Parallel workflow test",
             user_id=workflow_user_context.user_id,
             chat_thread_id=workflow_user_context.thread_id,
             run_id=workflow_user_context.run_id,
@@ -701,7 +701,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         
         # Create shared state with data_helper results
         shared_state = DeepAgentState(
-            user_request={"message": "Test error recovery"},
+            user_request="Test error recovery",
             user_id=workflow_user_context.user_id,
             chat_thread_id=workflow_user_context.thread_id,
             run_id=workflow_user_context.run_id,

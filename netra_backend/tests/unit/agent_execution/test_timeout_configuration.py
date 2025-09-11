@@ -29,7 +29,7 @@ from netra_backend.app.core.agent_execution_tracker import (
     ExecutionState,
     get_execution_tracker
 )
-from shared.types.core_types import UserTier
+from netra_backend.app.agents.base.agent_business_rules import UserTier
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 

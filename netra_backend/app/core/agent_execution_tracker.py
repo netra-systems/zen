@@ -1226,6 +1226,15 @@ class AgentExecutionTracker:
             "created_with_ssot": True
         }
     
+    def get_default_timeout(self) -> int:
+        """
+        Get the default execution timeout value.
+        
+        Returns:
+            int: Default timeout in seconds for agent execution
+        """
+        return self.execution_timeout
+    
     def get_metrics(self) -> Dict[str, Any]:
         """Get execution metrics"""
         active_count = len(self._active_executions)

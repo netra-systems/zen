@@ -82,6 +82,7 @@ if it hasn't been deployed last 3 minutes.
 9.1) Git commit remaining related work in conceptual batches. 
 9.2) **SAFE PR CREATION**: Create PR WITHOUT changing current branch:
     - Record current branch (should be develop-long-lived): `git branch --show-current`
+    - pull latest, and handle merge conflicts
     - Create feature branch remotely: `git push origin HEAD:feature/issue-${ISSUE_NUMBER}-$(date +%s)`
     - Create PR from feature branch to current branch: `gh pr create --base develop-long-lived --head feature/issue-${ISSUE_NUMBER}-$(date +%s) --title "Fix: Issue #${ISSUE_NUMBER}" --body "Closes #${ISSUE_NUMBER}"`
     - VERIFY current branch unchanged: `git branch --show-current`

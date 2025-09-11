@@ -31,6 +31,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 import websockets
+from websockets.asyncio.client import ClientConnection
 from websockets import ConnectionClosed, InvalidStatus, WebSocketException
 
 from shared.isolated_environment import get_env
@@ -156,7 +157,7 @@ class RealWebSocketTestClient:
         self.auth_helper = E2EWebSocketAuthHelper(environment=environment)
         
         # Connection management
-        self.connection: Optional[websockets.WebSocketServerProtocol] = None
+        self.connection: Optional[ClientConnection] = None
         self.connection_id = f"ws_test_{uuid.uuid4().hex[:8]}"
         self.state = WebSocketConnectionState.DISCONNECTED
         self.authenticated_user: Optional[AuthenticatedUser] = None

@@ -35,6 +35,7 @@ from collections import defaultdict
 
 import pytest
 import websockets
+from websockets.asyncio.client import ClientConnection
 from websockets.exceptions import ConnectionClosed, WebSocketException
 
 # SSOT imports following CLAUDE.md absolute import requirements  
@@ -77,7 +78,7 @@ class TestWebSocketPersistenceRecovery(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.active_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.active_connections: Dict[str, ClientConnection] = {}
         self.connection_events: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         self.recovery_metrics: Dict[str, Dict[str, Any]] = {}
         
@@ -96,7 +97,7 @@ class TestWebSocketPersistenceRecovery(BaseIntegrationTest):
         self.active_connections.clear()
         await super().async_teardown()
     
-    async def create_persistent_connection(self, user_id: str) -> websockets.WebSocketServerProtocol:
+    async def create_persistent_connection(self, user_id: str) -> ClientConnection:
         """
         Create a WebSocket connection with persistence tracking.
         
@@ -146,7 +147,7 @@ class TestWebSocketPersistenceRecovery(BaseIntegrationTest):
     async def simulate_connection_drop(
         self, 
         user_id: str,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         method: str = "close"
     ) -> float:
         """
@@ -189,7 +190,7 @@ class TestWebSocketPersistenceRecovery(BaseIntegrationTest):
         user_id: str,
         max_attempts: int = 3,
         backoff_start: float = 1.0
-    ) -> Optional[websockets.WebSocketServerProtocol]:
+    ) -> Optional[ClientConnection]:
         """
         Attempt to recover a dropped connection with exponential backoff.
         
@@ -241,7 +242,7 @@ class TestWebSocketPersistenceRecovery(BaseIntegrationTest):
     async def monitor_connection_events(
         self,
         user_id: str,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         duration: float = 20.0
     ) -> List[Dict[str, Any]]:
         """

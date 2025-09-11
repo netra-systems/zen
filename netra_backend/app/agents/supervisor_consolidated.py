@@ -14,6 +14,9 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 
+# ExecutionContext imports
+from netra_backend.app.agents.base.interface import ExecutionContext
+
 # UserExecutionContext pattern imports
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
@@ -107,6 +110,11 @@ class SupervisorAgent(BaseAgent):
         
         self.flow_logger = get_supervisor_flow_logger()
         
+        # Initialize workflow executor for workflow orchestration
+        from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
+        self.workflow_executor = SupervisorWorkflowExecutor(self)
+        logger.info("✅ SupervisorAgent workflow_executor initialized")
+        
         # ARCHITECTURE: Conditional factory pre-configuration
         # Only pre-configure if WebSocket bridge is available, otherwise defer to execute()
         if websocket_bridge:
@@ -147,6 +155,55 @@ class SupervisorAgent(BaseAgent):
         logger.info("SupervisorAgent initialized with UserExecutionContext pattern")
 
     # === UserExecutionContext Pattern Implementation ===
+    
+    def _create_supervisor_execution_context(self, 
+                                           user_context: UserExecutionContext, 
+                                           agent_name: str = "Supervisor",
+                                           additional_metadata: Optional[Dict[str, Any]] = None) -> ExecutionContext:
+        """Create supervisor-specific execution context from UserExecutionContext.
+        
+        This method bridges the gap between UserExecutionContext (user isolation pattern)
+        and ExecutionContext (agent execution pattern) for supervisor operations.
+        
+        Args:
+            user_context: UserExecutionContext with user-specific data
+            agent_name: Name of the supervisor agent
+            additional_metadata: Optional additional metadata
+            
+        Returns:
+            ExecutionContext configured for supervisor execution
+        """
+        # Create execution context from user context
+        execution_context = ExecutionContext(
+            request_id=getattr(user_context, 'request_id', f"supervisor_{user_context.run_id}"),
+            user_id=str(user_context.user_id),
+            run_id=str(user_context.run_id),
+            agent_name=agent_name,
+            session_id=getattr(user_context, 'session_id', None),
+            correlation_id=getattr(user_context, 'correlation_id', None),
+            stream_updates=True,  # Supervisor always streams updates
+            parameters={
+                "user_request": user_context.metadata.get("user_request", ""),
+                "thread_id": str(user_context.thread_id),
+                "websocket_connection_id": getattr(user_context, 'websocket_connection_id', None)
+            },
+            metadata=user_context.metadata.copy() if user_context.metadata else {}
+        )
+        
+        # Add additional metadata if provided
+        if additional_metadata:
+            execution_context.metadata.update(additional_metadata)
+        
+        # Add supervisor-specific metadata
+        execution_context.metadata.update({
+            "supervisor_execution": True,
+            "user_isolation_enabled": True,
+            "execution_pattern": "UserExecutionContext"
+        })
+        
+        logger.debug(f"Created supervisor execution context for user {user_context.user_id}, run {user_context.run_id}")
+        
+        return execution_context
     
     async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
         """Execute the supervisor with UserExecutionContext pattern.

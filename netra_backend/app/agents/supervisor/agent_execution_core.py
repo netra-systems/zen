@@ -51,6 +51,14 @@ from netra_backend.app.core.timeout_configuration import (
     TimeoutTier
 )
 
+# CRITICAL ISSUE #387 REMEDIATION: Agent Execution Prerequisites Validation
+from netra_backend.app.agents.supervisor.agent_execution_prerequisites import (
+    AgentExecutionPrerequisites,
+    PrerequisiteValidationLevel,
+    AgentExecutionPrerequisiteError,
+    validate_all_agent_execution_prerequisites
+)
+
 logger = central_logger.get_logger(__name__)
 
 
@@ -94,10 +102,14 @@ class AgentExecutionCore:
     # HEARTBEAT_INTERVAL: Send heartbeat every 5 seconds
     HEARTBEAT_INTERVAL = 5.0
     
+    # DEFAULT_TIMEOUT: Default execution timeout for agents - reduced for faster feedback  
+    DEFAULT_TIMEOUT = 25.0
+    
     def __init__(self, 
                  registry: 'AgentRegistry', 
                  websocket_bridge: Optional['AgentWebSocketBridge'] = None,
-                 default_tier: Optional[TimeoutTier] = None):
+                 default_tier: Optional[TimeoutTier] = None,
+                 prerequisite_validation_level: Optional[PrerequisiteValidationLevel] = None):
         self.registry = registry
         self.websocket_bridge = websocket_bridge
         self.execution_tracker = get_execution_tracker()
@@ -111,13 +123,27 @@ class AgentExecutionCore:
         self.default_tier = default_tier or TimeoutTier.FREE
         self._default_timeout = get_agent_execution_timeout(self.default_tier)
         
+        # CRITICAL ISSUE #387 REMEDIATION: Initialize prerequisites validation
+        self.prerequisite_validation_level = prerequisite_validation_level or PrerequisiteValidationLevel.STRICT
+        self.prerequisites_validator = AgentExecutionPrerequisites(self.prerequisite_validation_level)
+        
+        # Calculate registry agent count safely (handle Mocks in testing)
+        registry_count = 0
+        if registry:
+            try:
+                registry_dict = getattr(registry, '_registry', {})
+                registry_count = len(registry_dict) if hasattr(registry_dict, '__len__') else 0
+            except (TypeError, AttributeError):
+                registry_count = 0  # Handle Mock objects in tests
+        
         logger.info(
             f"🚀 AGENT_CORE_INIT: AgentExecutionCore initialized successfully. "
             f"Tier: {self.default_tier.value}, Default_timeout: {self._default_timeout}s, "
             f"Streaming_capable: {self.default_tier in [TimeoutTier.ENTERPRISE, TimeoutTier.PLATFORM]}, "
             f"WebSocket_bridge: {'configured' if websocket_bridge else 'missing'}, "
-            f"Registry_agents: {len(getattr(registry, '_registry', {})) if registry else 0}. "
-            f"Ready for agent execution with comprehensive monitoring."
+            f"Registry_agents: {registry_count}, "
+            f"Prerequisites_validation: {self.prerequisite_validation_level.value}. "
+            f"Ready for agent execution with comprehensive monitoring and Issue #387 prerequisites validation."
         )
     
     def get_execution_timeout(self, tier: Optional[TimeoutTier] = None, streaming: bool = False) -> float:
@@ -227,6 +253,49 @@ class AgentExecutionCore:
                 f"This failure protects $500K+ ARR by preventing cross-user data contamination."
             )
             raise
+        
+        # CRITICAL ISSUE #387 REMEDIATION: Validate prerequisites BEFORE expensive operations
+        try:
+            prerequisite_result = await self.prerequisites_validator.validate_all_prerequisites(
+                context, user_execution_context
+            )
+            
+            if prerequisite_result.is_valid:
+                logger.info(
+                    f"🔍 PREREQUISITES_VALIDATION_SUCCESS: All prerequisites validated successfully. "
+                    f"Agent: {context.agent_name}, User: {user_context.user_id[:8]}..., "
+                    f"Validation_time: {prerequisite_result.validation_time_ms:.1f}ms, "
+                    f"Level: {self.prerequisite_validation_level.value}, "
+                    f"Business_impact: Prevents failed execution, protects $500K+ ARR through early validation."
+                )
+            else:
+                logger.warning(
+                    f"🔍 PREREQUISITES_VALIDATION_WARNING: Some prerequisites failed but continuing in {self.prerequisite_validation_level.value} mode. "
+                    f"Agent: {context.agent_name}, Failed_count: {len(prerequisite_result.failed_prerequisites)}, "
+                    f"Failed_items: {', '.join(prerequisite_result.failed_prerequisites[:3])}, "
+                    f"Validation_time: {prerequisite_result.validation_time_ms:.1f}ms"
+                )
+                
+        except AgentExecutionPrerequisiteError as prereq_error:
+            logger.error(
+                f"🔍 PREREQUISITES_VALIDATION_FAILURE: Critical prerequisites failed - blocking execution. "
+                f"Agent: {context.agent_name}, User: {user_context.user_id[:8]}..., "
+                f"Failed_prerequisites: {', '.join(prereq_error.failed_prerequisites)}, "
+                f"Error: {str(prereq_error)}, "
+                f"Business_impact: Early failure prevents resource waste and provides fast user feedback. "
+                f"This protects $500K+ ARR by ensuring reliable agent execution."
+            )
+            raise
+        except Exception as validation_error:
+            logger.error(
+                f"🔍 PREREQUISITES_VALIDATION_ERROR: Unexpected error during prerequisites validation. "
+                f"Agent: {context.agent_name}, Error: {validation_error}, "
+                f"Error_type: {type(validation_error).__name__}, "
+                f"Fallback: Continuing execution based on validation level {self.prerequisite_validation_level.value}"
+            )
+            # In permissive/demo mode, continue execution despite validation errors
+            if self.prerequisite_validation_level == PrerequisiteValidationLevel.STRICT:
+                raise
         
         # Determine appropriate timeout based on tier and execution type
         execution_timeout = timeout or self.get_execution_timeout(tier, streaming)

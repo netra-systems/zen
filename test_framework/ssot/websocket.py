@@ -83,6 +83,8 @@ class MockWebSocketConnection:
 
 class WebSocketEventType(Enum):
     """Standard WebSocket event types for testing."""
+    __test__ = False  # Tell pytest this is not a test class
+    
     AGENT_STARTED = "agent_started"
     AGENT_THINKING = "agent_thinking"
     AGENT_COMPLETED = "agent_completed"

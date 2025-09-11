@@ -36,12 +36,12 @@ class TestSupervisorOrchestration(BaseTestCase):
         self.websocket_bridge.websocket_manager = Mock()
         self.websocket_bridge.emit_agent_event = AsyncMock()
         
-        # Create real UserExecutionContext
+        # Create real UserExecutionContext using proper constructor
         self.test_context = UserExecutionContext(
             user_id="test-user-basic",
             thread_id="test-thread-basic", 
             run_id="test-run-basic",
-            metadata={"user_request": "basic test request"}
+            agent_context={"user_request": "basic test request"}
         ).with_db_session(AsyncMock())
         
         # Mock registries

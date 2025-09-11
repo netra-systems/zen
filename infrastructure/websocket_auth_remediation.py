@@ -64,9 +64,10 @@ class WebSocketAuthHelpers:
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.auth_timeout = float(get_env("WEBSOCKET_AUTH_TIMEOUT", "15.0"))
-        self.retry_attempts = int(get_env("WEBSOCKET_AUTH_RETRIES", "3"))
-        self.backoff_multiplier = float(get_env("WEBSOCKET_AUTH_BACKOFF", "1.5"))
+        env = get_env()
+        self.auth_timeout = float(env.get("WEBSOCKET_AUTH_TIMEOUT", "15.0"))
+        self.retry_attempts = int(env.get("WEBSOCKET_AUTH_RETRIES", "3"))
+        self.backoff_multiplier = float(env.get("WEBSOCKET_AUTH_BACKOFF", "1.5"))
         
     async def validate_websocket_token(
         self, 
@@ -225,14 +226,15 @@ class WebSocketAuthHelpers:
     
     def _get_auth_service_url(self, use_internal: bool) -> str:
         """Get auth service URL for validation calls."""
+        env = get_env()
         if use_internal:
             # Use internal VPC URL for better performance and reliability
-            internal_url = get_env("AUTH_SERVICE_INTERNAL_URL")
+            internal_url = env.get("AUTH_SERVICE_INTERNAL_URL")
             if internal_url:
                 return internal_url
         
         # Fallback to external URL
-        external_url = get_env("AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai")
+        external_url = env.get("AUTH_SERVICE_URL", "https://auth.staging.netrasystems.ai")
         return external_url
 
 
@@ -241,9 +243,10 @@ class WebSocketAuthCircuitBreaker:
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.failure_threshold = int(get_env("AUTH_CIRCUIT_BREAKER_THRESHOLD", "5"))
-        self.recovery_timeout = int(get_env("AUTH_CIRCUIT_BREAKER_TIMEOUT", "60"))
-        self.half_open_max_calls = int(get_env("AUTH_CIRCUIT_BREAKER_HALF_OPEN", "3"))
+        env = get_env()
+        self.failure_threshold = int(env.get("AUTH_CIRCUIT_BREAKER_THRESHOLD", "5"))
+        self.recovery_timeout = int(env.get("AUTH_CIRCUIT_BREAKER_TIMEOUT", "60"))
+        self.half_open_max_calls = int(env.get("AUTH_CIRCUIT_BREAKER_HALF_OPEN", "3"))
         
         self.failure_count = 0
         self.last_failure_time = None
@@ -326,7 +329,8 @@ class WebSocketAuthMonitor:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.auth_attempts = []
-        self.max_history = int(get_env("AUTH_MONITOR_HISTORY", "1000"))
+        env = get_env()
+        self.max_history = int(env.get("AUTH_MONITOR_HISTORY", "1000"))
         
     def record_auth_attempt(self, result: WebSocketAuthResult):
         """Record an authentication attempt for monitoring."""
@@ -413,7 +417,8 @@ class WebSocketAuthManager:
         self.monitor = WebSocketAuthMonitor()
         
         # Demo mode configuration
-        self.demo_mode = get_env("DEMO_MODE", "0") == "1"
+        env = get_env()
+        self.demo_mode = env.get("DEMO_MODE", "0") == "1"
         if self.demo_mode:
             self.logger.info("WebSocket auth manager running in DEMO_MODE - auth bypass enabled")
     

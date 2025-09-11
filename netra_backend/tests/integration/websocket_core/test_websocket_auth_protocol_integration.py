@@ -17,6 +17,7 @@ import asyncio
 import base64
 import json
 import websockets
+from websockets.asyncio.client import ClientConnection
 import ssl
 from typing import List, Dict, Optional
 from unittest.mock import patch, MagicMock
@@ -93,7 +94,7 @@ class TestWebSocketAuthProtocolIntegration(SSotAsyncTestCase):
         self, 
         subprotocols: List[str], 
         timeout: int = 10
-    ) -> Optional[websockets.WebSocketClientProtocol]:
+    ) -> Optional[ClientConnection]:
         """
         Create a WebSocket connection with specified subprotocols
         

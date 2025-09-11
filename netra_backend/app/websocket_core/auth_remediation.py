@@ -66,13 +66,14 @@ class WebSocketAuthIntegration:
     
     def _load_config_from_environment(self) -> WebSocketAuthConfig:
         """Load configuration from environment variables."""
+        env = get_env()
         return WebSocketAuthConfig(
-            auth_timeout=float(get_env("WEBSOCKET_AUTH_TIMEOUT", "15.0")),
-            retry_attempts=int(get_env("WEBSOCKET_AUTH_RETRIES", "3")),
-            circuit_breaker_enabled=get_env("WEBSOCKET_AUTH_CIRCUIT_BREAKER", "true").lower() == "true",
-            demo_mode_enabled=get_env("DEMO_MODE", "0") == "1",
-            internal_auth_service=get_env("AUTH_SERVICE_INTERNAL_URL") is not None,
-            monitoring_enabled=get_env("WEBSOCKET_AUTH_MONITORING", "true").lower() == "true"
+            auth_timeout=float(env.get("WEBSOCKET_AUTH_TIMEOUT", "15.0")),
+            retry_attempts=int(env.get("WEBSOCKET_AUTH_RETRIES", "3")),
+            circuit_breaker_enabled=env.get("WEBSOCKET_AUTH_CIRCUIT_BREAKER", "true").lower() == "true",
+            demo_mode_enabled=env.get("DEMO_MODE", "0") == "1",
+            internal_auth_service=env.get("AUTH_SERVICE_INTERNAL_URL") is not None,
+            monitoring_enabled=env.get("WEBSOCKET_AUTH_MONITORING", "true").lower() == "true"
         )
     
     async def authenticate_websocket_connection(
