@@ -369,6 +369,7 @@ class UnifiedWebSocketAuthenticator:
             circuit_state = await self._check_circuit_breaker()
             if circuit_state == "OPEN":
                 error_msg = "Authentication circuit breaker is OPEN - too many recent failures"
+                logger.critical(f"🚨 CIRCUIT BREAKER OPEN: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'}, failure_count: {self._circuit_breaker['failure_count']})")
                 logger.warning(f"SSOT WEBSOCKET AUTH: {error_msg}")
                 self._websocket_auth_failures += 1
                 
@@ -381,6 +382,7 @@ class UnifiedWebSocketAuthenticator:
             # Validate WebSocket connection state first
             if not self._is_websocket_valid_for_auth(websocket):
                 error_msg = f"WebSocket in invalid state for authentication: {_safe_websocket_state_for_logging(connection_state)}"
+                logger.critical(f"🚨 WEBSOCKET STATE ERROR: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'})")
                 logger.error(f"SSOT WEBSOCKET AUTH: {error_msg}")
                 await self._record_circuit_breaker_failure()
                 self._websocket_auth_failures += 1
@@ -757,6 +759,7 @@ class UnifiedWebSocketAuthenticator:
             auth_result: Failed authentication result
             close_connection: Whether to close WebSocket connection after error
         """
+        logger.critical(f"🚨 HANDLING AUTH FAILURE: {auth_result.error_code}: {auth_result.error_message} (close_connection: {close_connection})")
         logger.warning(f"SSOT WEBSOCKET AUTH: Handling auth failure - {auth_result.error_code}: {auth_result.error_message}")
         
         try:
