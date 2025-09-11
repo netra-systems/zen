@@ -340,7 +340,7 @@ class TestAgentResponseQualityValidation(BaseIntegrationTest):
     def setup_method(self):
         """Set up test fixtures."""
         super().setup_method()
-        self.env = IsolatedEnvironment()
+        self.env = self.get_env()  # Use SSOT environment from base class
         self.quality_validator = ResponseQualityValidator()
         self.test_user_id = "test_user_quality"
         self.test_thread_id = "thread_quality_001"

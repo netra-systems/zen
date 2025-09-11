@@ -704,10 +704,11 @@ class GCPWebSocketInitializationValidator:
             
             # Phase 2: Validate Services (Agent Supervisor, WebSocket Bridge)
             if self.current_state != GCPReadinessState.FAILED:
+                # PERFORMANCE OPTIMIZATION: Reduced timeout from 2.0s to 1.0s for faster service validation
                 self.logger.info("📋 Phase 2: Validating services (Agent Supervisor, WebSocket Bridge)...")
                 services_ready = await self._validate_service_group([
                     'agent_supervisor', 'websocket_bridge'
-                ], timeout_seconds=2.0)
+                ], timeout_seconds=1.0)
                 
                 if not services_ready['success']:
                     failed_services.extend(services_ready['failed'])
@@ -718,10 +719,11 @@ class GCPWebSocketInitializationValidator:
             
             # Phase 3: Validate WebSocket Integration
             if self.current_state == GCPReadinessState.SERVICES_READY:
+                # PERFORMANCE OPTIMIZATION: Reduced timeout from 1.0s to 0.5s for faster integration validation
                 self.logger.info("📋 Phase 3: Validating WebSocket integration...")
                 integration_ready = await self._validate_service_group([
                     'websocket_integration'
-                ], timeout_seconds=1.0)
+                ], timeout_seconds=0.5)
                 
                 if not integration_ready['success']:
                     failed_services.extend(integration_ready['failed'])
