@@ -999,60 +999,14 @@ class DatabaseTestManager:
 DatabaseTestHelper = DatabaseTestUtility
 
 # Compatibility aliases for integration tests (Issue #308)
-class SSotDatabaseTestMixin:
-    """SSOT Database Test Mixin for integration tests.
-    
-    This mixin provides common database testing functionality that can be
-    mixed into test classes to provide unified database access patterns.
-    """
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._db_utility = None
-    
-    async def setUp_database(self):
-        """Set up database utility for testing."""
-        self._db_utility = DatabaseTestUtility("netra_backend")
-        await self._db_utility.initialize()
-        
-    async def tearDown_database(self):
-        """Clean up database utility after testing."""
-        if self._db_utility:
-            await self._db_utility.cleanup()
-            self._db_utility = None
-    
-    @property
-    def db_utility(self) -> DatabaseTestUtility:
-        """Get the database utility instance."""
-        if not self._db_utility:
-            raise RuntimeError("Database utility not initialized. Call setUp_database() first.")
-        return self._db_utility
-    
-    async def get_test_session(self):
-        """Get a test database session."""
-        return await self.db_utility.get_test_session()
-    
-    async def create_test_user(self, **kwargs):
-        """Create a test user."""
-        async with await self.get_test_session() as session:
-            return await self.db_utility.create_test_user(session, **kwargs)
-    
-    async def create_test_thread(self, user_id: str, **kwargs):
-        """Create a test thread."""
-        async with await self.get_test_session() as session:
-            return await self.db_utility.create_test_thread(session, user_id, **kwargs)
-    
-    async def create_test_message(self, thread_id: str, **kwargs):
-        """Create a test message."""
-        async with await self.get_test_session() as session:
-            return await self.db_utility.create_test_message(session, thread_id, **kwargs)
+SSotDatabaseTestMixin = DatabaseTestUtility  # Mixin-style compatibility alias
 
 # Export SSOT database utilities
 __all__ = [
     'DatabaseTestUtility',
     'DatabaseTestHelper',   # Legacy alias for DatabaseTestUtility
     'DatabaseTestManager',  # Added for legacy compatibility
-    'SSotDatabaseTestMixin', # SSOT mixin for test classes
+    'SSotDatabaseTestMixin', # Compatibility alias for integration tests
     'PostgreSQLTestUtility', 
     'ClickHouseTestUtility',
     'DatabaseTestMetrics',

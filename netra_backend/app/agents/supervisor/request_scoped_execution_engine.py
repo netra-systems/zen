@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -128,8 +128,16 @@ class RequestScopedExecutionEngine:
         self.user_context = validate_user_context(user_context)
         
         if not registry:
+            logger.error(
+                f"❌ VALIDATION FAILURE: AgentRegistry cannot be None for RequestScopedExecutionEngine. "
+                f"User: {user_context.user_id[:8]}..., Engine initialization failed."
+            )
             raise ValueError("AgentRegistry cannot be None")
         if not websocket_bridge:
+            logger.error(
+                f"❌ VALIDATION FAILURE: AgentWebSocketBridge cannot be None for RequestScopedExecutionEngine. "
+                f"User: {user_context.user_id[:8]}..., Engine initialization failed."
+            )
             raise ValueError("AgentWebSocketBridge cannot be None")
         
         self.registry = registry
@@ -174,7 +182,7 @@ class RequestScopedExecutionEngine:
     
     async def execute_agent(self, 
                            context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
+                           state: UserExecutionContext) -> AgentExecutionResult:
         """Execute a single agent with complete request isolation.
         
         This method provides the same interface as the original ExecutionEngine
@@ -192,6 +200,11 @@ class RequestScopedExecutionEngine:
             RuntimeError: If execution fails
         """
         if not self._is_active:
+            logger.error(
+                f"❌ VALIDATION FAILURE: Attempted to execute agent on inactive ExecutionEngine. "
+                f"Engine ID: {self.engine_id}, User: {self.user_context.user_id[:8]}..., "
+                f"Agent: {context.agent_name}, This indicates improper engine lifecycle management."
+            )
             raise ValueError("ExecutionEngine is no longer active")
         
         # Validate execution context
@@ -199,6 +212,12 @@ class RequestScopedExecutionEngine:
         
         # Ensure context matches our user context
         if context.user_id != self.user_context.user_id:
+            logger.error(
+                f"❌ VALIDATION FAILURE: Context user_id mismatch in agent execution. "
+                f"Expected: {self.user_context.user_id}, Got: {context.user_id}, "
+                f"Agent: {context.agent_name}, Engine: {self.engine_id}, "
+                f"This is a critical security violation - user context isolation compromised."
+            )
             raise ValueError(
                 f"Context user_id mismatch: expected {self.user_context.user_id}, "
                 f"got {context.user_id}"
@@ -333,16 +352,36 @@ class RequestScopedExecutionEngine:
             ValueError: If context contains invalid values
         """
         if not context.user_id or not context.user_id.strip():
+            logger.error(
+                f"❌ VALIDATION FAILURE: Invalid execution context - user_id must be non-empty. "
+                f"Got: {context.user_id!r}, Agent: {getattr(context, 'agent_name', 'unknown')}"
+            )
             raise ValueError("Invalid execution context: user_id must be non-empty")
         
         if not context.run_id or not context.run_id.strip():
+            logger.error(
+                f"❌ VALIDATION FAILURE: Invalid execution context - run_id must be non-empty. "
+                f"Got: {context.run_id!r}, User: {context.user_id[:8]}..., "
+                f"Agent: {getattr(context, 'agent_name', 'unknown')}"
+            )
             raise ValueError("Invalid execution context: run_id must be non-empty")
         
         if context.run_id == 'registry':
+            logger.error(
+                f"❌ VALIDATION FAILURE: Invalid execution context - run_id cannot be 'registry' placeholder. "
+                f"User: {context.user_id[:8]}..., Agent: {getattr(context, 'agent_name', 'unknown')}, "
+                f"This indicates improper context initialization."
+            )
             raise ValueError("Invalid execution context: run_id cannot be 'registry' placeholder")
         
         # Validate consistency with user context
         if context.user_id != self.user_context.user_id:
+            logger.error(
+                f"❌ VALIDATION FAILURE: Context user_id mismatch during validation. "
+                f"Expected: {self.user_context.user_id}, Got: {context.user_id}, "
+                f"Agent: {getattr(context, 'agent_name', 'unknown')}, "
+                f"This is a critical security violation - user isolation compromised."
+            )
             raise ValueError(
                 f"Context user_id mismatch: expected {self.user_context.user_id}, got {context.user_id}"
             )
@@ -355,7 +394,7 @@ class RequestScopedExecutionEngine:
     
     async def _execute_with_error_handling(self, 
                                           context: AgentExecutionContext,
-                                          state: DeepAgentState,
+                                          state: UserExecutionContext,
                                           execution_id: str) -> AgentExecutionResult:
         """Execute agent with error handling and fallback.
         

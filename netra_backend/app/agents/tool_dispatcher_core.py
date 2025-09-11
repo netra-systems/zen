@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.logging_config import central_logger
@@ -155,7 +155,7 @@ class ToolDispatcher:
         self,
         tool_name: str,
         parameters: Dict[str, Any],
-        state: DeepAgentState,
+        state: UserExecutionContext,
         run_id: str
     ) -> ToolDispatchResponse:
         """Dispatch a tool with parameters - only available on request-scoped instances.
