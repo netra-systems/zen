@@ -50,23 +50,29 @@ If changes made then go back to 2.1
 2.4 do E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE
 Saving the actual test output to prove it passes or fails in reports at each step. 
 
-IF there is the need: Create a new git issue or update existing
+2.5 IF there is the need: Create a new git issue or update existing
 The issue format is E2E-DEPLOY-{human skimable name of failure reason}-{test short reference name}
 or update existing
 
-3) For each failure, spawn a multi-agent team to do a five whys bug fix per claude.md (Read the GCP staging logs for errors too). MUST BE SSOT. MUST solve the REAL ROOT ROOT ROOT ISSUE.
-Update LOG with status.
+3) SNST: For each failure, spawn a -agent team to do a five whys bug fix per claude.md
+3.1 Read the GCP staging logs for errors too.
+MUST BE SSOT. MUST solve the REAL ROOT ROOT ROOT ISSUE.
+do E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE-PUSH
+do UPDATE-COMMENT
 
-4) Spawn a new agent to audit SSOT and prove with evidence or disprove
-Update LOG with status.
-IF the situation is bad, revert back to step 3) and repeat until 4) passes.
+4) SNST: Audit SSOT and prove with evidence or disprove
+do E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE-PUSH
+do UPDATE-COMMENT
 
-5) Spawn a new agent 
+IF the situation is bad, revert it, and go back to step 3).
+
+5) SNST:
 PROVE THAT PRIOR AGENTS CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
 otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and
 do not introduce new problems.
-Update LOG with status.
-IF the change is false go back to step 3
+do E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE-PUSH
+do UPDATE-COMMENT
+IF the change is false go back to step 3.
 
 6)  GITHUB PR INTEGRATION
 Use github python tools or local (gh) commands.
