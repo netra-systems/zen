@@ -115,10 +115,7 @@ class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
             context.context_data["content_filtering"] = "strict"
             context.context_data["safety_level"] = "maximum"
             
-            agent = DataHelperAgent(
-                agent_id="content_safety_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test harmful content scenarios
             harmful_scenarios = [
@@ -209,10 +206,7 @@ class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
             context.context_data["content_classification"] = "enabled"
             context.context_data["classification_threshold"] = 0.8
             
-            agent = DataHelperAgent(
-                agent_id="classification_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test content classification scenarios
             classification_tests = [
@@ -313,10 +307,7 @@ class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
             context.context_data["content_sanitization"] = "enabled"
             context.context_data["sanitization_mode"] = "filter_and_replace"
             
-            agent = DataHelperAgent(
-                agent_id="sanitization_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test content sanitization scenarios
             sanitization_tests = [
@@ -424,10 +415,7 @@ class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
                 context.context_data["content_filter_level"] = age_config["filter_level"]
                 context.context_data["parental_controls"] = age_config["age"] < 18
                 
-                agent = DataHelperAgent(
-                    agent_id=f"age_filter_agent_{age_config['group']}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 # Test age-appropriate scenarios
                 test_query = "Explain optimization techniques and their applications"
@@ -502,10 +490,7 @@ class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
             context.context_data["inclusivity_mode"] = "strict"
             context.context_data["cultural_context"] = "global"
             
-            agent = DataHelperAgent(
-                agent_id="cultural_sensitivity_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test cultural sensitivity scenarios
             sensitivity_scenarios = [
@@ -600,10 +585,7 @@ class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
             context.context_data["audit_level"] = "detailed"
             context.context_data["compliance_mode"] = "enterprise"
             
-            agent = DataHelperAgent(
-                agent_id="audit_trail_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test audit trail scenarios
             audit_scenarios = [
@@ -689,10 +671,7 @@ class TestAgentResponseContentFilteringSafety(BaseIntegrationTest):
             context.context_data["monitoring_sensitivity"] = "high"
             context.context_data["alert_threshold"] = 0.7
             
-            agent = DataHelperAgent(
-                agent_id="content_monitoring_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test real-time monitoring scenarios
             monitoring_tests = [

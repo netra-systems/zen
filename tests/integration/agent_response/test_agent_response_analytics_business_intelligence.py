@@ -111,10 +111,7 @@ class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
             context.context_data["analytics_mode"] = "real_time"
             context.context_data["metrics_collection"] = "enabled"
             
-            agent = DataHelperAgent(
-                agent_id="analytics_realtime_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Generate multiple queries to create analytics data
             analytics_queries = [
@@ -214,10 +211,7 @@ class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
                 "objectives": ["cost_reduction", "performance_optimization", "scalability"]
             }
             
-            agent = DataHelperAgent(
-                agent_id="bi_insights_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Business intelligence query scenarios
             bi_scenarios = [
@@ -339,10 +333,7 @@ class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
                 "efficiency_scores": [0.75, 0.78, 0.80, 0.82, 0.79, 0.85, 0.87, 0.83, 0.89, 0.91, 0.93, 0.90]
             }
             
-            agent = DataHelperAgent(
-                agent_id="predictive_analytics_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Predictive analytics scenarios
             predictive_scenarios = [
@@ -458,10 +449,7 @@ class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
                 "data_sources": ["optimization_metrics", "user_analytics", "performance_data"]
             }
             
-            agent = DataHelperAgent(
-                agent_id="dashboard_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Dashboard generation scenarios
             dashboard_scenarios = [
@@ -573,10 +561,7 @@ class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
                 "timestamps": ["2024-01-01", "2024-01-02", "2024-01-03", "2024-01-04", "2024-01-05"]
             }
             
-            agent = DataHelperAgent(
-                agent_id="anomaly_detection_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Anomaly detection scenarios
             anomaly_scenarios = [
@@ -686,10 +671,7 @@ class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
             ]
             context.context_data["correlation_analysis"] = True
             
-            agent = DataHelperAgent(
-                agent_id="cross_dimensional_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Cross-dimensional analysis scenarios
             dimensional_scenarios = [
@@ -797,10 +779,7 @@ class TestAgentResponseAnalyticsBusinessIntelligence(BaseIntegrationTest):
             context.context_data["export_formats"] = ["csv", "json", "excel", "pdf"]
             context.context_data["integration_targets"] = ["tableau", "powerbi", "looker", "qlik"]
             
-            agent = DataHelperAgent(
-                agent_id="analytics_export_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Export integration scenarios
             export_scenarios = [

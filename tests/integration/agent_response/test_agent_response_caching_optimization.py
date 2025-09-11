@@ -81,10 +81,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
             # First request - should miss cache and compute response
             start_time = time.time()
             
-            agent = DataHelperAgent(
-                agent_id="cache_agent_001",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Generate initial response
             query_hash = hashlib.md5(
@@ -132,10 +129,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
         
         with create_isolated_execution_context(user_id) as context:
             
-            agent = DataHelperAgent(
-                agent_id="invalidation_agent_001",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Initial cached response
             initial_result = await agent.arun(
@@ -180,10 +174,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
             context_a.context_data["company"] = "TechCorp"
             context_a.context_data["data_access"] = ["internal", "confidential"]
             
-            agent_a = DataHelperAgent(
-                agent_id="cache_agent_a_001",
-                user_context=context_a
-            )
+            agent_a = DataHelperAgent()
             
             result_a = await agent_a.arun(
                 input_data="Show company-specific optimization data",
@@ -195,10 +186,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
             context_b.context_data["company"] = "InnovateLab"
             context_b.context_data["data_access"] = ["public"]
             
-            agent_b = DataHelperAgent(
-                agent_id="cache_agent_b_001",
-                user_context=context_b
-            )
+            agent_b = DataHelperAgent()
             
             result_b = await agent_b.arun(
                 input_data="Show company-specific optimization data",
@@ -232,10 +220,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
         
         with create_isolated_execution_context(user_id) as context:
             
-            agent = DataHelperAgent(
-                agent_id="compression_agent_001",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Generate large response for compression testing
             large_query = "Generate a comprehensive optimization report with detailed metrics, " \
@@ -284,10 +269,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
             
             with create_isolated_execution_context(user_id) as context:
                 
-                agent = DataHelperAgent(
-                    agent_id=f"memory_agent_{i:03d}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 # Generate varying response sizes
                 query = f"Optimization analysis #{i} with detailed metrics"
@@ -333,10 +315,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
             
             with create_isolated_execution_context(user_id) as context:
                 
-                agent = DataHelperAgent(
-                    agent_id=f"load_agent_{user_index:03d}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -392,10 +371,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
             context1.context_data["session_id"] = "session_001"
             context1.context_data["device"] = "desktop"
             
-            agent1 = DataHelperAgent(
-                agent_id="consistency_agent_001",
-                user_context=context1
-            )
+            agent1 = DataHelperAgent()
             
             result1 = await agent1.arun(
                 input_data=test_query,
@@ -407,10 +383,7 @@ class TestAgentResponseCachingOptimization(BaseIntegrationTest):
             context2.context_data["session_id"] = "session_002"
             context2.context_data["device"] = "mobile"
             
-            agent2 = DataHelperAgent(
-                agent_id="consistency_agent_002",
-                user_context=context2
-            )
+            agent2 = DataHelperAgent()
             
             result2 = await agent2.arun(
                 input_data=test_query,

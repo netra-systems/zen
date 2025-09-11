@@ -98,10 +98,7 @@ class TestAgentResponsePerformanceOptimization(BaseIntegrationTest):
         
         with create_isolated_execution_context(user_id) as context:
             
-            agent = DataHelperAgent(
-                agent_id="latency_test_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test simple queries (should be fast)
             simple_latencies = []
@@ -167,10 +164,7 @@ class TestAgentResponsePerformanceOptimization(BaseIntegrationTest):
             
             with create_isolated_execution_context(user_id) as context:
                 
-                agent = DataHelperAgent(
-                    agent_id=f"concurrent_agent_{user_index:03d}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -245,10 +239,7 @@ class TestAgentResponsePerformanceOptimization(BaseIntegrationTest):
         
         with create_isolated_execution_context(user_id) as context:
             
-            agent = DataHelperAgent(
-                agent_id="size_optimization_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test different response size scenarios
             size_test_queries = [
@@ -310,10 +301,7 @@ class TestAgentResponsePerformanceOptimization(BaseIntegrationTest):
             
             with create_isolated_execution_context(user_id) as context:
                 
-                agent = DataHelperAgent(
-                    agent_id=f"memory_test_agent_{i:03d}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 # Simulate memory usage measurement
                 pre_query_memory = self._estimate_memory_usage()
@@ -389,10 +377,7 @@ class TestAgentResponsePerformanceOptimization(BaseIntegrationTest):
             context.context_data["streaming_enabled"] = True
             context.context_data["chunk_size"] = 100  # characters
             
-            agent = DataHelperAgent(
-                agent_id="streaming_test_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Long query that benefits from streaming
             long_query = "Generate a comprehensive optimization report including " \
@@ -449,10 +434,7 @@ class TestAgentResponsePerformanceOptimization(BaseIntegrationTest):
         with create_isolated_execution_context(user_id) as context:
             context.context_data["caching_enabled"] = True
             
-            agent = DataHelperAgent(
-                agent_id="caching_performance_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             test_query = "Analyze optimization metrics for performance testing"
             
@@ -512,10 +494,7 @@ class TestAgentResponsePerformanceOptimization(BaseIntegrationTest):
         with create_isolated_execution_context(user_id) as context:
             context.context_data["adaptive_performance"] = True
             
-            agent = DataHelperAgent(
-                agent_id="complexity_adaptation_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test queries of varying complexity
             complexity_tests = [

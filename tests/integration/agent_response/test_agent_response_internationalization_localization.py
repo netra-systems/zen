@@ -132,10 +132,7 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                 context.context_data["region"] = locale_info["region"]
                 context.context_data["i18n_enabled"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"i18n_agent_{locale_code}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -252,10 +249,7 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                 context.context_data["cultural_adaptation"] = True
                 context.context_data["cultural_context"] = scenario["cultural_aspects"]
                 
-                agent = DataHelperAgent(
-                    agent_id=f"cultural_agent_{scenario['locale']}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -340,10 +334,7 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                 context.context_data["number_format"] = locale_info["number_format"]
                 context.context_data["formatting_enabled"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"formatting_agent_{locale_code}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -453,10 +444,7 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                 context.context_data["text_direction"] = scenario["expected_direction"]
                 context.context_data["rtl_support"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"rtl_agent_{scenario['locale']}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -557,10 +545,7 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                 context.context_data["utc_offset"] = scenario["utc_offset"]
                 context.context_data["timezone_aware"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"timezone_agent_{scenario['timezone'].replace('/', '_')}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -649,10 +634,7 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                 context.context_data["fallback_locale"] = scenario["fallback_locale"]
                 context.context_data["localization_fallback"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"fallback_agent_{scenario['requested_locale']}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 start_time = time.time()
                 
@@ -734,10 +716,7 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                 context.context_data["localization_enabled"] = scenario["localization"]
                 context.context_data["performance_test"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"perf_agent_{scenario['label']}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 # Run multiple iterations for better performance measurement
                 iteration_times = []

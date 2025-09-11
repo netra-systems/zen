@@ -132,10 +132,7 @@ class TestAgentResponseExternalIntegrations(BaseIntegrationTest):
                 }
             }
             
-            agent = DataHelperAgent(
-                agent_id="api_integration_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test API integration scenarios
             api_scenarios = [
@@ -211,10 +208,7 @@ class TestAgentResponseExternalIntegrations(BaseIntegrationTest):
                 "sync_interval": 300  # 5 minutes
             }
             
-            agent = DataHelperAgent(
-                agent_id="db_sync_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test database sync scenarios
             sync_scenarios = [
@@ -300,10 +294,7 @@ class TestAgentResponseExternalIntegrations(BaseIntegrationTest):
                 "metrics_namespace": "netra_optimization"
             }
             
-            agent = DataHelperAgent(
-                agent_id="monitoring_integration_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test monitoring integration scenarios
             monitoring_scenarios = [
@@ -409,10 +400,7 @@ class TestAgentResponseExternalIntegrations(BaseIntegrationTest):
                 }
             }
             
-            agent = DataHelperAgent(
-                agent_id="notification_integration_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test notification scenarios
             notification_scenarios = [
@@ -522,10 +510,7 @@ class TestAgentResponseExternalIntegrations(BaseIntegrationTest):
                 }
             ]
             
-            agent = DataHelperAgent(
-                agent_id="webhook_integration_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test webhook scenarios
             webhook_scenarios = [
@@ -625,10 +610,7 @@ class TestAgentResponseExternalIntegrations(BaseIntegrationTest):
                 "backup_notification": True
             }
             
-            agent = DataHelperAgent(
-                agent_id="failover_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test failover scenarios
             failover_scenarios = [
@@ -727,10 +709,7 @@ class TestAgentResponseExternalIntegrations(BaseIntegrationTest):
                 "half_open_max_calls": 2
             }
             
-            agent = DataHelperAgent(
-                agent_id="circuit_breaker_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Simulate multiple integration attempts
             integration_attempts = []

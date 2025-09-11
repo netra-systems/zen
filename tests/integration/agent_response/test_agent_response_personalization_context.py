@@ -103,10 +103,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
         with create_isolated_execution_context(beginner_user_id) as beginner_context:
             beginner_context.context_data.update(self.user_profiles["beginner_user"])
             
-            beginner_agent = DataHelperAgent(
-                agent_id="personalization_beginner_agent",
-                user_context=beginner_context
-            )
+            beginner_agent = DataHelperAgent()
             
             beginner_result = await beginner_agent.arun(
                 input_data=query,
@@ -118,10 +115,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
         with create_isolated_execution_context(expert_user_id) as expert_context:
             expert_context.context_data.update(self.user_profiles["expert_user"])
             
-            expert_agent = DataHelperAgent(
-                agent_id="personalization_expert_agent",
-                user_context=expert_context
-            )
+            expert_agent = DataHelperAgent()
             
             expert_result = await expert_agent.arun(
                 input_data=query,
@@ -163,10 +157,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
         with create_isolated_execution_context(user_id) as context:
             context.context_data.update(self.user_profiles["enterprise_user"])
             
-            agent = DataHelperAgent(
-                agent_id="context_aware_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Initial query
             initial_query = "What are the key performance metrics for AI optimization?"
@@ -224,10 +215,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
             business_context.context_data.update(self.user_profiles["enterprise_user"])
             business_context.context_data["preferences"]["explanation_style"] = "business_focused"
             
-            business_agent = DataHelperAgent(
-                agent_id="preference_business_agent",
-                user_context=business_context
-            )
+            business_agent = DataHelperAgent()
             
             business_result = await business_agent.arun(
                 input_data=query,
@@ -240,10 +228,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
             technical_context.context_data.update(self.user_profiles["expert_user"])
             technical_context.context_data["preferences"]["explanation_style"] = "technical_detailed"
             
-            technical_agent = DataHelperAgent(
-                agent_id="preference_technical_agent",
-                user_context=technical_context
-            )
+            technical_agent = DataHelperAgent()
             
             technical_result = await technical_agent.arun(
                 input_data=query,
@@ -285,10 +270,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
             roi_context.context_data.update(self.user_profiles["enterprise_user"])
             roi_context.context_data["learning_goals"] = ["roi_optimization", "cost_reduction"]
             
-            roi_agent = DataHelperAgent(
-                agent_id="learning_roi_agent",
-                user_context=roi_context
-            )
+            roi_agent = DataHelperAgent()
             
             roi_result = await roi_agent.arun(
                 input_data=query,
@@ -301,10 +283,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
             mastery_context.context_data.update(self.user_profiles["expert_user"])
             mastery_context.context_data["learning_goals"] = ["advanced_techniques", "cutting_edge_methods"]
             
-            mastery_agent = DataHelperAgent(
-                agent_id="learning_mastery_agent",
-                user_context=mastery_context
-            )
+            mastery_agent = DataHelperAgent()
             
             mastery_result = await mastery_agent.arun(
                 input_data=query,
@@ -352,10 +331,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
             
             historical_interactions = []
             
-            agent = DataHelperAgent(
-                agent_id="historical_learning_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Build interaction history
             for i, query in enumerate(historical_queries):
@@ -410,10 +386,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
         with create_isolated_execution_context(user_id) as context:
             context.context_data.update(self.user_profiles["enterprise_user"])
             
-            agent = DataHelperAgent(
-                agent_id="multimodal_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Text-based interaction
             text_query = "Show me optimization metrics dashboard"
@@ -472,10 +445,7 @@ class TestAgentResponsePersonalizationContext(BaseIntegrationTest):
         with create_isolated_execution_context(user_id) as context:
             context.context_data.update(self.user_profiles["beginner_user"])
             
-            agent = DataHelperAgent(
-                agent_id="realtime_preference_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Initial query with beginner preferences
             initial_query = "Explain machine learning optimization"

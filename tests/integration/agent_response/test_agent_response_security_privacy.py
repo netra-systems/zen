@@ -119,10 +119,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             context.context_data["security_level"] = "enterprise"
             context.context_data["compliance_mode"] = "strict"
             
-            agent = DataHelperAgent(
-                agent_id="security_redaction_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test queries containing sensitive data
             sensitive_queries = [
@@ -175,10 +172,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
                 "team_size": 15
             }
             
-            agent_a = DataHelperAgent(
-                agent_id="isolation_agent_a",
-                user_context=context_a
-            )
+            agent_a = DataHelperAgent()
             
             result_a = await agent_a.arun(
                 input_data="Analyze our current project performance and budget",
@@ -191,10 +185,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             context_b.context_data["company"] = "PublicInc"
             context_b.context_data["security_clearance"] = "public"
             
-            agent_b = DataHelperAgent(
-                agent_id="isolation_agent_b",
-                user_context=context_b
-            )
+            agent_b = DataHelperAgent()
             
             # User B tries to access User A's project data
             result_b = await agent_b.arun(
@@ -240,10 +231,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             context.context_data["audit_required"] = True
             context.context_data["compliance_standards"] = ["sox", "gdpr"]
             
-            agent = DataHelperAgent(
-                agent_id="audit_trail_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Perform auditable actions
             sensitive_queries = [
@@ -301,10 +289,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             context.context_data["encryption_required"] = True
             context.context_data["encryption_level"] = "aes256"
             
-            agent = DataHelperAgent(
-                agent_id="encryption_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Query for potentially sensitive data
             sensitive_query = "Provide detailed performance metrics with customer identifiers"
@@ -360,10 +345,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             context.context_data["content_filtering"] = "enabled"
             context.context_data["safety_level"] = "strict"
             
-            agent = DataHelperAgent(
-                agent_id="content_filter_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Test harmful request patterns
             harmful_queries = [
@@ -417,10 +399,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             gdpr_context.context_data["jurisdiction"] = "eu"
             gdpr_context.context_data["consent_status"] = "explicit"
             
-            gdpr_agent = DataHelperAgent(
-                agent_id="privacy_gdpr_agent",
-                user_context=gdpr_context
-            )
+            gdpr_agent = DataHelperAgent()
             
             gdpr_result = await gdpr_agent.arun(
                 input_data="Analyze user behavior patterns for optimization",
@@ -434,10 +413,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             ccpa_context.context_data["jurisdiction"] = "california"
             ccpa_context.context_data["opt_out_status"] = "not_opted_out"
             
-            ccpa_agent = DataHelperAgent(
-                agent_id="privacy_ccpa_agent",
-                user_context=ccpa_context
-            )
+            ccpa_agent = DataHelperAgent()
             
             ccpa_result = await ccpa_agent.arun(
                 input_data="Analyze user behavior patterns for optimization",
@@ -480,10 +456,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             valid_context.context_data["session_expiry"] = time.time() + 3600  # 1 hour
             valid_context.context_data["ip_address"] = "192.168.1.100"
             
-            valid_agent = DataHelperAgent(
-                agent_id="session_valid_agent",
-                user_context=valid_context
-            )
+            valid_agent = DataHelperAgent()
             
             valid_result = await valid_agent.arun(
                 input_data="Access my optimization dashboard",
@@ -496,10 +469,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             expired_context.context_data["session_expiry"] = time.time() - 3600  # 1 hour ago
             expired_context.context_data["ip_address"] = "192.168.1.100"
             
-            expired_agent = DataHelperAgent(
-                agent_id="session_expired_agent",
-                user_context=expired_context
-            )
+            expired_agent = DataHelperAgent()
             
             expired_result = await expired_agent.arun(
                 input_data="Access my optimization dashboard",
@@ -537,10 +507,7 @@ class TestAgentResponseSecurityPrivacy(BaseIntegrationTest):
             context.context_data["data_retention_policy"] = "7_years"
             context.context_data["deletion_requested"] = False
             
-            agent = DataHelperAgent(
-                agent_id="retention_agent",
-                user_context=context
-            )
+            agent = DataHelperAgent()
             
             # Normal data access
             normal_result = await agent.arun(

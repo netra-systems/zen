@@ -100,10 +100,7 @@ class TestAgentResponseVersioningCompatibility(BaseIntegrationTest):
                 context.context_data["api_version"] = version_config["api_version"]
                 context.context_data["client_type"] = f"test_client_{version_key}"
                 
-                agent = DataHelperAgent(
-                    agent_id=f"version_agent_{version_key}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 result = await agent.arun(
                     input_data="Get optimization status with version compatibility",
@@ -153,10 +150,7 @@ class TestAgentResponseVersioningCompatibility(BaseIntegrationTest):
                 context.context_data["client_name"] = client_name
                 context.context_data["legacy_mode"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"compat_agent_{client_name}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 result = await agent.arun(
                     input_data=base_query,
@@ -208,10 +202,7 @@ class TestAgentResponseVersioningCompatibility(BaseIntegrationTest):
                 context.context_data["api_version"] = version_config["api_version"]
                 context.context_data["response_format"] = version_config["response_format"]
                 
-                agent = DataHelperAgent(
-                    agent_id=f"format_agent_{version_key}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 result = await agent.arun(
                     input_data=test_query,
@@ -276,10 +267,7 @@ class TestAgentResponseVersioningCompatibility(BaseIntegrationTest):
                 context.context_data["api_version"] = scenario["version"]
                 context.context_data["use_deprecated"] = scenario["deprecated_feature"]
                 
-                agent = DataHelperAgent(
-                    agent_id=f"deprecation_agent_{scenario['version']}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 result = await agent.arun(
                     input_data=scenario["query"],
@@ -327,10 +315,7 @@ class TestAgentResponseVersioningCompatibility(BaseIntegrationTest):
                 context.context_data["api_version"] = version_config["api_version"]
                 context.context_data["schema_validation"] = True
                 
-                agent = DataHelperAgent(
-                    agent_id=f"schema_agent_{version_key}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 result = await agent.arun(
                     input_data=schema_test_query,
@@ -399,10 +384,7 @@ class TestAgentResponseVersioningCompatibility(BaseIntegrationTest):
                     prev_version = version_sequence[i-1]
                     context.context_data["previous_version"] = self.version_configs[prev_version]["api_version"]
                 
-                agent = DataHelperAgent(
-                    agent_id=f"migration_agent_{version_key}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 result = await agent.arun(
                     input_data=test_query,
@@ -461,10 +443,7 @@ class TestAgentResponseVersioningCompatibility(BaseIntegrationTest):
                 context.context_data["rollback_test"] = True
                 context.context_data["sequence_step"] = step
                 
-                agent = DataHelperAgent(
-                    agent_id=f"rollback_agent_{step}",
-                    user_context=context
-                )
+                agent = DataHelperAgent()
                 
                 result = await agent.arun(
                     input_data=test_query,
