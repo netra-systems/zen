@@ -46,8 +46,10 @@ def test_example_with_staging_compatible():
             
             # Verify the specific error occurs
             assert result.returncode != 0, "Expected collection to fail with strict markers"
-            assert "'staging_compatible' not found in markers" in result.stderr, \
-                f"Expected marker error not found. stderr: {result.stderr}"
+            # The error appears in stdout, not stderr for pytest collection errors
+            full_output = result.stdout + result.stderr
+            assert "'staging_compatible' not found in" in full_output, \
+                f"Expected marker error not found. Full output: {full_output}"
             
         finally:
             # Clean up temporary file
@@ -89,9 +91,18 @@ def test_example_with_staging_compatible():
         for file_path in affected_files:
             full_path = Path(file_path)
             if full_path.exists():
-                content = full_path.read_text()
-                if "staging_compatible" in content:
-                    files_with_marker.append(file_path)
+                try:
+                    content = full_path.read_text(encoding='utf-8')
+                    if "staging_compatible" in content:
+                        files_with_marker.append(file_path)
+                except UnicodeDecodeError:
+                    # Try with different encoding
+                    try:
+                        content = full_path.read_text(encoding='latin-1')
+                        if "staging_compatible" in content:
+                            files_with_marker.append(file_path)
+                    except Exception as e:
+                        print(f"Could not read {file_path}: {e}")
         
         assert len(files_with_marker) > 0, \
             f"Expected to find staging_compatible marker in E2E files, but found none. Checked: {affected_files}"

@@ -54,6 +54,17 @@ from .agent_types import (
     TypedAgentResult
 )
 
+# Service types - imported from netra_backend for compatibility
+try:
+    from netra_backend.app.schemas.startup_types import ServiceType
+except ImportError:
+    # Define ServiceType enum locally if netra_backend not available
+    from enum import Enum
+    class ServiceType(str, Enum):
+        """Service types for startup tracking."""
+        BACKEND = "backend"
+        FRONTEND = "frontend"
+
 __all__ = [
     # Legacy types
     "PerformanceMetrics", 
@@ -93,5 +104,8 @@ __all__ = [
     
     # Migration and compatibility utilities
     "upgrade_legacy_context", "downgrade_to_legacy_context",
-    "to_string_dict", "from_string_dict"
+    "to_string_dict", "from_string_dict",
+    
+    # Service types
+    "ServiceType"
 ]

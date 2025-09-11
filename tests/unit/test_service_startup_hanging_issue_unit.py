@@ -60,13 +60,11 @@ class TestServiceStartupHangingIssueUnit(SSotAsyncTestCase):
         elapsed_time = time.time() - start_time
         
         # Should complete within reasonable time (timeout + buffer)
-        self.assertLess(elapsed_time, 10.0, 
-                       f"Health check took {elapsed_time:.2f}s, expected <10s")
+        assert elapsed_time < 10.0, f"Health check took {elapsed_time:.2f}s, expected <10s"
         
         # Should report unhealthy due to timeout
-        self.assertFalse(status.healthy, "Service should be unhealthy due to timeout")
-        self.assertIn("timeout", status.error.lower() if status.error else "", 
-                     "Error should mention timeout")
+        assert not status.healthy, "Service should be unhealthy due to timeout"
+        assert "timeout" in (status.error.lower() if status.error else ""), "Error should mention timeout"
     
     async def test_wait_for_services_healthy_timeout(self):
         """Test that _wait_for_services_healthy doesn't hang when services never become healthy"""
