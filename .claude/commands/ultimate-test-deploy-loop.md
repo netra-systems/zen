@@ -26,7 +26,8 @@ that improve SSOT coverage while keeping system state.
 
 PROCESS INSTRUCTIONS START:
 
-0) Deploy the backend service if it hasn't been deployed last few minutes (Check recent revisions) 
+0) Check recent backend service revisions.
+If it hasn't been deployed in last few minutes do a fresh deploy with scripts\deploy_to_gcp.py
 WAIT for service revision success.
 
 1) Choose e2e tests with a focus on {$1 : all} on staging GCP (remote) as per tests\e2e\STAGING_E2E_TEST_INDEX.md
