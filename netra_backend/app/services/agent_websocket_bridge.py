@@ -25,6 +25,19 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.thread_run_registry import get_thread_run_registry, ThreadRunRegistry
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+# PHASE 2 FIX: Import event delivery tracking for Issue #373 remediation
+# Import conditionally to avoid circular dependencies
+try:
+    from netra_backend.app.websocket_core.event_delivery_tracker import (
+        get_event_delivery_tracker, EventPriority, EventDeliveryStatus
+    )
+    EVENT_TRACKER_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"EventDeliveryTracker not available: {e}")
+    EVENT_TRACKER_AVAILABLE = False
+    get_event_delivery_tracker = None
+    EventPriority = None
+    EventDeliveryStatus = None
 from shared.monitoring.interfaces import MonitorableComponent
 
 if TYPE_CHECKING:
@@ -1179,9 +1192,40 @@ class AgentWebSocketBridge(MonitorableComponent):
             user_id = effective_user_context.user_id
             print(f"DEBUG: notify_agent_started - run_id={run_id}, user_id={user_id}")
             
+            # PHASE 2 FIX: Track event delivery with retry capability (if available)
+            event_id = None
+            if EVENT_TRACKER_AVAILABLE and get_event_delivery_tracker:
+                try:
+                    tracker = get_event_delivery_tracker()
+                    event_id = tracker.track_event(
+                        event_type="agent_started",
+                        user_id=user_id,
+                        run_id=run_id,
+                        thread_id=getattr(effective_user_context, 'thread_id', None),
+                        data=notification,
+                        priority=EventPriority.CRITICAL,  # Agent start is critical for UX
+                        timeout_s=30.0,
+                        max_retries=3
+                    )
+                except Exception as e:
+                    logger.warning(f"Event tracking failed: {e}")
+                    event_id = None
+            
             # PHASE 1 FIX: Direct WebSocket emission using user_id
             success = await self._websocket_manager.send_to_user(user_id, notification)
             print(f"DEBUG: notify_agent_started - send_to_user success={success}")
+            
+            # PHASE 2 FIX: Update tracker with delivery result (if available)
+            if event_id and EVENT_TRACKER_AVAILABLE:
+                try:
+                    tracker = get_event_delivery_tracker()
+                    if success:
+                        tracker.mark_event_sent(event_id)
+                        # Note: Confirmation would be handled by client WebSocket response
+                    else:
+                        tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False")
+                except Exception as e:
+                    logger.warning(f"Event tracking update failed: {e}")
             
             if success:
                 logger.info(f"✅ EMISSION SUCCESS: agent_started → user={user_id} (run_id={run_id}, agent={agent_name})")
@@ -1318,6 +1362,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             # Use agent name from context if not provided
             effective_agent_name = agent_name or getattr(effective_user_context, 'agent_context', {}).get('agent_name', 'Agent')
             
+            # Extract event_id if present in parameters for confirmation tracking
+            event_id = None
+            if parameters and isinstance(parameters, dict):
+                event_id = parameters.get('event_id')
+            
             # Build standardized notification message with user_id for proper routing
             notification = {
                 "type": "tool_executing",
@@ -1333,6 +1382,10 @@ class AgentWebSocketBridge(MonitorableComponent):
                 }
             }
             
+            # Include event_id for confirmation tracking if present
+            if event_id:
+                notification["event_id"] = event_id
+            
             # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
             user_id = effective_user_context.user_id
             
@@ -1341,10 +1394,30 @@ class AgentWebSocketBridge(MonitorableComponent):
             
             if success:
                 logger.debug(f"✅ EMISSION SUCCESS: tool_executing → user={user_id} (run_id={run_id}, tool={tool_name})")
+                
+                # Confirm event delivery if event_id is present
+                if event_id:
+                    try:
+                        tracker = get_event_delivery_tracker()
+                        tracker.confirm_event(event_id)
+                        logger.debug(f"Confirmed event delivery: {event_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to confirm event {event_id}: {e}")
+                
                 if hasattr(self, '_track_event_delivery'):
                     await self._track_event_delivery("tool_executing", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name})")
+                
+                # Mark event as failed if event_id is present
+                if event_id:
+                    try:
+                        tracker = get_event_delivery_tracker()
+                        tracker.fail_event(event_id, "WebSocket send failed")
+                        logger.debug(f"Marked event as failed: {event_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to mark event as failed {event_id}: {e}")
+                
                 if hasattr(self, '_track_event_delivery'):
                     await self._track_event_delivery("tool_executing", run_id, False)
             
@@ -1381,47 +1454,78 @@ class AgentWebSocketBridge(MonitorableComponent):
         Business Value: Shows completed work, delivers actionable insights
         """
         try:
+            # PHASE 1 FIX: Use UserExecutionContext for proper user_id routing
+            effective_user_context = user_context or self.user_context
+            if not effective_user_context:
+                logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for tool_completed (run_id={run_id}, tool={tool_name})")
+                return False
+            
             if not self._websocket_manager:
                 logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for tool_completed (run_id={run_id}, tool={tool_name})")
                 return False
             
-            # Build standardized notification message
+            # Use agent name from context if not provided
+            effective_agent_name = agent_name or getattr(effective_user_context, 'agent_context', {}).get('agent_name', 'Agent')
+            
+            # Extract event_id if present in result for confirmation tracking
+            event_id = None
+            if result and isinstance(result, dict):
+                event_id = result.get('event_id')
+            
+            # Build standardized notification message with user_id for proper routing
             notification = {
                 "type": "tool_completed",
                 "run_id": run_id,
-                "agent_name": agent_name,
+                "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
+                "agent_name": effective_agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "payload": {
                     "tool_name": tool_name,
                     "result": self._sanitize_result(result) if result else {},
                     "execution_time_ms": execution_time_ms,
                     "status": "completed",
-                    "message": f"{agent_name} completed {tool_name}"
+                    "message": f"{effective_agent_name} completed {tool_name}"
                 }
             }
             
-            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
-            thread_id = await self._resolve_thread_id_from_run_id(run_id)
-            if not thread_id:
-                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
-                return False
+            # Include event_id for confirmation tracking if present
+            if event_id:
+                notification["event_id"] = event_id
             
-            # PHASE 3 FIX: Enhanced event delivery with retry mechanism
-            success = await self._emit_with_retry(
-                event_type="tool_completed",
-                thread_id=thread_id, 
-                notification=notification,
-                run_id=run_id,
-                agent_name=agent_name,
-                max_retries=3
-            )
+            # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
+            user_id = effective_user_context.user_id
+            
+            # PHASE 1 FIX: Direct WebSocket emission using user_id
+            success = await self._websocket_manager.send_to_user(user_id, notification)
             
             if success:
-                logger.debug(f"✅ EMISSION SUCCESS: tool_completed → thread={thread_id} (run_id={run_id}, tool={tool_name})")
-                await self._track_event_delivery("tool_completed", run_id, True)
+                logger.debug(f"✅ EMISSION SUCCESS: tool_completed → user={user_id} (run_id={run_id}, tool={tool_name})")
+                
+                # Confirm event delivery if event_id is present
+                if event_id:
+                    try:
+                        tracker = get_event_delivery_tracker()
+                        tracker.confirm_event(event_id)
+                        logger.debug(f"Confirmed event delivery: {event_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to confirm event {event_id}: {e}")
+                
+                if hasattr(self, '_track_event_delivery'):
+                    await self._track_event_delivery("tool_completed", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name})")
-                await self._track_event_delivery("tool_completed", run_id, False)
+                
+                # Mark event as failed if event_id is present
+                if event_id:
+                    try:
+                        tracker = get_event_delivery_tracker()
+                        tracker.fail_event(event_id, "WebSocket send failed")
+                        logger.debug(f"Marked event as failed: {event_id}")
+                    except Exception as e:
+                        logger.warning(f"Failed to mark event as failed {event_id}: {e}")
+                
+                if hasattr(self, '_track_event_delivery'):
+                    await self._track_event_delivery("tool_completed", run_id, False)
             
             return success
             
@@ -1435,7 +1539,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         agent_name: str, 
         result: Optional[Dict[str, Any]] = None,
         execution_time_ms: Optional[float] = None,
-        trace_context: Optional[Dict[str, Any]] = None
+        trace_context: Optional[Dict[str, Any]] = None,
+        user_context: Optional['UserExecutionContext'] = None
     ) -> bool:
         """
         Send agent completion notification with final results.
@@ -1454,14 +1559,21 @@ class AgentWebSocketBridge(MonitorableComponent):
         Business Value: Users know when valuable AI response is ready
         """
         try:
+            # PHASE 1 FIX: Use UserExecutionContext for proper user_id routing
+            effective_user_context = user_context or self.user_context
+            if not effective_user_context:
+                logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for agent_completed (run_id={run_id}, agent={agent_name})")
+                return False
+            
             if not self._websocket_manager:
                 logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_completed (run_id={run_id}, agent={agent_name})")
                 return False
             
-            # Build standardized notification message
+            # Build standardized notification message with user_id for proper routing
             notification = {
                 "type": "agent_completed",
                 "run_id": run_id,
+                "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "payload": {
@@ -1476,31 +1588,23 @@ class AgentWebSocketBridge(MonitorableComponent):
             if trace_context:
                 notification["trace"] = trace_context
             
-            # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
-            thread_id = await self._resolve_thread_id_from_run_id(run_id)
-            if not thread_id:
-                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
-                return False
+            # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
+            user_id = effective_user_context.user_id
             
-            # PHASE 3 FIX: Enhanced event delivery with retry mechanism - CRITICAL EVENT
-            success = await self._emit_with_retry(
-                event_type="agent_completed",
-                thread_id=thread_id, 
-                notification=notification,
-                run_id=run_id,
-                agent_name=agent_name,
-                max_retries=5,  # Extra retries for critical completion event
-                critical_event=True
-            )
+            # PHASE 1 FIX: Direct WebSocket emission using user_id - CRITICAL EVENT
+            success = await self._websocket_manager.send_to_user(user_id, notification)
             
             if success:
-                logger.info(f"✅ EMISSION SUCCESS: agent_completed → thread={thread_id} (run_id={run_id}, agent={agent_name})")
-                await self._track_event_delivery("agent_completed", run_id, True)
+                logger.info(f"✅ EMISSION SUCCESS: agent_completed → user={user_id} (run_id={run_id}, agent={agent_name})")
+                if hasattr(self, '_track_event_delivery'):
+                    await self._track_event_delivery("agent_completed", run_id, True)
             else:
                 logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name})")
-                await self._track_event_delivery("agent_completed", run_id, False)
-                # PHASE 3 FIX: Alert for critical event failure
-                await self._alert_critical_event_failure("agent_completed", run_id, agent_name)
+                if hasattr(self, '_track_event_delivery'):
+                    await self._track_event_delivery("agent_completed", run_id, False)
+                # PHASE 2 FIX: Alert for critical event failure (to be implemented)
+                if hasattr(self, '_alert_critical_event_failure'):
+                    await self._alert_critical_event_failure("agent_completed", run_id, agent_name)
             
             return success
             
@@ -3299,6 +3403,11 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None, w
     
     logger.info("Creating isolated AgentWebSocketBridge instance")
     bridge = AgentWebSocketBridge(user_context=user_context)
+    
+    # PHASE 1 FIX: Set the websocket_manager if provided
+    if websocket_manager:
+        bridge.websocket_manager = websocket_manager
+        logger.info(f"WebSocket manager set on bridge: {type(websocket_manager).__name__}")
     
     # Note: User emitters are created on-demand via await bridge.create_user_emitter(user_context)
     # when actually needed to avoid sync/async complexity in factory function
