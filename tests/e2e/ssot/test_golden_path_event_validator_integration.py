@@ -19,7 +19,7 @@ from unittest.mock import patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestGoldenPathEventValidatorIntegration(SSotAsyncTestCase):
