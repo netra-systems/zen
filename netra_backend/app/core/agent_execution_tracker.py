@@ -340,7 +340,14 @@ class AgentExecutionTracker:
         # Update metrics
         self._total_executions += 1
         
-        logger.info(f"Created execution {execution_id} for agent {agent_name}")
+        logger.info(
+            f"🎆 EXECUTION_CREATED: New agent execution tracking initiated. "
+            f"Execution_id: {execution_id}, Agent: {agent_name}, "
+            f"User: {user_id[:8]}..., Thread: {thread_id}, "
+            f"Timeout: {timeout_seconds or 25}s, State: {ExecutionState.PENDING.value}, "
+            f"Metadata_keys: {list(metadata.keys()) if metadata else []}, "
+            f"Business_context: Tracking started for user AI interaction (90% platform value)"
+        )
         return execution_id
     
     def start_execution(self, execution_id: str) -> bool:
@@ -456,7 +463,42 @@ class AgentExecutionTracker:
             elif state == ExecutionState.DEAD:
                 self._dead_executions += 1
         
-        logger.info(f"Updated execution {execution_id} to state {state.value}")
+        # Enhanced logging for execution state changes with business context
+        if state == ExecutionState.COMPLETED:
+            logger.info(
+                f"✅ EXECUTION_COMPLETED: Agent execution finished successfully. "
+                f"Execution_id: {execution_id}, Duration: {(record.updated_at - record.started_at).total_seconds():.3f}s, "
+                f"Agent: {record.agent_name}, User: {record.user_id[:8]}..., "
+                f"State_transition: {old_state.value} -> {state.value}, "
+                f"Business_value: AI response delivered to user (90% platform value achieved)"
+            )
+        elif state == ExecutionState.FAILED:
+            logger.error(
+                f"🚨 EXECUTION_FAILED: Agent execution failed - user experience degraded. "
+                f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
+                f"User: {record.user_id[:8]}..., Error: {error or 'Unknown'}, "
+                f"Duration: {(record.updated_at - record.started_at).total_seconds():.3f}s, "
+                f"State_transition: {old_state.value} -> {state.value}, "
+                f"Business_impact: User receives error instead of AI response (90% platform value lost)"
+            )
+        elif state == ExecutionState.TIMEOUT:
+            logger.error(
+                f"⏰ EXECUTION_TIMEOUT: Agent execution exceeded time limit. "
+                f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
+                f"User: {record.user_id[:8]}..., Timeout_limit: {record.timeout_seconds}s, "
+                f"State_transition: {old_state.value} -> {state.value}, "
+                f"Business_impact: User experience degraded due to timeout"
+            )
+        elif state == ExecutionState.DEAD:
+            logger.critical(
+                f"💀 EXECUTION_DEAD: Agent stopped responding - critical failure detected. "
+                f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
+                f"User: {record.user_id[:8]}..., Last_heartbeat: {record.time_since_heartbeat.total_seconds():.1f}s ago, "
+                f"State_transition: {old_state.value} -> {state.value}, "
+                f"Business_impact: Silent failure prevented, user notified of system issue"
+            )
+        else:
+            logger.info(f"🔄 EXECUTION_STATE_UPDATED: {execution_id} -> {state.value}")
         return True
     
     def get_execution_state(self, execution_id: str) -> Optional[ExecutionState]:
@@ -533,10 +575,22 @@ class AgentExecutionTracker:
             # Check for death conditions
             if record.is_dead(self.heartbeat_timeout):
                 dead_executions.append(record)
-                logger.warning(f"Detected dead execution: {exec_id}")
+                logger.critical(
+                    f"💀 DEAD_EXECUTION_DETECTED: Agent stopped responding - automatic recovery initiated. "
+                    f"Execution_id: {exec_id}, Agent: {record.agent_name}, "
+                    f"User: {record.user_id[:8]}..., Heartbeat_gap: {record.time_since_heartbeat.total_seconds():.1f}s, "
+                    f"Business_impact: Silent failure prevented, user will be notified, "
+                    f"Recovery_action: Marking as DEAD and triggering cleanup"
+                )
             elif record.is_timed_out():
                 dead_executions.append(record)
-                logger.warning(f"Detected timed-out execution: {exec_id}")
+                logger.error(
+                    f"⏰ TIMEOUT_EXECUTION_DETECTED: Agent execution exceeded time limit - automatic cleanup. "
+                    f"Execution_id: {exec_id}, Agent: {record.agent_name}, "
+                    f"User: {record.user_id[:8]}..., Runtime: {record.duration.total_seconds():.1f}s if record.duration else 'unknown', "
+                    f"Timeout_limit: {record.timeout_seconds}s, "
+                    f"Business_impact: User experience degraded, timeout recovery in progress"
+                )
         
         return dead_executions
     
@@ -770,7 +824,13 @@ class AgentExecutionTracker:
                 transition.websocket_event_sent = True
                 websocket_event_sent = True
             except Exception as e:
-                logger.error(f"Failed to emit WebSocket event for phase transition: {e}")
+                logger.error(
+                    f"🚨 WEBSOCKET_EVENT_FAILED: Critical failure sending phase transition to user. "
+                    f"Event: agent_phase_transition, User: {record.user_id[:8]}..., "
+                    f"Phase: {new_phase.value}, Agent: {record.agent_name}, "
+                    f"Error: {e}, Error_type: {type(e).__name__}, "
+                    f"Business_impact: User loses real-time progress updates (degraded UX)"
+                )
         
         logger.info(
             f"Phase transition {execution_id}: {transition.from_phase} -> {new_phase} "

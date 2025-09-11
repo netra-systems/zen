@@ -74,7 +74,8 @@ from netra_backend.app.websocket_core import (
     create_server_message,
     create_error_message,
     MessageType,
-    WebSocketConfig
+    WebSocketConfig,
+    negotiate_websocket_subprotocol  # PRIORITY 4 FIX: JWT subprotocol negotiation
 )
 
 # Authentication and security (SSOT for all patterns)
@@ -286,9 +287,31 @@ class WebSocketSSOTRouter:
         - User-Agent header detection
         - Default: main mode (full functionality)
         """
-        connection_mode = self._get_connection_mode(websocket, mode, user_agent)
+        connection_id = f"ssot_{uuid.uuid4().hex[:8]}"
+        start_time = time.time()
         
-        logger.info(f"SSOT WebSocket connection initiated - Mode: {connection_mode.value}, Path: {websocket.url.path}")
+        # CRITICAL: Log connection initiation with all context for Golden Path debugging
+        connection_context = {
+            "connection_id": connection_id,
+            "websocket_url": str(websocket.url),
+            "path": websocket.url.path,
+            "query_params": dict(websocket.url.query_params) if websocket.url.query_params else {},
+            "mode_parameter": mode,
+            "user_agent": user_agent,
+            "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+            "headers_count": len(websocket.headers) if websocket.headers else 0,
+            "has_auth_header": 'authorization' in (websocket.headers or {}),
+            "has_subprotocol_header": 'sec-websocket-protocol' in (websocket.headers or {}),
+            "origin": websocket.headers.get('origin', 'unknown') if websocket.headers else 'unknown',
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "golden_path_stage": "connection_initiation"
+        }
+        
+        connection_mode = self._get_connection_mode(websocket, mode, user_agent)
+        connection_context["resolved_mode"] = connection_mode.value
+        
+        logger.info(f"🔗 GOLDEN PATH CONNECTION: WebSocket connection initiated - connection_id: {connection_id}, mode: {connection_mode.value}")
+        logger.info(f"🔍 CONNECTION CONTEXT: {json.dumps(connection_context, indent=2)}")
         
         # Dispatch to appropriate mode handler
         try:
@@ -301,10 +324,44 @@ class WebSocketSSOTRouter:
             elif connection_mode == WebSocketMode.LEGACY:
                 await self._handle_legacy_mode(websocket)
             else:
+                # CRITICAL: Log unsupported mode failure with full context
+                error_context = {
+                    "connection_id": connection_id,
+                    "unsupported_mode": str(connection_mode),
+                    "available_modes": [mode.value for mode in WebSocketMode],
+                    "mode_parameter": mode,
+                    "path": websocket.url.path,
+                    "user_agent": user_agent,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_impact": "CRITICAL - Connection rejected due to invalid mode"
+                }
+                
+                logger.critical(f"🚨 GOLDEN PATH MODE FAILURE: Unsupported WebSocket mode {connection_mode} for connection {connection_id}")
+                logger.critical(f"🔍 MODE FAILURE CONTEXT: {json.dumps(error_context, indent=2)}")
+                
                 raise ValueError(f"Unsupported WebSocket mode: {connection_mode}")
                 
         except Exception as e:
+            # CRITICAL: Enhanced error logging with timing and full failure context
+            connection_duration = time.time() - start_time
+            
+            failure_context = {
+                "connection_id": connection_id,
+                "mode": connection_mode.value,
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "connection_duration_seconds": round(connection_duration, 3),
+                "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                "path": websocket.url.path,
+                "user_agent": user_agent,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_impact": "CRITICAL - Connection failed completely"
+            }
+            
+            logger.critical(f"🚨 GOLDEN PATH CONNECTION FAILURE: WebSocket mode {connection_mode.value} failed for connection {connection_id} after {connection_duration:.3f}s")
+            logger.critical(f"🔍 CONNECTION FAILURE CONTEXT: {json.dumps(failure_context, indent=2)}")
             logger.error(f"SSOT WebSocket mode {connection_mode.value} failed: {e}")
+            
             await self._handle_connection_error(websocket, e, connection_mode)
     
     async def factory_websocket_endpoint(self, websocket: WebSocket):
@@ -407,12 +464,34 @@ class WebSocketSSOTRouter:
                 await websocket.accept()
             
             # Step 2: SSOT Authentication (preserves full auth pipeline)
+            logger.critical(f"🔑 GOLDEN PATH AUTH: Starting SSOT authentication for connection {connection_id} - user_id: pending, connection_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown'))}, timestamp: {datetime.now(timezone.utc).isoformat()}")
+            
             auth_result = await authenticate_websocket_ssot(
                 websocket, 
                 preliminary_connection_id=preliminary_connection_id
             )
             
             if not auth_result.success:
+                # CRITICAL AUTH FAILURE LOGGING
+                auth_failure_context = {
+                    "connection_id": connection_id,
+                    "preliminary_connection_id": preliminary_connection_id,
+                    "error_message": auth_result.error_message,
+                    "error_code": getattr(auth_result, 'error_code', 'UNKNOWN'),
+                    "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                    "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                    "headers_available": len(websocket.headers) if websocket.headers else 0,
+                    "has_auth_header": 'authorization' in (websocket.headers or {}),
+                    "has_subprotocol_header": 'sec-websocket-protocol' in (websocket.headers or {}),
+                    "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
+                    "origin": websocket.headers.get('origin', 'unknown') if websocket.headers else 'unknown',
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_impact": "CRITICAL - Blocks user login to AI response flow"
+                }
+                
+                logger.critical(f"🚨 GOLDEN PATH AUTH FAILURE: WebSocket authentication failed for connection {connection_id} - {auth_result.error_message}")
+                logger.critical(f"🔍 AUTH FAILURE CONTEXT: {json.dumps(auth_failure_context, indent=2)}")
+                
                 # ISSUE #342 FIX: Improved error messages with specific guidance
                 logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error_message}")
                 
@@ -421,10 +500,17 @@ class WebSocketSSOTRouter:
                 error_msg_str = str(auth_result.error_message or "").lower()
                 if "subprotocol" in error_msg_str or "no token" in error_msg_str:
                     error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error_message}"
+                    logger.critical(f"🔑 TOKEN EXTRACTION FAILURE: No JWT token found in WebSocket headers or subprotocols for connection {connection_id}")
                 elif "jwt" in error_msg_str:
                     error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error_message}"
+                    logger.critical(f"🔑 JWT VALIDATION FAILURE: Token validation failed for connection {connection_id} - likely secret mismatch or malformed token")
+                elif "expired" in error_msg_str:
+                    logger.critical(f"🔑 JWT EXPIRY FAILURE: Token expired for connection {connection_id} - user needs to re-authenticate")
+                elif "invalid" in error_msg_str:
+                    logger.critical(f"🔑 JWT INVALID FAILURE: Invalid JWT token for connection {connection_id} - possible tampering or corruption")
                 else:
                     error_message = f"Authentication failed: {auth_result.error_message}"
+                    logger.critical(f"🔑 UNKNOWN AUTH FAILURE: Unclassified authentication error for connection {connection_id}: {auth_result.error_message}")
                 
                 await safe_websocket_send(websocket, create_error_message("AUTH_FAILED", error_message))
                 await safe_websocket_close(websocket, 1008, "Authentication failed")
@@ -433,15 +519,47 @@ class WebSocketSSOTRouter:
             user_context = auth_result.user_context
             user_id = getattr(auth_result.user_context, 'user_id', None) if auth_result.success else None
             
+            # CRITICAL SUCCESS LOGGING
+            auth_success_context = {
+                "connection_id": connection_id,
+                "user_id": user_id[:8] + "..." if user_id else 'unknown',
+                "websocket_client_id": getattr(user_context, 'websocket_client_id', 'unknown') if user_context else 'unknown',
+                "thread_id": getattr(user_context, 'thread_id', 'unknown') if user_context else 'unknown',
+                "run_id": getattr(user_context, 'run_id', 'unknown') if user_context else 'unknown',
+                "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_milestone": "Authentication successful - user can proceed to AI interactions"
+            }
+            
+            logger.info(f"✅ GOLDEN PATH AUTH SUCCESS: User {user_id[:8] if user_id else 'unknown'}... authenticated successfully for connection {connection_id}")
+            logger.info(f"🔍 AUTH SUCCESS CONTEXT: {json.dumps(auth_success_context, indent=2)}")
             logger.info(f"[MAIN MODE] Authentication success: user={user_id[:8] if user_id else 'unknown'}")
             
             # Step 3: Create WebSocket Manager (with emergency fallback)
+            logger.info(f"🔧 GOLDEN PATH MANAGER: Creating WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+            
             ws_manager = await self._create_websocket_manager(user_context)
             if not ws_manager:
+                # CRITICAL MANAGER CREATION FAILURE
+                manager_failure_context = {
+                    "connection_id": connection_id,
+                    "user_id": user_id[:8] + "..." if user_id else 'unknown',
+                    "user_context_available": user_context is not None,
+                    "websocket_client_id": getattr(user_context, 'websocket_client_id', 'unknown') if user_context else 'unknown',
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_impact": "CRITICAL - Prevents WebSocket message handling and agent communication"
+                }
+                
+                logger.critical(f"🚨 GOLDEN PATH MANAGER FAILURE: Failed to create WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                logger.critical(f"🔍 MANAGER FAILURE CONTEXT: {json.dumps(manager_failure_context, indent=2)}")
                 logger.error("[MAIN MODE] Failed to create WebSocket manager")
+                
                 await safe_websocket_send(websocket, create_error_message("SERVICE_INIT_FAILED", "Service initialization failed"))
                 await safe_websocket_close(websocket, 1011, "Service initialization failed")
                 return
+            
+            logger.info(f"✅ GOLDEN PATH MANAGER: WebSocket manager created successfully for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
             
             # Step 4: Health validation
             health_report = self._validate_websocket_component_health(user_context)
@@ -467,7 +585,42 @@ class WebSocketSSOTRouter:
                 },
                 "timestamp": datetime.now(timezone.utc).isoformat()
             })
-            await safe_websocket_send(websocket, success_message)
+            
+            # CRITICAL: Log connection establishment success with event capability details
+            establishment_context = {
+                "connection_id": connection_id,
+                "user_id": user_id[:8] + "..." if user_id else "unknown",
+                "websocket_client_id": getattr(user_context, 'websocket_client_id', 'unknown') if user_context else 'unknown',
+                "thread_id": getattr(user_context, 'thread_id', 'unknown') if user_context else 'unknown',
+                "run_id": getattr(user_context, 'run_id', 'unknown') if user_context else 'unknown',
+                "critical_events_enabled": ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"],
+                "websocket_manager_ready": ws_manager is not None,
+                "agent_handlers_ready": True,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_milestone": "Connection established - ready for AI interactions"
+            }
+            
+            send_success = await safe_websocket_send(websocket, success_message)
+            if send_success:
+                logger.info(f"✅ GOLDEN PATH ESTABLISHED: Connection {connection_id} ready for user {user_id[:8] if user_id else 'unknown'}... with all 5 critical events")
+                logger.info(f"🔍 ESTABLISHMENT CONTEXT: {json.dumps(establishment_context, indent=2)}")
+            else:
+                # CRITICAL: Log connection establishment failure
+                establishment_failure_context = {
+                    "connection_id": connection_id,
+                    "user_id": user_id[:8] + "..." if user_id else "unknown",
+                    "error": "Failed to send connection established message",
+                    "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                    "message_size": len(json.dumps(success_message.model_dump())) if hasattr(success_message, 'model_dump') else 'unknown',
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_impact": "CRITICAL - User cannot receive confirmation of connection readiness"
+                }
+                
+                logger.critical(f"🚨 GOLDEN PATH ESTABLISHMENT FAILURE: Failed to send connection established message to user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                logger.critical(f"🔍 ESTABLISHMENT FAILURE CONTEXT: {json.dumps(establishment_failure_context, indent=2)}")
+                
+                await safe_websocket_close(websocket, 1011, "Failed to establish connection")
+                return
             
             # Step 7: Main message loop (preserves full message routing)
             await self._main_message_loop(websocket, ws_manager, user_context, connection_id)
@@ -799,43 +952,225 @@ class WebSocketSSOTRouter:
         # Get appropriate WebSocket timeout (coordinated with agent execution timeouts)
         websocket_timeout = get_websocket_recv_timeout()
         
-        logger.info(f"[MAIN MODE] Starting message loop for user {user_id[:8]} (websocket_timeout: {websocket_timeout}s)")
+        # CRITICAL: Log message loop startup with comprehensive context
+        loop_context = {
+            "connection_id": connection_id,
+            "user_id": user_id[:8] + "..." if user_id else "unknown",
+            "websocket_timeout": websocket_timeout,
+            "message_router_available": message_router is not None,
+            "websocket_manager_available": ws_manager is not None,
+            "thread_id": getattr(user_context, 'thread_id', 'unknown') if user_context else 'unknown',
+            "run_id": getattr(user_context, 'run_id', 'unknown') if user_context else 'unknown',
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "golden_path_stage": "message_loop_ready"
+        }
+        
+        logger.info(f"🔄 GOLDEN PATH MESSAGE LOOP: Starting for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+        logger.info(f"🔍 MESSAGE LOOP CONTEXT: {json.dumps(loop_context, indent=2)}")
+        
+        message_count = 0
+        agent_event_count = 0
+        last_heartbeat = time.time()
         
         try:
             while True:
+                # CRITICAL: Check connection state before each message receive
                 if not is_websocket_connected(websocket):
-                    logger.info("[MAIN MODE] WebSocket disconnected")
+                    # CRITICAL: Log disconnection with context
+                    disconnect_context = {
+                        "connection_id": connection_id,
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "messages_processed": message_count,
+                        "agent_events_processed": agent_event_count,
+                        "loop_duration_seconds": round(time.time() - last_heartbeat, 3),
+                        "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "golden_path_impact": "INFO - Normal connection closure"
+                    }
+                    
+                    logger.info(f"🔌 GOLDEN PATH DISCONNECT: WebSocket disconnected for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                    logger.info(f"🔍 DISCONNECT CONTEXT: {json.dumps(disconnect_context, indent=2)}")
                     break
                 
                 # Receive message with coordinated timeout
                 try:
+                    receive_start = time.time()
                     raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
-                    message_data = json.loads(raw_message)
+                    receive_duration = time.time() - receive_start
+                    message_count += 1
                     
-                    logger.info(f"[MAIN MODE] Received: {message_data.get('type', 'unknown')}")
+                    try:
+                        message_data = json.loads(raw_message)
+                        message_type = message_data.get('type', 'unknown')
+                        
+                        # CRITICAL: Log message reception with full context
+                        message_context = {
+                            "connection_id": connection_id,
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "message_id": message_data.get('id', 'no_id'),
+                            "message_type": message_type,
+                            "message_size": len(raw_message),
+                            "receive_duration_ms": round(receive_duration * 1000, 2),
+                            "total_messages": message_count,
+                            "thread_id": message_data.get('thread_id', 'not_specified'),
+                            "run_id": message_data.get('run_id', 'not_specified'),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "golden_path_stage": "message_received"
+                        }
+                        
+                        # Check if this is a critical agent-related message
+                        is_agent_message = message_type in ['start_agent', 'user_message', 'chat', 'agent_request']
+                        if is_agent_message:
+                            agent_event_count += 1
+                            message_context["is_agent_message"] = True
+                            message_context["agent_events_total"] = agent_event_count
+                            
+                            logger.info(f"🤖 GOLDEN PATH AGENT MESSAGE: Received {message_type} from user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                            logger.info(f"🔍 AGENT MESSAGE CONTEXT: {json.dumps(message_context, indent=2)}")
+                        else:
+                            logger.info(f"📨 GOLDEN PATH MESSAGE: Received {message_type} from user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                            logger.debug(f"🔍 MESSAGE CONTEXT: {json.dumps(message_context, indent=2)}")
+                        
+                        # Route message through SSOT router
+                        if message_router:
+                            routing_start = time.time()
+                            success = await message_router.route_message(user_id, websocket, message_data)
+                            routing_duration = time.time() - routing_start
+                            
+                            # CRITICAL: Log routing results with timing
+                            routing_context = {
+                                "connection_id": connection_id,
+                                "user_id": user_id[:8] + "..." if user_id else "unknown",
+                                "message_type": message_type,
+                                "routing_success": success,
+                                "routing_duration_ms": round(routing_duration * 1000, 2),
+                                "router_available": True,
+                                "timestamp": datetime.now(timezone.utc).isoformat(),
+                                "golden_path_impact": "CRITICAL - Message routing failed" if not success else "SUCCESS - Message routed successfully"
+                            }
+                            
+                            if success:
+                                if is_agent_message:
+                                    logger.info(f"✅ GOLDEN PATH ROUTING SUCCESS: Agent message {message_type} routed successfully for user {user_id[:8] if user_id else 'unknown'}... in {routing_duration*1000:.2f}ms")
+                                else:
+                                    logger.debug(f"✅ MESSAGE ROUTING SUCCESS: {message_type} routed successfully for user {user_id[:8] if user_id else 'unknown'}... in {routing_duration*1000:.2f}ms")
+                                logger.debug(f"🔍 ROUTING SUCCESS CONTEXT: {json.dumps(routing_context, indent=2)}")
+                            else:
+                                logger.critical(f"🚨 GOLDEN PATH ROUTING FAILURE: Message {message_type} routing failed for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                                logger.critical(f"🔍 ROUTING FAILURE CONTEXT: {json.dumps(routing_context, indent=2)}")
+                        else:
+                            # CRITICAL: Log missing router - this breaks the Golden Path
+                            router_failure_context = {
+                                "connection_id": connection_id,
+                                "user_id": user_id[:8] + "..." if user_id else "unknown",
+                                "message_type": message_type,
+                                "router_available": False,
+                                "timestamp": datetime.now(timezone.utc).isoformat(),
+                                "golden_path_impact": "CRITICAL - No message router available, messages cannot be processed"
+                            }
+                            
+                            logger.critical(f"🚨 GOLDEN PATH ROUTER MISSING: No message router available for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                            logger.critical(f"🔍 ROUTER MISSING CONTEXT: {json.dumps(router_failure_context, indent=2)}")
                     
-                    # Route message through SSOT router
-                    if message_router:
-                        success = await message_router.route_message(user_id, websocket, message_data)
-                        if not success:
-                            logger.warning("[MAIN MODE] Message routing failed")
+                    except json.JSONDecodeError as e:
+                        # CRITICAL: Log JSON parsing failures with message context
+                        json_error_context = {
+                            "connection_id": connection_id,
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "error_type": "JSON_PARSE_ERROR",
+                            "error_message": str(e),
+                            "raw_message_size": len(raw_message),
+                            "raw_message_preview": raw_message[:200] + "..." if len(raw_message) > 200 else raw_message,
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "golden_path_impact": "WARNING - Malformed message from client"
+                        }
+                        
+                        logger.warning(f"⚠️ GOLDEN PATH JSON ERROR: Invalid JSON from user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                        logger.warning(f"🔍 JSON ERROR CONTEXT: {json.dumps(json_error_context, indent=2)}")
+                        
+                        error_msg = create_error_message("JSON_PARSE_ERROR", "Invalid JSON format")
+                        await safe_websocket_send(websocket, error_msg)
                     
                 except asyncio.TimeoutError:
+                    # CRITICAL: Log heartbeat with connection health context
+                    current_time = time.time()
+                    time_since_last_heartbeat = current_time - last_heartbeat
+                    last_heartbeat = current_time
+                    
+                    heartbeat_context = {
+                        "connection_id": connection_id,
+                        "user_id": user_id[:8] + "..." if user_id else "unknown",
+                        "timeout_duration": websocket_timeout,
+                        "time_since_last_heartbeat": round(time_since_last_heartbeat, 2),
+                        "messages_processed": message_count,
+                        "agent_events_processed": agent_event_count,
+                        "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "golden_path_stage": "heartbeat_keepalive"
+                    }
+                    
+                    logger.debug(f"💓 GOLDEN PATH HEARTBEAT: Sending keepalive to user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                    logger.debug(f"🔍 HEARTBEAT CONTEXT: {json.dumps(heartbeat_context, indent=2)}")
+                    
                     # Send heartbeat
                     heartbeat_msg = create_server_message({
                         "type": "heartbeat",
-                        "timestamp": datetime.now(timezone.utc).isoformat()
+                        "connection_id": connection_id,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "stats": {
+                            "messages_processed": message_count,
+                            "agent_events_processed": agent_event_count
+                        }
                     })
-                    await safe_websocket_send(websocket, heartbeat_msg)
-                except json.JSONDecodeError as e:
-                    logger.error(f"[MAIN MODE] JSON decode error: {e}")
-                    error_msg = create_error_message("JSON_PARSE_ERROR", "Invalid JSON format")
-                    await safe_websocket_send(websocket, error_msg)
+                    heartbeat_sent = await safe_websocket_send(websocket, heartbeat_msg)
+                    
+                    if not heartbeat_sent:
+                        # CRITICAL: Log heartbeat send failure
+                        heartbeat_failure_context = {
+                            "connection_id": connection_id,
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "error": "Failed to send heartbeat",
+                            "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "golden_path_impact": "WARNING - Connection may be stale"
+                        }
+                        
+                        logger.warning(f"⚠️ GOLDEN PATH HEARTBEAT FAILURE: Failed to send heartbeat to user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                        logger.warning(f"🔍 HEARTBEAT FAILURE CONTEXT: {json.dumps(heartbeat_failure_context, indent=2)}")
                     
         except WebSocketDisconnect:
-            logger.info("[MAIN MODE] WebSocket disconnected by client")
+            # CRITICAL: Log client disconnect with session summary
+            disconnect_summary = {
+                "connection_id": connection_id,
+                "user_id": user_id[:8] + "..." if user_id else "unknown",
+                "disconnect_type": "client_initiated",
+                "session_duration_seconds": round(time.time() - last_heartbeat, 3),
+                "total_messages_processed": message_count,
+                "agent_events_processed": agent_event_count,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_impact": "INFO - Normal client disconnect"
+            }
+            
+            logger.info(f"👋 GOLDEN PATH CLIENT DISCONNECT: User {user_id[:8] if user_id else 'unknown'}... disconnected connection {connection_id}")
+            logger.info(f"🔍 DISCONNECT SUMMARY: {json.dumps(disconnect_summary, indent=2)}")
+            
         except Exception as e:
-            logger.error(f"[MAIN MODE] Message loop error: {e}")
+            # CRITICAL: Log unexpected message loop errors with full context
+            loop_error_context = {
+                "connection_id": connection_id,
+                "user_id": user_id[:8] + "..." if user_id else "unknown",
+                "error_type": type(e).__name__,
+                "error_message": str(e),
+                "messages_processed": message_count,
+                "agent_events_processed": agent_event_count,
+                "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_impact": "CRITICAL - Message loop crashed"
+            }
+            
+            logger.critical(f"🚨 GOLDEN PATH LOOP ERROR: Message loop crashed for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+            logger.critical(f"🔍 LOOP ERROR CONTEXT: {json.dumps(loop_error_context, indent=2)}")
+            logger.error(f"[MAIN MODE] Message loop error: {e}", exc_info=True)
     
     async def _factory_message_loop(self, websocket: WebSocket, websocket_manager, user_context, auth_info):
         """Factory message loop with user isolation."""
@@ -986,7 +1321,10 @@ class WebSocketSSOTRouter:
                     "details": {"error_type": str(type(error).__name__), "mode": mode.value},
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
-                error_message = create_server_message("error", error_data)
+                error_message = create_server_message({
+                    "type": "error",
+                    **error_data
+                })
                 await safe_websocket_send(websocket, error_message)
                 await safe_websocket_close(websocket, 1011, f"{mode.value} mode error")
         except Exception as cleanup_error:

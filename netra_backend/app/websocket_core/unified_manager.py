@@ -5,6 +5,7 @@ This module is the single source of truth for WebSocket connection management.
 
 import asyncio
 import json
+import time
 from enum import Enum
 from typing import Dict, Optional, Set, Any, List, Union
 from dataclasses import dataclass
@@ -435,11 +436,46 @@ class UnifiedWebSocketManager:
     
     async def add_connection(self, connection: WebSocketConnection) -> None:
         """Add a new WebSocket connection with thread safety and type validation."""
+        connection_start_time = time.time()
+        
+        # CRITICAL: Log connection addition attempt with full context
+        connection_add_context = {
+            "connection_id": connection.connection_id,
+            "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+            "websocket_available": connection.websocket is not None,
+            "websocket_state": _get_enum_key_representation(getattr(connection.websocket, 'client_state', 'unknown')) if hasattr(connection.websocket, 'client_state') else 'unknown',
+            "existing_connections_count": len(self._connections),
+            "user_existing_connections": len(self._user_connections.get(connection.user_id, set())),
+            "has_queued_messages": connection.user_id in self._message_recovery_queue and bool(self._message_recovery_queue[connection.user_id]),
+            "manager_mode": self.mode.value,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "golden_path_stage": "connection_addition_start"
+        }
+        
+        logger.info(f"🔗 GOLDEN PATH CONNECTION ADD: Adding connection {connection.connection_id} for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
+        logger.info(f"🔍 CONNECTION ADD CONTEXT: {json.dumps(connection_add_context, indent=2)}")
+        
         # Validate connection before adding
-        if not connection.user_id:
-            raise ValueError("Connection must have a valid user_id")
-        if not connection.connection_id:
-            raise ValueError("Connection must have a valid connection_id")
+        try:
+            if not connection.user_id:
+                raise ValueError("Connection must have a valid user_id")
+            if not connection.connection_id:
+                raise ValueError("Connection must have a valid connection_id")
+            logger.debug(f"✅ CONNECTION VALIDATION: Connection {connection.connection_id} validated successfully")
+        except Exception as e:
+            # CRITICAL: Log validation failure
+            validation_failure_context = {
+                "connection_id": connection.connection_id,
+                "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                "validation_error": str(e),
+                "error_type": type(e).__name__,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_impact": "CRITICAL - Connection rejected due to validation failure"
+            }
+            
+            logger.critical(f"🚨 GOLDEN PATH CONNECTION VALIDATION FAILURE: Connection {connection.connection_id} validation failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
+            logger.critical(f"🔍 VALIDATION FAILURE CONTEXT: {json.dumps(validation_failure_context, indent=2)}")
+            raise
             
         # Use user-specific lock for connection operations
         user_lock = await self._get_user_connection_lock(connection.user_id)
@@ -462,6 +498,23 @@ class UnifiedWebSocketManager:
                 })()
                 self.active_connections[connection.user_id].append(conn_info)
                 
+                # CRITICAL: Log successful connection addition with state details
+                connection_duration = time.time() - connection_start_time
+                
+                connection_success_context = {
+                    "connection_id": connection.connection_id,
+                    "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                    "total_connections": len(self._connections),
+                    "user_total_connections": len(self._user_connections[connection.user_id]),
+                    "connection_duration_ms": round(connection_duration * 1000, 2),
+                    "active_users": len(self._user_connections),
+                    "manager_mode": self.mode.value,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_milestone": "Connection successfully added to manager"
+                }
+                
+                logger.info(f"✅ GOLDEN PATH CONNECTION ADDED: Connection {connection.connection_id} added for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {connection_duration*1000:.2f}ms")
+                logger.info(f"🔍 CONNECTION SUCCESS CONTEXT: {json.dumps(connection_success_context, indent=2)}")
                 logger.info(f"Added connection {connection.connection_id} for user {connection.user_id} (thread-safe)")
                 
                 # CRITICAL FIX: Process any queued messages for this user after connection established
@@ -474,17 +527,79 @@ class UnifiedWebSocketManager:
         if process_recovery:
             queued_messages = self._message_recovery_queue.get(connection.user_id, [])
             if queued_messages:
-                logger.info(f"Processing {len(queued_messages)} queued messages for user {connection.user_id}")
+                # CRITICAL: Log message recovery processing
+                recovery_context = {
+                    "connection_id": connection.connection_id,
+                    "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                    "queued_messages_count": len(queued_messages),
+                    "message_types": [msg.get('type', 'unknown') for msg in queued_messages[:5]],  # First 5 types
+                    "timeout_seconds": 5.0,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_stage": "message_recovery_processing"
+                }
+                
+                logger.info(f"📤 GOLDEN PATH MESSAGE RECOVERY: Processing {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
+                logger.info(f"🔍 MESSAGE RECOVERY CONTEXT: {json.dumps(recovery_context, indent=2)}")
+                
                 # HANG FIX: Await the processing to ensure messages are sent before method returns
                 # This prevents test hanging where the test expects messages but they're still processing
+                recovery_start = time.time()
                 try:
                     await asyncio.wait_for(
                         self._process_queued_messages(connection.user_id), 
                         timeout=5.0  # Reasonable timeout to prevent infinite hang
                     )
+                    
+                    # CRITICAL: Log successful recovery completion
+                    recovery_duration = time.time() - recovery_start
+                    
+                    recovery_success_context = {
+                        "connection_id": connection.connection_id,
+                        "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                        "messages_processed": len(queued_messages),
+                        "recovery_duration_ms": round(recovery_duration * 1000, 2),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "golden_path_milestone": "Message recovery completed successfully"
+                    }
+                    
+                    logger.info(f"✅ GOLDEN PATH RECOVERY SUCCESS: Processed {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {recovery_duration*1000:.2f}ms")
+                    logger.info(f"🔍 RECOVERY SUCCESS CONTEXT: {json.dumps(recovery_success_context, indent=2)}")
+                    
                 except asyncio.TimeoutError:
+                    recovery_duration = time.time() - recovery_start
+                    
+                    # CRITICAL: Log recovery timeout
+                    timeout_context = {
+                        "connection_id": connection.connection_id,
+                        "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                        "messages_pending": len(queued_messages),
+                        "timeout_seconds": 5.0,
+                        "elapsed_time_ms": round(recovery_duration * 1000, 2),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "golden_path_impact": "WARNING - Message recovery timed out, messages may be lost"
+                    }
+                    
+                    logger.warning(f"⚠️ GOLDEN PATH RECOVERY TIMEOUT: Message recovery timed out for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
+                    logger.warning(f"🔍 RECOVERY TIMEOUT CONTEXT: {json.dumps(timeout_context, indent=2)}")
                     logger.error(f"Timeout processing queued messages for user {connection.user_id}")
+                    
                 except Exception as e:
+                    recovery_duration = time.time() - recovery_start
+                    
+                    # CRITICAL: Log recovery error
+                    recovery_error_context = {
+                        "connection_id": connection.connection_id,
+                        "user_id": connection.user_id[:8] + "..." if connection.user_id else "unknown",
+                        "messages_pending": len(queued_messages),
+                        "error_type": type(e).__name__,
+                        "error_message": str(e),
+                        "elapsed_time_ms": round(recovery_duration * 1000, 2),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "golden_path_impact": "WARNING - Message recovery failed, messages may be lost"
+                    }
+                    
+                    logger.warning(f"⚠️ GOLDEN PATH RECOVERY ERROR: Message recovery failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
+                    logger.warning(f"🔍 RECOVERY ERROR CONTEXT: {json.dumps(recovery_error_context, indent=2)}")
                     logger.error(f"Error processing queued messages for user {connection.user_id}: {e}")
     
     async def remove_connection(self, connection_id: Union[str, ConnectionID]) -> None:

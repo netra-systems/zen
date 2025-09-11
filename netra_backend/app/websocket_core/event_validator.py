@@ -38,6 +38,7 @@ GitHub Issue: https://github.com/netra-systems/netra-apex/issues/214
 """
 
 import asyncio
+import json
 import logging
 import time
 import uuid
@@ -53,6 +54,143 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
+
+# Business SLA thresholds for performance logging
+SLA_INDIVIDUAL_VALIDATION_MS = 1.0  # Individual event validation should complete in <1ms
+SLA_BATCH_VALIDATION_MS = 10.0      # Batch validation should complete in <10ms
+SLA_CRITICAL_EVENT_GAP_SEC = 15.0   # Critical events should not have >15s gaps
+
+# Revenue impact thresholds for business logging
+REVENUE_IMPACT_THRESHOLDS = {
+    "NONE": 0,      # All events received - no revenue impact
+    "LOW": 1,       # 1 missing event - minor UX degradation
+    "MEDIUM": 2,    # 2 missing events - noticeable UX issues  
+    "HIGH": 3,      # 3+ missing events - major UX failure
+    "CRITICAL": 999 # agent_completed missing - users never see results
+}
+
+def create_structured_log_data(
+    event_type: str,
+    user_id: str,
+    error_type: str = "unknown",
+    business_impact: str = "unknown",
+    revenue_risk: str = "NONE",
+    remediation_action: str = "No action specified",
+    **additional_fields
+) -> Dict[str, Any]:
+    """
+    Create structured log data with business context for monitoring systems.
+    
+    Args:
+        event_type: The WebSocket event type that failed
+        user_id: Affected user ID (truncated for security)
+        error_type: Type of error (validation_failure, missing_field, security_breach, etc.)
+        business_impact: Description of business impact
+        revenue_risk: Revenue risk level (NONE, LOW, MEDIUM, HIGH, CRITICAL)
+        remediation_action: Specific steps to fix the issue
+        **additional_fields: Additional structured data
+        
+    Returns:
+        Dictionary of structured log data compatible with JSON logging
+    """
+    return {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "event_type": event_type,
+        "user_id": user_id[:8] + "..." if user_id and len(user_id) > 8 else user_id,
+        "error_type": error_type,
+        "business_impact": business_impact,
+        "revenue_risk": revenue_risk,
+        "remediation_action": remediation_action,
+        "component": "websocket_event_validator",
+        "subsystem": "chat_infrastructure",
+        "business_value_protection": "500K_plus_ARR",
+        **additional_fields
+    }
+
+def get_business_aware_log_level(criticality: 'EventCriticality', missing_events: int = 0, 
+                                security_breach: bool = False) -> str:
+    """
+    Determine business-aware log level based on impact to revenue and user experience.
+    
+    Args:
+        criticality: Event criticality level
+        missing_events: Number of missing critical events
+        security_breach: Whether this represents a security issue
+        
+    Returns:
+        Log level string (CRITICAL, ERROR, WARNING, INFO)
+    """
+    if security_breach:
+        return "CRITICAL"  # Security breaches are always critical
+    
+    if criticality == EventCriticality.MISSION_CRITICAL:
+        if missing_events == 0:
+            return "INFO"  # Single mission critical event succeeded
+        elif missing_events == 1:
+            return "WARNING"  # One mission critical event missing
+        else:
+            return "CRITICAL"  # Multiple mission critical events missing
+    
+    if missing_events >= 3:
+        return "ERROR"  # Major UX failure
+    elif missing_events >= 1:
+        return "WARNING"  # Minor UX degradation
+    else:
+        return "INFO"  # Normal operation
+
+def get_enhanced_error_message(base_error: str, event_type: str, context: Dict[str, Any]) -> str:
+    """
+    Convert generic error messages to business-context enhanced error messages.
+    
+    Args:
+        base_error: Original generic error message
+        event_type: The WebSocket event type
+        context: Additional context for enhancement
+        
+    Returns:
+        Enhanced error message with business context and remediation steps
+    """
+    # Enhanced error message templates
+    enhanced_messages = {
+        "Event missing required fields": (
+            f"CRITICAL: {event_type} event missing required fields - users cannot see AI processing, "
+            f"breaking 90% of platform value. IMMEDIATE ACTION: Verify AgentExecutionTracker includes "
+            f"all required fields. Missing fields: {context.get('missing_fields', 'unknown')}"
+        ),
+        "Event missing required 'type' field": (
+            f"CRITICAL: WebSocket event completely malformed - missing 'type' field. This breaks the "
+            f"entire chat experience for users. IMMEDIATE ACTION: Check event creation in agent execution "
+            f"pipeline - all events must include 'type' field. User: {context.get('user_id', 'unknown')}"
+        ),
+        "Mission critical event": (
+            f"CRITICAL: {event_type} is mission-critical for $500K+ ARR protection. Users will not see "
+            f"AI value delivery without this event. IMMEDIATE ACTION: Check agent execution tracker and "
+            f"ensure all 5 critical events are sent. Context: {context.get('specific_issue', 'unknown')}"
+        ),
+        "Event contains different user_id": (
+            f"SECURITY BREACH: Cross-user event leakage detected in {event_type} event. This violates "
+            f"enterprise security guarantees. IMMEDIATE ACTION: Check user context isolation in agent "
+            f"execution. Expected user: {context.get('expected_user', 'unknown')}, "
+            f"Found user: {context.get('found_user', 'unknown')}"
+        ),
+        "Connection not active": (
+            f"CONNECTION FAILURE: WebSocket connection inactive for {event_type} event delivery. Users "
+            f"will not receive real-time AI progress updates. IMMEDIATE ACTION: Check WebSocket connection "
+            f"health in unified_manager.py. Connection: {context.get('connection_id', 'unknown')}"
+        )
+    }
+    
+    # Try to find enhanced message by matching base error patterns
+    for pattern, enhanced in enhanced_messages.items():
+        if pattern in base_error:
+            return enhanced
+    
+    # Fallback: enhance with event context
+    return (
+        f"VALIDATION FAILURE: {base_error} for {event_type} event. This may impact user experience. "
+        f"RECOMMENDED ACTION: Check event creation pipeline and ensure all required fields are present. "
+        f"Context: {json.dumps(context, default=str)}"
+    )
 
 
 # Consolidated Enums and Types
@@ -338,10 +476,10 @@ class UnifiedEventValidator:
     def validate_event(self, event: Dict[str, Any], user_id: str, 
                       connection_id: Optional[str] = None) -> ValidationResult:
         """
-        Validate a WebSocket event with comprehensive error checking.
+        Validate a WebSocket event with comprehensive error checking and performance SLA monitoring.
         
         This is the main validation method from the production validator,
-        enhanced with business value tracking from the SSOT framework.
+        enhanced with business value tracking and performance logging.
         
         Args:
             event: Event data to validate
@@ -351,6 +489,7 @@ class UnifiedEventValidator:
         Returns:
             ValidationResult with validation outcome and error details
         """
+        start_time = time.time()
         self.validation_stats["total_validations"] += 1
         
         try:
@@ -359,6 +498,7 @@ class UnifiedEventValidator:
             if not result.is_valid:
                 self._log_validation_failure(result, event, user_id, connection_id)
                 self.validation_stats["failed_validations"] += 1
+                self._log_performance_with_sla_context(start_time, "validation_failure", event.get("type", "unknown"))
                 return result
             
             # Event type specific validation
@@ -367,6 +507,7 @@ class UnifiedEventValidator:
             if not result.is_valid:
                 self._log_validation_failure(result, event, user_id, connection_id)
                 self.validation_stats["failed_validations"] += 1
+                self._log_performance_with_sla_context(start_time, "validation_failure", event_type)
                 return result
             
             # Mission critical event validation
@@ -376,6 +517,7 @@ class UnifiedEventValidator:
                     self.validation_stats["mission_critical_failures"] += 1
                     self.validation_stats["failed_validations"] += 1
                     self._log_mission_critical_failure(result, event, user_id, connection_id)
+                    self._log_performance_with_sla_context(start_time, "mission_critical_failure", event_type)
                     return result
             
             # User context validation
@@ -383,12 +525,25 @@ class UnifiedEventValidator:
             if not result.is_valid:
                 self._log_validation_failure(result, event, user_id, connection_id)
                 self.validation_stats["failed_validations"] += 1
+                self._log_performance_with_sla_context(start_time, "validation_failure", event_type)
                 return result
             
             # Success case - record event for business value tracking
             self.record_event(event)
             
-            logger.debug(f"✅ Event validation passed: {event_type} for user {user_id[:8]}...")
+            # Log successful validation with performance context
+            validation_time_ms = (time.time() - start_time) * 1000
+            if validation_time_ms > SLA_INDIVIDUAL_VALIDATION_MS:
+                logger.warning(
+                    f"⚠️ SLA BREACH: Event validation took {validation_time_ms:.2f}ms "
+                    f"(SLA: <{SLA_INDIVIDUAL_VALIDATION_MS}ms). Event: {event_type}, User: {user_id[:8]}..."
+                )
+                logger.warning(
+                    f"⚠️ BUSINESS IMPACT: Slow validation may delay real-time chat updates for users"
+                )
+            else:
+                logger.debug(f"✅ Event validation passed: {event_type} for user {user_id[:8]}... ({validation_time_ms:.2f}ms)")
+            
             return ValidationResult(
                 is_valid=True,
                 criticality=self._get_event_criticality(event_type),
@@ -397,10 +552,28 @@ class UnifiedEventValidator:
             )
             
         except Exception as e:
+            validation_time_ms = (time.time() - start_time) * 1000
             self.validation_stats["failed_validations"] += 1
-            logger.critical(f"🚨 CRITICAL: Event validation exception: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Event validation system failure")
-            logger.critical(f"🚨 Impact: Event may be malformed or cause downstream issues")
+            
+            # Enhanced exception logging with business context
+            structured_exception_data = create_structured_log_data(
+                event_type=event.get("type", "unknown") if isinstance(event, dict) else "malformed",
+                user_id=user_id,
+                error_type="validation_system_exception",
+                business_impact="Event validation system failure - all events at risk",
+                revenue_risk="CRITICAL",
+                remediation_action="Check validation pipeline, verify event structure, review error logs",
+                exception_type=type(e).__name__,
+                validation_duration_ms=validation_time_ms,
+                connection_id=connection_id
+            )
+            
+            logger.critical(f"🚨 CRITICAL SYSTEM FAILURE: Event validation exception: {e}")
+            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Entire validation system compromised")
+            logger.critical(f"🚨 REVENUE IMPACT: All WebSocket events at risk for user {user_id[:8]}...")
+            logger.critical(f"🚨 PERFORMANCE IMPACT: Validation failed after {validation_time_ms:.2f}ms")
+            logger.critical(f"🚨 Structured Exception Data: {json.dumps(structured_exception_data, indent=2)}")
+            
             # Log stack trace for debugging
             import traceback
             logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
@@ -517,6 +690,134 @@ class UnifiedEventValidator:
                 business_impact="Connection validation system failure"
             )
     
+    def _log_performance_with_sla_context(self, start_time: float, outcome: str, event_type: str):
+        """Log performance metrics with SLA context and business impact."""
+        validation_time_ms = (time.time() - start_time) * 1000
+        
+        if validation_time_ms > SLA_INDIVIDUAL_VALIDATION_MS:
+            # SLA breach - log with business context
+            structured_perf_data = {
+                "validation_duration_ms": validation_time_ms,
+                "sla_threshold_ms": SLA_INDIVIDUAL_VALIDATION_MS,
+                "sla_breach": True,
+                "event_type": event_type,
+                "outcome": outcome,
+                "business_impact": "Delayed real-time updates may degrade user experience",
+                "remediation_action": "Optimize validation pipeline, check for blocking operations"
+            }
+            
+            logger.warning(
+                f"⚠️ PERFORMANCE SLA BREACH: {event_type} validation took {validation_time_ms:.2f}ms "
+                f"(SLA: <{SLA_INDIVIDUAL_VALIDATION_MS}ms). Outcome: {outcome}"
+            )
+            logger.warning(
+                f"⚠️ BUSINESS IMPACT: Users may experience delayed chat responses"
+            )
+            logger.warning(f"⚠️ Performance Data: {json.dumps(structured_perf_data)}")
+        else:
+            # Within SLA - debug level logging
+            logger.debug(
+                f"✅ Performance OK: {event_type} validation completed in {validation_time_ms:.2f}ms "
+                f"(SLA: <{SLA_INDIVIDUAL_VALIDATION_MS}ms). Outcome: {outcome}"
+            )
+    
+    def _get_remediation_action(self, result: ValidationResult, event_type: str) -> str:
+        """Get specific remediation action based on validation failure type."""
+        error_message = result.error_message or ""
+        
+        if "missing required fields" in error_message:
+            return (
+                f"1. Check AgentExecutionTracker.{event_type}() method. "
+                f"2. Verify all required fields are populated. "
+                f"3. Test event creation in development environment. "
+                f"4. Review EVENT_SCHEMAS in event_validator.py"
+            )
+        elif "missing valid run_id" in error_message:
+            return (
+                f"1. Check AgentExecutionTracker.start() includes run_id generation. "
+                f"2. Verify UserExecutionContext contains valid run_id. "
+                f"3. Check agent_execution_core.py for proper ID propagation. "
+                f"4. Test complete agent flow end-to-end"
+            )
+        elif "cross-user" in error_message.lower():
+            return (
+                f"1. SECURITY CRITICAL - Check UserExecutionContext isolation. "
+                f"2. Verify agent_execution_core.py user context handling. "
+                f"3. Review factory pattern implementation for user isolation. "
+                f"4. Run security audit on multi-user execution paths"
+            )
+        elif "connection not active" in error_message.lower():
+            return (
+                f"1. Check WebSocket connection health in unified_manager.py. "
+                f"2. Verify connection cleanup and reconnection logic. "
+                f"3. Test WebSocket stability under load. "
+                f"4. Review connection pooling configuration"
+            )
+        else:
+            return (
+                f"1. Review validation logs for specific error details. "
+                f"2. Check {event_type} event creation pipeline. "
+                f"3. Verify event structure matches EVENT_SCHEMAS. "
+                f"4. Test event flow in development environment"
+            )
+    
+    def _get_mission_critical_remediation(self, event_type: str, error_message: str) -> str:
+        """Get mission critical specific remediation actions."""
+        base_action = self._get_remediation_action(
+            ValidationResult(is_valid=False, error_message=error_message), 
+            event_type
+        )
+        
+        mission_critical_prefix = (
+            f"IMMEDIATE ACTION for {event_type} (MISSION CRITICAL): "
+            f"This event is essential for $500K+ ARR protection. "
+        )
+        
+        event_specific_actions = {
+            "agent_started": "Check AgentExecutionTracker.start() and verify agent registration.",
+            "agent_completed": "Check AgentExecutionTracker.complete() - users MUST see results.",
+            "tool_executing": "Check ToolDispatcher integration and tool event emission.",
+            "tool_completed": "Check tool completion handlers and result propagation.",
+            "agent_thinking": "Check reasoning event emission in agent execution loop."
+        }
+        
+        specific_action = event_specific_actions.get(event_type, "Check agent execution pipeline.")
+        
+        return f"{mission_critical_prefix} {specific_action} {base_action}"
+    
+    def _get_mission_critical_error_message(self, event_type: str, error_message: str, user_id: str) -> str:
+        """Get enhanced mission critical error message with business context."""
+        business_context = {
+            "agent_started": (
+                f"Users cannot see that AI processing has begun. This creates the impression that "
+                f"the system is broken or unresponsive, leading to user abandonment."
+            ),
+            "agent_completed": (
+                f"Users will NEVER see their AI results. This represents complete chat failure "
+                f"and total loss of business value for the user interaction."
+            ),
+            "tool_executing": (
+                f"Users cannot see AI problem-solving transparency. This reduces trust in AI "
+                f"decision-making and perceived value of the platform."
+            ),
+            "tool_completed": (
+                f"Users cannot see actionable insights from AI tools. This delivers incomplete "
+                f"value and reduces the effectiveness of AI recommendations."
+            ),
+            "agent_thinking": (
+                f"Users have no visibility into AI reasoning process. This creates uncertainty "
+                f"about whether the system is processing their request effectively."
+            )
+        }
+        
+        context = business_context.get(event_type, "Critical chat functionality compromised")
+        
+        return (
+            f"{event_type.upper()} EVENT FAILURE for user {user_id[:8]}... - {error_message}. "
+            f"BUSINESS IMPACT: {context} REVENUE IMPACT: Direct threat to $500K+ ARR from "
+            f"degraded chat experience (90% of platform value)."
+        )
+    
     def validate_event_sequence(self) -> Tuple[bool, List[str]]:
         """
         Validate that events are received in logical order.
@@ -560,10 +861,10 @@ class UnifiedEventValidator:
     
     def validate_event_timing(self) -> Tuple[bool, List[str]]:
         """
-        Validate event timing constraints.
+        Validate event timing constraints with enhanced business context logging.
         
         This method is from the SSOT framework validator, providing
-        comprehensive timing validation.
+        comprehensive timing validation with SLA context.
         
         Returns:
             Tuple of (is_valid, validation_errors)
@@ -573,7 +874,16 @@ class UnifiedEventValidator:
         # Check overall execution time
         total_time = time.time() - self.validation_start_time
         if total_time > self.timeout_seconds:
-            errors.append(f"Agent execution exceeded timeout: {total_time:.2f}s > {self.timeout_seconds}s")
+            error_msg = f"Agent execution exceeded timeout: {total_time:.2f}s > {self.timeout_seconds}s"
+            errors.append(error_msg)
+            
+            # Log with business context
+            logger.warning(
+                f"⚠️ EXECUTION TIMEOUT: Agent took {total_time:.2f}s (timeout: {self.timeout_seconds}s)"
+            )
+            logger.warning(
+                f"⚠️ BUSINESS IMPACT: Users may perceive system as slow or unresponsive"
+            )
         
         # Check for reasonable gaps between critical events
         critical_events = [event for event in self.received_events 
@@ -588,10 +898,33 @@ class UnifiedEventValidator:
                     gap = (curr_event.timestamp - prev_event.timestamp).total_seconds()
                     
                     # Flag unusually long gaps (may indicate stalled agent)
-                    if gap > 15.0:  # 15 second gap is concerning
-                        errors.append(
-                            f"Long gap between {prev_event.event_type} and {curr_event.event_type}: {gap:.2f}s"
+                    if gap > SLA_CRITICAL_EVENT_GAP_SEC:
+                        error_msg = f"Long gap between {prev_event.event_type} and {curr_event.event_type}: {gap:.2f}s"
+                        errors.append(error_msg)
+                        
+                        # Enhanced logging with business impact
+                        logger.warning(
+                            f"⚠️ EVENT GAP SLA BREACH: {gap:.2f}s gap between {prev_event.event_type} and {curr_event.event_type} "
+                            f"(SLA: <{SLA_CRITICAL_EVENT_GAP_SEC}s)"
                         )
+                        logger.warning(
+                            f"⚠️ BUSINESS IMPACT: Users experience long delays between AI progress updates"
+                        )
+                        
+                        # Log structured data for monitoring
+                        structured_timing_data = create_structured_log_data(
+                            event_type="timing_gap_breach",
+                            user_id="system",
+                            error_type="performance_degradation",
+                            business_impact=f"Users experience {gap:.2f}s delay between AI progress updates",
+                            revenue_risk="LOW",
+                            remediation_action="Check agent execution pipeline for blocking operations or resource constraints",
+                            gap_duration_sec=gap,
+                            sla_threshold_sec=SLA_CRITICAL_EVENT_GAP_SEC,
+                            prev_event=prev_event.event_type,
+                            curr_event=curr_event.event_type
+                        )
+                        logger.warning(f"⚠️ Timing Data: {json.dumps(structured_timing_data)}")
         
         return len(errors) == 0, errors
     
@@ -653,14 +986,16 @@ class UnifiedEventValidator:
     
     def perform_full_validation(self) -> ValidationResult:
         """
-        Perform comprehensive validation of all received events.
+        Perform comprehensive validation of all received events with enhanced business logging.
         
         This method is from the SSOT framework validator, providing
-        complete validation with business value assessment.
+        complete validation with business value assessment and SLA monitoring.
         
         Returns:
             ValidationResult with complete validation results
         """
+        start_time = time.time()
+        
         # Determine missing critical events
         required_events = self.get_required_critical_events()
         missing_events = required_events - self.critical_events_received
@@ -691,11 +1026,69 @@ class UnifiedEventValidator:
             error_message=error_message
         )
         
-        # Log validation result
+        # Performance logging with SLA context
+        validation_time_ms = (time.time() - start_time) * 1000
+        if validation_time_ms > SLA_BATCH_VALIDATION_MS:
+            logger.warning(
+                f"⚠️ BATCH SLA BREACH: Full validation took {validation_time_ms:.2f}ms "
+                f"(SLA: <{SLA_BATCH_VALIDATION_MS}ms). Events processed: {len(self.received_events)}"
+            )
+            logger.warning(
+                f"⚠️ BUSINESS IMPACT: Slow batch validation may delay agent execution completion signals"
+            )
+        
+        # Enhanced business logging for validation results
         if result.is_valid:
-            logger.success(f"Agent event validation PASSED - Business value score: {result.business_value_score:.1f}%")
+            structured_success_data = create_structured_log_data(
+                event_type="batch_validation",
+                user_id="system",
+                error_type="none",
+                business_impact=f"All critical events received - full chat value delivered",
+                revenue_risk="NONE",
+                remediation_action="No action required",
+                validation_duration_ms=validation_time_ms,
+                events_processed=len(self.received_events),
+                business_value_score=result.business_value_score,
+                critical_events_received=len(self.critical_events_received)
+            )
+            
+            logger.info(f"✅ BUSINESS VALUE DELIVERED: Agent event validation PASSED")
+            logger.info(f"✅ Business value score: {result.business_value_score:.1f}% ({len(self.critical_events_received)}/{len(required_events)} critical events)")
+            logger.info(f"✅ Chat functionality: FULLY OPERATIONAL - Users receive complete AI experience")
+            logger.debug(f"✅ Success Data: {json.dumps(structured_success_data, indent=2)}")
         else:
-            logger.error(f"Agent event validation FAILED - Revenue impact: {result.revenue_impact} - {error_message}")
+            # Enhanced failure logging with business context
+            structured_failure_data = create_structured_log_data(
+                event_type="batch_validation",
+                user_id="system",
+                error_type="business_value_degradation",
+                business_impact=f"Missing {len(missing_events)} critical events - chat value compromised",
+                revenue_risk=result.revenue_impact,
+                remediation_action=self._get_batch_validation_remediation(missing_events, all_errors),
+                validation_duration_ms=validation_time_ms,
+                events_processed=len(self.received_events),
+                business_value_score=result.business_value_score,
+                missing_events=list(missing_events),
+                sequence_errors=sequence_errors,
+                timing_errors=timing_errors,
+                content_errors=content_errors
+            )
+            
+            if result.revenue_impact == "CRITICAL":
+                logger.critical(f"🚨 CRITICAL BUSINESS FAILURE: Agent event validation FAILED")
+                logger.critical(f"🚨 Revenue impact: {result.revenue_impact} - Users may receive NO AI value")
+                logger.critical(f"🚨 Missing critical events: {missing_events}")
+                logger.critical(f"🚨 Business value score: {result.business_value_score:.1f}% (UNACCEPTABLE)")
+                logger.critical(f"🚨 Chat functionality: SEVERELY COMPROMISED - $500K+ ARR at risk")
+            elif result.revenue_impact in ["HIGH", "MEDIUM"]:
+                logger.error(f"❌ MAJOR UX DEGRADATION: Agent event validation FAILED")
+                logger.error(f"❌ Revenue impact: {result.revenue_impact} - Users receive degraded AI experience")
+                logger.error(f"❌ Missing events: {missing_events} - Business value score: {result.business_value_score:.1f}%")
+            else:
+                logger.warning(f"⚠️ MINOR UX ISSUE: Agent event validation FAILED")
+                logger.warning(f"⚠️ Revenue impact: {result.revenue_impact} - Slight degradation in chat experience")
+            
+            logger.error(f"❌ Failure Data: {json.dumps(structured_failure_data, indent=2)}")
         
         return result
     
@@ -770,6 +1163,36 @@ class UnifiedEventValidator:
         self.validation_start_time = time.time()
         
         logger.info("WebSocket event validation statistics and event tracking reset")
+    
+    def _get_batch_validation_remediation(self, missing_events: Set[str], all_errors: List[str]) -> str:
+        """Get specific remediation actions for batch validation failures."""
+        remediation_steps = []
+        
+        if missing_events:
+            remediation_steps.append(
+                f"MISSING EVENTS: Check agent execution pipeline for {missing_events}. "
+                f"Verify AgentExecutionTracker emits all 5 critical events."
+            )
+        
+        if any("sequence" in error for error in all_errors):
+            remediation_steps.append(
+                "SEQUENCE ERRORS: Check agent execution order - agent_started must come before agent_completed."
+            )
+        
+        if any("timeout" in error or "gap" in error for error in all_errors):
+            remediation_steps.append(
+                "TIMING ERRORS: Check for stalled agent execution. Review agent timeout configuration."
+            )
+        
+        if any("content" in error or "missing data" in error for error in all_errors):
+            remediation_steps.append(
+                "CONTENT ERRORS: Check event payload structure. Verify all required fields are populated."
+            )
+        
+        if not remediation_steps:
+            remediation_steps.append("Review agent execution logs and event emission pipeline.")
+        
+        return " ".join(remediation_steps)
     
     # Private validation methods (consolidated from both implementations)
     
@@ -893,38 +1316,128 @@ class UnifiedEventValidator:
     
     def _log_validation_failure(self, result: ValidationResult, event: Any, 
                                user_id: str, connection_id: Optional[str]):
-        """Log validation failure with appropriate severity."""
+        """Log validation failure with enhanced business context and structured data."""
         event_type = "unknown"
         if isinstance(event, dict):
             event_type = event.get("type", "unknown")
         elif event is not None:
             event_type = f"malformed({type(event).__name__})"
         
-        log_level = logger.critical if result.criticality == EventCriticality.MISSION_CRITICAL else logger.error
+        # Determine business-aware log level
+        missing_events = len(result.missing_critical_events) if hasattr(result, 'missing_critical_events') else 0
+        is_security_issue = "cross-user" in (result.error_message or "").lower() or "security" in (result.business_impact or "").lower()
+        business_log_level = get_business_aware_log_level(result.criticality, missing_events, is_security_issue)
         
-        log_level(f"🚨 EVENT VALIDATION FAILURE: {result.error_message}")
-        log_level(f"🚨 Event: {event_type}, User: {user_id[:8]}..., Connection: {connection_id}")
-        log_level(f"🚨 Criticality: {result.criticality.value}")
+        # Create enhanced error message with business context
+        context = {
+            'missing_fields': getattr(result, 'missing_fields', None),
+            'user_id': user_id[:8] + "..." if user_id else None,
+            'connection_id': connection_id,
+            'specific_issue': result.error_message,
+            'revenue_impact': getattr(result, 'revenue_impact', 'UNKNOWN')
+        }
+        enhanced_error = get_enhanced_error_message(result.error_message or "Unknown validation error", event_type, context)
         
-        if result.business_impact:
-            log_level(f"🚨 BUSINESS IMPACT: {result.business_impact}")
+        # Create structured log data for monitoring systems
+        structured_data = create_structured_log_data(
+            event_type=event_type,
+            user_id=user_id,
+            error_type="event_validation_failure",
+            business_impact=result.business_impact or f"Validation failure for {event_type} event",
+            revenue_risk=getattr(result, 'revenue_impact', 'UNKNOWN'),
+            remediation_action=self._get_remediation_action(result, event_type),
+            connection_id=connection_id,
+            criticality=result.criticality.value,
+            missing_events_count=missing_events,
+            business_value_score=getattr(result, 'business_value_score', 0.0)
+        )
+        
+        # Log with appropriate severity based on business impact
+        if business_log_level == "CRITICAL":
+            logger.critical(f"🚨 CRITICAL BUSINESS IMPACT: {enhanced_error}")
+            logger.critical(f"🚨 Structured Data: {json.dumps(structured_data, indent=2)}")
+        elif business_log_level == "ERROR":
+            logger.error(f"❌ MAJOR UX FAILURE: {enhanced_error}")
+            logger.error(f"❌ Structured Data: {json.dumps(structured_data, indent=2)}")
+        elif business_log_level == "WARNING":
+            logger.warning(f"⚠️ UX DEGRADATION: {enhanced_error}")
+            logger.warning(f"⚠️ Structured Data: {json.dumps(structured_data, indent=2)}")
+        else:
+            logger.info(f"ℹ️ VALIDATION INFO: {enhanced_error}")
+            logger.info(f"ℹ️ Structured Data: {json.dumps(structured_data, indent=2)}")
+        
+        # Additional business context logging
+        if result.criticality == EventCriticality.MISSION_CRITICAL:
+            logger.critical(f"💰 REVENUE PROTECTION ALERT: Mission critical event {event_type} failed validation")
+            logger.critical(f"💰 This directly impacts the $500K+ ARR protected by WebSocket event delivery")
+            logger.critical(f"💰 Chat functionality (90% of platform value) may be degraded for user {user_id[:8]}...")
     
     def _log_mission_critical_failure(self, result: ValidationResult, event: Any, 
                                      user_id: str, connection_id: Optional[str]):
-        """Log mission critical event failure with maximum visibility."""
+        """Log mission critical event failure with maximum business visibility and actionable remediation."""
         event_type = "unknown"
         if isinstance(event, dict):
             event_type = event.get("type", "unknown")
         elif event is not None:
             event_type = f"malformed({type(event).__name__})"
         
-        logger.critical(f"🚨 MISSION CRITICAL EVENT VALIDATION FAILURE")
-        logger.critical(f"🚨 Event Type: {event_type}")
-        logger.critical(f"🚨 Error: {result.error_message}")
-        logger.critical(f"🚨 User: {user_id[:8]}..., Connection: {connection_id}")
-        logger.critical(f"🚨 BUSINESS VALUE AT RISK: {result.business_impact}")
-        logger.critical(f"🚨 This is a CRITICAL FAILURE requiring immediate attention")
-        logger.critical(f"🚨 Mission critical events MUST NOT fail - chat value depends on them")
+        # Create comprehensive structured data for mission critical failures
+        structured_data = create_structured_log_data(
+            event_type=event_type,
+            user_id=user_id,
+            error_type="mission_critical_failure",
+            business_impact=f"CRITICAL: {event_type} event failure blocks revenue-generating chat functionality",
+            revenue_risk="CRITICAL",
+            remediation_action=self._get_mission_critical_remediation(event_type, result.error_message),
+            connection_id=connection_id,
+            affected_user_count=1,
+            revenue_at_risk="$500K+ ARR",
+            platform_value_impact="90% of platform value",
+            urgency="IMMEDIATE",
+            escalation_required=True
+        )
+        
+        # Enhanced mission critical error message with specific business context
+        enhanced_error = self._get_mission_critical_error_message(event_type, result.error_message, user_id)
+        
+        # LOUD logging for mission critical failures
+        logger.critical("" + "=" * 100)
+        logger.critical("🚨🚨🚨 MISSION CRITICAL BUSINESS FAILURE 🚨🚨🚨")
+        logger.critical("=" * 100)
+        logger.critical(f"💥 CRITICAL FAILURE: {enhanced_error}")
+        logger.critical(f"💥 Event Type: {event_type} (MISSION CRITICAL for user experience)")
+        logger.critical(f"💥 Affected User: {user_id[:8]}... (Connection: {connection_id})")
+        logger.critical(f"💥 Revenue Impact: CRITICAL - $500K+ ARR at risk")
+        logger.critical(f"💥 Business Impact: {result.business_impact}")
+        logger.critical(f"💥 Platform Value Impact: 90% of chat functionality affected")
+        logger.critical("=" * 100)
+        logger.critical("🔧 IMMEDIATE REMEDIATION REQUIRED:")
+        logger.critical(f"🔧 {self._get_mission_critical_remediation(event_type, result.error_message)}")
+        logger.critical("=" * 100)
+        logger.critical(f"📊 Structured Monitoring Data: {json.dumps(structured_data, indent=2)}")
+        logger.critical("=" * 100)
+        
+        # Additional context based on specific event type
+        if event_type == "agent_started":
+            logger.critical("🎯 SPECIFIC IMPACT: Users cannot see that AI processing has begun")
+            logger.critical("🎯 USER EXPERIENCE: Users may think the system is broken or unresponsive")
+        elif event_type == "agent_completed":
+            logger.critical("🎯 SPECIFIC IMPACT: Users will NEVER see their AI results")
+            logger.critical("🎯 USER EXPERIENCE: Complete chat failure - users get no value")
+        elif event_type == "tool_executing":
+            logger.critical("🎯 SPECIFIC IMPACT: Users cannot see AI problem-solving in progress")
+            logger.critical("🎯 USER EXPERIENCE: Reduced transparency in AI decision-making")
+        elif event_type == "tool_completed":
+            logger.critical("🎯 SPECIFIC IMPACT: Users cannot see actionable insights from AI tools")
+            logger.critical("🎯 USER EXPERIENCE: Incomplete information delivery")
+        
+        # Performance impact logging if applicable
+        if hasattr(self, 'validation_stats'):
+            failure_rate = (self.validation_stats['mission_critical_failures'] / 
+                          max(self.validation_stats['total_validations'], 1)) * 100
+            logger.critical(f"📈 SYSTEM HEALTH: Mission critical failure rate: {failure_rate:.2f}%")
+            if failure_rate > 1.0:  # More than 1% mission critical failure rate is alarming
+                logger.critical(f"📈 ALERT: Mission critical failure rate exceeds acceptable threshold (1.0%)")
 
 
 # Backward Compatibility Aliases and Global Functions

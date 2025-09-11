@@ -1010,6 +1010,13 @@ class StagingConfig(AppConfig):
     debug: bool = False
     log_level: str = "INFO"
     
+    # CRITICAL FIX: Override localhost defaults with proper staging URLs  
+    # This fixes validation failures where StagingConfig inherits localhost URLs from AppConfig
+    # Issue resolved: Configuration validation failed for environment 'staging'
+    frontend_url: str = "https://app.staging.netrasystems.ai"
+    api_base_url: str = "https://api.staging.netrasystems.ai" 
+    auth_service_url: str = "https://auth.staging.netrasystems.ai"
+    
     # Staging telemetry settings
     otel_enabled: str = "true"
     otel_console_exporter: str = "false"  # Disable console output for staging

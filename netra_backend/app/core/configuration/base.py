@@ -16,7 +16,8 @@ from typing import Any, Dict, Optional
 from netra_backend.app.core.environment_constants import EnvironmentDetector
 from netra_backend.app.core.configuration.loader import ConfigurationLoader
 from netra_backend.app.core.configuration.validator import ConfigurationValidator
-from netra_backend.app.logging_config import central_logger as logger
+# CIRCULAR DEPENDENCY FIX: Lazy load logger to break circular import
+# from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.config import (
     AppConfig,
     DevelopmentConfig,
@@ -35,11 +36,27 @@ class UnifiedConfigManager:
     
     def __init__(self):
         """Initialize the unified configuration manager."""
-        self._logger = logger
+        self._logger = None  # Lazy loaded to break circular dependency
         self._loader = ConfigurationLoader()
         self._validator = ConfigurationValidator()
         self._config_cache: Optional[AppConfig] = None
         self._environment: Optional[str] = None
+
+    def _get_logger(self):
+        """Lazy load logger to prevent circular dependency.
+        
+        CIRCULAR DEPENDENCY FIX: Only import logger when needed to break:
+        shared/logging -> config -> netra_backend/logging_config -> shared/logging loop
+        """
+        if self._logger is None:
+            try:
+                from netra_backend.app.logging_config import central_logger
+                self._logger = central_logger
+            except ImportError:
+                # Fallback to basic logging if circular dependency still exists
+                import logging
+                self._logger = logging.getLogger(__name__)
+        return self._logger
     
     def get_config(self) -> AppConfig:
         """Get the unified application configuration.
@@ -58,28 +75,28 @@ class UnifiedConfigManager:
         
         if self._config_cache is None or is_test_environment:
             if is_test_environment:
-                self._logger.debug("Test environment detected - forcing fresh configuration load")
+                self._get_logger().debug("Test environment detected - forcing fresh configuration load")
             else:
-                self._logger.info("Loading unified configuration")
+                self._get_logger().info("Loading unified configuration")
                 
             config = self._create_config_for_environment(current_environment)
             
             # Validate the configuration
             validation_result = self._validator.validate_complete_config(config)
             if not validation_result.is_valid:
-                self._logger.error(
+                self._get_logger().error(
                     f"❌ VALIDATION FAILURE: Configuration validation failed for environment '{current_environment}'. "
                     f"Errors: {validation_result.errors}. This may cause system instability."
                 )
             else:
-                self._logger.debug(f"✅ Configuration validation passed for environment '{current_environment}'")
+                self._get_logger().debug(f"✅ Configuration validation passed for environment '{current_environment}'")
             
             # Only cache for non-test environments
             if not is_test_environment:
                 self._config_cache = config
-                self._logger.info(f"Configuration loaded and cached for environment: {current_environment}")
+                self._get_logger().info(f"Configuration loaded and cached for environment: {current_environment}")
             else:
-                self._logger.debug(f"Configuration loaded (not cached) for test environment: {current_environment}")
+                self._get_logger().debug(f"Configuration loaded (not cached) for test environment: {current_environment}")
                 return config
         
         return self._config_cache
@@ -107,7 +124,7 @@ class UnifiedConfigManager:
         }
         
         config_class = config_classes.get(environment, DevelopmentConfig)
-        self._logger.info(f"Creating {config_class.__name__} for environment: {environment}")
+        self._get_logger().info(f"Creating {config_class.__name__} for environment: {environment}")
         
         try:
             config = config_class()
@@ -122,11 +139,11 @@ class UnifiedConfigManager:
                     service_secret = env.get('SERVICE_SECRET') or env.get('JWT_SECRET_KEY')
                     if service_secret:
                         config.service_secret = service_secret.strip()
-                        self._logger.info("Loaded SERVICE_SECRET from IsolatedEnvironment (SSOT compliant)")
+                        self._get_logger().info("Loaded SERVICE_SECRET from IsolatedEnvironment (SSOT compliant)")
                     else:
-                        self._logger.warning("SERVICE_SECRET not found in environment variables")
+                        self._get_logger().warning("SERVICE_SECRET not found in environment variables")
                 except Exception as e:
-                    self._logger.error(f"Failed to load SERVICE_SECRET from environment: {e}")
+                    self._get_logger().error(f"Failed to load SERVICE_SECRET from environment: {e}")
                     # SSOT COMPLIANT: Log critical failure but don't bypass SSOT
                     # This maintains SSOT compliance even if configuration is unavailable
                     
@@ -136,11 +153,11 @@ class UnifiedConfigManager:
                 original_service_id = config.service_id
                 config.service_id = str(config.service_id).strip()
                 if config.service_id != original_service_id:
-                    self._logger.warning(f"SERVICE_ID contained whitespace - sanitized from {repr(original_service_id)} to {repr(config.service_id)}")
+                    self._get_logger().warning(f"SERVICE_ID contained whitespace - sanitized from {repr(original_service_id)} to {repr(config.service_id)}")
                     
             return config
         except Exception as e:
-            self._logger.error(
+            self._get_logger().error(
                 f"❌ VALIDATION FAILURE: Failed to create configuration for environment '{environment}'. "
                 f"Error: {e}. Falling back to basic AppConfig. This may cause missing configuration values."
             )
@@ -174,7 +191,7 @@ class UnifiedConfigManager:
             validation_result = self._validator.validate_complete_config(config)
             return validation_result.is_valid
         except Exception as e:
-            self._logger.error(f"Configuration validation failed: {e}")
+            self._get_logger().error(f"Configuration validation failed: {e}")
             return False
     
     def get_environment_name(self) -> str:

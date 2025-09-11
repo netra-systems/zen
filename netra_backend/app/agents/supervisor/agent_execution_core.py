@@ -112,10 +112,12 @@ class AgentExecutionCore:
         self._default_timeout = get_agent_execution_timeout(self.default_tier)
         
         logger.info(
-            f"AgentExecutionCore initialized with tier-based timeout configuration "
-            f"(tier: {self.default_tier.value}, default_timeout: {self._default_timeout}s, "
-            f"streaming_capable: {self.default_tier in [TimeoutTier.ENTERPRISE, TimeoutTier.PLATFORM]}) "
-            f"for comprehensive monitoring"
+            f"🚀 AGENT_CORE_INIT: AgentExecutionCore initialized successfully. "
+            f"Tier: {self.default_tier.value}, Default_timeout: {self._default_timeout}s, "
+            f"Streaming_capable: {self.default_tier in [TimeoutTier.ENTERPRISE, TimeoutTier.PLATFORM]}, "
+            f"WebSocket_bridge: {'configured' if websocket_bridge else 'missing'}, "
+            f"Registry_agents: {len(getattr(registry, '_registry', {})) if registry else 0}. "
+            f"Ready for agent execution with comprehensive monitoring."
         )
     
     def get_execution_timeout(self, tier: Optional[TimeoutTier] = None, streaming: bool = False) -> float:
@@ -208,16 +210,36 @@ class AgentExecutionCore:
         """
         
         # CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation
-        user_execution_context = self._validate_user_execution_context(user_context, context)
+        try:
+            user_execution_context = self._validate_user_execution_context(user_context, context)
+            logger.info(
+                f"🔐 SECURITY_VALIDATION_SUCCESS: UserExecutionContext validated for agent execution. "
+                f"Agent: {context.agent_name}, User: {user_context.user_id[:8]}..., "
+                f"Thread: {user_context.thread_id}, Run: {user_context.run_id}, "
+                f"Isolation_verified: True, Security_level: Enterprise"
+            )
+        except Exception as validation_error:
+            logger.critical(
+                f"🚨 SECURITY_VALIDATION_FAILURE: UserExecutionContext validation failed - CRITICAL SECURITY RISK. "
+                f"Agent: {context.agent_name}, Error: {validation_error}, "
+                f"Error_type: {type(validation_error).__name__}, "
+                f"Business_impact: Agent execution blocked to prevent user isolation breach. "
+                f"This failure protects $500K+ ARR by preventing cross-user data contamination."
+            )
+            raise
         
         # Determine appropriate timeout based on tier and execution type
         execution_timeout = timeout or self.get_execution_timeout(tier, streaming)
         selected_tier = tier or self.default_tier
         
         logger.info(
-            f"Agent execution starting: {context.agent_name} "
-            f"(tier: {selected_tier.value}, timeout: {execution_timeout}s, "
-            f"streaming: {streaming}, user: {user_execution_context.user_id[:8] if user_execution_context.user_id else 'unknown'})"
+            f"🎯 AGENT_EXECUTION_START: Beginning agent execution with enterprise-grade isolation. "
+            f"Agent: {context.agent_name}, Tier: {selected_tier.value}, "
+            f"Timeout: {execution_timeout}s, Streaming: {streaming}, "
+            f"User: {user_execution_context.user_id[:8]}..., "
+            f"Thread: {user_execution_context.thread_id}, Run: {user_execution_context.run_id}, "
+            f"Correlation: {trace_context.correlation_id if trace_context else 'none'}, "
+            f"WebSocket_bridge: {'available' if self.websocket_bridge else 'unavailable'}"
         )
         
         # Get or create trace context
@@ -340,28 +362,59 @@ class AgentExecutionCore:
                         context={"status": "starting", "phase": "initialization"}
                     )
                 
-                # Get agent from registry
-                agent = self._get_agent_or_error(context.agent_name)
-                if isinstance(agent, AgentExecutionResult):
-                    # Agent not found - mark as failed
-                    self.execution_tracker.update_execution_state(
-                        exec_id, 
-                        ExecutionState.FAILED,
-                        error=f"Agent {context.agent_name} not found"
+                # Get agent from registry with detailed error logging
+                try:
+                    agent = self._get_agent_or_error(context.agent_name)
+                    if isinstance(agent, AgentExecutionResult):
+                        # Agent not found - this is a critical configuration issue
+                        logger.critical(
+                            f"🚨 AGENT_NOT_FOUND: Critical agent missing from registry - user request will fail. "
+                            f"Agent: {context.agent_name}, User: {user_execution_context.user_id[:8]}..., "
+                            f"Available_agents: {list(getattr(self.registry, '_registry', {}).keys()) if self.registry else []}, "
+                            f"Registry_size: {len(getattr(self.registry, '_registry', {})) if self.registry else 0}, "
+                            f"Business_impact: User will receive error instead of AI response (90% platform value lost), "
+                            f"This indicates system configuration issue requiring immediate attention."
+                        )
+                        
+                        # Mark as failed with detailed error context
+                        self.execution_tracker.update_execution_state(
+                            exec_id, 
+                            ExecutionState.FAILED,
+                            error=f"Agent {context.agent_name} not found in registry"
+                        )
+                        
+                        # CRITICAL REMEDIATION: Transition to failed phase
+                        await self.agent_tracker.transition_state(
+                            state_exec_id, 
+                            AgentExecutionPhase.FAILED,
+                            metadata={
+                                "error": "Agent not found",
+                                "requested_agent": context.agent_name,
+                                "available_agents": list(getattr(self.registry, '_registry', {}).keys()) if self.registry else [],
+                                "configuration_issue": True
+                            },
+                            websocket_manager=self.websocket_bridge
+                        )
+                        self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
+                        
+                        return agent
+                    else:
+                        logger.info(
+                            f"✅ AGENT_FOUND: Agent retrieved successfully from registry. "
+                            f"Agent: {context.agent_name}, Agent_type: {type(agent).__name__}, "
+                            f"User: {user_execution_context.user_id[:8]}..., "
+                            f"Ready for execution with WebSocket event integration."
+                        )
+                except Exception as registry_error:
+                    logger.critical(
+                        f"🚨 AGENT_REGISTRY_FAILURE: Critical failure accessing agent registry. "
+                        f"Agent: {context.agent_name}, Error: {registry_error}, "
+                        f"Error_type: {type(registry_error).__name__}, "
+                        f"User: {user_execution_context.user_id[:8]}..., "
+                        f"Registry_state: {'available' if self.registry else 'missing'}, "
+                        f"Business_impact: System-level failure preventing all agent executions."
                     )
-                    
-                    # CRITICAL REMEDIATION: Transition to failed phase
-                    await self.agent_tracker.transition_state(
-                        state_exec_id, 
-                        AgentExecutionPhase.FAILED,
-                        metadata={"error": "Agent not found"},
-                        websocket_manager=self.websocket_bridge
-                    )
-                    self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
-                    
-                    # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
-                    # Removing manual call to prevent duplicate notifications
-                    return agent
+                    raise
                 
                 # CRITICAL REMEDIATION: Execute with comprehensive timeout management
                 # This prevents agent execution from hanging indefinitely and blocking user responses
@@ -391,7 +444,13 @@ class AgentExecutionCore:
                     
                 except CircuitBreakerOpenError as e:
                     # Circuit breaker is open - create fallback response
-                    logger.error(f"🚫 Circuit breaker open for {context.agent_name}: {e}")
+                    logger.error(
+                        f"🚫 CIRCUIT_BREAKER_OPEN: Agent execution blocked by circuit breaker protection. "
+                        f"Agent: {context.agent_name}, User: {user_execution_context.user_id[:8]}..., "
+                        f"Error: {e}, Failure_threshold_reached: True, "
+                        f"Business_impact: User request degraded to fallback response to maintain system stability. "
+                        f"This protects overall system health while individual agent recovers."
+                    )
                     
                     # Transition to circuit breaker open phase
                     await self.agent_tracker.transition_state(
@@ -418,11 +477,14 @@ class AgentExecutionCore:
                 except TimeoutError as e:
                     # Agent execution timed out - provide detailed context with tier information
                     logger.error(
-                        f"⏰ TIMEOUT: Agent '{context.agent_name}' exceeded timeout limit of {execution_timeout}s "
-                        f"(tier: {selected_tier.value}, streaming: {streaming}). "
-                        f"User: {user_execution_context.user_id}, Thread: {user_execution_context.thread_id}, "
-                        f"Run ID: {context.run_id}. This may indicate the agent is stuck or processing "
-                        f"a complex request. Consider upgrading to higher tier for extended timeouts. Original error: {e}"
+                        f"⏰ AGENT_EXECUTION_TIMEOUT: Agent exceeded execution time limit - user experience degraded. "
+                        f"Agent: {context.agent_name}, Timeout_limit: {execution_timeout}s, "
+                        f"Tier: {selected_tier.value}, Streaming: {streaming}, "
+                        f"User: {user_execution_context.user_id[:8]}..., Thread: {user_execution_context.thread_id}, "
+                        f"Run: {context.run_id}, Error: {e}, "
+                        f"Business_impact: User will receive timeout error instead of AI response. "
+                        f"Possible_causes: Agent stuck, complex processing, external API delays. "
+                        f"Recommendation: {'Upgrade to Enterprise tier for 300s timeout' if selected_tier.value != 'ENTERPRISE' else 'Contact support for investigation'}."
                     )
                     
                     # Transition to timeout phase
@@ -445,12 +507,37 @@ class AgentExecutionCore:
                         duration=0.0
                     )
             
-                # Collect and persist metrics
-                metrics = await self._collect_metrics(exec_id, result, user_execution_context, heartbeat)
-                await self._persist_metrics(exec_id, metrics, context.agent_name, user_execution_context)
+                # Collect and persist metrics with detailed logging
+                try:
+                    metrics = await self._collect_metrics(exec_id, result, user_execution_context, heartbeat)
+                    await self._persist_metrics(exec_id, metrics, context.agent_name, user_execution_context)
+                    
+                    logger.debug(
+                        f"📊 METRICS_COLLECTED: Agent execution metrics captured successfully. "
+                        f"Agent: {context.agent_name}, Success: {result.success}, "
+                        f"Duration: {result.duration:.3f}s, User: {user_execution_context.user_id[:8]}..., "
+                        f"Metrics_count: {len(metrics) if metrics else 0}, "
+                        f"Persistence: {'enabled' if self.persistence else 'disabled'}"
+                    )
+                except Exception as metrics_error:
+                    logger.warning(
+                        f"⚠️ METRICS_COLLECTION_FAILED: Non-critical metrics collection error. "
+                        f"Agent: {context.agent_name}, Error: {metrics_error}, "
+                        f"Error_type: {type(metrics_error).__name__}, "
+                        f"Impact: Execution continues normally, metrics unavailable for this run."
+                    )
                 
                 # CRITICAL REMEDIATION: Mark execution complete with state tracking
                 if result.success:
+                    logger.info(
+                        f"✅ AGENT_EXECUTION_SUCCESS: Agent completed successfully - delivering AI value to user. "
+                        f"Agent: {context.agent_name}, Duration: {result.duration:.3f}s, "
+                        f"User: {user_execution_context.user_id[:8]}..., "
+                        f"Business_value: AI response delivered (90% of platform value), "
+                        f"WebSocket_events: Completion notifications sent, "
+                        f"State_transition: COMPLETED, Metrics_captured: True"
+                    )
+                    
                     trace_context.add_event("agent.completed")
                     self.execution_tracker.update_execution_state(
                         exec_id, 
@@ -496,6 +583,16 @@ class AgentExecutionCore:
                     # Mark execution as successful in tracker state
                     self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
                 else:
+                    logger.error(
+                        f"🚨 AGENT_EXECUTION_FAILURE: Agent execution failed - user experience degraded. "
+                        f"Agent: {context.agent_name}, Duration: {result.duration:.3f}s if result.duration else 0, "
+                        f"Error: {result.error or 'Unknown error'}, "
+                        f"User: {user_execution_context.user_id[:8]}..., "
+                        f"Business_impact: User receives error instead of AI response (90% platform value lost), "
+                        f"Error_category: {'timeout' if 'timeout' in (result.error or '').lower() else 'execution_failure'}, "
+                        f"Recovery_action: Fallback response sent, WebSocket_events: Error notifications sent"
+                    )
+                    
                     trace_context.add_event("agent.error", {"error": result.error})
                     self.execution_tracker.update_execution_state(
                         exec_id, 

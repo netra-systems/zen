@@ -140,14 +140,29 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         self._initialized = True
         if user_context:
-            logger.info(f"AgentWebSocketBridge initialized (non-singleton mode) for user {user_context.user_id}")
+            logger.info(
+                f"🌉 WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized with user isolation. "
+                f"User: {user_context.user_id[:8]}..., Mode: non-singleton, "
+                f"Thread: {user_context.thread_id}, Request: {user_context.request_id}, "
+                f"Business_context: Ready for real-time agent event delivery (critical for chat UX)"
+            )
         else:
-            logger.info("AgentWebSocketBridge initialized (non-singleton mode)")
+            logger.info(
+                f"🌉 WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized (system mode). "
+                f"Mode: non-singleton, User_context: none, "
+                f"Business_context: System-level initialization for agent event infrastructure"
+            )
     
     def _initialize_configuration(self) -> None:
         """Initialize bridge configuration."""
         self.config = IntegrationConfig()
-        logger.debug("Integration configuration initialized")
+        logger.debug(
+            f"⚙️ BRIDGE_CONFIG_INIT: WebSocket-Agent integration configuration loaded. "
+            f"Timeout: {self.config.initialization_timeout_s}s, "
+            f"Health_check_interval: {self.config.health_check_interval_s}s, "
+            f"Recovery_attempts: {self.config.recovery_max_attempts}, "
+            f"Business_context: Configuration ready for reliable agent-websocket coordination"
+        )
     
     def _initialize_state(self) -> None:
         """Initialize integration state tracking.
@@ -3228,16 +3243,20 @@ class WebSocketNotifier:
 # Use create_agent_websocket_bridge(user_context) instead
 
 
-def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -> AgentWebSocketBridge:
+def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None, websocket_manager = None) -> AgentWebSocketBridge:
     """
-    Create a new AgentWebSocketBridge instance with optional user context.
+    Create a new AgentWebSocketBridge instance with optional user context or websocket manager.
     
     This factory function replaces the singleton pattern to prevent cross-user
     data leakage. Each bridge instance is isolated and can safely create
     user-specific emitters.
     
+    PRIORITY 2 FIX: Added websocket_manager parameter for API signature compatibility.
+    Both user_context and websocket_manager are supported for backward compatibility.
+    
     Args:
         user_context: Optional UserExecutionContext for default emitter creation
+        websocket_manager: Optional WebSocketManager (for compatibility, will be used to create user context)
         
     Returns:
         AgentWebSocketBridge: New isolated bridge instance
@@ -3250,6 +3269,27 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None) -
     """
     from netra_backend.app.logging_config import central_logger
     logger = central_logger.get_logger(__name__)
+    
+    # PRIORITY 2 FIX: Handle both user_context and websocket_manager parameters for compatibility
+    if websocket_manager and not user_context:
+        # If websocket_manager is provided but no user_context, try to extract or create context
+        logger.warning("websocket_manager parameter provided without user_context - using basic context creation")
+        if hasattr(websocket_manager, 'user_context') and websocket_manager.user_context:
+            user_context = websocket_manager.user_context
+            logger.info(f"Extracted user_context from websocket_manager for user {user_context.user_id[:8]}...")
+        else:
+            # Create a minimal user context for compatibility
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            from shared.id_generation import UnifiedIdGenerator
+            user_context = UserExecutionContext(
+                user_id="websocket-compat-user",
+                thread_id=UnifiedIdGenerator.generate_base_id("thread_compat"),
+                run_id=UnifiedIdGenerator.generate_base_id("run_compat"),
+                request_id=UnifiedIdGenerator.generate_base_id("req_compat")
+            )
+            logger.info("Created compatibility user_context from websocket_manager parameter")
+    elif websocket_manager and user_context:
+        logger.info("Both websocket_manager and user_context provided - using user_context (preferred)")
     
     logger.info("Creating isolated AgentWebSocketBridge instance")
     bridge = AgentWebSocketBridge(user_context=user_context)

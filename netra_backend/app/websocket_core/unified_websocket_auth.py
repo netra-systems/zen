@@ -369,6 +369,7 @@ class UnifiedWebSocketAuthenticator:
             circuit_state = await self._check_circuit_breaker()
             if circuit_state == "OPEN":
                 error_msg = "Authentication circuit breaker is OPEN - too many recent failures"
+                logger.critical(f"🚨 CIRCUIT BREAKER OPEN: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'}, failure_count: {self._circuit_breaker['failure_count']})")
                 logger.warning(f"SSOT WEBSOCKET AUTH: {error_msg}")
                 self._websocket_auth_failures += 1
                 
@@ -381,6 +382,7 @@ class UnifiedWebSocketAuthenticator:
             # Validate WebSocket connection state first
             if not self._is_websocket_valid_for_auth(websocket):
                 error_msg = f"WebSocket in invalid state for authentication: {_safe_websocket_state_for_logging(connection_state)}"
+                logger.critical(f"🚨 WEBSOCKET STATE ERROR: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'})")
                 logger.error(f"SSOT WEBSOCKET AUTH: {error_msg}")
                 await self._record_circuit_breaker_failure()
                 self._websocket_auth_failures += 1
@@ -757,6 +759,7 @@ class UnifiedWebSocketAuthenticator:
             auth_result: Failed authentication result
             close_connection: Whether to close WebSocket connection after error
         """
+        logger.critical(f"🚨 HANDLING AUTH FAILURE: {auth_result.error_code}: {auth_result.error_message} (close_connection: {close_connection})")
         logger.warning(f"SSOT WEBSOCKET AUTH: Handling auth failure - {auth_result.error_code}: {auth_result.error_message}")
         
         try:
@@ -1056,6 +1059,199 @@ class UnifiedWebSocketAuthenticator:
             "connection_states_seen": self._connection_states_seen,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
+    
+    # PRIORITY 3 IMPLEMENTATION: Missing WebSocket authentication methods
+    
+    def _check_demo_mode_authentication(self, websocket: WebSocket, e2e_context: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        PRIORITY 3 FIX: Check if DEMO_MODE authentication bypass should be applied.
+        
+        This method validates whether DEMO_MODE is enabled in environment variables
+        and allows WebSocket connections to bypass full authentication for isolated
+        demonstration environments.
+        
+        Args:
+            websocket: WebSocket connection object
+            e2e_context: Optional E2E testing context
+            
+        Returns:
+            True if DEMO_MODE authentication bypass is enabled, False otherwise
+        """
+        try:
+            from shared.isolated_environment import get_env
+            env = get_env()
+            
+            # Check DEMO_MODE environment variable (default is enabled for demos)
+            demo_mode_enabled = env.get("DEMO_MODE", "1") == "1"
+            
+            # Additional validation: check if this is a production environment
+            current_env = env.get("ENVIRONMENT", "unknown").lower()
+            google_project = env.get("GOOGLE_CLOUD_PROJECT", "")
+            is_production = current_env in ['production', 'prod'] or 'prod' in google_project.lower()
+            
+            # SECURITY: Never allow DEMO_MODE in production
+            if is_production and demo_mode_enabled:
+                logger.warning(f"SECURITY: DEMO_MODE disabled in production environment (env={current_env}, project={google_project})")
+                return False
+            
+            if demo_mode_enabled:
+                logger.info("DEMO_MODE: Authentication bypass enabled for isolated demo environment")
+                return True
+            else:
+                logger.debug("DEMO_MODE: Authentication bypass disabled, using full auth flow")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error checking DEMO_MODE authentication: {e}")
+            return False  # Fail safely - require full authentication
+    
+    def _extract_jwt_from_subprotocol(self, websocket: WebSocket) -> Optional[str]:
+        """
+        PRIORITY 3 FIX: Extract JWT token from WebSocket subprotocol headers.
+        
+        This method extracts JWT authentication tokens that are passed via WebSocket
+        subprotocol headers, enabling client-side authentication token transmission.
+        
+        Expected formats:
+        - 'jwt-auth.TOKEN_HERE'
+        - 'Bearer.TOKEN_HERE'
+        - 'auth-TOKEN_HERE'
+        
+        Args:
+            websocket: WebSocket connection object
+            
+        Returns:
+            JWT token string if found, None otherwise
+        """
+        try:
+            # Check if WebSocket has subprotocols
+            if not hasattr(websocket, 'subprotocols') or not websocket.subprotocols:
+                logger.debug("No subprotocols available for JWT extraction")
+                return None
+            
+            subprotocols = websocket.subprotocols
+            if isinstance(subprotocols, str):
+                subprotocols = [subprotocols]
+            
+            logger.debug(f"Examining {len(subprotocols)} subprotocols for JWT token")
+            
+            for subprotocol in subprotocols:
+                if not isinstance(subprotocol, str):
+                    continue
+                
+                # Check for jwt-auth format
+                if subprotocol.startswith('jwt-auth.'):
+                    token = subprotocol[9:]  # Remove 'jwt-auth.' prefix
+                    if len(token) > 10:  # Basic token length validation
+                        logger.debug("Found JWT token in jwt-auth subprotocol")
+                        return token
+                
+                # Check for Bearer format
+                if subprotocol.startswith('Bearer.'):
+                    token = subprotocol[7:]  # Remove 'Bearer.' prefix
+                    if len(token) > 10:
+                        logger.debug("Found JWT token in Bearer subprotocol")
+                        return token
+                
+                # Check for auth format
+                if subprotocol.startswith('auth-'):
+                    token = subprotocol[5:]  # Remove 'auth-' prefix
+                    if len(token) > 10:
+                        logger.debug("Found JWT token in auth subprotocol")
+                        return token
+                
+                # Check for direct token format (entire subprotocol is token)
+                if '.' in subprotocol and len(subprotocol) > 50:  # JWT tokens are usually long
+                    # Basic JWT format check (has dots for header.payload.signature)
+                    parts = subprotocol.split('.')
+                    if len(parts) >= 3:
+                        logger.debug("Found potential JWT token as direct subprotocol")
+                        return subprotocol
+            
+            logger.debug("No JWT token found in subprotocols")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error extracting JWT from subprotocol: {e}")
+            return None
+    
+    async def authenticate_request(
+        self, 
+        websocket: WebSocket, 
+        token: Optional[str] = None,
+        e2e_context: Optional[Dict[str, Any]] = None
+    ) -> WebSocketAuthResult:
+        """
+        PRIORITY 3 FIX: High-level authentication request handler.
+        
+        This method provides a unified interface for authenticating WebSocket requests,
+        combining token extraction, demo mode checking, and full authentication flow.
+        
+        Args:
+            websocket: WebSocket connection object
+            token: Optional JWT token (if not provided, will try to extract from subprotocol)
+            e2e_context: Optional E2E testing context
+            
+        Returns:
+            WebSocketAuthResult with authentication outcome
+        """
+        try:
+            logger.debug("Starting authenticate_request flow")
+            
+            # Step 1: Check DEMO_MODE authentication bypass
+            if self._check_demo_mode_authentication(websocket, e2e_context):
+                logger.info("DEMO_MODE: Bypassing authentication for demo environment")
+                
+                # Create demo user context
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                from shared.id_generation import UnifiedIdGenerator
+                
+                demo_user_context = UserExecutionContext(
+                    user_id="demo-user",
+                    thread_id=UnifiedIdGenerator.generate_base_id("demo_thread"),
+                    run_id=UnifiedIdGenerator.generate_base_id("demo_run"),
+                    request_id=UnifiedIdGenerator.generate_base_id("demo_req"),
+                    websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id("demo-user")
+                )
+                
+                # Create successful auth result for demo mode
+                from netra_backend.app.services.unified_authentication_service import AuthResult
+                demo_auth_result = AuthResult(
+                    success=True,
+                    user_id="demo-user",
+                    email="demo@example.com",
+                    permissions=["execute_agents", "demo_access"],
+                    validated_at=datetime.now(timezone.utc),
+                    metadata={"auth_method": "demo_mode", "bypass_enabled": True}
+                )
+                
+                return WebSocketAuthResult(
+                    success=True,
+                    user_context=demo_user_context,
+                    auth_result=demo_auth_result
+                )
+            
+            # Step 2: Extract token from subprotocol if not provided
+            if not token:
+                token = self._extract_jwt_from_subprotocol(websocket)
+                if token:
+                    logger.debug("Successfully extracted JWT token from subprotocol")
+                else:
+                    logger.debug("No token provided and none found in subprotocols")
+            
+            # Step 3: Proceed with full authentication using the main flow
+            return await self.authenticate_websocket_connection(
+                websocket, 
+                e2e_context=e2e_context
+            )
+            
+        except Exception as e:
+            logger.error(f"Error in authenticate_request: {e}")
+            return WebSocketAuthResult(
+                success=False,
+                error_message=f"Authentication request error: {str(e)}",
+                error_code="AUTHENTICATE_REQUEST_ERROR"
+            )
 
 
 # Global SSOT instance for WebSocket authentication

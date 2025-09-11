@@ -285,8 +285,22 @@ class AgentRequestHandler(BaseMessageHandler):
             require_multi_agent = payload.get("require_multi_agent", False)
             real_llm = payload.get("real_llm", False)
             
-            # CRITICAL FIX: Emit the required WebSocket events for agent execution
+            # CRITICAL: Emit the required WebSocket events for agent execution with comprehensive logging
             # This ensures that tests looking for these events will pass
+            
+            # CRITICAL: Log start of event delivery sequence
+            event_sequence_context = {
+                "user_id": user_id[:8] + "..." if user_id else "unknown",
+                "turn_id": turn_id,
+                "user_request_preview": user_request[:100] + "..." if len(user_request) > 100 else user_request,
+                "real_llm": real_llm,
+                "expected_events": ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_stage": "websocket_event_sequence_start"
+            }
+            
+            logger.info(f"📡 GOLDEN PATH EVENTS: Starting WebSocket event sequence for user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+            logger.info(f"🔍 EVENT SEQUENCE CONTEXT: {json.dumps(event_sequence_context, indent=2)}")
             
             # 1. Send agent_started event
             agent_started_event = create_server_message(
@@ -300,8 +314,13 @@ class AgentRequestHandler(BaseMessageHandler):
                     "timestamp": time.time()
                 }
             )
-            await websocket.send_text(json.dumps(agent_started_event.model_dump()))
-            logger.info(f"Sent agent_started event to {user_id}")
+            
+            try:
+                await websocket.send_text(json.dumps(agent_started_event.model_dump()))
+                logger.info(f"✅ GOLDEN PATH EVENT: agent_started sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+            except Exception as e:
+                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send agent_started to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                raise
             
             # Small delay to simulate processing
             await asyncio.sleep(0.1)
@@ -318,8 +337,13 @@ class AgentRequestHandler(BaseMessageHandler):
                     "timestamp": time.time()
                 }
             )
-            await websocket.send_text(json.dumps(agent_thinking_event.model_dump()))
-            logger.info(f"Sent agent_thinking event to {user_id}")
+            
+            try:
+                await websocket.send_text(json.dumps(agent_thinking_event.model_dump()))
+                logger.info(f"✅ GOLDEN PATH EVENT: agent_thinking sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+            except Exception as e:
+                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send agent_thinking to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                raise
             
             await asyncio.sleep(0.1)
             
@@ -336,8 +360,13 @@ class AgentRequestHandler(BaseMessageHandler):
                     "timestamp": time.time()
                 }
             )
-            await websocket.send_text(json.dumps(tool_executing_event.model_dump()))
-            logger.info(f"Sent tool_executing event to {user_id}")
+            
+            try:
+                await websocket.send_text(json.dumps(tool_executing_event.model_dump()))
+                logger.info(f"✅ GOLDEN PATH EVENT: tool_executing sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+            except Exception as e:
+                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send tool_executing to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                raise
             
             await asyncio.sleep(0.1)
             
@@ -355,8 +384,13 @@ class AgentRequestHandler(BaseMessageHandler):
                     "timestamp": time.time()
                 }
             )
-            await websocket.send_text(json.dumps(tool_completed_event.model_dump()))
-            logger.info(f"Sent tool_completed event to {user_id}")
+            
+            try:
+                await websocket.send_text(json.dumps(tool_completed_event.model_dump()))
+                logger.info(f"✅ GOLDEN PATH EVENT: tool_completed sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+            except Exception as e:
+                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send tool_completed to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                raise
             
             await asyncio.sleep(0.1)
             
@@ -389,8 +423,45 @@ class AgentRequestHandler(BaseMessageHandler):
                 }
             )
             
-            await websocket.send_text(json.dumps(agent_completed_event.model_dump()))
-            logger.info(f"Sent agent_completed event to {user_id} for turn {turn_id}")
+            try:
+                await websocket.send_text(json.dumps(agent_completed_event.model_dump()))
+                logger.info(f"✅ GOLDEN PATH EVENT: agent_completed sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                
+                # CRITICAL: Log successful completion of all 5 critical events
+                completion_summary = {
+                    "user_id": user_id[:8] + "..." if user_id else "unknown",
+                    "turn_id": turn_id,
+                    "events_delivered": ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"],
+                    "total_events": 5,
+                    "orchestration_time": orchestration_time,
+                    "agents_involved": agents_involved,
+                    "real_llm_used": real_llm,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_milestone": "All 5 critical WebSocket events delivered successfully"
+                }
+                
+                logger.info(f"🎉 GOLDEN PATH COMPLETE: All 5 critical events delivered to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                logger.info(f"🔍 COMPLETION SUMMARY: {json.dumps(completion_summary, indent=2)}")
+                
+            except Exception as e:
+                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send agent_completed to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                
+                # CRITICAL: Log final event failure context
+                final_failure_context = {
+                    "user_id": user_id[:8] + "..." if user_id else "unknown",
+                    "turn_id": turn_id,
+                    "failed_event": "agent_completed",
+                    "events_delivered_before_failure": ["agent_started", "agent_thinking", "tool_executing", "tool_completed"],
+                    "events_missing": ["agent_completed"],
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_impact": "CRITICAL - Final event failed, user may not know agent processing is complete"
+                }
+                
+                logger.critical(f"🔍 FINAL EVENT FAILURE: {json.dumps(final_failure_context, indent=2)}")
+                raise
+                
             return True
             
         except Exception as e:

@@ -24,3 +24,4 @@ Dockerfile* text eol=lf
 *.gif binary
 *.ico binary
 *.pdf binary
+merges/MERGEISSUE:2025-09-11.md merge=ours

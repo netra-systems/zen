@@ -63,8 +63,11 @@ async def get_current_user(
 
 async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     """Validate token with auth service and extract all claims."""
+    logger.critical(f"🔑 AUTH INTEGRATION: Validating token with auth service (token_length: {len(token) if token else 0})")
+    
     validation_result = await auth_client.validate_token_jwt(token)
     if not validation_result or not validation_result.get("valid"):
+        logger.critical(f"🚨 AUTH INTEGRATION FAILURE: Token validation failed - invalid or expired (result: {validation_result})")
         logger.warning("Token validation failed - invalid or expired")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -72,6 +75,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not validation_result.get("user_id"):
+        logger.critical(f"🚨 AUTH INTEGRATION FAILURE: Token validation failed - no user_id in payload (payload_keys: {list(validation_result.keys()) if validation_result else 'none'})")
         logger.warning("Token validation failed - no user_id in payload")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -79,6 +83,8 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         )
     
     # Log successful token validation with key claims info
+    user_id = validation_result.get('user_id', 'unknown')
+    logger.info(f"✅ AUTH INTEGRATION SUCCESS: Token validated for user {user_id[:8]}... with role: {validation_result.get('role', 'none')}")
     logger.debug(
         f"Token validated successfully for user {validation_result.get('user_id', 'unknown')[:8]}... "
         f"with role: {validation_result.get('role', 'none')} "
@@ -101,8 +107,10 @@ async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str,
     user = result.scalar_one_or_none()
     
     if not user:
+        logger.warning(f"🔑 USER AUTO-CREATE: User {user_id[:8]}... not found in database, auto-creating from JWT claims")
         user = await _auto_create_user_if_needed(db, validation_result)
     else:
+        logger.info(f"🔑 USER FOUND: User {user_id[:8]}... exists in database, syncing JWT claims")
         # SECURITY: Sync JWT role/permissions with database if needed
         await _sync_jwt_claims_to_user_record(user, validation_result, db)
     
@@ -141,9 +149,11 @@ async def _sync_jwt_claims_to_user_record(user: User, validation_result: Dict[st
         
         if needs_update:
             await db.commit()
+            logger.warning(f"🔄 USER SYNC: User record synchronized with JWT claims for user {user.id[:8]}... (role: {jwt_role}, admin: {jwt_is_admin})")
             logger.info(f"User record synchronized with JWT claims for user {user.id[:8]}...")
     
     except Exception as e:
+        logger.critical(f"🚨 USER SYNC FAILURE: Failed to sync JWT claims to user record: {e} (type: {type(e).__name__})")
         logger.error(f"Failed to sync JWT claims to user record: {e}")
         # Don't fail the entire authentication flow for sync issues
         await db.rollback()
@@ -162,6 +172,7 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
     user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
     
     config = get_config()
+    logger.warning(f"🔑 USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}...)")
     logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     return user
 
@@ -186,10 +197,13 @@ async def get_current_user_optional(
     try:
         # Extract the token and validate it
         token = credentials.credentials
+        logger.info(f"🔑 OPTIONAL AUTH: Attempting optional authentication (token_length: {len(token) if token else 0})")
         validation_result = await _validate_token_with_auth_service(token)
         user = await _get_user_from_database(db, validation_result)
+        logger.info(f"✅ OPTIONAL AUTH SUCCESS: Optional authentication succeeded for user {user.id[:8] if user and hasattr(user, 'id') else 'unknown'}...")
         return user
     except Exception as e:
+        logger.warning(f"🔑 OPTIONAL AUTH FAILURE: Optional authentication failed: {e} (type: {type(e).__name__})")
         logger.debug(f"Optional auth failed: {e}")
         return None
 
@@ -292,6 +306,9 @@ async def require_admin_with_enhanced_validation(
         jwt_admin_status = await extract_admin_status_from_jwt(token)
         
         if not jwt_admin_status.get("is_admin", False):
+            logger.critical(
+                f"🚨 ADMIN ACCESS DENIED: User {user.id if hasattr(user, 'id') else 'unknown'} failed both database and JWT admin validation. JWT result: {jwt_admin_status}"
+            )
             logger.error(
                 f"Admin access denied for user {user.id if hasattr(user, 'id') else 'unknown'} - "
                 f"Failed both database and JWT validation. JWT result: {jwt_admin_status}"
@@ -301,6 +318,9 @@ async def require_admin_with_enhanced_validation(
                 detail="Admin access required: Insufficient privileges"
             )
         else:
+            logger.warning(
+                f"🔄 ADMIN JWT OVERRIDE: Admin access granted via JWT override for user {user.id if hasattr(user, 'id') else 'unknown'} - Database record may be out of sync"
+            )
             logger.warning(
                 f"Admin access granted via JWT override for user {user.id if hasattr(user, 'id') else 'unknown'} - "
                 f"Database record may be out of sync"
@@ -312,6 +332,9 @@ async def require_admin(user: User = Depends(get_current_user)) -> User:
     """Require admin permissions."""
     if not _check_admin_permissions(user):
         # Enhanced logging for security audit
+        logger.critical(
+            f"🚨 ADMIN ACCESS DENIED: User {user.id if hasattr(user, 'id') else 'unknown'} lacks admin permissions in database record"
+        )
         logger.warning(
             f"Admin access denied for user {user.id if hasattr(user, 'id') else 'unknown'} - "
             f"insufficient permissions in database record"
