@@ -212,6 +212,13 @@ class ValidationConstants:
     MAX_EMAIL_LENGTH: Final[int] = 254
 
 
+# Module-level exports for backward compatibility
+JWT_SECRET_KEY = JWTConstants.JWT_SECRET_KEY
+SECRET_KEY = JWTConstants.SECRET_KEY
+AUTHORIZATION = HeaderConstants.AUTHORIZATION
+BEARER_PREFIX = HeaderConstants.BEARER_PREFIX
+
+
 # Convenience export of all constant classes
 __all__ = [
     'AuthConstants',
@@ -221,5 +228,10 @@ __all__ = [
     'AuthErrorConstants',
     'OAuthConstants',
     'CacheConstants',
-    'ValidationConstants'
+    'ValidationConstants',
+    # Module-level exports for backward compatibility
+    'JWT_SECRET_KEY',
+    'SECRET_KEY',
+    'AUTHORIZATION',
+    'BEARER_PREFIX'
 ]
