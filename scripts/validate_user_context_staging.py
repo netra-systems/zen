@@ -267,7 +267,7 @@ async def main():
         # Show golden path issues
         for test in report["golden_path_validation"]["golden_path_tests"]:
             if not test["validation_success"]:
-                print(f"❌ {test['test_name']}: {test.get('error', 'Status ' + str(test.get('status_code')))}")}
+                print(f"❌ {test['test_name']}: {test.get('error', 'Status ' + str(test.get('status_code')))}")
                 
         # Show breaking change issues
         for test in report["breaking_change_validation"]["breaking_change_tests"]:
