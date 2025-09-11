@@ -1613,6 +1613,290 @@ class WebSocketEmitterFactory:
             **base_stats,
             'performance': performance_stats
         }
+    
+    # ===================== PHASE 3: ENHANCED ERROR HANDLING & FALLBACK CHANNELS =====================
+    
+    async def _try_fallback_channels(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Try alternative delivery channels when primary WebSocket fails."""
+        logger.info(f"Attempting fallback channels for {event_type} - user {self.user_id}")
+        
+        fallback_attempts = [
+            self._try_database_persistence_fallback,
+            self._try_redis_queue_fallback,
+            self._try_direct_connection_fallback
+        ]
+        
+        for fallback_method in fallback_attempts:
+            try:
+                success = await fallback_method(event_type, data)
+                if success:
+                    logger.info(f"Fallback succeeded via {fallback_method.__name__} for {event_type}")
+                    return True
+            except Exception as e:
+                logger.warning(f"Fallback {fallback_method.__name__} failed: {e}")
+                continue
+        
+        return False
+    
+    async def _try_database_persistence_fallback(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Persist event to database for later delivery."""
+        try:
+            # Store event in database for retry delivery
+            fallback_event = {
+                'user_id': self.user_id,
+                'event_type': event_type,
+                'data': data,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'delivery_attempts': 0,
+                'max_attempts': 5,
+                'status': 'pending',
+                'fallback_reason': 'websocket_failure'
+            }
+            
+            # If manager supports database fallback
+            if hasattr(self.manager, 'store_fallback_event'):
+                await self.manager.store_fallback_event(fallback_event)
+                logger.info(f"Event {event_type} stored in database fallback for user {self.user_id}")
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Database fallback failed for {event_type}: {e}")
+            return False
+    
+    async def _try_redis_queue_fallback(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Queue event in Redis for background delivery."""
+        try:
+            # Queue event for background processing
+            queue_event = {
+                'user_id': self.user_id,
+                'event_type': event_type,
+                'data': data,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'priority': 'high' if event_type in self.CRITICAL_EVENTS else 'normal'
+            }
+            
+            # If manager supports Redis queuing
+            if hasattr(self.manager, 'queue_event_for_retry'):
+                await self.manager.queue_event_for_retry(queue_event)
+                logger.info(f"Event {event_type} queued in Redis for user {self.user_id}")
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Redis queue fallback failed for {event_type}: {e}")
+            return False
+    
+    async def _try_direct_connection_fallback(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Attempt direct WebSocket connection bypass."""
+        try:
+            # Try to force a new connection
+            if hasattr(self.manager, 'force_reconnect'):
+                reconnect_success = await self.manager.force_reconnect(self.user_id)
+                if reconnect_success:
+                    # Try emission one more time with new connection
+                    await asyncio.sleep(0.1)  # Brief pause for connection establishment
+                    await self.manager.emit_critical_event(
+                        user_id=self.user_id,
+                        event_type=event_type,
+                        data=data
+                    )
+                    logger.info(f"Direct reconnection fallback succeeded for {event_type}")
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Direct connection fallback failed for {event_type}: {e}")
+            return False
+    
+    async def _emergency_fallback(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """Last resort emergency fallback for critical events."""
+        logger.critical(f"EMERGENCY FALLBACK ACTIVATED for {event_type} - user {self.user_id}")
+        
+        emergency_strategies = [
+            self._try_emergency_notification,
+            self._try_alternative_user_notification,
+            self._try_system_alert_fallback
+        ]
+        
+        for strategy in emergency_strategies:
+            try:
+                success = await strategy(event_type, data, last_error)
+                if success:
+                    logger.critical(f"Emergency strategy {strategy.__name__} succeeded for {event_type}")
+                    return True
+            except Exception as e:
+                logger.critical(f"Emergency strategy {strategy.__name__} failed: {e}")
+                continue
+        
+        return False
+    
+    async def _try_emergency_notification(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """Emergency notification via alternative channels."""
+        try:
+            # Create emergency notification
+            emergency_data = {
+                'type': 'emergency_notification',
+                'original_event_type': event_type,
+                'user_id': self.user_id,
+                'message': f"Critical event {event_type} delivery failed - using emergency channel",
+                'original_data': data,
+                'error_details': str(last_error),
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            # If manager supports emergency notifications
+            if hasattr(self.manager, 'send_emergency_notification'):
+                await self.manager.send_emergency_notification(emergency_data)
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.critical(f"Emergency notification failed: {e}")
+            return False
+    
+    async def _try_alternative_user_notification(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """Try notifying user via alternative methods (email, SMS, etc.)."""
+        try:
+            # For critical events, try alternative notification methods
+            if event_type in self.CRITICAL_EVENTS:
+                notification_data = {
+                    'user_id': self.user_id,
+                    'event_type': event_type,
+                    'message': f"Your request is being processed - WebSocket notification failed",
+                    'fallback_reason': 'websocket_failure',
+                    'timestamp': datetime.now(timezone.utc).isoformat()
+                }
+                
+                # If manager supports alternative notifications
+                if hasattr(self.manager, 'send_alternative_notification'):
+                    await self.manager.send_alternative_notification(notification_data)
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Alternative user notification failed: {e}")
+            return False
+    
+    async def _try_system_alert_fallback(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """System-level alert for monitoring and intervention."""
+        try:
+            # Create system alert for ops team
+            alert_data = {
+                'alert_type': 'critical_event_failure',
+                'event_type': event_type,
+                'user_id': self.user_id,
+                'error': str(last_error),
+                'data_summary': {k: str(v)[:100] for k, v in data.items()},  # Truncated for alerts
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'requires_intervention': True
+            }
+            
+            # If manager supports system alerts
+            if hasattr(self.manager, 'trigger_system_alert'):
+                await self.manager.trigger_system_alert(alert_data)
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.critical(f"System alert fallback failed: {e}")
+            return False
+    
+    async def _trigger_connection_recovery(self, event_type: str, data: Dict[str, Any]):
+        """Trigger automatic connection recovery procedures."""
+        try:
+            logger.info(f"Triggering connection recovery for user {self.user_id}")
+            
+            # Update circuit breaker state
+            self._update_connection_health(False)
+            
+            # Attempt connection recovery
+            recovery_strategies = [
+                self._attempt_websocket_reconnection,
+                self._attempt_connection_pool_refresh,
+                self._attempt_manager_reset
+            ]
+            
+            for strategy in recovery_strategies:
+                try:
+                    success = await strategy()
+                    if success:
+                        logger.info(f"Connection recovery succeeded via {strategy.__name__}")
+                        # Retry the original event
+                        await asyncio.sleep(0.2)  # Brief pause
+                        retry_success = await self._emit_critical(event_type, data)
+                        if retry_success:
+                            return True
+                except Exception as e:
+                    logger.warning(f"Recovery strategy {strategy.__name__} failed: {e}")
+                    continue
+            
+            logger.error(f"All connection recovery strategies failed for user {self.user_id}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Connection recovery trigger failed: {e}")
+            return False
+    
+    async def _attempt_websocket_reconnection(self) -> bool:
+        """Attempt to reconnect WebSocket connection."""
+        try:
+            if hasattr(self.manager, 'reconnect_user'):
+                success = await self.manager.reconnect_user(self.user_id)
+                if success:
+                    self._update_connection_health(True)
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"WebSocket reconnection failed: {e}")
+            return False
+    
+    async def _attempt_connection_pool_refresh(self) -> bool:
+        """Attempt to refresh connection pool."""
+        try:
+            if hasattr(self.manager, 'refresh_connection_pool'):
+                await self.manager.refresh_connection_pool(self.user_id)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Connection pool refresh failed: {e}")
+            return False
+    
+    async def _attempt_manager_reset(self) -> bool:
+        """Attempt to reset manager state for this user."""
+        try:
+            if hasattr(self.manager, 'reset_user_state'):
+                await self.manager.reset_user_state(self.user_id)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Manager reset failed: {e}")
+            return False
+    
+    def get_error_handling_stats(self) -> Dict[str, Any]:
+        """Get error handling and fallback statistics."""
+        return {
+            'connection_health_score': self._connection_health_score,
+            'circuit_breaker_open': self._circuit_breaker_open,
+            'consecutive_failures': self._consecutive_failures,
+            'error_count': self.metrics.error_count,
+            'retry_count': self.metrics.retry_count,
+            'last_health_check': self._last_health_check.isoformat() if hasattr(self, '_last_health_check') else None,
+            'fallback_channels_available': [
+                'database_persistence',
+                'redis_queue', 
+                'direct_connection',
+                'emergency_notification',
+                'alternative_user_notification',
+                'system_alert'
+            ]
+        }
 
 
 class WebSocketEmitterPool:
