@@ -17,6 +17,10 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 
+# SSOT ExecutionResult imports
+from netra_backend.app.agents.base.interface import ExecutionResult
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+
 # SSOT imports - use the proper service location
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
@@ -78,7 +82,7 @@ class SupervisorAgent(BaseAgent):
         
         logger.info("✅ SSOT SupervisorAgent initialized using factory and execution engine patterns")
 
-    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> ExecutionResult:
         """Execute using SSOT UserExecutionEngine pattern.
         
         Args:
@@ -86,7 +90,7 @@ class SupervisorAgent(BaseAgent):
             stream_updates: Whether to stream updates via WebSocket
             
         Returns:
-            Dictionary with execution results
+            ExecutionResult with SSOT-compliant format
         """
         # Validate context using SSOT validation
         context = validate_user_context(context)
@@ -145,14 +149,20 @@ class SupervisorAgent(BaseAgent):
             
             logger.info(f"✅ SSOT SupervisorAgent execution completed for user {context.user_id}")
             
-            return {
-                "supervisor_result": "completed",
-                "orchestration_successful": result.success if hasattr(result, 'success') else True,
-                "user_isolation_verified": True,
-                "results": result.result if hasattr(result, 'result') else result,
-                "user_id": context.user_id,
-                "run_id": context.run_id
-            }
+            # Return SSOT ExecutionResult format
+            orchestration_successful = result.success if hasattr(result, 'success') else True
+            return ExecutionResult(
+                status=ExecutionStatus.COMPLETED,
+                request_id=getattr(context, 'request_id', f"supervisor_{context.run_id}"),
+                data={
+                    "supervisor_result": "completed",
+                    "orchestration_successful": orchestration_successful,
+                    "user_isolation_verified": True,
+                    "results": result.result if hasattr(result, 'result') else result,
+                    "user_id": str(context.user_id),
+                    "run_id": str(context.run_id)
+                }
+            )
             
         except Exception as e:
             # CRITICAL FIX: Emit error event on failure
@@ -164,7 +174,22 @@ class SupervisorAgent(BaseAgent):
                     error_context={"error_type": type(e).__name__}
                 )
                 logger.error(f"📡 Emitted agent_error event for run {context.run_id}: {e}")
-            raise
+            
+            # Return SSOT ExecutionResult for error cases
+            return ExecutionResult(
+                status=ExecutionStatus.FAILED,
+                request_id=getattr(context, 'request_id', f"supervisor_{context.run_id}"),
+                error_message=str(e),
+                error_code=type(e).__name__,
+                data={
+                    "supervisor_result": "failed",
+                    "orchestration_successful": False,
+                    "user_isolation_verified": True,
+                    "error": str(e),
+                    "user_id": str(context.user_id),
+                    "run_id": str(context.run_id)
+                }
+            )
             
         finally:
             # Cleanup using SSOT cleanup
