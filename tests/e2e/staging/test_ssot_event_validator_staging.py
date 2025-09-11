@@ -19,7 +19,7 @@ import aiohttp
 from concurrent.futures import ThreadPoolExecutor
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.core.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestSsotEventValidatorStaging(SSotAsyncTestCase):

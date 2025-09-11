@@ -109,7 +109,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     
     logger.critical(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
                    f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
-                   f"auth_service_endpoint: {getattr(auth_client, 'base_url', 'unknown')}, "
+                   f"auth_service_endpoint: {auth_client.settings.base_url}, "
                    f"service_timeout: 30s, reuse_check: passed)")
     
     try:

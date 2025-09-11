@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-11 13:12:56
+**Generated:** 2025-09-11 13:43:28
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -8,9 +8,9 @@
 
 - **Total Tests:** 4
 - **Passed:** 0 (0.0%)
-- **Failed:** 2 (50.0%)
-- **Skipped:** 2
-- **Duration:** 0.17 seconds
+- **Failed:** 0 (0.0%)
+- **Skipped:** 0
+- **Duration:** 23.74 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -49,7 +49,11 @@ test_golden_path_validation_staging_current.py::test_staging_environment_service
 test_golden_path_validation_staging_current.py::test_recommended_validator_architecture_for_staging FAILED
 
 ==================================================
+<<<<<<< HEAD
 0 passed, 2 failed, 2 skipped in 0.17s
+=======
+0 passed, 0 failed in 23.74s
+>>>>>>> origin/develop-long-lived
 ```
 
 ## Test Coverage Matrix

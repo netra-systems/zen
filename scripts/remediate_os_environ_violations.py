@@ -35,15 +35,15 @@ class RemediationResult:
 class OSEnvironRemediator:
     """Automated remediation of os.environ violations"""
     
-    # Mapping of file categories to appropriate environment imports
+    # Mapping of file categories to appropriate environment imports (SSOT-compliant)
     ENV_IMPORTS = {
-        'test': 'from test_framework.environment_isolation import get_test_env',
-        'netra_backend': 'from netra_backend.app.core.isolated_environment import get_env',
-        'auth_service': 'from auth_service.auth_core.isolated_environment import get_env',
-        'analytics_service': 'from analytics_service.analytics_core.isolated_environment import get_env',
-        'dev_launcher': 'from dev_launcher.isolated_environment import get_env',
-        'scripts': 'from dev_launcher.isolated_environment import get_env',
-        'shared': 'from dev_launcher.isolated_environment import get_env'
+        'test': 'from shared.isolated_environment import get_env',
+        'netra_backend': 'from shared.isolated_environment import get_env',
+        'auth_service': 'from shared.isolated_environment import get_env',
+        'analytics_service': 'from shared.isolated_environment import get_env',
+        'dev_launcher': 'from shared.isolated_environment import get_env',
+        'scripts': 'from shared.isolated_environment import get_env',
+        'shared': 'from shared.isolated_environment import get_env'
     }
     
     # Patterns for os.environ usage and their replacements
