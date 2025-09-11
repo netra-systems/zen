@@ -140,14 +140,29 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         self._initialized = True
         if user_context:
-            logger.info(f"AgentWebSocketBridge initialized (non-singleton mode) for user {user_context.user_id}")
+            logger.info(
+                f"🌉 WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized with user isolation. "
+                f"User: {user_context.user_id[:8]}..., Mode: non-singleton, "
+                f"Thread: {user_context.thread_id}, Request: {user_context.request_id}, "
+                f"Business_context: Ready for real-time agent event delivery (critical for chat UX)"
+            )
         else:
-            logger.info("AgentWebSocketBridge initialized (non-singleton mode)")
+            logger.info(
+                f"🌉 WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized (system mode). "
+                f"Mode: non-singleton, User_context: none, "
+                f"Business_context: System-level initialization for agent event infrastructure"
+            )
     
     def _initialize_configuration(self) -> None:
         """Initialize bridge configuration."""
         self.config = IntegrationConfig()
-        logger.debug("Integration configuration initialized")
+        logger.debug(
+            f"⚙️ BRIDGE_CONFIG_INIT: WebSocket-Agent integration configuration loaded. "
+            f"Timeout: {self.config.initialization_timeout_s}s, "
+            f"Health_check_interval: {self.config.health_check_interval_s}s, "
+            f"Recovery_attempts: {self.config.recovery_max_attempts}, "
+            f"Business_context: Configuration ready for reliable agent-websocket coordination"
+        )
     
     def _initialize_state(self) -> None:
         """Initialize integration state tracking.

@@ -1452,8 +1452,12 @@ async def create_isolated_execution_context(
     )
     
     logger.info(
-        f"Created isolated execution context: user={user_id[:8]}..., "
-        f"request={request_id[:8]}..., isolation={isolation_level}"
+        f"🔒 ISOLATED_CONTEXT_CREATED: Secure isolated execution context ready. "
+        f"User: {user_id[:8]}..., Request: {request_id[:8]}..., "
+        f"Isolation_level: {isolation_level}, Validation_performed: {validate_user and database_session is not None}, "
+        f"WebSocket_emitter: {'configured' if websocket_emitter else 'none'}, "
+        f"DB_session: {'attached' if database_session else 'none'}, "
+        f"Business_context: Enterprise-grade security for agent execution"
     )
     
     return context
