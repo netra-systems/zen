@@ -256,8 +256,7 @@ class UnifiedAuthInterface:
         """Create user session - CANONICAL implementation."""
         # Session functionality handled by auth_service directly
         # For now, return a simple session ID since tests just check interface existence
-        import uuid
-        return str(uuid.uuid4())
+        return UnifiedIdGenerator.generate_base_id("session")
     
     async def get_user_session(self, user_id: str) -> Optional[Dict]:
         """Get user session - CANONICAL implementation."""
