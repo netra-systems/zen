@@ -123,12 +123,50 @@ ConnectionRefusedError: [WinError 1225] The remote computer refused the network 
 
 ---
 
+## GitHub Issues Created
+✅ **All critical issues have been processed through GitHub issue tracker**
+
+### Issue #347: Agent Name Registry Mismatch (P0 Critical)
+- **URL:** https://github.com/netra-systems/netra-apex/issues/347
+- **Title:** `failing-test-regression-critical-golden-path-agent-name-mismatch-blocking-business-validation`
+- **Root Cause:** Golden Path tests reference `apex_optimizer` agent, but registry only contains `optimization` agent
+- **Business Impact:** $500K+ ARR Golden Path workflow blocked - cannot validate login → AI response journey
+- **Resolution:** Update agent name references from `apex_optimizer` → `optimization` in Golden Path tests
+
+### Issue #349: AgentExecutionTracker Missing Business Methods (High Priority) 
+- **URL:** https://github.com/netra-systems/netra-apex/issues/349
+- **Title:** `failing-test-regression-high-agentexecutiontracker-missing-business-methods`
+- **Missing Methods:** `get_execution_metrics()`, `record_execution()`, `get_execution_analytics()`
+- **Business Impact:** Performance monitoring and analytics disabled for Golden Path validation
+- **Resolution:** Restore business metrics methods removed during SSOT consolidation
+
+### Issue #350: E2E WebSocket Connection Failures (Critical)
+- **URL:** https://github.com/netra-systems/netra-apex/issues/350  
+- **Title:** `failing-test-new-critical-golden-path-e2e-websocket-connection-blocked`
+- **Root Cause:** Backend services not running/accessible during E2E test execution
+- **Business Impact:** Complete E2E Golden Path testing blocked - cannot validate end-to-end user journey
+- **Resolution:** Service orchestration strategy for Golden Path E2E testing environment
+
+## Priority Resolution Order (Updated)
+
+### P0 - IMMEDIATE (Business Critical) - ✅ TRACKED IN GITHUB
+1. **Fix Agent Name Registry Mismatch** - Issue #347 - Update `apex_optimizer` → `optimization` 
+2. **Start Backend Services for E2E** - Issue #350 - Enable WebSocket connection testing
+3. **Restore AgentExecutionTracker Methods** - Issue #349 - Add back missing business metrics methods
+
+### P1 - HIGH (Integration Critical) 
+1. **Validate Golden Path Test Suite** - Run complete test suite after P0 fixes
+2. **Fix Remaining Integration Issues** - Address secondary test failures
+3. **Service Startup Automation** - Create reliable test service orchestration
+
 ## Next Actions Required
-1. Create GitHub issues for each failure category
-2. Prioritize UserExecutionContext API compatibility fixes
-3. Restore missing AgentExecutionTracker business methods
-4. Investigate backend service startup for E2E testing
-5. Validate fixes against full Golden Path test suite
+1. ✅ **COMPLETED:** Create GitHub issues for each failure category
+2. ✅ **TRACKED:** Agent name registry mismatch in Issue #347  
+3. ✅ **TRACKED:** Missing AgentExecutionTracker business methods in Issue #349
+4. ✅ **TRACKED:** Backend service startup for E2E testing in Issue #350
+5. **TODO:** Validate fixes against full Golden Path test suite after resolution
 
 **Total Issues Identified:** 3 major issue categories with 15+ individual test failures
+**GitHub Issues Created:** 3 critical issues (P0: #347, #350; High: #349)
 **Blocking Golden Path:** ✅ CONFIRMED - Critical business functionality blocked
+**Issue Tracking:** ✅ COMPLETED - All issues properly documented in GitHub
