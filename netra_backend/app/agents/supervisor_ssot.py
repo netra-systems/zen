@@ -283,6 +283,101 @@ class SupervisorAgent(BaseAgent):
         logger.info("✅ Created SSOT SupervisorAgent using factory pattern")
         return supervisor
 
+    async def _execute_orchestration_workflow(self, 
+                                            engine: UserExecutionEngine,
+                                            context: UserExecutionContext,
+                                            user_request: str,
+                                            stream_updates: bool = True) -> Any:
+        """Execute the agent orchestration workflow.
+        
+        This method implements the actual orchestration logic without circular dependencies.
+        It orchestrates triage -> data -> optimization -> actions -> reporting agents.
+        
+        Args:
+            engine: UserExecutionEngine for agent execution
+            context: User execution context
+            user_request: The user's request
+            stream_updates: Whether to stream updates
+            
+        Returns:
+            Orchestration workflow result
+        """
+        logger.info(f"🎭 Starting orchestration workflow for user {context.user_id}")
+        
+        try:
+            # Step 1: Triage the user request
+            triage_result = await engine.execute_agent_pipeline(
+                agent_name="triage",
+                execution_context=context,
+                input_data={"user_request": user_request}
+            )
+            
+            # Step 2: Data analysis based on triage
+            data_result = await engine.execute_agent_pipeline(
+                agent_name="data",
+                execution_context=context,
+                input_data={
+                    "user_request": user_request,
+                    "triage_result": triage_result
+                }
+            )
+            
+            # Step 3: Optimization recommendations
+            optimization_result = await engine.execute_agent_pipeline(
+                agent_name="optimization",
+                execution_context=context,
+                input_data={
+                    "user_request": user_request,
+                    "triage_result": triage_result,
+                    "data_result": data_result
+                }
+            )
+            
+            # Step 4: Action planning
+            actions_result = await engine.execute_agent_pipeline(
+                agent_name="actions",
+                execution_context=context,
+                input_data={
+                    "user_request": user_request,
+                    "optimization_result": optimization_result
+                }
+            )
+            
+            # Step 5: Final reporting
+            reporting_result = await engine.execute_agent_pipeline(
+                agent_name="reporting",
+                execution_context=context,
+                input_data={
+                    "user_request": user_request,
+                    "triage_result": triage_result,
+                    "data_result": data_result,
+                    "optimization_result": optimization_result,
+                    "actions_result": actions_result
+                }
+            )
+            
+            # Compile final result
+            orchestration_result = {
+                "workflow_completed": True,
+                "triage": triage_result,
+                "data": data_result,
+                "optimization": optimization_result,
+                "actions": actions_result,
+                "reporting": reporting_result,
+                "user_request": user_request
+            }
+            
+            logger.info(f"✅ Orchestration workflow completed for user {context.user_id}")
+            return orchestration_result
+            
+        except Exception as e:
+            logger.error(f"❌ Orchestration workflow failed for user {context.user_id}: {e}")
+            return {
+                "workflow_completed": False,
+                "error": str(e),
+                "user_request": user_request
+            }
+
     def __str__(self) -> str:
         return f"SupervisorAgent(SSOT pattern, factory-based)"
     

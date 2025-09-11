@@ -678,8 +678,8 @@ class TestDatabaseManagerErrorHandlingAndRecovery(SSotAsyncTestCase):
     
     async def test_migration_url_failure_handling(self):
         """Test migration URL method handles failures appropriately."""
-        with patch('shared.database_url_builder.DatabaseURLBuilder') as mock_builder_class:
-            with patch('shared.isolated_environment.get_env') as mock_get_env:
+        with patch('netra_backend.app.db.database_manager.get_env') as mock_get_env:
+            with patch('netra_backend.app.db.database_manager.DatabaseURLBuilder') as mock_builder_class:
                 # Mock environment
                 mock_env = Mock()
                 mock_env.as_dict.return_value = {}
