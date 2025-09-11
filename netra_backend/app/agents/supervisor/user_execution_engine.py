@@ -654,8 +654,13 @@ class UserExecutionEngine(IExecutionEngine):
         effective_user_context = user_context or self.context
         
         # Create a DeepAgentState from the context
+        # Extract user message from metadata, defaulting to empty string if not found
+        user_message = ""
+        if isinstance(context.metadata, dict):
+            user_message = context.metadata.get('message', '') or context.metadata.get('user_request', '')
+        
         state = DeepAgentState(
-            user_request=context.metadata or {},
+            user_request=user_message,
             user_id=effective_user_context.user_id,
             chat_thread_id=effective_user_context.thread_id,
             run_id=effective_user_context.run_id,
@@ -1052,8 +1057,15 @@ class UserExecutionEngine(IExecutionEngine):
             )
             
             # Create agent state from input data
+            # Extract user message from input_data, defaulting to empty string if not found
+            user_message = ""
+            if isinstance(input_data, dict):
+                user_message = input_data.get('message', '') or input_data.get('user_request', '')
+            elif isinstance(input_data, str):
+                user_message = input_data
+            
             state = DeepAgentState(
-                user_request=input_data,
+                user_request=user_message,
                 user_id=execution_context.user_id,
                 chat_thread_id=execution_context.thread_id,
                 run_id=execution_context.run_id,

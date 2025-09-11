@@ -473,9 +473,15 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> UnifiedWebSoc
     return WebSocketManager(user_context=user_context)
 
 
+# ===== BACKWARD COMPATIBILITY ALIASES =====
+
+# For tests that still expect WebSocketManagerAdapter
+WebSocketManagerAdapter = _LegacyWebSocketManagerAdapter
+
 __all__ = [
     "get_legacy_websocket_manager",
-    "migrate_singleton_usage"
+    "migrate_singleton_usage",
+    "WebSocketManagerAdapter"  # Backward compatibility
 ]
 
 # DEPRECATED: WebSocketManagerAdapter removed for SSOT compliance
