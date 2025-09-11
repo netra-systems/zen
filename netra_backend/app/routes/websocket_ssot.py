@@ -408,12 +408,34 @@ class WebSocketSSOTRouter:
                 await websocket.accept()
             
             # Step 2: SSOT Authentication (preserves full auth pipeline)
+            logger.critical(f"🔑 GOLDEN PATH AUTH: Starting SSOT authentication for connection {connection_id} - user_id: pending, connection_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown'))}, timestamp: {datetime.now(timezone.utc).isoformat()}")
+            
             auth_result = await authenticate_websocket_ssot(
                 websocket, 
                 preliminary_connection_id=preliminary_connection_id
             )
             
             if not auth_result.success:
+                # CRITICAL AUTH FAILURE LOGGING
+                auth_failure_context = {
+                    "connection_id": connection_id,
+                    "preliminary_connection_id": preliminary_connection_id,
+                    "error_message": auth_result.error_message,
+                    "error_code": getattr(auth_result, 'error_code', 'UNKNOWN'),
+                    "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
+                    "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                    "headers_available": len(websocket.headers) if websocket.headers else 0,
+                    "has_auth_header": 'authorization' in (websocket.headers or {}),
+                    "has_subprotocol_header": 'sec-websocket-protocol' in (websocket.headers or {}),
+                    "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
+                    "origin": websocket.headers.get('origin', 'unknown') if websocket.headers else 'unknown',
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_impact": "CRITICAL - Blocks user login to AI response flow"
+                }
+                
+                logger.critical(f"🚨 GOLDEN PATH AUTH FAILURE: WebSocket authentication failed for connection {connection_id} - {auth_result.error_message}")
+                logger.critical(f"🔍 AUTH FAILURE CONTEXT: {json.dumps(auth_failure_context, indent=2)}")
+                
                 # ISSUE #342 FIX: Improved error messages with specific guidance
                 logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error_message}")
                 
@@ -422,10 +444,17 @@ class WebSocketSSOTRouter:
                 error_msg_str = str(auth_result.error_message or "").lower()
                 if "subprotocol" in error_msg_str or "no token" in error_msg_str:
                     error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error_message}"
+                    logger.critical(f"🔑 TOKEN EXTRACTION FAILURE: No JWT token found in WebSocket headers or subprotocols for connection {connection_id}")
                 elif "jwt" in error_msg_str:
                     error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error_message}"
+                    logger.critical(f"🔑 JWT VALIDATION FAILURE: Token validation failed for connection {connection_id} - likely secret mismatch or malformed token")
+                elif "expired" in error_msg_str:
+                    logger.critical(f"🔑 JWT EXPIRY FAILURE: Token expired for connection {connection_id} - user needs to re-authenticate")
+                elif "invalid" in error_msg_str:
+                    logger.critical(f"🔑 JWT INVALID FAILURE: Invalid JWT token for connection {connection_id} - possible tampering or corruption")
                 else:
                     error_message = f"Authentication failed: {auth_result.error_message}"
+                    logger.critical(f"🔑 UNKNOWN AUTH FAILURE: Unclassified authentication error for connection {connection_id}: {auth_result.error_message}")
                 
                 await safe_websocket_send(websocket, create_error_message("AUTH_FAILED", error_message))
                 await safe_websocket_close(websocket, 1008, "Authentication failed")
@@ -434,15 +463,47 @@ class WebSocketSSOTRouter:
             user_context = auth_result.user_context
             user_id = getattr(auth_result.user_context, 'user_id', None) if auth_result.success else None
             
+            # CRITICAL SUCCESS LOGGING
+            auth_success_context = {
+                "connection_id": connection_id,
+                "user_id": user_id[:8] + "..." if user_id else 'unknown',
+                "websocket_client_id": getattr(user_context, 'websocket_client_id', 'unknown') if user_context else 'unknown',
+                "thread_id": getattr(user_context, 'thread_id', 'unknown') if user_context else 'unknown',
+                "run_id": getattr(user_context, 'run_id', 'unknown') if user_context else 'unknown',
+                "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
+                "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_milestone": "Authentication successful - user can proceed to AI interactions"
+            }
+            
+            logger.info(f"✅ GOLDEN PATH AUTH SUCCESS: User {user_id[:8] if user_id else 'unknown'}... authenticated successfully for connection {connection_id}")
+            logger.info(f"🔍 AUTH SUCCESS CONTEXT: {json.dumps(auth_success_context, indent=2)}")
             logger.info(f"[MAIN MODE] Authentication success: user={user_id[:8] if user_id else 'unknown'}")
             
             # Step 3: Create WebSocket Manager (with emergency fallback)
+            logger.info(f"🔧 GOLDEN PATH MANAGER: Creating WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+            
             ws_manager = await self._create_websocket_manager(user_context)
             if not ws_manager:
+                # CRITICAL MANAGER CREATION FAILURE
+                manager_failure_context = {
+                    "connection_id": connection_id,
+                    "user_id": user_id[:8] + "..." if user_id else 'unknown',
+                    "user_context_available": user_context is not None,
+                    "websocket_client_id": getattr(user_context, 'websocket_client_id', 'unknown') if user_context else 'unknown',
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "golden_path_impact": "CRITICAL - Prevents WebSocket message handling and agent communication"
+                }
+                
+                logger.critical(f"🚨 GOLDEN PATH MANAGER FAILURE: Failed to create WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
+                logger.critical(f"🔍 MANAGER FAILURE CONTEXT: {json.dumps(manager_failure_context, indent=2)}")
                 logger.error("[MAIN MODE] Failed to create WebSocket manager")
+                
                 await safe_websocket_send(websocket, create_error_message("SERVICE_INIT_FAILED", "Service initialization failed"))
                 await safe_websocket_close(websocket, 1011, "Service initialization failed")
                 return
+            
+            logger.info(f"✅ GOLDEN PATH MANAGER: WebSocket manager created successfully for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}")
             
             # Step 4: Health validation
             health_report = self._validate_websocket_component_health(user_context)
