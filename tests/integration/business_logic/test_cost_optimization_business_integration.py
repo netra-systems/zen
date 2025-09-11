@@ -32,7 +32,7 @@ from test_framework.websocket_helpers import assert_websocket_events_sent
 from shared.isolated_environment import get_env
 
 
-class TestCostOptimizationBusinessIntegration(BaseIntegrationTest, ServiceOrchestrationIntegrationTest):
+class TestCostOptimizationBusinessIntegration(ServiceOrchestrationIntegrationTest):
     """
     Integration tests for cost optimization analysis workflows.
     Tests actual business value delivery through AI-powered cost analysis.

@@ -209,7 +209,7 @@ class TestUnifiedTestRunnerIntegration(SSotBaseTestCase, UnifiedTestRunnerTestMi
     def setUp(self):
         """Set up each test with fresh state."""
         super().setUp()
-        self.project_root = TestUnifiedTestRunnerIntegration.project_root  # Use class-level project_root
+        self.project_root = self.__class__.project_root  # Use class-level project_root
         self.test_discovery = TestDiscovery(self.project_root)
         self.test_validation = TestValidation(self.project_root)
         
@@ -360,7 +360,7 @@ class TestDiscoveryAndCollection(TestUnifiedTestRunnerIntegration):
         
         # Scan test files for syntax errors
         for test_dir in ["tests", "netra_backend/tests"]:
-            test_path = project_root / test_dir
+            test_path = self.project_root / test_dir
             if not test_path.exists():
                 continue
                 
@@ -722,7 +722,7 @@ class TestSSotTestInfrastructure(TestUnifiedTestRunnerIntegration):
         test_files_scanned = 0
         
         for test_dir in ["tests/integration", "tests/unit"]:
-            test_path = project_root / test_dir
+            test_path = self.project_root / test_dir
             if not test_path.exists():
                 continue
                 
@@ -767,7 +767,7 @@ class TestSSotTestInfrastructure(TestUnifiedTestRunnerIntegration):
         integration_files_with_mocks = []
         integration_files_scanned = 0
         
-        integration_path = project_root / "tests" / "integration"
+        integration_path = self.project_root / "tests" / "integration"
         if integration_path.exists():
             for test_file in integration_path.rglob("test_*.py"):
                 integration_files_scanned += 1
