@@ -32,7 +32,7 @@ from typing import Dict, Any, Optional
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import IntegrityError, ConstraintViolation
+from sqlalchemy.exc import IntegrityError
 
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.models_user import User, Secret, ToolUsageLog

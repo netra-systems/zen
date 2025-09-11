@@ -175,6 +175,25 @@ except ImportError:
     def create_error_message(error_code, message="Error", **kwargs):
         return {"type": "error", "error_code": error_code, "message": message, **kwargs}
 
+# Import JWT protocol handler functions for subprotocol negotiation (Issue #280 fix)
+try:
+    from netra_backend.app.websocket_core.unified_jwt_protocol_handler import (
+        extract_jwt_from_subprotocol,
+        negotiate_websocket_subprotocol,
+        extract_jwt_token,
+        normalize_jwt_token
+    )
+except ImportError:
+    # Fallback implementations for missing protocol handler
+    def extract_jwt_from_subprotocol(subprotocol_value):
+        return None
+    def negotiate_websocket_subprotocol(client_protocols):
+        return None
+    def extract_jwt_token(websocket):
+        return None
+    def normalize_jwt_token(jwt_token):
+        return jwt_token
+
 # Import RateLimiter for backward compatibility
 try:
     from netra_backend.app.websocket_core.rate_limiter import RateLimiter, WebSocketRateLimiter
@@ -322,6 +341,12 @@ __all__ = [
     # Rate limiting
     "RateLimiter",
     "WebSocketRateLimiter",
+    
+    # JWT Protocol Handler (Issue #280 fix)
+    "extract_jwt_from_subprotocol",
+    "negotiate_websocket_subprotocol", 
+    "extract_jwt_token",
+    "normalize_jwt_token",
     
     # Utility functions and classes
     "WebSocketHeartbeat",

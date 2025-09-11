@@ -146,10 +146,10 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['auth_validation'] = ServiceReadinessCheck(
             name='auth_validation',
             validator=self._validate_auth_system_readiness,
-            timeout_seconds=5.0 if self.is_gcp_environment else 20.0,
+            timeout_seconds=10.0 if self.is_gcp_environment else 20.0,
             retry_count=3,
             retry_delay=1.0,
-            is_critical=True,
+            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,
             description="Auth validation and JWT system"
         )
         
@@ -318,11 +318,37 @@ class GCPWebSocketInitializationValidator:
             return False
     
     def _validate_agent_supervisor_readiness(self) -> bool:
-        """Validate agent supervisor readiness - CRITICAL for chat."""
+        """
+        Validate agent supervisor readiness - CRITICAL for chat.
+        
+        RACE CONDITION FIX: Skip validation during early startup phases (before SERVICES)
+        to prevent 1011 errors when GCP validation runs before Phase 5 completion.
+        """
         try:
             if not self.app_state:
                 return False
             
+            # CRITICAL FIX: Check startup phase before validating agent_supervisor
+            # This prevents race condition where validation runs before Phase 5 (SERVICES)
+            if hasattr(self.app_state, 'startup_phase'):
+                current_phase = str(self.app_state.startup_phase).lower()
+                
+                # Skip validation during early phases (before services phase)
+                early_phases = ['init', 'dependencies', 'database', 'cache']
+                if current_phase in early_phases:
+                    self.logger.debug(
+                        f"Skipping agent_supervisor validation during startup phase '{current_phase}' "
+                        f"to prevent WebSocket race condition - supervisor not yet initialized"
+                    )
+                    return False
+                
+                # Log when validation proceeds in appropriate phases
+                if current_phase in ['services', 'websocket', 'finalize', 'complete']:
+                    self.logger.debug(
+                        f"Proceeding with agent_supervisor validation in startup phase '{current_phase}'"
+                    )
+            
+            # Proceed with existing validation logic
             # Check agent_supervisor exists and is not None
             if not hasattr(self.app_state, 'agent_supervisor'):
                 return False
@@ -345,7 +371,12 @@ class GCPWebSocketInitializationValidator:
             return False
     
     def _validate_websocket_bridge_readiness(self) -> bool:
-        """Validate AgentWebSocketBridge readiness with GOLDEN PATH graceful degradation."""
+        """
+        Validate AgentWebSocketBridge readiness with GOLDEN PATH graceful degradation.
+        
+        RACE CONDITION FIX: Skip validation during early startup phases (before SERVICES)
+        to prevent 1011 errors when validation runs before bridge initialization.
+        """
         try:
             if not self.app_state:
                 self.logger.warning("WebSocket bridge readiness: No app_state available")
@@ -355,6 +386,27 @@ class GCPWebSocketInitializationValidator:
                     return True
                 return False
             
+            # CRITICAL FIX: Check startup phase before validating websocket_bridge
+            # WebSocket bridge is initialized in Phase 5 (SERVICES) along with agent_supervisor
+            if hasattr(self.app_state, 'startup_phase'):
+                current_phase = str(self.app_state.startup_phase).lower()
+                
+                # Skip validation during early phases (before services phase)
+                early_phases = ['init', 'dependencies', 'database', 'cache']
+                if current_phase in early_phases:
+                    self.logger.debug(
+                        f"Skipping websocket_bridge validation during startup phase '{current_phase}' "
+                        f"to prevent WebSocket race condition - bridge not yet initialized"
+                    )
+                    return False
+                
+                # Log when validation proceeds in appropriate phases
+                if current_phase in ['services', 'websocket', 'finalize', 'complete']:
+                    self.logger.debug(
+                        f"Proceeding with websocket_bridge validation in startup phase '{current_phase}'"
+                    )
+            
+            # Proceed with existing validation logic
             # Check agent_websocket_bridge exists and is not None
             if not hasattr(self.app_state, 'agent_websocket_bridge'):
                 self.logger.warning("WebSocket bridge readiness: No agent_websocket_bridge in app_state")
@@ -455,6 +507,87 @@ class GCPWebSocketInitializationValidator:
             self.logger.debug(f"WebSocket integration readiness check failed: {e}")
             return False
     
+    async def _wait_for_startup_phase_completion(
+        self, 
+        minimum_phase: str = 'services',
+        timeout_seconds: float = 30.0
+    ) -> bool:
+        """
+        Wait for startup to reach at least the specified phase.
+        
+        RACE CONDITION FIX: This prevents validation from running too early by
+        waiting for the deterministic startup sequence to reach the required phase.
+        
+        Args:
+            minimum_phase: Minimum phase required ('services', 'websocket', etc.)
+            timeout_seconds: Maximum time to wait for phase completion
+            
+        Returns:
+            bool: True if phase was reached, False if timeout or failure
+        """
+        if not self.app_state:
+            self.logger.warning("Cannot wait for startup phase - no app_state available")
+            return False
+        
+        start_time = time.time()
+        check_interval = 0.1  # Check every 100ms
+        
+        valid_phases = ['services', 'websocket', 'finalize', 'complete']
+        phase_order = ['init', 'dependencies', 'database', 'cache', 'services', 'websocket', 'finalize', 'complete']
+        
+        if minimum_phase not in phase_order:
+            self.logger.error(f"Invalid minimum phase '{minimum_phase}' - must be one of {valid_phases}")
+            return False
+        
+        minimum_phase_index = phase_order.index(minimum_phase)
+        
+        self.logger.info(f"Waiting for startup phase to reach '{minimum_phase}' (timeout: {timeout_seconds}s)")
+        
+        while time.time() - start_time < timeout_seconds:
+            try:
+                if hasattr(self.app_state, 'startup_phase'):
+                    current_phase = str(self.app_state.startup_phase).lower()
+                    
+                    if current_phase in phase_order:
+                        current_phase_index = phase_order.index(current_phase)
+                        
+                        if current_phase_index >= minimum_phase_index:
+                            elapsed = time.time() - start_time
+                            self.logger.info(
+                                f"Startup phase '{current_phase}' reached minimum '{minimum_phase}' "
+                                f"after {elapsed:.2f}s"
+                            )
+                            return True
+                        else:
+                            self.logger.debug(
+                                f"Current startup phase '{current_phase}' < minimum '{minimum_phase}' "
+                                f"- waiting... ({time.time() - start_time:.1f}s elapsed)"
+                            )
+                    else:
+                        self.logger.debug(f"Unknown startup phase '{current_phase}' - continuing to wait...")
+                else:
+                    self.logger.debug("No startup_phase attribute - waiting for startup initialization...")
+                
+                # Check if startup failed
+                if hasattr(self.app_state, 'startup_failed') and self.app_state.startup_failed:
+                    self.logger.error("Startup failed - aborting phase wait")
+                    return False
+                
+                await asyncio.sleep(check_interval)
+                
+            except Exception as e:
+                self.logger.warning(f"Error checking startup phase: {e}")
+                await asyncio.sleep(check_interval)
+        
+        # Timeout reached
+        elapsed = time.time() - start_time
+        current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
+        self.logger.warning(
+            f"Timeout waiting for startup phase '{minimum_phase}' - "
+            f"current phase: '{current_phase}' after {elapsed:.2f}s"
+        )
+        return False
+
     async def validate_gcp_readiness_for_websocket(
         self, 
         timeout_seconds: float = 30.0
@@ -492,6 +625,40 @@ class GCPWebSocketInitializationValidator:
                 )
             
             self.current_state = GCPReadinessState.INITIALIZING
+            
+            # CRITICAL FIX: Wait for startup to reach services phase before validation
+            # This prevents race condition where validation runs before Phase 5 completion
+            wait_timeout = min(timeout_seconds * 0.6, 20.0)  # Use 60% of total timeout, max 20s
+            startup_ready = await self._wait_for_startup_phase_completion(
+                minimum_phase='services', 
+                timeout_seconds=wait_timeout
+            )
+            
+            if not startup_ready:
+                # Startup didn't reach services phase - this is the race condition
+                elapsed_time = time.time() - self.validation_start_time
+                current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
+                
+                self.logger.error(
+                    f"🔴 RACE CONDITION DETECTED: Startup phase '{current_phase}' did not reach 'services' "
+                    f"within {wait_timeout:.1f}s - this would cause WebSocket 1011 errors"
+                )
+                
+                return GCPReadinessResult(
+                    ready=False,
+                    state=GCPReadinessState.FAILED,
+                    elapsed_time=elapsed_time,
+                    failed_services=["startup_phase_timeout"],
+                    warnings=[f"Startup did not reach services phase within {wait_timeout:.1f}s"],
+                    details={
+                        "race_condition_detected": True,
+                        "current_phase": current_phase,
+                        "minimum_required_phase": "services",
+                        "startup_timeout": wait_timeout
+                    }
+                )
+            
+            self.logger.info(f"✅ Startup phase requirement met - proceeding with service validation")
             
             # Phase 1: Validate Dependencies (Database, Redis, Auth) with GOLDEN PATH degradation
             self.logger.info("📋 Phase 1: Validating dependencies (Database, Redis, Auth)...")

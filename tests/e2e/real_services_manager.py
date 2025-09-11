@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass, field
+from enum import Enum
 
 import httpx
 import websockets
@@ -60,6 +61,13 @@ class ServiceHealthCheckError(Exception):
     pass
 
 
+class CircuitBreakerState(Enum):
+    """Circuit breaker states."""
+    CLOSED = "closed"      # Normal operation
+    OPEN = "open"          # Failing fast, not trying requests
+    HALF_OPEN = "half_open" # Testing if service recovered
+
+
 # =============================================================================
 # CONFIGURATION AND DATA STRUCTURES
 # =============================================================================
@@ -83,6 +91,9 @@ class ServiceStatus:
     response_time_ms: Optional[float] = None
     error: Optional[str] = None
     last_check: float = field(default_factory=time.time)
+    circuit_breaker_state: CircuitBreakerState = CircuitBreakerState.CLOSED
+    failure_count: int = 0
+    last_failure_time: Optional[float] = None
 
 
 @dataclass
@@ -93,6 +104,350 @@ class DatabaseConnectionInfo:
     clickhouse_url: Optional[str] = None
     connected: bool = False
     error: Optional[str] = None
+
+
+@dataclass
+class HealthCheckConfig:
+    """Configuration for health checking behavior."""
+    parallel_execution: bool = True
+    max_concurrent_checks: int = 10
+    circuit_breaker_enabled: bool = True
+    circuit_breaker_failure_threshold: int = 5
+    circuit_breaker_recovery_timeout: float = 30.0
+    circuit_breaker_test_timeout: float = 5.0
+    health_check_timeout: float = 10.0
+    retry_attempts: int = 2
+    retry_delay: float = 1.0
+
+
+class AsyncHealthChecker:
+    """
+    Parallel health checker with circuit breaker pattern.
+    
+    This class implements parallel health checking using asyncio.gather()
+    to achieve significant performance improvements over sequential checks.
+    Includes circuit breaker pattern for failed services.
+    """
+    
+    def __init__(self, config: Optional[HealthCheckConfig] = None):
+        """Initialize health checker with configuration."""
+        self.config = config or HealthCheckConfig()
+        self.circuit_breaker_states: Dict[str, CircuitBreakerState] = {}
+        self.failure_counts: Dict[str, int] = {}
+        self.last_failure_times: Dict[str, float] = {}
+        
+        logger.info(f"AsyncHealthChecker initialized - parallel: {self.config.parallel_execution}, "
+                   f"circuit_breaker: {self.config.circuit_breaker_enabled}")
+    
+    async def check_services_parallel(self, 
+                                    service_endpoints: List[ServiceEndpoint],
+                                    http_client: httpx.AsyncClient,
+                                    database_checker_func = None) -> Dict[str, ServiceStatus]:
+        """
+        Check all services in parallel using asyncio.gather().
+        
+        Args:
+            service_endpoints: List of service endpoints to check
+            http_client: HTTP client for making requests
+            database_checker_func: Optional database health check function
+            
+        Returns:
+            Dict mapping service names to their status
+        """
+        if not self.config.parallel_execution:
+            # Fallback to sequential for compatibility
+            return await self._check_services_sequential(service_endpoints, http_client, database_checker_func)
+        
+        start_time = time.time()
+        logger.info(f"Starting parallel health checks for {len(service_endpoints)} services")
+        
+        # Create tasks for all services
+        tasks = []
+        service_names = []
+        
+        for endpoint in service_endpoints:
+            if endpoint.name == "database" and database_checker_func:
+                # Special handling for database
+                task = self._check_database_with_circuit_breaker(endpoint, database_checker_func)
+            else:
+                # HTTP/WebSocket services
+                task = self._check_service_with_circuit_breaker(endpoint, http_client)
+            
+            tasks.append(task)
+            service_names.append(endpoint.name)
+        
+        try:
+            # Execute all health checks in parallel
+            semaphore = asyncio.Semaphore(self.config.max_concurrent_checks)
+            
+            async def bounded_check(task):
+                async with semaphore:
+                    return await task
+            
+            bounded_tasks = [bounded_check(task) for task in tasks]
+            results = await asyncio.gather(*bounded_tasks, return_exceptions=True)
+            
+            # Process results
+            status_dict = {}
+            for i, result in enumerate(results):
+                service_name = service_names[i]
+                
+                if isinstance(result, Exception):
+                    logger.error(f"Health check failed for {service_name}: {result}")
+                    status_dict[service_name] = ServiceStatus(
+                        name=service_name,
+                        healthy=False,
+                        url=service_endpoints[i].url,
+                        error=f"Health check exception: {str(result)}",
+                        circuit_breaker_state=self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED),
+                        failure_count=self.failure_counts.get(service_name, 0)
+                    )
+                else:
+                    status_dict[service_name] = result
+            
+            total_time = (time.time() - start_time) * 1000
+            logger.info(f"Parallel health checks completed in {total_time:.2f}ms")
+            
+            return status_dict
+            
+        except Exception as e:
+            logger.error(f"Parallel health check execution failed: {e}")
+            # Fallback to sequential on failure
+            return await self._check_services_sequential(service_endpoints, http_client, database_checker_func)
+    
+    async def _check_services_sequential(self,
+                                       service_endpoints: List[ServiceEndpoint],
+                                       http_client: httpx.AsyncClient,
+                                       database_checker_func = None) -> Dict[str, ServiceStatus]:
+        """Fallback sequential health checking."""
+        status_dict = {}
+        
+        for endpoint in service_endpoints:
+            if endpoint.name == "database" and database_checker_func:
+                status = await self._check_database_with_circuit_breaker(endpoint, database_checker_func)
+            else:
+                status = await self._check_service_with_circuit_breaker(endpoint, http_client)
+            
+            status_dict[endpoint.name] = status
+        
+        return status_dict
+    
+    async def _check_service_with_circuit_breaker(self, 
+                                                 endpoint: ServiceEndpoint, 
+                                                 http_client: httpx.AsyncClient) -> ServiceStatus:
+        """Check service with circuit breaker pattern."""
+        service_name = endpoint.name
+        
+        # Check circuit breaker state
+        if self.config.circuit_breaker_enabled:
+            circuit_state = self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED)
+            
+            if circuit_state == CircuitBreakerState.OPEN:
+                # Check if we should try again
+                last_failure = self.last_failure_times.get(service_name, 0)
+                if time.time() - last_failure < self.config.circuit_breaker_recovery_timeout:
+                    return ServiceStatus(
+                        name=service_name,
+                        healthy=False,
+                        url=endpoint.url,
+                        error="Circuit breaker OPEN - not attempting check",
+                        circuit_breaker_state=CircuitBreakerState.OPEN,
+                        failure_count=self.failure_counts.get(service_name, 0)
+                    )
+                else:
+                    # Try to transition to HALF_OPEN
+                    self.circuit_breaker_states[service_name] = CircuitBreakerState.HALF_OPEN
+        
+        # Perform actual health check
+        start_time = time.time()
+        
+        try:
+            if endpoint.url.startswith(("ws://", "wss://")):
+                healthy, error = await self._check_websocket_health_with_timeout(endpoint)
+            else:
+                healthy, error = await self._check_http_health_with_timeout(endpoint, http_client)
+            
+            response_time = (time.time() - start_time) * 1000
+            
+            # Update circuit breaker state
+            if self.config.circuit_breaker_enabled:
+                if healthy:
+                    self._handle_success(service_name)
+                else:
+                    self._handle_failure(service_name)
+            
+            return ServiceStatus(
+                name=service_name,
+                healthy=healthy,
+                url=endpoint.url,
+                response_time_ms=response_time,
+                error=error,
+                circuit_breaker_state=self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED),
+                failure_count=self.failure_counts.get(service_name, 0)
+            )
+            
+        except Exception as e:
+            if self.config.circuit_breaker_enabled:
+                self._handle_failure(service_name)
+            
+            return ServiceStatus(
+                name=service_name,
+                healthy=False,
+                url=endpoint.url,
+                error=str(e),
+                circuit_breaker_state=self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED),
+                failure_count=self.failure_counts.get(service_name, 0)
+            )
+    
+    async def _check_database_with_circuit_breaker(self,
+                                                  endpoint: ServiceEndpoint,
+                                                  database_checker_func) -> ServiceStatus:
+        """Check database with circuit breaker pattern."""
+        service_name = endpoint.name
+        
+        # Circuit breaker logic (similar to service check)
+        if self.config.circuit_breaker_enabled:
+            circuit_state = self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED)
+            
+            if circuit_state == CircuitBreakerState.OPEN:
+                last_failure = self.last_failure_times.get(service_name, 0)
+                if time.time() - last_failure < self.config.circuit_breaker_recovery_timeout:
+                    return ServiceStatus(
+                        name=service_name,
+                        healthy=False,
+                        url=endpoint.url,
+                        error="Circuit breaker OPEN - not attempting database check",
+                        circuit_breaker_state=CircuitBreakerState.OPEN,
+                        failure_count=self.failure_counts.get(service_name, 0)
+                    )
+                else:
+                    self.circuit_breaker_states[service_name] = CircuitBreakerState.HALF_OPEN
+        
+        try:
+            db_health = await database_checker_func()
+            healthy = db_health.get("connected", False)
+            error = db_health.get("error")
+            
+            if self.config.circuit_breaker_enabled:
+                if healthy:
+                    self._handle_success(service_name)
+                else:
+                    self._handle_failure(service_name)
+            
+            return ServiceStatus(
+                name=service_name,
+                healthy=healthy,
+                url=endpoint.url,
+                error=error,
+                circuit_breaker_state=self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED),
+                failure_count=self.failure_counts.get(service_name, 0)
+            )
+            
+        except Exception as e:
+            if self.config.circuit_breaker_enabled:
+                self._handle_failure(service_name)
+            
+            return ServiceStatus(
+                name=service_name,
+                healthy=False,
+                url=endpoint.url,
+                error=str(e),
+                circuit_breaker_state=self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED),
+                failure_count=self.failure_counts.get(service_name, 0)
+            )
+    
+    async def _check_http_health_with_timeout(self, 
+                                            endpoint: ServiceEndpoint, 
+                                            http_client: httpx.AsyncClient) -> tuple[bool, Optional[str]]:
+        """Check HTTP endpoint health with improved timeout handling."""
+        try:
+            health_url = f"{endpoint.url.rstrip('/')}{endpoint.health_path}"
+            
+            # Use configurable timeout with retry logic
+            for attempt in range(self.config.retry_attempts + 1):
+                try:
+                    response = await http_client.get(
+                        health_url, 
+                        timeout=self.config.health_check_timeout
+                    )
+                    
+                    if response.status_code == 200:
+                        return True, None
+                    else:
+                        error_msg = f"HTTP {response.status_code}"
+                        if attempt < self.config.retry_attempts:
+                            logger.debug(f"Attempt {attempt + 1} failed for {endpoint.name}: {error_msg}, retrying...")
+                            await asyncio.sleep(self.config.retry_delay)
+                            continue
+                        return False, error_msg
+                        
+                except (httpx.TimeoutException, httpx.ConnectError) as e:
+                    error_msg = "Connection timeout" if isinstance(e, httpx.TimeoutException) else "Connection refused"
+                    if attempt < self.config.retry_attempts:
+                        logger.debug(f"Attempt {attempt + 1} failed for {endpoint.name}: {error_msg}, retrying...")
+                        await asyncio.sleep(self.config.retry_delay)
+                        continue
+                    return False, error_msg
+            
+            return False, "Max retry attempts exceeded"
+            
+        except Exception as e:
+            return False, str(e)
+    
+    async def _check_websocket_health_with_timeout(self, endpoint: ServiceEndpoint) -> tuple[bool, Optional[str]]:
+        """Check WebSocket endpoint health with improved timeout handling."""
+        try:
+            # Use configurable timeout with retry logic
+            for attempt in range(self.config.retry_attempts + 1):
+                try:
+                    async with websockets.connect(
+                        endpoint.url, 
+                        ping_timeout=self.config.health_check_timeout,
+                        close_timeout=self.config.health_check_timeout
+                    ) as websocket:
+                        # Send a simple ping
+                        await websocket.send(json.dumps({"type": "ping"}))
+                        return True, None
+                        
+                except (ConnectionClosedError, WebSocketException, OSError) as e:
+                    error_msg = f"WebSocket error: {str(e)}"
+                    if attempt < self.config.retry_attempts:
+                        logger.debug(f"Attempt {attempt + 1} failed for {endpoint.name}: {error_msg}, retrying...")
+                        await asyncio.sleep(self.config.retry_delay)
+                        continue
+                    return False, error_msg
+            
+            return False, "Max retry attempts exceeded"
+            
+        except Exception as e:
+            return False, str(e)
+    
+    def _handle_success(self, service_name: str) -> None:
+        """Handle successful health check for circuit breaker."""
+        self.failure_counts[service_name] = 0
+        self.circuit_breaker_states[service_name] = CircuitBreakerState.CLOSED
+        if service_name in self.last_failure_times:
+            del self.last_failure_times[service_name]
+    
+    def _handle_failure(self, service_name: str) -> None:
+        """Handle failed health check for circuit breaker."""
+        self.failure_counts[service_name] = self.failure_counts.get(service_name, 0) + 1
+        self.last_failure_times[service_name] = time.time()
+        
+        if self.failure_counts[service_name] >= self.config.circuit_breaker_failure_threshold:
+            self.circuit_breaker_states[service_name] = CircuitBreakerState.OPEN
+            logger.warning(f"Circuit breaker OPEN for {service_name} after {self.failure_counts[service_name]} failures")
+    
+    def get_circuit_breaker_status(self) -> Dict[str, Dict[str, Any]]:
+        """Get current circuit breaker status for all services."""
+        status = {}
+        for service_name in set(list(self.circuit_breaker_states.keys()) + list(self.failure_counts.keys())):
+            status[service_name] = {
+                "state": self.circuit_breaker_states.get(service_name, CircuitBreakerState.CLOSED).value,
+                "failure_count": self.failure_counts.get(service_name, 0),
+                "last_failure_time": self.last_failure_times.get(service_name)
+            }
+        return status
 
 
 # =============================================================================
@@ -117,13 +472,15 @@ class RealServicesManager:
     
     def __init__(self, 
                  project_root: Optional[Path] = None,
-                 env_config: Optional[TestEnvironmentConfig] = None):
+                 env_config: Optional[TestEnvironmentConfig] = None,
+                 health_check_config: Optional[HealthCheckConfig] = None):
         """
         Initialize Real Services Manager.
         
         Args:
             project_root: Optional project root path
             env_config: Optional test environment configuration
+            health_check_config: Optional health checking configuration
         """
         self.project_root = project_root or self._detect_project_root()
         self.env_config = env_config
@@ -131,6 +488,9 @@ class RealServicesManager:
         
         # Service endpoints configuration
         self.service_endpoints = self._configure_service_endpoints()
+        
+        # Health checker with parallel execution
+        self.health_checker = AsyncHealthChecker(health_check_config)
         
         # Connection managers
         self._http_client: Optional[httpx.AsyncClient] = None
@@ -142,6 +502,8 @@ class RealServicesManager:
         self._cleanup_registered = False
         
         logger.info(f"RealServicesManager initialized for project: {self.project_root}")
+        logger.info(f"Health checker config - parallel: {self.health_checker.config.parallel_execution}, "
+                   f"circuit_breaker: {self.health_checker.config.circuit_breaker_enabled}")
     
     def _detect_project_root(self) -> Path:
         """Detect project root directory."""
@@ -317,110 +679,67 @@ class RealServicesManager:
         return await self._check_all_services_health()
     
     async def _check_all_services_health(self) -> Dict[str, Any]:
-        """Internal method to check all service health."""
-        health_results = []
-        service_details = {}
-        
+        """Internal method to check all service health using parallel execution."""
         # Ensure HTTP client is available
         await self._ensure_http_client()
         
-        # Check each service endpoint
-        for endpoint in self.service_endpoints:
-            if endpoint.name == "database":
-                # Special handling for database
-                db_health = await self._check_database_health()
-                status = ServiceStatus(
-                    name="database",
-                    healthy=db_health.get("connected", False),
-                    url=endpoint.url,
-                    error=db_health.get("error")
-                )
-            else:
-                # HTTP/WebSocket services
-                status = await self._check_service_health(endpoint)
-            
-            self._service_status[endpoint.name] = status
-            service_details[endpoint.name] = {
+        start_time = time.time()
+        
+        # Use AsyncHealthChecker for parallel health checks
+        status_dict = await self.health_checker.check_services_parallel(
+            service_endpoints=self.service_endpoints,
+            http_client=self._http_client,
+            database_checker_func=self._check_database_health
+        )
+        
+        # Update internal status tracking
+        self._service_status.update(status_dict)
+        
+        # Build response format
+        health_results = []
+        service_details = {}
+        
+        for name, status in status_dict.items():
+            service_details[name] = {
                 "healthy": status.healthy,
                 "url": status.url,
                 "response_time_ms": status.response_time_ms,
                 "error": status.error,
-                "last_check": status.last_check
+                "last_check": status.last_check,
+                "circuit_breaker_state": status.circuit_breaker_state.value,
+                "failure_count": status.failure_count
             }
-            
             health_results.append(status.healthy)
         
         all_healthy = all(health_results)
         failures = [name for name, details in service_details.items() if not details["healthy"]]
         
+        total_time = (time.time() - start_time) * 1000
+        logger.info(f"Health check completed in {total_time:.2f}ms using parallel execution")
+        
         return {
             "all_healthy": all_healthy,
             "services": service_details,
             "failures": failures,
-            "summary": f"{len(health_results) - len(failures)}/{len(health_results)} services healthy"
+            "summary": f"{len(health_results) - len(failures)}/{len(health_results)} services healthy",
+            "total_time_ms": total_time,
+            "parallel_execution": self.health_checker.config.parallel_execution
         }
     
     async def _check_service_health(self, endpoint: ServiceEndpoint) -> ServiceStatus:
-        """Check health of a single service endpoint."""
-        start_time = time.time()
-        
-        try:
-            if endpoint.url.startswith(("ws://", "wss://")):
-                # WebSocket health check
-                healthy, error = await self._check_websocket_health(endpoint)
-            else:
-                # HTTP health check
-                healthy, error = await self._check_http_health(endpoint)
-            
-            response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
-            
-            return ServiceStatus(
-                name=endpoint.name,
-                healthy=healthy,
-                url=endpoint.url,
-                response_time_ms=response_time,
-                error=error
-            )
-            
-        except Exception as e:
-            return ServiceStatus(
-                name=endpoint.name,
-                healthy=False,
-                url=endpoint.url,
-                error=str(e)
-            )
+        """Check health of a single service endpoint (legacy method for backward compatibility)."""
+        # Use the health checker for individual service checks
+        await self._ensure_http_client()
+        return await self.health_checker._check_service_with_circuit_breaker(endpoint, self._http_client)
     
     async def _check_http_health(self, endpoint: ServiceEndpoint) -> tuple[bool, Optional[str]]:
-        """Check HTTP endpoint health."""
-        try:
-            health_url = f"{endpoint.url.rstrip('/')}{endpoint.health_path}"
-            response = await self._http_client.get(health_url, timeout=endpoint.timeout)
-            
-            if response.status_code == 200:
-                return True, None
-            else:
-                return False, f"HTTP {response.status_code}"
-                
-        except httpx.TimeoutException:
-            return False, "Connection timeout"
-        except httpx.ConnectError:
-            return False, "Connection refused"
-        except Exception as e:
-            return False, str(e)
+        """Check HTTP endpoint health (legacy method - delegates to health checker)."""
+        await self._ensure_http_client()
+        return await self.health_checker._check_http_health_with_timeout(endpoint, self._http_client)
     
     async def _check_websocket_health(self, endpoint: ServiceEndpoint) -> tuple[bool, Optional[str]]:
-        """Check WebSocket endpoint health."""
-        try:
-            # Simple connection test
-            async with websockets.connect(endpoint.url, ping_timeout=5) as websocket:
-                # Send a simple ping
-                await websocket.send(json.dumps({"type": "ping"}))
-                return True, None
-                
-        except (ConnectionClosedError, WebSocketException, OSError) as e:
-            return False, f"WebSocket error: {str(e)}"
-        except Exception as e:
-            return False, str(e)
+        """Check WebSocket endpoint health (legacy method - delegates to health checker)."""
+        return await self.health_checker._check_websocket_health_with_timeout(endpoint)
     
     # =============================================================================
     # DATABASE MANAGEMENT
@@ -746,6 +1065,56 @@ class RealServicesManager:
             }
     
     # =============================================================================
+    # CIRCUIT BREAKER AND ADVANCED HEALTH MONITORING
+    # =============================================================================
+    
+    def get_circuit_breaker_status(self) -> Dict[str, Dict[str, Any]]:
+        """Get current circuit breaker status for all services."""
+        return self.health_checker.get_circuit_breaker_status()
+    
+    def configure_health_checking(self, config: HealthCheckConfig) -> None:
+        """Update health checking configuration."""
+        old_parallel = self.health_checker.config.parallel_execution
+        self.health_checker.config = config
+        
+        logger.info(f"Health checker reconfigured - parallel: {config.parallel_execution} "
+                   f"(was {old_parallel}), circuit_breaker: {config.circuit_breaker_enabled}")
+    
+    def enable_parallel_health_checks(self, enabled: bool = True) -> None:
+        """Enable or disable parallel health checking."""
+        self.health_checker.config.parallel_execution = enabled
+        logger.info(f"Parallel health checks {'enabled' if enabled else 'disabled'}")
+    
+    def enable_circuit_breaker(self, enabled: bool = True) -> None:
+        """Enable or disable circuit breaker pattern."""
+        self.health_checker.config.circuit_breaker_enabled = enabled
+        logger.info(f"Circuit breaker {'enabled' if enabled else 'disabled'}")
+    
+    def reset_circuit_breakers(self) -> None:
+        """Reset all circuit breakers to CLOSED state."""
+        self.health_checker.circuit_breaker_states.clear()
+        self.health_checker.failure_counts.clear()
+        self.health_checker.last_failure_times.clear()
+        logger.info("All circuit breakers reset to CLOSED state")
+    
+    async def get_health_check_performance_metrics(self) -> Dict[str, Any]:
+        """Get performance metrics for health checking."""
+        # Run a test health check to measure performance
+        start_time = time.time()
+        health_results = await self._check_all_services_health()
+        total_time = (time.time() - start_time) * 1000
+        
+        return {
+            "total_time_ms": total_time,
+            "services_checked": len(self.service_endpoints),
+            "parallel_execution": self.health_checker.config.parallel_execution,
+            "average_time_per_service_ms": total_time / len(self.service_endpoints) if self.service_endpoints else 0,
+            "all_healthy": health_results.get("all_healthy", False),
+            "circuit_breaker_enabled": self.health_checker.config.circuit_breaker_enabled,
+            "max_concurrent_checks": self.health_checker.config.max_concurrent_checks
+        }
+    
+    # =============================================================================
     # HTTP CLIENT MANAGEMENT
     # =============================================================================
     
@@ -815,6 +1184,9 @@ def get_default_service_endpoints() -> List[ServiceEndpoint]:
 
 __all__ = [
     'RealServicesManager',
+    'AsyncHealthChecker',
+    'HealthCheckConfig',
+    'CircuitBreakerState',
     'ServiceUnavailableError',
     'ServiceStartupError',
     'ServiceHealthCheckError',

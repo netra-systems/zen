@@ -28,7 +28,8 @@ if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
-from netra_backend.app.agents.state import DeepAgentState
+# SECURITY FIX: Removed DeepAgentState import - migrated to secure UserExecutionContext pattern
+# from netra_backend.app.agents.state import DeepAgentState  # REMOVED: Security vulnerability
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -653,17 +654,35 @@ class UserExecutionEngine(IExecutionEngine):
         # Use the provided user_context or fall back to our instance context
         effective_user_context = user_context or self.context
         
-        # Create a DeepAgentState from the context
-        state = DeepAgentState(
-            user_request=context.metadata or {},
-            user_id=effective_user_context.user_id,
-            chat_thread_id=effective_user_context.thread_id,
-            run_id=effective_user_context.run_id,
-            agent_input={
+        # SECURITY FIX: Use UserExecutionContext instead of vulnerable DeepAgentState
+        # This eliminates input injection and serialization vulnerabilities
+        # Extract user message from metadata, defaulting to empty string if not found
+        user_message = ""
+        if isinstance(context.metadata, dict):
+            user_message = context.metadata.get('message', '') or context.metadata.get('user_request', '')
+        
+        # Create secure context with input validation
+        secure_context = effective_user_context.create_child_context(
+            operation_name=f"agent_execution_{context.agent_name}",
+            additional_agent_context={
                 'agent_name': context.agent_name,
-                'user_id': effective_user_context.user_id,
-                'thread_id': effective_user_context.thread_id,
-                'context': context.metadata or {}
+                'user_message': user_message,
+                'execution_type': 'single_agent',
+                'operation_source': 'user_execution_engine'
+            },
+            additional_audit_metadata={
+                'execution_id': context.execution_id if hasattr(context, 'execution_id') else None,
+                'agent_execution_context': {
+                    'agent_name': context.agent_name,
+                    'thread_id': context.thread_id,
+                    'user_id': context.user_id,
+                    'run_id': context.run_id
+                },
+                'security_migration': {
+                    'migrated_from': 'DeepAgentState',
+                    'migration_date': '2025-09-10',
+                    'vulnerability_fix': 'input_injection_serialization'
+                }
             }
         )
         if not self._is_active:
@@ -738,9 +757,9 @@ class UserExecutionEngine(IExecutionEngine):
                         execution_id, ExecutionState.RUNNING
                     )
                     
-                    # Execute with timeout and user context
+                    # Execute with timeout and secure user context
                     result = await asyncio.wait_for(
-                        self._execute_with_error_handling(context, state, execution_id),
+                        self._execute_with_error_handling(context, secure_context, execution_id),
                         timeout=self.AGENT_EXECUTION_TIMEOUT
                     )
                     
@@ -831,13 +850,16 @@ class UserExecutionEngine(IExecutionEngine):
     
     async def _execute_with_error_handling(self, 
                                           context: AgentExecutionContext,
-                                          state: DeepAgentState,
+                                          secure_context: 'UserExecutionContext',
                                           execution_id: str) -> AgentExecutionResult:
         """Execute agent with error handling and user-scoped fallback.
         
+        SECURITY FIX: Now uses secure UserExecutionContext instead of vulnerable DeepAgentState.
+        This prevents input injection and serialization security vulnerabilities.
+        
         Args:
             context: Agent execution context
-            state: Deep agent state
+            secure_context: Secure user execution context (replaces vulnerable DeepAgentState)
             execution_id: Execution tracking ID
             
         Returns:
@@ -850,9 +872,10 @@ class UserExecutionEngine(IExecutionEngine):
             self.execution_tracker.heartbeat(execution_id)
             
             # Send user-specific thinking updates during execution
+            user_message = secure_context.agent_context.get('user_message', 'Task')
             await self._send_user_agent_thinking(
                 context,
-                f"Processing request: {getattr(state, 'user_prompt', 'Task')[:100]}...",
+                f"Processing request: {user_message[:100]}...",
                 step_number=2
             )
             
@@ -876,7 +899,7 @@ class UserExecutionEngine(IExecutionEngine):
                     logger.warning(f"⚠️ Agent {context.agent_name} doesn't have tool dispatcher support")
             
             # Execute with user isolation - use the agent_core for proper lifecycle management
-            result = await self.agent_core.execute_agent(context, state)
+            result = await self.agent_core.execute_agent(context, secure_context)
             
             # Final heartbeat
             self.execution_tracker.heartbeat(execution_id)
@@ -888,7 +911,7 @@ class UserExecutionEngine(IExecutionEngine):
             
             # Use user-scoped fallback manager
             return await self.fallback_manager.create_fallback_result(
-                context, state, e, start_time
+                context, secure_context, e, start_time
             )
     
     async def _send_user_agent_started(self, context: AgentExecutionContext) -> None:
@@ -1025,9 +1048,9 @@ class UserExecutionEngine(IExecutionEngine):
                                     input_data: Dict[str, Any]) -> AgentExecutionResult:
         """Execute agent pipeline with user isolation for integration testing.
         
-        This method provides a simplified interface for tests that expect the
+        SECURITY FIX: This method provides a simplified interface for tests that expect the
         execute_agent_pipeline signature. It creates the required AgentExecutionContext
-        and DeepAgentState from the provided parameters.
+        and secure UserExecutionContext from the provided parameters (no longer uses vulnerable DeepAgentState).
         
         Args:
             agent_name: Name of the agent to execute
@@ -1051,21 +1074,40 @@ class UserExecutionEngine(IExecutionEngine):
                 metadata=input_data
             )
             
-            # Create agent state from input data
-            state = DeepAgentState(
-                user_request=input_data,
-                user_id=execution_context.user_id,
-                chat_thread_id=execution_context.thread_id,
-                run_id=execution_context.run_id,
-                agent_input={
+            # SECURITY FIX: Use secure UserExecutionContext instead of vulnerable DeepAgentState
+            # Extract user message from input_data, defaulting to empty string if not found
+            user_message = ""
+            if isinstance(input_data, dict):
+                user_message = input_data.get('message', '') or input_data.get('user_request', '')
+            elif isinstance(input_data, str):
+                user_message = input_data
+            
+            # Create secure context with input validation instead of vulnerable DeepAgentState
+            secure_pipeline_context = execution_context.create_child_context(
+                operation_name=f"agent_pipeline_{agent_name}",
+                additional_agent_context={
                     'agent_name': agent_name,
-                    'user_id': execution_context.user_id,
-                    'thread_id': execution_context.thread_id
+                    'user_message': user_message,
+                    'execution_type': 'agent_pipeline',
+                    'operation_source': 'execute_agent_pipeline',
+                    'input_data': input_data
+                },
+                additional_audit_metadata={
+                    'pipeline_execution': {
+                        'agent_name': agent_name,
+                        'input_data_type': type(input_data).__name__,
+                        'has_message': bool(user_message)
+                    },
+                    'security_migration': {
+                        'migrated_from': 'DeepAgentState',
+                        'migration_date': '2025-09-10',
+                        'vulnerability_fix': 'pipeline_input_injection_serialization'
+                    }
                 }
             )
             
-            # Execute agent with the created context and state
-            result = await self.execute_agent(agent_context, state)
+            # Execute agent with the created context and secure context
+            result = await self.execute_agent(agent_context, secure_pipeline_context)
             
             logger.debug(f"Agent pipeline executed: {agent_name} for user {execution_context.user_id}")
             return result

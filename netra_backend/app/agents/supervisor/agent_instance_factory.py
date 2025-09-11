@@ -786,6 +786,11 @@ class AgentInstanceFactory:
                     if hasattr(agent, 'tool_dispatcher') and tool_dispatcher is not None:
                         agent.tool_dispatcher = tool_dispatcher
                         logger.debug(f"Injected tool_dispatcher into {agent_name}")
+                    
+                    # GOLDEN PATH COMPATIBILITY: Enable test mode when WebSocket bridge is unavailable
+                    if not self._websocket_bridge and hasattr(agent, 'enable_websocket_test_mode'):
+                        agent.enable_websocket_test_mode()
+                        logger.debug(f"Enabled WebSocket test mode for {agent_name} (no bridge available)")
                 else:
                     # FALLBACK: Use legacy constructor patterns (may trigger deprecation warnings)
                     logger.debug(f"⚠️ No factory method found for {agent_class_name}, using legacy constructor")
@@ -909,6 +914,12 @@ class AgentInstanceFactory:
             # Track performance metrics if enabled
             if should_track_metrics and hasattr(self, '_perf_stats'):
                 self._perf_stats['agent_creation_ms'].append(creation_time_ms)
+            
+            # GOLDEN PATH COMPATIBILITY: Enable test mode for agents when WebSocket bridge is unavailable
+            # (This catches agents that weren't created via factory method)
+            if not self._websocket_bridge and hasattr(agent, 'enable_websocket_test_mode'):
+                agent.enable_websocket_test_mode()
+                logger.debug(f"Enabled WebSocket test mode for {agent_name} (no bridge configured in factory)")
             
             logger.info(f"✅ Created agent instance {agent_name} for user {user_context.user_id} in {creation_time_ms:.1f}ms (run_id: {user_context.run_id})")
             
@@ -1195,6 +1206,41 @@ class AgentInstanceFactory:
             'contexts': contexts_summary,
             'summary_timestamp': datetime.now(timezone.utc).isoformat()
         }
+    
+    async def create_agent(self, 
+                          agent_name: str,
+                          user_context: UserExecutionContext,
+                          agent_class: Optional[Type[BaseAgent]] = None) -> BaseAgent:
+        """
+        COMPATIBILITY METHOD: create_agent() wrapper for create_agent_instance().
+        
+        This method provides backward compatibility for tests and code that expect
+        a create_agent() method on the AgentInstanceFactory. It wraps the standard
+        create_agent_instance() method with appropriate logging and deprecation warning.
+        
+        Args:
+            agent_name: Name of the agent to create
+            user_context: User execution context for isolation
+            agent_class: Optional specific agent class (if not using registry)
+            
+        Returns:
+            BaseAgent: Fresh agent instance configured for the user context
+            
+        Raises:
+            ValueError: If agent not found or invalid parameters
+            RuntimeError: If agent creation fails
+        """
+        logger.warning(
+            f"🔄 COMPATIBILITY: create_agent() method called - redirecting to create_agent_instance(). "
+            f"Consider updating calling code to use create_agent_instance() directly for {agent_name}"
+        )
+        
+        # Use the standard create_agent_instance method
+        return await self.create_agent_instance(
+            agent_name=agent_name,
+            user_context=user_context,
+            agent_class=agent_class
+        )
     
     async def cleanup_inactive_contexts(self, max_age_seconds: int = 3600) -> int:
         """

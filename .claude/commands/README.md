@@ -13,13 +13,14 @@
 
 ## Overview
 
-This directory contains **25 custom slash commands** for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
+This directory contains **37 custom slash commands** for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
 
 **Command Categories:**
 - **12 Core Commands** - Development workflow and debugging
-- **2 Mission Critical** - Long-running validation and monitoring (8-20 hours)
-- **8 Testing & Development** - Comprehensive test creation and execution
-- **3 Analysis & Architecture** - SSOT compliance and system diagnostics
+- **4 Mission Critical** - Long-running validation and monitoring (8-20 hours)
+- **10 Testing & Development** - Comprehensive test creation and execution
+- **6 Repository Maintenance** - Git, issue, and test management
+- **5 Analysis & Architecture** - SSOT compliance and system diagnostics
 
 ## Command Structure
 
@@ -404,6 +405,174 @@ $1, $2, $ARGUMENTS                  # Use arguments
 /canary
 ```
 
+## Repository Maintenance Commands
+
+### 26. `/e2e-fix-directly`
+**Purpose**: Real e2e test fix deploy loop (backend focused by default)  
+**Key Features**:
+- Runs E2E tests and remediates issues
+- Creates PRs for fixes automatically
+- Backend focused by default
+- Continuous remediation until all pass
+
+**Example**:
+```bash
+/e2e-fix-directly           # Fix all E2E tests
+/e2e-fix-directly backend   # Backend-focused E2E fixes
+```
+
+### 27. `/failingtestsgardener`
+**Purpose**: Collect test issues and create GitHub issues (no remediation)  
+**Key Features**:
+- Identifies all failing tests
+- Creates GitHub issues for tracking
+- Does NOT attempt remediation
+- Comprehensive test coverage analysis
+
+**Example**:
+```bash
+/failingtestsgardener       # All test issues
+/failingtestsgardener unit  # Unit test issues only
+```
+
+### 28. `/gcploggardener`
+**Purpose**: GCP log issue collector and GitHub issue creator  
+**Key Features**:
+- Collects GCP log errors
+- Creates GitHub issues for tracking
+- Does NOT attempt remediation
+- Comprehensive log analysis
+
+**Example**:
+```bash
+/gcploggardener            # Latest GCP log issues
+/gcploggardener 24h backend # Last 24h backend issues
+```
+
+### 29. `/gitcommitgardener`
+**Purpose**: Safe repository management and cleanup  
+**Key Features**:
+- Repository health monitoring
+- Git commit optimization
+- Safe cleanup operations
+- Branch protection compliance
+
+**Example**:
+```bash
+/gitcommitgardener
+```
+
+### 30. `/gitissueprogressor`
+**Purpose**: Full day GitHub issue workflow management  
+**Key Features**:
+- Issue prioritization and progression
+- Automated investigation
+- Multi-agent resolution
+- Progress tracking
+
+**Example**:
+```bash
+/gitissueprogressor
+```
+
+### 31. `/prmergergit`
+**Purpose**: Safe pull request merging with validation  
+**Key Features**:
+- Pre-merge test validation
+- Conflict resolution assistance
+- Repository state verification
+- Safe merge protocols
+
+**Example**:
+```bash
+/prmergergit
+```
+
+### 32. `/refresh-upate-tests`
+**Purpose**: Refresh, update, and align tests for existing areas  
+**Key Features**:
+- Updates existing test suites
+- Aligns with latest best practices
+- Creates new tests if needed
+- Follows TEST_CREATION_GUIDE.md standards
+
+**Example**:
+```bash
+/refresh-upate-tests auth   # Refresh auth tests
+/refresh-upate-tests agents # Refresh agent tests
+```
+
+### 33. `/ssotgardener`
+**Purpose**: SSOT violation discovery and remediation  
+**Key Features**:
+- Discovers SSOT violations
+- Fixes issues blocking golden path
+- Multi-agent remediation
+- Test validation for changes
+- **Time Expectation**: 8-30+ hours
+
+**Example**:
+```bash
+/ssotgardener              # Full SSOT audit
+/ssotgardener websocket    # WebSocket SSOT focus
+```
+
+### 34. `/test-fix-REMOVED_SYNTAX_ERROR`
+**Purpose**: Fix tests marked with REMOVED_SYNTAX_ERROR  
+**Key Features**:
+- Identifies marked tests
+- Systematic error resolution
+- Test restoration and validation
+- SSOT compliance during fixes
+
+**Example**:
+```bash
+/test-fix-REMOVED_SYNTAX_ERROR
+```
+
+### 35. `/testgardener`
+**Purpose**: Test management and organization  
+**Key Features**:
+- Comprehensive test organization
+- Test health assessment
+- GitHub issue integration
+- Repository safety focus
+
+**Example**:
+```bash
+/testgardener              # General test gardening
+/testgardener integration  # Integration test focus
+```
+
+## Additional Commands
+
+### 36. `/action`
+**Purpose**: Process multiple items with Five Whys analysis  
+**Key Features**:
+- Multi-item processing
+- Five Whys methodology
+- Automated resolution workflow
+- GitHub integration
+
+**Example**:
+```bash
+/action
+```
+
+### 37. `/audit-gcp-error-loop`
+**Purpose**: GCP error monitoring with auto-debug  
+**Key Features**:
+- Continuous error monitoring
+- Automatic Five Whys debugging
+- Real-time pattern detection
+- Long-running operation (8+ hours)
+
+**Example**:
+```bash
+/audit-gcp-error-loop                    # All services
+/audit-gcp-error-loop backend-staging 12 # Backend 12h monitoring
+```
+
 ## Project Standards Enforced
 
 ### NO MOCKS Policy
@@ -518,15 +687,29 @@ Brief description of what this command does.
 /websocket-test            # Check events
 /test-real e2e             # Full system test
 /audit-docker-logs         # Audit Docker logs with auto-debug
+/action                    # Multi-item Five Whys processing
 
 # Architecture & SSOT
 /scope-work                # P0 SSOT refactoring planning  
 /ssot-regression-check agent # Audit commits for SSOT violations
 /canary                    # System health diagnostics
 
+# Repository Maintenance
+/testgardener              # Test organization and health
+/failingtestsgardener      # Collect test issues (no fix)
+/gcploggardener           # Collect GCP log issues
+/gitcommitgardener        # Repository cleanup (8-20h)
+/gitissueprogressor       # Full day issue workflow
+/prmergergit              # Safe PR merging
+/ssotgardener             # SSOT violation fixes (8-30h)
+/e2e-fix-directly         # E2E test fix and deploy
+/refresh-upate-tests      # Refresh test suites
+/test-fix-REMOVED_SYNTAX_ERROR # Fix marked tests
+
 # Deployment & Monitoring
 /deploy-gcp staging        # Deploy to GCP
 /audit-gcp-logs            # Audit Cloud Run logs
+/audit-gcp-error-loop      # GCP error monitoring (8+ hours)
 
 # Advanced Analysis
 /analyze-repository audit 5    # Repository audit with 5 agents
@@ -546,3 +729,6 @@ Brief description of what this command does.
 
 **🌙 Mission Critical (8-20 hours)**
 - `/ultimate-test-deploy-loop`, `/audit-gcp-logs-loop`, `/test-create-integration`, `/test-create-unit-coverage`
+
+**🔧 Repository Maintenance (8-30+ hours)**
+- `/ssotgardener`, `/gitcommitgardener`, `/gitissueprogressor`, `/audit-gcp-error-loop`

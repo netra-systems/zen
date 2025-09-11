@@ -162,7 +162,10 @@ def _configure_span_exporters(tracer_provider, env, current_env: str) -> None:
         exporters_configured += 1
     
     if exporters_configured == 0:
-        logging.warning("No telemetry exporters configured - traces will not be exported")
+        # This is expected in staging/production without explicit OTLP endpoint
+        # or when google-cloud-trace is not installed
+        logging.info("Telemetry enabled but no exporters configured - traces will not be exported. "
+                     "To enable tracing, either set OTEL_EXPORTER_OTLP_ENDPOINT or install google-cloud-trace package.")
 
 
 def _configure_otlp_exporter(tracer_provider, env) -> bool:
@@ -215,7 +218,8 @@ def _configure_cloud_trace_exporter(tracer_provider, env) -> bool:
         return False
         
     try:
-        from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+        # The correct import path for the GCP trace exporter
+        from opentelemetry.exporter.gcp_trace import CloudTraceSpanExporter
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
         
         # Create Cloud Trace exporter

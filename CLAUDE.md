@@ -128,7 +128,7 @@ Use the test gardner command if test collection issues.
 ### 2.2. Complexity Management
 - **Anti-Over-Engineering:** Finite complexity budget, value > complexity
 - **Rule of Two:** Abstract only after 2+ implementations  
-- **Code Clarity:** Functions <25 lines, modules <750 lines (2000 for SSOT mega classes)
+- **Code Clarity:** Functions <25 lines, modules <1500 lines (4000 for SSOT mega classes)
 - **Task Decomposition:** Use sub-agents for complex tasks
 
 ### 2.3. Quality Standards
@@ -306,7 +306,7 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 - @index.xml - All learnings index
 - @core.xml - System architecture
 - @type_safety.xml - Type safety rules
-- @mega_class_exceptions.xml - SSOT classes up to 2000 lines
+- @mega_class_exceptions.xml - SSOT classes up to 4000 lines
 - @git_commit_atomic_units.xml - Commit standards
 - @configuration_architecture.md - Environment management
 

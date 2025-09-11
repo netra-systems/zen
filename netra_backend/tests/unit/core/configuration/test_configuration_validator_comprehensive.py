@@ -402,8 +402,8 @@ class TestEnvironmentSpecificBehavior(BaseTestCase):
         
         original_env = validator._environment
         
-        # Mock environment change
-        with patch('netra_backend.app.core.environment_constants.get_current_environment', return_value='production'):
+        # Mock environment change - patch the validator's method directly
+        with patch.object(validator, '_get_environment', return_value='production'):
             validator.refresh_environment()
             
             # Environment should be updated
