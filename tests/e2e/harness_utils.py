@@ -442,3 +442,19 @@ class UnifiedTestHarnessComplete:
 def create_unified_test_harness() -> UnifiedTestHarnessComplete:
     """Create unified test harness instance for WebSocket authentication testing."""
     return UnifiedTestHarnessComplete()
+
+
+# Compatibility function for existing imports
+def create_test_harness(harness_name: str = "default") -> UnifiedTestHarnessComplete:
+    """
+    Create test harness with optional name parameter.
+    
+    Args:
+        harness_name: Optional name for the harness (for logging purposes)
+        
+    Returns:
+        UnifiedTestHarnessComplete instance
+    """
+    harness = UnifiedTestHarnessComplete()
+    harness.harness_name = harness_name
+    return harness
