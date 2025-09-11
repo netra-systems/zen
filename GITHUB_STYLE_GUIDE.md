@@ -25,6 +25,11 @@ for work occuring within a similar amount of time.
 - Use imperatives: "Fix X," "Update Y," "Review Z"
 - Include specific file paths, line numbers, and error messages
 
+### Safety checks
+- Never commit files with ":" (colon) in filename
+- ALWAYS keep main branch, ALWAYS STOP before removing or deleting any major branches.
+- ALWAYS use safe approaches. ALWAYS STOP before using a "filter-branch" or any other risky approaches.
+
 ---
 
 ## Issues
