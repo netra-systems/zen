@@ -632,7 +632,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
         try:
             # Get circuit breaker from auth client (real implementation)
             circuit_breaker = self.auth_client.circuit_breaker
-            initial_state = circuit_breaker.get_status()
+            initial_state = circuit_breaker.get_stats()
             
             logger.info(f"Circuit breaker initial state: {initial_state}")
             
