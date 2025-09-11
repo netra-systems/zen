@@ -42,8 +42,7 @@ class TestAgentExecutionContextManagement(BaseIntegrationTest):
         user_context = UserExecutionContext(
             user_id="test_user_200",
             thread_id="thread_500", 
-            session_id="session_800",
-            workspace_id="workspace_100"
+            run_id="run_test_execution_800"
         )
         
         context_manager = AgentExecutionContextManager()
@@ -95,15 +94,13 @@ class TestAgentExecutionContextManagement(BaseIntegrationTest):
         user1_context = UserExecutionContext(
             user_id="user_001",
             thread_id="thread_001",
-            session_id="session_001", 
-            workspace_id="workspace_001"
+            run_id="run_user_001_test"
         )
         
         user2_context = UserExecutionContext(
             user_id="user_002", 
             thread_id="thread_002",
-            session_id="session_002",
-            workspace_id="workspace_002"
+            run_id="run_user_002_test"
         )
         
         context_manager = AgentExecutionContextManager()
@@ -145,7 +142,7 @@ class TestAgentExecutionContextManagement(BaseIntegrationTest):
         
         # Verify complete separation
         assert context_1_retrieved.execution_id != context_2_retrieved.execution_id
-        assert context_1_retrieved.user_context.workspace_id != context_2_retrieved.user_context.workspace_id
+        assert context_1_retrieved.user_context.run_id != context_2_retrieved.user_context.run_id
 
     @pytest.mark.integration
     @pytest.mark.context_management
@@ -155,8 +152,7 @@ class TestAgentExecutionContextManagement(BaseIntegrationTest):
         user_context = UserExecutionContext(
             user_id="test_user_202",
             thread_id="thread_502",
-            session_id="session_802", 
-            workspace_id="workspace_102"
+            run_id="run_test_persistence_802"
         )
         
         context_manager = AgentExecutionContextManager(
@@ -206,8 +202,7 @@ class TestAgentExecutionContextManagement(BaseIntegrationTest):
         user_context = UserExecutionContext(
             user_id="test_user_203", 
             thread_id="thread_503",
-            session_id="session_803",
-            workspace_id="workspace_103"
+            run_id="run_test_timeout_803"
         )
         
         context_manager = AgentExecutionContextManager(
@@ -257,8 +252,7 @@ class TestAgentExecutionContextManagement(BaseIntegrationTest):
             user_context = UserExecutionContext(
                 user_id=f"user_{i:03d}",
                 thread_id=f"thread_{i:03d}",
-                session_id=f"session_{i:03d}",
-                workspace_id=f"workspace_{i:03d}"
+                run_id=f"run_limit_test_{i:03d}"
             )
             user_contexts.append(user_context)
             execution_ids.append(str(uuid4()))
