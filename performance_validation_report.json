@@ -1,0 +1,57 @@
+{
+  "validation_timestamp": 1757563459.416557,
+  "staging_url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
+  "performance_results": [
+    {
+      "path": "/health",
+      "concurrent_requests": 5,
+      "total_requests": 25,
+      "duration_seconds": 1.9996192455291748,
+      "requests_per_second": 12.50238016857257,
+      "success_count": 25,
+      "failure_count": 0,
+      "success_rate": 100.0,
+      "avg_response_time_ms": 141.1436367034912,
+      "min_response_time_ms": 72.5247859954834,
+      "max_response_time_ms": 1151.2258052825928,
+      "p50_response_time_ms": 88.32836151123047,
+      "p95_response_time_ms": 850.3984689712524,
+      "p99_response_time_ms": 1151.2258052825928,
+      "scenario_name": "Light Load - Health Endpoint"
+    },
+    {
+      "path": "/",
+      "concurrent_requests": 10,
+      "total_requests": 50,
+      "duration_seconds": 1.0508673191070557,
+      "requests_per_second": 47.5797458831302,
+      "success_count": 50,
+      "failure_count": 0,
+      "success_rate": 100.0,
+      "avg_response_time_ms": 121.24874114990234,
+      "min_response_time_ms": 77.24714279174805,
+      "max_response_time_ms": 196.69485092163086,
+      "p50_response_time_ms": 106.23598098754883,
+      "p95_response_time_ms": 194.994854927063,
+      "p99_response_time_ms": 196.69485092163086,
+      "scenario_name": "Medium Load - Root Endpoint"
+    },
+    {
+      "path": "/docs",
+      "concurrent_requests": 20,
+      "total_requests": 100,
+      "duration_seconds": 1.1043317317962646,
+      "requests_per_second": 90.55250077559914,
+      "success_count": 100,
+      "failure_count": 0,
+      "success_rate": 100.0,
+      "avg_response_time_ms": 123.74557495117188,
+      "min_response_time_ms": 73.94576072692871,
+      "max_response_time_ms": 194.4420337677002,
+      "p50_response_time_ms": 114.18843269348145,
+      "p95_response_time_ms": 191.17110967636108,
+      "p99_response_time_ms": 194.4341015815735,
+      "scenario_name": "Heavy Load - API Docs"
+    }
+  ]
+}

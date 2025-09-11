@@ -1,0 +1,41 @@
+{
+  "validation_timestamp": 557553.9948415,
+  "staging_url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
+  "test_results": [
+    {
+      "test": "Health Endpoint",
+      "success": true,
+      "status_code": 200,
+      "details": {
+        "status": "healthy",
+        "service": "netra-ai-platform",
+        "version": "1.0.0",
+        "timestamp": 1757563389.0926328
+      }
+    },
+    {
+      "test": "Root Endpoint",
+      "success": true,
+      "status_code": 200,
+      "details": {
+        "message": "Welcome to Netra API"
+      }
+    },
+    {
+      "test": "API Documentation",
+      "success": true,
+      "status_code": 200
+    },
+    {
+      "test": "OpenAPI Spec",
+      "success": true,
+      "status_code": 200
+    }
+  ],
+  "summary": {
+    "total_tests": 4,
+    "passed_tests": 4,
+    "success_rate": 100.0,
+    "overall_success": true
+  }
+}

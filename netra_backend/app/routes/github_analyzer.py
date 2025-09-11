@@ -171,16 +171,55 @@ async def _initialize_analysis_components(analysis_id: str) -> GitHubAnalyzerSer
 
 
 async def _setup_analysis_environment(request: AnalysisRequest) -> tuple:
-    """Setup analysis state and context."""
-    from netra_backend.app.agents.state import DeepAgentState
-    state = DeepAgentState()
+    """Setup analysis state and context.
+    
+    SECURITY FIX: Use secure UserExecutionContext instead of vulnerable DeepAgentState.
+    This prevents input injection and serialization security vulnerabilities.
+    """
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+    
+    # Generate secure IDs for the analysis context
+    id_manager = UnifiedIDManager()
+    thread_id = id_manager.generate_thread_id()
+    run_id = id_manager.generate_run_id(thread_id)
+    request_id = str(uuid.uuid4())
+    
+    # Create secure context with input validation
+    secure_context = UserExecutionContext.from_request(
+        user_id="github_analyzer_service",  # Service account for analysis
+        thread_id=thread_id,
+        run_id=run_id,
+        request_id=request_id,
+        agent_context={
+            'operation_type': 'github_analysis',
+            'repository_url': request.repository_url,
+            'analysis_depth': getattr(request, 'analysis_depth', 'standard'),
+            'operation_source': 'github_analyzer_api'
+        },
+        audit_metadata={
+            'security_migration': {
+                'migrated_from': 'DeepAgentState',
+                'migration_date': '2025-09-10',
+                'vulnerability_fix': 'github_analyzer_input_injection_serialization'
+            },
+            'analysis_request': {
+                'repository_url': request.repository_url,
+                'request_timestamp': datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
     context = _build_analysis_context(request)
-    return state, context
+    return secure_context, context
 
 async def _execute_repository_analysis(analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerService) -> Any:
-    """Execute the repository analysis with proper context."""
-    state, context = await _setup_analysis_environment(request)
-    return await analyzer.execute(state, context)
+    """Execute the repository analysis with proper context.
+    
+    SECURITY FIX: Now uses secure UserExecutionContext instead of vulnerable DeepAgentState.
+    """
+    secure_context, context = await _setup_analysis_environment(request)
+    return await analyzer.execute(secure_context, context)
 
 
 def _build_analysis_context(request: AnalysisRequest) -> Dict[str, Any]:

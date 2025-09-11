@@ -6,11 +6,11 @@
 
 ## Executive Summary
 
-- **Total Tests:** 5
+- **Total Tests:** 6
 - **Passed:** 0 (0.0%)
-- **Failed:** 5 (100.0%)
+- **Failed:** 6 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.13 seconds
+- **Duration:** 2.04 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,6 +19,7 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
+| test_jwt_secret_consistency_verification | FAIL failed | 0.361s | test_websocket_auth_fix_verification.py |
 | test_gcp_redis_websocket_1011_error_risk_prediction | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
 | test_gcp_redis_websocket_chat_functionality_readiness | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
 | test_gcp_redis_websocket_monitoring_observability_readiness | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
@@ -26,6 +27,19 @@
 | test_gcp_redis_websocket_readiness_assessment | FAIL failed | 0.000s | test_gcp_redis_websocket_golden_path_simple.py |
 
 ## Failed Tests Details
+
+### FAILED: test_jwt_secret_consistency_verification
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_websocket_auth_fix_verification.py
+- **Duration:** 0.361s
+- **Error:** tests/e2e/staging_test_base.py:308: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_websocket_auth_fix_verification.py:189: in test_jwt_secret_consistency_verification
+    ???
+/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/tasks.py:507: in wait_for
+    return await fut
+           ^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/w...
 
 ### FAILED: test_gcp_redis_websocket_1011_error_risk_prediction
 - **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_gcp_redis_websocket_golden_path_simple.py
@@ -64,7 +78,7 @@ E     - Alert con...
 ### FAILED: test_gcp_redis_websocket_production_scalability_readiness
 - **File:** /Users/rindhujajohnson/Netra/GitHub/netra-apex/tests/e2e/staging/test_gcp_redis_websocket_golden_path_simple.py
 - **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_gcp_redis_websocket_golden_path_simple.py:100: in test_gcp_redis_websocket_production_scalability_readiness
+- **Error:** tests/e2e/staging/test_gcp_redis_websocket_production_scalability_readiness
     self.assertGreaterEqual(
 E   AssertionError: 35 not greater than or equal to 75 : CRITICAL: System not ready for production scale:
 E     - Scalability score: 35/100
@@ -88,6 +102,7 @@ E     - Deployment blockers: ['12 competing Redis manager classes', 'Multiple Re
 ## Pytest Output Format
 
 ```
+test_websocket_auth_fix_verification.py::test_jwt_secret_consistency_verification FAILED
 test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_1011_error_risk_prediction FAILED
 test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_chat_functionality_readiness FAILED
 test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_monitoring_observability_readiness FAILED
@@ -95,13 +110,14 @@ test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_product
 test_gcp_redis_websocket_golden_path_simple.py::test_gcp_redis_websocket_readiness_assessment FAILED
 
 ==================================================
-0 passed, 5 failed in 0.13s
+0 passed, 6 failed in 2.04s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
+| Authentication | 1 | 0 | 1 | 0.0% |
 | WebSocket | 5 | 0 | 5 | 0.0% |
 
 ---

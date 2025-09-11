@@ -59,8 +59,14 @@
       "Bash(gcloud secrets list:*)",
       "Bash(gcloud secrets versions access:*)",
       "Bash(./scripts/enable_gcp_tracing_staging.sh:*)",
+      "Bash(for:*)",
+      "Bash(do if [ \"$file\" != \".claude/commands/README.md\" ])",
+      "Bash(then basename \"$file\" .md)",
+      "Bash(fi)",
+      "Bash(done)",
       "Bash(sed:*)",
-      "Bash(netra_backend/tests/unit/websocket_core/test_gcp_startup_phase_validation.py)"
+      "Bash(netra_backend/tests/unit/websocket_core/test_gcp_startup_phase_validation.py)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

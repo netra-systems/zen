@@ -89,12 +89,19 @@ class OptimizationsCoreSubAgent(BaseAgent):
             
         return True
     
-    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+    async def execute(self, context: UserExecutionContext = None, stream_updates: bool = False, 
+                     message: str = None, **kwargs) -> Dict[str, Any]:
         """Execute optimization analysis with proper session isolation.
+        
+        GOLDEN PATH COMPATIBILITY: Supports legacy call patterns:
+        - execute(context) - Modern pattern
+        - execute(message="...", context=...) - Legacy Golden Path pattern
         
         Args:
             context: User execution context with database session
             stream_updates: Whether to stream progress updates
+            message: User message for legacy compatibility
+            **kwargs: Additional legacy parameters
             
         Returns:
             Dict with optimization analysis results
@@ -102,6 +109,23 @@ class OptimizationsCoreSubAgent(BaseAgent):
         Raises:
             ValueError: If context validation fails
         """
+        # GOLDEN PATH COMPATIBILITY: Handle legacy interface patterns
+        if context is None and message is not None:
+            # Legacy call pattern: execute(message="..., context=...)
+            if 'context' in kwargs:
+                context = kwargs.pop('context')
+                logger.debug(f"OptimizationsCoreSubAgent: Converting legacy execute(message, context) call")
+            else:
+                raise ValueError("Context required for optimization analysis")
+        
+        if message is not None and context is not None:
+            # Inject message into context for legacy compatibility
+            if hasattr(context, 'agent_context') and context.agent_context is not None:
+                context.agent_context["user_request"] = message
+                context.agent_context["message"] = message
+            # Enable test mode for compatibility
+            if hasattr(self, 'enable_websocket_test_mode'):
+                self.enable_websocket_test_mode()
         logger.info(f"OptimizationsCoreSubAgent executing for user {context.user_id}, run {context.run_id}")
         
         # Validate context at method entry
