@@ -59,8 +59,10 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
             manager = EmergencyWebSocketManager()
             
             # This should fail due to broken imports in the _setup_agent_handlers method
+            # Note: _setup_agent_handlers requires ws_manager as first parameter
+            mock_ws_manager = MagicMock()
             with pytest.raises(ImportError) as exc_info:
-                await manager._setup_agent_handlers(mock_user_context)
+                await manager._setup_agent_handlers(mock_ws_manager, mock_user_context)
             
             # Verify it's the expected import error
             error_msg = str(exc_info.value)
@@ -140,7 +142,8 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
                 manager = EmergencyWebSocketManager()
                 
                 # This should succeed with patched imports
-                await manager._setup_agent_handlers(mock_user_context)
+                mock_ws_manager = MagicMock()
+                await manager._setup_agent_handlers(mock_ws_manager, mock_user_context)
                 
                 # Verify bridge creation was called
                 mock_create_bridge.assert_called_once_with(mock_user_context)
@@ -172,7 +175,8 @@ class TestWebSocketSSotAgentIntegration(SSotAsyncTestCase):
             # This should fail because agent bridge creation fails due to broken imports
             with pytest.raises(ImportError):
                 # First setup handlers (this will fail)
-                await manager._setup_agent_handlers(mock_user_context)
+                mock_ws_manager = MagicMock()
+                await manager._setup_agent_handlers(mock_ws_manager, mock_user_context)
             
             logger.critical("GOLDEN PATH BLOCKED: Agent message processing unavailable due to import issue")
             
