@@ -153,9 +153,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify basic orchestration success
-        self.assertIsNotNone(result)
-        self.assertIn("status", result)
-        self.assertEqual(result["status"], "completed")
+        assert result is not None
+        assert "status" in result
+        assert result["status"] == "completed"
         
         # Verify WebSocket events were sent
         websocket_bridge.send_event.assert_called()
