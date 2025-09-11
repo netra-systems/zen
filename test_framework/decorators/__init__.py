@@ -21,7 +21,8 @@ from test_framework.decorators.test_decorators import (
     requires_docker,
     requires_websocket,
     mission_critical,
-    race_condition_test
+    race_condition_test,
+    experimental_test
 )
 
 # Re-export all decorators
@@ -32,5 +33,6 @@ __all__ = [
     'requires_docker',
     'requires_websocket',
     'mission_critical',
-    'race_condition_test'
+    'race_condition_test',
+    'experimental_test'
 ]

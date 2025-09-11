@@ -32,9 +32,9 @@ from tests.e2e.real_services_manager import RealServicesManager, ServiceStatus, 
 class TestServiceStartupHangingIssueUnit(SSotAsyncTestCase):
     """Unit tests for service startup hanging behavior"""
     
-    def setUp(self):
+    async def setUp(self):
         """Setup test environment"""
-        super().setUp()
+        await super().setUp()
         self.manager = RealServicesManager()
     
     async def test_health_check_timeout_behavior(self):

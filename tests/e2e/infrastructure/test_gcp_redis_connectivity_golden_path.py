@@ -657,77 +657,157 @@ class TestGCPRedisConnectivityGoldenPath:
     @pytest.mark.e2e
     @pytest.mark.infrastructure
     @pytest.mark.performance
-    async def test_redis_failure_detection_timing_precision(
+    async def test_redis_data_persistence_across_connections(
         self, 
-        gcp_validator
+        real_redis_client
     ):
         """
-        TEST: Precise timing measurement of Redis failure detection.
+        TEST: Redis data persistence across connections for chat continuity.
         
-        CRITICAL: This test validates that failure detection happens at the
-        exact timing observed in production logs (7.51s ± 0.1s precision).
+        REAL TEST: This test validates that Redis maintains data consistency
+        across connection cycles. Test FAILS if Redis loses data unexpectedly.
         
-        Expected Behavior:
-        - Failure detection should be highly consistent in timing
-        - Multiple runs should show same timing pattern
-        - Timing should match production observations exactly
-        
-        Business Impact: Confirms root cause analysis accuracy
+        Business Impact: Chat functionality requires Redis to maintain conversation
+        state and user sessions across reconnections and server restarts.
         """
-        logger.info("⏱️  Testing Redis failure detection timing precision")
+        logger.info("💾 Testing Redis data persistence across connections for chat continuity")
         
-        # Run multiple timing measurements for precision validation
-        timing_measurements = []
+        # Test 1: Data survives connection cycles
+        test_data = {
+            "conversation_id": f"test_conv_{int(time.time())}",
+            "user_id": "test_persistence_user",
+            "messages": [
+                {"id": 1, "content": "Hello", "timestamp": datetime.now(timezone.utc).isoformat()},
+                {"id": 2, "content": "How are you?", "timestamp": datetime.now(timezone.utc).isoformat()}
+            ],
+            "chat_state": "active"
+        }
         
-        for run in range(3):  # Multiple runs for timing consistency
-            logger.info(f"Timing measurement run {run + 1}/3")
+        persistence_key = f"chat_persistence_test:{test_data['conversation_id']}"
+        test_value = json.dumps(test_data)
+        
+        try:
+            # Store conversation data with long TTL
+            set_result = await real_redis_client.set(persistence_key, test_value, ex=3600)
+            assert set_result is True, f"Failed to store chat data: {set_result}"
             
-            start_time = time.time()
+            logger.info("✅ Chat data stored successfully")
             
-            result = await gcp_validator.validate_gcp_readiness_for_websocket(
-                timeout_seconds=30.0  # Shorter timeout for precision testing
+            # Verify immediate retrieval
+            immediate_data = await real_redis_client.get(persistence_key)
+            assert immediate_data == test_value, f"Data corruption on immediate read: {immediate_data}"
+            
+            logger.info("✅ Chat data retrieved successfully after storage")
+            
+            # Create new Redis client connection (simulate reconnection)
+            env = get_env()
+            redis_host = env.get("REDIS_HOST", "localhost")
+            redis_port = int(env.get("REDIS_PORT", "6379"))
+            redis_db = int(env.get("REDIS_DB", "0"))
+            
+            new_client = redis.Redis(
+                host=redis_host,
+                port=redis_port,
+                db=redis_db,
+                decode_responses=True,
+                socket_connect_timeout=5.0,
+                socket_timeout=5.0,
+                retry_on_timeout=True,
+                health_check_interval=30
             )
             
-            elapsed_time = time.time() - start_time
-            timing_measurements.append(elapsed_time)
-            
-            logger.info(f"  Run {run + 1}: {elapsed_time:.3f}s - Ready: {result.ready}")
-            
-            if result.ready:
-                logger.info(f"✅ SUCCESS: Redis working on run {run + 1} - Infrastructure operational!")
-                break
+            # Test data persistence across connection
+            try:
+                reconnected_data = await new_client.get(persistence_key)
                 
-            # Small delay between runs
-            await asyncio.sleep(1.0)
+                if reconnected_data != test_value:
+                    logger.error(f"❌ REDIS PERSISTENCE FAILURE: Data corruption across connections")
+                    logger.error(f"   Original: {test_value[:100]}...")
+                    logger.error(f"   Retrieved: {reconnected_data}")
+                    raise AssertionError(f"Redis persistence test FAILED - data corruption across connections")
+                
+                logger.info("✅ Chat data persisted correctly across connection cycle")
+                
+                # Test complex data structure retrieval
+                parsed_data = json.loads(reconnected_data)
+                assert parsed_data["conversation_id"] == test_data["conversation_id"], "Conversation ID corruption"
+                assert parsed_data["user_id"] == test_data["user_id"], "User ID corruption"
+                assert len(parsed_data["messages"]) == 2, f"Message count corruption: {len(parsed_data['messages'])}"
+                assert parsed_data["chat_state"] == "active", f"Chat state corruption: {parsed_data['chat_state']}"
+                
+                logger.info("✅ Complex chat data structure integrity maintained")
+                
+            finally:
+                await new_client.close()
+            
+            # Cleanup test data
+            await real_redis_client.delete(persistence_key)
+            
+        except Exception as e:
+            logger.error(f"❌ REDIS PERSISTENCE FAILURE: {e}")
+            # Cleanup on failure
+            try:
+                await real_redis_client.delete(persistence_key)
+            except:
+                pass
+            raise AssertionError(f"Redis persistence test FAILED - chat data reliability compromised: {e}")
         
-        if all(measurement > 7.0 for measurement in timing_measurements):
-            # Calculate timing statistics
-            avg_timing = sum(timing_measurements) / len(timing_measurements)
-            min_timing = min(timing_measurements)
-            max_timing = max(timing_measurements)
+        # Test 2: Multiple conversation data isolation
+        try:
+            # Create multiple conversation datasets
+            conversations = []
+            for i in range(3):
+                conv_data = {
+                    "conversation_id": f"test_multi_conv_{i}_{int(time.time())}",
+                    "user_id": f"user_{i}",
+                    "messages": [f"Message {i}-{j}" for j in range(3)],
+                    "chat_state": f"state_{i}"
+                }
+                conversations.append(conv_data)
             
-            logger.info(f"Timing Statistics:")
-            logger.info(f"  Average: {avg_timing:.3f}s")
-            logger.info(f"  Range: {min_timing:.3f}s - {max_timing:.3f}s")
-            logger.info(f"  Measurements: {[f'{t:.3f}s' for t in timing_measurements]}")
+            # Store all conversations
+            for i, conv in enumerate(conversations):
+                key = f"multi_chat_test:{conv['conversation_id']}"
+                value = json.dumps(conv)
+                result = await real_redis_client.set(key, value, ex=1800)
+                assert result is True, f"Failed to store conversation {i}: {result}"
             
-            # Validate consistency with 7.51s pattern (±0.2s tolerance)
-            assert 7.3 <= avg_timing <= 7.7, (
-                f"Average timing {avg_timing:.3f}s doesn't match expected 7.51s pattern"
-            )
+            logger.info(f"✅ Stored {len(conversations)} separate conversations")
             
-            # Validate consistency between runs (±0.5s tolerance)
-            timing_spread = max_timing - min_timing
-            assert timing_spread <= 1.0, (
-                f"Timing spread {timing_spread:.3f}s too large - indicates inconsistent failure"
-            )
+            # Verify data isolation - each conversation should be intact
+            for i, conv in enumerate(conversations):
+                key = f"multi_chat_test:{conv['conversation_id']}"
+                retrieved = await real_redis_client.get(key)
+                
+                if retrieved is None:
+                    logger.error(f"❌ REDIS ISOLATION FAILURE: Conversation {i} data lost")
+                    raise AssertionError(f"Redis isolation test FAILED - conversation {i} data lost")
+                
+                parsed = json.loads(retrieved)
+                if parsed["conversation_id"] != conv["conversation_id"]:
+                    logger.error(f"❌ REDIS ISOLATION FAILURE: Conversation {i} ID corruption")
+                    raise AssertionError(f"Redis isolation test FAILED - conversation {i} data corrupted")
             
-            logger.info("✅ CONFIRMED: Timing pattern matches production observations precisely")
-            assert True, f"Redis failure detection timing validated: {avg_timing:.3f}s average"
+            logger.info("✅ Multiple conversation data isolation verified")
             
-        else:
-            logger.info("✅ SUCCESS: Redis infrastructure working - no failure timing to measure")
-            assert True, "Redis infrastructure operational - timing test not applicable"
+            # Cleanup all test conversations
+            for conv in conversations:
+                key = f"multi_chat_test:{conv['conversation_id']}"
+                await real_redis_client.delete(key)
+            
+        except Exception as e:
+            logger.error(f"❌ REDIS ISOLATION FAILURE: {e}")
+            # Cleanup on failure
+            try:
+                for conv in conversations:
+                    key = f"multi_chat_test:{conv['conversation_id']}"
+                    await real_redis_client.delete(key)
+            except:
+                pass
+            raise AssertionError(f"Redis isolation test FAILED - multi-user chat data integrity compromised: {e}")
+        
+        # Test passes ONLY when Redis demonstrates reliable data persistence
+        logger.info("✅ Redis data persistence meets chat continuity requirements")
 
 
 # Test execution metadata for reporting

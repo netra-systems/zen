@@ -234,6 +234,36 @@ def race_condition_test(func: Callable) -> Callable:
     return marked_func
 
 
+def experimental_test(func: Callable) -> Callable:
+    """Decorator to mark tests as experimental.
+    
+    This decorator applies the 'experimental' pytest marker and logs
+    the experimental nature of the test for test infrastructure planning.
+    Experimental tests may be unstable or under development.
+    
+    Args:
+        func: Test function to decorate
+        
+    Returns:
+        Decorated test function with experimental marker
+    """
+    
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    
+    # Apply pytest marker
+    marked_func = pytest.mark.experimental(wrapper)
+    
+    # Add metadata for test discovery
+    marked_func._experimental_test = True
+    marked_func._test_type = 'experimental'
+    
+    logger.debug(f"Test {func.__name__} marked as experimental test")
+    
+    return marked_func
+
+
 # Export all decorators for easy importing
 __all__ = [
     'requires_real_database',
@@ -242,5 +272,6 @@ __all__ = [
     'requires_docker',
     'requires_websocket',
     'mission_critical',
-    'race_condition_test'
+    'race_condition_test',
+    'experimental_test'
 ]
