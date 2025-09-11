@@ -828,3 +828,5 @@ def is_connection_ready_for_messages(connection_id: ConnectionID) -> bool:
 
 # Compatibility alias for integration tests
 WebSocketConnectionStateMachine = ConnectionStateMachine
+# Compatibility alias for tests expecting ApplicationConnectionStateMachine
+ApplicationConnectionStateMachine = ConnectionStateMachine
