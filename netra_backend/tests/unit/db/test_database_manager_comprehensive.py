@@ -57,7 +57,18 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
         """Set up for each test method."""
         super().setup_method()
         self.test_env_vars = {
-            "ENVIRONMENT": "test",
+            "ENVIRONMENT": "development",  # Use development to get PostgreSQL URLs
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            # Add OAuth test credentials to prevent configuration validation errors
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+        self.test_env_vars_sqlite = {
+            "ENVIRONMENT": "test",  # Use test to get SQLite URLs
             "POSTGRES_HOST": "localhost", 
             "POSTGRES_PORT": "5434",
             "POSTGRES_USER": "test_user",
@@ -71,13 +82,9 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
     @pytest.mark.unit
     async def test_database_manager_initialization_success(self, isolated_env):
         """Test successful DatabaseManager initialization with proper configuration."""
-        # Setup isolated environment with valid configuration
-        isolated_env.set("ENVIRONMENT", "test", source="test")
-        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
-        isolated_env.set("POSTGRES_PORT", "5434", source="test")
-        isolated_env.set("POSTGRES_USER", "test_user", source="test")
-        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
-        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        # Setup isolated environment with valid configuration - use development for PostgreSQL
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
         
         with patch('netra_backend.app.core.config.get_config') as mock_config:
             # Mock config with proper attributes
@@ -101,6 +108,41 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             assert db_manager._initialized
             assert 'primary' in db_manager._engines
             assert isinstance(db_manager._engines['primary'], AsyncEngine)
+
+    @pytest.mark.unit
+    async def test_database_manager_initialization_test_environment_sqlite(self, isolated_env):
+        """Test DatabaseManager initialization in test environment uses SQLite."""
+        # Setup isolated environment with test environment - should use SQLite
+        for key, value in self.test_env_vars_sqlite.items():
+            isolated_env.set(key, value, source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            # Mock config with proper attributes
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            # Create DatabaseManager instance
+            db_manager = DatabaseManager()
+            
+            # Test initial state
+            assert not db_manager._initialized
+            assert db_manager._engines == {}
+            assert db_manager._url_builder is None
+            
+            # Test initialization - should use SQLite in test environment
+            await db_manager.initialize()
+            
+            # Verify initialization completed with SQLite
+            assert db_manager._initialized
+            assert 'primary' in db_manager._engines
+            assert isinstance(db_manager._engines['primary'], AsyncEngine)
+            
+            # Verify URL is SQLite format for test environment
+            database_url = db_manager._get_database_url()
+            assert database_url.startswith("sqlite+aiosqlite://")
+            assert ":memory:" in database_url
             assert isinstance(db_manager._url_builder, DatabaseURLBuilder)
     
     @pytest.mark.unit
