@@ -394,6 +394,9 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
         
         CRITICAL: This test must FAIL if agent state is not properly synchronized.
         """
+        # Setup async components
+        await self.async_setup_method()
+        
         # Create user execution context
         thread_id = self.id_manager.generate_thread_id()
         run_id = self.id_manager.generate_run_id(thread_id)

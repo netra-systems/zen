@@ -68,6 +68,9 @@ from netra_backend.app.core.resilience.domain_circuit_breakers import (
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.schemas.shared_types import RetryConfig as SharedRetryConfig
 
+# SSOT COMPATIBILITY: Export AgentState from its proper location
+from netra_backend.app.agents.models import AgentState
+
 # Import telemetry components for distributed tracing
 from netra_backend.app.core.telemetry import telemetry_manager, agent_tracer
 
