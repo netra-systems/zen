@@ -121,6 +121,7 @@ Every task needs:
 - **Stability by Default:** Atomic changes, flag breaking changes
 
 **TEST DISCOVERY:** `python tests/unified_test_runner.py`
+**CRITICAL ISSUE:** Test collection blocked by syntax errors in WebSocket files - only ~160/10,383 unit tests discoverable
 **COMPLIANCE:** Save checklist after every session.
 
 ### 2.2. Complexity Management
@@ -271,6 +272,7 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 ```bash
 python tests/unified_test_runner.py --real-services
 ```
+**CURRENT ISSUE:** Docker daemon connectivity problems preventing real service testing
 
 **Alpine Options:**
 - Default: Alpine containers with rebuild
@@ -312,8 +314,9 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 ## 9. SYSTEM STATUS TRACKING
 
 **Pre-Work Check:**
-- @reports/MASTER_WIP_STATUS.md - System health and compliance
+- @reports/MASTER_WIP_STATUS.md - System health and compliance (Updated: 2025-09-10 - Critical test discovery issues)
 - @reports/DEFINITION_OF_DONE_CHECKLIST.md - Module checklists
+- @SSOT_IMPORT_REGISTRY.md - Authoritative import reference (Completed)
 - Regenerate status after work completion
 
 ## 10. EXECUTION CHECKLIST
