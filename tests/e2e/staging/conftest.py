@@ -331,3 +331,53 @@ async def websocket_client():
             yield ws
     except Exception as e:
         pytest.skip(f"WebSocket connection failed: {e}")
+
+@pytest.fixture(scope="session")
+async def staging_services_fixture():
+    """
+    Staging services fixture providing real staging service connections.
+    
+    Provides access to staging environment services for E2E testing:
+    - Staging backend API client
+    - Staging configuration
+    - WebSocket connection capabilities
+    - Health check utilities
+    
+    This fixture enables E2E tests to run against real staging services
+    following SSOT compliance patterns.
+    """
+    from tests.e2e.staging_test_config import get_staging_config
+    import httpx
+    
+    config = get_staging_config()
+    
+    # Health check to ensure staging services are available
+    try:
+        async with httpx.AsyncClient(timeout=10) as health_client:
+            health_response = await health_client.get(config.health_endpoint)
+            if health_response.status_code != 200:
+                pytest.skip(f"Staging backend not healthy: {health_response.status_code}")
+    except Exception as e:
+        pytest.skip(f"Staging backend not accessible: {e}")
+    
+    # Create staging HTTP client
+    async with httpx.AsyncClient(
+        base_url=config.backend_url,
+        timeout=30,
+        headers=config.get_headers()
+    ) as client:
+        
+        # Prepare staging services dictionary
+        services = {
+            "config": config,
+            "http_client": client,
+            "backend_url": config.backend_url,
+            "api_url": config.api_url,
+            "websocket_url": config.websocket_url,
+            "auth_url": config.auth_url,
+            "health_endpoints": config.health_endpoints,
+            "test_jwt_token": config.test_jwt_token,
+            "test_api_key": config.test_api_key
+        }
+        
+        yield services
