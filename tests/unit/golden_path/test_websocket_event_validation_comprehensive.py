@@ -121,9 +121,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         """
         # Create WebSocket emitter with event capture
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         # Mock the actual WebSocket send to capture events
@@ -233,9 +232,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket event data has proper format and required fields.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         emitter.send_event = self.capture_event
@@ -300,9 +298,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket events are emitted in logical order for user experience.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         emitter.send_event = self.capture_event
@@ -378,16 +375,14 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         
         # Create separate emitters for each user
         user1_emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=user1_id,
-            thread_id=thread1_id
+            manager=self.mock_websocket_manager,
+            user_id=user1_id
         )
         user1_emitter.send_event = capture_user1_event
         
         user2_emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=user2_id,
-            thread_id=thread2_id
+            manager=self.mock_websocket_manager,
+            user_id=user2_id
         )
         user2_emitter.send_event = capture_user2_event
         
@@ -451,9 +446,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket events are emitted within performance requirements.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         # Track emission timing
@@ -512,14 +506,13 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         BVJ: All segments | System Reliability | Ensures graceful error handling
         Test that WebSocket event emission handles errors gracefully.
         """
-        # Create emitter with failing WebSocket
-        failing_websocket = AsyncMock()
-        failing_websocket.send_text.side_effect = Exception("WebSocket connection failed")
+        # Create emitter with failing WebSocket manager
+        failing_manager = self.mock_factory.create_websocket_manager_mock()
+        failing_manager.emit_critical_event.side_effect = Exception("WebSocket connection failed")
         
         emitter = UnifiedWebSocketEmitter(
-            websocket=failing_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=failing_manager,
+            user_id=self.test_user_id
         )
         
         # Track error handling
@@ -658,9 +651,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket event payloads are within acceptable size limits.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         # Track payload sizes

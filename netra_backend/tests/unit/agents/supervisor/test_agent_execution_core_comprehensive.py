@@ -91,7 +91,7 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
             correlation_id="corr-789"
         )
         
-        self.user_context = UserExecutionContext.create_for_user(
+        self.user_context = UserExecutionContext.from_request(
             user_id=self.test_user_id,
             thread_id=self.test_thread_id,
             run_id=str(self.test_run_id)

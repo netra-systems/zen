@@ -63,7 +63,31 @@ no such service: backend
 **GitHub Issue Created:** https://github.com/netra-systems/netra-apex/issues/315
 **Status:** CRITICAL infrastructure issue documented with comprehensive technical analysis
 
-### Issue #2: Test Execution Timeout  
+### Issue #2: Critical Authentication Service Test Failures
+**Severity:** CRITICAL
+**Category:** failing-test-auth-service-critical
+**Test File:** `auth_service/tests/unit/`
+**Description:** Massive authentication test failure rate: 85 failed + 73 errors out of ~400 tests
+**Root Causes:**
+1. **Missing OAuth Classes**: `OAuthHandler`, `OAuthValidator` not defined in imports
+2. **RedisManager Interface Mismatch**: Missing `connect()` method - has `_connected` instead
+3. **Database Model Integration Issues**: Various model relationship and constraint failures
+4. **Unicode Encoding Errors**: Loguru handler failing on Windows with charmap codec
+**Business Impact:**
+- **CRITICAL**: $15K+ MRR per Enterprise customer authentication cannot be validated
+- **CRITICAL**: OAuth integration business logic completely untested
+- **HIGH**: Password security policies not validatable
+- **HIGH**: Multi-tenant user isolation at risk
+**Error Examples:**
+```
+NameError: name 'OAuthHandler' is not defined
+AttributeError: 'RedisManager' object has no attribute 'connect'
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705'
+```
+**Test Stats:** 85 failed, 243 passed, 73 errors (21% failure rate)
+**Next Action:** Create GitHub issue for auth service test infrastructure
+
+### Issue #3: Test Execution Timeout  
 **Severity:** HIGH
 **Category:** infrastructure
 **Description:** Comprehensive test suite times out, preventing full analysis
