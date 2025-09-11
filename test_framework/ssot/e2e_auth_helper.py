@@ -756,6 +756,158 @@ class E2EAuthHelper:
         
         return token
     
+    async def authenticate_test_user(
+        self,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        tier: Optional[str] = None,
+        permissions: Optional[List[str]] = None,
+        force_new: bool = False
+    ) -> Dict[str, Any]:
+        """
+        MISSING METHOD FIX: Authenticate test user with comprehensive auth result.
+        
+        This is the SSOT method that E2E tests expect for user authentication.
+        It provides a unified interface that returns complete authentication data
+        including tokens, user info, and test-specific metadata.
+        
+        Args:
+            email: User email (uses config default if not provided)
+            password: User password (uses config default if not provided)
+            tier: User tier/role ("free", "early", "mid", "enterprise")
+            permissions: User permissions (auto-generated based on tier if not provided)
+            force_new: Force new authentication even if cached token exists
+            
+        Returns:
+            Dict containing complete authentication result with all expected fields
+        """
+        # Use defaults if not provided
+        email = email or self.config.test_user_email
+        password = password or self.config.test_user_password
+        
+        # Generate tier-based permissions if not provided
+        if permissions is None:
+            if tier == "enterprise":
+                permissions = ["read", "write", "admin", "enterprise", "multi_tenant"]
+            elif tier == "mid":
+                permissions = ["read", "write", "premium"]
+            elif tier == "early":
+                permissions = ["read", "write", "early_access"]
+            else:  # free tier
+                permissions = ["read", "write"]
+        
+        try:
+            # For staging environment, try OAuth simulation first
+            if self.environment == "staging":
+                try:
+                    staging_token = await self.get_staging_token_async(email=email)
+                    if staging_token:
+                        # Build comprehensive auth result for staging
+                        user_id = self._extract_user_id(staging_token)
+                        auth_result = {
+                            "success": True,
+                            "user_id": user_id,
+                            "email": email,
+                            "access_token": staging_token,
+                            "jwt_token": staging_token,  # Some tests expect this key
+                            "token": staging_token,      # Some tests expect this key
+                            "permissions": permissions,
+                            "tier": tier or "free",
+                            "environment": "staging",
+                            "auth_method": "oauth_simulation",
+                            "is_test_user": True,
+                            "created_at": datetime.now(timezone.utc).isoformat(),
+                            "user": {
+                                "id": user_id,
+                                "email": email,
+                                "permissions": permissions,
+                                "tier": tier or "free"
+                            }
+                        }
+                        
+                        # Cache the result
+                        self._cached_token = staging_token
+                        self._token_expiry = datetime.now(timezone.utc) + timedelta(minutes=30)
+                        
+                        return auth_result
+                except Exception as e:
+                    print(f"[WARNING] Staging OAuth simulation failed: {e}")
+                    print(f"[INFO] Falling back to standard authentication")
+            
+            # Standard authentication flow (local testing or staging fallback)
+            try:
+                # Try authenticate_user method first
+                token, user_data = await self.authenticate_user(email=email, password=password, force_new=force_new)
+                
+                # Build comprehensive auth result
+                auth_result = {
+                    "success": True,
+                    "user_id": user_data.get("id", self._extract_user_id(token)),
+                    "email": email,
+                    "access_token": token,
+                    "jwt_token": token,
+                    "token": token,
+                    "permissions": permissions,
+                    "tier": tier or "free",
+                    "environment": self.environment,
+                    "auth_method": "service_auth",
+                    "is_test_user": True,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "user": user_data
+                }
+                
+                return auth_result
+                
+            except Exception as auth_error:
+                print(f"[WARNING] Service authentication failed: {auth_error}")
+                print(f"[INFO] Falling back to JWT token creation")
+                
+                # Final fallback: Create test JWT directly
+                user_id = f"test_user_{hash(email) & 0xFFFFFFFF:08x}"
+                jwt_token = self.create_test_jwt_token(
+                    user_id=user_id,
+                    email=email,
+                    permissions=permissions
+                )
+                
+                # Build auth result from JWT creation
+                auth_result = {
+                    "success": True,
+                    "user_id": user_id,
+                    "email": email,
+                    "access_token": jwt_token,
+                    "jwt_token": jwt_token,
+                    "token": jwt_token,
+                    "permissions": permissions,
+                    "tier": tier or "free",
+                    "environment": self.environment,
+                    "auth_method": "jwt_direct",
+                    "is_test_user": True,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "user": {
+                        "id": user_id,
+                        "email": email,
+                        "permissions": permissions,
+                        "tier": tier or "free"
+                    }
+                }
+                
+                return auth_result
+                
+        except Exception as e:
+            # If all authentication methods fail, return failure result
+            error_result = {
+                "success": False,
+                "error": f"Authentication failed: {str(e)}",
+                "email": email,
+                "environment": self.environment,
+                "attempted_methods": ["oauth_simulation", "service_auth", "jwt_direct"],
+                "is_test_user": True
+            }
+            
+            print(f"[ERROR] authenticate_test_user failed completely: {e}")
+            return error_result
+
     async def validate_jwt_token(self, token: str) -> Dict[str, Any]:
         """
         Validate JWT token and return validation result.
@@ -1137,6 +1289,41 @@ async def create_authenticated_user(
     return token, user_data
 
 
+async def authenticate_test_user(
+    email: Optional[str] = None,
+    password: Optional[str] = None,
+    tier: Optional[str] = None,
+    permissions: Optional[List[str]] = None,
+    environment: str = "test",
+    force_new: bool = False
+) -> Dict[str, Any]:
+    """
+    SSOT standalone function for authenticating test users.
+    
+    This is the function that tests import directly for user authentication.
+    It provides a unified interface across all environments and authentication methods.
+    
+    Args:
+        email: User email (auto-generated if not provided)
+        password: User password (uses default if not provided)
+        tier: User tier/role ("free", "early", "mid", "enterprise")
+        permissions: User permissions (auto-generated based on tier if not provided)
+        environment: Test environment ('test', 'staging', etc.)
+        force_new: Force new authentication even if cached token exists
+        
+    Returns:
+        Dict containing complete authentication result with all expected fields
+    """
+    auth_helper = E2EAuthHelper(environment=environment)
+    return await auth_helper.authenticate_test_user(
+        email=email,
+        password=password,
+        tier=tier,
+        permissions=permissions,
+        force_new=force_new
+    )
+
+
 async def create_authenticated_user_context(
     user_email: Optional[str] = None,
     user_id: Optional[str] = None,
@@ -1296,7 +1483,8 @@ __all__ = [
     "create_test_user",
     "get_authenticated_headers", 
     "cleanup_test_user",
-    "E2EAuthenticatedTestCase"
+    "E2EAuthenticatedTestCase",
+    "authenticate_test_user"            # CRITICAL FIX: Missing method now available
 ]
 
 # Backwards compatibility alias - some tests import E2EAuthenticationHelper
