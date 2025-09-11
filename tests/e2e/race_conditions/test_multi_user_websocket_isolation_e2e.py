@@ -34,7 +34,7 @@ from test_framework.ssot.e2e_auth_helper import (
     AuthenticatedUser,
     create_authenticated_user
 )
-from test_framework.ssot.real_services_test_fixtures import requires_real_services
+from test_framework.decorators import requires_real_services
 from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.logging_config import central_logger
 

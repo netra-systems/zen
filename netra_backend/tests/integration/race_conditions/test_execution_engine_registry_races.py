@@ -31,11 +31,11 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, get_agent_registry
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory as AgentFactory, get_agent_instance_factory as get_agent_factory
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.core.agent_execution_tracker import ExecutionTracker, get_execution_tracker
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, get_execution_tracker
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.database import DatabaseTestHelper
-# Skip requires_real functions - using real services by default in integration tests
+from test_framework.decorators import requires_real_database, requires_real_redis
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

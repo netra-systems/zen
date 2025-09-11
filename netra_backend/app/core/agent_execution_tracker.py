@@ -1150,3 +1150,7 @@ async def shutdown_tracker():
     tracker = get_execution_tracker()
     await tracker.stop_monitoring()
     logger.info("Shutdown agent execution tracker")
+
+
+# COMPATIBILITY ALIAS: Export AgentExecutionTracker as ExecutionTracker for backward compatibility
+ExecutionTracker = AgentExecutionTracker
