@@ -21,12 +21,78 @@ IMPORT GUIDANCE:
 - RECOMMENDED: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 """
 
-from typing import Optional
+from typing import Optional, Dict, Any
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.core_types import UserID, ensure_user_id
 
 logger = central_logger.get_logger(__name__)
+
+# Factory instance management (singleton pattern for compatibility)
+import threading
+_factory_instance: Optional['WebSocketManagerFactory'] = None
+_factory_lock = threading.Lock()
+
+
+@dataclass
+class ManagerMetrics:
+    """Manager metrics data class for test compatibility."""
+    managers_created: int = 0
+    managers_active: int = 0
+    managers_cleaned: int = 0
+    connections_total: int = 0
+    connections_active: int = 0
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert metrics to dictionary."""
+        return {
+            'managers_created': self.managers_created,
+            'managers_active': self.managers_active,
+            'managers_cleaned': self.managers_cleaned,
+            'connections_total': self.connections_total,
+            'connections_active': self.connections_active,
+            'created_at': self.created_at
+        }
+
+
+@dataclass
+class FactoryMetrics:
+    """Factory metrics data class for test compatibility."""
+    emitters_created: int = 0
+    emitters_active: int = 0
+    emitters_cleaned: int = 0
+    events_sent_total: int = 0
+    events_failed_total: int = 0
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    ssot_redirect: bool = True
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'FactoryMetrics':
+        """Create metrics from dictionary."""
+        return cls(
+            emitters_created=data.get('emitters_created', 0),
+            emitters_active=data.get('emitters_active', 0),
+            emitters_cleaned=data.get('emitters_cleaned', 0),
+            events_sent_total=data.get('events_sent_total', 0),
+            events_failed_total=data.get('events_failed_total', 0),
+            created_at=data.get('created_at', datetime.now(timezone.utc).isoformat()),
+            ssot_redirect=data.get('ssot_redirect', True)
+        )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert metrics to dictionary."""
+        return {
+            'emitters_created': self.emitters_created,
+            'emitters_active': self.emitters_active,
+            'emitters_cleaned': self.emitters_cleaned,
+            'events_sent_total': self.events_sent_total,
+            'events_failed_total': self.events_failed_total,
+            'created_at': self.created_at,
+            'ssot_redirect': self.ssot_redirect
+        }
 
 
 def create_websocket_manager(user_context=None, user_id: Optional[UserID] = None):
@@ -90,6 +156,65 @@ def get_websocket_manager_factory():
     """
     logger.warning("get_websocket_manager_factory is deprecated. Use create_websocket_manager directly.")
     return create_websocket_manager
+
+
+def create_websocket_manager_sync(user_context=None, user_id: Optional[UserID] = None):
+    """
+    SYNC COMPATIBILITY FUNCTION: Synchronous version of create_websocket_manager.
+    
+    This function provides the same functionality as create_websocket_manager but
+    in a synchronous context for tests that don't use async patterns.
+    
+    Args:
+        user_context: Optional UserExecutionContext for user isolation (preferred)
+        user_id: Optional UserID for basic isolation (fallback for tests)
+    
+    Returns:
+        WebSocketManager: Configured WebSocket manager instance
+    """
+    logger.info("Creating WebSocket manager via sync factory (test compatibility)")
+    return create_websocket_manager(user_context=user_context, user_id=user_id)
+
+
+def _validate_ssot_user_context(user_context) -> bool:
+    """
+    PRIVATE COMPATIBILITY FUNCTION: Validate SSOT user context for tests.
+    
+    This function provides validation of user execution context to ensure
+    SSOT compliance patterns are followed in factory operations.
+    
+    Args:
+        user_context: UserExecutionContext to validate
+        
+    Returns:
+        bool: True if context is valid and SSOT compliant
+    """
+    if user_context is None:
+        logger.debug("User context is None - not SSOT compliant")
+        return False
+    
+    # Check for required attributes
+    required_attrs = ['user_id', 'request_id']
+    for attr in required_attrs:
+        if not hasattr(user_context, attr):
+            logger.debug(f"User context missing required attribute: {attr}")
+            return False
+        if getattr(user_context, attr) is None:
+            logger.debug(f"User context attribute {attr} is None")
+            return False
+    
+    # Validate user_id type
+    if not isinstance(user_context.user_id, (str, UserID)):
+        logger.debug(f"User context user_id has invalid type: {type(user_context.user_id)}")
+        return False
+    
+    # Check for proper isolation
+    if hasattr(user_context, '_shared_state') and user_context._shared_state:
+        logger.warning("User context has shared state - potential SSOT violation")
+        return False
+    
+    logger.debug("User context validation passed - SSOT compliant")
+    return True
 
 
 class WebSocketManagerFactory:
@@ -280,12 +405,18 @@ class WebSocketManagerFactory:
 # Export all compatibility functions and classes
 __all__ = [
     'create_websocket_manager',
+    'create_websocket_manager_sync',
     'get_websocket_manager_factory', 
     'WebSocketManagerFactory',
     'IsolatedWebSocketManager',
     'create_defensive_user_execution_context',
     'ConnectionLifecycleManager',
-    'FactoryInitializationError'
+    'FactoryInitializationError',
+    'FactoryMetrics',
+    'ManagerMetrics',
+    '_factory_instance',
+    '_factory_lock',
+    '_validate_ssot_user_context'
 ]
 
 logger.info("WebSocket Manager Factory compatibility module loaded - Golden Path ready with enhanced compatibility")
