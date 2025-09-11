@@ -46,9 +46,8 @@ from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID,
 from shared.isolated_environment import get_env
 
 # WebSocket Manager imports - SSOT verified paths
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode
-from netra_backend.app.websocket_core.types import WebSocketConnectionState, ConnectionInfo, WebSocketMessage, MessageType
-from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection
+from netra_backend.app.websocket_core.types import WebSocketConnectionState, ConnectionInfo, MessageType
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Agent and execution context imports
@@ -168,13 +167,13 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         conn_2 = self.create_mock_connection(self.test_user_id_2)
         
         # Set up WebSocket connections in manager
-        connection_info_1 = ConnectionInfo(
+        websocket_conn_1 = WebSocketConnection(
             connection_id=conn_1.connection_id,
             user_id=self.test_user_id_1,
             websocket=conn_1,
             connected_at=datetime.now(timezone.utc)
         )
-        connection_info_2 = ConnectionInfo(
+        websocket_conn_2 = WebSocketConnection(
             connection_id=conn_2.connection_id,
             user_id=self.test_user_id_2,
             websocket=conn_2,
@@ -182,8 +181,8 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         )
         
         # Add connections to manager
-        await manager.add_connection(connection_info_1)
-        await manager.add_connection(connection_info_2)
+        await manager.add_connection(websocket_conn_1)
+        await manager.add_connection(websocket_conn_2)
         
         # Send user-specific messages concurrently
         message_1 = {"type": "agent_started", "user_id": self.test_user_id_1, "data": "User 1 data"}

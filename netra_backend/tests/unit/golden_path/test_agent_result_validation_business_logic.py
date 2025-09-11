@@ -817,6 +817,28 @@ class TestAgentResultValidationBusinessLogic:
         
         validation = self.validator.validate_agent_result(result)
         
+        # With the enhanced scoring algorithm, minimal but actionable content gets NEEDS_REVISION
+        # Only completely non-actionable content with very low overall score gets REJECTED
+        assert validation.validation_result == ValidationResult.NEEDS_REVISION
+        assert validation.tier_compliance is False
+        assert validation.quality_level == ResultQualityLevel.UNACCEPTABLE
+        assert len(validation.validation_issues) > 0
+
+    def test_validate_truly_rejected_result(self):
+        """Test validation of result that should be truly rejected."""
+        result_data = {
+            'error': 'Failed to analyze'  # No actionable content
+        }
+        
+        result = self._create_test_result(
+            user_tier=SubscriptionTier.FREE,
+            confidence=0.25,  # Very low confidence
+            result_data=result_data
+        )
+        
+        validation = self.validator.validate_agent_result(result)
+        
+        # Truly non-actionable content with very low scores should be REJECTED
         assert validation.validation_result == ValidationResult.REJECTED
         assert validation.tier_compliance is False
         assert validation.quality_level == ResultQualityLevel.UNACCEPTABLE
@@ -842,6 +864,7 @@ class TestAgentResultValidationBusinessLogic:
         
         validation = self.validator.validate_agent_result(result)
         
+        # Should get conditional approval - passes quality threshold but has minor issues
         assert validation.validation_result == ValidationResult.CONDITIONAL_APPROVAL
         assert validation.tier_compliance is False  # Has tier compliance issues but still gets conditional approval
         assert len(validation.validation_issues) == 1  # Should have one validation issue (business value)

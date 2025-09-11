@@ -16,12 +16,13 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 
+# Get environment first
+env = get_env()
+
 # Set minimal test environment
 env.set("TESTING", "1", "test")
 env.set("DATABASE_URL", "sqlite+aiosqlite:///:memory:", "test")
 env.set("DEV_MODE_DISABLE_CLICKHOUSE", "true", "test")
-
-env = get_env()
 @pytest.fixture
 def client():
     """Use real service instance."""
