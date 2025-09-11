@@ -45,6 +45,11 @@ from netra_backend.app.core.agent_execution_tracker import (
     AgentExecutionPhase,
     CircuitBreakerOpenError
 )
+from netra_backend.app.core.timeout_configuration import (
+    get_agent_execution_timeout,
+    get_streaming_timeout,
+    TimeoutTier
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -81,13 +86,18 @@ class AgentExecutionCore:
     
     CRITICAL REMEDIATION: Enhanced with comprehensive timeout management and circuit breakers
     to prevent agent execution pipeline blocking that prevents users from receiving AI responses.
+    
+    **ENTERPRISE STREAMING SUPPORT**: Tier-based timeout configuration enables 300s streaming
+    for enterprise customers while maintaining fast feedback for other tiers.
     """
     
-    # CRITICAL REMEDIATION: Reduced timeout configuration for faster feedback
-    DEFAULT_TIMEOUT = 25.0  # Reduced from 30s for faster feedback
-    HEARTBEAT_INTERVAL = 5.0  # Send heartbeat every 5 seconds
+    # HEARTBEAT_INTERVAL: Send heartbeat every 5 seconds
+    HEARTBEAT_INTERVAL = 5.0
     
-    def __init__(self, registry: 'AgentRegistry', websocket_bridge: Optional['AgentWebSocketBridge'] = None):
+    def __init__(self, 
+                 registry: 'AgentRegistry', 
+                 websocket_bridge: Optional['AgentWebSocketBridge'] = None,
+                 default_tier: Optional[TimeoutTier] = None):
         self.registry = registry
         self.websocket_bridge = websocket_bridge
         self.execution_tracker = get_execution_tracker()
@@ -97,10 +107,39 @@ class AgentExecutionCore:
         # CRITICAL REMEDIATION: Initialize consolidated agent execution tracker
         self.agent_tracker = AgentExecutionTracker()
         
+        # Tier-based timeout configuration
+        self.default_tier = default_tier or TimeoutTier.FREE
+        self._default_timeout = get_agent_execution_timeout(self.default_tier)
+        
         logger.info(
-            f"AgentExecutionCore initialized with consolidated agent execution tracker (default_timeout: {self.DEFAULT_TIMEOUT}s) "
+            f"AgentExecutionCore initialized with tier-based timeout configuration "
+            f"(tier: {self.default_tier.value}, default_timeout: {self._default_timeout}s, "
+            f"streaming_capable: {self.default_tier in [TimeoutTier.ENTERPRISE, TimeoutTier.PLATFORM]}) "
             f"for comprehensive monitoring"
         )
+    
+    def get_execution_timeout(self, tier: Optional[TimeoutTier] = None, streaming: bool = False) -> float:
+        """Get appropriate execution timeout for customer tier and execution type.
+        
+        **ENTERPRISE STREAMING**: Returns tier-appropriate timeout:
+        - Enterprise streaming: 300s (5-minute capability)
+        - Enterprise normal: 300s (extended processing)
+        - Platform streaming: 120s (2-minute capability)
+        - Other tiers: Standard timeout based on environment
+        
+        Args:
+            tier: Customer tier (defaults to instance default)
+            streaming: Whether this is a streaming execution
+            
+        Returns:
+            float: Timeout in seconds
+        """
+        selected_tier = tier or self.default_tier
+        
+        if streaming and selected_tier in [TimeoutTier.ENTERPRISE, TimeoutTier.PLATFORM, TimeoutTier.MID]:
+            return float(get_streaming_timeout(selected_tier))
+        else:
+            return float(get_agent_execution_timeout(selected_tier))
         
     def _validate_user_execution_context(
         self, 
@@ -145,12 +184,41 @@ class AgentExecutionCore:
         self, 
         context: AgentExecutionContext,
         user_context: UserExecutionContext,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
+        tier: Optional[TimeoutTier] = None,
+        streaming: bool = False
     ) -> AgentExecutionResult:
-        """Execute agent with full lifecycle tracking and death detection."""
+        """Execute agent with full lifecycle tracking and death detection.
+        
+        **ENTERPRISE STREAMING**: Supports tier-based timeout configuration with:
+        - Enterprise: 300s streaming capability with progressive phases
+        - Platform: 120s streaming capability  
+        - Mid: 60s streaming capability
+        - Free/Early: Standard environment-based timeouts
+        
+        Args:
+            context: Agent execution context
+            user_context: User execution context (security isolation)
+            timeout: Override timeout in seconds
+            tier: Customer tier for timeout selection
+            streaming: Whether this is a streaming execution
+            
+        Returns:
+            AgentExecutionResult: Execution result with tier-appropriate timeout
+        """
         
         # CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation
         user_execution_context = self._validate_user_execution_context(user_context, context)
+        
+        # Determine appropriate timeout based on tier and execution type
+        execution_timeout = timeout or self.get_execution_timeout(tier, streaming)
+        selected_tier = tier or self.default_tier
+        
+        logger.info(
+            f"Agent execution starting: {context.agent_name} "
+            f"(tier: {selected_tier.value}, timeout: {execution_timeout}s, "
+            f"streaming: {streaming}, user: {user_execution_context.user_id[:8] if user_execution_context.user_id else 'unknown'})"
+        )
         
         # Get or create trace context
         parent_trace = get_unified_trace_context()
@@ -180,10 +248,12 @@ class AgentExecutionCore:
             agent_name=context.agent_name,
             thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
-            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
+            timeout_seconds=execution_timeout,
             metadata={
                 'correlation_id': trace_context.correlation_id,
-                'run_id': str(context.run_id)
+                'run_id': str(context.run_id),
+                'tier': selected_tier.value,
+                'streaming': streaming
             }
         )
         
@@ -192,11 +262,13 @@ class AgentExecutionCore:
             agent_name=context.agent_name,
             thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
-            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
+            timeout_seconds=execution_timeout,
             metadata={
                 'correlation_id': trace_context.correlation_id,
                 'run_id': str(context.run_id),
-                'timeout': timeout or self.DEFAULT_TIMEOUT
+                'timeout': execution_timeout,
+                'tier': selected_tier.value,
+                'streaming': streaming
             }
         )
         
@@ -300,18 +372,21 @@ class AgentExecutionCore:
                         if heartbeat:  # This will be False since heartbeat is disabled
                             async with heartbeat:
                                 return await self._execute_with_protection(
-                                    agent, context, user_execution_context, exec_id, heartbeat, timeout, trace_context
+                                    agent, context, user_execution_context, exec_id, heartbeat, execution_timeout, trace_context
                                 )
                         else:
                             # Direct execution without heartbeat wrapper
                             return await self._execute_with_protection(
-                                agent, context, user_execution_context, exec_id, None, timeout, trace_context
+                                agent, context, user_execution_context, exec_id, None, execution_timeout, trace_context
                             )
                     
-                    # CRITICAL: Execute agent with timeout management to prevent blocking
+                    # CRITICAL: Execute agent with tier-based timeout management to prevent blocking
+                    # Enterprise tier: 300s streaming capability
+                    # Platform tier: 120s streaming capability
+                    # Other tiers: Environment-based timeouts
                     result = await asyncio.wait_for(
                         agent_execution_wrapper(),
-                        timeout=timeout or self.DEFAULT_TIMEOUT
+                        timeout=execution_timeout
                     )
                     
                 except CircuitBreakerOpenError as e:
@@ -341,13 +416,13 @@ class AgentExecutionCore:
                     )
                     
                 except TimeoutError as e:
-                    # Agent execution timed out - provide detailed context
-                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
+                    # Agent execution timed out - provide detailed context with tier information
                     logger.error(
-                        f"⏰ TIMEOUT: Agent '{context.agent_name}' exceeded timeout limit of {timeout_duration}s. "
+                        f"⏰ TIMEOUT: Agent '{context.agent_name}' exceeded timeout limit of {execution_timeout}s "
+                        f"(tier: {selected_tier.value}, streaming: {streaming}). "
                         f"User: {user_execution_context.user_id}, Thread: {user_execution_context.thread_id}, "
                         f"Run ID: {context.run_id}. This may indicate the agent is stuck or processing "
-                        f"a complex request. Original error: {e}"
+                        f"a complex request. Consider upgrading to higher tier for extended timeouts. Original error: {e}"
                     )
                     
                     # Transition to timeout phase
@@ -358,15 +433,15 @@ class AgentExecutionCore:
                         websocket_manager=self.websocket_bridge
                     )
                     
-                    # Create detailed timeout result with enhanced context
-                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
+                    # Create detailed timeout result with enhanced context and tier information
                     result = AgentExecutionResult(
                         success=False,
                         agent_name=context.agent_name,
-                        error=f"Agent '{context.agent_name}' timed out after {timeout_duration}s. "
+                        error=f"Agent '{context.agent_name}' timed out after {execution_timeout}s "
+                              f"(tier: {selected_tier.value}, streaming: {streaming}). "
                               f"Execution exceeded maximum allowed time, possibly due to complex processing "
                               f"or external resource delays. User: {user_execution_context.user_id}, "
-                              f"Run ID: {context.run_id}.",
+                              f"Run ID: {context.run_id}. Consider upgrading to higher tier for extended timeouts.",
                         duration=0.0
                     )
             

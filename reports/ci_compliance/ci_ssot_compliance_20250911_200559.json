@@ -1,0 +1,185 @@
+{
+  "validation_summary": {
+    "passed": true,
+    "exit_code": 0,
+    "validation_timestamp": "2025-09-11T20:05:59.522214",
+    "total_files_checked": 3,
+    "critical_violations": 0,
+    "error_violations": 2,
+    "warning_violations": 12
+  },
+  "config": {
+    "mode": "pr-validation",
+    "compliance_level": "standard",
+    "environment": "github-actions",
+    "branch": "fix/issue-308-integration-test-collection-blocker",
+    "commit_sha": null,
+    "pr_number": null
+  },
+  "violations": [
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/ssot_service_initializer.py",
+      "line": 7,
+      "content": "CRITICAL: This eliminates fallback handler creation by providing authentic",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/service_initialization_manager.py",
+      "line": 7,
+      "content": "CRITICAL: This replaces the dumb fallback handler creation with authentic",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_emitter.py",
+      "line": 820,
+      "content": "        Escalate failed authentication events to fallback channels.",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_emitter.py",
+      "line": 828,
+      "content": "                f\"ESCALATING TO FALLBACK - Authentication event {event_type} \"",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_emitter.py",
+      "line": 1115,
+      "content": "        self.auth_metrics['fallback_escalations'] += 1",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_emitter.py",
+      "line": 1137,
+      "content": "        Send authentication event via fallback channel.",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_emitter.py",
+      "line": 1148,
+      "content": "                f\"Using fallback channel for auth event {event_type} \"",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_emitter.py",
+      "line": 1159,
+      "content": "                f\"AUTH FALLBACK TRIGGERED: {event_type} for user {self.user_id} - \"",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_websocket_auth.py",
+      "line": 58,
+      "content": "    determine if this is an E2E test that should bypass strict authentication.",
+      "type": "websocket_auth_bypass",
+      "description": "WebSocket authentication bypass mechanism",
+      "suggestion": "Remove auth bypass, enforce proper WebSocket authentication",
+      "severity": "ERROR",
+      "issue_reference": "WebSocket security - No auth bypass allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_websocket_auth.py",
+      "line": 136,
+      "content": "            logger.info(\"DEMO MODE: Authentication bypass disabled, using full auth flow\")",
+      "type": "websocket_auth_bypass",
+      "description": "WebSocket authentication bypass mechanism",
+      "suggestion": "Remove auth bypass, enforce proper WebSocket authentication",
+      "severity": "ERROR",
+      "issue_reference": "WebSocket security - No auth bypass allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_websocket_auth.py",
+      "line": 1407,
+      "content": "    \"WebSocketAuthenticator\",  # Legacy alias",
+      "type": "legacy_auth_patterns",
+      "description": "Legacy authentication patterns outside SSOT",
+      "suggestion": "Migrate to UnifiedAuthInterface SSOT pattern",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - Legacy auth removal",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/unified_websocket_auth.py",
+      "line": 1408,
+      "content": "    \"UnifiedWebSocketAuth\",  # Legacy alias",
+      "type": "legacy_auth_patterns",
+      "description": "Legacy authentication patterns outside SSOT",
+      "suggestion": "Migrate to UnifiedAuthInterface SSOT pattern",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - Legacy auth removal",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/user_context_extractor.py",
+      "line": 223,
+      "content": "                logger.info(\"\ud83d\udd04 FALLBACK: Using auth_client_core for token validation\")",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file": "/Users/rindhujajohnson/Netra/GitHub/netra-apex/netra_backend/app/websocket_core/user_context_extractor.py",
+      "line": 251,
+      "content": "                payload[\"source\"] = \"auth_service_fallback\"",
+      "type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    }
+  ],
+  "recommendations": [
+    "\ud83d\udd27 Fix SSOT violations by using UnifiedAuthInterface for auth operations",
+    "Remove direct JWT operations bypassing auth service",
+    "\ud83d\udcdd Review warning violations for architectural improvements"
+  ],
+  "blocking_reasons": [],
+  "business_impact": {
+    "revenue_protection": "$500K+ ARR protected from security vulnerabilities",
+    "compliance_status": "PASS"
+  }
+}

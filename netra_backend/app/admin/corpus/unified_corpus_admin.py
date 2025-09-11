@@ -129,42 +129,59 @@ class IndexingError(CorpusAdminError):
 
 
 # ============================================================================
-# USER EXECUTION CONTEXT
+# USER EXECUTION CONTEXT - SSOT IMPORT
 # ============================================================================
 
-@dataclass
-class UserExecutionContext:
+# SSOT CONSOLIDATION: Import UserExecutionContext from authoritative services implementation
+# This eliminates duplicate implementation and ensures consistent security validation
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+
+# Legacy corpus-specific extensions preserved through this helper function
+def initialize_corpus_context(context: UserExecutionContext, corpus_base_path: str = None) -> UserExecutionContext:
     """
-    User execution context for corpus operations.
-    Ensures complete isolation between users with corpus-specific fields.
+    Initialize corpus-specific fields for UserExecutionContext.
     
-    Includes standard user identification fields plus corpus-specific functionality.
+    This function extends the SSOT UserExecutionContext with corpus-specific functionality
+    while maintaining the security guarantees of the authoritative implementation.
+    
+    Args:
+        context: SSOT UserExecutionContext instance
+        corpus_base_path: Optional base path for corpus data (defaults to env var)
+    
+    Returns:
+        UserExecutionContext with corpus-specific metadata initialized
     """
-    user_id: str
-    request_id: str
-    thread_id: str
-    run_id: str = ""  # Added for compatibility with standard UserExecutionContext
-    session_id: str = ""
-    corpus_path: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    active_runs: Dict[str, Any] = field(default_factory=dict)
-    run_history: List[Dict[str, Any]] = field(default_factory=list)
-    websocket_connection_id: Optional[str] = None  # Added for compatibility
+    if corpus_base_path is None:
+        corpus_base_path = os.getenv('CORPUS_BASE_PATH', '/data/corpus')
     
-    def __post_init__(self):
-        """Initialize user-specific corpus path and validate required fields"""
-        # Basic validation for required fields
-        if not self.user_id:
-            raise ValueError("UserExecutionContext.user_id cannot be empty")
-        if not self.request_id:
-            raise ValueError("UserExecutionContext.request_id cannot be empty") 
-        if not self.thread_id:
-            raise ValueError("UserExecutionContext.thread_id cannot be empty")
-        
-        # Initialize corpus-specific fields
-        if not self.corpus_path:
-            base_path = os.getenv('CORPUS_BASE_PATH', '/data/corpus')
-            self.corpus_path = os.path.join(base_path, self.user_id)
+    corpus_path = os.path.join(corpus_base_path, context.user_id)
+    
+    # Add corpus-specific data to agent_context (SSOT pattern)
+    corpus_metadata = {
+        'corpus_path': corpus_path,
+        'corpus_base_path': corpus_base_path,
+        'active_runs': {},
+        'run_history': []
+    }
+    
+    # Create new context with corpus metadata (immutable pattern)
+    enhanced_agent_context = context.agent_context.copy()
+    enhanced_agent_context.update(corpus_metadata)
+    
+    # Return new context with corpus-specific metadata
+    return UserExecutionContext(
+        user_id=context.user_id,
+        thread_id=context.thread_id,
+        run_id=context.run_id,
+        request_id=context.request_id,
+        db_session=context.db_session,
+        websocket_client_id=context.websocket_client_id,
+        created_at=context.created_at,
+        agent_context=enhanced_agent_context,
+        audit_metadata=context.audit_metadata,
+        operation_depth=context.operation_depth,
+        parent_request_id=context.parent_request_id
+    )
 
 
 class IsolationStrategy(str, Enum):

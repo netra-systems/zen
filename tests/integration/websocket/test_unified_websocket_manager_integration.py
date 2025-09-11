@@ -44,6 +44,7 @@ import websockets
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestMetrics, CategoryType
 from shared.types.core_types import UserID, ThreadID, ConnectionID, WebSocketID, ensure_user_id
 from shared.isolated_environment import get_env
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # WebSocket Manager imports - SSOT verified paths
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode, WebSocketConnection
@@ -93,20 +94,24 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
     revenue-generating user flow: AI chat interactions via WebSocket events.
     """
 
-    async def async_setup(self):
+    def setup_method(self, method=None):
         """Set up test environment with real services context."""
-        await super().async_setup()
+        super().setup_method(method)
         
         # Initialize isolated environment
         self.env = get_env()
         
-        # Generate unique test identifiers
-        self.test_user_id_1 = ensure_user_id(f"test_user_{uuid.uuid4().hex[:8]}")
-        self.test_user_id_2 = ensure_user_id(f"test_user_{uuid.uuid4().hex[:8]}")
-        self.test_user_id_3 = ensure_user_id(f"test_user_{uuid.uuid4().hex[:8]}")
+        # Generate unique test identifiers using UnifiedIDManager
+        id_manager = UnifiedIDManager()
+        self.test_user_id_1 = id_manager.generate_id(IDType.USER, prefix="test")
+        self.test_user_id_2 = id_manager.generate_id(IDType.USER, prefix="test")
+        self.test_user_id_3 = id_manager.generate_id(IDType.USER, prefix="test")
         
         # Initialize metrics
         self.test_metrics = SsotTestMetrics()
+        
+        # Initialize manager tracking
+        self.websocket_managers = []
         self.test_metrics.start_timing()
         
         # Track connections for cleanup
@@ -159,8 +164,14 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         manager = self.create_websocket_manager()
         
         # Create isolated user contexts
-        user_context_1 = UserExecutionContext(user_id=self.test_user_id_1)
-        user_context_2 = UserExecutionContext(user_id=self.test_user_id_2)
+        id_manager = UnifiedIDManager()
+        thread_id_1 = id_manager.generate_id(IDType.THREAD, prefix="test")
+        thread_id_2 = id_manager.generate_id(IDType.THREAD, prefix="test")
+        run_id_1 = id_manager.generate_id(IDType.RUN, prefix="test")
+        run_id_2 = id_manager.generate_id(IDType.RUN, prefix="test")
+        
+        user_context_1 = UserExecutionContext(user_id=self.test_user_id_1, thread_id=thread_id_1, run_id=run_id_1)
+        user_context_2 = UserExecutionContext(user_id=self.test_user_id_2, thread_id=thread_id_2, run_id=run_id_2)
         
         # Create connections for each user
         conn_1 = self.create_mock_connection(self.test_user_id_1)

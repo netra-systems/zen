@@ -42,7 +42,7 @@ import time
 from netra_backend.app.db.database_manager import DatabaseManager, get_database_manager, get_db_session
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.base_test_case import BaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase as BaseTestCase
 
 logger = logging.getLogger(__name__)
 

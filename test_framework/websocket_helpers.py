@@ -1272,3 +1272,32 @@ async def establish_minimum_websocket_connections(connection_count: int = 1, tim
             raise RuntimeError(f"Unable to establish minimum WebSocket connections: {e}")
     
     return connections
+
+
+def create_mock_websocket(
+    headers: Optional[Dict[str, str]] = None,
+    state: WebSocketState = WebSocketState.CONNECTING
+) -> MagicMock:
+    """
+    Create a mock WebSocket object for testing.
+    
+    Args:
+        headers: Optional headers to include
+        state: WebSocket connection state
+        
+    Returns:
+        Mock WebSocket object with proper interface
+    """
+    mock_websocket = MagicMock(spec=WebSocket)
+    mock_websocket.state = state
+    mock_websocket.headers = headers or {}
+    
+    # Mock async methods
+    mock_websocket.accept = AsyncMock()
+    mock_websocket.send_text = AsyncMock()
+    mock_websocket.send_json = AsyncMock()
+    mock_websocket.receive_text = AsyncMock()
+    mock_websocket.receive_json = AsyncMock()
+    mock_websocket.close = AsyncMock()
+    
+    return mock_websocket

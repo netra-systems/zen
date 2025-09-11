@@ -215,7 +215,16 @@ class DeepAgentState(BaseModel):
     agent_context: Dict[str, Any] = Field(default_factory=dict)
     
     def __init__(self, **data):
-        """Initialize DeepAgentState with deprecation warning and field synchronization."""
+        """Initialize DeepAgentState with critical security isolation barriers.
+        
+        PHASE 1 EMERGENCY SECURITY REMEDIATION (2025-09-11):
+        - Added strict user isolation validation
+        - Implemented cross-user contamination detection
+        - Added runtime security boundary enforcement
+        """
+        # EMERGENCY SECURITY VALIDATION: Detect potential cross-user contamination attempts
+        self._validate_security_boundaries(data)
+        
         # GOLDEN PATH FIX: Synchronize user_request and user_prompt fields for backward compatibility
         if 'user_prompt' in data and 'user_request' not in data:
             data['user_request'] = data['user_prompt']
@@ -233,9 +242,9 @@ class DeepAgentState(BaseModel):
             # If both provided, use thread_id as the canonical value
             data['chat_thread_id'] = data.pop('thread_id')
         
-        # Issue comprehensive deprecation warning
+        # CRITICAL SECURITY WARNING: Issue comprehensive deprecation warning with security implications
         warnings.warn(
-            f"🚨 CRITICAL DEPRECATION: DeepAgentState usage creates user isolation risks. "
+            f"🚨 CRITICAL SECURITY VULNERABILITY: DeepAgentState usage creates user isolation risks. "
             f"This pattern will be REMOVED in v3.0.0 (Q1 2025). "
             f"\n"
             f"📋 IMMEDIATE MIGRATION REQUIRED:"
@@ -249,7 +258,269 @@ class DeepAgentState(BaseModel):
             DeprecationWarning,
             stacklevel=2
         )
-        super().__init__(**data)
+        
+        # SECURITY ISOLATION: Initialize with isolated defaults to prevent cross-user contamination
+        super().__init__(**self._apply_security_isolation(data))
+    
+    def _validate_security_boundaries(self, data: Dict[str, Any]) -> None:
+        """
+        CRITICAL SECURITY: Validate data for cross-user contamination risks.
+        
+        This method implements emergency security barriers to detect and prevent
+        potential cross-user data contamination during DeepAgentState creation.
+        
+        Raises:
+            SecurityError: If cross-user contamination risks are detected
+            ValueError: If security validation fails
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Security validation flags
+        security_violations = []
+        
+        # SECURITY CHECK 1: Validate user identifiers are consistent
+        user_id = data.get('user_id')
+        thread_id = data.get('chat_thread_id') or data.get('thread_id')
+        run_id = data.get('run_id')
+        
+        if user_id and thread_id:
+            # Basic validation that thread belongs to user (simplified check)
+            if not str(thread_id).startswith(str(user_id)[:8]):
+                logger.warning(
+                    f"🔒 SECURITY ALERT: Thread ID '{thread_id}' may not belong to user '{user_id}'. "
+                    f"Potential cross-user thread assignment detected."
+                )
+        
+        # SECURITY CHECK 2: Validate sensitive data patterns
+        agent_input = data.get('agent_input', {})
+        if isinstance(agent_input, dict):
+            sensitive_patterns = [
+                'api_key', 'password', 'secret', 'token', 'credential',
+                'admin', 'root', 'backdoor', 'bypass', 'override'
+            ]
+            
+            agent_input_str = str(agent_input).lower()
+            for pattern in sensitive_patterns:
+                if pattern in agent_input_str:
+                    logger.warning(
+                        f"🔒 SECURITY ALERT: Potential sensitive data pattern '{pattern}' "
+                        f"detected in agent_input for user '{user_id}'"
+                    )
+        
+        # SECURITY CHECK 3: Validate no cross-user data injection
+        context_tracking = data.get('context_tracking', {})
+        if isinstance(context_tracking, dict):
+            # Check for references to other users
+            context_str = str(context_tracking)
+            if any(keyword in context_str.lower() for keyword in ['other_user', 'cross_user', 'all_users']):
+                security_violations.append("Cross-user references detected in context_tracking")
+        
+        # SECURITY CHECK 4: Validate metadata integrity
+        metadata = data.get('metadata')
+        if metadata and hasattr(metadata, 'custom_fields'):
+            custom_fields_str = str(metadata.custom_fields)
+            if any(dangerous in custom_fields_str.lower() for dangerous in ['inject', 'execute', 'eval', 'system']):
+                security_violations.append("Potentially dangerous code injection patterns in metadata")
+        
+        # ENFORCE SECURITY BOUNDARIES
+        if security_violations:
+            violation_summary = "; ".join(security_violations)
+            logger.error(
+                f"🚨 CRITICAL SECURITY VIOLATIONS DETECTED: {violation_summary}. "
+                f"User: {user_id}, Thread: {thread_id}, Run: {run_id}"
+            )
+            raise ValueError(
+                f"🚨 SECURITY BOUNDARY VIOLATION: DeepAgentState creation blocked due to "
+                f"security violations: {violation_summary}. "
+                f"This pattern poses cross-user contamination risks."
+            )
+    
+    def _apply_security_isolation(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        CRITICAL SECURITY: Apply security isolation to prevent cross-user contamination.
+        
+        This method ensures that all mutable objects are properly isolated
+        and cannot be shared between different user contexts.
+        
+        Args:
+            data: The initialization data
+            
+        Returns:
+            Dict[str, Any]: Data with security isolation applied
+        """
+        import copy
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # DEEP COPY all mutable objects to ensure isolation
+        isolated_data = {}
+        
+        for key, value in data.items():
+            if isinstance(value, (list, dict, set)):
+                # Deep copy all mutable collections to prevent sharing
+                isolated_data[key] = copy.deepcopy(value)
+                logger.debug(f"🔒 Security isolation: Deep copied mutable field '{key}' for user isolation")
+            elif hasattr(value, '__dict__') and not isinstance(value, (str, int, float, bool, type(None))):
+                # Deep copy objects with state
+                try:
+                    isolated_data[key] = copy.deepcopy(value)
+                    logger.debug(f"🔒 Security isolation: Deep copied object field '{key}' for user isolation")
+                except Exception as e:
+                    # Fallback for non-copyable objects
+                    isolated_data[key] = value
+                    logger.warning(f"⚠️ Could not deep copy field '{key}': {e}")
+            else:
+                # Immutable types are safe to share
+                isolated_data[key] = value
+        
+        # ENSURE ISOLATED DEFAULT FACTORIES
+        # Force creation of new instances for list/dict fields to prevent sharing
+        if 'messages' not in isolated_data:
+            isolated_data['messages'] = []  # New list instance
+        if 'quality_metrics' not in isolated_data:
+            isolated_data['quality_metrics'] = {}  # New dict instance
+        if 'context_tracking' not in isolated_data:
+            isolated_data['context_tracking'] = {}  # New dict instance
+        if 'agent_context' not in isolated_data:
+            isolated_data['agent_context'] = {}  # New dict instance
+        
+        logger.info(f"🔒 Security isolation applied to DeepAgentState initialization")
+        return isolated_data
+    
+    def _validate_updates_security(self, updates: Dict[str, Any]) -> None:
+        """
+        CRITICAL SECURITY: Validate updates for cross-user contamination risks.
+        
+        This method prevents malicious updates that could cause cross-user data
+        contamination during copy_with_updates operations.
+        
+        Args:
+            updates: The update dictionary to validate
+            
+        Raises:
+            ValueError: If security violations are detected
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        security_violations = []
+        
+        # SECURITY CHECK 1: Validate user_id consistency
+        if 'user_id' in updates:
+            new_user_id = updates['user_id']
+            current_user_id = self.user_id
+            
+            if current_user_id and new_user_id != current_user_id:
+                security_violations.append(
+                    f"User ID change attempt: {current_user_id} -> {new_user_id}"
+                )
+        
+        # SECURITY CHECK 2: Validate thread_id ownership
+        if 'thread_id' in updates or 'chat_thread_id' in updates:
+            new_thread_id = updates.get('thread_id') or updates.get('chat_thread_id')
+            current_user_id = self.user_id
+            
+            if current_user_id and new_thread_id:
+                # Basic check that thread belongs to user
+                if not str(new_thread_id).startswith(str(current_user_id)[:8]):
+                    security_violations.append(
+                        f"Cross-user thread assignment: user {current_user_id} attempting to access thread {new_thread_id}"
+                    )
+        
+        # SECURITY CHECK 3: Validate no malicious injection patterns
+        for key, value in updates.items():
+            if isinstance(value, str):
+                value_lower = value.lower()
+                dangerous_patterns = [
+                    'exec(', 'eval(', '__import__', 'subprocess', 'os.system',
+                    '<script>', 'javascript:', 'data:', 'bypass', 'override',
+                    'admin_access', 'root_access', 'backdoor'
+                ]
+                
+                for pattern in dangerous_patterns:
+                    if pattern in value_lower:
+                        security_violations.append(
+                            f"Dangerous injection pattern '{pattern}' in field '{key}'"
+                        )
+        
+        # ENFORCE SECURITY BOUNDARIES
+        if security_violations:
+            violation_summary = "; ".join(security_violations)
+            logger.error(
+                f"🚨 CRITICAL SECURITY VIOLATIONS in copy_with_updates: {violation_summary}. "
+                f"User: {self.user_id}, Thread: {self.chat_thread_id}"
+            )
+            raise ValueError(
+                f"🚨 SECURITY VIOLATION: copy_with_updates blocked due to security violations: "
+                f"{violation_summary}. This prevents cross-user contamination."
+            )
+    
+    def _validate_merge_security(self, other_state: 'DeepAgentState') -> None:
+        """
+        CRITICAL SECURITY: Validate merge operation for cross-user contamination risks.
+        
+        This method prevents merging states from different users which would cause
+        severe security violations and data contamination.
+        
+        Args:
+            other_state: The state to merge from
+            
+        Raises:
+            ValueError: If cross-user merge is attempted
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        security_violations = []
+        
+        # SECURITY CHECK 1: Prevent cross-user merges
+        current_user = self.user_id
+        other_user = other_state.user_id
+        
+        if current_user and other_user and current_user != other_user:
+            security_violations.append(
+                f"Cross-user merge attempt: {current_user} trying to merge from {other_user}"
+            )
+            
+        # SECURITY CHECK 2: Validate thread ownership
+        current_thread = self.chat_thread_id
+        other_thread = other_state.chat_thread_id
+        
+        if current_thread and other_thread and current_thread != other_thread:
+            # Check if threads belong to the same user
+            if current_user and not str(other_thread).startswith(str(current_user)[:8]):
+                security_violations.append(
+                    f"Cross-user thread merge: thread {other_thread} doesn't belong to user {current_user}"
+                )
+        
+        # SECURITY CHECK 3: Scan for sensitive data in other state
+        other_dict = other_state.to_dict()
+        other_str = str(other_dict).lower()
+        
+        sensitive_patterns = [
+            'api_key', 'password', 'secret', 'token', 'credential', 'auth',
+            'admin', 'backdoor', 'bypass', 'override', 'inject', 'execute'
+        ]
+        
+        for pattern in sensitive_patterns:
+            if pattern in other_str:
+                logger.warning(
+                    f"🔒 SECURITY ALERT: Merge operation involves sensitive data pattern '{pattern}' "
+                    f"from user {other_user} to user {current_user}"
+                )
+        
+        # ENFORCE SECURITY BOUNDARIES  
+        if security_violations:
+            violation_summary = "; ".join(security_violations)
+            logger.error(
+                f"🚨 CRITICAL SECURITY VIOLATIONS in merge_from: {violation_summary}. "
+                f"Current user: {current_user}, Other user: {other_user}"
+            )
+            raise ValueError(
+                f"🚨 SECURITY VIOLATION: merge_from blocked due to cross-user contamination risk: "
+                f"{violation_summary}. This prevents unauthorized data access between users."
+            )
     
     @property
     def thread_id(self) -> Optional[str]:
@@ -284,6 +555,9 @@ class DeepAgentState(BaseModel):
     def copy_with_updates(self, **updates: Union[str, int, float, bool, None]
                          ) -> 'DeepAgentState':
         """Create a new instance with updated fields (immutable pattern)."""
+        # CRITICAL SECURITY: Validate updates for cross-user contamination risks
+        self._validate_updates_security(updates)
+        
         current_data = self.model_dump()
         current_data.update(updates)
         
@@ -335,6 +609,9 @@ class DeepAgentState(BaseModel):
         """Create new state with data merged from another state (immutable)."""
         if not isinstance(other_state, DeepAgentState):
             raise TypeError("other_state must be a DeepAgentState instance")
+        
+        # CRITICAL SECURITY: Validate merge operation for cross-user contamination risks
+        self._validate_merge_security(other_state)
         
         merged_metadata = self._create_merged_metadata(other_state)
         merged_results = self._create_merged_results(other_state)

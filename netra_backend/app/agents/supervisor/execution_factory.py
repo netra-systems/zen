@@ -53,19 +53,21 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 # - CLEANED -> COMPLETED (execution finished and resources cleaned up)
 
 
+# SSOT CONSOLIDATION: Import UserExecutionContext from authoritative services implementation
+# This eliminates duplicate implementation and ensures consistent security validation
+from netra_backend.app.services.user_execution_context import UserExecutionContext
+
 @dataclass
-class UserExecutionContext:
+class ExecutionFactoryContext:
     """
-    Per-request execution context with complete user isolation.
+    Factory-specific execution state wrapper for UserExecutionContext.
     
-    This dataclass encapsulates all execution state for a single user request,
-    ensuring complete isolation between concurrent users.
+    This dataclass provides execution factory-specific functionality while
+    delegating core context management to the SSOT UserExecutionContext.
     
     Business Value: Prevents user context leakage and enables reliable multi-user execution
     """
-    user_id: str
-    request_id: str
-    thread_id: str
+    context: UserExecutionContext
     session_id: Optional[str] = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     
@@ -91,7 +93,22 @@ class UserExecutionContext:
             'last_activity_at': self.created_at.isoformat()
         })
         self.status = ExecutionStatus.EXECUTING  # SSOT: ACTIVE -> EXECUTING
-        logger.debug(f"UserExecutionContext created: user_id={self.user_id}, request_id={self.request_id}")
+        logger.debug(f"ExecutionFactoryContext created: user_id={self.context.user_id}, request_id={self.context.request_id}")
+    
+    @property
+    def user_id(self) -> str:
+        """Delegate to SSOT UserExecutionContext."""
+        return self.context.user_id
+    
+    @property
+    def request_id(self) -> str:
+        """Delegate to SSOT UserExecutionContext."""
+        return self.context.request_id
+        
+    @property
+    def thread_id(self) -> str:
+        """Delegate to SSOT UserExecutionContext."""
+        return self.context.thread_id
     
     def update_activity(self) -> None:
         """Update last activity timestamp."""
