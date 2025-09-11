@@ -65,7 +65,7 @@ async def get_websocket_manager(user_context=None):
     Raises:
         ValueError: If user_context is None (import-time initialization not allowed)
     
-    Note: For new code, use create_websocket_manager(user_context) directly.
+    Note: For new code, use WebSocketManager(user_context=user_context) directly.
     """
     if user_context is None:
         # CRITICAL: Import-time initialization violates User Context Architecture
@@ -96,7 +96,7 @@ from netra_backend.app.websocket_core.context import (
 
 # Backward compatibility aliases
 # WebSocketManager is now imported directly
-# SECURITY FIX: Removed singleton websocket_manager - use create_websocket_manager() instead
+# SECURITY FIX: Removed singleton websocket_manager - use WebSocketManager() directly instead
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
 UserWebSocketEmitter = UnifiedWebSocketEmitter

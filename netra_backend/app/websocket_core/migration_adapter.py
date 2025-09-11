@@ -38,10 +38,7 @@ import weakref
 import threading
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    get_websocket_manager_factory
-)
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, UnifiedWebSocketManager
 from netra_backend.app.logging_config import central_logger
 
@@ -72,7 +69,7 @@ class _LegacyWebSocketManagerAdapter:
             DeprecationWarning,
             stacklevel=2
         )
-        self._factory = get_websocket_manager_factory()
+        # SSOT: No factory needed - direct instantiation
         self._legacy_stats = {
             "singleton_calls": 0,
             "contexts_created": 0,
@@ -472,8 +469,8 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> UnifiedWebSoc
     Returns:
         Isolated WebSocket manager instance
     """
-    factory = get_websocket_manager_factory()
-    return factory.create_manager(user_context)
+    # SSOT: Direct instantiation instead of factory
+    return WebSocketManager(user_context=user_context)
 
 
 __all__ = [
