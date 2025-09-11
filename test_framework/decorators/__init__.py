@@ -24,7 +24,8 @@ from test_framework.decorators.test_decorators import (
     race_condition_test,
     experimental_test,
     feature_flag,
-    requires_feature
+    requires_feature,
+    tdd_test
 )
 
 # Re-export all decorators
@@ -38,5 +39,6 @@ __all__ = [
     'race_condition_test',
     'experimental_test',
     'feature_flag',
-    'requires_feature'
+    'requires_feature',
+    'tdd_test'
 ]
