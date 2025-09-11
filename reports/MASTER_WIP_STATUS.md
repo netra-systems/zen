@@ -132,6 +132,8 @@ The Netra Apex AI Optimization Platform has achieved significant improvements in
 | **E2E Tests** | 65+ | 70% | 🚨 BLOCKED | Docker daemon connectivity issues |
 | **API Tests** | 150+ | 90% | ✅ EXCELLENT | Working without Docker dependency |
 
+📖 **COMPREHENSIVE TEST EXECUTION:** See [`TEST_EXECUTION_GUIDE.md`](../TEST_EXECUTION_GUIDE.md) for complete methodology on running all tests without fast-fail, separating collection errors from test failures, and getting accurate pass/fail counts.
+
 ### Mission Critical Test Suite
 ```bash
 # Core validation suite - MUST PASS before deployment

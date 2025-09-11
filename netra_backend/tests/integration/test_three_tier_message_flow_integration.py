@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.database.message_repository import MessageRepository
-from netra_backend.app.services.state_cache_manager import StateCacheManager
+from netra_backend.app.services.state_persistence import StateCacheManager
 from netra_backend.app.routes.utils.thread_handlers import handle_create_thread_request
 from shared.types import RunID, UserID, ThreadID
 
