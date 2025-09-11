@@ -16,12 +16,14 @@ Discovered **7 critical issue categories** affecting the Netra staging environme
 
 ---
 
-## Issue #1: WebSocket Startup Race Condition (CRITICAL)
+## Issue #1: WebSocket Startup Race Condition (CRITICAL) - ✅ PROCESSED
 
 **Severity:** ERROR  
 **Frequency:** Multiple occurrences  
 **Service:** netra-backend-staging  
 **Module:** `netra_backend.app.websocket_core.gcp_initialization_validator`
+**GitHub Issue:** #372 - Updated with latest evidence and cross-references  
+**Status:** P0 Critical priority assigned, infrastructure-dependency labeled
 
 **Error Message:**
 ```
