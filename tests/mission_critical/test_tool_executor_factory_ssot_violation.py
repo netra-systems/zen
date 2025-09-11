@@ -21,17 +21,30 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
-# Import both competing systems to prove violation
+# PHASE 2: Import SSOT factory and legacy systems to validate consolidation
 try:
-    from netra_backend.app.agents.tool_executor_factory import (
-        ToolExecutorFactory, 
-        get_tool_executor_factory
+    # NEW SSOT FACTORY (Phase 2 consolidation target)
+    from netra_backend.app.factories.tool_dispatcher_factory import (
+        ToolDispatcherFactory,
+        get_tool_dispatcher_factory,
+        create_tool_dispatcher
     )
-    TOOL_EXECUTOR_FACTORY_AVAILABLE = True
+    SSOT_TOOL_DISPATCHER_FACTORY_AVAILABLE = True
 except ImportError:
-    TOOL_EXECUTOR_FACTORY_AVAILABLE = False
+    SSOT_TOOL_DISPATCHER_FACTORY_AVAILABLE = False
 
 try:
+    # DEPRECATED: Legacy ToolExecutorFactory (should redirect to SSOT factory)
+    from netra_backend.app.agents.tool_executor_factory import (
+        ToolExecutorFactory as LegacyToolExecutorFactory, 
+        get_tool_executor_factory as get_legacy_tool_executor_factory
+    )
+    LEGACY_TOOL_EXECUTOR_FACTORY_AVAILABLE = True
+except ImportError:
+    LEGACY_TOOL_EXECUTOR_FACTORY_AVAILABLE = False
+
+try:
+    # DEPRECATED: UnifiedToolDispatcher (should redirect to SSOT factory)
     from netra_backend.app.core.tools.unified_tool_dispatcher import (
         UnifiedToolDispatcher,
         UnifiedToolDispatcherFactory
