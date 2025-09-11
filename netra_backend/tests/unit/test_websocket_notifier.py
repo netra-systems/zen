@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
-class TestWebSocketNotifier(BaseIntegrationTest):
+class TestWebSocketNotifier.create_for_user(BaseIntegrationTest):
     """Test WebSocketNotifier pure business logic."""
 
     def setUp(self):
@@ -32,9 +32,8 @@ class TestWebSocketNotifier(BaseIntegrationTest):
         self.mock_websocket_manager = AsyncMock()
         
         # Initialize notifier in test mode to prevent hanging background tasks
-        self.notifier = AgentWebSocketBridge(
-            websocket_manager=self.mock_websocket_manager,
-            test_mode=True
+        self.notifier = WebSocketNotifier(
+            websocket_manager=self.mock_websocket_manager, test_mode=True
         )
 
     @pytest.mark.unit 

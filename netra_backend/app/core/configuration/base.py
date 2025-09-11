@@ -111,27 +111,18 @@ class UnifiedConfigManager:
             # This handles cases where the config class doesn't properly load it
             if not config.service_secret:
                 try:
-                    from netra_backend.app.core.managers.unified_configuration_manager import ConfigurationManagerFactory
-                    config_manager = ConfigurationManagerFactory.get_global_manager()
-                    service_secret = config_manager.get_str('security.jwt_secret')
+                    # Direct environment access to avoid circular import during startup
+                    import os
+                    service_secret = os.environ.get('SERVICE_SECRET') or os.environ.get('JWT_SECRET_KEY')
                     if service_secret:
                         config.service_secret = service_secret.strip()
-                        self._logger.info("Loaded SERVICE_SECRET through UnifiedConfigurationManager SSOT")
+                        self._logger.info("Loaded SERVICE_SECRET from environment (avoiding startup circular import)")
+                    else:
+                        self._logger.warning("SERVICE_SECRET not found in environment variables")
                 except Exception as e:
-                    self._logger.error(f"SSOT configuration access failed: {e}")
-                    # SSOT COMPLIANT: Use UnifiedConfigurationManager even in fallback
-                    try:
-                        # Try alternative SSOT access method
-                        from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
-                        fallback_manager = UnifiedConfigurationManager()
-                        service_secret = fallback_manager.get_str('SERVICE_SECRET')
-                        if service_secret:
-                            config.service_secret = service_secret.strip()
-                            self._logger.warning("Used SSOT fallback UnifiedConfigurationManager for SERVICE_SECRET")
-                    except Exception as fallback_error:
-                        self._logger.critical(f"Both primary and fallback SSOT access failed: {fallback_error}")
-                        # SSOT COMPLIANT: Log critical failure but don't bypass SSOT
-                        # This maintains SSOT compliance even if configuration is unavailable
+                    self._logger.error(f"Failed to load SERVICE_SECRET from environment: {e}")
+                    # SSOT COMPLIANT: Log critical failure but don't bypass SSOT
+                    # This maintains SSOT compliance even if configuration is unavailable
                     
             # DEFENSIVE FIX: Ensure service_id is also sanitized from environment
             # This prevents header value issues from Windows line endings or whitespace

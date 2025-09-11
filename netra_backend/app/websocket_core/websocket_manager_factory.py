@@ -22,7 +22,7 @@ SECURITY CRITICAL: This implementation addresses the following vulnerabilities:
 
 Architecture Pattern: Factory + Isolation + Lifecycle Management
 - WebSocketManagerFactory: Creates isolated manager instances
-- WebSocketManager: Single source of truth for WebSocket management
+- IsolatedWebSocketManager: Per-connection manager with private state
 - ConnectionLifecycleManager: Handles connection lifecycle and cleanup
 - UserExecutionContext: Enforces user isolation at all levels
 """
@@ -39,8 +39,8 @@ import logging
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.execution_types import StronglyTypedUserExecutionContext
-from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, WebSocketManager
-from netra_backend.app.websocket_core.protocols import WebSocketProtocol
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
+from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
@@ -599,7 +599,7 @@ class ConnectionLifecycleManager:
     - Security audit logging
     """
     
-    def __init__(self, user_context: UserExecutionContext, ws_manager: 'WebSocketManager'):
+    def __init__(self, user_context: UserExecutionContext, ws_manager: 'IsolatedWebSocketManager'):
         """
         Initialize connection lifecycle manager.
         
@@ -777,7 +777,758 @@ class ConnectionLifecycleManager:
                 pass
 
 
-# IsolatedWebSocketManager removed for SSOT compliance - use WebSocketManager instead
+class IsolatedWebSocketManager(WebSocketManagerProtocol):
+    """
+    User-isolated WebSocket manager with completely private state.
+    
+    🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class explicitly implements 
+    WebSocketManagerProtocol to prevent interface drift during migrations.
+    
+    This addresses the root cause identified in Five Whys analysis:
+    "lack of formal interface contracts causing implementation drift."
+    
+    PROTOCOL COMPLIANCE: This manager implements ALL required methods from
+    WebSocketManagerProtocol, ensuring consistent interface across migrations.
+    
+    This class provides the same interface as UnifiedWebSocketManager but with
+    complete user isolation. Each instance manages connections for only one user
+    and maintains private state that cannot be accessed by other users.
+    
+    SECURITY FEATURES:
+    - Private connection dictionary (no shared state)
+    - Private message queue and error recovery
+    - UserExecutionContext enforcement on all operations
+    - Connection-scoped lifecycle management
+    - Isolated error handling and metrics
+    """
+    
+    def __init__(self, user_context: UserExecutionContext):
+        """
+        Initialize isolated WebSocket manager for a specific user.
+        
+        Args:
+            user_context: User execution context for isolation
+            
+        Raises:
+            ValueError: If user_context is invalid
+        """
+        # CRITICAL FIX: Accept both legacy and SSOT UserExecutionContext types
+        is_legacy_type = isinstance(user_context, UserExecutionContext)
+        is_ssot_type = isinstance(user_context, StronglyTypedUserExecutionContext)
+        
+        if not (is_legacy_type or is_ssot_type):
+            raise ValueError(
+                "user_context must be a UserExecutionContext instance (legacy or SSOT). "
+                f"Got {type(user_context).__name__} from {getattr(type(user_context), '__module__', 'unknown')}. "
+                "Expected: netra_backend.app.services.user_execution_context.UserExecutionContext (legacy) or "
+                "shared.types.execution_types.StronglyTypedUserExecutionContext (SSOT)"
+            )
+        
+        self.user_context = user_context
+        self._connections: Dict[str, WebSocketConnection] = {}
+        self._connection_ids: Set[str] = set()
+        self._message_queue: asyncio.Queue = asyncio.Queue(maxsize=1000)
+        self._manager_lock = asyncio.Lock()
+        self.created_at = datetime.utcnow()
+        self._is_active = True
+        
+        # Metrics tracking
+        self._metrics = ManagerMetrics()
+        self._metrics.last_activity = self.created_at
+        
+        # Connection lifecycle manager
+        self._lifecycle_manager = ConnectionLifecycleManager(user_context, self)
+        
+        # Error recovery system (isolated per user)
+        self._message_recovery_queue: List[Dict] = []
+        self._connection_error_count: int = 0
+        self._last_error_time: Optional[datetime] = None
+        
+        logger.info(
+            f"IsolatedWebSocketManager created for user {user_context.user_id[:8]}... "
+            f"(manager_id: {id(self)})"
+        )
+    
+    def _validate_active(self) -> None:
+        """Validate that this manager is still active."""
+        if not self._is_active:
+            raise RuntimeError(
+                f"WebSocket manager for user {self.user_context.user_id} is no longer active. "
+                f"This manager has been cleaned up and should not be used."
+            )
+    
+    def _update_activity(self) -> None:
+        """Update last activity timestamp."""
+        self._metrics.last_activity = datetime.utcnow()
+        self._metrics.manager_age_seconds = (
+            datetime.utcnow() - self.created_at
+        ).total_seconds()
+    
+    async def add_connection(self, connection: WebSocketConnection) -> None:
+        """
+        Add a WebSocket connection to this isolated manager.
+        
+        Args:
+            connection: WebSocket connection to add
+            
+        Raises:
+            ValueError: If connection doesn't belong to this user
+            RuntimeError: If manager is not active
+        """
+        self._validate_active()
+        
+        # SECURITY: Strict user validation
+        if connection.user_id != self.user_context.user_id:
+            logger.critical(
+                f"SECURITY VIOLATION: Attempted to add connection for user {connection.user_id} "
+                f"to manager for user {self.user_context.user_id}. This indicates a potential "
+                f"context isolation failure or malicious activity."
+            )
+            raise ValueError(
+                f"Connection user_id {connection.user_id} does not match manager user_id {self.user_context.user_id}. "
+                f"This violates user isolation requirements."
+            )
+        
+        async with self._manager_lock:
+            self._connections[connection.connection_id] = connection
+            self._connection_ids.add(connection.connection_id)
+            
+            # Update metrics
+            self._metrics.connections_managed = len(self._connections)
+            self._update_activity()
+            
+            # Register with lifecycle manager
+            self._lifecycle_manager.register_connection(connection)
+            
+            logger.info(
+                f"Added connection {connection.connection_id} to isolated manager "
+                f"for user {self.user_context.user_id[:8]}... "
+                f"(Total connections: {len(self._connections)})"
+            )
+    
+    async def remove_connection(self, connection_id: str) -> None:
+        """
+        Remove a WebSocket connection from this isolated manager.
+        
+        Args:
+            connection_id: Connection ID to remove
+        """
+        self._validate_active()
+        
+        async with self._manager_lock:
+            if connection_id in self._connections:
+                connection = self._connections[connection_id]
+                
+                # SECURITY: Verify this connection belongs to our user
+                if connection.user_id != self.user_context.user_id:
+                    logger.critical(
+                        f"SECURITY VIOLATION: Attempted to remove connection {connection_id} "
+                        f"for user {connection.user_id} from manager for user {self.user_context.user_id}. "
+                        f"This should be impossible and indicates a serious bug."
+                    )
+                    return
+                
+                del self._connections[connection_id]
+                self._connection_ids.discard(connection_id)
+                
+                # Update metrics
+                self._metrics.connections_managed = len(self._connections)
+                self._update_activity()
+                
+                logger.info(
+                    f"Removed connection {connection_id} from isolated manager "
+                    f"for user {self.user_context.user_id[:8]}... "
+                    f"(Remaining connections: {len(self._connections)})"
+                )
+            else:
+                logger.debug(f"Connection {connection_id} not found for removal")
+    
+    def get_connection(self, connection_id: str) -> Optional[WebSocketConnection]:
+        """
+        Get a specific connection from this isolated manager.
+        
+        Args:
+            connection_id: Connection ID to retrieve
+            
+        Returns:
+            WebSocketConnection if found, None otherwise
+        """
+        self._validate_active()
+        return self._connections.get(connection_id)
+    
+    def get_user_connections(self) -> Set[str]:
+        """
+        Get all connection IDs for this user.
+        
+        Returns:
+            Set of connection IDs
+        """
+        self._validate_active()
+        return self._connection_ids.copy()
+    
+    def is_connection_active(self, user_id: str) -> bool:
+        """
+        Check if user has active WebSocket connections.
+        CRITICAL for authentication event validation.
+        
+        Args:
+            user_id: User ID to check (must match this manager's user)
+            
+        Returns:
+            True if user has at least one active connection, False otherwise
+            
+        Raises:
+            ValueError: If user_id doesn't match this manager's user
+        """
+        self._validate_active()
+        
+        # SECURITY: Validate that the requested user_id matches this manager's user
+        if user_id != self.user_context.user_id:
+            logger.warning(
+                f"SECURITY WARNING: Requested connection status for user {user_id} "
+                f"from isolated manager for user {self.user_context.user_id}. "
+                f"This violates user isolation."
+            )
+            return False
+        
+        # Check if we have any connections
+        if not self._connection_ids:
+            return False
+        
+        # Check if at least one connection is still valid
+        for conn_id in self._connection_ids:
+            connection = self.get_connection(conn_id)
+            if connection and connection.websocket:
+                # TODO: Add more sophisticated health check if websocket has state
+                return True
+        
+        return False
+    
+    async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
+        """
+        Send a message to all connections for this user.
+        
+        PROTOCOL COMPLIANCE: Implements WebSocketManagerProtocol.send_to_user()
+        with user isolation validation.
+        
+        Args:
+            user_id: Target user ID (must match this manager's user context)
+            message: Message to send
+            
+        Raises:
+            ValueError: If user_id doesn't match this manager's user context
+            RuntimeError: If manager is not active
+        """
+        self._validate_active()
+        
+        # SECURITY: Validate that the requested user_id matches this manager's user
+        manager_user_id = str(self.user_context.user_id)
+        target_user_id = str(user_id)
+        
+        if target_user_id != manager_user_id:
+            logger.critical(
+                f"SECURITY VIOLATION: Attempted to send message to user {target_user_id} "
+                f"from isolated manager for user {manager_user_id[:8]}... "
+                f"This violates user isolation requirements."
+            )
+            raise ValueError(
+                f"Cannot send message to user {target_user_id} from manager for user {manager_user_id}. "
+                f"This violates user isolation - use the correct manager instance for the target user."
+            )
+        
+        async with self._manager_lock:
+            connection_ids = list(self._connection_ids)
+            
+            if not connection_ids:
+                logger.warning(
+                    f"No connections available for user {self.user_context.user_id[:8]}... "
+                    f"Message type: {message.get('type', 'unknown')}"
+                )
+                # Store for recovery
+                self._message_recovery_queue.append({
+                    **message,
+                    'failed_at': datetime.utcnow().isoformat(),
+                    'failure_reason': 'no_connections'
+                })
+                self._metrics.messages_failed_total += 1
+                return
+            
+            successful_sends = 0
+            failed_connections = []
+            
+            for conn_id in connection_ids:
+                connection = self._connections.get(conn_id)
+                if connection and connection.websocket:
+                    try:
+                        # Check if WebSocket is still connected before sending
+                        from fastapi.websockets import WebSocketState
+                        if hasattr(connection.websocket, 'client_state'):
+                            if connection.websocket.client_state != WebSocketState.CONNECTED:
+                                logger.warning(f"WebSocket {conn_id} not in CONNECTED state")
+                                failed_connections.append(conn_id)
+                                continue
+                        
+                        # CRITICAL FIX: Use safe serialization to handle WebSocketState enums and other complex objects
+                        from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
+                        safe_message = _serialize_message_safely(message)
+                        
+                        # Send with timeout to prevent hanging
+                        await asyncio.wait_for(
+                            connection.websocket.send_json(safe_message),
+                            timeout=5.0
+                        )
+                        successful_sends += 1
+                        logger.debug(f"Sent message to connection {conn_id}")
+                        
+                    except asyncio.TimeoutError:
+                        logger.error(
+                            f"Timeout sending message to connection {conn_id} "
+                            f"for user {self.user_context.user_id[:8]}..."
+                        )
+                        failed_connections.append(conn_id)
+                        self._connection_error_count += 1
+                        self._last_error_time = datetime.utcnow()
+                        
+                    except Exception as e:
+                        logger.error(
+                            f"Failed to send message to connection {conn_id} "
+                            f"for user {self.user_context.user_id[:8]}...: {e}"
+                        )
+                        failed_connections.append(conn_id)
+                        self._connection_error_count += 1
+                        self._last_error_time = datetime.utcnow()
+                else:
+                    logger.warning(f"Invalid connection {conn_id} - removing from manager")
+                    failed_connections.append(conn_id)
+            
+            # Update metrics
+            if successful_sends > 0:
+                self._metrics.messages_sent_total += successful_sends
+            if failed_connections:
+                self._metrics.messages_failed_total += len(failed_connections)
+            
+            self._update_activity()
+            
+            # Clean up failed connections
+            for conn_id in failed_connections:
+                try:
+                    await self.remove_connection(conn_id)
+                except Exception as e:
+                    logger.error(f"Failed to cleanup connection {conn_id}: {e}")
+            
+            if successful_sends == 0:
+                logger.error(
+                    f"Complete message delivery failure for user {self.user_context.user_id[:8]}... "
+                    f"Message type: {message.get('type', 'unknown')}"
+                )
+    
+    async def emit_critical_event(self, event_type: str, data: Dict[str, Any]) -> None:
+        """
+        Emit a critical event to this user with guaranteed delivery tracking.
+        
+        Args:
+            event_type: Type of event (e.g., 'agent_started', 'tool_executing')
+            data: Event payload
+            
+        Raises:
+            ValueError: If event parameters are invalid
+            RuntimeError: If manager is not active
+        """
+        self._validate_active()
+        
+        # Validate parameters
+        if not event_type or not event_type.strip():
+            raise ValueError("event_type cannot be empty for critical event")
+        
+        message = {
+            "type": event_type,
+            "data": data,
+            "timestamp": datetime.utcnow().isoformat(),
+            "critical": True,
+            "user_context": {
+                "user_id": self.user_context.user_id,
+                "request_id": self.user_context.request_id
+            }
+        }
+        
+        try:
+            await self.send_to_user(self.user_context.user_id, message)
+            logger.debug(
+                f"Successfully emitted critical event {event_type} "
+                f"to user {self.user_context.user_id[:8]}..."
+            )
+        except Exception as e:
+            logger.critical(
+                f"CRITICAL EVENT EMISSION FAILURE: Failed to emit {event_type} "
+                f"to user {self.user_context.user_id[:8]}...: {e}"
+            )
+            # Store for recovery
+            self._message_recovery_queue.append({
+                **message,
+                'failed_at': datetime.utcnow().isoformat(),
+                'failure_reason': f'emission_error: {e}'
+            })
+            raise
+    
+    async def cleanup_all_connections(self) -> None:
+        """Clean up all connections and deactivate this manager."""
+        logger.info(f"Cleaning up isolated manager for user {self.user_context.user_id[:8]}...")
+        
+        # Mark as inactive
+        self._is_active = False
+        self._metrics.cleanup_scheduled = True
+        
+        # Use lifecycle manager for cleanup
+        await self._lifecycle_manager.force_cleanup_all()
+        
+        # Clear our internal state
+        async with self._manager_lock:
+            self._connections.clear()
+            self._connection_ids.clear()
+            
+            # Clear recovery queue
+            self._message_recovery_queue.clear()
+        
+        logger.info(f"Cleanup completed for isolated manager for user {self.user_context.user_id[:8]}...")
+    
+    def get_manager_stats(self) -> Dict[str, Any]:
+        """
+        Get comprehensive statistics for this manager.
+        
+        Returns:
+            Dictionary containing manager metrics
+        """
+        self._update_activity()
+        
+        return {
+            "user_context": self.user_context.to_dict(),
+            "manager_id": id(self),
+            "is_active": self._is_active,
+            "metrics": self._metrics.to_dict(),
+            "connections": {
+                "total": len(self._connections),
+                "connection_ids": list(self._connection_ids)
+            },
+            "recovery_queue_size": len(self._message_recovery_queue),
+            "error_count": self._connection_error_count,
+            "last_error": self._last_error_time.isoformat() if self._last_error_time else None
+        }
+    
+    def get_connection_id_by_websocket(self, websocket) -> Optional[ConnectionID]:
+        """
+        Get connection ID for a given WebSocket instance with type safety.
+        
+        This method provides compatibility with the UnifiedWebSocketManager interface.
+        It searches through active connections to find the one matching the WebSocket.
+        
+        Args:
+            websocket: WebSocket instance to search for
+            
+        Returns:
+            Strongly typed ConnectionID if found, None otherwise
+        """
+        self._validate_active()
+        
+        for conn_id, connection in self._connections.items():
+            if connection.websocket == websocket:
+                logger.debug(f"Found connection ID {conn_id} for WebSocket {id(websocket)}")
+                return ConnectionID(conn_id)
+        
+        logger.debug(f"No connection found for WebSocket {id(websocket)}")
+        return None
+    
+    def update_connection_thread(self, connection_id: str, thread_id: str) -> bool:
+        """
+        Update the thread ID associated with a connection.
+        
+        This method provides compatibility with the UnifiedWebSocketManager interface.
+        It updates the thread_id field of the connection if found.
+        
+        Args:
+            connection_id: Connection ID to update
+            thread_id: New thread ID to associate
+            
+        Returns:
+            True if update successful, False if connection not found
+        """
+        self._validate_active()
+        
+        connection = self._connections.get(connection_id)
+        if connection:
+            # Update the thread_id on the connection object
+            if hasattr(connection, 'thread_id'):
+                old_thread_id = connection.thread_id
+                connection.thread_id = thread_id
+                logger.info(
+                    f"Updated thread association for connection {connection_id}: "
+                    f"{old_thread_id} → {thread_id}"
+                )
+                self._update_activity()
+                return True
+            else:
+                logger.warning(
+                    f"Connection {connection_id} does not have thread_id attribute. "
+                    f"WebSocketConnection may need to be updated to support thread tracking."
+                )
+                return False
+        else:
+            logger.warning(f"Connection {connection_id} not found for thread update")
+            return False
+    
+    async def health_check(self) -> bool:
+        """
+        Enhanced health check to detect zombie managers that appear active but are stuck.
+        
+        This method performs deep health validation to identify managers that pass
+        basic state checks but are actually unresponsive (zombie managers).
+        
+        Health criteria:
+        1. Manager is marked as active
+        2. Manager has responsive connections  
+        3. WebSocket connections can handle ping/pong
+        4. No excessive error accumulation
+        5. Recent activity within reasonable timeframe
+        
+        Returns:
+            True if manager is healthy and responsive, False if zombie/stuck
+        """
+        try:
+            # Basic state validation
+            if not self._is_active:
+                logger.debug(f"Health check failed: manager inactive for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check if we have connections
+            if not self._connections:
+                logger.debug(f"Health check failed: no connections for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check error accumulation (zombie indicators)
+            if self._connection_error_count > 10:  # High error count indicates problems
+                logger.debug(f"Health check failed: high error count ({self._connection_error_count}) for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check for recent errors within last minute (zombie indicator)
+            if self._last_error_time:
+                error_age = (datetime.utcnow() - self._last_error_time).total_seconds()
+                if error_age < 60 and self._connection_error_count > 3:  # Recent errors with accumulation
+                    logger.debug(f"Health check failed: recent errors ({error_age}s ago) for user {self.user_context.user_id[:8]}...")
+                    return False
+            
+            # Enhanced connection health validation
+            healthy_connections = 0
+            total_connections = len(self._connections)
+            
+            for conn_id, connection in list(self._connections.items()):
+                try:
+                    # Check if connection object is valid
+                    if not connection or not connection.websocket:
+                        continue
+                    
+                    # Check WebSocket state if available
+                    from fastapi.websockets import WebSocketState
+                    if hasattr(connection.websocket, 'client_state'):
+                        if connection.websocket.client_state == WebSocketState.CONNECTED:
+                            healthy_connections += 1
+                        else:
+                            logger.debug(f"Connection {conn_id} not in CONNECTED state: {_safe_websocket_state_for_logging(connection.websocket.client_state)}")
+                    else:
+                        # If no state info available, assume healthy if websocket exists
+                        healthy_connections += 1
+                
+                except Exception as conn_error:
+                    logger.debug(f"Connection health check error for {conn_id}: {conn_error}")
+                    continue
+            
+            # Require at least 50% of connections to be healthy
+            health_ratio = healthy_connections / total_connections if total_connections > 0 else 0
+            if health_ratio < 0.5:
+                logger.debug(f"Health check failed: low healthy connection ratio ({health_ratio:.2f}) for user {self.user_context.user_id[:8]}...")
+                return False
+            
+            # Check activity recency (zombie managers may have stale activity)
+            if self._metrics.last_activity:
+                activity_age = (datetime.utcnow() - self._metrics.last_activity).total_seconds()
+                # Allow up to 2 minutes of inactivity for healthy managers
+                if activity_age > 120:  
+                    logger.debug(f"Health check failed: stale activity ({activity_age}s ago) for user {self.user_context.user_id[:8]}...")
+                    return False
+            
+            # All health checks passed
+            logger.debug(f"Health check passed: manager healthy for user {self.user_context.user_id[:8]}... ({healthy_connections}/{total_connections} connections healthy)")
+            return True
+            
+        except Exception as health_error:
+            logger.error(f"Health check error for user {self.user_context.user_id[:8]}...: {health_error}")
+            # If health check itself fails, consider the manager unhealthy
+            return False
+    
+    def get_connection_health(self, user_id: str) -> Dict[str, Any]:
+        """
+        Get detailed connection health information for a user.
+        
+        PROTOCOL COMPLIANCE: Required by WebSocketManagerProtocol.
+        
+        Args:
+            user_id: User ID to check health for
+            
+        Returns:
+            Dictionary containing health metrics and connection status
+        """
+        self._validate_active()
+        
+        # Validate that the requested user_id matches this manager's user
+        if user_id != self.user_context.user_id:
+            logger.warning(
+                f"Health check requested for user {user_id} from manager for user {self.user_context.user_id}. "
+                f"Returning empty health data due to user isolation."
+            )
+            return {
+                'user_id': user_id,
+                'error': 'user_isolation_violation',
+                'message': 'Cannot get health for different user in isolated manager'
+            }
+        
+        connection_ids = list(self._connection_ids)
+        total_connections = len(connection_ids)
+        active_connections = 0
+        connection_details = []
+        
+        for conn_id in connection_ids:
+            connection = self._connections.get(conn_id)
+            if connection:
+                is_active = connection.websocket is not None
+                if is_active:
+                    active_connections += 1
+                
+                connection_details.append({
+                    'connection_id': conn_id,
+                    'active': is_active,
+                    'connected_at': connection.connected_at.isoformat(),
+                    'metadata': connection.metadata or {},
+                    'thread_id': getattr(connection, 'thread_id', None)
+                })
+        
+        return {
+            'user_id': user_id,
+            'total_connections': total_connections,
+            'active_connections': active_connections,
+            'has_active_connections': active_connections > 0,
+            'connections': connection_details,
+            'manager_active': self._is_active,
+            'manager_created_at': self.created_at.isoformat(),
+            'metrics': self._metrics.to_dict(),
+            'recovery_queue_size': len(self._message_recovery_queue),
+            'error_count': self._connection_error_count
+        }
+    
+    async def send_error(self, user_id: Union[str, UserID], error_message: str) -> None:
+        """
+        Send an error message to the specified user.
+        
+        CRITICAL FIX: This method was missing and causing AttributeError in message handlers.
+        Implements the standard error message sending interface expected by WebSocket handlers.
+        
+        Args:
+            user_id: Target user ID (must match this manager's user context)  
+            error_message: Error message to send
+            
+        Raises:
+            ValueError: If user_id doesn't match this manager's user context
+            RuntimeError: If manager is not active
+        """
+        self._validate_active()
+        
+        # SECURITY: Validate that the requested user_id matches this manager's user
+        manager_user_id = str(self.user_context.user_id)
+        target_user_id = str(user_id)
+        
+        if target_user_id != manager_user_id:
+            logger.critical(
+                f"SECURITY VIOLATION: Attempted to send error to user {target_user_id} "
+                f"from isolated manager for user {manager_user_id[:8]}... "
+                f"This violates user isolation requirements."
+            )
+            raise ValueError(
+                f"Cannot send error to user {target_user_id} from manager for user {manager_user_id}. "
+                f"This violates user isolation - use the correct manager instance for the target user."
+            )
+        
+        # Format error message using standard WebSocket error format
+        error_payload = {
+            "type": "error",
+            "data": {
+                "error": error_message,
+                "timestamp": datetime.utcnow().isoformat(),
+                "user_context": {
+                    "user_id": self.user_context.user_id,
+                    "request_id": getattr(self.user_context, 'request_id', None)
+                }
+            },
+            "critical": True
+        }
+        
+        try:
+            await self.send_to_user(user_id, error_payload)
+            logger.debug(
+                f"Successfully sent error message to user {self.user_context.user_id[:8]}...: {error_message[:100]}"
+            )
+        except Exception as e:
+            logger.critical(
+                f"CRITICAL ERROR: Failed to send error message to user {self.user_context.user_id[:8]}...: {e}. "
+                f"Original error: {error_message}"
+            )
+            # Store for recovery (this is critical - user needs to know about errors)
+            self._message_recovery_queue.append({
+                **error_payload,
+                'failed_at': datetime.utcnow().isoformat(),
+                'failure_reason': f'error_send_failure: {e}',
+                'original_error': error_message
+            })
+            raise
+
+    async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
+        """
+        Send message to a thread (compatibility method).
+        
+        PROTOCOL COMPLIANCE: Required by WebSocketManagerProtocol.
+        
+        In the isolated manager context, we route thread messages to the user
+        if the thread belongs to this manager's user context.
+        
+        Args:
+            thread_id: Thread ID to send to 
+            message: Message to send
+            
+        Returns:
+            True if sent successfully, False otherwise
+        """
+        try:
+            self._validate_active()
+            
+            # In isolated manager, check if this thread belongs to our user
+            if hasattr(self.user_context, 'thread_id') and self.user_context.thread_id == thread_id:
+                # Send to our user
+                await self.send_to_user(self.user_context.user_id, message)
+                logger.debug(f"Sent thread message to user {self.user_context.user_id[:8]}... via thread {thread_id}")
+                return True
+            else:
+                # Check if any of our connections match this thread
+                for connection in self._connections.values():
+                    if hasattr(connection, 'thread_id') and connection.thread_id == thread_id:
+                        await self.send_to_user(self.user_context.user_id, message)
+                        logger.debug(f"Sent thread message to user {self.user_context.user_id[:8]}... via connection thread {thread_id}")
+                        return True
+                
+                logger.debug(
+                    f"Thread {thread_id} not found in isolated manager for user {self.user_context.user_id[:8]}... "
+                    f"(manager thread: {getattr(self.user_context, 'thread_id', 'none')})"
+                )
+                return False
+                
+        except Exception as e:
+            logger.error(f"Failed to send message to thread {thread_id}: {e}")
+            return False
 
 
 class WebSocketManagerFactory:
@@ -811,29 +1562,7 @@ class WebSocketManagerFactory:
             max_managers_per_user: Maximum number of managers per user (default: 20, was 5)
             connection_timeout_seconds: Timeout for idle connections (default: 30 minutes)
         """
-        # PHASE 1 SSOT REMEDIATION: Add deprecation warning
-        import warnings
-        import inspect
-        
-        # Get caller information for better debugging
-        frame = inspect.currentframe()
-        caller_info = "unknown"
-        if frame and frame.f_back:
-            caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
-        
-        warnings.warn(
-            f"WebSocketManagerFactory is deprecated and will be removed in Phase 3. "
-            f"Use 'WebSocketManager.from_user_context(user_context)' instead for SSOT compliance. "
-            f"Called from: {caller_info}",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        logger.warning(
-            f"SSOT MIGRATION REQUIRED: WebSocketManagerFactory usage detected at {caller_info}. "
-            f"Migrate to WebSocketManager.from_user_context() for Phase 2+ compatibility."
-        )
-        self._active_managers: Dict[str, WebSocketManager] = {}
+        self._active_managers: Dict[str, IsolatedWebSocketManager] = {}
         self._user_manager_count: Dict[str, int] = {}
         self._manager_creation_time: Dict[str, datetime] = {}
         self._factory_lock = RLock()  # Use RLock for thread safety
@@ -882,7 +1611,7 @@ class WebSocketManagerFactory:
         
         return isolation_key
     
-    async def create_manager(self, user_context: UserExecutionContext) -> WebSocketManager:
+    async def create_manager(self, user_context: UserExecutionContext) -> IsolatedWebSocketManager:
         """
         Create an isolated WebSocket manager for a user context.
         
@@ -970,8 +1699,8 @@ class WebSocketManagerFactory:
                 else:
                     logger.info(f"✅ Emergency cleanup successful - proceeding with manager creation for user {user_id[:8]}...")
             
-            # Create new isolated manager using SSOT factory method
-            manager = WebSocketManager.from_user_context(user_context)
+            # Create new isolated manager
+            manager = IsolatedWebSocketManager(user_context)
             
             # Register manager
             self._active_managers[isolation_key] = manager
@@ -993,7 +1722,7 @@ class WebSocketManagerFactory:
             
             return manager
     
-    def get_manager(self, isolation_key: str) -> Optional[WebSocketManager]:
+    def get_manager(self, isolation_key: str) -> Optional[IsolatedWebSocketManager]:
         """
         Get an existing manager by isolation key.
         
@@ -1455,7 +2184,7 @@ class WebSocketManagerFactory:
     # SSOT INTERFACE STANDARDIZATION METHODS (Week 1 - Low Risk)
     # ============================================================================
     
-    def create_isolated_manager(self, user_id: str, connection_id: str) -> WebSocketManager:
+    def create_isolated_manager(self, user_id: str, connection_id: str) -> IsolatedWebSocketManager:
         """
         Create an isolated WebSocket manager for a user with specified connection ID.
         
@@ -1507,8 +2236,8 @@ class WebSocketManagerFactory:
                         # No event loop running, can use asyncio.run directly
                         manager = asyncio.run(self.create_manager(user_context))
                 except RuntimeError:
-                    # Fallback to direct instantiation for tests using SSOT factory method
-                    manager = WebSocketManager.from_user_context(user_context)
+                    # Fallback to direct instantiation for tests
+                    manager = IsolatedWebSocketManager(user_context)
                     
                     # Register the manager manually for consistency
                     isolation_key = self._generate_isolation_key(user_context)
@@ -1541,7 +2270,7 @@ class WebSocketManagerFactory:
                 details={"connection_id": connection_id, "error": str(e)}
             ) from e
     
-    def get_manager_by_user(self, user_id: str) -> Optional[WebSocketManager]:
+    def get_manager_by_user(self, user_id: str) -> Optional[IsolatedWebSocketManager]:
         """
         Get an active WebSocket manager for a specific user.
         
@@ -1599,249 +2328,6 @@ class WebSocketManagerFactory:
         
         logger.debug(f"📊 SSOT INTERFACE: Active connections count = {total_connections}")
         return total_connections
-    
-    # ============================================================================
-    # ADDITIONAL SSOT INTERFACE METHODS (Required by validation tests)
-    # ============================================================================
-    
-    async def send_message(self, user_id: str, message: Dict[str, Any]) -> bool:
-        """
-        Send a message to a specific user via their WebSocket manager.
-        
-        SSOT INTERFACE COMPLIANCE: Delegates to appropriate user manager.
-        
-        Args:
-            user_id: Target user identifier
-            message: Message to send
-            
-        Returns:
-            True if message sent successfully, False otherwise
-        """
-        manager = self.get_manager_by_user(user_id)
-        if manager and hasattr(manager, 'send_to_user'):
-            try:
-                await manager.send_to_user(user_id, message)
-                return True
-            except Exception as e:
-                logger.error(f"Failed to send message to user {user_id}: {e}")
-                return False
-        return False
-    
-    async def broadcast_message(self, message: Dict[str, Any]) -> int:
-        """
-        Broadcast a message to all connected users.
-        
-        SSOT INTERFACE COMPLIANCE: Broadcasts via all active managers.
-        
-        Args:
-            message: Message to broadcast
-            
-        Returns:
-            Number of users who received the message
-        """
-        sent_count = 0
-        with self._factory_lock:
-            for manager in self._active_managers.values():
-                try:
-                    if hasattr(manager, 'send_to_user') and hasattr(manager, 'user_context'):
-                        await manager.send_to_user(manager.user_context.user_id, message)
-                        sent_count += 1
-                except Exception as e:
-                    logger.warning(f"Failed to broadcast to manager: {e}")
-        return sent_count
-    
-    def get_connection_count(self) -> int:
-        """
-        Get total connection count (alias for get_active_connections_count).
-        
-        SSOT INTERFACE COMPLIANCE: Provides expected method name.
-        
-        Returns:
-            Total number of active connections
-        """
-        return self.get_active_connections_count()
-    
-    async def add_connection(self, user_id: str, websocket: Any) -> bool:
-        """
-        Add a WebSocket connection for a user.
-        
-        SSOT INTERFACE COMPLIANCE: Delegates to user's manager.
-        
-        Args:
-            user_id: User identifier
-            websocket: WebSocket connection object
-            
-        Returns:
-            True if connection added successfully, False otherwise
-        """
-        try:
-            # Find or create manager for this user
-            manager = self.get_manager_by_user(user_id)
-            if not manager:
-                # Create manager if it doesn't exist
-                connection_id = f"conn_{uuid.uuid4().hex[:8]}"
-                manager = self.create_isolated_manager(user_id, connection_id)
-            
-            # Create WebSocket connection object
-            connection = WebSocketConnection(
-                user_id=user_id,
-                connection_id=f"ws_{uuid.uuid4().hex[:8]}",
-                websocket=websocket
-            )
-            
-            if hasattr(manager, 'add_connection'):
-                await manager.add_connection(connection)
-                return True
-            return False
-        except Exception as e:
-            logger.error(f"Failed to add connection for user {user_id}: {e}")
-            return False
-    
-    async def remove_connection(self, user_id: str) -> bool:
-        """
-        Remove a user's WebSocket connection.
-        
-        SSOT INTERFACE COMPLIANCE: Delegates to user's manager.
-        
-        Args:
-            user_id: User identifier
-            
-        Returns:
-            True if connection removed successfully, False otherwise
-        """
-        manager = self.get_manager_by_user(user_id)
-        if manager:
-            try:
-                # Clean up the entire manager for this user
-                isolation_key = self._find_isolation_key_for_user(user_id)
-                if isolation_key:
-                    return await self.cleanup_manager(isolation_key)
-                return False
-            except Exception as e:
-                logger.error(f"Failed to remove connection for user {user_id}: {e}")
-                return False
-        return False
-    
-    def is_user_connected(self, user_id: str) -> bool:
-        """
-        Check if a user is currently connected.
-        
-        SSOT INTERFACE COMPLIANCE: Checks user's manager status.
-        
-        Args:
-            user_id: User identifier
-            
-        Returns:
-            True if user is connected, False otherwise
-        """
-        manager = self.get_manager_by_user(user_id)
-        return manager is not None and getattr(manager, '_is_active', False)
-    
-    async def handle_connection(self, websocket: Any) -> str:
-        """
-        Handle a new WebSocket connection.
-        
-        SSOT INTERFACE COMPLIANCE: Creates manager for new connection.
-        
-        Args:
-            websocket: WebSocket connection object
-            
-        Returns:
-            Connection ID for the established connection
-        """
-        try:
-            # Extract user_id from websocket (implementation dependent)
-            user_id = getattr(websocket, 'user_id', f"user_{uuid.uuid4().hex[:8]}")
-            connection_id = f"conn_{uuid.uuid4().hex[:8]}"
-            
-            # Create or get manager for this user
-            manager = self.create_isolated_manager(user_id, connection_id)
-            
-            # Add the connection
-            await self.add_connection(user_id, websocket)
-            
-            return connection_id
-        except Exception as e:
-            logger.error(f"Failed to handle new connection: {e}")
-            raise
-    
-    async def handle_disconnection(self, user_id: str) -> bool:
-        """Handle disconnection."""
-        return await self.remove_connection(user_id)
-    
-    async def send_agent_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> bool:
-        """
-        Send an agent event to a specific user.
-        
-        SSOT INTERFACE COMPLIANCE: Sends structured events via user's manager.
-        
-        Args:
-            user_id: Target user identifier
-            event_type: Type of agent event
-            data: Event data payload
-            
-        Returns:
-            True if event sent successfully, False otherwise
-        """
-        event_message = {
-            'type': 'agent_event',
-            'event_type': event_type,
-            'data': data,
-            'timestamp': datetime.utcnow().isoformat()
-        }
-        return await self.send_message(user_id, event_message)
-    
-    async def handle_disconnection(self, user_id: str) -> bool:
-        """
-        Handle a WebSocket disconnection.
-        
-        SSOT INTERFACE COMPLIANCE: Cleans up user's manager.
-        
-        Args:
-            user_id: User identifier
-            
-        Returns:
-            True if disconnection handled successfully, False otherwise
-        """
-        return await self.remove_connection(user_id)
-    
-    async def send_agent_event(self, user_id: str, event_type: str, data: Dict[str, Any]) -> bool:
-        """
-        Send an agent event to a specific user.
-        
-        SSOT INTERFACE COMPLIANCE: Sends structured events via user's manager.
-        
-        Args:
-            user_id: Target user identifier
-            event_type: Type of agent event
-            data: Event data payload
-            
-        Returns:
-            True if event sent successfully, False otherwise
-        """
-        event_message = {
-            'type': 'agent_event',
-            'event_type': event_type,
-            'data': data,
-            'timestamp': datetime.utcnow().isoformat()
-        }
-        return await self.send_message(user_id, event_message)
-    
-    def _find_isolation_key_for_user(self, user_id: str) -> Optional[str]:
-        """
-        Find the isolation key for a user's active manager.
-        
-        Args:
-            user_id: User identifier
-            
-        Returns:
-            Isolation key if found, None otherwise
-        """
-        with self._factory_lock:
-            for key, manager in self._active_managers.items():
-                if hasattr(manager, 'user_context') and manager.user_context.user_id == user_id:
-                    return key
-        return None
 
 
 # Global factory instance
@@ -1863,7 +2349,7 @@ def get_websocket_manager_factory() -> WebSocketManagerFactory:
         return _factory_instance
 
 
-async def create_websocket_manager(user_context: UserExecutionContext) -> WebSocketManager:
+async def create_websocket_manager(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
     """
     Create an isolated WebSocket manager for a user context.
     
@@ -2289,7 +2775,7 @@ def validate_websocket_component_health(user_context: Optional[UserExecutionCont
         }
 
 
-def create_websocket_manager_sync(user_context: UserExecutionContext) -> WebSocketManager:
+def create_websocket_manager_sync(user_context: UserExecutionContext) -> IsolatedWebSocketManager:
     """
     Synchronous wrapper for create_websocket_manager for testing purposes.
     
@@ -2350,7 +2836,7 @@ def create_websocket_manager_sync(user_context: UserExecutionContext) -> WebSock
 async def _create_emergency_fallback_manager(
     user_context: UserExecutionContext, 
     original_error: Exception
-) -> Optional['WebSocketManager']:
+) -> Optional['IsolatedWebSocketManager']:
     """
     PHASE 2 FIX: Create emergency fallback WebSocket manager for service continuity.
     
@@ -2369,29 +2855,23 @@ async def _create_emergency_fallback_manager(
         logger.info("PHASE 2 FIX: Creating emergency fallback WebSocket manager")
         
         # Import minimal components needed for emergency manager
-        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection, WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
         
-        # Create emergency UserExecutionContext for proper manager creation
-        try:
-            from netra_backend.app.services.user_execution_context import UserExecutionContext
-            emergency_user_context = UserExecutionContext(
-                user_id=getattr(user_context, 'user_id', f'emergency_{uuid.uuid4().hex[:8]}'),
-                thread_id=getattr(user_context, 'thread_id', f'emergency_thread_{uuid.uuid4().hex[:8]}'),
-                run_id=getattr(user_context, 'run_id', f'emergency_run_{uuid.uuid4().hex[:8]}'),
-                websocket_client_id=getattr(user_context, 'websocket_client_id', f'emergency_ws_{uuid.uuid4().hex[:8]}'),
-                agent_context={'emergency_mode': True, 'original_error': str(original_error)},
-                audit_metadata={'created_at': datetime.now(timezone.utc).isoformat(), 'source': 'emergency_fallback'}
-            )
-            
-            # Create emergency manager using SSOT factory method
-            emergency_manager = WebSocketManager.from_user_context(emergency_user_context)
-            
-            logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_user_context.user_id[:8]}...")
-        except Exception as e:
-            logger.error(f"Failed to create emergency UserExecutionContext: {e}")
-            # Final fallback - create basic manager without context
-            emergency_manager = WebSocketManager()
-            logger.warning("Created basic WebSocket manager without user context as final fallback")
+        # Create minimal manager configuration
+        emergency_config = {
+            'user_id': getattr(user_context, 'user_id', f'emergency_{uuid.uuid4().hex[:8]}'),
+            'websocket_client_id': getattr(user_context, 'websocket_client_id', f'emergency_ws_{uuid.uuid4().hex[:8]}'),
+            'thread_id': getattr(user_context, 'thread_id', f'emergency_thread_{uuid.uuid4().hex[:8]}'),
+            'run_id': getattr(user_context, 'run_id', f'emergency_run_{uuid.uuid4().hex[:8]}'),
+            'emergency_mode': True,
+            'original_error': str(original_error),
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Create emergency manager with minimal functionality
+        emergency_manager = EmergencyWebSocketManager(emergency_config)
+        
+        logger.info(f"PHASE 2 FIX: Emergency fallback manager created for user {emergency_config['user_id'][:8]}...")
         return emergency_manager
         
     except Exception as e:
@@ -2399,7 +2879,7 @@ async def _create_emergency_fallback_manager(
         return None
 
 
-async def _create_degraded_service_manager(user_context: UserExecutionContext) -> Optional['WebSocketManager']:
+async def _create_degraded_service_manager(user_context: UserExecutionContext) -> Optional['IsolatedWebSocketManager']:
     """
     PHASE 2 FIX: Create degraded service WebSocket manager as last resort.
     
@@ -2415,25 +2895,19 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
     try:
         logger.warning("PHASE 2 FIX: Creating degraded service WebSocket manager - last resort")
         
-        # Create degraded UserExecutionContext for proper manager creation
-        try:
-            from netra_backend.app.services.user_execution_context import UserExecutionContext
-            degraded_user_context = UserExecutionContext(
-                user_id='degraded_service_user',
-                thread_id=f'degraded_thread_{int(time.time())}',
-                run_id=f'degraded_run_{int(time.time())}',
-                websocket_client_id=f'degraded_ws_{int(time.time())}',
-                agent_context={'degraded_mode': True, 'functionality_level': 'minimal'},
-                audit_metadata={'created_at': datetime.now(timezone.utc).isoformat(), 'source': 'degraded_service'}
-            )
-            
-            # Create degraded manager using SSOT factory method
-            degraded_manager = WebSocketManager.from_user_context(degraded_user_context)
-        except Exception as e:
-            logger.error(f"Failed to create degraded UserExecutionContext: {e}")
-            # Final fallback - create basic manager without context
-            degraded_manager = WebSocketManager()
-            logger.warning("Created basic WebSocket manager without user context as degraded fallback")
+        # Create absolute minimal configuration
+        degraded_config = {
+            'user_id': 'degraded_service_user',
+            'websocket_client_id': f'degraded_ws_{int(time.time())}',
+            'thread_id': f'degraded_thread_{int(time.time())}',
+            'run_id': f'degraded_run_{int(time.time())}',
+            'degraded_mode': True,
+            'functionality_level': 'minimal',
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Create degraded manager
+        degraded_manager = DegradedWebSocketManager(degraded_config)
         
         logger.warning("PHASE 2 FIX: Degraded service manager created - limited functionality available")
         return degraded_manager
@@ -2443,14 +2917,139 @@ async def _create_degraded_service_manager(user_context: UserExecutionContext) -
         return None
 
 
-# WebSocketManager removed for SSOT compliance - use WebSocketManager instead
+class EmergencyWebSocketManager:
+    """
+    PHASE 2 FIX: Emergency WebSocket manager for service continuity.
+    
+    Provides minimal WebSocket functionality when normal factory creation fails.
+    This ensures users can maintain WebSocket connections during service issues.
+    """
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.user_id = config['user_id']
+        self.websocket_client_id = config['websocket_client_id']
+        self.thread_id = config['thread_id'] 
+        self.run_id = config['run_id']
+        self.emergency_mode = True
+        self.created_at = datetime.now(timezone.utc)
+        
+        # Minimal state tracking
+        self._connections = {}
+        self._message_queue = []
+        self._is_healthy = True
+        
+        logger.info(f"PHASE 2 FIX: EmergencyWebSocketManager initialized for {self.user_id[:8]}...")
+    
+    async def send_message(self, websocket, message: Dict[str, Any]) -> bool:
+        """Send message with emergency error handling."""
+        try:
+            # Add emergency mode indicator to messages
+            emergency_message = {
+                **message,
+                'emergency_mode': True,
+                'manager_type': 'emergency_fallback',
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            if hasattr(websocket, 'send_json'):
+                await websocket.send_json(emergency_message)
+                return True
+            else:
+                logger.warning("PHASE 2 FIX: WebSocket send_json not available in emergency mode")
+                return False
+                
+        except Exception as e:
+            logger.error(f"PHASE 2 FIX: Emergency manager send failed: {e}")
+            return False
+    
+    async def handle_message(self, websocket, message: Dict[str, Any]) -> bool:
+        """Handle incoming messages in emergency mode."""
+        try:
+            # Queue messages for later processing when services recover
+            self._message_queue.append({
+                'message': message,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'websocket_id': id(websocket)
+            })
+            
+            # Send acknowledgment that message was received
+            ack_message = {
+                'type': 'emergency_ack',
+                'message': 'Message received in emergency mode - will process when services recover',
+                'emergency_mode': True,
+                'queue_position': len(self._message_queue)
+            }
+            
+            return await self.send_message(websocket, ack_message)
+            
+        except Exception as e:
+            logger.error(f"PHASE 2 FIX: Emergency message handling failed: {e}")
+            return False
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get emergency manager health status."""
+        return {
+            'healthy': self._is_healthy,
+            'manager_type': 'emergency_fallback',
+            'emergency_mode': True,
+            'connections': len(self._connections),
+            'queued_messages': len(self._message_queue),
+            'created_at': self.created_at.isoformat(),
+            'uptime_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
+        }
 
 
-# WebSocketManager removed for SSOT compliance - use WebSocketManager instead
+class DegradedWebSocketManager:
+    """
+    PHASE 2 FIX: Degraded WebSocket manager for absolute last resort.
+    
+    Provides the most minimal WebSocket functionality possible to maintain
+    basic connectivity when all other systems have failed.
+    """
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.degraded_mode = True
+        self.created_at = datetime.now(timezone.utc)
+        
+        logger.warning(f"PHASE 2 FIX: DegradedWebSocketManager initialized - minimal functionality only")
+    
+    async def send_message(self, websocket, message: Dict[str, Any]) -> bool:
+        """Send message with degraded functionality."""
+        try:
+            degraded_message = {
+                'type': 'degraded_service',
+                'message': 'Service operating in degraded mode - limited functionality available',
+                'original_message_type': message.get('type', 'unknown'),
+                'degraded_mode': True,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            if hasattr(websocket, 'send_json'):
+                await websocket.send_json(degraded_message)
+                return True
+            return False
+            
+        except Exception as e:
+            logger.error(f"PHASE 2 FIX: Degraded manager send failed: {e}")
+            return False
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get degraded manager health status."""
+        return {
+            'healthy': False,
+            'manager_type': 'degraded_service',
+            'degraded_mode': True,
+            'functionality_level': 'minimal',
+            'created_at': self.created_at.isoformat(),
+            'message': 'Operating in degraded mode - please retry connection'
+        }
 
 
 __all__ = [
     "WebSocketManagerFactory",
+    "IsolatedWebSocketManager", 
     "ConnectionLifecycleManager",
     "FactoryMetrics",
     "ManagerMetrics",
@@ -2462,5 +3061,8 @@ __all__ = [
     "create_defensive_user_execution_context",
     "validate_websocket_component_health",  # Component health validation
     # Five Whys Root Cause Prevention
-    "WebSocketProtocol",  # Re-exported from protocols module
+    "WebSocketManagerProtocol",  # Re-exported from protocols module
+    # Phase 2 Emergency Fallback Components
+    "EmergencyWebSocketManager",
+    "DegradedWebSocketManager"
 ]

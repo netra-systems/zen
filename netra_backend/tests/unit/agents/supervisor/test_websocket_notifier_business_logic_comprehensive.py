@@ -67,7 +67,7 @@ class TestWebSocketNotifierBusinessLogic(SSotBaseTestCase):
         """Create WebSocketNotifier with mocked dependencies - suppress deprecation warning for testing."""
         with patch('warnings.warn'):  # Suppress deprecation warning during testing
             # Use test_mode=True to prevent background task hanging
-            notifier = AgentWebSocketBridge(mock_websocket_manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(mock_websocket_manager, test_mode=True)
         
         yield notifier
         
@@ -454,7 +454,7 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         
         with patch('warnings.warn'):  # Suppress deprecation warning
             manager = AsyncMock() 
-            notifier = AgentWebSocketBridge(manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(manager, test_mode=True)
         
         # Create high-value customer context
         vip_context = AgentExecutionContext(
@@ -483,7 +483,7 @@ class TestWebSocketNotifierBusinessScenarios(SSotBaseTestCase):
         
         with patch('warnings.warn'):
             manager = AsyncMock()
-            notifier = AgentWebSocketBridge(manager, test_mode=True)
+            notifier = WebSocketNotifier.create_for_user(manager, test_mode=True)
         
         # Create free tier context
         free_context = AgentExecutionContext(

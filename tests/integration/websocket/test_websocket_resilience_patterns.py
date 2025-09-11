@@ -510,7 +510,7 @@ class ResilientWebSocketAgentExecutor:
         )
         
         # Setup resilient WebSocket notifier
-        websocket_notifier = AgentWebSocketBridge(user_context=user_context)
+        websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
         
         # Track WebSocket events during resilience testing
         events_sent = []

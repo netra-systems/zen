@@ -70,12 +70,12 @@ class P0StabilityProof:
         print("-" * 60)
         
         try:
-            # Import and inspect the fix
-            from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+            # Import and inspect the fix - CANONICAL IMPORT for SSOT compliance
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             import inspect
             
             # Get the source code of the critical method
-            source = inspect.getsource(UnifiedWebSocketManager.emit_critical_event)
+            source = inspect.getsource(WebSocketManager.emit_critical_event)
             
             # Check for GCP staging auto-detection patterns
             gcp_detection_present = (

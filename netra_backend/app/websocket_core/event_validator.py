@@ -236,18 +236,21 @@ class UnifiedEventValidator:
     def __init__(self, 
                  user_context: Optional[StronglyTypedUserExecutionContext] = None,
                  strict_mode: bool = True,
-                 timeout_seconds: float = 30.0):
+                 timeout_seconds: float = 30.0,
+                 validation_mode: str = "realtime"):
         """
-        Initialize unified event validator.
+        Initialize unified event validator with dual validation modes.
         
         Args:
             user_context: Optional strongly typed user execution context
             strict_mode: If True, require ALL 5 critical events
             timeout_seconds: Maximum time to wait for events
+            validation_mode: "realtime" for individual events, "sequence" for complete validation
         """
         self.user_context = user_context
         self.strict_mode = strict_mode
         self.timeout_seconds = timeout_seconds
+        self.validation_mode = validation_mode
         
         # Validation statistics (from production validator)
         self.validation_stats = {
@@ -270,7 +273,7 @@ class UnifiedEventValidator:
         except Exception:
             self.env = None
         
-        logger.info(f"UnifiedEventValidator initialized in {'strict' if strict_mode else 'permissive'} mode")
+        logger.info(f"UnifiedEventValidator initialized in {'strict' if strict_mode else 'permissive'} mode, validation_mode: {validation_mode}")
     
     def get_required_critical_events(self) -> Set[str]:
         """Get the set of required critical events."""
@@ -281,6 +284,56 @@ class UnifiedEventValidator:
             CriticalAgentEventType.TOOL_COMPLETED.value,
             CriticalAgentEventType.AGENT_COMPLETED.value
         }
+    
+    def validate_with_mode(self, event_or_events, user_id: str, 
+                          connection_id: Optional[str] = None) -> ValidationResult:
+        """
+        Validate events based on configured validation mode.
+        
+        This method provides the dual validation mode functionality:
+        - "realtime" mode: Validates individual events as they arrive
+        - "sequence" mode: Validates complete event sequences for business value
+        
+        Args:
+            event_or_events: Single event (dict) for realtime, list for sequence
+            user_id: Target user ID
+            connection_id: Optional connection ID
+            
+        Returns:
+            ValidationResult with mode-appropriate validation
+        """
+        if self.validation_mode == "realtime":
+            # Individual event validation (production validator style)
+            if not isinstance(event_or_events, dict):
+                return ValidationResult(
+                    is_valid=False,
+                    error_message="Realtime mode requires single event dict",
+                    criticality=EventCriticality.MISSION_CRITICAL
+                )
+            return self.validate_event(event_or_events, user_id, connection_id)
+            
+        elif self.validation_mode == "sequence":
+            # Complete sequence validation (SSOT framework style)
+            if not isinstance(event_or_events, list):
+                return ValidationResult(
+                    is_valid=False,
+                    error_message="Sequence mode requires list of events",
+                    criticality=EventCriticality.MISSION_CRITICAL
+                )
+            
+            # Record all events first
+            for event in event_or_events:
+                self.record_event(event)
+            
+            # Perform complete validation
+            return self.perform_full_validation()
+            
+        else:
+            return ValidationResult(
+                is_valid=False,
+                error_message=f"Unknown validation mode: {self.validation_mode}",
+                criticality=EventCriticality.MISSION_CRITICAL
+            )
     
     def validate_event(self, event: Dict[str, Any], user_id: str, 
                       connection_id: Optional[str] = None) -> ValidationResult:
@@ -884,11 +937,11 @@ def get_websocket_validator() -> UnifiedEventValidator:
     Get the global WebSocket event validator instance.
     
     This function provides backward compatibility with the production
-    websocket_error_validator.py implementation.
+    websocket_error_validator.py implementation (realtime mode).
     """
     global _unified_validator_instance
     if _unified_validator_instance is None:
-        _unified_validator_instance = UnifiedEventValidator()
+        _unified_validator_instance = UnifiedEventValidator(validation_mode="realtime")
     return _unified_validator_instance
 
 def reset_websocket_validator():
@@ -907,7 +960,7 @@ def validate_agent_events(
     SSOT function to validate a list of agent events.
     
     This function provides backward compatibility with the SSOT framework
-    agent_event_validators.py implementation.
+    agent_event_validators.py implementation (sequence mode).
     
     Args:
         events: List of events to validate
@@ -917,7 +970,11 @@ def validate_agent_events(
     Returns:
         ValidationResult with validation results
     """
-    validator = UnifiedEventValidator(user_context=user_context, strict_mode=strict_mode)
+    validator = UnifiedEventValidator(
+        user_context=user_context, 
+        strict_mode=strict_mode,
+        validation_mode="sequence"
+    )
     
     # Record all events
     for event in events:
@@ -997,28 +1054,28 @@ def create_mock_critical_events(
             event_type=CriticalAgentEventType.AGENT_THINKING.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 1),
+            timestamp=base_time.replace(microsecond=100000),
             data={"agent": agent_name, "progress": "thinking"}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.TOOL_EXECUTING.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 2),
+            timestamp=base_time.replace(microsecond=200000),
             data={"tool": tool_name, "status": "executing"}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.TOOL_COMPLETED.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 3),
+            timestamp=base_time.replace(microsecond=300000),
             data={"tool": tool_name, "status": "completed", "result": "mock result"}
         ),
         WebSocketEventMessage(
             event_type=CriticalAgentEventType.AGENT_COMPLETED.value,
             user_id=user_id,
             thread_id=thread_id,
-            timestamp=base_time.replace(second=base_time.second + 4),
+            timestamp=base_time.replace(microsecond=400000),
             data={"agent": agent_name, "status": "completed", "result": "mock agent result"}
         )
     ]

@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-10 15:25:16
+**Generated:** 2025-09-10 15:18:36
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -9,8 +9,8 @@
 - **Total Tests:** 7
 - **Passed:** 0 (0.0%)
 - **Failed:** 0 (0.0%)
-- **Skipped:** 7
-- **Duration:** 0.79 seconds
+- **Skipped:** 0
+- **Duration:** 0.09 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -39,7 +39,7 @@ test_oauth_configuration.py::test_oauth_redirect_uri_misconfiguration SKIPPED
 test_oauth_configuration.py::test_oauth_scopes_configuration_incomplete SKIPPED
 
 ==================================================
-0 passed, 0 failed, 7 skipped in 0.79s
+0 passed, 0 failed in 0.09s
 ```
 
 ## Test Coverage Matrix

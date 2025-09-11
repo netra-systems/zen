@@ -62,7 +62,7 @@ from test_framework.ssot.websocket_golden_path_helpers import (
     test_websocket_golden_path,
     assert_golden_path_success
 )
-from test_framework.ssot.agent_event_validators import (
+from netra_backend.app.websocket_core.event_validator import (
     AgentEventValidator,
     CriticalAgentEventType,
     assert_critical_events_received,

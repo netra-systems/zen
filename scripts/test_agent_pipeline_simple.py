@@ -116,7 +116,7 @@ class MockAgent:
     def __init__(self, name: str, websocket_manager: WebSocketManager, processing_time: float = 0.1):
         self.name = name
         self.websocket_manager = websocket_manager
-        self.notifier = AgentWebSocketBridge(websocket_manager)
+        self.notifier = WebSocketNotifier.create_for_user(websocket_manager)
         self.processing_time = processing_time
         
     async def execute(self, state: DeepAgentState, run_id: str, **kwargs) -> Any:

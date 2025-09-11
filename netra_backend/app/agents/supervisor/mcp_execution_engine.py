@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    # CANONICAL IMPORT: Use direct import path for better SSOT compliance
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager

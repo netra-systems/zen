@@ -340,7 +340,7 @@ class RealChatBusinessValueTester:
         )
         
         # Setup WebSocket notifier with event capture
-        websocket_notifier = AgentWebSocketBridge(user_context=user_context)
+        websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
         
         async def business_value_event_capture(event_type: str, event_data: dict):
             """Capture WebSocket events for business value validation."""

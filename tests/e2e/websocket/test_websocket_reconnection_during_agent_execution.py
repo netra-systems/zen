@@ -301,12 +301,11 @@ class RealWebSocketReconnectionTester:
         )
         
         # Setup WebSocket notifier with reconnection tracking
-        websocket_notifier = AgentWebSocketBridge(user_context=user_context)
+        websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
         
         # Track connection state
         connection_state = {
-            "connected": True,
-            "events_sent": 0,
+            "connected": True, "events_sent": 0,
             "events_during_disruption": 0,
             "events_after_reconnection": 0,
             "disruption_occurred": False,

@@ -301,7 +301,7 @@ class RealAgentExecutionWebSocketIntegrator:
         )
         
         # Setup WebSocket notifier with integration tracking
-        websocket_notifier = AgentWebSocketBridge(user_context=user_context)
+        websocket_notifier = WebSocketNotifier.create_for_user(user_context=user_context)
         
         async def integration_tracked_event_sender(event_type: str, event_data: dict):
             """Send WebSocket events with integration tracking."""

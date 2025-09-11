@@ -20,12 +20,25 @@ DEPRECATED IMPORTS (Phase 1 warnings, Phase 3 removal):
 """
 
 # Unified implementations (SSOT)
-from netra_backend.app.websocket_core.unified_manager import (
-    WebSocketManager,
-    UnifiedWebSocketManager,  # Backward compatibility alias
-    WebSocketConnection,
-    # SECURITY FIX: get_websocket_manager removed - caused multi-user data leakage
+# CANONICAL IMPORT: Prefer the canonical import path for better SSOT compliance
+# DEPRECATED: from netra_backend.app.websocket_core import WebSocketManager
+# CANONICAL: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+import warnings
+warnings.warn(
+    "Importing WebSocketManager from 'netra_backend.app.websocket_core' is deprecated. "
+    "Use canonical path 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead.",
+    DeprecationWarning,
+    stacklevel=2
 )
+
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager,
+    WebSocketConnection,
+    WebSocketManagerProtocol,
+    _serialize_message_safely
+)
+# Backward compatibility alias
+UnifiedWebSocketManager = WebSocketManager
 
 from netra_backend.app.websocket_core.unified_emitter import (
     UnifiedWebSocketEmitter,

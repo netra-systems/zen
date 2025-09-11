@@ -37,7 +37,7 @@ from test_framework.ssot.e2e_auth_helper import (
     E2EWebSocketAuthHelper,
     create_authenticated_user_context
 )
-from test_framework.ssot.agent_event_validators import (
+from netra_backend.app.websocket_core.event_validator import (
     AgentEventValidator,
     CriticalAgentEventType,
     WebSocketEventMessage,

@@ -78,10 +78,16 @@ class BusinessHealthChecker:
             # Test WebSocket event system
             print("  Testing WebSocket agent events...")
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            from netra_backend.app.websocket_core import get_websocket_manager
+            # SECURITY FIX: Use factory pattern instead of singleton
+            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
             
             bridge = AgentWebSocketBridge()
-            manager = get_websocket_manager()
+            # Test factory availability (cannot create manager without user context)
+            factory = get_websocket_manager_factory()
+            if not factory:
+                self.warnings.append("WebSocket factory not available")
+                scores["websocket_events"] = 0
+                return scores
             
             # Test critical events
             test_run_id = f"health_check_{int(time.time())}"

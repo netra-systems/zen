@@ -332,7 +332,7 @@ class TestWebSocketStateConsistencyIntegration(BaseIntegrationTest):
             test_websockets.append(ws)
         
         # Create WebSocketNotifier
-        websocket_notifier = AgentWebSocketBridge(websocket_manager=None)
+        websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager=None)
         
         # Track notifier state checks
         notifier_state_tracker = WebSocketStateTracker()
@@ -361,8 +361,7 @@ class TestWebSocketStateConsistencyIntegration(BaseIntegrationTest):
             for check_round in range(50):  # Many state checks
                 for ws in test_websockets:
                     await notifier_state_tracker.record_component_state(
-                        "websocket_notifier",
-                        ws,
+                        "websocket_notifier", ws,
                         {"check_round": check_round, "websocket_name": ws.test_name}
                     )
                 await asyncio.sleep(0.002)  # Very frequent monitoring
