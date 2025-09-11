@@ -1,513 +1,397 @@
 """
-Database Operations for Tests
-Handles CRUD operations across all databases.
-ARCHITECTURE: Under 300 lines, 25-line functions max
+Database Operations for E2E Tests - REAL DATABASE TESTING ONLY
+Handles CRUD operations across all databases WITHOUT MOCK FALLBACKS.
+
+ANTI-CHEATING MEASURES:
+- NO mock fallbacks when databases unavailable - test FAILS properly  
+- NO try/catch suppression hiding real errors
+- Real database connections required for all operations
+- Business context provided in all failures
+
+Business Value Justification (BVJ):
+- Segment: All tiers (Free, Early, Mid, Enterprise)
+- Goal: Data integrity and reliability (99.9% requirement)
+- Value Impact: Protects $200K+ MRR dependent on database operations
+- Revenue Impact: Prevents data corruption affecting all customer segments
 """
 
+import asyncio
+import logging
 from datetime import datetime, timezone
-from tests.e2e.database_test_connections import DatabaseConnectionManager
 from typing import Any, Dict, List, Optional
-import json
+from tests.e2e.database_test_connections import DatabaseConnectionManager
 
-class UserDataOperations:
+logger = logging.getLogger(__name__)
 
-    """Handles user data operations across databases."""
+
+class RealUserDataOperations:
+    """Handles user data operations across databases - NO MOCK FALLBACKS."""
     
-
     def __init__(self, db_manager: DatabaseConnectionManager):
-
         self.db_manager = db_manager
         
-
     async def create_auth_user(self, user_data: Dict[str, Any]) -> str:
-
-        """Create user in Auth PostgreSQL."""
-
+        """Create user in Auth PostgreSQL - FAILS if database unavailable."""
+        
         if not self.db_manager.postgres_pool:
-
-            return self._mock_user_creation(user_data)
-
+            raise ConnectionError(
+                "BUSINESS CRITICAL: PostgreSQL unavailable for E2E test. "
+                "Auth user creation impossible - ALL customer authentication blocked. "
+                "$500K+ ARR at risk."
+            )
+            
         return await self._create_real_auth_user(user_data)
         
-
-    def _mock_user_creation(self, user_data: Dict[str, Any]) -> str:
-
-        """Mock user creation for testing."""
-
-        return user_data["id"]
-        
-
     async def _create_real_auth_user(self, user_data: Dict[str, Any]) -> str:
-
         """Create real user in Auth PostgreSQL."""
-
+        
         async with self.db_manager.postgres_pool.acquire() as conn:
-
-            user_id = await conn.fetchval(
-
-                "INSERT INTO auth_users (id, email, full_name, is_active, created_at) "
-
-                "VALUES ($1, $2, $3, $4, $5) ON CONFLICT (email) DO UPDATE "
-
-                "SET full_name = $3, is_active = $4 RETURNING id",
-
-                user_data["id"], user_data["email"], user_data["full_name"],
-
-                user_data["is_active"], user_data["created_at"]
-
-            )
-
-            return user_id or user_data["id"]
+            try:
+                user_id = await conn.fetchval(
+                    "INSERT INTO auth_users (id, email, full_name, is_active, created_at) "
+                    "VALUES ($1, $2, $3, $4, $5) ON CONFLICT (email) DO UPDATE "
+                    "SET full_name = $3, is_active = $4 RETURNING id",
+                    user_data["id"], user_data["email"], user_data["full_name"],
+                    user_data["is_active"], user_data["created_at"]
+                )
+                
+                if not user_id:
+                    raise RuntimeError(
+                        f"BUSINESS CRITICAL: User creation failed for {user_data['email']}. "
+                        "Enterprise customer onboarding blocked - $15K+ MRR per customer at risk."
+                    )
+                    
+                return user_id
+                
+            except Exception as e:
+                raise RuntimeError(
+                    f"BUSINESS CRITICAL: Auth user creation failed: {e}. "
+                    "All customer authentication affected - $500K+ ARR at risk."
+                )
             
-
     async def sync_to_backend(self, user_data: Dict[str, Any]) -> bool:
-
-        """Sync user to Backend PostgreSQL."""
-
+        """Sync user to Backend PostgreSQL - FAILS if database unavailable."""
+        
         if not self.db_manager.postgres_pool:
-
-            return True  # Mock success
-
+            raise ConnectionError(
+                "BUSINESS CRITICAL: Backend PostgreSQL unavailable for E2E test. "
+                "User sync impossible - cross-service data integrity compromised. "
+                "$200K+ MRR depends on data consistency."
+            )
+            
         return await self._sync_real_backend_user(user_data)
         
-
     async def _sync_real_backend_user(self, user_data: Dict[str, Any]) -> bool:
-
         """Sync real user to Backend PostgreSQL."""
-
-        async with self.db_manager.postgres_pool.acquire() as conn:
-
-            await conn.execute(
-
-                "INSERT INTO users (id, email, full_name, is_active, role, created_at) "
-
-                "VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (id) DO UPDATE "
-
-                "SET email = $2, full_name = $3, is_active = $4",
-
-                user_data["id"], user_data["email"], user_data["full_name"],
-
-                user_data["is_active"], user_data.get("role", "user"), user_data["created_at"]
-
-            )
-
-        return True
-
-
-class ChatMessageOperations:
-
-    """Handles chat message operations in ClickHouse."""
-    
-
-    def __init__(self, db_manager: DatabaseConnectionManager):
-
-        self.db_manager = db_manager
-
-        self.messages = []  # Mock storage
         
+        async with self.db_manager.postgres_pool.acquire() as conn:
+            try:
+                await conn.execute(
+                    "INSERT INTO backend_users (id, email, auth_user_id, subscription_tier, created_at) "
+                    "VALUES ($1, $2, $3, $4, $5) ON CONFLICT (auth_user_id) DO UPDATE "
+                    "SET email = $2, subscription_tier = $4",
+                    user_data["id"], user_data["email"], user_data["id"], 
+                    user_data.get("subscription_tier", "free"), user_data["created_at"]
+                )
+                
+                # Verify the sync actually worked
+                backend_user_exists = await conn.fetchval(
+                    "SELECT EXISTS(SELECT 1 FROM backend_users WHERE auth_user_id = $1)",
+                    user_data["id"]
+                )
+                
+                if not backend_user_exists:
+                    raise RuntimeError(
+                        f"BUSINESS CRITICAL: Backend user sync verification failed for {user_data['email']}. "
+                        "Data consistency broken - customer data integrity compromised."
+                    )
+                    
+                return True
+                
+            except Exception as e:
+                raise RuntimeError(
+                    f"BUSINESS CRITICAL: Backend user sync failed: {e}. "
+                    "Cross-service data integrity compromised - $200K+ MRR at risk."
+                )
 
-    async def store_message(self, message_data: Dict[str, Any]) -> bool:
 
-        """Store chat message in ClickHouse."""
-
+class RealChatMessageOperations:
+    """Handles chat message operations - NO MOCK FALLBACKS."""
+    
+    def __init__(self, db_manager: DatabaseConnectionManager):
+        self.db_manager = db_manager
+        
+    async def store_message(self, message_data: Dict[str, Any]) -> str:
+        """Store message in ClickHouse - FAILS if database unavailable."""
+        
         if not self.db_manager.clickhouse_client:
-
-            return self._mock_message_storage(message_data)
-
+            raise ConnectionError(
+                "BUSINESS CRITICAL: ClickHouse unavailable for E2E test. "
+                "AI conversation storage impossible - chat functionality represents 90% of platform value. "
+                "CRITICAL REVENUE IMPACT."
+            )
+            
         return await self._store_real_message(message_data)
         
-
-    def _mock_message_storage(self, message_data: Dict[str, Any]) -> bool:
-
-        """Mock message storage for testing."""
-
-        self.messages.append(message_data)
-
-        return True
-        
-
-    async def _store_real_message(self, message_data: Dict[str, Any]) -> bool:
-
+    async def _store_real_message(self, message_data: Dict[str, Any]) -> str:
         """Store real message in ClickHouse."""
-
+        
         try:
-
-            self.db_manager.clickhouse_client.insert(
-
-                "chat_messages",
-
-                [[
-
-                    message_data["id"], message_data["user_id"], 
-
-                    message_data["content"], message_data["timestamp"]
-
-                ]],
-
-                column_names=["id", "user_id", "content", "timestamp"]
-
+            message_id = str(message_data.get("id", f"msg_{datetime.now().isoformat()}"))
+            
+            # Store in ClickHouse analytics database
+            self.db_manager.clickhouse_client.insert("chat_messages", [
+                {
+                    "message_id": message_id,
+                    "user_id": message_data["user_id"],
+                    "content": message_data["content"],
+                    "timestamp": message_data.get("timestamp", datetime.now(timezone.utc)),
+                    "tokens_used": message_data.get("tokens_used", 0),
+                    "model_cost": message_data.get("model_cost", 0.0),
+                    "response_time_ms": message_data.get("response_time_ms", 0),
+                }
+            ])
+            
+            # Verify the message was actually stored
+            stored_messages = self.db_manager.clickhouse_client.query(
+                "SELECT COUNT(*) FROM chat_messages WHERE message_id = %(message_id)s",
+                {"message_id": message_id}
             )
-
-            return True
-
-        except Exception:
-
-            return False
             
-
-    async def get_user_messages(self, user_id: str) -> List[Dict[str, Any]]:
-
-        """Get user messages from ClickHouse."""
-
-        if not self.db_manager.clickhouse_client:
-
-            return [msg for msg in self.messages if msg["user_id"] == user_id]
-
-        return await self._get_real_user_messages(user_id)
-        
-
-    async def _get_real_user_messages(self, user_id: str) -> List[Dict[str, Any]]:
-
-        """Get real user messages from ClickHouse."""
-
-        try:
-
-            result = self.db_manager.clickhouse_client.query(
-
-                f"SELECT * FROM chat_messages WHERE user_id = '{user_id}'"
-
-            )
-
-            return result.result_rows
-
-        except Exception:
-
-            return []
-
-
-class SessionCacheOperations:
-
-    """Handles session caching in Redis."""
-    
-
-    def __init__(self, db_manager: DatabaseConnectionManager):
-
-        self.db_manager = db_manager
-
-        self.cache = {}  # Mock storage
-        
-
-    async def cache_session(self, user_id: str, session_data: Dict[str, Any]) -> bool:
-
-        """Cache active session in Redis."""
-
-        if not self.db_manager.redis_client:
-
-            return self._mock_session_cache(user_id, session_data)
-
-        return await self._cache_real_session(user_id, session_data)
-        
-
-    def _mock_session_cache(self, user_id: str, session_data: Dict[str, Any]) -> bool:
-
-        """Mock session caching for testing."""
-
-        self.cache[f"session:{user_id}"] = session_data
-
-        return True
-        
-
-    async def _cache_real_session(self, user_id: str, session_data: Dict[str, Any]) -> bool:
-
-        """Cache real session in Redis."""
-
-        try:
-
-            await self.db_manager.redis_client.set(
-
-                f"session:{user_id}", 
-
-                json.dumps(session_data),
-
-                ex=3600  # 1 hour expiration
-
-            )
-
-            return True
-
-        except Exception:
-
-            return False
-            
-
-    async def get_cached_session(self, user_id: str) -> Optional[Dict[str, Any]]:
-
-        """Get cached session from Redis."""
-
-        if not self.db_manager.redis_client:
-
-            return self.cache.get(f"session:{user_id}")
-
-        return await self._get_real_cached_session(user_id)
-        
-
-    async def _get_real_cached_session(self, user_id: str) -> Optional[Dict[str, Any]]:
-
-        """Get real cached session from Redis."""
-
-        try:
-
-            data = await self.db_manager.redis_client.get(f"session:{user_id}")
-
-            return json.loads(data) if data else None
-
-        except Exception:
-
-            return None
-
-
-class DatabaseOperations:
-
-    """Unified database operations class combining all database operations."""
-    
-
-    def __init__(self, db_manager: DatabaseConnectionManager = None):
-
-        """Initialize with optional database connection manager."""
-
-        if db_manager is None:
-
-            self.db_manager = DatabaseConnectionManager()
-
-        else:
-
-            self.db_manager = db_manager
-            
-
-        self.user_ops = UserDataOperations(self.db_manager)
-
-        self.message_ops = ChatMessageOperations(self.db_manager)
-
-        self.session_ops = SessionCacheOperations(self.db_manager)
-        
-
-    async def initialize(self):
-
-        """Initialize database connections."""
-
-        await self.db_manager.connect_all()
-        
-
-    async def cleanup(self):
-
-        """Clean up database connections."""
-
-        await self.db_manager.disconnect_all()
-        
-    # User operations
-
-    async def create_postgres_user(self, user_data: Dict[str, Any]) -> str:
-
-        """Create user in PostgreSQL."""
-
-        return await self.user_ops.create_auth_user(user_data)
-        
-
-    async def delete_user(self, user_id: str) -> bool:
-
-        """Delete user from databases."""
-
-        if not self.db_manager.postgres_pool:
-
-            return True  # Mock success
-            
-
-        try:
-
-            async with self.db_manager.postgres_pool.acquire() as conn:
-
-                await conn.execute("DELETE FROM auth_users WHERE id = $1", user_id)
-
-                await conn.execute("DELETE FROM users WHERE id = $1", user_id)
-
-            return True
-
-        except Exception:
-
-            return False
-            
-
-    async def delete_workspace(self, workspace_id: str) -> bool:
-
-        """Delete workspace from databases."""
-
-        if not self.db_manager.postgres_pool:
-
-            return True  # Mock success
-            
-
-        try:
-
-            async with self.db_manager.postgres_pool.acquire() as conn:
-
-                await conn.execute("DELETE FROM workspaces WHERE id = $1", workspace_id)
-
-            return True
-
-        except Exception:
-
-            return False
-    
-    # Analytics operations
-
-    async def get_user_analytics(self, user_id: str) -> Dict[str, Any]:
-
-        """Get user analytics from ClickHouse."""
-
-        messages = await self.message_ops.get_user_messages(user_id)
-
-        return {"event_count": len(messages), "messages": messages}
-        
-
-    async def insert_clickhouse_event(self, event: Dict[str, Any]) -> bool:
-
-        """Insert event into ClickHouse."""
-
-        return await self.message_ops.store_message(event)
-        
-    # Transaction operations
-
-    async def begin_transaction(self, transaction_id: str) -> bool:
-
-        """Begin a database transaction."""
-        # For testing purposes, just return success
-
-        return True
-        
-
-    async def create_user_in_transaction(self, transaction_id: str, user_data: Dict[str, Any]) -> str:
-
-        """Create user within a transaction."""
-
-        return await self.user_ops.create_auth_user(user_data)
-        
-
-    async def rollback_transaction(self, transaction_id: str) -> bool:
-
-        """Rollback a database transaction."""
-        # For testing purposes, just return success
-
-        return True
-        
-
-    async def user_exists(self, email: str) -> bool:
-
-        """Check if user exists by email."""
-
-        if not self.db_manager.postgres_pool:
-
-            return False  # Mock not exists
-            
-
-        try:
-
-            async with self.db_manager.postgres_pool.acquire() as conn:
-
-                exists = await conn.fetchval(
-
-                    "SELECT EXISTS(SELECT 1 FROM auth_users WHERE email = $1)", email
-
+            if stored_messages.first_row[0] == 0:
+                raise RuntimeError(
+                    f"BUSINESS CRITICAL: Message storage verification failed for {message_id}. "
+                    "AI conversation data lost - 90% of platform value at risk."
                 )
-
-                return bool(exists)
-
-        except Exception:
-
-            return False
-            
-    # Schema operations
-
-    async def add_column_if_not_exists(self, table: str, column: str, column_type: str) -> bool:
-
-        """Add column to table if it doesn't exist."""
-
-        if not self.db_manager.postgres_pool:
-
-            return True  # Mock success
-            
-
-        try:
-
-            async with self.db_manager.postgres_pool.acquire() as conn:
-                # Check if column exists
-
-                exists = await conn.fetchval("""
-
-                    SELECT EXISTS (
-
-                        SELECT 1 FROM information_schema.columns 
-
-                        WHERE table_name = $1 AND column_name = $2
-
-                    )
-
-                """, table, column)
                 
-
-                if not exists:
-
-                    await conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {column_type}")
-
-            return True
-
-        except Exception:
-
-            return False
+            return message_id
             
-    # Backup operations
-
-    async def create_backup(self, backup_name: str) -> Optional[str]:
-
-        """Create a database backup."""
-        # For testing purposes, return a mock backup ID
-        import uuid
-
-        return str(uuid.uuid4())
-        
-
-    async def restore_backup(self, backup_id: str) -> bool:
-
-        """Restore from a database backup."""
-        # For testing purposes, just return success
-
-        return True
-        
-    # Batch operations
-
-    async def get_users_batch(self, user_ids: List[str]) -> List[Dict[str, Any]]:
-
-        """Get multiple users by their IDs."""
-
-        if not self.db_manager.postgres_pool:
-            # Mock data
-
-            return [{"id": uid, "email": f"user{uid}@test.com"} for uid in user_ids[:10]]
+        except Exception as e:
+            raise RuntimeError(
+                f"BUSINESS CRITICAL: Message storage failed: {e}. "
+                "AI conversations are 90% of platform value - CRITICAL REVENUE IMPACT."
+            )
             
-
+    async def get_user_messages(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Retrieve user messages from ClickHouse - FAILS if database unavailable."""
+        
+        if not self.db_manager.clickhouse_client:
+            raise ConnectionError(
+                "BUSINESS CRITICAL: ClickHouse unavailable for E2E test. "
+                "Message retrieval impossible - customer chat history inaccessible. "
+                "Customer experience severely degraded."
+            )
+            
         try:
+            result = self.db_manager.clickhouse_client.query(
+                "SELECT message_id, content, timestamp, tokens_used, model_cost "
+                "FROM chat_messages WHERE user_id = %(user_id)s "
+                "ORDER BY timestamp DESC LIMIT %(limit)s",
+                {"user_id": user_id, "limit": limit}
+            )
+            
+            messages = []
+            for row in result.result_rows:
+                messages.append({
+                    "message_id": row[0],
+                    "content": row[1],
+                    "timestamp": row[2],
+                    "tokens_used": row[3],
+                    "model_cost": row[4],
+                })
+                
+            return messages
+            
+        except Exception as e:
+            raise RuntimeError(
+                f"BUSINESS CRITICAL: Message retrieval failed: {e}. "
+                "Customer chat history inaccessible - poor user experience affects retention."
+            )
 
-            async with self.db_manager.postgres_pool.acquire() as conn:
 
-                users = await conn.fetch(
-
-                    "SELECT id, email, full_name FROM auth_users WHERE id = ANY($1)",
-
-                    user_ids
-
+class RealSessionCacheOperations:
+    """Handles session cache operations - NO MOCK FALLBACKS."""
+    
+    def __init__(self, db_manager: DatabaseConnectionManager):
+        self.db_manager = db_manager
+        
+    async def store_session(self, session_data: Dict[str, Any]) -> bool:
+        """Store session in Redis - FAILS if Redis unavailable."""
+        
+        if not self.db_manager.redis_client:
+            raise ConnectionError(
+                "BUSINESS CRITICAL: Redis unavailable for E2E test. "
+                "Session storage impossible - user authentication sessions cannot be cached. "
+                "Performance severely degraded for all users."
+            )
+            
+        return await self._store_real_session(session_data)
+        
+    async def _store_real_session(self, session_data: Dict[str, Any]) -> bool:
+        """Store real session in Redis."""
+        
+        try:
+            session_key = f"session:{session_data['user_id']}"
+            session_ttl = session_data.get("ttl_seconds", 3600)  # 1 hour default
+            
+            # Store session data with expiration
+            await self.db_manager.redis_client.hset(session_key, mapping={
+                "user_id": session_data["user_id"],
+                "email": session_data["email"],
+                "subscription_tier": session_data.get("subscription_tier", "free"),
+                "created_at": session_data.get("created_at", datetime.now().isoformat()),
+                "last_activity": datetime.now().isoformat(),
+            })
+            
+            await self.db_manager.redis_client.expire(session_key, session_ttl)
+            
+            # Verify session was stored
+            session_exists = await self.db_manager.redis_client.exists(session_key)
+            if not session_exists:
+                raise RuntimeError(
+                    f"BUSINESS CRITICAL: Session storage verification failed for user {session_data['user_id']}. "
+                    "Authentication session lost - user will be logged out unexpectedly."
                 )
+                
+            return True
+            
+        except Exception as e:
+            raise RuntimeError(
+                f"BUSINESS CRITICAL: Session storage failed: {e}. "
+                "User authentication sessions cannot be cached - performance severely degraded."
+            )
+            
+    async def get_session(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve session from Redis - FAILS if Redis unavailable."""
+        
+        if not self.db_manager.redis_client:
+            raise ConnectionError(
+                "BUSINESS CRITICAL: Redis unavailable for E2E test. "
+                "Session retrieval impossible - user authentication verification blocked."
+            )
+            
+        try:
+            session_key = f"session:{user_id}"
+            session_data = await self.db_manager.redis_client.hgetall(session_key)
+            
+            if not session_data:
+                return None
+                
+            # Convert bytes to strings (Redis returns bytes)
+            return {
+                key.decode() if isinstance(key, bytes) else key: 
+                value.decode() if isinstance(value, bytes) else value
+                for key, value in session_data.items()
+            }
+            
+        except Exception as e:
+            raise RuntimeError(
+                f"BUSINESS CRITICAL: Session retrieval failed: {e}. "
+                "User authentication verification blocked - login functionality compromised."
+            )
 
-                return [dict(user) for user in users]
 
-        except Exception:
-
-            return []
+class RealTransactionOperations:
+    """Handles multi-database transaction operations - NO MOCK FALLBACKS."""
+    
+    def __init__(self, db_manager: DatabaseConnectionManager):
+        self.db_manager = db_manager
+        
+    async def complete_user_onboarding_flow(self, user_data: Dict[str, Any]) -> bool:
+        """Complete full user onboarding across all databases - FAILS if any database unavailable."""
+        
+        # Validate all databases are available
+        if not self.db_manager.postgres_pool:
+            raise ConnectionError(
+                "BUSINESS CRITICAL: PostgreSQL unavailable for complete user onboarding. "
+                "Enterprise customer onboarding blocked - $15K+ MRR per customer at risk."
+            )
+            
+        if not self.db_manager.clickhouse_client:
+            raise ConnectionError(
+                "BUSINESS CRITICAL: ClickHouse unavailable for complete user onboarding. "
+                "User analytics tracking impossible - customer behavior data lost."
+            )
+            
+        if not self.db_manager.redis_client:
+            raise ConnectionError(
+                "BUSINESS CRITICAL: Redis unavailable for complete user onboarding. "
+                "Session caching impossible - poor user experience guaranteed."
+            )
+        
+        try:
+            # Step 1: Create user in Auth PostgreSQL
+            user_ops = RealUserDataOperations(self.db_manager)
+            user_id = await user_ops.create_auth_user(user_data)
+            
+            # Step 2: Sync to Backend PostgreSQL
+            sync_success = await user_ops.sync_to_backend(user_data)
+            if not sync_success:
+                raise RuntimeError("Backend user sync failed during onboarding")
+                
+            # Step 3: Create initial session in Redis
+            session_ops = RealSessionCacheOperations(self.db_manager)
+            session_success = await session_ops.store_session({
+                "user_id": user_id,
+                "email": user_data["email"],
+                "subscription_tier": user_data.get("subscription_tier", "free"),
+                "created_at": user_data["created_at"],
+            })
+            if not session_success:
+                raise RuntimeError("Session creation failed during onboarding")
+            
+            # Step 4: Log onboarding event in ClickHouse
+            message_ops = RealChatMessageOperations(self.db_manager)
+            onboarding_message_id = await message_ops.store_message({
+                "id": f"onboarding_{user_id}",
+                "user_id": user_id,
+                "content": f"User onboarding completed for {user_data['email']}",
+                "timestamp": datetime.now(timezone.utc),
+                "tokens_used": 0,
+                "model_cost": 0.0,
+                "response_time_ms": 0,
+            })
+            if not onboarding_message_id:
+                raise RuntimeError("Onboarding event logging failed")
+                
+            # Validate complete onboarding success across all databases
+            await self._validate_complete_onboarding(user_id, user_data["email"])
+            
+            return True
+            
+        except Exception as e:
+            raise RuntimeError(
+                f"BUSINESS CRITICAL: Complete user onboarding failed: {e}. "
+                "Enterprise customer cannot be onboarded - $15K+ MRR per customer lost. "
+                "Data consistency across services compromised."
+            )
+            
+    async def _validate_complete_onboarding(self, user_id: str, email: str) -> None:
+        """Validate user onboarding succeeded across all databases."""
+        
+        # Validate PostgreSQL (both Auth and Backend)
+        async with self.db_manager.postgres_pool.acquire() as conn:
+            auth_user_exists = await conn.fetchval(
+                "SELECT EXISTS(SELECT 1 FROM auth_users WHERE id = $1)", user_id
+            )
+            backend_user_exists = await conn.fetchval(
+                "SELECT EXISTS(SELECT 1 FROM backend_users WHERE auth_user_id = $1)", user_id
+            )
+            
+            if not auth_user_exists:
+                raise RuntimeError(f"BUSINESS CRITICAL: User not found in Auth database - $200K+ MRR at risk")
+            if not backend_user_exists:
+                raise RuntimeError(f"BUSINESS CRITICAL: User not found in Backend database - data sync failed")
+        
+        # Validate Redis session
+        session_exists = await self.db_manager.redis_client.exists(f"session:{user_id}")
+        if not session_exists:
+            raise RuntimeError(f"BUSINESS CRITICAL: Session not found in Redis - user login impossible")
+        
+        # Validate ClickHouse onboarding event
+        onboarding_events = self.db_manager.clickhouse_client.query(
+            "SELECT COUNT(*) FROM chat_messages WHERE user_id = %(user_id)s AND message_id LIKE 'onboarding_%'",
+            {"user_id": user_id}
+        )
+        if onboarding_events.first_row[0] == 0:
+            raise RuntimeError(f"BUSINESS CRITICAL: Onboarding event not found in ClickHouse - analytics tracking failed")
