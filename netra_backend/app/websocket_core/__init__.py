@@ -40,6 +40,7 @@ from netra_backend.app.websocket_core.unified_emitter import (
 # CRITICAL SECURITY MIGRATION: Import factory pattern components
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
+    IsolatedWebSocketManager,
     get_websocket_manager_factory,
     create_websocket_manager
 )
@@ -187,6 +188,7 @@ try:
     from netra_backend.app.websocket_core.connection_state_machine import (
         ApplicationConnectionState,
         ConnectionStateMachine,
+        ApplicationConnectionStateMachine,
         ConnectionStateMachineRegistry,
         StateTransitionInfo,
         get_connection_state_registry,
@@ -251,6 +253,7 @@ __all__ = [
     
     # CRITICAL SECURITY MIGRATION: Factory pattern exports
     "WebSocketManagerFactory",
+    "IsolatedWebSocketManager",
     "get_websocket_manager_factory",
     "create_websocket_manager",
     "get_websocket_manager",  # Backward compatibility
@@ -302,6 +305,7 @@ __all__ = [
     # Connection state machine components
     "ApplicationConnectionState",
     "ConnectionStateMachine", 
+    "ApplicationConnectionStateMachine",
     "ConnectionStateMachineRegistry",
     "StateTransitionInfo",
     "get_connection_state_registry",
