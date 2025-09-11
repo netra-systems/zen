@@ -656,6 +656,39 @@ async def get_request_scoped_user_context(
             detail=f"Failed to create request-scoped context: {str(e)}"
         )
 
+# Alias for HTTP API compatibility (PRIORITY 1 FIX)
+async def get_request_scoped_context(
+    user_id: str,
+    thread_id: str,
+    run_id: Optional[str] = None,
+    websocket_connection_id: Optional[str] = None
+) -> RequestScopedContext:
+    """Alias for get_request_scoped_user_context for HTTP API compatibility.
+    
+    CRITICAL FIX for Issue #358: HTTP API components expect this function name.
+    This is a direct alias that provides the same functionality as
+    get_request_scoped_user_context with parameter name compatibility.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation
+        run_id: Optional run identifier (auto-generated if not provided)
+        websocket_connection_id: Optional WebSocket connection identifier
+        
+    Returns:
+        RequestScopedContext: Context with metadata only, no sessions
+        
+    Raises:
+        HTTPException: If context creation fails
+    """
+    # Delegate to the main implementation with parameter name mapping
+    return await get_request_scoped_user_context(
+        user_id=user_id,
+        thread_id=thread_id, 
+        run_id=run_id,
+        websocket_client_id=websocket_connection_id  # Parameter name mapping
+    )
+
 def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, run_id: Optional[str] = None) -> UserExecutionContext:
     """Get existing user execution context or create if needed - CORRECT PATTERN.
     
@@ -761,7 +794,8 @@ def create_user_execution_context(user_id: str,
                                   thread_id: str, 
                                   run_id: Optional[str] = None,
                                   db_session: Optional[AsyncSession] = None,
-                                  websocket_client_id: Optional[str] = None) -> UserExecutionContext:
+                                  websocket_client_id: Optional[str] = None,
+                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
     """Create UserExecutionContext for per-request isolation.
     
     ⚠️  DEPRECATED: This function breaks conversation continuity!
@@ -782,7 +816,8 @@ def create_user_execution_context(user_id: str,
         thread_id: Thread identifier for conversation
         run_id: Optional run identifier (auto-generated if not provided)
         db_session: Optional database session (MUST be request-scoped)
-        websocket_connection_id: Optional WebSocket connection identifier
+        websocket_client_id: Optional WebSocket client identifier (preferred)
+        websocket_connection_id: Optional WebSocket connection identifier (alias)
         
     Returns:
         UserExecutionContext: Isolated context for the request
@@ -791,6 +826,12 @@ def create_user_execution_context(user_id: str,
         HTTPException: If context creation fails
     """
     logger.warning("Using deprecated create_user_execution_context - consider get_request_scoped_user_context")
+    
+    # PRIORITY 1 FIX: Handle both websocket parameter names for compatibility
+    websocket_id = websocket_client_id or websocket_connection_id
+    if websocket_connection_id and websocket_client_id:
+        logger.warning("Both websocket_client_id and websocket_connection_id provided - using websocket_client_id")
+        websocket_id = websocket_client_id
     
     try:
         # CRITICAL: Validate that session is not from global storage
@@ -822,7 +863,7 @@ def create_user_execution_context(user_id: str,
             thread_id=thread_id,
             run_id=run_id,
             db_session=db_session,
-            websocket_client_id=websocket_client_id  # Fixed parameter name
+            websocket_client_id=websocket_id  # Use resolved websocket parameter
         )
         
         logger.info(f"Created UserExecutionContext for user {user_id}, run {run_id}")

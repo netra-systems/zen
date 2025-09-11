@@ -49,14 +49,13 @@ class BackendEnvironment:
             if not secret_key or secret_key.startswith("dev-"):
                 self.env.set("SECRET_KEY", "test-secret-key-for-test-environment-only-32-chars-min", source="backend_environment_test_defaults")
             
-            jwt_secret = self.env.get("JWT_SECRET_KEY") 
-            if not jwt_secret or jwt_secret.startswith("development-"):
-                self.env.set("JWT_SECRET_KEY", "test-jwt-secret-key-for-testing-only-must-be-32-chars", source="backend_environment_test_defaults")
+            # SSOT COMPLIANCE: JWT_SECRET_KEY removed - Auth service is SSOT for JWT operations
+            # Backend tests should not require direct JWT secret access
         
         # Core backend requirements
         # Database URL can come from components or built from POSTGRES_* variables
+        # SSOT COMPLIANCE: JWT_SECRET_KEY removed - Backend should not require direct JWT secret access
         required_vars = [
-            "JWT_SECRET_KEY",
             "SECRET_KEY"
         ]
         
@@ -87,21 +86,7 @@ class BackendEnvironment:
             logger.debug("Skipping database URL validation during test collection mode")
     
     # Authentication & Security
-    def get_jwt_secret_key(self) -> str:
-        """
-        Get JWT secret key for authentication.
-        
-        Uses unified secrets manager to properly handle environment-specific JWT secrets.
-        This ensures consistency with auth service which uses environment-specific secrets.
-        
-        Priority order:
-        1. Environment-specific JWT_SECRET_{ENVIRONMENT} (e.g., JWT_SECRET_STAGING)
-        2. Generic JWT_SECRET_KEY
-        3. Legacy JWT_SECRET
-        4. Development fallback
-        """
-        from netra_backend.app.core.configuration.unified_secrets import get_jwt_secret
-        return get_jwt_secret()
+    # SSOT COMPLIANCE: JWT secret access REMOVED - Auth service is SSOT for JWT operations
     
     def get_secret_key(self) -> str:
         """Get general secret key for session/encryption."""
@@ -208,8 +193,8 @@ class BackendEnvironment:
             is_validation_test_context = (
                 self.get_environment() == "staging" and 
                 self.env.get("REDIS_HOST") == "" and
-                self.env.get("SECRET_KEY") == "" and
-                self.env.get("JWT_SECRET_KEY") == "short"
+                self.env.get("SECRET_KEY") == ""
+                # SSOT COMPLIANCE: JWT_SECRET_KEY validation removed - Auth service is SSOT
             ) or (
                 # Support pytest test context detection 
                 self.env.get("PYTEST_CURRENT_TEST") is not None and
@@ -392,21 +377,18 @@ class BackendEnvironment:
             self.env.get("ENVIRONMENT", "").lower() in ["test", "testing"]
         )
         
+        # SSOT COMPLIANCE: JWT secret validation removed - Auth service is SSOT for JWT operations
+        # Backend validation should only check backend-specific requirements
+        
         if is_test_context:
             # Use direct environment access for test validation to respect isolation
-            jwt_secret = self.env.get("JWT_SECRET_KEY", "")
             secret_key = self.env.get("SECRET_KEY", "")
         else:
-            # Use normal getters for production (includes unified secrets manager)
-            jwt_secret = self.get_jwt_secret_key()
+            # Use normal getters for production
             secret_key = self.get_secret_key()
         
         # Validate required variables with proper length checks
-        if not jwt_secret:
-            issues.append("Missing required variable: JWT_SECRET_KEY")
-        elif len(jwt_secret) < 16:  # Minimum security requirement
-            issues.append("JWT_SECRET_KEY too short (minimum 16 characters required)")
-            
+        # SSOT COMPLIANCE: Only validate SECRET_KEY, not JWT secrets
         if not secret_key:
             issues.append("Missing required variable: SECRET_KEY")
         elif len(secret_key) < 16:  # Minimum security requirement  
@@ -430,9 +412,8 @@ class BackendEnvironment:
                 issues.append(f"Redis configuration validation failed: {str(e)}")
         
         # Check for insecure defaults in non-development (use test context values if in test)
+        # SSOT COMPLIANCE: Only check SECRET_KEY, not JWT secrets
         if not self.is_development():
-            if jwt_secret == "dev-jwt-secret":
-                issues.append("Using development JWT_SECRET_KEY in non-development environment")
             if secret_key == "dev-secret-key":
                 issues.append("Using development SECRET_KEY in non-development environment")
         
