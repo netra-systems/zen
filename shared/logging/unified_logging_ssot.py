@@ -406,13 +406,19 @@ class UnifiedLoggingSSOT:
         
         # Configure console handler with proper formatting
         if self._config['enable_json_logging']:
-            # JSON format for GCP Cloud Run
+            # JSON format for GCP Cloud Run - use custom sink to avoid format string issues
+            def json_sink(message):
+                """Custom sink that outputs JSON directly to stdout."""
+                json_formatter = self._get_json_formatter()
+                json_output = json_formatter(message.record)
+                sys.stdout.write(json_output + '\n')
+                sys.stdout.flush()
+            
             logger.add(
-                sys.stdout,
+                sink=json_sink,
                 level=self._config['log_level'],
-                format=self._get_json_formatter(),
                 filter=self._should_log_record,
-                serialize=False  # We'll handle JSON serialization
+                serialize=False  # We handle JSON serialization in the sink
             )
         else:
             # Human-readable format for development
