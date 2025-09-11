@@ -915,6 +915,12 @@ class AgentInstanceFactory:
             if should_track_metrics and hasattr(self, '_perf_stats'):
                 self._perf_stats['agent_creation_ms'].append(creation_time_ms)
             
+            # GOLDEN PATH COMPATIBILITY: Enable test mode for agents when WebSocket bridge is unavailable
+            # (This catches agents that weren't created via factory method)
+            if not self._websocket_bridge and hasattr(agent, 'enable_websocket_test_mode'):
+                agent.enable_websocket_test_mode()
+                logger.debug(f"Enabled WebSocket test mode for {agent_name} (no bridge configured in factory)")
+            
             logger.info(f"✅ Created agent instance {agent_name} for user {user_context.user_id} in {creation_time_ms:.1f}ms (run_id: {user_context.run_id})")
             
             return agent

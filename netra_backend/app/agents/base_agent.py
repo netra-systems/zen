@@ -1391,6 +1391,24 @@ class BaseAgent(ABC):
         if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
             self._websocket_adapter.enable_test_mode()
             logger.debug(f"Agent {self.name} enabled WebSocket test mode")
+    
+    @property
+    def websocket_emitter(self):
+        """GOLDEN PATH COMPATIBILITY: Property to access WebSocket emitter.
+        
+        This provides backward compatibility for tests that expect agents to have
+        a websocket_emitter attribute.
+        """
+        return getattr(self, '_websocket_emitter', None)
+    
+    @websocket_emitter.setter
+    def websocket_emitter(self, emitter):
+        """GOLDEN PATH COMPATIBILITY: Set WebSocket emitter for tests.
+        
+        This allows tests to inject mock WebSocket emitters into agents.
+        """
+        self._websocket_emitter = emitter
+        logger.debug(f"Agent {self.name} websocket_emitter set to {type(emitter).__name__}")
 
     # Backward compatibility for _send_update pattern
     async def send_legacy_update(self, run_id: str, status: str, message: str, 
