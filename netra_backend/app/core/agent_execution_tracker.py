@@ -20,12 +20,11 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Any, Set, Callable, TypeVar
 from collections import defaultdict
-import logging
-
-# Import UnifiedIDManager for SSOT ID generation
+# Import UnifiedIDManager for SSOT ID generation  
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+from netra_backend.app.logging_config import central_logger
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 T = TypeVar('T')
 

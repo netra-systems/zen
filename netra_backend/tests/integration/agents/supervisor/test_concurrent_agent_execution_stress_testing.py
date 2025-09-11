@@ -155,6 +155,7 @@ def stress_websocket_manager():
         return True
     
     ws_manager.send_event = stress_send_event
+    ws_manager.send_to_thread = stress_send_event  # Bridge calls send_to_thread, not send_event
     ws_manager.is_connected = Mock(return_value=True)
     ws_manager.get_connection_count = Mock(return_value=50)  # Simulate many connections
     

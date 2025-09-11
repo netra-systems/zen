@@ -16,11 +16,9 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-# CRITICAL SECURITY FIX: Migrating from DeepAgentState to UserExecutionContext
-# DeepAgentState creates user isolation risks and will be removed
-import warnings
+# CRITICAL SECURITY FIX: Migration to UserExecutionContext completed
+# DeepAgentState removed to eliminate user isolation risks
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - will be removed
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,

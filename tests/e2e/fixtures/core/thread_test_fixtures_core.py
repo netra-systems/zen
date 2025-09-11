@@ -20,6 +20,7 @@ import asyncio
 import threading
 from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
+from .thread_performance_utils import ThreadPerformanceUtils
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
@@ -260,7 +261,7 @@ test_users = thread_test_factory.create_test_users(5)
 __all__ = [
     'ThreadContextManager',
     'ThreadTestDataFactory', 
-    'ThreadWebSocketFixtures',
+    'ThreadWebSocketFixtures', 'ThreadPerformanceUtils',
     'ThreadTestUser',
     'test_users',
     'thread_context_manager',
@@ -566,7 +567,7 @@ __all__ = [
     'ThreadTestUser',
     'ThreadContextManager',
     'ThreadTestDataFactory',
-    'ThreadWebSocketFixtures', 
+    'ThreadWebSocketFixtures', 'ThreadPerformanceUtils', 
     'ThreadIsolationValidator',
     'WebSocketThreadManager',
     'unified_harness',

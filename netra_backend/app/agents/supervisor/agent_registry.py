@@ -215,6 +215,9 @@ class UserAgentSession:
             # Use standard factory for real bridges
             bridge = create_agent_websocket_bridge(user_context)
         
+        # CRITICAL FIX: Set the WebSocket manager on the bridge so it can emit events
+        bridge.websocket_manager = manager
+        
         self._websocket_bridge = bridge
         logger.debug(f"WebSocket bridge set for user {self.user_id}: {type(bridge).__name__}")
         
@@ -639,6 +642,19 @@ class AgentRegistry(BaseAgentRegistry):
         
         if agent is None:
             raise KeyError(f"No factory registered for agent type: {agent_type}")
+        
+        # Set WebSocket bridge on agent if available
+        if hasattr(user_session, '_websocket_bridge') and user_session._websocket_bridge:
+            if hasattr(agent, 'set_websocket_bridge'):
+                agent.set_websocket_bridge(user_session._websocket_bridge, user_context.run_id, agent_type)
+                logger.debug(f"✅ Set WebSocket bridge on agent {agent_type} for user {user_id}")
+            elif hasattr(agent, '_websocket_bridge'):
+                agent._websocket_bridge = user_session._websocket_bridge
+                agent._run_id = user_context.run_id
+                agent._agent_name = agent_type
+                logger.debug(f"✅ Set WebSocket bridge attributes on agent {agent_type} for user {user_id}")
+        else:
+            logger.warning(f"❌ No WebSocket bridge available for agent {agent_type} user {user_id}")
         
         # Register agent with user session
         await user_session.register_agent(agent_type, agent)

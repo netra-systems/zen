@@ -60,7 +60,7 @@ class CloudRunRaceCondition:
         return 0.0
 
 
-class WebSocketCloudRunRaceConditionTests:
+class TestWebSocketCloudRunRaceConditions:
     """
     Tests that reproduce the exact race conditions that occur in GCP Cloud Run environments.
     
