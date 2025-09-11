@@ -12,7 +12,9 @@ Expected Result: PASS after SSOT consolidation removes duplicate imports
 """
 
 import asyncio
+import logging
 import sys
+import unittest
 from pathlib import Path
 from typing import Dict, List, Any
 
@@ -25,7 +27,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class TestWebSocketSSotImportViolations(SSotBaseTestCase):
+class TestWebSocketSSotImportViolations(SSotBaseTestCase, unittest.TestCase):
     """
     Test suite to detect and validate WebSocket SSOT import violations.
     
@@ -70,8 +72,9 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase):
                           f"Found {successful_imports} working import paths: {import_test_results}")
         
         # Log the violation for debugging
-        self.logger.warning(f"WebSocket SSOT Import Violation: {successful_imports} import paths work")
-        self.metrics.record_test_event("websocket_ssot_import_violation", {
+        import logging
+        logging.getLogger(__name__).warning(f"WebSocket SSOT Import Violation: {successful_imports} import paths work")
+        self.record_metric("websocket_ssot_import_violation", {
             "successful_imports": successful_imports,
             "import_results": import_test_results
         })
@@ -102,7 +105,7 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase):
                              "SSOT VIOLATION DETECTED: Multiple WebSocket manager class definitions found. "
                              f"Found {len(unique_classes)} unique class IDs")
             
-            self.logger.warning(f"Circular Import Test: Found {len(unique_classes)} unique WebSocket manager classes")
+            logging.getLogger(__name__).warning(f"Circular Import Test: Found {len(unique_classes)} unique WebSocket manager classes")
             
         except ImportError as e:
             # If imports fail, that might indicate circular dependency issues
@@ -112,7 +115,7 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase):
         new_modules = set(sys.modules.keys()) - original_modules
         websocket_modules = [mod for mod in new_modules if 'websocket' in mod.lower()]
         
-        self.metrics.record_test_event("websocket_circular_import_test", {
+        self.record_metric("websocket_circular_import_test", {
             "unique_classes": len(unique_classes),
             "new_websocket_modules": len(websocket_modules)
         })
@@ -159,8 +162,8 @@ class TestWebSocketSSotImportViolations(SSotBaseTestCase):
                           "SSOT VIOLATION DETECTED: Multiple WebSocket manager aliases found. "
                           f"Found {working_aliases} working aliases: {aliases_found}")
         
-        self.logger.warning(f"WebSocket Alias Confusion: {working_aliases} aliases work")
-        self.metrics.record_test_event("websocket_alias_confusion", {
+        logging.getLogger(__name__).warning(f"WebSocket Alias Confusion: {working_aliases} aliases work")
+        self.record_metric("websocket_alias_confusion", {
             "working_aliases": working_aliases,
             "alias_results": aliases_found
         })
