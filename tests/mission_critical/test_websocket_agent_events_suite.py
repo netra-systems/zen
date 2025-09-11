@@ -45,7 +45,8 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.state import DeepAgentState
+# Removed DeepAgentState import - using UserExecutionContext for user isolation security
+# from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - security vulnerability
 from netra_backend.app.llm.llm_manager import LLMManager
 
 # Import WebSocket test utilities - REAL SERVICES ONLY per CLAUDE.md
@@ -465,13 +466,26 @@ class TestIndividualWebSocketEvents:
     
     @pytest.fixture(autouse=True)
     async def setup_individual_event_testing(self):
-        """Setup for individual event testing."""
+        """Setup for individual event testing with UserExecutionContext."""
         self.test_base = WebSocketTestBase()
         self._test_session = self.test_base.real_websocket_test_session()
         self.test_base = await self._test_session.__aenter__()
         
-        # Create test context for event testing
-        self.test_context = await self.test_base.create_test_context(user_id="event_test_user")
+        # Create UserExecutionContext for secure event testing
+        self.user_context = UserExecutionContext(
+            user_id="mission_critical_event_test_user",
+            thread_id="mission_critical_event_test_thread",
+            run_id="mission_critical_event_test_run",
+            websocket_client_id="ws_mission_critical_events",
+            agent_context={
+                "test_type": "individual_websocket_events",
+                "mission_critical": True,
+                "event_validation": True
+            }
+        )
+        
+        # Create test context with UserExecutionContext
+        self.test_context = await self.test_base.create_test_context_with_user_context(self.user_context)
         await self.test_context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
         
         yield
@@ -491,14 +505,20 @@ class TestIndividualWebSocketEvents:
         """
         validator = MissionCriticalEventValidator(strict_mode=True)
         
-        # Create test agent_started event data
+        # Create test agent_started event data using UserExecutionContext
         agent_started_event = {
             "type": "agent_started",
-            "user_id": self.test_context.user_context.user_id,
-            "thread_id": self.test_context.user_context.thread_id,
+            "user_id": self.user_context.user_id,
+            "thread_id": self.user_context.thread_id,
+            "run_id": self.user_context.run_id,
+            "websocket_client_id": self.user_context.websocket_client_id,
             "agent_name": "test_agent",
             "task": "Process user request",
-            "timestamp": time.time()
+            "timestamp": time.time(),
+            "user_context": {
+                "test_type": self.user_context.agent_context["test_type"],
+                "mission_critical": True
+            }
         }
         
         # Send the event through real WebSocket
@@ -534,10 +554,14 @@ class TestIndividualWebSocketEvents:
         
         agent_thinking_event = {
             "type": "agent_thinking",
+            "user_id": self.user_context.user_id,
+            "thread_id": self.user_context.thread_id,
+            "run_id": self.user_context.run_id,
             "reasoning": "Analyzing user request and determining best approach",
             "step": "initial_analysis",
             "progress": 0.2,
-            "timestamp": time.time()
+            "timestamp": time.time(),
+            "user_context_validation": True
         }
         
         await self.test_context.send_message(agent_thinking_event)

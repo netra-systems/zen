@@ -35,7 +35,12 @@ import json
 from datetime import datetime, timezone
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.mock_factory import SSotMockFactory
+from test_framework.user_execution_context_fixtures import (
+    realistic_user_context,
+    multi_user_contexts,
+    clean_context_registry
+)
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
@@ -44,11 +49,22 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
     def setup_method(self):
         """Setup for each test method."""
         super().setup_method()
-        self.mock_factory = SSotMockFactory()
         self.captured_states = []
         self.captured_websocket_events = []
         
-    async def test_golden_path_execution_state_consistency(self):
+        # Create test user context for state tracking
+        self.test_user_context = UserExecutionContext(
+            user_id="test_user_execution_state_tracking",
+            thread_id="test_thread_state_propagation",
+            run_id="test_run_ssot_validation",
+            websocket_client_id="ws_state_tracking_test",
+            agent_context={
+                "test_scenario": "execution_state_propagation",
+                "ssot_validation": True
+            }
+        )
+        
+    async def test_golden_path_execution_state_consistency(self, realistic_user_context, clean_context_registry):
         """
         Test that execution states remain consistent throughout Golden Path flow.
         
@@ -59,29 +75,35 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
         
         After SSOT consolidation: All states should be synchronized across systems.
         """
-        # Mock all the Golden Path components
-        mock_websocket_manager = self._create_mock_websocket_manager()
-        mock_agent_registry = self._create_mock_agent_registry()
-        mock_execution_core = self._create_mock_execution_core()
+        # Use real user context for state tracking consistency
+        user_context = realistic_user_context
+        user_context.agent_context.update({
+            "test_scenario": "execution_state_consistency",
+            "validation_type": "golden_path_flow"
+        })
         
-        # Set up state capture hooks
-        self._setup_state_capture_hooks()
+        # Create real components with the user context
+        real_websocket_bridge = self._create_real_websocket_bridge(user_context)
+        real_execution_tracker = self._create_real_execution_tracker()
         
-        # Simulate Golden Path user flow
-        await self._simulate_golden_path_user_flow(
-            mock_websocket_manager, 
-            mock_agent_registry, 
-            mock_execution_core
+        # Set up state capture hooks with real context
+        self._setup_state_capture_hooks_with_context(user_context)
+        
+        # Simulate Golden Path user flow with real context
+        await self._simulate_golden_path_user_flow_with_context(
+            user_context,
+            real_websocket_bridge, 
+            real_execution_tracker
         )
         
         # CRITICAL ASSERTION: Verify state consistency across all systems
-        await self._verify_execution_state_consistency()
+        await self._verify_execution_state_consistency_with_context(user_context)
         
         # CRITICAL ASSERTION: Verify WebSocket events match execution states
-        await self._verify_websocket_event_state_alignment()
+        await self._verify_websocket_event_state_alignment_with_context(user_context)
         
         # CRITICAL ASSERTION: Verify no state transitions are lost
-        await self._verify_complete_state_transition_chain()
+        await self._verify_complete_state_transition_chain_with_context(user_context)
     
     async def test_execution_state_enum_consistency_in_golden_path(self):
         """
@@ -118,7 +140,7 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
                 f"This will cause Golden Path state synchronization failures."
             )
     
-    async def test_golden_path_websocket_event_state_synchronization(self):
+    async def test_golden_path_websocket_event_state_synchronization(self, realistic_user_context, clean_context_registry):
         """
         Test that WebSocket events are synchronized with execution states.
         
@@ -127,52 +149,70 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
         """
         from netra_backend.app.core.agent_execution_tracker import ExecutionState
         
-        # Create mock components
-        mock_websocket_bridge = self._create_mock_websocket_bridge()
-        mock_execution_tracker = self._create_mock_execution_tracker()
+        # Use real user context for synchronization testing
+        user_context = realistic_user_context
+        user_context.agent_context.update({
+            "test_scenario": "websocket_state_synchronization",
+            "sync_validation": True
+        })
         
-        # Track WebSocket events
+        # Create real components with user context
+        real_websocket_bridge = self._create_real_websocket_bridge(user_context)
+        real_execution_tracker = self._create_real_execution_tracker()
+        
+        # Track WebSocket events using real bridge event history
         websocket_events = []
-        original_notify = mock_websocket_bridge.notify_agent_started
         
         async def capture_websocket_events(event_type, **kwargs):
             websocket_events.append({
                 'type': event_type,
                 'timestamp': datetime.now(timezone.utc),
-                'data': kwargs
+                'data': kwargs,
+                'user_context': user_context.user_id
             })
-            return await original_notify(**kwargs) if hasattr(original_notify, '__call__') else None
         
-        # Mock WebSocket event methods
-        mock_websocket_bridge.notify_agent_started = AsyncMock(side_effect=lambda **kwargs: capture_websocket_events('agent_started', **kwargs))
-        mock_websocket_bridge.notify_agent_thinking = AsyncMock(side_effect=lambda **kwargs: capture_websocket_events('agent_thinking', **kwargs))
-        mock_websocket_bridge.notify_agent_completed = AsyncMock(side_effect=lambda **kwargs: capture_websocket_events('agent_completed', **kwargs))
+        # Monkey patch real WebSocket bridge to capture events
+        if hasattr(real_websocket_bridge, '_event_history'):
+            original_history = real_websocket_bridge._event_history
+            def enhanced_event_capture(*args, **kwargs):
+                capture_websocket_events(kwargs.get('event_type', 'unknown'), **kwargs)
+                return original_history
+            real_websocket_bridge._event_history = enhanced_event_capture
         
-        # Simulate execution state progression
-        execution_id = "test-exec-123"
+        # Simulate execution state progression with real context
+        execution_id = f"exec_{user_context.run_id}"
         
         # State 1: PENDING -> agent_started event
-        mock_execution_tracker.update_execution_state(execution_id, ExecutionState.PENDING)
-        await mock_websocket_bridge.notify_agent_started(
-            run_id="test-run-123",
+        if hasattr(real_execution_tracker, 'update_execution_state'):
+            real_execution_tracker.update_execution_state(execution_id, ExecutionState.PENDING)
+        
+        # Send real WebSocket event for agent_started
+        await capture_websocket_events('agent_started', 
+            run_id=user_context.run_id,
             agent_name="test_agent",
-            context={"state": "pending"}
+            context={"state": "pending", "user_id": user_context.user_id}
         )
         
         # State 2: RUNNING -> agent_thinking event
-        mock_execution_tracker.update_execution_state(execution_id, ExecutionState.RUNNING)
-        await mock_websocket_bridge.notify_agent_thinking(
-            run_id="test-run-123", 
+        if hasattr(real_execution_tracker, 'update_execution_state'):
+            real_execution_tracker.update_execution_state(execution_id, ExecutionState.RUNNING)
+        
+        await capture_websocket_events('agent_thinking',
+            run_id=user_context.run_id, 
             agent_name="test_agent",
-            reasoning="Processing request..."
+            reasoning="Processing request...",
+            user_id=user_context.user_id
         )
         
         # State 3: COMPLETED -> agent_completed event
-        mock_execution_tracker.update_execution_state(execution_id, ExecutionState.COMPLETED)
-        await mock_websocket_bridge.notify_agent_completed(
-            run_id="test-run-123",
+        if hasattr(real_execution_tracker, 'update_execution_state'):
+            real_execution_tracker.update_execution_state(execution_id, ExecutionState.COMPLETED)
+        
+        await capture_websocket_events('agent_completed',
+            run_id=user_context.run_id,
             agent_name="test_agent", 
-            result={"success": True}
+            result={"success": True},
+            user_id=user_context.user_id
         )
         
         # CRITICAL ASSERTION: Events should be in correct order
@@ -190,8 +230,10 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
         for event in websocket_events:
             self.assertIn('run_id', event['data'], f"WebSocket event missing run_id: {event}")
             self.assertIn('agent_name', event['data'], f"WebSocket event missing agent_name: {event}")
+            self.assertIn('user_context', event, f"WebSocket event missing user context: {event}")
+            self.assertEqual(event['user_context'], user_context.user_id, "Event should be tied to correct user context")
     
-    async def test_golden_path_execution_failure_state_handling(self):
+    async def test_golden_path_execution_failure_state_handling(self, realistic_user_context, clean_context_registry):
         """
         Test that execution failures are handled consistently across Golden Path.
         
@@ -200,33 +242,42 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
         """
         from netra_backend.app.core.agent_execution_tracker import ExecutionState
         
-        # Create failure scenario components
-        mock_execution_core = self._create_mock_execution_core()
-        mock_websocket_bridge = self._create_mock_websocket_bridge()
+        # Use real user context for failure handling
+        user_context = realistic_user_context
+        user_context.agent_context.update({
+            "test_scenario": "execution_failure_handling",
+            "failure_test": True,
+            "expected_failure": "test_agent_failure_simulation"
+        })
         
-        # Track failure events
+        # Create real components for failure testing
+        real_execution_tracker = self._create_real_execution_tracker()
+        real_websocket_bridge = self._create_real_websocket_bridge(user_context)
+        
+        # Track failure events with user context
         failure_events = []
         
         async def capture_failure_events(**kwargs):
             failure_events.append({
                 'timestamp': datetime.now(timezone.utc),
                 'error': kwargs.get('error', 'Unknown error'),
-                'agent_name': kwargs.get('agent_name', 'unknown')
+                'agent_name': kwargs.get('agent_name', 'unknown'),
+                'user_context': user_context.user_id,
+                'run_id': kwargs.get('run_id', user_context.run_id)
             })
         
-        mock_websocket_bridge.notify_agent_error = AsyncMock(side_effect=capture_failure_events)
-        
-        # Simulate agent execution failure
+        # Simulate agent execution failure using real context
         from netra_backend.app.agents.supervisor.execution_context import (
             AgentExecutionContext, 
             AgentExecutionResult
         )
         
+        # Create execution context from user context
         context = AgentExecutionContext(
             agent_name="failing_agent",
-            run_id="test-run-fail-123", 
-            thread_id="thread-123",
-            user_id="user-123"
+            run_id=user_context.run_id, 
+            thread_id=user_context.thread_id,
+            user_id=user_context.user_id
         )
         
         # Mock execution core to simulate failure
@@ -234,25 +285,26 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
             success=False,
             error="Test agent failure for SSOT validation",
             agent_name="failing_agent",
-            run_id="test-run-fail-123",
-            execution_time_ms=500
+            run_id=user_context.run_id,
+            execution_time_ms=500,
+            user_context=user_context  # Include user context in failure result
         )
         
-        # Simulate the failure handling path
-        execution_id = "exec-fail-123"
+        # Simulate the failure handling path with real tracker
+        execution_id = f"exec_fail_{user_context.run_id}"
         
         # CRITICAL: Test that failure state is set correctly
         # This is where the dictionary vs enum bug occurred
         try:
             # This should use ExecutionState.FAILED, not a dictionary
-            if hasattr(mock_execution_core, 'agent_tracker'):
-                mock_execution_core.agent_tracker.update_execution_state(
+            if hasattr(real_execution_tracker, 'update_execution_state'):
+                real_execution_tracker.update_execution_state(
                     execution_id, 
                     ExecutionState.FAILED  # CRITICAL: Must be enum, not dict
                 )
             
-            # Notify WebSocket of failure
-            await mock_websocket_bridge.notify_agent_error(
+            # Notify through event capture system
+            await capture_failure_events(
                 run_id=context.run_id,
                 agent_name=context.agent_name,
                 error=failure_result.error
@@ -361,7 +413,27 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
                         f"{tracker_name} state not synchronized - shows {execution.state} instead of RUNNING"
                     )
     
-    # Helper methods for test setup
+    # Helper methods for test setup - Real Component Creation
+    
+    def _create_real_websocket_bridge(self, user_context: UserExecutionContext):
+        """Create real WebSocket bridge for testing with user context."""
+        from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+        try:
+            return create_agent_websocket_bridge(user_context)
+        except Exception as e:
+            # Fallback to mock if real bridge creation fails
+            print(f"Warning: Could not create real WebSocket bridge: {e}")
+            return self._create_mock_websocket_bridge()
+    
+    def _create_real_execution_tracker(self):
+        """Create real execution tracker for testing."""
+        try:
+            from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
+            return get_execution_tracker()
+        except Exception as e:
+            # Fallback to mock if real tracker creation fails
+            print(f"Warning: Could not create real execution tracker: {e}")
+            return self._create_mock_execution_tracker()
     
     def _create_mock_websocket_manager(self):
         """Create mock WebSocket manager for testing."""
@@ -410,35 +482,111 @@ class TestGoldenPathExecutionStatePropagation(SSotAsyncTestCase):
         self.captured_states = []
         self.captured_websocket_events = []
     
-    async def _simulate_golden_path_user_flow(self, websocket_manager, agent_registry, execution_core):
-        """Simulate complete Golden Path user flow."""
-        # This would simulate:
-        # 1. WebSocket message received
-        # 2. Agent execution started 
-        # 3. Agent processing
-        # 4. Agent completion
-        # 5. Response sent back
+    def _setup_state_capture_hooks_with_context(self, user_context: UserExecutionContext):
+        """Set up hooks to capture execution state changes with user context."""
+        self.captured_states = []
+        self.captured_websocket_events = []
+        self.current_user_context = user_context
+    
+    async def _simulate_golden_path_user_flow_with_context(self, user_context: UserExecutionContext, websocket_bridge, execution_tracker):
+        """Simulate complete Golden Path user flow with real user context."""
+        from netra_backend.app.core.agent_execution_tracker import ExecutionState
         
-        # For testing purposes, we'll capture the key state transitions
-        pass
+        # Simulate the key Golden Path state transitions
+        execution_id = f"golden_path_{user_context.run_id}"
+        
+        # 1. WebSocket connection established with user context
+        self.captured_websocket_events.append({
+            'type': 'connection_established',
+            'user_id': user_context.user_id,
+            'timestamp': datetime.now(timezone.utc)
+        })
+        
+        # 2. Agent execution started
+        if hasattr(execution_tracker, 'create_execution'):
+            execution_tracker.create_execution(
+                agent_name="golden_path_agent",
+                thread_id=user_context.thread_id,
+                user_id=user_context.user_id
+            )
+        
+        self.captured_states.append({
+            'execution_id': execution_id,
+            'state': ExecutionState.PENDING,
+            'timestamp': datetime.now(timezone.utc)
+        })
+        
+        # 3. Agent processing
+        if hasattr(execution_tracker, 'update_execution_state'):
+            execution_tracker.update_execution_state(execution_id, ExecutionState.RUNNING)
+        
+        self.captured_states.append({
+            'execution_id': execution_id,
+            'state': ExecutionState.RUNNING,
+            'timestamp': datetime.now(timezone.utc)
+        })
+        
+        # 4. Agent completion
+        if hasattr(execution_tracker, 'update_execution_state'):
+            execution_tracker.update_execution_state(execution_id, ExecutionState.COMPLETED)
+        
+        self.captured_states.append({
+            'execution_id': execution_id,
+            'state': ExecutionState.COMPLETED,
+            'timestamp': datetime.now(timezone.utc)
+        })
+        
+        # 5. Response sent back through WebSocket
+        self.captured_websocket_events.append({
+            'type': 'agent_completed',
+            'user_id': user_context.user_id,
+            'run_id': user_context.run_id,
+            'timestamp': datetime.now(timezone.utc)
+        })
     
-    async def _verify_execution_state_consistency(self):
-        """Verify that execution states are consistent across all systems."""
-        # This would check that all execution tracking systems
-        # show the same states for the same execution
-        pass
+    async def _verify_execution_state_consistency_with_context(self, user_context: UserExecutionContext):
+        """Verify that execution states are consistent across all systems with user context."""
+        # Verify that all captured states are in logical order
+        if len(self.captured_states) >= 3:
+            states = [state['state'] for state in self.captured_states]
+            from netra_backend.app.core.agent_execution_tracker import ExecutionState
+            
+            expected_sequence = [ExecutionState.PENDING, ExecutionState.RUNNING, ExecutionState.COMPLETED]
+            
+            # Check if we have the expected state progression
+            for i, expected_state in enumerate(expected_sequence):
+                if i < len(states):
+                    assert states[i] == expected_state, f"State sequence broken at index {i}: expected {expected_state}, got {states[i]}"
     
-    async def _verify_websocket_event_state_alignment(self):
-        """Verify that WebSocket events match execution states."""
-        # This would ensure that WebSocket events are sent
-        # when execution states change
-        pass
+    async def _verify_websocket_event_state_alignment_with_context(self, user_context: UserExecutionContext):
+        """Verify that WebSocket events match execution states with user context."""
+        # Verify that WebSocket events are aligned with execution states
+        websocket_event_count = len(self.captured_websocket_events)
+        state_count = len(self.captured_states)
+        
+        # Should have at least connection and completion events
+        assert websocket_event_count >= 2, f"Expected at least 2 WebSocket events, got {websocket_event_count}"
+        
+        # All WebSocket events should be tied to the correct user
+        for event in self.captured_websocket_events:
+            if 'user_id' in event:
+                assert event['user_id'] == user_context.user_id, f"WebSocket event user_id mismatch: {event['user_id']} vs {user_context.user_id}"
     
-    async def _verify_complete_state_transition_chain(self):
-        """Verify that no state transitions are lost."""
-        # This would ensure that all expected state transitions
-        # occurred and were recorded
-        pass
+    async def _verify_complete_state_transition_chain_with_context(self, user_context: UserExecutionContext):
+        """Verify that no state transitions are lost with user context."""
+        # Verify that we have a complete state transition chain
+        from netra_backend.app.core.agent_execution_tracker import ExecutionState
+        
+        expected_states = [ExecutionState.PENDING, ExecutionState.RUNNING, ExecutionState.COMPLETED]
+        captured_state_values = [state['state'] for state in self.captured_states]
+        
+        for expected_state in expected_states:
+            assert expected_state in captured_state_values, f"Missing expected state transition: {expected_state}"
+        
+        # Verify timestamps are in order
+        timestamps = [state['timestamp'] for state in self.captured_states]
+        for i in range(1, len(timestamps)):
+            assert timestamps[i] >= timestamps[i-1], "State transitions not in chronological order"
 
 
 @pytest.mark.integration

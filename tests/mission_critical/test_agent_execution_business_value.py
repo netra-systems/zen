@@ -38,7 +38,14 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
+# Migrated to use UserExecutionContext fixtures
+# from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
+from test_framework.user_execution_context_fixtures import (
+    realistic_user_context,
+    multi_user_contexts,
+    clean_context_registry
+)
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.websocket_core.event_validator import (
     AgentEventValidator,
