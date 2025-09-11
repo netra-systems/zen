@@ -12,7 +12,7 @@
 The **ServiceDependencyChecker** was still using the old constructor pattern:
 ```python
 # OLD (BROKEN):
-self.golden_path_validator = GoldenPathValidator(environment=environment)
+self.golden_path_validator = GoldenPathValidator()
 # ❌ Passed EnvironmentType.DEVELOPMENT default to staging
 ```
 

@@ -36,7 +36,7 @@
 TypeError: GoldenPathValidator.__init__() got an unexpected keyword argument 'environment'
 
 Error location: Line 46
-return GoldenPathValidator(environment=EnvironmentType.STAGING)
+return GoldenPathValidator()
 ```
 
 **Tests Affected:**
