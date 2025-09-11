@@ -40,6 +40,7 @@ from urllib.parse import urlencode
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.network_constants import URLConstants
 
 
 @dataclass
@@ -383,9 +384,9 @@ class TestBasicTriageResponseStagingE2E(SSotAsyncTestCase):
         
         # Configure staging environment
         self.staging_config = StagingEnvironmentConfig(
-            backend_url=self.env.get("STAGING_BACKEND_URL", "https://netra-staging-backend.run.app"),
-            auth_url=self.env.get("STAGING_AUTH_URL", "https://netra-staging-auth.run.app"),
-            websocket_url=self.env.get("STAGING_WEBSOCKET_URL", "wss://netra-staging-backend.run.app"),
+            backend_url=self.env.get("STAGING_BACKEND_URL", URLConstants.STAGING_BACKEND_URL),
+            auth_url=self.env.get("STAGING_AUTH_URL", URLConstants.STAGING_AUTH_URL),
+            websocket_url=self.env.get("STAGING_WEBSOCKET_URL", URLConstants.STAGING_WEBSOCKET_URL),
             oauth_client_id=self.env.get("STAGING_OAUTH_CLIENT_ID", "staging-client-id"),
             use_real_llm=self.env.get("STAGING_USE_REAL_LLM", "true").lower() == "true"
         )
