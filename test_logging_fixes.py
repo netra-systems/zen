@@ -86,8 +86,10 @@ def test_safe_field_access():
     logger = UnifiedLoggingSSOT()
     
     # Test with complete record
+    level_mock = Mock()
+    level_mock.name = 'CRITICAL'
     complete_record = {
-        'level': Mock(name='CRITICAL'),
+        'level': level_mock,
         'message': 'Test message',
         'name': 'test_logger'
     }
@@ -113,7 +115,7 @@ def test_safe_field_access():
     assert safe_message == 'fallback'
     assert safe_name == 'fallback'
     
-    print("✅ Safe field access test passed")
+    print("[PASS] Safe field access test passed")
 
 
 def test_gcp_format_validation():
@@ -146,7 +148,7 @@ def test_gcp_format_validation():
     assert validated_severity['severity'] == 'INFO'
     assert 'original_severity' in validated_severity
     
-    print("✅ GCP format validation test passed")
+    print("[PASS] GCP format validation test passed")
 
 
 def test_complete_json_formatter():
@@ -196,7 +198,7 @@ def test_complete_json_formatter():
         print(f"JSON formatter error (should not happen): {e}")
         raise
     
-    print("✅ Complete JSON formatter test passed")
+    print("[PASS] Complete JSON formatter test passed")
 
 
 def test_context_thread_safety():
@@ -220,7 +222,7 @@ def test_context_thread_safety():
     assert context_with_data.get('user_id') == 'test_user'
     assert context_with_data.get('request_id') == 'test_request'
     
-    print("✅ Thread-safe context test passed")
+    print("[PASS] Thread-safe context test passed")
 
 
 if __name__ == "__main__":
@@ -238,7 +240,7 @@ if __name__ == "__main__":
         print("[PASS] Issue #253 (Empty CRITICAL log entries) is resolved")
         
     except Exception as e:
-        print(f"\n❌ Test failed: {e}")
+        print(f"\n[FAIL] Test failed: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)
