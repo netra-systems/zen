@@ -78,7 +78,12 @@ class UnifiedJWTProtocolHandler:
         """
         Extract JWT from subprotocol header value directly.
         
-        This method supports the new subprotocol extraction API for issue #280.
+        ISSUE #342 FIX: Enhanced subprotocol format support
+        
+        This method supports multiple subprotocol formats:
+        - jwt.TOKEN (original format)
+        - jwt-auth.TOKEN (Issue #342 fix)
+        - bearer.TOKEN (Issue #342 fix)
         
         Args:
             subprotocol_value: Direct subprotocol header value
@@ -96,25 +101,38 @@ class UnifiedJWTProtocolHandler:
         subprotocols = [p.strip() for p in subprotocol_value.split(",")]
         
         for protocol in subprotocols:
+            # ISSUE #342 FIX: Support multiple subprotocol formats
+            extracted_token = None
+            
             if protocol.startswith("jwt."):
-                encoded_token = protocol[4:]  # Remove "jwt." prefix
-                
-                # Validate minimum token length
-                if len(encoded_token) < 10:
-                    raise ValueError(f"JWT token too short in subprotocol: {protocol}")
+                extracted_token = protocol[4:]  # Remove "jwt." prefix
+                logger.debug("Found jwt.TOKEN format")
+            elif protocol.startswith("jwt-auth."):
+                extracted_token = protocol[9:]  # Remove "jwt-auth." prefix
+                logger.debug("Found jwt-auth.TOKEN format (Issue #342 fix)")
+            elif protocol.startswith("bearer."):
+                extracted_token = protocol[7:]  # Remove "bearer." prefix
+                logger.debug("Found bearer.TOKEN format (Issue #342 fix)")
+            
+            if extracted_token:
+                # Validate minimum token length - return None instead of raising ValueError to prevent 1011 errors
+                if len(extracted_token) < 10:
+                    logger.debug(f"JWT token too short in subprotocol: {protocol}, returning None to prevent 1011 error")
+                    return None
                 
                 # Try to decode as base64url first (standard frontend implementation)
-                jwt_token = UnifiedJWTProtocolHandler._decode_base64url_token(encoded_token)
+                jwt_token = UnifiedJWTProtocolHandler._decode_base64url_token(extracted_token)
                 if jwt_token:
-                    logger.debug("Extracted base64url-decoded JWT from subprotocol value")
+                    logger.debug(f"Extracted base64url-decoded JWT from subprotocol format: {protocol[:protocol.find('.')]}.")
                     return jwt_token
                 
                 # If base64url decode fails, treat as raw token (direct format)
-                if UnifiedJWTProtocolHandler._is_valid_jwt_format(encoded_token):
-                    logger.debug("Extracted raw JWT from subprotocol value")
-                    return encoded_token
+                if UnifiedJWTProtocolHandler._is_valid_jwt_format(extracted_token):
+                    logger.debug(f"Extracted raw JWT from subprotocol format: {protocol[:protocol.find('.')]}.")
+                    return extracted_token
                 else:
-                    raise ValueError(f"Invalid JWT format in subprotocol: {protocol}")
+                    logger.debug(f"Invalid JWT format in subprotocol: {protocol}, returning None to prevent 1011 error")
+                    return None
                 
         return None
 
@@ -280,8 +298,13 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
     """
     Negotiate WebSocket subprotocol for JWT authentication (RFC 6455 compliance).
     
-    This function implements the server-side subprotocol negotiation required
-    for proper WebSocket JWT authentication according to RFC 6455.
+    ISSUE #342 FIX: Enhanced subprotocol negotiation
+    
+    This function implements server-side subprotocol negotiation with support for
+    multiple JWT authentication formats:
+    - jwt.TOKEN (original format)
+    - jwt-auth.TOKEN (Issue #342 fix)
+    - bearer.TOKEN (Issue #342 fix)
     
     Args:
         client_protocols: List of subprotocols requested by client
@@ -289,17 +312,32 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
     Returns:
         Optional[str]: Accepted subprotocol or None if no suitable protocol found
     """
-    supported_protocols = ['jwt-auth', 'jwt']
+    # ISSUE #342 FIX: Extended supported protocols
+    supported_protocols = ['jwt-auth', 'jwt', 'bearer']
     
     for protocol in client_protocols:
         # Check for direct protocol match
         if protocol in supported_protocols:
+            logger.debug(f"Direct protocol match: {protocol}")
             return protocol
             
-        # Check for JWT token format (jwt.TOKEN)
+        # ISSUE #342 FIX: Support multiple JWT token formats
         if protocol.startswith('jwt.') and len(protocol) > 4:
+            logger.debug("Found jwt.TOKEN format")
             # Return the protocol type, not the full token for security
             return 'jwt-auth'
+        elif protocol.startswith('jwt-auth.') and len(protocol) > 9:
+            logger.debug("Found jwt-auth.TOKEN format (Issue #342 fix)")
+            # Return the protocol type, not the full token for security
+            return 'jwt-auth'
+        elif protocol.startswith('bearer.') and len(protocol) > 7:
+            logger.debug("Found bearer.TOKEN format (Issue #342 fix)")
+            # Return the protocol type, not the full token for security
+            return 'bearer'
+    
+    # ISSUE #342 FIX: Improved error logging for debugging
+    logger.warning(f"No supported subprotocols found in client request: {client_protocols}")
+    logger.debug(f"Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN")
     
     return None
 

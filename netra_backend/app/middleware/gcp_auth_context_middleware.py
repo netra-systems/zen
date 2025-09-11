@@ -105,13 +105,10 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
                 # this would decode and validate the JWT)
                 auth_context.update(await self._decode_jwt_context(jwt_token))
             
-            # Extract from session if available
-            if hasattr(request, 'session') and request.session:
-                auth_context.update({
-                    'session_id': request.session.get('session_id'),
-                    'user_id': request.session.get('user_id'),
-                    'user_email': request.session.get('user_email')
-                })
+            # Extract from session if available - DEFENSIVE SESSION ACCESS
+            # CRITICAL FIX: Prevent SessionMiddleware crashes with try-catch and hasattr checks
+            session_data = self._safe_extract_session_data(request)
+            auth_context.update(session_data)
             
             # Extract from request state (OAuth/auth service integration)
             if hasattr(request.state, 'user'):
@@ -137,6 +134,111 @@ class GCPAuthContextMiddleware(BaseHTTPMiddleware):
             }
         
         return auth_context
+    
+    def _safe_extract_session_data(self, request: Request) -> Dict[str, Any]:
+        """Safely extract session data with defensive programming.
+        
+        CRITICAL FIX for Issue #169: SessionMiddleware authentication failures
+        
+        This method implements multiple fallback strategies to prevent crashes
+        when SessionMiddleware is not installed or configured properly:
+        1. Check for session attribute existence
+        2. Try-catch around session access to handle middleware order issues
+        3. Fallback to request state and cookies if session unavailable
+        
+        Args:
+            request: FastAPI request object
+            
+        Returns:
+            Dict containing session data or empty dict if unavailable
+        """
+        session_data = {}
+        
+        try:
+            # First line of defense: Check if session attribute exists
+            if hasattr(request, 'session'):
+                try:
+                    # Second line of defense: Try to access session safely
+                    session = request.session
+                    if session:
+                        session_data.update({
+                            'session_id': session.get('session_id'),
+                            'user_id': session.get('user_id'),
+                            'user_email': session.get('user_email')
+                        })
+                        logger.debug(f"Successfully extracted session data: {list(session_data.keys())}")
+                        return session_data
+                except (AttributeError, RuntimeError) as e:
+                    # Session middleware not installed or session access failed
+                    logger.warning(f"Session access failed (middleware not installed?): {e}")
+            
+            # Third line of defense: Fallback to cookie-based session extraction
+            session_data.update(self._extract_session_from_cookies(request))
+            
+            # Fourth line of defense: Fallback to request state
+            session_data.update(self._extract_session_from_request_state(request))
+            
+            if session_data:
+                logger.info(f"Session data extracted via fallback methods: {list(session_data.keys())}")
+            else:
+                logger.debug("No session data available via any method")
+                
+        except Exception as e:
+            logger.error(f"Unexpected error in session data extraction: {e}", exc_info=e)
+        
+        return session_data
+    
+    def _extract_session_from_cookies(self, request: Request) -> Dict[str, Any]:
+        """Extract session data from cookies as fallback.
+        
+        Args:
+            request: FastAPI request object
+            
+        Returns:
+            Dict containing session data from cookies
+        """
+        cookie_data = {}
+        try:
+            # Look for session-related cookies
+            session_cookie = request.cookies.get('session')
+            user_id_cookie = request.cookies.get('user_id')
+            email_cookie = request.cookies.get('user_email')
+            
+            if session_cookie:
+                cookie_data['session_id'] = session_cookie
+            if user_id_cookie:
+                cookie_data['user_id'] = user_id_cookie
+            if email_cookie:
+                cookie_data['user_email'] = email_cookie
+                
+        except Exception as e:
+            logger.debug(f"Cookie extraction failed: {e}")
+        
+        return cookie_data
+    
+    def _extract_session_from_request_state(self, request: Request) -> Dict[str, Any]:
+        """Extract session data from request state as fallback.
+        
+        Args:
+            request: FastAPI request object
+            
+        Returns:
+            Dict containing session data from request state
+        """
+        state_data = {}
+        try:
+            # Check for session data in request state
+            if hasattr(request.state, 'session_id'):
+                state_data['session_id'] = request.state.session_id
+            if hasattr(request.state, 'user_id'):
+                state_data['user_id'] = request.state.user_id
+            if hasattr(request.state, 'user_email'):
+                state_data['user_email'] = request.state.user_email
+                
+        except Exception as e:
+            logger.debug(f"Request state extraction failed: {e}")
+        
+        return state_data
     
     async def _decode_jwt_context(self, jwt_token: str) -> Dict[str, Any]:
         """Decode JWT token to extract user context.

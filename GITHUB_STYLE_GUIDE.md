@@ -19,6 +19,8 @@
 - Seperate required "bulk dump" information from conversational information
 - Prefer to edit update and extend existing comments rather then create new comments, especially 
 for work occuring within a similar amount of time.
+- NEVER make issues purely about local docker config issues or local dev config
+e.g. if docker isn't starting on port 8083, 99% of the time that is something for you to figure out locally NOT to make a general issue about.
 
 ### 3. Actionable Communication
 - Every piece of communication should have a clear next step

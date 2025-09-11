@@ -74,6 +74,10 @@ class SessionIsolationError(Exception):
 def validate_session_is_request_scoped_simple(session: AsyncSession) -> None:
     """Simple session validation for request scope."""
     if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
+        logger.error(
+            f"❌ VALIDATION FAILURE: Session {id(session)} is globally stored, violating request scoping. "
+            f"Session type: {type(session).__name__}. This is a critical isolation violation."
+        )
         raise SessionIsolationError("Session must be request-scoped, not globally stored")
     logger.debug(f"Session {id(session)} validated as request-scoped")
 
@@ -128,7 +132,11 @@ def _validate_session_type(session) -> None:
     try:
         validate_db_session(session, "dependencies_validation")
     except TypeError as e:
-        logger.error(f"Invalid session type: {type(session)}")
+        logger.error(
+            f"❌ VALIDATION FAILURE: Invalid session type during validation. "
+            f"Expected AsyncSession, got: {type(session).__name__}. "
+            f"Error: {e}. This indicates improper session injection."
+        )
         raise RuntimeError(str(e))
     
     # Tag session as request-scoped (only for real sessions)
@@ -154,6 +162,16 @@ class RequestScopedContext:
     run_id: Optional[str] = None
     websocket_client_id: Optional[str] = None
     request_id: Optional[str] = None
+    
+    @property
+    def websocket_connection_id(self) -> Optional[str]:
+        """Compatibility property for websocket_connection_id access.
+        
+        CRITICAL FIX for Issue #357: HTTP API agent execution requires this property
+        but RequestScopedContext only has websocket_client_id. This property alias
+        enables HTTP API fallback when WebSocket connections are unavailable.
+        """
+        return self.websocket_client_id
     
     def __post_init__(self):
         # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID generation
@@ -638,6 +656,39 @@ async def get_request_scoped_user_context(
             detail=f"Failed to create request-scoped context: {str(e)}"
         )
 
+# Alias for HTTP API compatibility (PRIORITY 1 FIX)
+async def get_request_scoped_context(
+    user_id: str,
+    thread_id: str,
+    run_id: Optional[str] = None,
+    websocket_connection_id: Optional[str] = None
+) -> RequestScopedContext:
+    """Alias for get_request_scoped_user_context for HTTP API compatibility.
+    
+    CRITICAL FIX for Issue #358: HTTP API components expect this function name.
+    This is a direct alias that provides the same functionality as
+    get_request_scoped_user_context with parameter name compatibility.
+    
+    Args:
+        user_id: Unique user identifier
+        thread_id: Thread identifier for conversation
+        run_id: Optional run identifier (auto-generated if not provided)
+        websocket_connection_id: Optional WebSocket connection identifier
+        
+    Returns:
+        RequestScopedContext: Context with metadata only, no sessions
+        
+    Raises:
+        HTTPException: If context creation fails
+    """
+    # Delegate to the main implementation with parameter name mapping
+    return await get_request_scoped_user_context(
+        user_id=user_id,
+        thread_id=thread_id, 
+        run_id=run_id,
+        websocket_client_id=websocket_connection_id  # Parameter name mapping
+    )
+
 def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, run_id: Optional[str] = None) -> UserExecutionContext:
     """Get existing user execution context or create if needed - CORRECT PATTERN.
     
@@ -743,7 +794,8 @@ def create_user_execution_context(user_id: str,
                                   thread_id: str, 
                                   run_id: Optional[str] = None,
                                   db_session: Optional[AsyncSession] = None,
-                                  websocket_client_id: Optional[str] = None) -> UserExecutionContext:
+                                  websocket_client_id: Optional[str] = None,
+                                  websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
     """Create UserExecutionContext for per-request isolation.
     
     ⚠️  DEPRECATED: This function breaks conversation continuity!
@@ -764,7 +816,8 @@ def create_user_execution_context(user_id: str,
         thread_id: Thread identifier for conversation
         run_id: Optional run identifier (auto-generated if not provided)
         db_session: Optional database session (MUST be request-scoped)
-        websocket_connection_id: Optional WebSocket connection identifier
+        websocket_client_id: Optional WebSocket client identifier (preferred)
+        websocket_connection_id: Optional WebSocket connection identifier (alias)
         
     Returns:
         UserExecutionContext: Isolated context for the request
@@ -773,6 +826,12 @@ def create_user_execution_context(user_id: str,
         HTTPException: If context creation fails
     """
     logger.warning("Using deprecated create_user_execution_context - consider get_request_scoped_user_context")
+    
+    # PRIORITY 1 FIX: Handle both websocket parameter names for compatibility
+    websocket_id = websocket_client_id or websocket_connection_id
+    if websocket_connection_id and websocket_client_id:
+        logger.warning("Both websocket_client_id and websocket_connection_id provided - using websocket_client_id")
+        websocket_id = websocket_client_id
     
     try:
         # CRITICAL: Validate that session is not from global storage
@@ -804,7 +863,7 @@ def create_user_execution_context(user_id: str,
             thread_id=thread_id,
             run_id=run_id,
             db_session=db_session,
-            websocket_client_id=websocket_client_id  # Fixed parameter name
+            websocket_client_id=websocket_id  # Use resolved websocket parameter
         )
         
         logger.info(f"Created UserExecutionContext for user {user_id}, run {run_id}")
@@ -844,7 +903,11 @@ async def get_request_scoped_supervisor(
     try:
         # CRITICAL: Validate that session is not globally stored
         if hasattr(db_session, '_global_storage_flag'):
-            logger.error("CRITICAL: Attempted to use globally stored session in request-scoped supervisor")
+            logger.error(
+                f"❌ VALIDATION FAILURE: Attempted to use globally stored session in request-scoped supervisor. "
+                f"Session ID: {id(db_session)}, User: {context.user_id}, "
+                f"This is a critical security violation - database sessions must be request-scoped only."
+            )
             raise RuntimeError("Database sessions must be request-scoped only")
             
         logger.debug(f"Creating request-scoped supervisor for user {context.user_id}, session {id(db_session)}")
@@ -923,7 +986,7 @@ async def get_request_scoped_supervisor(
                     user_id=context.user_id,
                     thread_id=context.thread_id,
                     run_id=context.run_id,
-                    session_id=context.websocket_connection_id
+                    websocket_client_id=context.websocket_connection_id
                 )
                 
                 # Create request-scoped tool dispatcher with user context

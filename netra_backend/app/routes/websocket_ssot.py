@@ -74,7 +74,8 @@ from netra_backend.app.websocket_core import (
     create_server_message,
     create_error_message,
     MessageType,
-    WebSocketConfig
+    WebSocketConfig,
+    negotiate_websocket_subprotocol  # PRIORITY 4 FIX: JWT subprotocol negotiation
 )
 
 # Authentication and security (SSOT for all patterns)
@@ -117,6 +118,11 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 # Environment and configuration
 from netra_backend.app.core.environment_constants import get_current_environment
+from netra_backend.app.core.timeout_configuration import (
+    get_websocket_recv_timeout,
+    get_streaming_timeout,
+    TimeoutTier
+)
 from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
@@ -209,7 +215,10 @@ class WebSocketSSOTRouter:
                 logger.info(f"WebSocket subprotocol negotiated: {accepted_protocol}")
                 return accepted_protocol
             else:
+                # ISSUE #342 FIX: Improved error messages for better developer experience
                 logger.warning(f"No supported subprotocol found in client request: {client_protocols}")
+                logger.info("SUPPORTED FORMATS: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN")
+                logger.info("EXAMPLE: For token 'eyJhbG...', send 'jwt.eyJhbG...' or 'jwt-auth.eyJhbG...' in Sec-WebSocket-Protocol header")
                 return None
                 
         except Exception as e:
@@ -389,6 +398,7 @@ class WebSocketSSOTRouter:
                 logger.warning("No app_state available for GCP readiness validation - proceeding")
             
             # Step 1: Negotiate subprotocol and accept WebSocket connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[MAIN MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -404,8 +414,20 @@ class WebSocketSSOTRouter:
             )
             
             if not auth_result.success:
-                logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error}")
-                await safe_websocket_send(websocket, create_error_message("AUTH_FAILED", "Authentication failed"))
+                # ISSUE #342 FIX: Improved error messages with specific guidance
+                logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error_message}")
+                
+                # Provide specific error guidance based on the failure reason
+                error_message = "Authentication failed"
+                error_msg_str = str(auth_result.error_message or "").lower()
+                if "subprotocol" in error_msg_str or "no token" in error_msg_str:
+                    error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error_message}"
+                elif "jwt" in error_msg_str:
+                    error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error_message}"
+                else:
+                    error_message = f"Authentication failed: {auth_result.error_message}"
+                
+                await safe_websocket_send(websocket, create_error_message("AUTH_FAILED", error_message))
                 await safe_websocket_close(websocket, 1008, "Authentication failed")
                 return
             
@@ -482,14 +504,17 @@ class WebSocketSSOTRouter:
             )
             
             if not user_context:
-                logger.error("[FACTORY MODE] Pre-authentication failed")
-                await websocket.close(code=1008, reason="Pre-authentication required")
+                # ISSUE #342 FIX: Improved error messages for factory mode
+                logger.error("[FACTORY MODE] Pre-authentication failed - JWT token required before connection")
+                logger.error("[FACTORY MODE] Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN in Sec-WebSocket-Protocol header")
+                await websocket.close(code=1008, reason="Pre-authentication required. Send JWT via Sec-WebSocket-Protocol header in format: jwt.TOKEN, jwt-auth.TOKEN, or bearer.TOKEN")
                 return
             
             user_id = user_context.user_id
             logger.info(f"[FACTORY MODE] Pre-auth success: user={user_id[:8]}")
             
             # Step 2: Negotiate subprotocol and accept connection after authentication (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[FACTORY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -564,6 +589,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[ISOLATED MODE] Starting isolated connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[ISOLATED MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -575,8 +601,21 @@ class WebSocketSSOTRouter:
             # Step 2: SSOT Authentication with audit logging
             auth_result = await authenticate_websocket_ssot(websocket)
             if not auth_result.success:
-                logger.error(f"[ISOLATED MODE] Authentication failed: {auth_result.error}")
-                await safe_websocket_close(websocket, 1008, "Authentication failed")
+                # ISSUE #342 FIX: Improved error messages with specific guidance
+                logger.error(f"[ISOLATED MODE] Authentication failed: {auth_result.error_message}")
+                
+                # Provide specific error guidance based on the failure reason
+                error_message = "Authentication failed"
+                error_msg_str = str(auth_result.error_message or "").lower()
+                if "subprotocol" in error_msg_str or "no token" in error_msg_str:
+                    error_message = f"WebSocket authentication failed. Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN. Error: {auth_result.error_message}"
+                elif "jwt" in error_msg_str:
+                    error_message = f"JWT token validation failed. Ensure JWT_SECRET_KEY is configured consistently. Error: {auth_result.error_message}"
+                else:
+                    error_message = f"Authentication failed: {auth_result.error_message}"
+                
+                logger.error(f"[ISOLATED MODE] {error_message}")
+                await safe_websocket_close(websocket, 1008, error_message)
                 return
             
             user_id = auth_result.user_context.user_id
@@ -648,6 +687,7 @@ class WebSocketSSOTRouter:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
+            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
             accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
             if accepted_subprotocol:
                 logger.info(f"[LEGACY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
@@ -757,7 +797,10 @@ class WebSocketSSOTRouter:
         message_router = get_message_router()
         user_id = user_context.user_id if user_context else "unknown"
         
-        logger.info(f"[MAIN MODE] Starting message loop for user {user_id[:8]}")
+        # Get appropriate WebSocket timeout (coordinated with agent execution timeouts)
+        websocket_timeout = get_websocket_recv_timeout()
+        
+        logger.info(f"[MAIN MODE] Starting message loop for user {user_id[:8]} (websocket_timeout: {websocket_timeout}s)")
         
         try:
             while True:
@@ -765,9 +808,9 @@ class WebSocketSSOTRouter:
                     logger.info("[MAIN MODE] WebSocket disconnected")
                     break
                 
-                # Receive message with timeout
+                # Receive message with coordinated timeout
                 try:
-                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
                     
                     logger.info(f"[MAIN MODE] Received: {message_data.get('type', 'unknown')}")
@@ -798,7 +841,11 @@ class WebSocketSSOTRouter:
     async def _factory_message_loop(self, websocket: WebSocket, websocket_manager, user_context, auth_info):
         """Factory message loop with user isolation."""
         user_id = user_context.user_id
-        logger.info(f"[FACTORY MODE] Starting isolated message loop for user {user_id[:8]}")
+        
+        # Get appropriate WebSocket timeout for factory mode
+        websocket_timeout = get_websocket_recv_timeout()
+        
+        logger.info(f"[FACTORY MODE] Starting isolated message loop for user {user_id[:8]} (websocket_timeout: {websocket_timeout}s)")
         
         try:
             while True:
@@ -806,7 +853,7 @@ class WebSocketSSOTRouter:
                     break
                 
                 try:
-                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
                     
                     # Factory pattern: isolated processing per user
@@ -837,7 +884,11 @@ class WebSocketSSOTRouter:
     async def _isolated_message_loop(self, websocket: WebSocket, connection_scoped_manager, user_context, agent_bridge):
         """Isolated message loop with zero event leakage."""
         user_id = user_context.user_id
-        logger.info(f"[ISOLATED MODE] Starting zero-leakage message loop for user {user_id[:8]}")
+        
+        # Get appropriate WebSocket timeout for isolated mode
+        websocket_timeout = get_websocket_recv_timeout()
+        
+        logger.info(f"[ISOLATED MODE] Starting zero-leakage message loop for user {user_id[:8]} (websocket_timeout: {websocket_timeout}s)")
         
         try:
             while True:
@@ -845,7 +896,7 @@ class WebSocketSSOTRouter:
                     break
                 
                 try:
-                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
                     
                     # Isolated processing: events only for this user
@@ -879,7 +930,11 @@ class WebSocketSSOTRouter:
     
     async def _legacy_message_loop(self, websocket: WebSocket, connection_id):
         """Legacy message loop for backward compatibility."""
-        logger.info(f"[LEGACY MODE] Starting compatibility message loop {connection_id}")
+        
+        # Get appropriate WebSocket timeout for legacy mode
+        websocket_timeout = get_websocket_recv_timeout()
+        
+        logger.info(f"[LEGACY MODE] Starting compatibility message loop {connection_id} (websocket_timeout: {websocket_timeout}s)")
         
         try:
             while True:
@@ -887,7 +942,7 @@ class WebSocketSSOTRouter:
                     break
                 
                 try:
-                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                    raw_message = await asyncio.wait_for(websocket.receive_text(), timeout=websocket_timeout)
                     message_data = json.loads(raw_message)
                     
                     # Basic legacy response

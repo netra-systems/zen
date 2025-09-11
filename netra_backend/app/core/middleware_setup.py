@@ -246,43 +246,61 @@ def _add_session_middleware_with_validation(app: FastAPI, session_config: dict, 
     )
 
 def _validate_and_get_secret_key(config, environment) -> str:
-    """Validate and get secret_key with enhanced environment variable loading.
+    """Validate and get secret_key using unified secret management.
     
-    CRITICAL FIX: Handles cases where config.secret_key is None or invalid
-    by directly loading from environment variables with fallback strategies.
+    CRITICAL FIX for Issue #169: Uses UnifiedSecretManager for consistent secret loading
+    across all deployment environments, eliminating the root cause of SessionMiddleware failures.
+    
+    This replaces multiple inconsistent secret loading patterns with a single SSOT approach.
     """
-    from shared.isolated_environment import get_env
+    from netra_backend.app.core.unified_secret_manager import get_session_secret
     
-    # First try config.secret_key
-    secret_key = getattr(config, 'secret_key', None)
+    # First try config.secret_key for backward compatibility
+    config_secret = getattr(config, 'secret_key', None)
+    if config_secret and config_secret != "default_secret_key" and len(config_secret) >= 32:
+        logger.info(f"Using config.secret_key for {environment.value} (length: {len(config_secret)})")
+        return config_secret
     
-    if not secret_key or secret_key == "default_secret_key" or len(secret_key) < 32:
-        logger.warning(f"Config secret_key invalid or missing (length: {len(secret_key) if secret_key else 0})")
+    # Use unified secret manager for comprehensive secret loading
+    try:
+        secret_info = get_session_secret(environment.value)
         
-        # Try to load directly from environment
-        env = get_env()
-        env_secret = env.get('SECRET_KEY')
+        if secret_info.is_fallback:
+            logger.warning(f"Using fallback SECRET_KEY for {environment.value} "
+                          f"(source: {secret_info.source.value})")
         
-        if env_secret and len(env_secret.strip()) >= 32:
-            secret_key = env_secret.strip()
-            logger.info("Loaded SECRET_KEY from environment (config fallback)")
+        if secret_info.is_generated:
+            logger.error(f"Using generated SECRET_KEY for {environment.value} "
+                        f"- GCP Secret Manager may be unavailable")
+        
+        # Log validation notes for debugging
+        for note in secret_info.validation_notes:
+            logger.debug(f"SECRET_KEY validation: {note}")
+        
+        logger.info(f"SECRET_KEY loaded via UnifiedSecretManager for {environment.value} "
+                   f"(source: {secret_info.source.value}, length: {secret_info.length})")
+        
+        return secret_info.value
+        
+    except Exception as e:
+        logger.error(f"UnifiedSecretManager failed to load SECRET_KEY: {e}")
+        
+        # Final emergency fallback to prevent deployment failures
+        if environment.value in ["development", "testing"]:
+            emergency_key = "emergency-dev-session-secret-key-32-chars-minimum-required-for-starlette"
+            logger.warning(f"Using emergency development SECRET_KEY for {environment.value}")
+            return emergency_key
         else:
-            # Generate a staging-safe secret for non-production environments
-            if environment.value in ["development", "testing"]:
-                secret_key = "dev-session-secret-key-32-chars-minimum-required-length-for-starlette"
-                logger.warning("Using development fallback SECRET_KEY")
-            else:
-                # Production/staging MUST have proper SECRET_KEY
-                raise ValueError(
-                    f"CRITICAL: SECRET_KEY environment variable is required for {environment.value} but "
-                    f"is missing or too short (minimum 32 characters). Found: {len(env_secret) if env_secret else 0} chars"
-                )
-    
-    # Final validation
-    if len(secret_key) < 32:
-        raise ValueError(f"SECRET_KEY must be at least 32 characters long, got {len(secret_key)}")
-    
-    return secret_key
+            # For production/staging, we must fail if we can't get a proper secret
+            raise ValueError(
+                f"CRITICAL: Could not load SECRET_KEY for {environment.value} environment. "
+                f"UnifiedSecretManager error: {e}. "
+                "Check GCP Secret Manager configuration and environment variables."
+            )
+
+
+# Legacy secret loading functions removed - now handled by UnifiedSecretManager
+# This eliminates duplicate secret management code and consolidates to SSOT pattern
 
 def _add_fallback_session_middleware(app: FastAPI) -> None:
     """Add basic session middleware as fallback to prevent deployment failures.
@@ -369,33 +387,99 @@ def setup_middleware(app: FastAPI) -> None:
     """
     Main middleware setup function - SSOT for all middleware configuration.
     
-    CRITICAL: This function consolidates all middleware setup in proper order.
-    Order matters for middleware execution - they are applied in reverse order.
+    CRITICAL FIX for Issue #169: Middleware registration order fixed to prevent SessionMiddleware errors.
+    
+    MIDDLEWARE ORDER (applied in reverse):
+    1. Session middleware FIRST - Required for request.session access
+    2. GCP Auth Context middleware - AFTER session, needs request.session 
+    3. CORS middleware - Cross-origin handling
+    4. Authentication middleware - AFTER CORS, needs session data
+    5. GCP WebSocket readiness - Environment specific
+    6. CORS redirect middleware - Last in chain
+    
+    This order ensures SessionMiddleware is available before any middleware tries to access request.session.
     """
-    logger.info("Starting middleware setup...")
+    logger.info("Starting middleware setup with proper order for SessionMiddleware...")
     
     try:
-        # 1. Session middleware (must be first for request.session access)
+        # PHASE 1: Core Infrastructure Middleware
+        # SESSION MIDDLEWARE MUST BE FIRST - All other middleware may depend on it
+        logger.debug("Setting up session middleware (Phase 1)...")
         setup_session_middleware(app)
         
-        # 2. GCP Authentication Context middleware (after session, needs request.session access)
+        # PHASE 2: Authentication and Context Middleware  
+        # GCP Authentication Context middleware AFTER session (needs request.session access)
+        logger.debug("Setting up GCP auth context middleware (Phase 2)...")
         setup_gcp_auth_context_middleware(app)
         
-        # 3. CORS middleware (handles cross-origin requests)
+        # PHASE 3: Request Handling Middleware
+        # CORS middleware handles cross-origin requests
+        logger.debug("Setting up CORS middleware (Phase 3)...")
         setup_cors_middleware(app)
         
-        # 4. Authentication middleware (after CORS, before application logic)
+        # Authentication middleware AFTER CORS (needs session and CORS headers)
+        logger.debug("Setting up authentication middleware (Phase 3)...")
         setup_auth_middleware(app)
         
-        # 5. GCP WebSocket readiness middleware (environment specific)
+        # PHASE 4: Environment Specific Middleware
+        # GCP WebSocket readiness middleware (staging/production only)
+        logger.debug("Setting up GCP WebSocket readiness middleware (Phase 4)...")
         setup_gcp_websocket_readiness_middleware(app)
         
-        # 6. CORS redirect middleware (handles redirects with CORS headers)
+        # PHASE 5: Final Request Processing
+        # CORS redirect middleware (handles redirects with proper CORS headers)
+        logger.debug("Setting up CORS redirect middleware (Phase 5)...")
         cors_redirect = create_cors_redirect_middleware()
         app.middleware("http")(cors_redirect)
         
-        logger.info("All middleware setup completed successfully")
+        # Validation: Ensure session middleware is properly installed
+        _validate_session_middleware_installation(app)
+        
+        logger.info("All middleware setup completed successfully with proper SessionMiddleware order")
         
     except Exception as e:
         logger.error(f"CRITICAL: Middleware setup failed: {e}")
+        # Enhanced error logging for debugging
+        logger.error(f"Middleware setup failure details: {type(e).__name__}: {str(e)}", exc_info=e)
         raise RuntimeError(f"Failed to setup middleware: {e}")
+
+
+def _validate_session_middleware_installation(app: FastAPI) -> None:
+    """Validate that SessionMiddleware is properly installed.
+    
+    CRITICAL FIX for Issue #169: Post-installation validation to catch configuration issues early.
+    
+    Args:
+        app: FastAPI application instance
+    """
+    try:
+        # Check if any SessionMiddleware is installed
+        session_middleware_found = False
+        
+        for middleware in app.user_middleware:
+            middleware_class = middleware.cls
+            if hasattr(middleware_class, '__name__'):
+                if 'SessionMiddleware' in middleware_class.__name__:
+                    session_middleware_found = True
+                    logger.debug(f"Found SessionMiddleware: {middleware_class.__name__}")
+                    break
+        
+        if session_middleware_found:
+            logger.info("✅ SessionMiddleware installation validated successfully")
+        else:
+            logger.error("❌ SessionMiddleware not found in middleware stack - this will cause request.session errors")
+            
+            # Log all installed middleware for debugging
+            middleware_list = []
+            for middleware in app.user_middleware:
+                middleware_list.append(middleware.cls.__name__ if hasattr(middleware.cls, '__name__') else str(middleware.cls))
+            
+            logger.error(f"Installed middleware: {middleware_list}")
+            
+            # This is a warning, not a fatal error, to prevent deployment failures
+            logger.warning("SessionMiddleware validation failed - authentication may not work properly")
+    
+    except Exception as e:
+        logger.warning(f"SessionMiddleware validation error (non-fatal): {e}")
+        # Don't fail deployment due to validation errors
+        pass

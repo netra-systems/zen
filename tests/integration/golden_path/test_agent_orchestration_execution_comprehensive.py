@@ -408,7 +408,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Create agents in expected execution order
         triage_agent = await factory.create_agent_instance("triage", user_context)
         data_agent = await factory.create_agent_instance("data_helper", user_context) 
-        optimizer_agent = await factory.create_agent_instance("apex_optimizer", user_context)
+        optimizer_agent = await factory.create_agent_instance("optimization", user_context)
         report_agent = await factory.create_agent_instance("reporting", user_context)
         
         # Mock tool execution for agents
@@ -799,7 +799,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         await self._ensure_agent_factory_configured()
         
         data_agent = await factory.create_agent_instance("data_helper", user_context)
-        optimizer_agent = await factory.create_agent_instance("apex_optimizer", user_context)
+        optimizer_agent = await factory.create_agent_instance("optimization", user_context)
         report_agent = await factory.create_agent_instance("reporting", user_context)
         
         # Setup inter-agent communication

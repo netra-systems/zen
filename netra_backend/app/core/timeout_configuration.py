@@ -24,8 +24,17 @@ import os
 from typing import Dict, Any
 from enum import Enum
 from dataclasses import dataclass
+from typing import Optional
 
 from shared.isolated_environment import get_env
+
+class TimeoutTier(Enum):
+    """Customer tiers for timeout configuration."""
+    FREE = "free"
+    EARLY = "early"
+    MID = "mid"
+    ENTERPRISE = "enterprise"
+    PLATFORM = "platform"
 
 class TimeoutEnvironment(Enum):
     """Environment types for timeout configuration."""
@@ -36,7 +45,7 @@ class TimeoutEnvironment(Enum):
 
 @dataclass
 class TimeoutConfig:
-    """Timeout configuration for specific environment."""
+    """Timeout configuration for specific environment and tier."""
     
     # WebSocket timeouts (must be > agent timeouts for hierarchy)
     websocket_connection_timeout: int
@@ -58,6 +67,13 @@ class TimeoutConfig:
     test_default_timeout: int
     test_integration_timeout: int
     test_e2e_timeout: int
+    
+    # Streaming timeouts (for enterprise tier) - moved after required fields
+    streaming_timeout: Optional[int] = None
+    streaming_phase_timeout: Optional[int] = None
+    
+    # Customer tier information
+    tier: Optional[TimeoutTier] = None
 
 
 class CloudNativeTimeoutManager:
@@ -68,13 +84,16 @@ class CloudNativeTimeoutManager:
     - Cloud Run environments get longer timeouts (cold starts)
     - Local development gets shorter timeouts (fast feedback)
     - Test environments get appropriate timeouts (stability vs speed)
+    - Enterprise tier gets extended timeouts (300s streaming capability)
     """
     
-    def __init__(self):
-        """Initialize timeout manager with environment detection."""
+    def __init__(self, default_tier: Optional[TimeoutTier] = None):
+        """Initialize timeout manager with environment detection and tier support."""
         self._env = get_env()
         self._environment = self._detect_environment()
-        self._config_cache = None
+        self._default_tier = default_tier or TimeoutTier.FREE
+        self._config_cache = {}
+        self._tier_config_cache = {}
         
     def _detect_environment(self) -> TimeoutEnvironment:
         """Detect current environment for timeout configuration."""
@@ -105,120 +124,315 @@ class CloudNativeTimeoutManager:
         else:
             return TimeoutEnvironment.LOCAL_DEVELOPMENT
     
-    def get_timeout_config(self) -> TimeoutConfig:
-        """Get timeout configuration for current environment.
+    def get_timeout_config(self, tier: Optional[TimeoutTier] = None) -> TimeoutConfig:
+        """Get timeout configuration for current environment and customer tier.
         
         **CRITICAL HIERARCHY**: WebSocket timeouts > Agent timeouts for coordination
+        **ENTERPRISE SUPPORT**: Tier-based timeout selection for streaming capabilities
+        
+        Args:
+            tier: Customer tier for timeout selection (defaults to FREE)
         
         Returns:
-            TimeoutConfig: Environment-specific timeout configuration
+            TimeoutConfig: Environment and tier-specific timeout configuration
         """
         # Always re-detect environment for testing flexibility
         current_env = self._detect_environment()
-        if self._config_cache is None or current_env != self._environment:
+        selected_tier = tier or self._default_tier
+        
+        cache_key = (current_env, selected_tier)
+        
+        if cache_key not in self._tier_config_cache or current_env != self._environment:
             self._environment = current_env
-            self._config_cache = self._create_timeout_config()
+            self._tier_config_cache[cache_key] = self._create_timeout_config(selected_tier)
             
-        return self._config_cache
+        return self._tier_config_cache[cache_key]
     
-    def _create_timeout_config(self) -> TimeoutConfig:
-        """Create timeout configuration for detected environment."""
+    def _create_timeout_config(self, tier: TimeoutTier = TimeoutTier.FREE) -> TimeoutConfig:
+        """Create timeout configuration for detected environment and customer tier.
+        
+        Args:
+            tier: Customer tier for timeout selection
+            
+        Returns:
+            TimeoutConfig: Configured timeouts for environment and tier
+        """
         
         if self._environment == TimeoutEnvironment.CLOUD_RUN_STAGING:
-            return TimeoutConfig(
-                # CRITICAL FIX: WebSocket timeouts for Cloud Run staging (35s > 30s agent)
-                websocket_connection_timeout=60,  # Connection establishment
-                websocket_recv_timeout=35,        # PRIORITY 3 FIX: 3s → 35s
-                websocket_send_timeout=30,
-                websocket_heartbeat_timeout=90,
-                
-                # Agent execution timeouts (must be < WebSocket recv timeout)
-                agent_execution_timeout=30,       # PRIORITY 3 FIX: 15s → 30s 
-                agent_thinking_timeout=25,
-                agent_tool_timeout=20,
-                agent_completion_timeout=15,
-                
-                # HTTP timeouts for Cloud Run
-                http_request_timeout=30,
-                http_connection_timeout=15,
-                
-                # Test timeouts for staging environment
-                test_default_timeout=60,
-                test_integration_timeout=90,
-                test_e2e_timeout=120
-            )
+            base_config = self._get_base_staging_config(tier)
+            return self._apply_tier_enhancements(base_config, tier)
             
         elif self._environment == TimeoutEnvironment.CLOUD_RUN_PRODUCTION:
-            return TimeoutConfig(
-                # Production WebSocket timeouts (slightly higher for reliability)
-                websocket_connection_timeout=90,
-                websocket_recv_timeout=45,        # Production: 45s > 40s agent
-                websocket_send_timeout=40, 
-                websocket_heartbeat_timeout=120,
-                
-                # Production agent timeouts (must be < WebSocket recv timeout)
-                agent_execution_timeout=40,       # Production: longer for complex tasks
-                agent_thinking_timeout=35,
-                agent_tool_timeout=30,
-                agent_completion_timeout=20,
-                
-                # Production HTTP timeouts
-                http_request_timeout=45,
-                http_connection_timeout=20,
-                
-                # Production test timeouts (if tests run in prod)
-                test_default_timeout=90,
-                test_integration_timeout=150,
-                test_e2e_timeout=180
-            )
+            base_config = self._get_base_production_config(tier)
+            return self._apply_tier_enhancements(base_config, tier)
             
         elif self._environment == TimeoutEnvironment.TESTING:
-            return TimeoutConfig(
-                # Testing WebSocket timeouts (moderate for stability)
-                websocket_connection_timeout=30,
-                websocket_recv_timeout=15,        # Testing: fast but stable
-                websocket_send_timeout=10,
-                websocket_heartbeat_timeout=45,
-                
-                # Testing agent timeouts (must be < WebSocket recv timeout) 
-                agent_execution_timeout=10,       # Testing: fast execution
-                agent_thinking_timeout=8,
-                agent_tool_timeout=5,
-                agent_completion_timeout=3,
-                
-                # Testing HTTP timeouts
-                http_request_timeout=15,
-                http_connection_timeout=10,
-                
-                # Test framework timeouts
-                test_default_timeout=30,
-                test_integration_timeout=45,
-                test_e2e_timeout=60
-            )
+            base_config = self._get_base_testing_config(tier)
+            return self._apply_tier_enhancements(base_config, tier)
             
         else:  # LOCAL_DEVELOPMENT
+            base_config = self._get_base_development_config(tier)
+            return self._apply_tier_enhancements(base_config, tier)
+    
+    def _get_base_staging_config(self, tier: TimeoutTier) -> TimeoutConfig:
+        """Get base staging configuration."""
+        return TimeoutConfig(
+            # CRITICAL FIX: WebSocket timeouts for Cloud Run staging (35s > 30s agent)
+            websocket_connection_timeout=60,  # Connection establishment
+            websocket_recv_timeout=35,        # PRIORITY 3 FIX: 3s → 35s
+            websocket_send_timeout=30,
+            websocket_heartbeat_timeout=90,
+            
+            # Agent execution timeouts (must be < WebSocket recv timeout)
+            agent_execution_timeout=30,       # PRIORITY 3 FIX: 15s → 30s 
+            agent_thinking_timeout=25,
+            agent_tool_timeout=20,
+            agent_completion_timeout=15,
+            
+            # HTTP timeouts for Cloud Run
+            http_request_timeout=30,
+            http_connection_timeout=15,
+            
+            # Test timeouts for staging environment
+            test_default_timeout=60,
+            test_integration_timeout=90,
+            test_e2e_timeout=120,
+            
+            tier=tier
+        )
+    
+    def _get_base_production_config(self, tier: TimeoutTier) -> TimeoutConfig:
+        """Get base production configuration."""
+        return TimeoutConfig(
+            # Production WebSocket timeouts (slightly higher for reliability)
+            websocket_connection_timeout=90,
+            websocket_recv_timeout=45,        # Production: 45s > 40s agent
+            websocket_send_timeout=40, 
+            websocket_heartbeat_timeout=120,
+            
+            # Production agent timeouts (must be < WebSocket recv timeout)
+            agent_execution_timeout=40,       # Production: longer for complex tasks
+            agent_thinking_timeout=35,
+            agent_tool_timeout=30,
+            agent_completion_timeout=20,
+            
+            # Production HTTP timeouts
+            http_request_timeout=45,
+            http_connection_timeout=20,
+            
+            # Production test timeouts (if tests run in prod)
+            test_default_timeout=90,
+            test_integration_timeout=150,
+            test_e2e_timeout=180,
+            
+            tier=tier
+        )
+    
+    def _get_base_testing_config(self, tier: TimeoutTier) -> TimeoutConfig:
+        """Get base testing configuration."""
+        return TimeoutConfig(
+            # Testing WebSocket timeouts (moderate for stability)
+            websocket_connection_timeout=30,
+            websocket_recv_timeout=15,        # Testing: fast but stable
+            websocket_send_timeout=10,
+            websocket_heartbeat_timeout=45,
+            
+            # Testing agent timeouts (must be < WebSocket recv timeout) 
+            agent_execution_timeout=10,       # Testing: fast execution
+            agent_thinking_timeout=8,
+            agent_tool_timeout=5,
+            agent_completion_timeout=3,
+            
+            # Testing HTTP timeouts
+            http_request_timeout=15,
+            http_connection_timeout=10,
+            
+            # Test framework timeouts
+            test_default_timeout=30,
+            test_integration_timeout=45,
+            test_e2e_timeout=60,
+            
+            tier=tier
+        )
+    
+    def _get_base_development_config(self, tier: TimeoutTier) -> TimeoutConfig:
+        """Get base development configuration."""
+        return TimeoutConfig(
+            # Local development WebSocket timeouts (fast feedback)
+            websocket_connection_timeout=20,
+            websocket_recv_timeout=10,        # Local: 10s > 8s agent
+            websocket_send_timeout=8,
+            websocket_heartbeat_timeout=30,
+            
+            # Local agent timeouts (must be < WebSocket recv timeout)
+            agent_execution_timeout=8,        # Local: fast development cycle
+            agent_thinking_timeout=6,
+            agent_tool_timeout=4,
+            agent_completion_timeout=2,
+            
+            # Local HTTP timeouts
+            http_request_timeout=10,
+            http_connection_timeout=5,
+            
+            # Local test timeouts 
+            test_default_timeout=15,
+            test_integration_timeout=30,
+            test_e2e_timeout=45,
+            
+            tier=tier
+        )
+    
+    def _apply_tier_enhancements(self, base_config: TimeoutConfig, tier: TimeoutTier) -> TimeoutConfig:
+        """Apply tier-specific enhancements to base configuration.
+        
+        **ENTERPRISE STREAMING**: Implements progressive timeout phases for enterprise customers:
+        - Phase 1: 60s (initial response)
+        - Phase 2: 120s (deeper analysis)
+        - Phase 3: 180s (complex processing)
+        - Phase 4: 240s (comprehensive research)
+        - Phase 5: 300s (maximum enterprise capability)
+        
+        Args:
+            base_config: Base timeout configuration
+            tier: Customer tier for enhancements
+            
+        Returns:
+            TimeoutConfig: Enhanced configuration with tier-specific features
+        """
+        if tier == TimeoutTier.ENTERPRISE:
+            # Enterprise tier gets extended streaming capabilities
             return TimeoutConfig(
-                # Local development WebSocket timeouts (fast feedback)
-                websocket_connection_timeout=20,
-                websocket_recv_timeout=10,        # Local: 10s > 8s agent
-                websocket_send_timeout=8,
-                websocket_heartbeat_timeout=30,
+                # Enterprise WebSocket timeouts (MUST be > agent timeouts for hierarchy)
+                websocket_connection_timeout=base_config.websocket_connection_timeout + 90,  # Extended
+                websocket_recv_timeout=360,         # CRITICAL: Must be > 300s agent timeout
+                websocket_send_timeout=base_config.websocket_send_timeout + 30,
+                websocket_heartbeat_timeout=base_config.websocket_heartbeat_timeout + 120,
                 
-                # Local agent timeouts (must be < WebSocket recv timeout)
-                agent_execution_timeout=8,        # Local: fast development cycle
-                agent_thinking_timeout=6,
-                agent_tool_timeout=4,
-                agent_completion_timeout=2,
+                # Enterprise agent execution timeouts (300s maximum capability)
+                agent_execution_timeout=300,        # Enterprise: 300s streaming capability
+                agent_thinking_timeout=min(base_config.agent_thinking_timeout * 2, 60),
+                agent_tool_timeout=min(base_config.agent_tool_timeout * 2, 90),
+                agent_completion_timeout=min(base_config.agent_completion_timeout * 2, 30),
                 
-                # Local HTTP timeouts
-                http_request_timeout=10,
-                http_connection_timeout=5,
+                # Enterprise streaming configuration
+                streaming_timeout=300,              # Maximum streaming duration
+                streaming_phase_timeout=60,         # Per-phase timeout (5 phases)
                 
-                # Local test timeouts 
-                test_default_timeout=15,
-                test_integration_timeout=30,
-                test_e2e_timeout=45
+                # Enterprise HTTP timeouts (extended)
+                http_request_timeout=base_config.http_request_timeout + 30,
+                http_connection_timeout=base_config.http_connection_timeout + 10,
+                
+                # Test timeouts (unchanged for enterprise)
+                test_default_timeout=base_config.test_default_timeout,
+                test_integration_timeout=base_config.test_integration_timeout,
+                test_e2e_timeout=base_config.test_e2e_timeout,
+                
+                tier=tier
             )
+        
+        elif tier == TimeoutTier.PLATFORM:
+            # Platform tier gets moderate enhancements
+            return TimeoutConfig(
+                # Platform WebSocket timeouts (MUST be > agent timeouts for hierarchy)
+                websocket_connection_timeout=base_config.websocket_connection_timeout + 50,  # Extended
+                websocket_recv_timeout=150,         # CRITICAL: Must be > 120s agent timeout
+                websocket_send_timeout=base_config.websocket_send_timeout + 20,
+                websocket_heartbeat_timeout=base_config.websocket_heartbeat_timeout + 60,
+                
+                # Platform agent execution timeouts (120s capability)
+                agent_execution_timeout=120,        # Platform: 120s for complex tasks
+                agent_thinking_timeout=min(base_config.agent_thinking_timeout + 15, 45),
+                agent_tool_timeout=min(base_config.agent_tool_timeout + 15, 60),
+                agent_completion_timeout=min(base_config.agent_completion_timeout + 10, 20),
+                
+                # Platform streaming configuration
+                streaming_timeout=120,              # Moderate streaming capability
+                streaming_phase_timeout=30,         # Per-phase timeout (4 phases)
+                
+                # Platform HTTP timeouts
+                http_request_timeout=base_config.http_request_timeout + 15,
+                http_connection_timeout=base_config.http_connection_timeout + 5,
+                
+                # Test timeouts (unchanged for platform)
+                test_default_timeout=base_config.test_default_timeout,
+                test_integration_timeout=base_config.test_integration_timeout,
+                test_e2e_timeout=base_config.test_e2e_timeout,
+                
+                tier=tier
+            )
+        
+        elif tier == TimeoutTier.MID:
+            # Mid tier gets small enhancements
+            return TimeoutConfig(
+                # Mid WebSocket timeouts (MUST be > agent timeouts for hierarchy)
+                websocket_connection_timeout=base_config.websocket_connection_timeout + 30,  # Extended
+                websocket_recv_timeout=90,          # CRITICAL: Must be > 60s agent timeout
+                websocket_send_timeout=base_config.websocket_send_timeout + 10,
+                websocket_heartbeat_timeout=base_config.websocket_heartbeat_timeout + 30,
+                
+                # Mid agent execution timeouts (60s capability)
+                agent_execution_timeout=60,         # Mid: 60s for moderate tasks
+                agent_thinking_timeout=min(base_config.agent_thinking_timeout + 5, 30),
+                agent_tool_timeout=min(base_config.agent_tool_timeout + 10, 35),
+                agent_completion_timeout=min(base_config.agent_completion_timeout + 5, 15),
+                
+                # Mid streaming configuration
+                streaming_timeout=60,               # Basic streaming capability
+                streaming_phase_timeout=20,         # Per-phase timeout (3 phases)
+                
+                # Mid HTTP timeouts
+                http_request_timeout=base_config.http_request_timeout + 10,
+                http_connection_timeout=base_config.http_connection_timeout + 3,
+                
+                # Test timeouts (unchanged for mid)
+                test_default_timeout=base_config.test_default_timeout,
+                test_integration_timeout=base_config.test_integration_timeout,
+                test_e2e_timeout=base_config.test_e2e_timeout,
+                
+                tier=tier
+            )
+        
+        else:  # FREE, EARLY tiers use base configuration
+            # Set tier information but no enhancements
+            base_config.tier = tier
+            return base_config
+    
+    def get_streaming_timeout(self, tier: Optional[TimeoutTier] = None) -> int:
+        """Get streaming timeout for customer tier.
+        
+        **ENTERPRISE STREAMING**: Returns tier-appropriate streaming timeout:
+        - Enterprise: 300s (5-minute streaming capability)
+        - Platform: 120s (2-minute streaming capability)  
+        - Mid: 60s (1-minute streaming capability)
+        - Early/Free: Uses agent_execution_timeout
+        
+        Args:
+            tier: Customer tier for timeout selection
+            
+        Returns:
+            int: Streaming timeout in seconds
+        """
+        config = self.get_timeout_config(tier)
+        return config.streaming_timeout or config.agent_execution_timeout
+    
+    def get_streaming_phase_timeout(self, tier: Optional[TimeoutTier] = None) -> int:
+        """Get per-phase streaming timeout for progressive execution.
+        
+        **PROGRESSIVE PHASES**: Enterprise tier supports 5 progressive phases:
+        - Phase 1: Initial response (60s)
+        - Phase 2: Deeper analysis (60s) 
+        - Phase 3: Complex processing (60s)
+        - Phase 4: Comprehensive research (60s)
+        - Phase 5: Final synthesis (60s)
+        
+        Args:
+            tier: Customer tier for timeout selection
+            
+        Returns:
+            int: Per-phase timeout in seconds
+        """
+        config = self.get_timeout_config(tier)
+        return config.streaming_phase_timeout or (config.agent_execution_timeout // 3)
     
     def get_websocket_recv_timeout(self) -> int:
         """Get WebSocket recv timeout for current environment.
@@ -231,16 +445,20 @@ class CloudNativeTimeoutManager:
         """
         return self.get_timeout_config().websocket_recv_timeout
     
-    def get_agent_execution_timeout(self) -> int:
-        """Get agent execution timeout for current environment.
+    def get_agent_execution_timeout(self, tier: Optional[TimeoutTier] = None) -> int:
+        """Get agent execution timeout for current environment and customer tier.
         
         **CRITICAL FOR COORDINATION**: This timeout must be less than WebSocket
         recv timeout to maintain proper timeout hierarchy.
+        **ENTERPRISE STREAMING**: Enterprise tier supports extended execution times
+        
+        Args:
+            tier: Customer tier for timeout selection
         
         Returns:
-            int: Agent execution timeout in seconds
+            int: Agent execution timeout in seconds (up to 300s for enterprise)
         """
-        return self.get_timeout_config().agent_execution_timeout
+        return self.get_timeout_config(tier).agent_execution_timeout
     
     def get_timeout_hierarchy_info(self) -> Dict[str, Any]:
         """Get timeout hierarchy information for debugging/validation.
@@ -302,33 +520,72 @@ def _get_timeout_manager() -> CloudNativeTimeoutManager:
     return _timeout_manager
 
 # Convenience functions for easy access
-def get_websocket_recv_timeout() -> int:
-    """Get WebSocket recv timeout for current environment.
+def get_websocket_recv_timeout(tier: Optional[TimeoutTier] = None) -> int:
+    """Get WebSocket recv timeout for current environment and customer tier.
     
     **PRIMARY USE CASE**: Replace hardcoded 3-second timeouts in test files.
+    **ENTERPRISE SUPPORT**: Tier-based timeout selection for streaming
+    
+    Args:
+        tier: Customer tier for timeout selection
     
     Returns:
-        int: WebSocket recv timeout in seconds (35s for staging, varies by env)
+        int: WebSocket recv timeout in seconds (varies by env and tier)
     """
-    return _get_timeout_manager().get_websocket_recv_timeout()
+    return _get_timeout_manager().get_timeout_config(tier).websocket_recv_timeout
 
-def get_agent_execution_timeout() -> int:
-    """Get agent execution timeout for current environment.
+def get_agent_execution_timeout(tier: Optional[TimeoutTier] = None) -> int:
+    """Get agent execution timeout for current environment and customer tier.
     
     **PRIMARY USE CASE**: Ensure agent timeouts coordinate with WebSocket timeouts.
+    **ENTERPRISE STREAMING**: Up to 300s for enterprise tier
+    
+    Args:
+        tier: Customer tier for timeout selection
     
     Returns:
-        int: Agent execution timeout in seconds (30s for staging, varies by env)
+        int: Agent execution timeout in seconds (up to 300s for enterprise)
     """
-    return _get_timeout_manager().get_agent_execution_timeout()
+    return _get_timeout_manager().get_agent_execution_timeout(tier)
 
-def get_timeout_config() -> TimeoutConfig:
-    """Get complete timeout configuration for current environment.
+def get_timeout_config(tier: Optional[TimeoutTier] = None) -> TimeoutConfig:
+    """Get complete timeout configuration for current environment and customer tier.
+    
+    **TIER SUPPORT**: Customer tier determines available streaming capabilities
+    
+    Args:
+        tier: Customer tier for timeout selection
     
     Returns:
-        TimeoutConfig: Complete timeout configuration
+        TimeoutConfig: Complete timeout configuration with tier enhancements
     """
-    return _get_timeout_manager().get_timeout_config()
+    return _get_timeout_manager().get_timeout_config(tier)
+
+def get_streaming_timeout(tier: Optional[TimeoutTier] = None) -> int:
+    """Get streaming timeout for customer tier.
+    
+    **ENTERPRISE STREAMING**: Tier-appropriate streaming timeout capability
+    
+    Args:
+        tier: Customer tier for timeout selection
+        
+    Returns:
+        int: Streaming timeout in seconds (up to 300s for enterprise)
+    """
+    return _get_timeout_manager().get_streaming_timeout(tier)
+
+def get_streaming_phase_timeout(tier: Optional[TimeoutTier] = None) -> int:
+    """Get per-phase streaming timeout for progressive execution.
+    
+    **PROGRESSIVE PHASES**: Enterprise tier supports 5 progressive phases
+    
+    Args:
+        tier: Customer tier for timeout selection
+        
+    Returns:
+        int: Per-phase timeout in seconds
+    """
+    return _get_timeout_manager().get_streaming_phase_timeout(tier)
 
 def validate_timeout_hierarchy() -> bool:
     """Validate timeout hierarchy for business reliability.
@@ -358,6 +615,7 @@ timeout_manager = _get_timeout_manager()
 
 # Export all public interfaces
 __all__ = [
+    "TimeoutTier",
     "TimeoutEnvironment",
     "TimeoutConfig", 
     "CloudNativeTimeoutManager",
@@ -365,6 +623,8 @@ __all__ = [
     "get_websocket_recv_timeout",
     "get_agent_execution_timeout", 
     "get_timeout_config",
+    "get_streaming_timeout",
+    "get_streaming_phase_timeout",
     "validate_timeout_hierarchy",
     "get_timeout_hierarchy_info"
 ]
