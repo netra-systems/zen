@@ -556,12 +556,21 @@ class UnifiedIdGenerator:
             except ValueError:
                 pass
         
-        # Handle websocket_factory_timestamp pattern
-        if 'websocket_factory_' in id_string and len(parts) == 3:
-            timestamp = parts[2] if parts[2].isdigit() else str(int(time.time() * 1000))
-            counter = _get_next_counter()
-            random_part = secrets.token_hex(4)
-            return f"thread_websocket_factory_{timestamp}_{counter}_{random_part}"
+        # Handle websocket_factory_timestamp pattern (simple legacy format)
+        if 'websocket_factory' in id_string:
+            # Check if this is a legacy websocket_factory format without proper SSOT structure
+            if len(parts) == 4 and parts[0] == 'thread' and parts[1] == 'websocket_factory':
+                # This is "thread_websocket_factory_XXXX" - legacy format needing normalization
+                timestamp = str(int(time.time() * 1000))
+                counter = _get_next_counter()
+                random_part = secrets.token_hex(4)
+                return f"thread_websocket_factory_{timestamp}_{counter}_{random_part}"
+            elif len(parts) == 3 and parts[2].isdigit():
+                # This is "websocket_factory_timestamp" format
+                timestamp = parts[2]
+                counter = _get_next_counter()
+                random_part = secrets.token_hex(4)
+                return f"thread_websocket_factory_{timestamp}_{counter}_{random_part}"
         
         # Return as-is if no pattern match
         return id_string
