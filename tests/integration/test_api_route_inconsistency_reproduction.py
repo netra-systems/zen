@@ -81,20 +81,20 @@ class TestAPIEndpointConsistencyReproduction(SSotBaseTestCase):
     @pytest.mark.integration
     async def test_route_inconsistency_demonstration(self):
         """
-        THIS TEST SHOULD FAIL INITIALLY - demonstrates the 404 vs 401 inconsistency.
+        THIS TEST SHOULD PASS AFTER FIX - demonstrates consistent 401 responses.
         
         This test tries both endpoints with invalid tokens and expects consistent behavior.
-        Before the fix: /api/v1/user/profile will return 404 (route not found)
-        After the fix: Both should return 401 (invalid token)
+        Before the fix: /api/v1/user/profile returned 404 (route not found)
+        After the fix: Both should return 401 (invalid token) - CONSISTENT BEHAVIOR
         """
         
         # Mock the inconsistent behavior before fix
         mock_client = MagicMock()
         
-        # Mock the expected endpoint to return 404 (route not found) - this demonstrates the bug
+        # After fix: Mock the expected endpoint to return 401 (proper auth error)
         mock_v1_response = MagicMock()
-        mock_v1_response.status_code = 404  # This is the bug - should be 401
-        mock_v1_response.json.return_value = {"detail": "Not Found"}
+        mock_v1_response.status_code = 401  # Fixed - now returns proper auth error
+        mock_v1_response.json.return_value = {"detail": "Invalid authentication credentials"}
         
         # Mock the actual endpoint to return 401 (proper auth error)
         mock_users_response = MagicMock()

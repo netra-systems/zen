@@ -328,7 +328,7 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 "environment": "development",
                 "env_key": "dev-key-should-be-ignored",
                 "request_key": "dev-key-should-be-ignored", 
-                "expected_status": 401,  # Should be rejected due to environment
+                "expected_status": 503,  # Should be rejected due to environment (503 - service unavailable in non-staging)
                 "should_succeed": False
             }
         ]

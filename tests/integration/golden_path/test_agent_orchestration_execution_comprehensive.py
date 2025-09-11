@@ -686,6 +686,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with performance tracking
         factory = get_agent_instance_factory()
+        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance("apex_optimizer", user_context)
         
         # Mock slow tool execution
@@ -738,6 +739,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create multiple coordinated agents
         factory = get_agent_instance_factory()
+        await self._ensure_agent_factory_configured()
         
         data_agent = await factory.create_agent_instance("data_helper", user_context)
         optimizer_agent = await factory.create_agent_instance("apex_optimizer", user_context)
@@ -903,6 +905,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with monitoring
         factory = get_agent_instance_factory()
+        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance("data_helper", user_context)
         
         # Setup monitoring collectors
@@ -989,6 +992,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         initial_memory_usage = self._get_memory_usage()  # Mock measurement
         
         # Create and execute multiple agents
+        await self._ensure_agent_factory_configured()
         for i in range(5):
             agent = await factory.create_agent_instance("triage", user_context)
             
@@ -1065,6 +1069,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         factory = get_agent_instance_factory()
         
         # Test access control for different agents
+        await self._ensure_agent_factory_configured()
         free_agent = await factory.create_agent_instance("triage", free_user_context)
         enterprise_agent = await factory.create_agent_instance("apex_optimizer", enterprise_user_context)
         
@@ -1205,6 +1210,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             return service_availability.get(service_name, False)
         
         # Create agent with dependency checking
+        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance("data_helper", user_context)
         agent.check_service_availability = check_service_availability
         
@@ -1260,6 +1266,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         execution_tracker = get_execution_tracker()
         
         factory = get_agent_instance_factory()
+        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance("apex_optimizer", user_context)
         
         # Mock tool dispatcher with metrics
@@ -1434,6 +1441,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Test each configuration profile
         results = {}
         
+        await self._ensure_agent_factory_configured()
         for profile_name, config in configurations.items():
             agent = await factory.create_agent_instance(
                 "data_helper", 
@@ -1521,6 +1529,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         external_services["metrics_collector"].record_metrics.return_value = {"recorded": True}
         
         factory = get_agent_instance_factory()
+        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance("apex_optimizer", user_context)
         
         # Mock tool dispatcher that calls external services
