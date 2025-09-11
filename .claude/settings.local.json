@@ -58,7 +58,9 @@
       "Bash(echo:*)",
       "Bash(gcloud secrets list:*)",
       "Bash(gcloud secrets versions access:*)",
-      "Bash(./scripts/enable_gcp_tracing_staging.sh:*)"
+      "Bash(./scripts/enable_gcp_tracing_staging.sh:*)",
+      "Bash(sed:*)",
+      "Bash(netra_backend/tests/unit/websocket_core/test_gcp_startup_phase_validation.py)"
     ],
     "deny": [],
     "ask": []
