@@ -420,7 +420,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
         # Validate correlation ID exists and is unique
         correlation_id1 = agent.correlation_id
         self.assertIsNotNone(correlation_id1)
-        self.assertIsInstance(correlation_id1, str)
+        self.assertTrue(isinstance(correlation_id1, str))
         self.assertGreater(len(correlation_id1), 10)
         
         # Create second agent
@@ -555,7 +555,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
         
         # Validate WebSocket adapter exists
         self.assertIsNotNone(agent._websocket_adapter)
-        self.assertIsInstance(agent._websocket_adapter, WebSocketBridgeAdapter)
+        self.assertTrue(isinstance(agent._websocket_adapter, WebSocketBridgeAdapter))
         
         # Test WebSocket context availability check
         self.assertFalse(agent.has_websocket_context())  # No bridge set yet

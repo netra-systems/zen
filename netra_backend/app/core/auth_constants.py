@@ -217,6 +217,7 @@ JWT_SECRET_KEY = JWTConstants.JWT_SECRET_KEY
 SECRET_KEY = JWTConstants.SECRET_KEY
 AUTHORIZATION = HeaderConstants.AUTHORIZATION
 BEARER_PREFIX = HeaderConstants.BEARER_PREFIX
+JWT_ALGORITHM = JWTConstants.HS256_ALGORITHM
 
 
 # Convenience export of all constant classes
@@ -233,5 +234,6 @@ __all__ = [
     'JWT_SECRET_KEY',
     'SECRET_KEY',
     'AUTHORIZATION',
-    'BEARER_PREFIX'
+    'BEARER_PREFIX',
+    'JWT_ALGORITHM'
 ]
