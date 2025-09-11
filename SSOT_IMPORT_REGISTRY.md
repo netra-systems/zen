@@ -28,6 +28,7 @@ from netra_backend.app.services.user_execution_context import create_isolated_ex
 
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
+from netra_backend.app.tools.result_aggregator import ToolResultAggregator
 
 # Shared Types (Cross-Service)
 from shared.types.core_types import UserID, ThreadID, RunID
