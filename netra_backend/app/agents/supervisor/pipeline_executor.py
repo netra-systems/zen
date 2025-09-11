@@ -414,12 +414,12 @@ class PipelineExecutor:
         session = await get_session_from_factory(db_session)
         await self.state_persistence.save_agent_state(request, session)
     
-    def _build_persistence_request(self, state: DeepAgentState, 
+    def _build_persistence_request(self, state: Any, 
                                    context: Dict[str, str]) -> StatePersistenceRequest:
         """Build StatePersistenceRequest for state persistence."""
         return self._create_persistence_request(state, context)
     
-    def _create_persistence_request(self, state: DeepAgentState,
+    def _create_persistence_request(self, state: Any,
                                    context: Dict[str, str]) -> StatePersistenceRequest:
         """Create StatePersistenceRequest object."""
         return StatePersistenceRequest(
@@ -431,14 +431,14 @@ class PipelineExecutor:
         )
     
     
-    async def _notify_completion(self, state: DeepAgentState,
+    async def _notify_completion(self, state: Any,
                                 context: Dict[str, str]) -> None:
         """Send completion notification."""
         if not self.websocket_manager:
             return
         await self._send_completion_message(state, context["thread_id"], context["run_id"])
     
-    async def _send_completion_message(self, state: DeepAgentState, 
+    async def _send_completion_message(self, state: Any, 
                                       thread_id: str, run_id: str) -> None:
         """Send completion message via WebSocket."""
         try:
@@ -446,7 +446,7 @@ class PipelineExecutor:
         except Exception as e:
             await self._handle_message_error(e, thread_id)
     
-    async def _send_message_safely(self, state: DeepAgentState, 
+    async def _send_message_safely(self, state: Any, 
                                   run_id: str, thread_id: str) -> None:
         """Send message with error handling via factory pattern for user isolation."""
         try:
@@ -473,13 +473,13 @@ class PipelineExecutor:
         else:
             logger.error(f"Failed to send completion: {error}")
     
-    def _build_completion_message(self, state: DeepAgentState, 
+    def _build_completion_message(self, state: Any, 
                                  run_id: str) -> 'WebSocketMessage':
         """Build completion message."""
         content = self._create_completion_content(state, run_id)
         return self._create_websocket_message(content)
     
-    def _create_completion_content(self, state: DeepAgentState, run_id: str):
+    def _create_completion_content(self, state: Any, run_id: str):
         """Create agent completion content."""
         from netra_backend.app.schemas.agent import AgentCompleted
         from netra_backend.app.schemas.agent_models import AgentResult
