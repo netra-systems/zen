@@ -1020,22 +1020,38 @@ class ClickHouseService:
                 # For required services, still raise the error
                 raise ConnectionError(f"ClickHouse initialization timeout after {init_timeout}s. Please ensure ClickHouse is running.") from e
     
-    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Execute query with circuit breaker protection and caching.
+    async def execute(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None, operation_context: str = "unknown") -> List[Dict[str, Any]]:
+        """Execute query with circuit breaker protection, caching, and comprehensive logging.
         
         Args:
             query: SQL query to execute
             params: Optional query parameters
             user_id: User identifier for cache isolation. If None, uses "system" namespace.
+            operation_context: Context description for logging (e.g., "agent_state_save", "analytics_query")
             
         Returns:
             Query results as list of dictionaries
         """
+        execute_start = time.time()
+        query_type = query.lower().strip().split()[0] if query.strip() else "unknown"
+        query_preview = query[:100] + "..." if len(query) > 100 else query
+        
+        logger.info(f"🏢 ClickHouse EXECUTE: {query_type.upper()} query for user {user_id or 'system'} - Context: {operation_context}")
+        logger.debug(f"📝 Query preview: {query_preview}")
+        
         # Check cache first for read queries
-        if query.lower().strip().startswith("select"):
+        if query_type == "select":
+            cache_start = time.time()
             cached_result = _clickhouse_cache.get(user_id, query, params)
+            cache_duration = time.time() - cache_start
+            
             if cached_result is not None:
+                total_duration = time.time() - execute_start
+                logger.info(f"🎯 ClickHouse CACHE HIT for user {user_id or 'system'} - "
+                           f"Context: {operation_context}, Rows: {len(cached_result)}, Duration: {total_duration:.3f}s")
                 return cached_result
+            else:
+                logger.debug(f"📭 ClickHouse cache miss for user {user_id or 'system'} (cache check: {cache_duration:.3f}s)")
         
         # Try to use connection manager if available
         try:
@@ -1069,8 +1085,14 @@ class ClickHouseService:
             
             return result
         except Exception as e:
+            execute_duration = time.time() - execute_start
             self._metrics["failures"] += 1
-            logger.error(f"ClickHouse query failed: {e}")
+            
+            logger.critical(f"💥 ClickHouse EXECUTION FAILED for user {user_id or 'system'} after {execute_duration:.3f}s")
+            logger.error(f"Context: {operation_context}, Query type: {query_type.upper()}")
+            logger.error(f"Error details: {type(e).__name__}: {str(e)}")
+            logger.error(f"ANALYTICS IMPACT: User {user_id or 'system'} data operation failed - {operation_context}")
+            
             raise
     
     async def _execute_with_circuit_breaker(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
