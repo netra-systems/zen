@@ -203,11 +203,18 @@ class AgentExecutionCore:
                 # Start execution tracking
                 await self.execution_tracker.start_execution(exec_id)
                 
-                # CRITICAL REMEDIATION: Transition to websocket setup phase
+                # CRITICAL REMEDIATION: Transition through proper phase sequence
                 await self.agent_tracker.transition_state(
                     state_exec_id, 
                     AgentExecutionPhase.WEBSOCKET_SETUP,
                     websocket_manager=self.websocket_bridge
+                )
+                
+                # Transition to context validation
+                await self.agent_tracker.transition_state(
+                    state_exec_id, 
+                    AgentExecutionPhase.CONTEXT_VALIDATION,
+                    metadata={"user_context_valid": True}
                 )
                 
                 # Add trace event
@@ -269,11 +276,9 @@ class AgentExecutionCore:
                             )
                     
                     # CRITICAL: Execute agent with timeout management to prevent blocking
-                    result = await self.agent_tracker.execute_agent_with_timeout(
-                        agent_execution_wrapper,
-                        context.agent_name,
-                        str(context.run_id),
-                        self.websocket_bridge
+                    result = await asyncio.wait_for(
+                        agent_execution_wrapper(),
+                        timeout=timeout or self.DEFAULT_TIMEOUT
                     )
                     
                 except CircuitBreakerOpenError as e:
