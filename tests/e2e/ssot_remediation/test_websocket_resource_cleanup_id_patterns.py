@@ -194,7 +194,8 @@ class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
             cleanup_attempts = []
             
             # Attempt 1: Cleanup with SSOT-compatible thread lookup
-            ssot_thread_id = ensure_thread_id(self.unified_id_generator.generate_thread_id())
+            ssot_thread_id_str, _, _ = self.unified_id_generator.generate_user_context_ids("cleanup", "ssot")
+            ssot_thread_id = ensure_thread_id(ssot_thread_id_str)
             cleanup_1 = await self._test_cleanup_with_thread_id(manager, ssot_thread_id)
             cleanup_attempts.append(('ssot_thread', cleanup_1))
             
@@ -265,8 +266,9 @@ class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
             # Mix SSOT and non-SSOT ID patterns to simulate dual SSOT scenario
             if i % 2 == 0:
                 # SSOT pattern
-                user_id = ensure_user_id(self.unified_id_generator.generate_user_id())
-                thread_id = ensure_thread_id(self.unified_id_generator.generate_thread_id())
+                thread_id_str, _, _ = self.unified_id_generator.generate_user_context_ids(f"leak-test-{i}", "ssot")
+                user_id = ensure_user_id(self.unified_id_generator.generate_base_id("user"))
+                thread_id = ensure_thread_id(thread_id_str)
             else:
                 # Non-SSOT pattern (simulating legacy or incorrect usage)
                 import uuid
