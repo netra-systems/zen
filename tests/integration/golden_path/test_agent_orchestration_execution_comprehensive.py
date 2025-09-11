@@ -90,9 +90,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
     focusing on business value delivery through agent coordination.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup test environment with proper SSOT patterns."""
-        super().setUp()
+        super().setup_method(method)
         self.mock_factory = SSotMockFactory()
         self.websocket_utility = WebSocketTestUtility()
         self.db_utility = DatabaseTestUtility()
@@ -103,12 +103,16 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         self.test_run_id = str(uuid.uuid4())
         
         # Mock WebSocket for testing
-        self.mock_websocket = self.mock_factory.create_mock_websocket()
-        self.mock_emitter = self.mock_factory.create_mock_websocket_emitter()
+        self.mock_websocket = self.mock_factory.create_websocket_mock()
+        self.mock_emitter = self.mock_factory.create_websocket_manager_mock()
+        
+        # Mock LLM Manager for SupervisorAgent
+        self.mock_llm_manager = MagicMock()
+        self.mock_llm_manager.get_default_client.return_value = self.mock_factory.create_llm_client_mock()
 
-    async def asyncSetUp(self):
+    async def async_setup_method(self, method):
         """Async setup for database and service initialization."""
-        await super().asyncSetUp()
+        await super().async_setup_method(method)
         
         # Initialize test database if available
         if hasattr(self, 'real_db'):
@@ -129,7 +133,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Create supervisor agent with real dependencies
-        supervisor = SupervisorAgent()
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
         
         # Mock WebSocket bridge for event tracking
         websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
@@ -1331,13 +1335,17 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             self.assertIn("recommendations", optimization_data)
             self.assertGreater(len(optimization_data["recommendations"]), 0)
 
-    async def asyncTearDown(self):
-        """Cleanup after async tests."""
-        await super().asyncTearDown()
-        
+    def teardown_method(self, method):
+        """Cleanup after tests."""
         # Cleanup any remaining resources
         if hasattr(self, 'mock_emitter'):
             self.mock_emitter.reset_mock()
+        
+        super().teardown_method(method)
+    
+    async def async_teardown_method(self, method):
+        """Async cleanup after tests."""
+        await super().async_teardown_method(method)
 
 
 if __name__ == "__main__":
