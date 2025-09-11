@@ -308,21 +308,108 @@ class PipelineExecutor:
         self._log_step_transitions_complete(pipeline, flow_id)
         return results
     
-    async def finalize_state(self, state: DeepAgentState, 
-                            context: Dict[str, str], db_session) -> None:
-        """Finalize and persist state.
+    async def finalize_user_context(self, user_context: UserExecutionContext, 
+                                   context: Dict[str, str], db_session) -> None:
+        """Finalize and persist user context results.
+        
+        SECURITY MIGRATION: Issue #271 - Uses UserExecutionContext for secure user isolation.
         
         Args:
-            state: Agent state to finalize
+            user_context: User execution context to finalize
             context: Execution context
             db_session: Database session for persistence operations
         """
-        await self._persist_final_state(state, context, db_session)
-        await self._notify_completion(state, context)
+        await self._persist_final_user_context(user_context, context, db_session)
+        await self._notify_user_completion(user_context, context)
     
-    async def _persist_final_state(self, state: DeepAgentState,
-                                  context: Dict[str, str], db_session) -> None:
-        """Save final state to persistence."""
+    async def _persist_final_user_context(self, user_context: UserExecutionContext,
+                                         context: Dict[str, str], db_session) -> None:
+        """Save final user context to persistence.
+        
+        SECURITY MIGRATION: Issue #271 - Secure alternative to state persistence.
+        """
+        request = self._build_user_persistence_request(user_context, context)
+        session = await get_session_from_factory(db_session)
+        await self.state_persistence.save_agent_state(request, session)
+    
+    def _build_user_persistence_request(self, user_context: UserExecutionContext, 
+                                       context: Dict[str, str]) -> StatePersistenceRequest:
+        """Build StatePersistenceRequest for user context persistence."""
+        from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
+        return StatePersistenceRequest(
+            run_id=context["run_id"],
+            thread_id=context.get("thread_id", user_context.thread_id),
+            user_id=user_context.user_id,
+            state_data=user_context.get_execution_results(),
+            checkpoint_type=CheckpointType.AUTO
+        )
+    
+    async def _notify_user_completion(self, user_context: UserExecutionContext,
+                                     context: Dict[str, str]) -> None:
+        """Send completion notification for user context.
+        
+        SECURITY MIGRATION: Issue #271 - User-isolated notifications.
+        """
+        if not self.websocket_manager:
+            return
+        await self._send_user_completion_message(user_context, context["thread_id"], context["run_id"])
+        
+    async def _send_user_completion_message(self, user_context: UserExecutionContext, 
+                                          thread_id: str, run_id: str) -> None:
+        """Send user completion message via WebSocket."""
+        try:
+            await self._send_user_message_safely(user_context, run_id, thread_id)
+        except Exception as e:
+            await self._handle_message_error(e, thread_id)
+    
+    async def _send_user_message_safely(self, user_context: UserExecutionContext, 
+                                       run_id: str, thread_id: str) -> None:
+        """Send message with error handling for user context."""
+        try:
+            # Get user-isolated emitter (factory pattern)
+            emitter = await self._get_user_emitter_from_context(run_id, thread_id)
+            if not emitter:
+                logger.debug(f"No user context available for pipeline WebSocket updates for user {user_context.user_id} - skipping")
+                return
+            
+            # Send pipeline completion notification with user context
+            completion_content = self._create_user_completion_content(user_context, run_id)
+            completion_message = self._build_user_completion_message(user_context, completion_content, run_id)
+            await emitter(completion_message)
+            
+        except Exception as e:
+            logger.error(f"Pipeline WebSocket notification failed for user {user_context.user_id}: {e}")
+            # Don't re-raise to prevent breaking pipeline
+    
+    def _build_user_completion_message(self, user_context: UserExecutionContext, 
+                                      content: Dict, run_id: str) -> Dict:
+        """Build pipeline completion message for user context."""
+        return {
+            "type": "pipeline_completed",
+            "run_id": run_id,
+            "user_id": user_context.user_id,
+            "thread_id": user_context.thread_id,
+            "content": content,
+            "timestamp": self._get_current_timestamp()
+        }
+        
+    def _create_user_completion_content(self, user_context: UserExecutionContext, run_id: str):
+        """Create completion content for user context."""
+        return {
+            "message": f"Pipeline execution completed for user {user_context.user_id}",
+            "run_id": run_id,
+            "results_count": len(user_context.get_execution_results()),
+            "status": "completed"
+        }
+    
+    def _get_current_timestamp(self) -> str:
+        """Get current timestamp for messaging."""
+        from datetime import datetime
+        return datetime.utcnow().isoformat()
+    
+    # DEPRECATED METHODS - Keep for backward compatibility but mark as deprecated
+    async def _persist_final_state(self, state, context: Dict[str, str], db_session) -> None:
+        """DEPRECATED: Save final state to persistence. Use _persist_final_user_context instead."""
         request = self._build_persistence_request(state, context)
         session = await get_session_from_factory(db_session)
         await self.state_persistence.save_agent_state(request, session)
