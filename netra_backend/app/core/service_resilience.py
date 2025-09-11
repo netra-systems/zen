@@ -164,12 +164,22 @@ def optional_service(service_name: str, fallback_result: Any = None):
         def sync_wrapper(*args, **kwargs):
             service = service_registry.get_service(service_name)
             if service is None:
-                logger.info(f"Service '{service_name}' unavailable, using fallback result")
+                logger.warning(f"🔧 GRACEFUL DEGRADATION: Service '{service_name}' unavailable, using fallback "
+                              f"(function: {func.__name__}, "
+                              f"fallback_type: {type(fallback_result).__name__}, "
+                              f"degradation_mode: fallback_result)")
                 return fallback_result
             try:
-                return func(*args, **kwargs)
+                result = func(*args, **kwargs)
+                logger.debug(f"✅ SERVICE OPERATION SUCCESS: Function '{func.__name__}' completed with service '{service_name}'")
+                return result
             except Exception as e:
-                logger.warning(f"Function {func.__name__} failed with service '{service_name}': {e}")
+                logger.critical(f"🚨 SERVICE OPERATION FAILURE: Function '{func.__name__}' failed with service '{service_name}' "
+                               f"(exception_type: {type(e).__name__}, "
+                               f"exception_message: {str(e)}, "
+                               f"circuit_breaker_action: Marking service unavailable, "
+                               f"fallback_activated: true, "
+                               f"golden_path_impact: {service_registry._assess_service_impact(service_name)})")
                 service_registry.mark_service_unavailable(service_name)
                 return fallback_result
                 
