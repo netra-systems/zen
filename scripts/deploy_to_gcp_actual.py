@@ -1070,9 +1070,8 @@ CMD ["npm", "start"]
                 "run.googleapis.com/network-interfaces=[{\"network\":\"default\",\"subnetwork\":\"default\"}]"
             ]
             
-            # Add VPC annotations to Cloud Run service
-            for annotation in vpc_annotations:
-                cmd.extend(["--set-labels", f"vpc-connectivity=enabled"])
+            # Add VPC label to Cloud Run service (once)
+            cmd.extend(["--labels", f"vpc-connectivity=enabled"])
             
             # CRITICAL: Cloud SQL proxy connection for database access
             # This fixes the database initialization timeout issue
