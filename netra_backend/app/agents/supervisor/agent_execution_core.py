@@ -175,13 +175,16 @@ class AgentExecutionCore:
             }
         )
         
-        # Register execution with tracker
-        exec_id = await self.execution_tracker.register_execution(
+        # Create execution with tracker
+        exec_id = self.execution_tracker.create_execution(
             agent_name=context.agent_name,
-            correlation_id=trace_context.correlation_id,
             thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
-            timeout_seconds=timeout or self.DEFAULT_TIMEOUT
+            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
+            metadata={
+                'correlation_id': trace_context.correlation_id,
+                'run_id': str(context.run_id)
+            }
         )
         
         # CRITICAL REMEDIATION: Create and start execution tracking for comprehensive monitoring
@@ -220,7 +223,9 @@ class AgentExecutionCore:
         async with TraceContextManager(trace_context):
             try:
                 # Start execution tracking
-                await self.execution_tracker.start_execution(exec_id)
+                started = self.execution_tracker.start_execution(exec_id)
+                if not started:
+                    raise RuntimeError(f"Failed to start execution tracking for {exec_id}")
                 
                 # CRITICAL REMEDIATION: Transition through proper phase sequence
                 await self.agent_tracker.transition_state(
@@ -267,8 +272,9 @@ class AgentExecutionCore:
                 agent = self._get_agent_or_error(context.agent_name)
                 if isinstance(agent, AgentExecutionResult):
                     # Agent not found - mark as failed
-                    await self.execution_tracker.complete_execution(
+                    self.execution_tracker.update_execution_state(
                         exec_id, 
+                        ExecutionState.FAILED,
                         error=f"Agent {context.agent_name} not found"
                     )
                     
@@ -371,7 +377,11 @@ class AgentExecutionCore:
                 # CRITICAL REMEDIATION: Mark execution complete with state tracking
                 if result.success:
                     trace_context.add_event("agent.completed")
-                    await self.execution_tracker.complete_execution(exec_id, result=result)
+                    self.execution_tracker.update_execution_state(
+                        exec_id, 
+                        ExecutionState.COMPLETED,
+                        result=result
+                    )
                     
                     # Transition through proper completion sequence: THINKING -> TOOL_PREPARATION -> TOOL_EXECUTION -> RESULT_PROCESSING
                     await self.agent_tracker.transition_state(
@@ -412,8 +422,9 @@ class AgentExecutionCore:
                     self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
-                    await self.execution_tracker.complete_execution(
+                    self.execution_tracker.update_execution_state(
                         exec_id, 
+                        ExecutionState.FAILED,
                         error=result.error or "Unknown error"
                     )
                     
@@ -451,8 +462,9 @@ class AgentExecutionCore:
                 trace_context.finish_span(span)
                 
                 # Ensure execution is marked as failed
-                await self.execution_tracker.complete_execution(
+                self.execution_tracker.update_execution_state(
                     exec_id,
+                    ExecutionState.FAILED,
                     error=f"Unexpected error: {str(e)}"
                 )
                 
@@ -774,8 +786,8 @@ class AgentExecutionCore:
         heartbeat: Optional[Any] = None  # Disabled - was AgentHeartbeat
     ) -> dict:
         """Collect comprehensive metrics for the execution."""
-        # Get metrics from execution tracker
-        tracker_metrics = await self.execution_tracker.collect_metrics(exec_id)
+        # Get metrics from execution tracker  
+        tracker_metrics = self.execution_tracker.get_metrics()
         
         # Combine with result metrics
         metrics = tracker_metrics or {}
