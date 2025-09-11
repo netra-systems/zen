@@ -12,7 +12,10 @@ Handles "start_agent" and "user_message" message types with proper database sess
 """
 
 import asyncio
+import json
 import os
+import time
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import WebSocket
@@ -86,6 +89,25 @@ class AgentMessageHandler(BaseMessageHandler):
         This is the NEW clean pattern that eliminates mock Request objects
         and uses honest WebSocket-specific abstractions.
         """
+        processing_start = time.time()
+        message_type = message.type if hasattr(message, 'type') else 'unknown'
+        
+        # CRITICAL: Log agent message processing start with Golden Path context
+        agent_processing_context = {
+            "user_id": user_id[:8] + "..." if user_id else "unknown",
+            "message_type": str(message_type),
+            "processing_pattern": "v3_clean_websocket",
+            "thread_id": message.payload.get("thread_id") or getattr(message, 'thread_id', None),
+            "run_id": message.payload.get("run_id"),
+            "has_user_request": bool(message.payload.get("user_request")),
+            "payload_size": len(str(message.payload)) if message.payload else 0,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "golden_path_stage": "agent_message_processing_start"
+        }
+        
+        logger.info(f"🤖 GOLDEN PATH AGENT PROCESSING: Starting v3 clean processing for {message_type} from user {user_id[:8] if user_id else 'unknown'}...")
+        logger.info(f"🔍 AGENT PROCESSING CONTEXT: {json.dumps(agent_processing_context, indent=2)}")
+        
         try:
             # Extract identifiers from message - use existing IDs for session continuity
             thread_id = message.payload.get("thread_id") or message.thread_id
@@ -105,11 +127,11 @@ class AgentMessageHandler(BaseMessageHandler):
                 connection_id = ws_manager.get_connection_id_by_websocket(websocket)
                 if connection_id:
                     ws_manager.update_connection_thread(connection_id, thread_id)
-                    logger.debug(f"Updated thread association: connection {connection_id} → thread {thread_id}")
+                    logger.debug(f"✅ THREAD ASSOCIATION: Updated connection {connection_id} → thread {thread_id}")
                 else:
                     # Generate connection ID if not found using SSOT
                     connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
-                    logger.warning(f"Generated fallback connection ID: {connection_id}")
+                    logger.warning(f"⚠️ FALLBACK CONNECTION ID: Generated {connection_id} for user {user_id[:8]}...")
 
             # Create clean WebSocketContext (no mock objects!)
             # Use actual context thread_id from get_user_execution_context for session continuity
@@ -120,6 +142,21 @@ class AgentMessageHandler(BaseMessageHandler):
                 run_id=context.run_id,  # Use run_id from execution context for session continuity
                 connection_id=connection_id
             )
+            
+            # CRITICAL: Log WebSocket context creation success
+            context_creation_details = {
+                "user_id": user_id[:8] + "..." if user_id else "unknown",
+                "websocket_context_id": getattr(websocket_context, 'connection_id', 'unknown'),
+                "execution_context_thread_id": context.thread_id,
+                "execution_context_run_id": context.run_id,
+                "websocket_manager_created": ws_manager is not None,
+                "connection_id": connection_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "golden_path_stage": "websocket_context_ready"
+            }
+            
+            logger.info(f"🔧 GOLDEN PATH CONTEXT: WebSocket context created for user {user_id[:8] if user_id else 'unknown'}...")
+            logger.debug(f"🔍 CONTEXT CREATION: {json.dumps(context_creation_details, indent=2)}")
             
             # Get database session using async generator pattern
             async for db_session in get_request_scoped_db_session():
@@ -150,10 +187,50 @@ class AgentMessageHandler(BaseMessageHandler):
                     )
                     
                     if success:
+                        # CRITICAL: Log successful agent processing with event delivery expectations
+                        processing_duration = time.time() - processing_start
+                        
+                        success_context = {
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "message_type": str(message_type),
+                            "processing_pattern": "v3_clean_websocket",
+                            "processing_duration_ms": round(processing_duration * 1000, 2),
+                            "thread_id": context.thread_id,
+                            "run_id": context.run_id,
+                            "websocket_context_id": getattr(websocket_context, 'connection_id', 'unknown'),
+                            "expected_websocket_events": [
+                                "agent_started", "agent_thinking", "tool_executing", 
+                                "tool_completed", "agent_completed"
+                            ],
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "golden_path_milestone": "Agent processing completed successfully - expecting WebSocket events"
+                        }
+                        
                         self._update_processing_stats(message.type)
-                        logger.info(f"✅ Successfully processed {message.type} for user {user_id} using v3 clean pattern")
+                        logger.info(f"✅ GOLDEN PATH AGENT SUCCESS: Processed {message_type} for user {user_id[:8] if user_id else 'unknown'}... in {processing_duration*1000:.2f}ms")
+                        logger.info(f"🔍 AGENT SUCCESS CONTEXT: {json.dumps(success_context, indent=2)}")
+                        logger.info(f"📡 EXPECTED EVENTS: User should receive agent_started → agent_thinking → tool_executing → tool_completed → agent_completed")
                     else:
+                        # CRITICAL: Log agent processing failure with detailed context
+                        processing_duration = time.time() - processing_start
+                        
+                        failure_context = {
+                            "user_id": user_id[:8] + "..." if user_id else "unknown",
+                            "message_type": str(message_type),
+                            "processing_pattern": "v3_clean_websocket",
+                            "processing_duration_ms": round(processing_duration * 1000, 2),
+                            "thread_id": context.thread_id,
+                            "run_id": context.run_id,
+                            "websocket_context_id": getattr(websocket_context, 'connection_id', 'unknown'),
+                            "failed_stage": "agent_message_processing",
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "golden_path_impact": "CRITICAL - Agent processing failed, no WebSocket events will be sent"
+                        }
+                        
                         self.processing_stats["errors"] += 1
+                        logger.critical(f"🚨 GOLDEN PATH AGENT FAILURE: Failed to process {message_type} for user {user_id[:8] if user_id else 'unknown'}... after {processing_duration*1000:.2f}ms")
+                        logger.critical(f"🔍 AGENT FAILURE CONTEXT: {json.dumps(failure_context, indent=2)}")
+                        logger.error(f"❌ NO WEBSOCKET EVENTS: User will not receive agent_started/agent_thinking/tool_executing/tool_completed/agent_completed events")
                     
                     return success
                     
