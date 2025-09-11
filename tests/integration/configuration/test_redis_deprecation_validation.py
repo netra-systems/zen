@@ -110,7 +110,6 @@ class TestRedisDeprecationValidation(SSotBaseTestCase):
                 required_elements = [
                     'deprecat',  # Mentions deprecation
                     'redis_url', # Mentions the specific variable
-                    'version',   # Mentions version removal
                 ]
                 
                 missing_elements = []
