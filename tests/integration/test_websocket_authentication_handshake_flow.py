@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.websocket,
-    pytest.mark.auth_handshake,
+    pytest.mark.websocket_authentication,  # Use existing WebSocket authentication marker
     pytest.mark.no_docker  # Explicitly no docker dependency
 ]
 

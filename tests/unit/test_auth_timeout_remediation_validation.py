@@ -148,16 +148,16 @@ class TestAuthTimeoutRemediationValidation(SSotAsyncTestCase):
             client = AuthServiceClient()
             timeouts = client._get_environment_specific_timeouts()
             
-            # VALIDATION ASSERTIONS: Verify remediated staging timeouts
-            self.assertEqual(timeouts.connect, 2.0, "Staging connect timeout should be 2.0s (increased from 1.0s)")
-            self.assertEqual(timeouts.read, 4.0, "Staging read timeout should be 4.0s (increased from 2.0s)")  
-            self.assertEqual(timeouts.write, 2.0, "Staging write timeout should be 2.0s (increased from 1.0s)")
-            self.assertEqual(timeouts.pool, 4.0, "Staging pool timeout should be 4.0s (increased from 2.0s)")
+            # VALIDATION ASSERTIONS: Verify Issue #469 optimized staging timeouts
+            self.assertEqual(timeouts.connect, 0.8, "Staging connect timeout should be 0.8s (optimized for Issue #469)")
+            self.assertEqual(timeouts.read, 1.6, "Staging read timeout should be 1.6s (optimized for Issue #469)")  
+            self.assertEqual(timeouts.write, 0.4, "Staging write timeout should be 0.4s (optimized for Issue #469)")
+            self.assertEqual(timeouts.pool, 0.4, "Staging pool timeout should be 0.4s (optimized for Issue #469)")
             
-            # Total timeout budget should be more reasonable for Cloud Run
+            # Total timeout budget optimized for 80% improvement (Issue #469)
             total_timeout = timeouts.connect + timeouts.read + timeouts.write + timeouts.pool  
-            self.assertEqual(total_timeout, 12.0, 
-                           f"Total staging timeout budget should be 12.0s (increased from 6.0s) but was {total_timeout}s")
+            self.assertEqual(total_timeout, 3.2, 
+                           f"Total staging timeout budget should be 3.2s (optimized from 12.0s for Issue #469) but was {total_timeout}s")
             
             # Compare with production (should still be reasonable)
             mock_env_dict.get.side_effect = lambda key, default=None: {

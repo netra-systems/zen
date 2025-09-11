@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-11 14:38:11
+**Generated:** 2025-09-11 15:19:05
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
 - **Total Tests:** 4
-- **Passed:** 0 (0.0%)
-- **Failed:** 2 (50.0%)
-- **Skipped:** 2
-- **Duration:** 0.76 seconds
-- **Pass Rate:** 0.0%
+- **Passed:** 1 (25.0%)
+- **Failed:** 3 (75.0%)
+- **Skipped:** 0
+- **Duration:** 0.36 seconds
+- **Pass Rate:** 25.0%
 
 ## Test Results by Priority
 
@@ -19,44 +19,55 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_auth_service_actually_works_in_staging | SKIP skipped | 0.000s | test_golden_path_validation_staging_current.py |
-| test_backend_service_actually_works_in_staging | SKIP skipped | 0.000s | test_golden_path_validation_staging_current.py |
-| test_staging_environment_service_architecture | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
-| test_recommended_validator_architecture_for_staging | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
+| test_staging_gcp_auth_timeout_performance_baseline_measurement | FAIL failed | 0.001s | test_gcp_timeout_optimization_e2e_469.py |
+| test_staging_gcp_multi_user_timeout_performance_validation | FAIL failed | 0.001s | test_gcp_timeout_optimization_e2e_469.py |
+| test_staging_gcp_timeout_optimization_validation | FAIL failed | 0.001s | test_gcp_timeout_optimization_e2e_469.py |
+| test_staging_gcp_timeout_optimization_e2e_recommendations_summary | PASS passed | 0.000s | test_gcp_timeout_optimization_e2e_469.py |
 
 ## Failed Tests Details
 
-### FAILED: test_staging_environment_service_architecture
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_validation_staging_current.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_golden_path_validation_staging_current.py:381: in test_staging_environment_service_architecture
-    assert validator_assumptions['conflicts_with_staging_reality'] is False, (
-E   AssertionError: STAGING REALITY vs VALIDATOR ASSUMPTIONS: Staging: {'auth_service': {'has_own_database': True, 'contains_tables': ['users', 'user_sessions', 'oauth_credentials'], 'accessible_from': ['auth_service_only']}, 'backend_service': {'has_own_database': True, 'contains_tables': ['chat_thre...
+### FAILED: test_staging_gcp_auth_timeout_performance_baseline_measurement
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py
+- **Duration:** 0.001s
+- **Error:** tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py:374: in test_staging_gcp_auth_timeout_performance_baseline_measurement
+    baseline_performance = await self.staging_monitor.measure_staging_auth_performance(
+                                 ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGCPTimeoutOptimizationE2E' object has no attribute 'staging_monitor'...
 
-### FAILED: test_recommended_validator_architecture_for_staging
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_validation_staging_current.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_golden_path_validation_staging_current.py:410: in test_recommended_validator_architecture_for_staging
-    assert False, (
-E   AssertionError: RECOMMENDED STAGING VALIDATOR ARCHITECTURE: {'auth_validation': {'method': 'HTTP call to auth service /health endpoint', 'validates': ['auth service availability', 'JWT capabilities'], 'database_access': 'none_from_backend'}, 'backend_validation': {'method': 'check backend database and components', 'validates': ['backend tables', 'ag...
+### FAILED: test_staging_gcp_multi_user_timeout_performance_validation
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py
+- **Duration:** 0.001s
+- **Error:** tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py:513: in test_staging_gcp_multi_user_timeout_performance_validation
+    baseline_performance = await self.staging_monitor.measure_staging_auth_performance(
+                                 ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGCPTimeoutOptimizationE2E' object has no attribute 'staging_monitor'...
+
+### FAILED: test_staging_gcp_timeout_optimization_validation
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py
+- **Duration:** 0.001s
+- **Error:** tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py:715: in test_staging_gcp_timeout_optimization_validation
+    scenario_performance = await self.staging_monitor.measure_staging_auth_performance(
+                                 ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGCPTimeoutOptimizationE2E' object has no attribute 'staging_monitor'...
 
 ## Pytest Output Format
 
 ```
-test_golden_path_validation_staging_current.py::test_auth_service_actually_works_in_staging SKIPPED
-test_golden_path_validation_staging_current.py::test_backend_service_actually_works_in_staging SKIPPED
-test_golden_path_validation_staging_current.py::test_staging_environment_service_architecture FAILED
-test_golden_path_validation_staging_current.py::test_recommended_validator_architecture_for_staging FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_auth_timeout_performance_baseline_measurement FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_multi_user_timeout_performance_validation FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_timeout_optimization_validation FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_timeout_optimization_e2e_recommendations_summary PASSED
 
 ==================================================
-0 passed, 2 failed, 2 skipped in 0.76s
+1 passed, 3 failed in 0.36s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| Authentication | 1 | 0 | 0 | 0.0% |
+| Authentication | 1 | 0 | 1 | 0.0% |
+| Performance | 2 | 0 | 2 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

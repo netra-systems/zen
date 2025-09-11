@@ -102,7 +102,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
         Test that demonstrates incompatibility when mixing old and new APIs.
         This should FAIL initially, showing the specific incompatibility.
         """
-        from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+        from shared.types.agent_types import AgentExecutionResult
         
         # Create SSOT result (this should work)
         ssot_result = AgentExecutionResult(
@@ -156,7 +156,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
         This should FAIL initially if API migration is incomplete.
         """
         # Import the classes used in Golden Path tests
-        from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+        from shared.types.agent_types import AgentExecutionResult
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # Create user context (this should work)
@@ -213,7 +213,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
         Test ExecutionResult API usage in factory pattern contexts.
         This should expose issues with factory-created agents using mixed APIs.
         """
-        from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+        from shared.types.agent_types import AgentExecutionResult
         
         # Simulate factory-created agent result
         factory_result = AgentExecutionResult(
@@ -260,7 +260,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
         Test that ExecutionResult API works correctly with WebSocket event emission.
         This validates the critical user experience path.
         """
-        from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+        from shared.types.agent_types import AgentExecutionResult
         
         # Create result that would be used for WebSocket events
         websocket_result = AgentExecutionResult(
@@ -309,7 +309,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
         
         Test that error handling works correctly with SSOT AgentExecutionResult API.
         """
-        from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+        from shared.types.agent_types import AgentExecutionResult
         
         # Create error result
         error_result = AgentExecutionResult(
@@ -401,7 +401,7 @@ class TestExecutionResultAPIMigrationValidation(SSotBaseTestCase):
         
         Test that validates AgentExecutionResult field types and constraints.
         """
-        from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+        from shared.types.agent_types import AgentExecutionResult
         
         # Test with all fields populated
         complete_result = AgentExecutionResult(

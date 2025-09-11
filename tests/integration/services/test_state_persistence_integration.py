@@ -49,14 +49,13 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import patch
 import redis
 import psycopg2
-import clickhouse_driver
 
 # SSOT Imports - Following SSOT_IMPORT_REGISTRY.md
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.core.managers.unified_state_manager import UnifiedStateManager
-from netra_backend.app.db.clickhouse_client import ClickHouseClient
-from netra_backend.app.core.configuration.database import DatabaseConfig
+from netra_backend.app.db.clickhouse import ClickHouseService, get_clickhouse_client
+from netra_backend.app.core.configuration.database import DatabaseConfigManager
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -80,15 +79,15 @@ class TestStatePersistenceIntegrationCore(SSotAsyncTestCase):
         postgres_url = cls.env.get_env_var('POSTGRES_URL', 'postgresql://localhost:5432/netra_test')
         cls.postgres_client = psycopg2.connect(postgres_url)
         
-        # Initialize real ClickHouse (Tier 3 - Cold Analytics)
-        clickhouse_host = cls.env.get_env_var('CLICKHOUSE_HOST', 'localhost')
-        cls.clickhouse_client = clickhouse_driver.Client(host=clickhouse_host)
+        # Initialize real ClickHouse (Tier 3 - Cold Analytics) using SSOT implementation
+        cls.clickhouse_service = ClickHouseService()
+        await cls.clickhouse_service.initialize()
         
         # Initialize persistence service
         cls.persistence_service = StatePersistenceService(
             redis_client=cls.redis_client,
             postgres_client=cls.postgres_client,
-            clickhouse_client=cls.clickhouse_client
+            clickhouse_service=cls.clickhouse_service
         )
         
         # Test data tracking
@@ -120,7 +119,7 @@ class TestStatePersistenceIntegrationCore(SSotAsyncTestCase):
         
         # ClickHouse schema
         try:
-            cls.clickhouse_client.execute("""
+            await cls.clickhouse_service.execute("""
                 CREATE TABLE IF NOT EXISTS state_analytics_test (
                     user_id String,
                     thread_id String,
@@ -154,7 +153,7 @@ class TestStatePersistenceIntegrationCore(SSotAsyncTestCase):
         # Clean up ClickHouse (Tier 3)
         for user_id in self.test_user_ids:
             try:
-                self.clickhouse_client.execute(
+                await self.clickhouse_service.execute(
                     "ALTER TABLE state_analytics_test DELETE WHERE user_id = %(user_id)s",
                     {"user_id": user_id}
                 )
@@ -305,7 +304,7 @@ class TestThreeTierArchitectureIntegration(TestStatePersistenceIntegrationCore):
         self.assertTrue(result.success)
         
         # Verify data exists in ClickHouse with analytics query
-        clickhouse_result = self.clickhouse_client.execute("""
+        clickhouse_result = await self.clickhouse_service.execute("""
             SELECT user_id, thread_id, state_data, event_timestamp
             FROM state_analytics_test
             WHERE user_id = %(user_id)s 
@@ -924,7 +923,7 @@ class TestDisasterRecoveryIntegration(TestStatePersistenceIntegrationCore):
         # Simulate network partition affecting Tier 2 and 3
         # (In real test, would use network simulation tools)
         with patch.object(self.persistence_service, 'postgres_client', None):
-            with patch.object(self.persistence_service, 'clickhouse_client', None):
+            with patch.object(self.persistence_service, 'clickhouse_service', None):
                 
                 # Updates should only succeed in Tier 1 during partition
                 partition_data = {

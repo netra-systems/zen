@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -22,17 +22,17 @@ class SupervisorUtilities:
         self.execution_engine = execution_engine
         self.error_handler = error_handler
     
-    async def run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
+    async def run_hooks(self, event: str, user_context: UserExecutionContext, **kwargs) -> None:
         """Run registered hooks for an event."""
         handlers = self.hooks.get(event, [])
         for handler in handlers:
-            await self._execute_single_hook(handler, event, state, **kwargs)
+            await self._execute_single_hook(handler, event, user_context, **kwargs)
 
     async def _execute_single_hook(self, handler, event: str, 
-                                  state: DeepAgentState, **kwargs) -> None:
+                                  user_context: UserExecutionContext, **kwargs) -> None:
         """Execute a single hook with error handling."""
         try:
-            await handler(state, **kwargs)
+            await handler(user_context, **kwargs)
         except Exception as e:
             logger.error(f"Hook {handler.__name__} failed: {e}")
             if event == "on_error":

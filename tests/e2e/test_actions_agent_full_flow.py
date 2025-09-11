@@ -62,7 +62,7 @@ from netra_backend.app.agents.state import (
 )
 
 try:
-    from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+    from shared.types.agent_types import AgentExecutionResult
 except ImportError:
     from netra_backend.app.schemas.shared_types import DataAnalysisResponse as AgentExecutionResult
 
