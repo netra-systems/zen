@@ -1397,6 +1397,222 @@ class WebSocketEmitterFactory:
             user_id=user_id,
             context=context
         )
+    
+    # ===================== PHASE 2: PERFORMANCE OPTIMIZATION FEATURES =====================
+    
+    def _start_batch_processor(self):
+        """Start background batch processor for non-critical events."""
+        if not self._enable_batching:
+            return
+            
+        # Start the batch processing task
+        self._batch_timer = asyncio.create_task(self._process_event_batches())
+        logger.debug(f"Batch processor started for user {self.user_id} (batch_size: {self._batch_size})")
+    
+    async def _process_event_batches(self):
+        """Background processor for batching non-critical events."""
+        try:
+            while True:
+                await asyncio.sleep(self._batch_timeout)
+                
+                async with self._buffer_lock:
+                    if not self._event_buffer:
+                        continue
+                    
+                    # Process batch if we have events or timeout reached
+                    batch_to_process = self._event_buffer.copy()
+                    self._event_buffer.clear()
+                
+                if batch_to_process:
+                    await self._send_event_batch(batch_to_process)
+                    
+        except asyncio.CancelledError:
+            logger.debug(f"Batch processor cancelled for user {self.user_id}")
+        except Exception as e:
+            logger.error(f"Batch processor error for user {self.user_id}: {e}")
+    
+    async def _send_event_batch(self, batch: List[Dict[str, Any]]):
+        """Send a batch of events together for better performance."""
+        try:
+            # Group events by type for better compression
+            grouped_events = {}
+            for event in batch:
+                event_type = event.get('type', 'unknown')
+                if event_type not in grouped_events:
+                    grouped_events[event_type] = []
+                grouped_events[event_type].append(event)
+            
+            # Send grouped batch
+            batch_data = {
+                'type': 'event_batch',
+                'user_id': self.user_id,
+                'batch_id': f"batch_{int(time.time() * 1000)}",
+                'events': grouped_events,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'batch_size': len(batch)
+            }
+            
+            if hasattr(self.manager, 'emit_event_batch'):
+                await self.manager.emit_event_batch(
+                    user_id=self.user_id,
+                    batch_data=batch_data
+                )
+            else:
+                # Fallback to individual events if manager doesn't support batching
+                for event in batch:
+                    await self._emit_individual_event(event)
+            
+            logger.debug(f"Sent event batch for user {self.user_id}: {len(batch)} events")
+            
+        except Exception as e:
+            logger.error(f"Failed to send event batch for user {self.user_id}: {e}")
+            # Fall back to individual event sending
+            for event in batch:
+                try:
+                    await self._emit_individual_event(event)
+                except Exception as fallback_error:
+                    logger.error(f"Fallback individual event failed: {fallback_error}")
+    
+    async def _emit_individual_event(self, event_data: Dict[str, Any]):
+        """Fallback method to emit individual events."""
+        event_type = event_data.get('type', 'unknown')
+        if hasattr(self.manager, 'emit_event'):
+            await self.manager.emit_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
+        else:
+            # Fallback to critical event method
+            await self.manager.emit_critical_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
+    
+    async def _queue_for_batching(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Queue non-critical event for batching."""
+        if not self._enable_batching:
+            # Send immediately if batching disabled
+            await self._emit_individual_event({
+                'type': event_type,
+                'user_id': self.user_id,
+                **data
+            })
+            return True
+        
+        event = {
+            'type': event_type,
+            'user_id': self.user_id,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            **data
+        }
+        
+        async with self._buffer_lock:
+            self._event_buffer.append(event)
+            
+            # Trigger immediate send if batch is full
+            if len(self._event_buffer) >= self._batch_size:
+                batch_to_send = self._event_buffer.copy()
+                self._event_buffer.clear()
+                
+                # Send batch immediately (don't wait for timer)
+                asyncio.create_task(self._send_event_batch(batch_to_send))
+        
+        return True
+    
+    def _update_connection_health(self, success: bool):
+        """Update connection health score based on operation success."""
+        if success:
+            self._consecutive_failures = 0
+            self._connection_health_score = min(100, self._connection_health_score + 2)
+            if self._circuit_breaker_open:
+                logger.info(f"Circuit breaker closed for user {self.user_id} - connection recovered")
+                self._circuit_breaker_open = False
+        else:
+            self._consecutive_failures += 1
+            self._connection_health_score = max(0, self._connection_health_score - 10)
+            
+            # Open circuit breaker if too many failures
+            if self._consecutive_failures >= 5 and not self._circuit_breaker_open:
+                self._circuit_breaker_open = True
+                logger.warning(f"Circuit breaker opened for user {self.user_id} - connection unhealthy")
+    
+    def _should_use_circuit_breaker(self) -> bool:
+        """Check if circuit breaker should prevent operations."""
+        if not self._circuit_breaker_open:
+            return False
+        
+        # Check if timeout has passed
+        elapsed = (datetime.utcnow() - self._last_health_check).total_seconds()
+        if elapsed > self._circuit_breaker_timeout:
+            self._circuit_breaker_open = False
+            logger.info(f"Circuit breaker timeout expired for user {self.user_id} - attempting recovery")
+            return False
+        
+        return True
+    
+    def get_performance_stats(self) -> Dict[str, Any]:
+        """Get detailed performance statistics."""
+        return {
+            'connection_health_score': self._connection_health_score,
+            'circuit_breaker_open': self._circuit_breaker_open,
+            'consecutive_failures': self._consecutive_failures,
+            'batching_enabled': self._enable_batching,
+            'batch_size': self._batch_size,
+            'batch_timeout': self._batch_timeout,
+            'high_throughput_mode': self._high_throughput_mode,
+            'performance_mode': self.performance_mode,
+            'current_buffer_size': len(self._event_buffer),
+            'events_per_minute': self.metrics.total_events / max(1, (datetime.utcnow() - self.metrics.created_at).total_seconds() / 60)
+        }
+    
+    async def cleanup(self):
+        """Enhanced cleanup with Phase 2 optimizations."""
+        try:
+            # Cancel batch processor
+            if hasattr(self, '_batch_timer') and self._batch_timer and not self._batch_timer.done():
+                self._batch_timer.cancel()
+                try:
+                    await self._batch_timer
+                except asyncio.CancelledError:
+                    pass
+            
+            # Send any remaining batched events
+            if hasattr(self, '_event_buffer') and self._event_buffer:
+                async with self._buffer_lock:
+                    if self._event_buffer:
+                        final_batch = self._event_buffer.copy()
+                        self._event_buffer.clear()
+                        await self._send_event_batch(final_batch)
+            
+            logger.info(f"UnifiedWebSocketEmitter cleanup completed for user {self.user_id}")
+            
+        except Exception as e:
+            logger.error(f"Cleanup failed for user {self.user_id}: {e}")
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get comprehensive emitter statistics including Phase 2 optimizations."""
+        base_stats = {
+            'user_id': self.user_id[:8] + '...' if self.user_id else 'unknown',
+            'total_events': self.metrics.total_events,
+            'critical_events': self.metrics.critical_events.copy(),
+            'error_count': self.metrics.error_count,
+            'retry_count': self.metrics.retry_count,
+            'last_event_time': self.metrics.last_event_time.isoformat() if self.metrics.last_event_time else None,
+            'created_at': self.metrics.created_at.isoformat(),
+            'user_tier': self._user_tier,
+            'emitter_type': 'UnifiedWebSocketEmitter',
+            'ssot_compliance': True
+        }
+        
+        # Add Phase 2 performance stats
+        performance_stats = self.get_performance_stats()
+        
+        return {
+            **base_stats,
+            'performance': performance_stats
+        }
 
 
 class WebSocketEmitterPool:
