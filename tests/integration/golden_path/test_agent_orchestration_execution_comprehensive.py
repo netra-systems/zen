@@ -196,15 +196,15 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         engine2 = await factory.create_for_user(user2_context)
         
         # Verify engines are different instances
-        self.assertIsNot(engine1, engine2)
-        self.assertNotEqual(engine1.get_user_context().user_id, engine2.get_user_context().user_id)
+        assert engine1 is not engine2
+        assert engine1.get_user_context().user_id != engine2.get_user_context().user_id
         
         # Verify user isolation - state should not leak
-        engine1.set_execution_state("test_key", "user1_value")
-        engine2.set_execution_state("test_key", "user2_value")
+        engine1.set_agent_state("test_agent", "user1_value")
+        engine2.set_agent_state("test_agent", "user2_value")
         
-        self.assertEqual(engine1.get_execution_state("test_key"), "user1_value")
-        self.assertEqual(engine2.get_execution_state("test_key"), "user2_value")
+        assert engine1.get_agent_state("test_agent") == "user1_value"
+        assert engine2.get_agent_state("test_agent") == "user2_value"
 
     @pytest.mark.integration
     @pytest.mark.real_services
