@@ -46,6 +46,14 @@ class WebSocketErrorSeverity(Enum):
     CRITICAL = "critical"
 
 
+class EventCriticality(Enum):
+    """Event criticality levels for test compatibility (alias for WebSocketErrorSeverity)."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
 @dataclass
 class ValidationResult:
     """Validation result data structure for test compatibility."""
@@ -395,6 +403,18 @@ def create_websocket_error_handler(validator: Optional[WebSocketErrorValidator] 
     return WebSocketErrorHandler(validator)
 
 
+def get_websocket_validator() -> WebSocketErrorValidator:
+    """Get or create a WebSocket validator instance (compatibility function)."""
+    return create_websocket_error_validator()
+
+
+def reset_websocket_validator():
+    """Reset WebSocket validator state (compatibility function for tests)."""
+    # This is a no-op function for stateless validator compatibility
+    logger.debug("WebSocket validator reset called (stateless validator - no-op)")
+    pass
+
+
 # Legacy alias for test compatibility
 WebSocketEventValidator = WebSocketErrorValidator
 
@@ -403,12 +423,15 @@ __all__ = [
     'WebSocketError',
     'WebSocketErrorType',
     'WebSocketErrorSeverity',
+    'EventCriticality',
     'WebSocketErrorValidator',
     'WebSocketEventValidator',  # Legacy alias
     'WebSocketErrorHandler',
     'ValidationResult',
     'create_websocket_error_validator',
-    'create_websocket_error_handler'
+    'create_websocket_error_handler',
+    'get_websocket_validator',
+    'reset_websocket_validator'
 ]
 
 logger.info("WebSocket Error Validator compatibility module loaded")

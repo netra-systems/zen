@@ -217,6 +217,44 @@ def _validate_ssot_user_context(user_context) -> bool:
     return True
 
 
+def _validate_ssot_user_context_staging_safe(user_context) -> bool:
+    """
+    STAGING-SAFE COMPATIBILITY FUNCTION: Validate SSOT user context with staging environment safety.
+    
+    This function provides validation of user execution context specifically for staging
+    environments where additional safety checks may be required.
+    
+    Args:
+        user_context: UserExecutionContext to validate
+        
+    Returns:
+        bool: True if context is valid and staging-safe
+    """
+    # First perform standard SSOT validation
+    if not _validate_ssot_user_context(user_context):
+        return False
+    
+    # Additional staging safety checks
+    if hasattr(user_context, 'environment') and user_context.environment == 'production':
+        logger.error("Production context in staging validation - potential configuration error")
+        return False
+    
+    # Validate test-specific attributes for staging safety
+    if hasattr(user_context, 'is_test_context') and not user_context.is_test_context:
+        logger.warning("Non-test context in staging validation - may not be safe")
+    
+    # Check for staging-specific isolation requirements
+    if hasattr(user_context, 'features') and user_context.features:
+        staging_unsafe_features = ['production_database', 'real_payment_processing', 'external_apis']
+        for feature in staging_unsafe_features:
+            if user_context.features.get(feature, False):
+                logger.error(f"Staging-unsafe feature '{feature}' enabled in context")
+                return False
+    
+    logger.debug("User context validation passed - staging-safe and SSOT compliant")
+    return True
+
+
 class WebSocketManagerFactory:
     """
     COMPATIBILITY CLASS: Legacy factory class for backward compatibility.
@@ -416,7 +454,8 @@ __all__ = [
     'ManagerMetrics',
     '_factory_instance',
     '_factory_lock',
-    '_validate_ssot_user_context'
+    '_validate_ssot_user_context',
+    '_validate_ssot_user_context_staging_safe'
 ]
 
 logger.info("WebSocket Manager Factory compatibility module loaded - Golden Path ready with enhanced compatibility")
