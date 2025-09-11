@@ -1,24 +1,22 @@
 """
 E2E Infrastructure Test: GCP Redis Connectivity Golden Path
 
-CRITICAL: This test suite exposes the CRITICAL Redis connection failure in GCP Staging
-that breaks the golden path user flow (90% of business value - AI chat functionality).
+CRITICAL: This test suite validates Redis connectivity for the golden path user flow 
+(90% of business value - AI chat functionality).
 
-Root Cause: GCP Infrastructure connectivity failure between Cloud Run and Memory Store Redis
-Issue: 7.51s timeout pattern causing complete chat functionality breakdown
-Impact: WebSocket readiness validation fails, causing startup failures
+REAL TEST REQUIREMENTS (CLAUDE.md Compliance):
+- NO MOCKS: Tests actual GCP Redis infrastructure
+- FAIL HARD: Tests MUST fail when Redis is broken
+- Real Services: WebSocket connections use real Redis for session management
+- Authentication: Real JWT authentication required
+- Business Focus: Protects $500K+ ARR chat functionality
 
-Business Value Justification:
-- Segment: Platform/Internal (protects all customer segments)
-- Business Goal: Platform Stability & Chat Value Protection
-- Value Impact: Prevents complete breakdown of AI chat functionality (core value proposition)
-- Strategic Impact: Ensures golden path user flow reliability in production environment
-
-CLAUDE.md Compliance:
-- Authentication: Uses E2EAuthHelper with real JWT authentication (MANDATORY for E2E tests)
-- Real Services: Tests actual GCP infrastructure, no mocks (MANDATORY for E2E tests)
-- Failure Design: Tests MUST fail when Redis infrastructure issue exists
-- Error Detection: Tests MUST raise errors, no try/except blocks hiding failures
+TEST STRATEGY:
+- Tests FAIL when Redis unavailable (infrastructure broken)
+- Tests PASS when Redis working (infrastructure operational)
+- No "assert True" patterns that always pass
+- Real Redis operations (set/get/expire) validated
+- WebSocket connections tested with real Redis dependency
 """
 
 import asyncio
@@ -26,11 +24,11 @@ import json
 import logging
 import time
 import pytest
+import redis.asyncio as redis
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 import aiohttp
 import websockets
-from unittest.mock import Mock
 
 from shared.isolated_environment import get_env
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, E2EAuthConfig
@@ -77,30 +75,39 @@ async def websocket_auth_helper(e2e_auth_helper):
 
 
 @pytest.fixture
-async def gcp_validator():
+async def real_redis_client():
     """
-    Fixture providing GCP WebSocket initialization validator for testing.
-    Uses real validator to test actual GCP infrastructure behavior.
+    Fixture providing real Redis client for testing actual Redis connectivity.
+    NO MOCKS - Uses actual Redis configuration from environment.
     """
-    # Mock app_state for validator testing
-    mock_app_state = Mock()
-    mock_app_state.db_session_factory = Mock()  # Simulate database ready
-    mock_app_state.database_available = True
+    env = get_env()
     
-    # Redis manager mock - this will fail in real GCP when Redis unavailable
-    mock_redis_manager = Mock()
-    mock_redis_manager.is_connected.return_value = False  # Simulate Redis failure
-    mock_app_state.redis_manager = mock_redis_manager
+    # Get Redis configuration (same as application uses)
+    redis_host = env.get("REDIS_HOST", "localhost")
+    redis_port = int(env.get("REDIS_PORT", "6379"))
+    redis_db = int(env.get("REDIS_DB", "0"))
     
-    validator = create_gcp_websocket_validator(mock_app_state)
+    logger.info(f"Connecting to Redis: {redis_host}:{redis_port}/{redis_db}")
     
-    # CRITICAL: Configure for staging environment to trigger GCP-specific timeouts
-    validator.update_environment_configuration(
-        environment="staging",
-        is_gcp=True
+    # Create real Redis client with same settings as application
+    client = redis.Redis(
+        host=redis_host,
+        port=redis_port,
+        db=redis_db,
+        decode_responses=True,
+        socket_connect_timeout=5.0,
+        socket_timeout=5.0,
+        retry_on_timeout=True,
+        health_check_interval=30
     )
     
-    yield validator
+    yield client
+    
+    # Cleanup
+    try:
+        await client.close()
+    except Exception as e:
+        logger.warning(f"Error closing Redis client: {e}")
 
 
 class TestGCPRedisConnectivityGoldenPath:
