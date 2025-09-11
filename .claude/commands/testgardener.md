@@ -19,7 +19,7 @@ After reading instructions output the issue to console.
 
 PROCESS INSTRUCTIONS START:
 
-Discover ALL_TESTS tests that won't collect
+Discover ALL_TESTS tests that won't collect or have import issues
 
 For each conceptual set of issues Spawn a new agent (SNST) 
 to remediate it.
