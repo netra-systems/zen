@@ -21,6 +21,8 @@ from contextlib import asynccontextmanager
 
 # Import UnifiedIdGenerator for SSOT ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+# Import ID migration bridge for pattern-agnostic matching (PHASE 1 SSOT REMEDIATION)
+from netra_backend.app.core.id_migration_bridge import get_migration_bridge, validate_id_compatibility
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState, WebSocketDisconnect
@@ -1473,6 +1475,149 @@ HEARTBEAT_TIMEOUT_SECONDS = 45  # Default heartbeat timeout
 
 
 # WebSocket Manager Factory Function - Compatibility Wrapper
+# PHASE 1 SSOT REMEDIATION - Resource Cleanup Utilities
+
+def find_matching_resources(target_id: str, resource_pool: Dict[str, Any]) -> List[str]:
+    """Find resources that match target ID for cleanup operations.
+    
+    PHASE 1 SSOT REMEDIATION: This function enables WebSocket resource cleanup
+    to work correctly despite ID pattern mismatches by using pattern-agnostic
+    matching instead of exact string equality.
+    
+    Args:
+        target_id: ID to find matches for
+        resource_pool: Dictionary of resource_id -> resource mappings
+        
+    Returns:
+        List of resource IDs that match the target
+    """
+    if not target_id or not resource_pool:
+        return []
+    
+    # Use migration bridge for pattern-agnostic matching
+    bridge = get_migration_bridge()
+    candidate_ids = list(resource_pool.keys())
+    
+    return bridge.find_matching_ids(target_id, candidate_ids)
+
+
+def cleanup_resources_by_pattern(target_pattern: str, resource_pools: Dict[str, Dict[str, Any]], 
+                                logger_context: Optional[str] = None) -> int:
+    """Clean up resources matching a pattern across multiple resource pools.
+    
+    PHASE 1 SSOT REMEDIATION: This function enables comprehensive resource cleanup
+    that works with both legacy and SSOT ID patterns.
+    
+    Args:
+        target_pattern: Pattern to match (thread_id, run_id, etc.)
+        resource_pools: Dict of pool_name -> {resource_id -> resource} mappings
+        logger_context: Optional context for logging
+        
+    Returns:
+        Number of resources cleaned up
+    """
+    cleaned_count = 0
+    context_msg = f" [{logger_context}]" if logger_context else ""
+    
+    for pool_name, pool in resource_pools.items():
+        if not pool:
+            continue
+        
+        # Find matching resources in this pool
+        matching_ids = find_matching_resources(target_pattern, pool)
+        
+        for resource_id in matching_ids:
+            try:
+                del pool[resource_id]
+                cleaned_count += 1
+                logger.debug(f"Cleaned up resource {resource_id} from {pool_name}{context_msg}")
+            except Exception as e:
+                logger.warning(f"Failed to clean up resource {resource_id} from {pool_name}{context_msg}: {e}")
+    
+    if cleaned_count > 0:
+        logger.info(f"Pattern cleanup{context_msg}: removed {cleaned_count} resources matching {target_pattern}")
+    
+    return cleaned_count
+
+
+def normalize_connection_id(connection_id: str, user_id: str) -> str:
+    """Normalize connection ID to SSOT format for consistent resource management.
+    
+    PHASE 1 SSOT REMEDIATION: This function ensures connection IDs are in
+    SSOT-compliant format to prevent cleanup mismatches.
+    
+    Args:
+        connection_id: Connection ID to normalize
+        user_id: User ID for context
+        
+    Returns:
+        Normalized connection ID
+    """
+    try:
+        # Use migration bridge for normalization
+        bridge = get_migration_bridge()
+        result = bridge.translate_id(connection_id)
+        return result.translated_id
+    except Exception as e:
+        logger.warning(f"Failed to normalize connection ID {connection_id} for user {user_id}: {e}")
+        return connection_id
+
+
+def validate_resource_compatibility(resource_id: str, context_ids: List[str]) -> bool:
+    """Validate that a resource is compatible with context IDs for cleanup.
+    
+    PHASE 1 SSOT REMEDIATION: This function prevents cleanup errors by
+    validating ID compatibility before attempting resource operations.
+    
+    Args:
+        resource_id: Resource ID to validate
+        context_ids: List of context IDs (thread_id, run_id, etc.)
+        
+    Returns:
+        True if resource is compatible with any context ID
+    """
+    if not resource_id or not context_ids:
+        return False
+    
+    for context_id in context_ids:
+        if validate_id_compatibility(resource_id, context_id):
+            return True
+    
+    return False
+
+
+def get_cleanup_priority(id_string: str) -> int:
+    """Get cleanup priority for an ID based on its pattern.
+    
+    PHASE 1 SSOT REMEDIATION: This function helps prioritize cleanup operations
+    to prevent resource conflicts during migration.
+    
+    Args:
+        id_string: ID to assess
+        
+    Returns:
+        Priority level (higher = more urgent)
+    """
+    try:
+        bridge = get_migration_bridge()
+        format_info, confidence = bridge.detect_id_format(id_string)
+        
+        # SSOT format gets highest priority
+        if format_info.name == 'SSOT' and confidence > 0.9:
+            return 100
+        
+        # Legacy formats get medium priority
+        if 'LEGACY' in format_info.name:
+            return 50
+        
+        # Unknown formats get low priority
+        return 10
+        
+    except Exception as e:
+        logger.debug(f"Error assessing cleanup priority for {id_string}: {e}")
+        return 1  # Default low priority
+
+
 def create_websocket_manager(user_context=None, user_id=None):
     """
     Create WebSocket manager instance - Compatibility wrapper.

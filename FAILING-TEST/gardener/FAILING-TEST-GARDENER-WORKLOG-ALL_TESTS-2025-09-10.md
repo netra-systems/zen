@@ -113,7 +113,29 @@ RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
 **P0 Security Warning:** "Multiple users may see each other's data with this pattern"
 **Next Action:** Create URGENT GitHub issue for P0 security vulnerability
 
-### Issue #4: Test Execution Timeout  
+### Issue #4: Critical API Authentication Route Failures  
+**Severity:** CRITICAL
+**Category:** failing-test-api-authentication-critical
+**Test Files:** `netra_backend/tests/api/test_*.py`
+**Description:** Systematic API authentication test failures - expecting 401 but getting 404 responses
+**Root Causes:**
+1. **Missing API Routes**: Endpoints returning 404 instead of 401 for authentication tests
+2. **Route Configuration Issues**: API routes not properly configured or registered
+3. **Authentication Middleware Problems**: Authentication layer not intercepting requests correctly
+**Business Impact:**
+- **CRITICAL**: API security validation completely broken
+- **CRITICAL**: Cannot validate Enterprise API access controls ($15K+ MRR per customer)
+- **HIGH**: Authentication middleware effectiveness unknown
+- **HIGH**: API route discovery and endpoint security untested
+**Error Pattern:**
+```
+assert 404 == 401  # Expected 401 Unauthorized, got 404 Not Found
+```
+**Test Stats:** 19 failed out of 23 authentication tests (83% failure rate)
+**Affected APIs:** Admin, Agents, Analytics, Billing, Corpus, Documents, Events, Health, Messages, Metrics, Organizations, Runs, Search, Settings, Threads, Users, WebSocket
+**Next Action:** Create GitHub issue for systematic API route configuration failure
+
+### Issue #5: Test Execution Timeout  
 **Severity:** HIGH
 **Category:** infrastructure
 **Description:** Comprehensive test suite times out, preventing full analysis
