@@ -594,11 +594,11 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         agent_context.agent_name = "tracked_agent"
         
         # Execute: Run with execution tracking - patch the execution_core's tracker directly
-        mock_tracker = AsyncMock()
-        mock_tracker.register_execution = AsyncMock(return_value=uuid4())
-        mock_tracker.start_execution = AsyncMock()
-        mock_tracker.complete_execution = AsyncMock()
-        mock_tracker.collect_metrics = AsyncMock(return_value={
+        mock_tracker = MagicMock()
+        mock_tracker.create_execution = MagicMock(return_value=str(uuid4()))
+        mock_tracker.start_execution = MagicMock(return_value=True)
+        mock_tracker.update_execution_state = MagicMock(return_value=True)
+        mock_tracker.get_metrics = MagicMock(return_value={
             "execution_time_ms": 200,
             "memory_usage_mb": 45.6,
             "cpu_percent": 12.3
@@ -622,17 +622,17 @@ class TestAgentExecutionCoreComprehensiveIntegration:
         assert result.success is True
         
         # Verify: Tracker integration calls made
-        mock_tracker.register_execution.assert_called_once()
+        mock_tracker.create_execution.assert_called_once()
         mock_tracker.start_execution.assert_called_once()
-        mock_tracker.complete_execution.assert_called_once()
-        mock_tracker.collect_metrics.assert_called_once()
+        mock_tracker.update_execution_state.assert_called()  # Called multiple times
+        mock_tracker.get_metrics.assert_called_once()
         
         # Verify: Registration included proper context
-        register_call = mock_tracker.register_execution.call_args
-        assert register_call[1]["agent_name"] == "tracked_agent"
-        assert register_call[1]["user_id"] == enhanced_user_context.user_id
-        assert register_call[1]["thread_id"] == enhanced_user_context.thread_id
-        assert register_call[1]["timeout_seconds"] == 5.0
+        create_call = mock_tracker.create_execution.call_args
+        assert create_call[1]["agent_name"] == "tracked_agent"
+        assert create_call[1]["user_id"] == enhanced_user_context.user_id
+        assert create_call[1]["thread_id"] == enhanced_user_context.thread_id
+        assert create_call[1]["timeout_seconds"] == 5.0
         
     async def test_trace_context_propagation_integration(
         self, execution_core, mock_registry, agent_context, enhanced_user_context
