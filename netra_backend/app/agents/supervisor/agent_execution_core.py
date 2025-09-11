@@ -260,7 +260,7 @@ class AgentExecutionCore:
                         metadata={"error": "Agent not found"},
                         websocket_manager=self.websocket_bridge
                     )
-                    self.agent_tracker.update_execution_state(state_exec_id, {"success": False, "completed": True})
+                    self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
                     
                     # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
                     # Removing manual call to prevent duplicate notifications
@@ -379,7 +379,7 @@ class AgentExecutionCore:
                     # No need to manually call notify_agent_completed here
                     
                     # Mark execution as successful in tracker state
-                    self.agent_tracker.update_execution_state(state_exec_id, {"success": True, "completed": True})
+                    self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
                     await self.execution_tracker.complete_execution(
