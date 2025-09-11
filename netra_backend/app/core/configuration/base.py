@@ -67,7 +67,12 @@ class UnifiedConfigManager:
             # Validate the configuration
             validation_result = self._validator.validate_complete_config(config)
             if not validation_result.is_valid:
-                self._logger.warning(f"Configuration validation issues: {validation_result.errors}")
+                self._logger.error(
+                    f"❌ VALIDATION FAILURE: Configuration validation failed for environment '{current_environment}'. "
+                    f"Errors: {validation_result.errors}. This may cause system instability."
+                )
+            else:
+                self._logger.debug(f"✅ Configuration validation passed for environment '{current_environment}'")
             
             # Only cache for non-test environments
             if not is_test_environment:
@@ -135,7 +140,10 @@ class UnifiedConfigManager:
                     
             return config
         except Exception as e:
-            self._logger.error(f"Failed to create config for {environment}: {e}")
+            self._logger.error(
+                f"❌ VALIDATION FAILURE: Failed to create configuration for environment '{environment}'. "
+                f"Error: {e}. Falling back to basic AppConfig. This may cause missing configuration values."
+            )
             # Fallback to basic config
             return AppConfig(environment=environment)
     
