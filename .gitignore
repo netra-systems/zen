@@ -147,3 +147,4 @@ google-cloud-cli-darwin-arm.tar.gz
 
 # Health check reports
 staging_health_check_*.json
+deploy-sa-key-staging.json

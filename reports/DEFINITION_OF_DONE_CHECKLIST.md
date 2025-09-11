@@ -298,6 +298,8 @@ python scripts/deploy_to_gcp.py --project netra-production --run-checks
 **Purpose:** Single Source of Truth test infrastructure ensuring reliable, consistent testing patterns  
 **SSOT Compliance:** 94.5% achieved - ALL P0 violations RESOLVED
 
+📖 **COMPLETE TEST EXECUTION GUIDE:** See [`TEST_EXECUTION_GUIDE.md`](../TEST_EXECUTION_GUIDE.md) for comprehensive methodology on running all unit tests without fast-fail behavior, separating collection failures from test failures, and understanding test infrastructure.
+
 **Primary SSOT Files:**
 - [ ] `/tests/unified_test_runner.py` (SSOT TEST EXECUTION - MEGA CLASS: max 2000 lines)
 - [ ] `/test_framework/ssot/base_test_case.py` (SSOT BaseTestCase - ALL tests inherit from this)

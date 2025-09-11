@@ -60,7 +60,7 @@ from netra_backend.app.core.websocket_exceptions import (
 )
 
 # Import the deprecated notifier for compatibility testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 
 class TestWebSocketEventFormatting:
     """Test WebSocket event formatting and validation for business value delivery."""

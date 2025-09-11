@@ -43,7 +43,7 @@ from netra_backend.app.websocket_core.types import (
 from netra_backend.app.websocket_core.context import WebSocketRequestContext  
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.event_validation_framework import EventValidationFramework
-from netra_backend.app.websocket_core.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 
 # Import agent execution components for real event testing
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore

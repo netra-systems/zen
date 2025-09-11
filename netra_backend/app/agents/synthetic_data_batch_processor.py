@@ -12,7 +12,8 @@ from typing import Any, Dict, List, Optional
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 # DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
-from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+# SSOT COMPLIANCE: Import from facade that redirects to SSOT
+from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.generation import GenerationStatus
 

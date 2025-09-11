@@ -19,7 +19,7 @@
     # REMOVED_SYNTAX_ERROR: # Removed non-existent AuthManager import
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-    # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.redis_manager import AuthRedisManager, auth_redis_manager
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import RedisManager as AuthRedisManager, auth_redis_manager
     # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.config import AuthConfig
     # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.routes.auth_routes import MockAuthService
 

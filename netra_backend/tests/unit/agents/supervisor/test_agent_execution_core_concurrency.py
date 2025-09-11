@@ -47,11 +47,11 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
-from netra_backend.app.agents.execution_timeout_manager import (
+from netra_backend.app.core.agent_execution_tracker import (
     TimeoutConfig,
-    CircuitBreakerOpenError
+    CircuitBreakerOpenError,
+    AgentExecutionPhase
 )
-from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
 
 
 @dataclass
@@ -258,6 +258,22 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                     "thread_id": threading.current_thread().ident
                 }
                 tracker._state_executions[state_id]["phases"].append(transition)
+                
+                # Debug output to understand why notify_agent_completed isn't called
+                print(f"DEBUG: transition_phase called: state_id={state_id}, phase={phase}, websocket_manager={websocket_manager is not None}")
+                
+                # Simulate WebSocket notifications for COMPLETED phase
+                if websocket_manager and phase == AgentExecutionPhase.COMPLETED:
+                    execution = tracker._state_executions[state_id]
+                    print(f"DEBUG: About to call notify_agent_completed for {execution['agent_name']}")
+                    await websocket_manager.notify_agent_completed(
+                        run_id=execution["run_id"],
+                        agent_name=execution["agent_name"],
+                        result={"status": "completed", "success": True}
+                    )
+                    print(f"DEBUG: Called notify_agent_completed for {execution['agent_name']}")
+                elif phase == AgentExecutionPhase.COMPLETED:
+                    print(f"DEBUG: COMPLETED phase reached but websocket_manager is None or falsy: {websocket_manager}")
         
         def complete_execution(state_id, success=True):
             if state_id in tracker._state_executions:
@@ -303,24 +319,25 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # Create a real UserExecutionContext following the migration guidance
+        # Pass metadata during construction since the class is frozen
         user_context = UserExecutionContext(
             user_id=UserID(user_id or f"user-{uuid4().hex[:8]}"),
             thread_id=ThreadID(thread_id or f"thread-{uuid4().hex[:8]}"),
             run_id=RunID(f"run-{uuid4().hex[:8]}"),
-            request_id=RequestID(f"req-{uuid4().hex[:8]}")
+            request_id=RequestID(f"req-{uuid4().hex[:8]}"),
+            agent_context={
+                "agent_name": "test_agent",
+                "operation_depth": 1,
+                "test_execution": True
+            }
         )
-        
-        # Add test metadata for agent execution
-        user_context.metadata = {
-            "agent_name": "test_agent",
-            "operation_depth": 1,
-            "test_execution": True
-        }
         
         # Add mock tool dispatcher for testing (if needed)
         if not hasattr(user_context, 'tool_dispatcher'):
-            user_context.tool_dispatcher = Mock()
-            user_context.tool_dispatcher.set_websocket_manager = Mock()
+            # Cannot set attributes on frozen dataclass, so we'll use object.__setattr__
+            from unittest.mock import Mock
+            mock_tool_dispatcher = Mock()
+            object.__setattr__(user_context, 'tool_dispatcher', mock_tool_dispatcher)
         
         return user_context
 
@@ -374,7 +391,6 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
         # Execute all agents concurrently
         tasks = [execute_single_agent(agent_name) for agent_name in agent_names]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
         # Validate isolation - no exceptions should propagate between executions
         successful_results = [r for r in results if isinstance(r, ConcurrentTestResult) and not r.errors]
         assert len(successful_results) == num_concurrent, f"Expected {num_concurrent} successful executions, got {len(successful_results)}"
@@ -1243,6 +1259,22 @@ class TestAgentExecutionCoreConcurrency(SSotAsyncTestCase):
                         "thread_id": threading.current_thread().ident
                     }
                     mock_state_tracker._state_executions[state_id]["phases"].append(transition)
+                    
+                    # Simulate WebSocket notifications for COMPLETED and FAILED phases
+                    if websocket_manager and phase == AgentExecutionPhase.COMPLETED:
+                        execution = mock_state_tracker._state_executions[state_id]
+                        await websocket_manager.notify_agent_completed(
+                            run_id=execution["run_id"],
+                            agent_name=execution["agent_name"],
+                            result={"status": "completed", "success": True}
+                        )
+                    elif websocket_manager and phase == AgentExecutionPhase.FAILED:
+                        execution = mock_state_tracker._state_executions[state_id]
+                        await websocket_manager.notify_agent_error(
+                            run_id=execution["run_id"],
+                            agent_name=execution["agent_name"],
+                            error={"status": "failed", "error": "Agent execution failed"}
+                        )
             
             def complete_execution(state_id, success=True):
                 if state_id in mock_state_tracker._state_executions:

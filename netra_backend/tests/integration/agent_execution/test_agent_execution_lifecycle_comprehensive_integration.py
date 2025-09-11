@@ -46,8 +46,8 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.agents.supervisor.execution_engine_factory import create_request_scoped_engine
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 
 # WebSocket Integration (Real Services)

@@ -45,7 +45,7 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket.connection_manager import WebSocketConnectionManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.core.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env
 

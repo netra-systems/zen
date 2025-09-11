@@ -974,7 +974,9 @@ class StartupOrchestrator:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.security_service import SecurityService
         
-        self.app.state.llm_manager = LLMManager()
+        # SSOT FIX: Use factory pattern for LLM manager creation
+        from netra_backend.app.llm.llm_manager import create_llm_manager
+        self.app.state.llm_manager = create_llm_manager()
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
@@ -1524,7 +1526,6 @@ class StartupOrchestrator:
     
     async def _initialize_factory_patterns(self) -> None:
         """Initialize factory patterns for singleton removal - CRITICAL."""
-        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory, get_execution_engine_factory
         from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, get_websocket_bridge_factory
         from netra_backend.app.agents.supervisor.agent_instance_factory import (
             get_agent_instance_factory,
@@ -1536,26 +1537,15 @@ class StartupOrchestrator:
         self.logger.info("    - Initializing factory patterns for singleton removal...")
         
         try:
-            # 1. Initialize ExecutionEngineFactory
-            execution_factory = get_execution_engine_factory()
+            # 1. Initialize UnifiedExecutionEngineFactory (MIGRATION COMPLETE)
+            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
             
-            # Configure execution factory with dependencies
-            # Note: With UserExecutionContext pattern, registry is created per-request
-            # so we don't configure it here - it will be provided at runtime
-            if hasattr(self.app.state, 'agent_supervisor'):
-                supervisor = self.app.state.agent_supervisor
-                # Get websocket factory (will be properly initialized below)
-                temp_websocket_factory = get_websocket_bridge_factory()
-                execution_factory.configure(
-                    agent_registry=None,  # Per-request in UserExecutionContext pattern
-                    websocket_bridge_factory=temp_websocket_factory,
-                    db_connection_pool=None  # Will be set later if needed
-                )
-                self.logger.info("    ✓ ExecutionEngineFactory configured (registry will be per-request)")
-            else:
-                self.logger.warning("    ⚠ Agent supervisor not available - factory configuration limited")
+            # Note: UnifiedExecutionEngineFactory is a class with class methods, not requiring instantiation
+            # Configuration will be done later after WebSocket bridge is available
+            # We store the class reference directly for later configuration and use
+            self.app.state.execution_engine_factory = UnifiedExecutionEngineFactory
+            self.logger.info("    ✓ UnifiedExecutionEngineFactory assigned (will be configured after WebSocket bridge)")
             
-            self.app.state.execution_engine_factory = execution_factory
             
             # 2. Initialize WebSocketConnectionPool first (required by factory)
             from netra_backend.app.services.websocket_connection_pool import get_websocket_connection_pool
@@ -1595,20 +1585,15 @@ class StartupOrchestrator:
             self.app.state.agent_instance_factory = agent_instance_factory
             self.logger.info("    ✓ AgentInstanceFactory configured")
             
-            # 5. Configure ExecutionEngineFactory with WebSocket bridge
-            from netra_backend.app.agents.supervisor.execution_engine_factory import (
-                configure_execution_engine_factory
-            )
-            execution_engine_factory = await configure_execution_engine_factory(
-                websocket_bridge=self.app.state.agent_websocket_bridge
-            )
-            self.app.state.execution_engine_factory = execution_engine_factory
-            self.logger.info("    ✓ ExecutionEngineFactory configured with WebSocket bridge")
+            # 5. Configure UnifiedExecutionEngineFactory with WebSocket bridge (MIGRATION COMPLETE)
+            # Configure class with WebSocket bridge for compatibility (configure is a class method)
+            UnifiedExecutionEngineFactory.configure(websocket_bridge=self.app.state.agent_websocket_bridge)
+            self.logger.info("    ✓ UnifiedExecutionEngineFactory configured with WebSocket bridge")
             
             # 6. Initialize FactoryAdapter for backward compatibility
             adapter_config = AdapterConfig.from_env()
             factory_adapter = FactoryAdapter(
-                execution_engine_factory=execution_engine_factory,
+                execution_engine_factory=UnifiedExecutionEngineFactory,
                 websocket_bridge_factory=websocket_factory,
                 config=adapter_config
             )

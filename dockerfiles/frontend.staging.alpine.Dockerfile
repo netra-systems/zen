@@ -45,7 +45,8 @@ COPY frontend/components.json ./
 COPY frontend/middleware.ts ./
 COPY frontend/config.ts ./
 COPY frontend/global.d.ts ./
-COPY frontend/next-env.d.ts ./
+# next-env.d.ts is auto-generated, make it optional
+COPY frontend/next-env.d.ts* ./
 
 # Copy public assets (changes less frequently)
 COPY frontend/public ./public

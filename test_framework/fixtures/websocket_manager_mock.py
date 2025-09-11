@@ -352,7 +352,7 @@ def mock_websocket_connection():
 @pytest.fixture
 def mock_websocket_notifier():
     """Provide a mock WebSocket notifier for testing."""
-    return MockWebSocketNotifier()
+    return MockWebSocketNotifier.create_for_user()
 
 
 @pytest.fixture

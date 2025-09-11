@@ -11,7 +11,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,
 )
@@ -24,7 +24,8 @@ from netra_backend.app.schemas.agent_state import (
 from netra_backend.app.services.state_persistence import state_persistence_service
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+    # CANONICAL IMPORT: Use direct import path for better SSOT compliance
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)

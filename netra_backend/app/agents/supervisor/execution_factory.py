@@ -44,6 +44,8 @@ if TYPE_CHECKING:
 
 logger = central_logger.get_logger(__name__)
 
+# Import UserExecutionEngine for SSOT remediation (Phase 1)
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 # SSOT COMPLIANCE: ExecutionStatus imported from core_enums
 # Mapping for execution_factory specific states:
@@ -340,15 +342,45 @@ class ExecutionEngineFactory:
                 )
                 logger.info(f"Created fallback WebSocket emitter for user {user_context.user_id}")
             
-            # Create isolated execution engine
-            engine = IsolatedExecutionEngine(
-                user_context=user_context,
-                agent_registry=self._agent_registry,  # Shared, immutable
-                websocket_emitter=websocket_emitter,  # Per-user
-                execution_semaphore=user_semaphore,   # Per-user
-                execution_timeout=self.config.execution_timeout_seconds,
-                factory=self  # Reference back for cleanup
-            )
+            # SSOT REMEDIATION PHASE 1: Delegate to UserExecutionEngine
+            # This maintains backward compatibility while routing through the preferred engine
+            try:
+                # Try to create UserExecutionEngine (preferred SSOT approach)
+                from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+                
+                agent_factory = get_agent_instance_factory()
+                
+                # Create UserExecutionEngine instead of IsolatedExecutionEngine
+                user_engine = UserExecutionEngine(
+                    context=user_context,
+                    agent_factory=agent_factory,
+                    websocket_emitter=websocket_emitter
+                )
+                
+                # Create a delegation wrapper that maintains IsolatedExecutionEngine interface
+                engine = UserExecutionEngineWrapper(
+                    user_engine=user_engine,
+                    user_context=user_context,
+                    agent_registry=self._agent_registry,
+                    websocket_emitter=websocket_emitter,
+                    execution_semaphore=user_semaphore,
+                    execution_timeout=self.config.execution_timeout_seconds,
+                    factory=self
+                )
+                
+                logger.info(f"✅ Created UserExecutionEngine (via wrapper) for user {user_context.user_id}")
+                
+            except Exception as e:
+                logger.warning(f"Failed to create UserExecutionEngine: {e}. Falling back to IsolatedExecutionEngine")
+                # Fallback to original IsolatedExecutionEngine for safety
+                engine = IsolatedExecutionEngine(
+                    user_context=user_context,
+                    agent_registry=self._agent_registry,  # Shared, immutable
+                    websocket_emitter=websocket_emitter,  # Per-user
+                    execution_semaphore=user_semaphore,   # Per-user
+                    execution_timeout=self.config.execution_timeout_seconds,
+                    factory=self  # Reference back for cleanup
+                )
             
             # Register cleanup callbacks
             user_context.cleanup_callbacks.append(engine.cleanup)
@@ -431,6 +463,48 @@ class ExecutionEngineFactory:
         }
 
 
+class UserExecutionEngineWrapper:
+    """
+    Wrapper that delegates to UserExecutionEngine while maintaining IsolatedExecutionEngine interface.
+    
+    This is part of SSOT remediation Phase 1 - providing backward compatibility
+    while routing all operations through UserExecutionEngine.
+    
+    Business Value: Enables gradual migration to SSOT without breaking existing code
+    """
+    
+    def __init__(self, 
+                 user_engine: UserExecutionEngine,
+                 user_context: UserExecutionContext,
+                 agent_registry: 'AgentRegistry',
+                 websocket_emitter: 'UserWebSocketEmitter',
+                 execution_semaphore: asyncio.Semaphore,
+                 execution_timeout: float,
+                 factory: ExecutionEngineFactory):
+        """Initialize wrapper with UserExecutionEngine delegation."""
+        self.user_engine = user_engine  # Primary engine
+        self.user_context = user_context
+        self.agent_registry = agent_registry
+        self.websocket_emitter = websocket_emitter
+        self.execution_semaphore = execution_semaphore
+        self.execution_timeout = execution_timeout
+        self.factory = factory
+        
+        logger.debug(f"UserExecutionEngineWrapper initialized for user {user_context.user_id} - delegating to UserExecutionEngine")
+    
+    # Delegate all methods to UserExecutionEngine
+    def __getattr__(self, name):
+        """Delegate unknown methods to the wrapped UserExecutionEngine."""
+        return getattr(self.user_engine, name)
+    
+    async def cleanup(self):
+        """Cleanup delegation - call UserExecutionEngine cleanup."""
+        try:
+            await self.user_engine.cleanup()
+        except Exception as e:
+            logger.error(f"Error during UserExecutionEngine cleanup: {e}")
+
+
 class IsolatedExecutionEngine:
     """
     Per-request ExecutionEngine with complete user isolation.
@@ -448,6 +522,14 @@ class IsolatedExecutionEngine:
                  execution_semaphore: asyncio.Semaphore,
                  execution_timeout: float,
                  factory: ExecutionEngineFactory):
+        
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
         self.user_context = user_context
         self.agent_registry = agent_registry  # Shared, immutable

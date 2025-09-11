@@ -35,6 +35,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
+from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
 from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
@@ -145,9 +146,9 @@ class MinimalFallbackManager:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=execution_time,
+            duration=execution_time,
             error=f"Agent execution failed: {str(error)}",
-            state=state,
+            data=state,
             metadata={
                 'fallback_result': True,
                 'original_error': str(error),
@@ -158,7 +159,7 @@ class MinimalFallbackManager:
         )
 
 
-class UserExecutionEngine:
+class UserExecutionEngine(IExecutionEngine):
     """Per-user execution engine with isolated state.
     
     This engine is created per-request with UserExecutionContext and maintains
@@ -297,14 +298,14 @@ class UserExecutionEngine:
             logger.error(f"Error getting available agents: {e}")
             return []
     
-    def get_available_tools(self) -> List[Any]:
+    async def get_available_tools(self) -> List[Any]:
         """Get available tools from tool dispatcher for integration testing.
         
         Returns:
             List of available tool objects from the tool dispatcher
         """
         try:
-            dispatcher = self.get_tool_dispatcher()
+            dispatcher = await self.get_tool_dispatcher()
             logger.debug(f"Tool dispatcher for user {self.context.user_id}: {type(dispatcher)}")
             
             if dispatcher and hasattr(dispatcher, 'get_available_tools'):
@@ -454,34 +455,57 @@ class UserExecutionEngine:
     
     @property
     def tool_dispatcher(self):
-        """Get tool dispatcher for this engine (property access for test compatibility)."""
+        """Get tool dispatcher for this engine (property access for test compatibility).
+        
+        NOTE: This property returns a coroutine for async contexts. 
+        For synchronous contexts, use the _tool_dispatcher attribute directly if available.
+        """
+        # For backwards compatibility, try to return the cached dispatcher
+        if hasattr(self, '_tool_dispatcher'):
+            return self._tool_dispatcher
+        # Otherwise return the coroutine for async contexts
         return self.get_tool_dispatcher()
     
-    def get_tool_dispatcher(self):
+    async def get_tool_dispatcher(self):
         """Get tool dispatcher for this engine with user context.
         
         Creates a user-scoped tool dispatcher with proper isolation and WebSocket event emission.
         This ensures tool_executing and tool_completed events are sent to the user.
         """
         if not hasattr(self, '_tool_dispatcher'):
-            self._tool_dispatcher = self._create_tool_dispatcher()
+            self._tool_dispatcher = await self._create_tool_dispatcher()
         return self._tool_dispatcher
     
-    def _create_tool_dispatcher(self):
+    async def _create_tool_dispatcher(self):
         """Create real tool dispatcher with WebSocket event emission."""
         try:
-            # Import the SSOT tool dispatcher factory
-            from netra_backend.app.agents.tool_dispatcher import create_request_scoped_tool_dispatcher
+            # Import the UnifiedToolDispatcher for async creation with AgentWebSocketBridge
+            from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
             
-            # Check if we have a WebSocket manager available
-            websocket_manager = getattr(self.websocket_emitter, 'manager', None) if self.websocket_emitter else None
+            # CRITICAL FIX: Get the AgentWebSocketBridge from the websocket_emitter
+            # The UnifiedToolDispatcher.create_for_user() method has built-in logic to handle AgentWebSocketBridge
+            websocket_bridge = getattr(self.websocket_emitter, 'websocket_bridge', None) if self.websocket_emitter else None
             
-            # Create request-scoped dispatcher with WebSocket events
-            dispatcher = create_request_scoped_tool_dispatcher(
-                user_context=self.context,
-                websocket_manager=websocket_manager,
-                tools=[]  # Tools will be registered as needed
-            )
+            if websocket_bridge:
+                logger.debug(f"Using AgentWebSocketBridge for tool dispatcher WebSocket events (user: {self.context.user_id})")
+                # Use the async create_for_user method that properly handles AgentWebSocketBridge
+                dispatcher = await UnifiedToolDispatcher.create_for_user(
+                    user_context=self.context,
+                    websocket_bridge=websocket_bridge,  # Pass AgentWebSocketBridge directly - has adapter logic
+                    tools=[],  # Tools will be registered as needed
+                    enable_admin_tools=False
+                )
+                logger.debug(f"✅ Created dispatcher with AgentWebSocketBridge adapter for user {self.context.user_id}")
+                    
+            else:
+                logger.warning(f"No WebSocket bridge available for user {self.context.user_id}, creating dispatcher without events")
+                # Create dispatcher without WebSocket events as fallback
+                dispatcher = await UnifiedToolDispatcher.create_for_user(
+                    user_context=self.context,
+                    websocket_bridge=None,
+                    tools=[],
+                    enable_admin_tools=False
+                )
             
             logger.info(f"✅ Created real tool dispatcher with WebSocket events for user {self.context.user_id}")
             return dispatcher
@@ -584,24 +608,19 @@ class UserExecutionEngine:
             # Use minimal adapters to maintain interface compatibility
             self.periodic_update_manager = MinimalPeriodicUpdateManager()
             
-            # CRITICAL FIX: Set tool dispatcher on registry before creating agent_core
-            # This ensures agents created by AgentExecutionCore have WebSocket-enabled tool dispatchers
-            if hasattr(registry, 'set_tool_dispatcher') or hasattr(registry, 'tool_dispatcher'):
-                tool_dispatcher = self.get_tool_dispatcher()
-                if hasattr(registry, 'set_tool_dispatcher'):
-                    registry.set_tool_dispatcher(tool_dispatcher)
-                    logger.info(f"✅ Set tool dispatcher on agent registry via set_tool_dispatcher method")
-                elif hasattr(registry, 'tool_dispatcher'):
-                    registry.tool_dispatcher = tool_dispatcher
-                    logger.info(f"✅ Set tool dispatcher on agent registry via direct assignment")
-            else:
-                logger.warning(f"⚠️ Agent registry doesn't support tool dispatcher - tool events may not work")
+            # NOTE: Tool dispatcher initialization is deferred to get_tool_dispatcher() 
+            # This avoids async initialization issues during component setup
+            # The tool dispatcher will be created when first requested, ensuring proper WebSocket integration
             
             self.agent_core = AgentExecutionCore(registry, websocket_bridge) 
             # Use minimal fallback manager with user context
             self.fallback_manager = MinimalFallbackManager(self.context)
-            self.flow_logger = get_supervisor_flow_logger()
-            self.execution_tracker = get_execution_tracker()
+            
+            # Create NEW instances per user for complete isolation (no shared state)
+            from netra_backend.app.agents.supervisor.observability_flow import SupervisorObservabilityLogger
+            from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
+            self.flow_logger = SupervisorObservabilityLogger(enabled=True)
+            self.execution_tracker = AgentExecutionTracker()
             
             logger.debug(f"Initialized components for UserExecutionEngine {self.engine_id}")
             
@@ -611,7 +630,7 @@ class UserExecutionEngine:
     
     async def execute_agent(self, 
                            context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
+                           user_context: Optional['UserExecutionContext'] = None) -> AgentExecutionResult:
         """Execute a single agent with complete user isolation.
         
         This method provides complete per-user isolation:
@@ -622,7 +641,7 @@ class UserExecutionEngine:
         
         Args:
             context: Agent execution context (must match user context)
-            state: Deep agent state for execution
+            user_context: Optional user context for isolation (uses self.context if None)
             
         Returns:
             AgentExecutionResult: Results of agent execution
@@ -631,6 +650,27 @@ class UserExecutionEngine:
             ValueError: If context doesn't match user or is invalid
             RuntimeError: If execution fails
         """
+        # Use the provided user_context or fall back to our instance context
+        effective_user_context = user_context or self.context
+        
+        # Create a DeepAgentState from the context
+        # Extract user message from metadata, defaulting to empty string if not found
+        user_message = ""
+        if isinstance(context.metadata, dict):
+            user_message = context.metadata.get('message', '') or context.metadata.get('user_request', '')
+        
+        state = DeepAgentState(
+            user_request=user_message,
+            user_id=effective_user_context.user_id,
+            chat_thread_id=effective_user_context.thread_id,
+            run_id=effective_user_context.run_id,
+            agent_input={
+                'agent_name': context.agent_name,
+                'user_id': effective_user_context.user_id,
+                'thread_id': effective_user_context.thread_id,
+                'context': context.metadata or {}
+            }
+        )
         if not self._is_active:
             raise ValueError(f"UserExecutionEngine {self.engine_id} is no longer active")
         
@@ -830,7 +870,7 @@ class UserExecutionEngine:
             
             # CRITICAL FIX: Set tool dispatcher on the agent before execution
             if hasattr(agent, 'tool_dispatcher') or hasattr(agent, 'set_tool_dispatcher'):
-                tool_dispatcher = self.get_tool_dispatcher()
+                tool_dispatcher = await self.get_tool_dispatcher()
                 if hasattr(agent, 'set_tool_dispatcher'):
                     agent.set_tool_dispatcher(tool_dispatcher)
                     logger.info(f"✅ Set tool dispatcher on {context.agent_name} via set_tool_dispatcher method")
@@ -906,14 +946,14 @@ class UserExecutionEngine:
                 result={
                     "agent_name": context.agent_name,
                     "success": result.success,
-                    "duration_ms": result.execution_time * 1000 if result.execution_time else 0,
+                    "duration_ms": result.duration * 1000 if result.duration else 0,
                     "status": "completed" if result.success else "failed",
                     "user_isolated": True,
                     "user_id": self.context.user_id,
                     "engine_id": self.engine_id,
                     "error": result.error if not result.success and result.error else None
                 },
-                execution_time_ms=result.execution_time * 1000 if result.execution_time else 0
+                execution_time_ms=result.duration * 1000 if result.duration else 0
             )
             
             if not success:
@@ -928,9 +968,9 @@ class UserExecutionEngine:
         return AgentExecutionResult(
             success=False,
             agent_name=context.agent_name,
-            execution_time=self.AGENT_EXECUTION_TIMEOUT,
+            duration=self.AGENT_EXECUTION_TIMEOUT,
             error=f"User agent execution timed out after {self.AGENT_EXECUTION_TIMEOUT}s",
-            state=None,
+            data=None,
             metadata={
                 'timeout': True,
                 'user_isolated': True,
@@ -1017,8 +1057,15 @@ class UserExecutionEngine:
             )
             
             # Create agent state from input data
+            # Extract user message from input_data, defaulting to empty string if not found
+            user_message = ""
+            if isinstance(input_data, dict):
+                user_message = input_data.get('message', '') or input_data.get('user_request', '')
+            elif isinstance(input_data, str):
+                user_message = input_data
+            
             state = DeepAgentState(
-                user_request=input_data,
+                user_request=user_message,
                 user_id=execution_context.user_id,
                 chat_thread_id=execution_context.thread_id,
                 run_id=execution_context.run_id,
@@ -1042,7 +1089,7 @@ class UserExecutionEngine:
                 success=False,
                 error=str(e),
                 duration=0.0,
-                state=None,
+                data=None,
                 metadata={
                     'user_id': execution_context.user_id,
                     'thread_id': execution_context.thread_id,
@@ -1055,6 +1102,95 @@ class UserExecutionEngine:
                     'error': str(e)
                 }
             )
+    
+    async def execute_pipeline(
+        self,
+        steps: List[PipelineStep],
+        context: AgentExecutionContext,
+        user_context: Optional['UserExecutionContext'] = None
+    ) -> List[AgentExecutionResult]:
+        """Execute a pipeline of agent steps with user isolation.
+        
+        Args:
+            steps: List of pipeline steps to execute
+            context: Base execution context for the pipeline
+            user_context: Optional user context for isolation
+            
+        Returns:
+            List[AgentExecutionResult]: Results from each pipeline step
+        """
+        effective_user_context = user_context or self.context
+        results = []
+        
+        logger.info(f"Starting pipeline execution with {len(steps)} steps for user {effective_user_context.user_id}")
+        
+        for i, step in enumerate(steps):
+            try:
+                # Create step-specific context
+                step_context = AgentExecutionContext(
+                    user_id=effective_user_context.user_id,
+                    thread_id=effective_user_context.thread_id,
+                    run_id=effective_user_context.run_id,
+                    request_id=effective_user_context.request_id,
+                    agent_name=step.agent_name,
+                    step=step,
+                    execution_timestamp=datetime.now(timezone.utc),
+                    pipeline_step_num=i + 1,
+                    metadata={
+                        **(context.metadata or {}),
+                        **(step.metadata or {}),
+                        'pipeline_step': i + 1,
+                        'total_steps': len(steps)
+                    }
+                )
+                
+                # Execute the step
+                result = await self.execute_agent(step_context, effective_user_context)
+                results.append(result)
+                
+                logger.debug(f"Pipeline step {i+1}/{len(steps)} completed for user {effective_user_context.user_id}: "
+                           f"{step.agent_name} - {'success' if result.success else 'failed'}")
+                
+                # Stop on failure unless continue_on_error is set
+                if not result.success and not step.metadata.get('continue_on_error', False):
+                    logger.warning(f"Pipeline execution stopped at step {i+1} due to failure: {result.error}")
+                    break
+                    
+            except Exception as e:
+                error_result = AgentExecutionResult(
+                    success=False,
+                    agent_name=step.agent_name,
+                    duration=0.0,
+                    error=str(e),
+                    data=None,
+                    metadata={
+                        'pipeline_step': i + 1,
+                        'total_steps': len(steps),
+                        'user_id': effective_user_context.user_id,
+                        'error_type': type(e).__name__
+                    }
+                )
+                results.append(error_result)
+                
+                logger.error(f"Pipeline step {i+1} failed for user {effective_user_context.user_id}: {e}")
+                
+                # Stop on exception unless continue_on_error is set
+                if not step.metadata.get('continue_on_error', False):
+                    break
+        
+        logger.info(f"Pipeline execution completed for user {effective_user_context.user_id}: "
+                   f"{len(results)} steps executed, "
+                   f"{sum(1 for r in results if r.success)} successful")
+        
+        return results
+    
+    async def get_execution_stats(self) -> Dict[str, Any]:
+        """Get execution performance and health statistics."""
+        return self.get_user_execution_stats()
+    
+    async def shutdown(self) -> None:
+        """Shutdown the execution engine and clean up resources."""
+        await self.cleanup()
     
     async def cleanup(self) -> None:
         """Clean up user engine resources.

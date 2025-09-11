@@ -25,8 +25,8 @@ from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketExce
 
 # Use SSOT testing framework
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.docker_test_utility import SSotDockerTestUtility
-from test_framework.ssot.websocket_test_utility import SSotWebSocketTestUtility
+from test_framework.ssot.docker import DockerTestUtility
+from test_framework.ssot.websocket import WebSocketTestUtility
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +50,8 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
         """Set up complete service stack for E2E testing"""
         super().setUpClass()
         
-        cls.docker_utility = SSotDockerTestUtility()
-        cls.websocket_utility = SSotWebSocketTestUtility()
+        cls.docker_utility = DockerTestUtility()
+        cls.websocket_utility = WebSocketTestUtility()
         
         # Start all required services (backend, auth, database)
         cls.backend_url = cls.docker_utility.ensure_backend_service()

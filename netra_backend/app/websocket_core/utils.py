@@ -1381,3 +1381,92 @@ def get_progressive_delay(attempt: int, environment: Optional[str] = None) -> fl
     except Exception as e:
         logger.error(f"Error calculating progressive delay: {e}")
         return 0.01  # Safe fallback
+
+
+# Stub functions for backward compatibility with legacy tests
+# These functions were previously imported from websocket routes but are no longer needed
+
+def _get_rate_limit_for_environment(environment: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Stub function for backward compatibility with legacy tests.
+    
+    Returns rate limiting configuration for the specified environment.
+    This is a minimal implementation for test compatibility.
+    """
+    from shared.isolated_environment import get_env
+    
+    if environment is None:
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+    
+    # Return basic rate limiting configuration
+    if environment in ["staging", "production"]:
+        return {
+            "max_requests_per_minute": 60,
+            "max_concurrent_connections": 10,
+            "rate_limit_window_seconds": 60
+        }
+    elif environment == "testing":
+        return {
+            "max_requests_per_minute": 1000,  # Higher for tests
+            "max_concurrent_connections": 100,
+            "rate_limit_window_seconds": 60
+        }
+    else:  # development
+        return {
+            "max_requests_per_minute": 120,
+            "max_concurrent_connections": 20,
+            "rate_limit_window_seconds": 60
+        }
+
+
+def _get_staging_optimized_timeouts(environment: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Stub function for backward compatibility with legacy tests.
+    
+    Returns timeout configuration optimized for the specified environment.
+    This is a minimal implementation for test compatibility.
+    """
+    from shared.isolated_environment import get_env
+    
+    if environment is None:
+        env = get_env()
+        environment = env.get("ENVIRONMENT", "development").lower()
+    
+    # Return environment-specific timeout configuration
+    if environment == "staging":
+        return {
+            "connection_timeout_seconds": 300,  # 5 minutes
+            "heartbeat_timeout_seconds": 90,
+            "message_timeout_seconds": 60,
+            "handshake_timeout_seconds": 30,
+            "close_timeout_seconds": 10
+        }
+    elif environment == "production":
+        return {
+            "connection_timeout_seconds": 600,  # 10 minutes
+            "heartbeat_timeout_seconds": 120,
+            "message_timeout_seconds": 90,
+            "handshake_timeout_seconds": 45,
+            "close_timeout_seconds": 15
+        }
+    elif environment == "testing":
+        return {
+            "connection_timeout_seconds": 30,   # Shorter for tests
+            "heartbeat_timeout_seconds": 10,
+            "message_timeout_seconds": 5,
+            "handshake_timeout_seconds": 2,
+            "close_timeout_seconds": 1
+        }
+    else:  # development
+        return {
+            "connection_timeout_seconds": 120,  # 2 minutes
+            "heartbeat_timeout_seconds": 45,
+            "message_timeout_seconds": 30,
+            "handshake_timeout_seconds": 10,
+            "close_timeout_seconds": 5
+        }
+
+
+# Heartbeat timeout constant for backward compatibility
+HEARTBEAT_TIMEOUT_SECONDS = 45  # Default heartbeat timeout

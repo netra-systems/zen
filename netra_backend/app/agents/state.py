@@ -174,8 +174,18 @@ class DeepAgentState(BaseModel):
     
     📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md
     ⚠️  USER DATA AT RISK: This pattern may cause data leakage between users
+    
+    🚀 GOLDEN PATH FIX (2025-09-10): Added thread_id property for backward compatibility.
+    The supervisor agent execution was failing with "'DeepAgentState' object has no attribute 'thread_id'"
+    because the model has chat_thread_id but code expects thread_id. This fix enables:
+    - Property access: state.thread_id maps to state.chat_thread_id
+    - Property setting: state.thread_id = value updates state.chat_thread_id
+    - Constructor compatibility: thread_id parameter maps to chat_thread_id field
+    - copy_with_updates compatibility: thread_id updates work correctly
+    This protects the $500K+ ARR Golden Path user workflow from thread_id attribute errors.
     """
     user_request: str = "default_request"  # Default for backward compatibility
+    user_prompt: str = "default_request"   # GOLDEN PATH FIX: Interface alignment for execution engines
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
     run_id: Optional[str] = None  # Unique identifier for this execution run
@@ -205,7 +215,24 @@ class DeepAgentState(BaseModel):
     agent_context: Dict[str, Any] = Field(default_factory=dict)
     
     def __init__(self, **data):
-        """Initialize DeepAgentState with deprecation warning."""
+        """Initialize DeepAgentState with deprecation warning and field synchronization."""
+        # GOLDEN PATH FIX: Synchronize user_request and user_prompt fields for backward compatibility
+        if 'user_prompt' in data and 'user_request' not in data:
+            data['user_request'] = data['user_prompt']
+        elif 'user_request' in data and 'user_prompt' not in data:
+            data['user_prompt'] = data['user_request']
+        elif 'user_prompt' in data and 'user_request' in data:
+            # If both are provided, prefer user_prompt as it's the expected interface
+            data['user_request'] = data['user_prompt']
+        
+        # GOLDEN PATH FIX: Handle thread_id backward compatibility
+        # Map thread_id to chat_thread_id for compatibility
+        if 'thread_id' in data and 'chat_thread_id' not in data:
+            data['chat_thread_id'] = data.pop('thread_id')
+        elif 'thread_id' in data and 'chat_thread_id' in data:
+            # If both provided, use thread_id as the canonical value
+            data['chat_thread_id'] = data.pop('thread_id')
+        
         # Issue comprehensive deprecation warning
         warnings.warn(
             f"🚨 CRITICAL DEPRECATION: DeepAgentState usage creates user isolation risks. "
@@ -223,6 +250,16 @@ class DeepAgentState(BaseModel):
             stacklevel=2
         )
         super().__init__(**data)
+    
+    @property
+    def thread_id(self) -> Optional[str]:
+        """GOLDEN PATH FIX: Property to access chat_thread_id as thread_id for backward compatibility."""
+        return self.chat_thread_id
+    
+    @thread_id.setter
+    def thread_id(self, value: Optional[str]) -> None:
+        """GOLDEN PATH FIX: Setter to update chat_thread_id via thread_id for backward compatibility."""
+        self.chat_thread_id = value
     
     @field_validator('step_count')
     @classmethod
@@ -249,6 +286,20 @@ class DeepAgentState(BaseModel):
         """Create a new instance with updated fields (immutable pattern)."""
         current_data = self.model_dump()
         current_data.update(updates)
+        
+        # GOLDEN PATH FIX: Maintain synchronization between user_request and user_prompt
+        if 'user_prompt' in updates and 'user_request' not in updates:
+            current_data['user_request'] = updates['user_prompt']
+        elif 'user_request' in updates and 'user_prompt' not in updates:
+            current_data['user_prompt'] = updates['user_request']
+        
+        # GOLDEN PATH FIX: Handle thread_id backward compatibility in copy_with_updates
+        if 'thread_id' in updates and 'chat_thread_id' not in updates:
+            current_data['chat_thread_id'] = updates.pop('thread_id')
+        elif 'thread_id' in updates and 'chat_thread_id' in updates:
+            # If both provided, use thread_id as the canonical value
+            current_data['chat_thread_id'] = updates.pop('thread_id')
+        
         return DeepAgentState(**current_data)
     
     def increment_step_count(self) -> 'DeepAgentState':

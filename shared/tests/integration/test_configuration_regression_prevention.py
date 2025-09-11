@@ -39,6 +39,7 @@ from test_framework.ssot.configuration_validator import (
 )
 
 # Import shared configuration system
+from shared.constants.service_identifiers import SERVICE_ID
 from shared.isolated_environment import (
     IsolatedEnvironment,
     EnvironmentValidator,
@@ -78,7 +79,7 @@ class TestConfigurationRegressionPrevention(BaseIntegrationTest):
         with self.isolated_helper.create_isolated_context("service_secret_regression") as context:
             # GIVEN: Configuration missing SERVICE_SECRET (reproducing incident)
             context.env.set("ENVIRONMENT", "staging", source="deployment")
-            context.env.set("SERVICE_ID", "netra-backend", source="service")
+            context.env.set("SERVICE_ID", SERVICE_ID, source="service")
             context.env.set("DATABASE_URL", "postgresql://staging:pass@db:5432/staging_db", source="service")
             context.env.set("JWT_SECRET_KEY", "staging_jwt_key", source="secret")
             # SERVICE_SECRET intentionally missing
@@ -111,7 +112,7 @@ class TestConfigurationRegressionPrevention(BaseIntegrationTest):
         REGRESSION TEST: Prevent SERVICE_ID timestamp suffix auth failures (2025-09-07).
         
         INCIDENT: SERVICE_ID with timestamp suffix caused auth failures every 60 seconds.
-        Auth service expected stable "netra-backend" but received "netra-auth-staging-[timestamp]".
+        Auth service expected stable SSOT SERVICE_ID but received "netra-auth-staging-[timestamp]".
         
         IMPACT: Recurring authentication failures every minute.
         LOG_PATTERN: "Service ID mismatch: received netra-auth-staging-[timestamp] but expected netra-backend"
@@ -140,7 +141,7 @@ class TestConfigurationRegressionPrevention(BaseIntegrationTest):
             assert timestamp_error, f"Must identify timestamp suffix issue: {error_messages}"
             
             # AND: Must reference the expected stable value
-            stable_value_mentioned = any("netra-backend" in msg for msg in error_messages)
+            stable_value_mentioned = any(SERVICE_ID in msg for msg in error_messages)
             assert stable_value_mentioned, "Must reference expected stable SERVICE_ID value"
 
     @pytest.mark.integration
@@ -401,7 +402,7 @@ class TestConfigurationRegressionPrevention(BaseIntegrationTest):
             context.env.set("ENVIRONMENT", "staging", source="deployment")
             
             # Issue 1: Missing SERVICE_SECRET
-            context.env.set("SERVICE_ID", "netra-backend", source="service")
+            context.env.set("SERVICE_ID", SERVICE_ID, source="service")
             # SERVICE_SECRET intentionally missing
             
             # Issue 2: Frontend variables missing
@@ -461,7 +462,7 @@ class TestConfigurationRegressionPrevention(BaseIntegrationTest):
                 "description": "Missing SERVICE_SECRET -> Auth failure -> Circuit breaker open -> 100% lockout",
                 "config": {
                     "ENVIRONMENT": "staging",
-                    "SERVICE_ID": "netra-backend",
+                    "SERVICE_ID": SERVICE_ID,
                     # SERVICE_SECRET missing - triggers cascade
                 },
                 "expected_impact": "complete authentication failure"

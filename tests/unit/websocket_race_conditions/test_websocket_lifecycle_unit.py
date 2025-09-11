@@ -41,7 +41,7 @@ from netra_backend.app.websocket_core.utils import (
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager, create_websocket_manager_sync
 from netra_backend.app.websocket_core.gcp_initialization_validator import GCPWebSocketInitializationValidator
-from netra_backend.app.routes.websocket import _get_staging_optimized_timeouts, HEARTBEAT_TIMEOUT_SECONDS
+from netra_backend.app.websocket_core.utils import _get_staging_optimized_timeouts, HEARTBEAT_TIMEOUT_SECONDS
 
 # SSOT authentication and execution context
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context

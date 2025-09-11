@@ -52,7 +52,7 @@
 # REMOVED_SYNTAX_ERROR: def test_imports():
     # REMOVED_SYNTAX_ERROR: """Test that all required WebSocket components can be imported."""
     # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         # REMOVED_SYNTAX_ERROR: print("OK WebSocketNotifier import successful")
 
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
@@ -79,16 +79,15 @@
     # REMOVED_SYNTAX_ERROR: """Test that WebSocketNotifier has all required methods."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)
 
         # Check all required methods exist
         # REMOVED_SYNTAX_ERROR: required_methods = [ )
-        # REMOVED_SYNTAX_ERROR: 'send_agent_started',
-        # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
+        # REMOVED_SYNTAX_ERROR: 'send_agent_started', # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
         # REMOVED_SYNTAX_ERROR: 'send_partial_result',
         # REMOVED_SYNTAX_ERROR: 'send_tool_executing',
         # REMOVED_SYNTAX_ERROR: 'send_tool_completed',

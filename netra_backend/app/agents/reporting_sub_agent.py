@@ -16,7 +16,8 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.state import DeepAgentState, ReportResult
 from netra_backend.app.core.serialization.unified_json_handler import (
     LLMResponseParser,
-    JSONErrorFixer
+    JSONErrorFixer,
+    UnifiedJSONHandler
 )
 from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 # DatabaseSessionManager removed - use SSOT database module get_db() instead
@@ -53,6 +54,9 @@ class ReportingSubAgent(BaseAgent):
         
         # Initialize template system for guaranteed value delivery
         self._templates = ReportTemplates()
+        
+        # Initialize SSOT JSON handler
+        self._json_handler = UnifiedJSONHandler("reporting_agent")
         
         # Cache TTL for test compliance
         self.cache_ttl = 3600  # 1 hour default
@@ -705,8 +709,7 @@ class ReportingSubAgent(BaseAgent):
         try:
             cached_data = await self.redis_manager.get(f"report_cache:{cache_key}")
             if cached_data:
-                import json
-                return json.loads(cached_data)
+                return self._json_handler.loads(cached_data)
         except Exception as e:
             self.logger.warning(f"Failed to retrieve cached report: {e}")
         
@@ -718,7 +721,6 @@ class ReportingSubAgent(BaseAgent):
             return
             
         try:
-            import json
             # Ensure any Pydantic models are serialized properly
             def serialize_value(v):
                 if hasattr(v, 'model_dump'):
@@ -735,7 +737,7 @@ class ReportingSubAgent(BaseAgent):
                 else:
                     serializable_result[key] = serialize_value(value)
             
-            cache_data = json.dumps(serializable_result)
+            cache_data = self._json_handler.dumps(serializable_result)
             ttl = getattr(self, 'cache_ttl', 3600)  # Default 1 hour TTL
             await self.redis_manager.set(
                 f"report_cache:{cache_key}",

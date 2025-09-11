@@ -41,12 +41,18 @@ except ImportError:
     REDIS_AVAILABLE = False
 
 from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.service_availability import check_service_availability, ServiceUnavailableError
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.redis_manager import RedisManager, redis_manager
 from netra_backend.app.core.backend_environment import BackendEnvironment
 
+# Check service availability at module level
+_service_status = check_service_availability(['redis'], timeout=2.0)
+_redis_available = _service_status['redis'] is True and REDIS_AVAILABLE
+_redis_skip_reason = f"Redis unavailable: {_service_status['redis']}" if not _redis_available else None
 
-@pytest.mark.skipif(not REDIS_AVAILABLE, reason="Redis not available")
+
+@pytest.mark.skipif(not _redis_available, reason=_redis_skip_reason)
 class TestCachePhaseComprehensive(BaseIntegrationTest):
     """
     Comprehensive integration tests for system startup CACHE phase.

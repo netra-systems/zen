@@ -14,7 +14,7 @@ from datetime import datetime, UTC
 import asyncio
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import redis_manager
 
 logger = logging.getLogger(__name__)
 
@@ -27,16 +27,16 @@ class HealthCheckService:
     including dependencies like Redis and database connections.
     """
     
-    def __init__(self, auth_config: AuthConfig, redis_manager: Optional[AuthRedisManager] = None):
+    def __init__(self, auth_config: AuthConfig, redis_manager_instance = None):
         """
         Initialize HealthCheckService with configuration.
         
         Args:
             auth_config: Authentication configuration
-            redis_manager: Optional Redis manager instance
+            redis_manager_instance: Optional Redis manager instance
         """
         self.auth_config = auth_config
-        self.redis_manager = redis_manager or AuthRedisManager()
+        self.redis_manager = redis_manager_instance or redis_manager
         
     async def check_service_health(self) -> Dict[str, Any]:
         """

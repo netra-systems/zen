@@ -1,24 +1,27 @@
-"""Redis Cache Manager - SSOT for Redis-based Caching
+"""Redis Cache Manager - SSOT Compatibility Layer
 
-This module provides Redis-based caching capabilities for the Netra platform,
-enabling high-performance distributed caching for multi-user scenarios.
+DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
+
+This module provides backward compatibility during Redis SSOT migration.
+The primary SSOT Redis manager now includes all cache functionality.
 
 Business Value Justification (BVJ):
-- Segment: All customer segments (Free -> Enterprise)
+- Segment: All customer segments (Free -> Enterprise)  
 - Business Goal: Improve response times and reduce database load
 - Value Impact: Faster user experiences and reduced infrastructure costs
 - Strategic Impact: Enables scaling to support more concurrent users
 
-SSOT Compliance:
-- Integrates with existing Redis infrastructure
-- Uses standardized cache key patterns
-- Provides unified interface for Redis operations
+SSOT Migration:
+- All functionality has been consolidated into netra_backend.app.redis_manager
+- This module provides compatibility wrappers during transition
+- Future imports should use redis_manager directly
 """
 
 import asyncio
 import json
 import pickle
 import time
+import warnings
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional, Union, Set
 from dataclasses import dataclass, field
@@ -27,6 +30,13 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
 
 logger = central_logger.get_logger(__name__)
+
+# Issue deprecation warning for this module
+warnings.warn(
+    "redis_cache_manager is deprecated. Use netra_backend.app.redis_manager.redis_manager directly",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 @dataclass
@@ -68,32 +78,25 @@ class CacheEntry:
 
 
 class RedisCacheManager:
-    """SSOT Redis Cache Manager for distributed caching.
+    """Compatibility wrapper for existing cache manager usage.
     
-    This class provides comprehensive Redis-based caching capabilities,
-    designed for high-performance multi-user scenarios with proper
-    isolation and monitoring.
+    DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
     
-    Key Features:
-    - High-performance Redis-based caching with automatic serialization
-    - Configurable TTL (time-to-live) support
-    - Cache statistics and monitoring
-    - Namespace isolation for multi-tenant support
-    - Bulk operations for improved performance
-    - Error handling and resilience
+    This class provides backward compatibility during Redis SSOT migration.
+    All operations are redirected to the primary SSOT Redis manager.
     """
     
     def __init__(self, redis_client=None, namespace: str = "netra"):
-        """Initialize Redis cache manager.
+        """Initialize Redis cache manager wrapper.
         
         Args:
-            redis_client: Optional Redis client instance (uses default if None)
+            redis_client: Optional Redis client instance (ignored, uses SSOT)
             namespace: Cache namespace for key isolation
         """
-        self.redis_client = redis_client or redis_manager
+        self.redis_client = redis_manager  # Always use SSOT
         self.namespace = namespace
         self.stats = CacheStats(start_time=datetime.now(timezone.utc))
-        logger.info(f"RedisCacheManager initialized with namespace: {namespace}")
+        logger.info(f"RedisCacheManager compatibility wrapper initialized with namespace: {namespace}")
     
     def _build_key(self, key: str) -> str:
         """Build namespaced cache key.
@@ -107,15 +110,7 @@ class RedisCacheManager:
         return f"{self.namespace}:cache:{key}"
     
     async def get(self, key: str, default: Any = None) -> Any:
-        """Get value from cache.
-        
-        Args:
-            key: Cache key
-            default: Default value if key not found
-            
-        Returns:
-            Cached value or default
-        """
+        """Get value from cache - redirects to SSOT Redis manager."""
         try:
             redis_key = self._build_key(key)
             raw_value = await self.redis_client.get(redis_key)
@@ -123,7 +118,6 @@ class RedisCacheManager:
             if raw_value is None:
                 self.stats.misses += 1
                 self.stats.total_operations += 1
-                logger.debug(f"Cache miss for key: {key}")
                 return default
             
             # Try JSON deserialization first, then pickle
@@ -133,12 +127,10 @@ class RedisCacheManager:
                 try:
                     value = pickle.loads(raw_value)
                 except (pickle.PickleError, TypeError):
-                    # If both fail, return raw value
                     value = raw_value.decode('utf-8') if isinstance(raw_value, bytes) else raw_value
             
             self.stats.hits += 1
             self.stats.total_operations += 1
-            logger.debug(f"Cache hit for key: {key}")
             return value
             
         except Exception as e:
@@ -147,24 +139,8 @@ class RedisCacheManager:
             logger.error(f"Error getting cache key {key}: {e}")
             return default
     
-    async def set(
-        self, 
-        key: str, 
-        value: Any, 
-        ttl: Optional[int] = None,
-        nx: bool = False
-    ) -> bool:
-        """Set value in cache.
-        
-        Args:
-            key: Cache key
-            value: Value to cache
-            ttl: Time to live in seconds (None for no expiration)
-            nx: Only set if key doesn't exist
-            
-        Returns:
-            True if value was set, False otherwise
-        """
+    async def set(self, key: str, value: Any, ttl: Optional[int] = None, nx: bool = False) -> bool:
+        """Set value in cache - redirects to SSOT Redis manager."""
         try:
             redis_key = self._build_key(key)
             
@@ -175,22 +151,13 @@ class RedisCacheManager:
                 try:
                     serialized_value = pickle.dumps(value)
                 except (pickle.PickleError, TypeError):
-                    # Fallback to string representation
                     serialized_value = str(value)
             
-            # Set in Redis
-            result = await self.redis_client.set(
-                redis_key, 
-                serialized_value, 
-                ex=ttl, 
-                nx=nx
-            )
+            # Set in Redis using SSOT manager
+            result = await self.redis_client.set(redis_key, serialized_value, ex=ttl)
             
             if result:
                 self.stats.sets += 1
-                logger.debug(f"Cache set for key: {key} (TTL: {ttl}s)")
-            else:
-                logger.debug(f"Cache set failed for key: {key} (nx={nx})")
             
             self.stats.total_operations += 1
             return bool(result)
@@ -202,21 +169,13 @@ class RedisCacheManager:
             return False
     
     async def delete(self, key: str) -> bool:
-        """Delete key from cache.
-        
-        Args:
-            key: Cache key to delete
-            
-        Returns:
-            True if key was deleted, False if key didn't exist
-        """
+        """Delete key from cache - redirects to SSOT Redis manager."""
         try:
             redis_key = self._build_key(key)
             result = await self.redis_client.delete(redis_key)
             
             if result > 0:
                 self.stats.deletes += 1
-                logger.debug(f"Cache delete for key: {key}")
             
             self.stats.total_operations += 1
             return result > 0
@@ -228,20 +187,12 @@ class RedisCacheManager:
             return False
     
     async def exists(self, key: str) -> bool:
-        """Check if key exists in cache.
-        
-        Args:
-            key: Cache key to check
-            
-        Returns:
-            True if key exists, False otherwise
-        """
+        """Check if key exists in cache - redirects to SSOT Redis manager."""
         try:
             redis_key = self._build_key(key)
             result = await self.redis_client.exists(redis_key)
             self.stats.total_operations += 1
             return result > 0
-            
         except Exception as e:
             self.stats.errors += 1
             self.stats.total_operations += 1
@@ -249,25 +200,12 @@ class RedisCacheManager:
             return False
     
     async def expire(self, key: str, ttl: int) -> bool:
-        """Set expiration time for a key.
-        
-        Args:
-            key: Cache key
-            ttl: Time to live in seconds
-            
-        Returns:
-            True if expiration was set, False otherwise
-        """
+        """Set expiration time for a key - redirects to SSOT Redis manager."""
         try:
             redis_key = self._build_key(key)
             result = await self.redis_client.expire(redis_key, ttl)
             self.stats.total_operations += 1
-            
-            if result:
-                logger.debug(f"Set expiration for key: {key} (TTL: {ttl}s)")
-            
             return bool(result)
-            
         except Exception as e:
             self.stats.errors += 1
             self.stats.total_operations += 1
@@ -275,14 +213,7 @@ class RedisCacheManager:
             return False
     
     async def get_ttl(self, key: str) -> Optional[int]:
-        """Get remaining time to live for a key.
-        
-        Args:
-            key: Cache key
-            
-        Returns:
-            TTL in seconds, None if key doesn't exist or has no expiration
-        """
+        """Get remaining time to live for a key - redirects to SSOT Redis manager."""
         try:
             redis_key = self._build_key(key)
             ttl = await self.redis_client.ttl(redis_key)
@@ -294,7 +225,6 @@ class RedisCacheManager:
                 return None
             else:
                 return ttl
-                
         except Exception as e:
             self.stats.errors += 1
             self.stats.total_operations += 1
@@ -302,14 +232,7 @@ class RedisCacheManager:
             return None
     
     async def get_many(self, keys: List[str]) -> Dict[str, Any]:
-        """Get multiple values from cache.
-        
-        Args:
-            keys: List of cache keys
-            
-        Returns:
-            Dictionary mapping keys to values (missing keys not included)
-        """
+        """Get multiple values from cache - redirects to SSOT Redis manager."""
         if not keys:
             return {}
         
@@ -339,7 +262,6 @@ class RedisCacheManager:
                     self.stats.misses += 1
             
             self.stats.total_operations += len(keys)
-            logger.debug(f"Bulk get: {len(result)}/{len(keys)} keys found")
             return result
             
         except Exception as e:
@@ -348,85 +270,39 @@ class RedisCacheManager:
             logger.error(f"Error getting multiple cache keys: {e}")
             return {}
     
-    async def set_many(
-        self, 
-        mapping: Dict[str, Any], 
-        ttl: Optional[int] = None
-    ) -> int:
-        """Set multiple values in cache.
-        
-        Args:
-            mapping: Dictionary of key-value pairs to set
-            ttl: Time to live in seconds (applied to all keys)
-            
-        Returns:
-            Number of keys successfully set
-        """
+    async def set_many(self, mapping: Dict[str, Any], ttl: Optional[int] = None) -> int:
+        """Set multiple values in cache - redirects to SSOT Redis manager."""
         if not mapping:
             return 0
         
         success_count = 0
         
-        try:
-            # Use pipeline for better performance
-            pipe = self.redis_client.pipeline()
-            
-            for key, value in mapping.items():
-                try:
-                    redis_key = self._build_key(key)
-                    
-                    # Serialize value
-                    try:
-                        serialized_value = json.dumps(value)
-                    except (TypeError, ValueError):
-                        try:
-                            serialized_value = pickle.dumps(value)
-                        except (pickle.PickleError, TypeError):
-                            serialized_value = str(value)
-                    
-                    if ttl:
-                        pipe.setex(redis_key, ttl, serialized_value)
-                    else:
-                        pipe.set(redis_key, serialized_value)
-                    
-                except Exception as serialize_error:
-                    logger.warning(f"Error serializing value for key {key}: {serialize_error}")
-                    continue
-            
-            # Execute pipeline
-            results = await pipe.execute()
-            success_count = sum(1 for result in results if result)
-            
-            self.stats.sets += success_count
-            self.stats.total_operations += len(mapping)
-            logger.debug(f"Bulk set: {success_count}/{len(mapping)} keys set")
-            
-        except Exception as e:
-            self.stats.errors += len(mapping)
-            self.stats.total_operations += len(mapping)
-            logger.error(f"Error setting multiple cache keys: {e}")
+        # Use individual sets for compatibility
+        for key, value in mapping.items():
+            try:
+                if await self.set(key, value, ttl=ttl):
+                    success_count += 1
+            except Exception as e:
+                logger.warning(f"Error setting cache key {key}: {e}")
+                continue
         
         return success_count
     
     async def delete_many(self, keys: List[str]) -> int:
-        """Delete multiple keys from cache.
-        
-        Args:
-            keys: List of cache keys to delete
-            
-        Returns:
-            Number of keys successfully deleted
-        """
+        """Delete multiple keys from cache - redirects to SSOT Redis manager."""
         if not keys:
             return 0
         
         try:
             redis_keys = [self._build_key(key) for key in keys]
-            deleted_count = await self.redis_client.delete(*redis_keys)
+            # Use SSOT Redis manager's delete method for each key
+            deleted_count = 0
+            for redis_key in redis_keys:
+                if await self.redis_client.delete(redis_key):
+                    deleted_count += 1
             
             self.stats.deletes += deleted_count
             self.stats.total_operations += len(keys)
-            logger.debug(f"Bulk delete: {deleted_count}/{len(keys)} keys deleted")
             return deleted_count
             
         except Exception as e:
@@ -436,11 +312,7 @@ class RedisCacheManager:
             return 0
     
     async def clear_namespace(self) -> int:
-        """Clear all keys in the current namespace.
-        
-        Returns:
-            Number of keys deleted
-        """
+        """Clear all keys in the current namespace - redirects to SSOT Redis manager."""
         try:
             pattern = f"{self.namespace}:cache:*"
             keys = await self.redis_client.scan_keys(pattern)
@@ -448,7 +320,12 @@ class RedisCacheManager:
             if not keys:
                 return 0
             
-            deleted_count = await self.redis_client.delete(*keys)
+            # Use individual deletes for compatibility
+            deleted_count = 0
+            for key in keys:
+                if await self.redis_client.delete(key):
+                    deleted_count += 1
+            
             self.stats.deletes += deleted_count
             self.stats.total_operations += len(keys)
             logger.info(f"Cleared {deleted_count} keys from namespace: {self.namespace}")
@@ -459,19 +336,11 @@ class RedisCacheManager:
             return 0
     
     async def get_stats(self) -> CacheStats:
-        """Get current cache statistics.
-        
-        Returns:
-            Current cache statistics
-        """
+        """Get current cache statistics."""
         return self.stats
     
     async def get_size_estimate(self) -> Dict[str, Any]:
-        """Get estimated cache size information.
-        
-        Returns:
-            Dictionary with cache size estimates
-        """
+        """Get estimated cache size information - redirects to SSOT Redis manager."""
         try:
             pattern = f"{self.namespace}:cache:*"
             keys = await self.redis_client.scan_keys(pattern)
@@ -516,11 +385,7 @@ class RedisCacheManager:
             }
     
     async def health_check(self) -> Dict[str, Any]:
-        """Perform a health check on the cache.
-        
-        Returns:
-            Health check results
-        """
+        """Perform a health check on the cache - redirects to SSOT Redis manager."""
         health = {
             "healthy": False,
             "namespace": self.namespace,

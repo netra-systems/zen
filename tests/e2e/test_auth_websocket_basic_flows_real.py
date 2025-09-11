@@ -29,7 +29,7 @@ from test_framework.environment_isolation import get_env as get_isolated_env
 from test_framework.base_e2e_test import BaseE2ETest
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from auth_service.auth_core.config import AuthConfig
 
 logger = central_logger.get_logger(__name__)

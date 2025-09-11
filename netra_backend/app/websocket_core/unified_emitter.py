@@ -28,7 +28,7 @@ Critical Events (NEVER REMOVE):
 import asyncio
 import time
 from typing import Optional, Dict, Any, TYPE_CHECKING, List
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from netra_backend.app.logging_config import central_logger
 
@@ -86,11 +86,19 @@ class UnifiedWebSocketEmitter:
     RETRY_BASE_DELAY = 0.1  # 100ms
     RETRY_MAX_DELAY = 2.0   # 2 seconds
     
+    # PERFORMANCE OPTIMIZATION: Fast mode for high-throughput scenarios
+    FAST_MODE_MAX_RETRIES = 1  # Minimal retries for performance
+    FAST_MODE_BASE_DELAY = 0.001  # 1ms instead of 100ms
+    FAST_MODE_MAX_DELAY = 0.01   # 10ms instead of 2s
+    
     def __init__(
         self,
-        manager: 'UnifiedWebSocketManager',
-        user_id: str,
-        context: Optional['UserExecutionContext'] = None
+        manager: 'UnifiedWebSocketManager' = None,
+        user_id: str = None,
+        context: Optional['UserExecutionContext'] = None,
+        performance_mode: bool = False,
+        # PHASE 1 BACKWARD COMPATIBILITY: Support legacy constructor parameters
+        websocket_manager: 'UnifiedWebSocketManager' = None
     ):
         """
         Initialize emitter for specific user.
@@ -99,23 +107,167 @@ class UnifiedWebSocketEmitter:
             manager: UnifiedWebSocketManager instance
             user_id: User ID this emitter serves
             context: Optional execution context for additional metadata
+            performance_mode: Enable high-throughput mode with minimal retries
+            websocket_manager: Legacy parameter alias for 'manager' (backward compatibility)
         """
+        # PHASE 1 BACKWARD COMPATIBILITY: Handle legacy parameter name
+        if websocket_manager is not None and manager is None:
+            manager = websocket_manager
+            logger.debug("Using legacy 'websocket_manager' parameter (redirected to 'manager')")
+        
+        if manager is None:
+            raise ValueError("Either 'manager' or 'websocket_manager' parameter is required")
+        
+        # Extract user_id from context if not provided directly
+        if user_id is None and context is not None:
+            user_id = getattr(context, 'user_id', None)
+        
+        if user_id is None:
+            raise ValueError("user_id is required (directly or via context.user_id)")
+        
         self.manager = manager
         self.user_id = user_id
         self.context = context
+        self.performance_mode = performance_mode
         
         # Metrics tracking
         self.metrics = EmitterMetrics()
         self.metrics.critical_events = {event: 0 for event in self.CRITICAL_EVENTS}
         
-        # Event buffer for batching (future optimization)
+        # PHASE 2: Enhanced event batching and performance optimization
         self._event_buffer: List[Dict[str, Any]] = []
         self._buffer_lock = asyncio.Lock()
+        self._batch_size = 5 if performance_mode else 10  # Smaller batches for performance mode
+        self._batch_timeout = 0.05 if performance_mode else 0.1  # 50ms vs 100ms
+        self._batch_timer: Optional[asyncio.Task] = None
+        self._enable_batching = not performance_mode  # Disable batching in performance mode for lower latency
+        
+        # PHASE 2: Connection pool optimization state
+        self._connection_health_score = 100  # Start with perfect health
+        self._last_health_check = datetime.utcnow()
+        self._consecutive_failures = 0
+        self._circuit_breaker_open = False
+        self._circuit_breaker_timeout = 30.0  # 30 seconds
+        
+        # PHASE 2: High-throughput optimization settings
+        self._high_throughput_mode = performance_mode
+        self._throughput_threshold = 100 if performance_mode else 50  # events per minute
+        self._adaptive_batching = True
+        
+        # Security validation state (from agent_websocket_bridge.py)
+        self._last_validated_run_id: Optional[str] = None
+        self._validation_cache: Dict[str, bool] = {}
+        
+        # Token metrics tracking (from base_agent.py)
+        self._token_metrics = {
+            'total_operations': 0,
+            'total_input_tokens': 0,
+            'total_output_tokens': 0,
+            'total_cost': 0.0
+        }
+        
+        # User tier tracking (from transparent_websocket_events.py)
+        self._user_tier: Optional[str] = getattr(context, 'user_tier', 'free') if context else 'free'
+        self._events_sent: List[Dict[str, Any]] = []
         
         # Validate critical events are available
         self._validate_critical_events()
         
-        logger.info(f"UnifiedWebSocketEmitter created for user {user_id}")
+        logger.info(f"UnifiedWebSocketEmitter created for user {user_id} (tier: {self._user_tier}, performance_mode: {performance_mode}, batching: {self._enable_batching})")
+        
+        # PHASE 2: Start background event processor for batching
+        if self._enable_batching:
+            self._start_batch_processor()
+    
+    def _start_batch_processor(self):
+        """Start background batch processor for non-critical events."""
+        if not self._enable_batching:
+            return
+            
+        # Start the batch processing task
+        self._batch_timer = asyncio.create_task(self._process_event_batches())
+        logger.debug(f"Batch processor started for user {self.user_id} (batch_size: {self._batch_size})")
+    
+    async def _process_event_batches(self):
+        """Background processor for batching non-critical events."""
+        try:
+            while True:
+                await asyncio.sleep(self._batch_timeout)
+                
+                async with self._buffer_lock:
+                    if not self._event_buffer:
+                        continue
+                    
+                    # Process batch if we have events or timeout reached
+                    batch_to_process = self._event_buffer.copy()
+                    self._event_buffer.clear()
+                
+                if batch_to_process:
+                    await self._send_event_batch(batch_to_process)
+                    
+        except asyncio.CancelledError:
+            logger.debug(f"Batch processor cancelled for user {self.user_id}")
+        except Exception as e:
+            logger.error(f"Batch processor error for user {self.user_id}: {e}")
+    
+    async def _send_event_batch(self, batch: List[Dict[str, Any]]):
+        """Send a batch of events together for better performance."""
+        try:
+            # Group events by type for better compression
+            grouped_events = {}
+            for event in batch:
+                event_type = event.get('type', 'unknown')
+                if event_type not in grouped_events:
+                    grouped_events[event_type] = []
+                grouped_events[event_type].append(event)
+            
+            # Send grouped batch
+            batch_data = {
+                'type': 'event_batch',
+                'user_id': self.user_id,
+                'batch_id': f"batch_{int(time.time() * 1000)}",
+                'events': grouped_events,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'batch_size': len(batch)
+            }
+            
+            if hasattr(self.manager, 'emit_event_batch'):
+                await self.manager.emit_event_batch(
+                    user_id=self.user_id,
+                    batch_data=batch_data
+                )
+            else:
+                # Fallback to individual events if manager doesn't support batching
+                for event in batch:
+                    await self._emit_individual_event(event)
+            
+            logger.debug(f"Sent event batch for user {self.user_id}: {len(batch)} events")
+            
+        except Exception as e:
+            logger.error(f"Failed to send event batch for user {self.user_id}: {e}")
+            # Fall back to individual event sending
+            for event in batch:
+                try:
+                    await self._emit_individual_event(event)
+                except Exception as fallback_error:
+                    logger.error(f"Fallback individual event failed: {fallback_error}")
+    
+    async def _emit_individual_event(self, event_data: Dict[str, Any]):
+        """Fallback method to emit individual events."""
+        event_type = event_data.get('type', 'unknown')
+        if hasattr(self.manager, 'emit_event'):
+            await self.manager.emit_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
+        else:
+            # Fallback to critical event method
+            await self.manager.emit_critical_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
     
     def _validate_critical_events(self):
         """
@@ -219,6 +371,11 @@ class UnifiedWebSocketEmitter:
             event_type: One of the CRITICAL_EVENTS
             data: Event payload
         """
+        # PHASE 1 ENHANCEMENT: Security validation before emission
+        if not self._validate_event_context(getattr(self.context, 'run_id', None), event_type):
+            logger.error(f"Security validation failed for event {event_type} - blocking emission")
+            return False
+        
         # SECURITY FIX 2: Connection state validation before ALL authentication events
         if not self.manager.is_connection_active(self.user_id):
             logger.critical(f"CRITICAL EVENT LOST - Connection dead for user {self.user_id}, event: {event_type}")
@@ -240,12 +397,30 @@ class UnifiedWebSocketEmitter:
                 'request_id': getattr(self.context, 'request_id', None),
             }
         
+        # PHASE 1 ENHANCEMENT: Add user tier metadata
+        if self._user_tier:
+            data = {
+                **data,
+                'metadata': {
+                    **(data.get('metadata', {})),
+                    'user_tier': self._user_tier,
+                    'is_priority_queue': self._user_tier == 'enterprise'
+                },
+                'user_id': self.user_id,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+        
         # Remove None values
         data = {k: v for k, v in data.items() if v is not None}
         
         # SECURITY FIX 3: Guaranteed delivery with enhanced retries for auth events
         is_auth_event = event_type in self.AUTHENTICATION_CRITICAL_EVENTS
-        max_attempts = self.MAX_CRITICAL_RETRIES if is_auth_event else self.MAX_RETRIES
+        
+        # PERFORMANCE OPTIMIZATION: Use fast mode settings if enabled
+        if self.performance_mode and not is_auth_event:
+            max_attempts = self.FAST_MODE_MAX_RETRIES
+        else:
+            max_attempts = self.MAX_CRITICAL_RETRIES if is_auth_event else self.MAX_RETRIES
         
         # Emit with retries
         last_error = None
@@ -281,11 +456,17 @@ class UnifiedWebSocketEmitter:
                         if success:
                             return True
                     else:
-                        # Standard retry with exponential backoff
-                        delay = min(
-                            self.RETRY_BASE_DELAY * (2 ** attempt),
-                            self.RETRY_MAX_DELAY
-                        )
+                        # Standard retry with exponential backoff (or fast mode)
+                        if self.performance_mode:
+                            delay = min(
+                                self.FAST_MODE_BASE_DELAY * (2 ** attempt),
+                                self.FAST_MODE_MAX_DELAY
+                            )
+                        else:
+                            delay = min(
+                                self.RETRY_BASE_DELAY * (2 ** attempt),
+                                self.RETRY_MAX_DELAY
+                            )
                         
                         logger.warning(
                             f"Failed to emit {event_type} for user {self.user_id} "
@@ -530,7 +711,12 @@ class UnifiedWebSocketEmitter:
             'retry_count': self.metrics.retry_count,
             'last_event_time': self.metrics.last_event_time.isoformat() if self.metrics.last_event_time else None,
             'uptime_seconds': uptime,
-            'has_context': self.context is not None
+            'has_context': self.context is not None,
+            'user_tier': self._user_tier,
+            'is_priority_user': self.is_priority_user(),
+            'token_metrics': self.get_token_metrics(),
+            'validation_cache_size': len(self._validation_cache),
+            'events_sent_count': len(self._events_sent)
         }
     
     def get_context(self) -> Optional['UserExecutionContext']:
@@ -674,8 +860,177 @@ class UnifiedWebSocketEmitter:
         logger.info(
             f"Emitter cleanup for user {self.user_id} - "
             f"Total events: {self.metrics.total_events}, "
-            f"Errors: {self.metrics.error_count}"
+            f"Errors: {self.metrics.error_count}, "
+            f"Token operations: {self._token_metrics['total_operations']}, "
+            f"Total cost: ${self._token_metrics['total_cost']:.4f}"
         )
+    
+    # ===================== PHASE 1 TOKEN METRICS (from base_agent.py) =====================
+    
+    def update_token_metrics(self, input_tokens: int, output_tokens: int, cost: float, operation: str = "unknown"):
+        """
+        Update token usage metrics for this emitter's context.
+        
+        Args:
+            input_tokens: Number of input tokens used
+            output_tokens: Number of output tokens generated
+            cost: Cost of the operation
+            operation: Description of the operation
+        """
+        self._token_metrics['total_operations'] += 1
+        self._token_metrics['total_input_tokens'] += input_tokens
+        self._token_metrics['total_output_tokens'] += output_tokens
+        self._token_metrics['total_cost'] += cost
+        
+        logger.debug(f"Token metrics updated for user {self.user_id}: {operation} - "
+                    f"Tokens: {input_tokens}+{output_tokens}, Cost: ${cost:.4f}")
+    
+    def get_token_metrics(self) -> Dict[str, Any]:
+        """
+        Get current token usage metrics.
+        
+        Returns:
+            Dictionary with token usage statistics
+        """
+        return {
+            **self._token_metrics,
+            'average_tokens_per_operation': (
+                (self._token_metrics['total_input_tokens'] + self._token_metrics['total_output_tokens']) /
+                max(1, self._token_metrics['total_operations'])
+            ),
+            'average_cost_per_operation': (
+                self._token_metrics['total_cost'] / max(1, self._token_metrics['total_operations'])
+            )
+        }
+    
+    # ===================== PHASE 1 USER TIER HANDLING (from transparent_websocket_events.py) =====================
+    
+    def set_user_tier(self, user_tier: str):
+        """
+        Set or update the user tier for this emitter.
+        
+        Args:
+            user_tier: User tier (free, early, mid, enterprise)
+        """
+        old_tier = self._user_tier
+        self._user_tier = user_tier
+        logger.info(f"User tier updated for {self.user_id}: {old_tier} -> {user_tier}")
+    
+    def get_user_tier(self) -> str:
+        """
+        Get the current user tier.
+        
+        Returns:
+            Current user tier
+        """
+        return self._user_tier or 'free'
+    
+    def is_priority_user(self) -> bool:
+        """
+        Check if this user is in the priority queue.
+        
+        Returns:
+            True if user has enterprise tier
+        """
+        return self._user_tier == 'enterprise'
+    
+    def _validate_event_context(self, run_id: Optional[str], event_type: str, agent_name: Optional[str] = None) -> bool:
+        """
+        Validate WebSocket event context to ensure proper user isolation.
+        
+        CRITICAL SECURITY: This validation prevents events from being sent without proper context,
+        which could result in events being delivered to wrong users or global broadcast.
+        
+        Args:
+            run_id: Run identifier to validate
+            event_type: Type of event being emitted (for logging)
+            agent_name: Optional agent name (for logging)
+            
+        Returns:
+            bool: True if context is valid and event should be sent
+            
+        Security Impact: Prevents cross-user data leakage and ensures WebSocket events
+                        are only sent to the correct user context.
+        """
+        try:
+            # Check cache first for performance
+            cache_key = f"{run_id}:{event_type}"
+            if cache_key in self._validation_cache:
+                return self._validation_cache[cache_key]
+            
+            # CRITICAL CHECK: run_id cannot be None
+            if run_id is None:
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). This would cause event misrouting!")
+                logger.error(f"🚨 SECURITY RISK: Events with None run_id can be delivered to wrong users!")
+                self._validation_cache[cache_key] = False
+                return False
+            
+            # CRITICAL CHECK: run_id cannot be 'registry' (system context)
+            if run_id == 'registry':
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). System context cannot emit user events!")
+                logger.error(f"🚨 SECURITY RISK: Registry context events would be broadcast to all users!")
+                self._validation_cache[cache_key] = False
+                return False
+            
+            # VALIDATION CHECK: run_id should be a non-empty string
+            if not isinstance(run_id, str) or not run_id.strip():
+                logger.error(f"🚨 CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
+                           f"(agent={agent_name or 'unknown'}). run_id must be non-empty string!")
+                self._validation_cache[cache_key] = False
+                return False
+            
+            # VALIDATION CHECK: run_id should not contain suspicious patterns
+            if self._is_suspicious_run_id(run_id):
+                logger.warning(f"⚠️ CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
+                              f"(agent={agent_name or 'unknown'}). Event will be sent but flagged for monitoring.")
+                # Allow but log for monitoring - some legitimate run_ids might trigger this
+            
+            # Context validation passed
+            logger.debug(f"✅ CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
+            self._validation_cache[cache_key] = True
+            self._last_validated_run_id = run_id
+            return True
+            
+        except Exception as e:
+            logger.error(f"🚨 CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
+                        f"(run_id={run_id}, agent={agent_name or 'unknown'}): {e}")
+            self._validation_cache[cache_key] = False
+            return False
+    
+    def _is_suspicious_run_id(self, run_id: str) -> bool:
+        """
+        Check if a run_id contains suspicious patterns that might indicate invalid context.
+        
+        This helps detect potentially invalid run_ids that could cause security issues
+        or indicate bugs in run_id generation.
+        
+        Args:
+            run_id: The run_id to check
+            
+        Returns:
+            bool: True if the run_id contains suspicious patterns
+        """
+        suspicious_patterns = [
+            'undefined', 'null', 'none', '',  # Falsy values that became strings
+            'test_', 'mock_', 'fake_',        # Test/mock values in production
+            'admin', 'system', 'root',        # System-level contexts
+            '__', '{{', '}}', '${',           # Template/variable placeholders
+            'localhost', '127.0.0.1',        # Local development patterns
+            'debug', 'trace',                 # Debug contexts
+        ]
+        
+        run_id_lower = run_id.lower()
+        for pattern in suspicious_patterns:
+            if pattern in run_id_lower:
+                return True
+                
+        # Check for unusual characters that might indicate encoding issues
+        if any(ord(char) > 127 for char in run_id):  # Non-ASCII characters
+            return True
+            
+        return False
 
 
 class AuthenticationWebSocketEmitter(UnifiedWebSocketEmitter):
@@ -1040,7 +1395,8 @@ class WebSocketEmitterFactory:
     def create_emitter(
         manager: 'UnifiedWebSocketManager',
         user_id: str,
-        context: Optional['UserExecutionContext'] = None
+        context: Optional['UserExecutionContext'] = None,
+        performance_mode: bool = False
     ) -> UnifiedWebSocketEmitter:
         """
         Create a new emitter instance.
@@ -1049,6 +1405,7 @@ class WebSocketEmitterFactory:
             manager: WebSocket manager
             user_id: Target user ID
             context: Optional execution context
+            performance_mode: Enable high-throughput mode
             
         Returns:
             New UnifiedWebSocketEmitter instance
@@ -1056,7 +1413,8 @@ class WebSocketEmitterFactory:
         return UnifiedWebSocketEmitter(
             manager=manager,
             user_id=user_id,
-            context=context
+            context=context,
+            performance_mode=performance_mode
         )
     
     @staticmethod
@@ -1084,6 +1442,30 @@ class WebSocketEmitterFactory:
         )
     
     @staticmethod
+    def create_performance_emitter(
+        manager: 'UnifiedWebSocketManager',
+        user_id: str,
+        context: Optional['UserExecutionContext'] = None
+    ) -> UnifiedWebSocketEmitter:
+        """
+        Create a performance-optimized emitter for high-throughput scenarios.
+        
+        Args:
+            manager: WebSocket manager
+            user_id: Target user ID
+            context: Optional execution context
+            
+        Returns:
+            UnifiedWebSocketEmitter with performance mode enabled
+        """
+        return UnifiedWebSocketEmitter(
+            manager=manager,
+            user_id=user_id,
+            context=context,
+            performance_mode=True
+        )
+    
+    @staticmethod
     def create_auth_emitter(
         manager: 'UnifiedWebSocketManager',
         user_id: str,
@@ -1105,6 +1487,506 @@ class WebSocketEmitterFactory:
             user_id=user_id,
             context=context
         )
+    
+    # ===================== PHASE 2: PERFORMANCE OPTIMIZATION FEATURES =====================
+    
+    def _start_batch_processor(self):
+        """Start background batch processor for non-critical events."""
+        if not self._enable_batching:
+            return
+            
+        # Start the batch processing task
+        self._batch_timer = asyncio.create_task(self._process_event_batches())
+        logger.debug(f"Batch processor started for user {self.user_id} (batch_size: {self._batch_size})")
+    
+    async def _process_event_batches(self):
+        """Background processor for batching non-critical events."""
+        try:
+            while True:
+                await asyncio.sleep(self._batch_timeout)
+                
+                async with self._buffer_lock:
+                    if not self._event_buffer:
+                        continue
+                    
+                    # Process batch if we have events or timeout reached
+                    batch_to_process = self._event_buffer.copy()
+                    self._event_buffer.clear()
+                
+                if batch_to_process:
+                    await self._send_event_batch(batch_to_process)
+                    
+        except asyncio.CancelledError:
+            logger.debug(f"Batch processor cancelled for user {self.user_id}")
+        except Exception as e:
+            logger.error(f"Batch processor error for user {self.user_id}: {e}")
+    
+    async def _send_event_batch(self, batch: List[Dict[str, Any]]):
+        """Send a batch of events together for better performance."""
+        try:
+            # Group events by type for better compression
+            grouped_events = {}
+            for event in batch:
+                event_type = event.get('type', 'unknown')
+                if event_type not in grouped_events:
+                    grouped_events[event_type] = []
+                grouped_events[event_type].append(event)
+            
+            # Send grouped batch
+            batch_data = {
+                'type': 'event_batch',
+                'user_id': self.user_id,
+                'batch_id': f"batch_{int(time.time() * 1000)}",
+                'events': grouped_events,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'batch_size': len(batch)
+            }
+            
+            if hasattr(self.manager, 'emit_event_batch'):
+                await self.manager.emit_event_batch(
+                    user_id=self.user_id,
+                    batch_data=batch_data
+                )
+            else:
+                # Fallback to individual events if manager doesn't support batching
+                for event in batch:
+                    await self._emit_individual_event(event)
+            
+            logger.debug(f"Sent event batch for user {self.user_id}: {len(batch)} events")
+            
+        except Exception as e:
+            logger.error(f"Failed to send event batch for user {self.user_id}: {e}")
+            # Fall back to individual event sending
+            for event in batch:
+                try:
+                    await self._emit_individual_event(event)
+                except Exception as fallback_error:
+                    logger.error(f"Fallback individual event failed: {fallback_error}")
+    
+    async def _emit_individual_event(self, event_data: Dict[str, Any]):
+        """Fallback method to emit individual events."""
+        event_type = event_data.get('type', 'unknown')
+        if hasattr(self.manager, 'emit_event'):
+            await self.manager.emit_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
+        else:
+            # Fallback to critical event method
+            await self.manager.emit_critical_event(
+                user_id=self.user_id,
+                event_type=event_type,
+                data=event_data
+            )
+    
+    async def _queue_for_batching(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Queue non-critical event for batching."""
+        if not self._enable_batching:
+            # Send immediately if batching disabled
+            await self._emit_individual_event({
+                'type': event_type,
+                'user_id': self.user_id,
+                **data
+            })
+            return True
+        
+        event = {
+            'type': event_type,
+            'user_id': self.user_id,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            **data
+        }
+        
+        async with self._buffer_lock:
+            self._event_buffer.append(event)
+            
+            # Trigger immediate send if batch is full
+            if len(self._event_buffer) >= self._batch_size:
+                batch_to_send = self._event_buffer.copy()
+                self._event_buffer.clear()
+                
+                # Send batch immediately (don't wait for timer)
+                asyncio.create_task(self._send_event_batch(batch_to_send))
+        
+        return True
+    
+    def _update_connection_health(self, success: bool):
+        """Update connection health score based on operation success."""
+        if success:
+            self._consecutive_failures = 0
+            self._connection_health_score = min(100, self._connection_health_score + 2)
+            if self._circuit_breaker_open:
+                logger.info(f"Circuit breaker closed for user {self.user_id} - connection recovered")
+                self._circuit_breaker_open = False
+        else:
+            self._consecutive_failures += 1
+            self._connection_health_score = max(0, self._connection_health_score - 10)
+            
+            # Open circuit breaker if too many failures
+            if self._consecutive_failures >= 5 and not self._circuit_breaker_open:
+                self._circuit_breaker_open = True
+                logger.warning(f"Circuit breaker opened for user {self.user_id} - connection unhealthy")
+    
+    def _should_use_circuit_breaker(self) -> bool:
+        """Check if circuit breaker should prevent operations."""
+        if not self._circuit_breaker_open:
+            return False
+        
+        # Check if timeout has passed
+        elapsed = (datetime.utcnow() - self._last_health_check).total_seconds()
+        if elapsed > self._circuit_breaker_timeout:
+            self._circuit_breaker_open = False
+            logger.info(f"Circuit breaker timeout expired for user {self.user_id} - attempting recovery")
+            return False
+        
+        return True
+    
+    def get_performance_stats(self) -> Dict[str, Any]:
+        """Get detailed performance statistics."""
+        return {
+            'connection_health_score': self._connection_health_score,
+            'circuit_breaker_open': self._circuit_breaker_open,
+            'consecutive_failures': self._consecutive_failures,
+            'batching_enabled': self._enable_batching,
+            'batch_size': self._batch_size,
+            'batch_timeout': self._batch_timeout,
+            'high_throughput_mode': self._high_throughput_mode,
+            'performance_mode': self.performance_mode,
+            'current_buffer_size': len(self._event_buffer),
+            'events_per_minute': self.metrics.total_events / max(1, (datetime.utcnow() - self.metrics.created_at).total_seconds() / 60)
+        }
+    
+    async def cleanup(self):
+        """Enhanced cleanup with Phase 2 optimizations."""
+        try:
+            # Cancel batch processor
+            if hasattr(self, '_batch_timer') and self._batch_timer and not self._batch_timer.done():
+                self._batch_timer.cancel()
+                try:
+                    await self._batch_timer
+                except asyncio.CancelledError:
+                    pass
+            
+            # Send any remaining batched events
+            if hasattr(self, '_event_buffer') and self._event_buffer:
+                async with self._buffer_lock:
+                    if self._event_buffer:
+                        final_batch = self._event_buffer.copy()
+                        self._event_buffer.clear()
+                        await self._send_event_batch(final_batch)
+            
+            logger.info(f"UnifiedWebSocketEmitter cleanup completed for user {self.user_id}")
+            
+        except Exception as e:
+            logger.error(f"Cleanup failed for user {self.user_id}: {e}")
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get comprehensive emitter statistics including Phase 2 optimizations."""
+        base_stats = {
+            'user_id': self.user_id[:8] + '...' if self.user_id else 'unknown',
+            'total_events': self.metrics.total_events,
+            'critical_events': self.metrics.critical_events.copy(),
+            'error_count': self.metrics.error_count,
+            'retry_count': self.metrics.retry_count,
+            'last_event_time': self.metrics.last_event_time.isoformat() if self.metrics.last_event_time else None,
+            'created_at': self.metrics.created_at.isoformat(),
+            'user_tier': self._user_tier,
+            'emitter_type': 'UnifiedWebSocketEmitter',
+            'ssot_compliance': True
+        }
+        
+        # Add Phase 2 performance stats
+        performance_stats = self.get_performance_stats()
+        
+        return {
+            **base_stats,
+            'performance': performance_stats
+        }
+    
+    # ===================== PHASE 3: ENHANCED ERROR HANDLING & FALLBACK CHANNELS =====================
+    
+    async def _try_fallback_channels(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Try alternative delivery channels when primary WebSocket fails."""
+        logger.info(f"Attempting fallback channels for {event_type} - user {self.user_id}")
+        
+        fallback_attempts = [
+            self._try_database_persistence_fallback,
+            self._try_redis_queue_fallback,
+            self._try_direct_connection_fallback
+        ]
+        
+        for fallback_method in fallback_attempts:
+            try:
+                success = await fallback_method(event_type, data)
+                if success:
+                    logger.info(f"Fallback succeeded via {fallback_method.__name__} for {event_type}")
+                    return True
+            except Exception as e:
+                logger.warning(f"Fallback {fallback_method.__name__} failed: {e}")
+                continue
+        
+        return False
+    
+    async def _try_database_persistence_fallback(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Persist event to database for later delivery."""
+        try:
+            # Store event in database for retry delivery
+            fallback_event = {
+                'user_id': self.user_id,
+                'event_type': event_type,
+                'data': data,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'delivery_attempts': 0,
+                'max_attempts': 5,
+                'status': 'pending',
+                'fallback_reason': 'websocket_failure'
+            }
+            
+            # If manager supports database fallback
+            if hasattr(self.manager, 'store_fallback_event'):
+                await self.manager.store_fallback_event(fallback_event)
+                logger.info(f"Event {event_type} stored in database fallback for user {self.user_id}")
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Database fallback failed for {event_type}: {e}")
+            return False
+    
+    async def _try_redis_queue_fallback(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Queue event in Redis for background delivery."""
+        try:
+            # Queue event for background processing
+            queue_event = {
+                'user_id': self.user_id,
+                'event_type': event_type,
+                'data': data,
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'priority': 'high' if event_type in self.CRITICAL_EVENTS else 'normal'
+            }
+            
+            # If manager supports Redis queuing
+            if hasattr(self.manager, 'queue_event_for_retry'):
+                await self.manager.queue_event_for_retry(queue_event)
+                logger.info(f"Event {event_type} queued in Redis for user {self.user_id}")
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Redis queue fallback failed for {event_type}: {e}")
+            return False
+    
+    async def _try_direct_connection_fallback(self, event_type: str, data: Dict[str, Any]) -> bool:
+        """Attempt direct WebSocket connection bypass."""
+        try:
+            # Try to force a new connection
+            if hasattr(self.manager, 'force_reconnect'):
+                reconnect_success = await self.manager.force_reconnect(self.user_id)
+                if reconnect_success:
+                    # Try emission one more time with new connection
+                    await asyncio.sleep(0.1)  # Brief pause for connection establishment
+                    await self.manager.emit_critical_event(
+                        user_id=self.user_id,
+                        event_type=event_type,
+                        data=data
+                    )
+                    logger.info(f"Direct reconnection fallback succeeded for {event_type}")
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Direct connection fallback failed for {event_type}: {e}")
+            return False
+    
+    async def _emergency_fallback(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """Last resort emergency fallback for critical events."""
+        logger.critical(f"EMERGENCY FALLBACK ACTIVATED for {event_type} - user {self.user_id}")
+        
+        emergency_strategies = [
+            self._try_emergency_notification,
+            self._try_alternative_user_notification,
+            self._try_system_alert_fallback
+        ]
+        
+        for strategy in emergency_strategies:
+            try:
+                success = await strategy(event_type, data, last_error)
+                if success:
+                    logger.critical(f"Emergency strategy {strategy.__name__} succeeded for {event_type}")
+                    return True
+            except Exception as e:
+                logger.critical(f"Emergency strategy {strategy.__name__} failed: {e}")
+                continue
+        
+        return False
+    
+    async def _try_emergency_notification(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """Emergency notification via alternative channels."""
+        try:
+            # Create emergency notification
+            emergency_data = {
+                'type': 'emergency_notification',
+                'original_event_type': event_type,
+                'user_id': self.user_id,
+                'message': f"Critical event {event_type} delivery failed - using emergency channel",
+                'original_data': data,
+                'error_details': str(last_error),
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            # If manager supports emergency notifications
+            if hasattr(self.manager, 'send_emergency_notification'):
+                await self.manager.send_emergency_notification(emergency_data)
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.critical(f"Emergency notification failed: {e}")
+            return False
+    
+    async def _try_alternative_user_notification(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """Try notifying user via alternative methods (email, SMS, etc.)."""
+        try:
+            # For critical events, try alternative notification methods
+            if event_type in self.CRITICAL_EVENTS:
+                notification_data = {
+                    'user_id': self.user_id,
+                    'event_type': event_type,
+                    'message': f"Your request is being processed - WebSocket notification failed",
+                    'fallback_reason': 'websocket_failure',
+                    'timestamp': datetime.now(timezone.utc).isoformat()
+                }
+                
+                # If manager supports alternative notifications
+                if hasattr(self.manager, 'send_alternative_notification'):
+                    await self.manager.send_alternative_notification(notification_data)
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Alternative user notification failed: {e}")
+            return False
+    
+    async def _try_system_alert_fallback(self, event_type: str, data: Dict[str, Any], last_error: Exception) -> bool:
+        """System-level alert for monitoring and intervention."""
+        try:
+            # Create system alert for ops team
+            alert_data = {
+                'alert_type': 'critical_event_failure',
+                'event_type': event_type,
+                'user_id': self.user_id,
+                'error': str(last_error),
+                'data_summary': {k: str(v)[:100] for k, v in data.items()},  # Truncated for alerts
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'requires_intervention': True
+            }
+            
+            # If manager supports system alerts
+            if hasattr(self.manager, 'trigger_system_alert'):
+                await self.manager.trigger_system_alert(alert_data)
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.critical(f"System alert fallback failed: {e}")
+            return False
+    
+    async def _trigger_connection_recovery(self, event_type: str, data: Dict[str, Any]):
+        """Trigger automatic connection recovery procedures."""
+        try:
+            logger.info(f"Triggering connection recovery for user {self.user_id}")
+            
+            # Update circuit breaker state
+            self._update_connection_health(False)
+            
+            # Attempt connection recovery
+            recovery_strategies = [
+                self._attempt_websocket_reconnection,
+                self._attempt_connection_pool_refresh,
+                self._attempt_manager_reset
+            ]
+            
+            for strategy in recovery_strategies:
+                try:
+                    success = await strategy()
+                    if success:
+                        logger.info(f"Connection recovery succeeded via {strategy.__name__}")
+                        # Retry the original event
+                        await asyncio.sleep(0.2)  # Brief pause
+                        retry_success = await self._emit_critical(event_type, data)
+                        if retry_success:
+                            return True
+                except Exception as e:
+                    logger.warning(f"Recovery strategy {strategy.__name__} failed: {e}")
+                    continue
+            
+            logger.error(f"All connection recovery strategies failed for user {self.user_id}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Connection recovery trigger failed: {e}")
+            return False
+    
+    async def _attempt_websocket_reconnection(self) -> bool:
+        """Attempt to reconnect WebSocket connection."""
+        try:
+            if hasattr(self.manager, 'reconnect_user'):
+                success = await self.manager.reconnect_user(self.user_id)
+                if success:
+                    self._update_connection_health(True)
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"WebSocket reconnection failed: {e}")
+            return False
+    
+    async def _attempt_connection_pool_refresh(self) -> bool:
+        """Attempt to refresh connection pool."""
+        try:
+            if hasattr(self.manager, 'refresh_connection_pool'):
+                await self.manager.refresh_connection_pool(self.user_id)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Connection pool refresh failed: {e}")
+            return False
+    
+    async def _attempt_manager_reset(self) -> bool:
+        """Attempt to reset manager state for this user."""
+        try:
+            if hasattr(self.manager, 'reset_user_state'):
+                await self.manager.reset_user_state(self.user_id)
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Manager reset failed: {e}")
+            return False
+    
+    def get_error_handling_stats(self) -> Dict[str, Any]:
+        """Get error handling and fallback statistics."""
+        return {
+            'connection_health_score': self._connection_health_score,
+            'circuit_breaker_open': self._circuit_breaker_open,
+            'consecutive_failures': self._consecutive_failures,
+            'error_count': self.metrics.error_count,
+            'retry_count': self.metrics.retry_count,
+            'last_health_check': self._last_health_check.isoformat() if hasattr(self, '_last_health_check') else None,
+            'fallback_channels_available': [
+                'database_persistence',
+                'redis_queue', 
+                'direct_connection',
+                'emergency_notification',
+                'alternative_user_notification',
+                'system_alert'
+            ]
+        }
 
 
 class WebSocketEmitterPool:

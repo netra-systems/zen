@@ -22,7 +22,7 @@ if project_root not in sys.path:
 # Import the improved components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from shared.types.core_types import AgentExecutionContext, create_execution_context_from_supervisor_style
 from fastapi.websockets import WebSocketState
 
@@ -83,14 +83,13 @@ async def test_error_handling():
     
     ws_manager.user_connections[user_id] = {conn_id}
     
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = WebSocketNotifier.create_for_user(ws_manager)
     
     # Send messages that will sometimes fail
     success_count = 0
     for i in range(20):
         context = create_execution_context_from_supervisor_style(
-            run_id=f"error_test_{i}",
-            thread_id=thread_id,
+            run_id=f"error_test_{i}", thread_id=thread_id,
             user_id=user_id,
             agent_name="error_test",
             retry_count=0,
@@ -237,14 +236,13 @@ async def test_concurrent_users():
         ws_manager.user_connections[user_id] = {conn_id}
         user_connections[user_id] = mock_ws
     
-    notifier = WebSocketNotifier(ws_manager)
+    notifier = WebSocketNotifier.create_for_user(ws_manager)
     
     # Send messages concurrently
     async def send_user_messages(user_id: str):
         for i in range(5):
             context = create_execution_context_from_supervisor_style(
-                run_id=f"concurrent_{user_id}_{i}",
-                thread_id=f"thread_{user_id.split('_')[1]}",
+                run_id=f"concurrent_{user_id}_{i}", thread_id=f"thread_{user_id.split('_')[1]}",
                 user_id=user_id,
                 agent_name="concurrent_test",
                 retry_count=0,

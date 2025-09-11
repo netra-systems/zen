@@ -60,7 +60,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env
 
 # Agent Event Validation
-from test_framework.ssot.agent_event_validators import (
+from netra_backend.app.websocket_core.event_validator import (
     AgentEventValidator,
     CriticalAgentEventType,
     WebSocketEventMessage

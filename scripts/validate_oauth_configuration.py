@@ -40,6 +40,9 @@ try:
     from auth_service.auth_core.routes.auth_routes import _determine_urls
     from fastapi.testclient import TestClient
     from auth_service.main import app
+    
+    # SSOT OAuth validation imports
+    from shared.configuration.central_config_validator import validate_oauth_configs_for_environment, get_central_validator
 except ImportError as e:
     print(f"ERROR: Failed to import required modules: {e}")
     print("Ensure you're running from the project root directory")
@@ -456,6 +459,58 @@ class OAuthConfigurationValidator:
         except Exception as e:
             self.log_error(f"Failed to validate OAuth provider connectivity: {e}")
             return False
+    
+    def validate_oauth_ssot_compliance(self) -> bool:
+        """
+        SSOT OAuth validation integration.
+        
+        Uses central configuration validator to validate OAuth setup.
+        This replaces duplicate OAuth validation logic in scripts.
+        """
+        try:
+            self.log_info("Running SSOT OAuth compliance validation...")
+            
+            # Use SSOT OAuth validation
+            validation_result = validate_oauth_configs_for_environment(self.environment)
+            
+            if validation_result["valid"]:
+                self.log_success("SSOT OAuth validation passed")
+                
+                # Additional SSOT checks
+                try:
+                    validator = get_central_validator()
+                    oauth_creds = validator.get_oauth_credentials()
+                    self.log_success(f"SSOT OAuth credentials validated (client_id length: {len(oauth_creds['client_id'])})")
+                    
+                    # Validate OAuth provider configuration through SSOT
+                    provider_valid = validator.validate_oauth_provider_configuration("google")
+                    if provider_valid:
+                        self.log_success("SSOT OAuth provider configuration valid")
+                    else:
+                        self.log_warning("SSOT OAuth provider configuration has issues")
+                        
+                except Exception as e:
+                    self.log_warning(f"Additional SSOT checks failed: {e}")
+                
+                self.validation_results["ssot_oauth"] = {
+                    "valid": True,
+                    "validation_result": validation_result
+                }
+                return True
+            else:
+                # Log SSOT validation errors
+                for error in validation_result["errors"]:
+                    self.log_error(f"SSOT OAuth validation: {error}")
+                
+                self.validation_results["ssot_oauth"] = {
+                    "valid": False,
+                    "errors": validation_result["errors"]
+                }
+                return False
+                
+        except Exception as e:
+            self.log_error(f"Failed to run SSOT OAuth validation: {e}")
+            return False
 
     async def run_validation(self) -> bool:
         """Run complete OAuth configuration validation"""
@@ -471,6 +526,9 @@ class OAuthConfigurationValidator:
         validation_results.append(self.validate_oauth_endpoints())
         validation_results.append(self.validate_oauth_initiation_redirect_uri())
         validation_results.append(self.analyze_auth_routes_source_code())
+        
+        # SSOT OAuth validation (replaces duplicate implementations)
+        validation_results.append(self.validate_oauth_ssot_compliance())
         
         # Network validations (async)
         validation_results.append(await self.validate_oauth_provider_connectivity())

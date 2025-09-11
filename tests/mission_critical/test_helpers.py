@@ -3,7 +3,7 @@
 import time
 from typing import Optional
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from shared.isolated_environment import IsolatedEnvironment
 
 
@@ -11,7 +11,14 @@ class SimpleWebSocketNotifier:
     """Simplified WebSocket notifier for testing that accepts direct parameters."""
     
     def __init__(self, websocket_manager):
-        self.notifier = WebSocketNotifier(websocket_manager)
+        # Create user context for SSOT pattern
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        user_context = UserExecutionContext(
+            user_id="test_user",
+            thread_id="test_thread", 
+            run_id="test_run"
+        )
+        self.notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(websocket_manager, user_context)
     
     def _create_context(self, connection_id: str, request_id: str, agent_name: str = "test_agent") -> AgentExecutionContext:
         """Create a context object from simple parameters."""

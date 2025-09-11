@@ -37,7 +37,7 @@
     # REMOVED_SYNTAX_ERROR: import pytest
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -51,12 +51,11 @@
         # REMOVED_SYNTAX_ERROR: mock_ws_manager = Magic    mock_ws_manager.websocket = TestWebSocketConnection()
 
         # Create notifier
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(mock_ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(mock_ws_manager)
 
         # Create test context
         # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
-        # REMOVED_SYNTAX_ERROR: agent_name="TestAgent",
-        # REMOVED_SYNTAX_ERROR: run_id="test_run_001",
+        # REMOVED_SYNTAX_ERROR: agent_name="TestAgent", # REMOVED_SYNTAX_ERROR: run_id="test_run_001",
         # REMOVED_SYNTAX_ERROR: thread_id="test_thread_001",
         # REMOVED_SYNTAX_ERROR: user_id="test_user_001"
         
@@ -118,11 +117,10 @@
             # REMOVED_SYNTAX_ERROR: """Test that notifier handles missing WebSocket manager gracefully."""
             # REMOVED_SYNTAX_ERROR: pass
             # Create notifier without manager
-            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(None)
+            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(None)
 
             # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
-            # REMOVED_SYNTAX_ERROR: agent_name="TestAgent",
-            # REMOVED_SYNTAX_ERROR: run_id="test_run",
+            # REMOVED_SYNTAX_ERROR: agent_name="TestAgent", # REMOVED_SYNTAX_ERROR: run_id="test_run",
             # REMOVED_SYNTAX_ERROR: thread_id="test_thread",
             # REMOVED_SYNTAX_ERROR: user_id="test_user"
             

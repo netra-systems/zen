@@ -115,6 +115,11 @@ services:
   # Dev Auth Service
   dev-auth:
     image: netra-dev-auth:latest
+    container_name: dev-auth
+    networks:
+      default:
+        aliases:
+          - auth
     build:
       context: .
       dockerfile: ./docker/auth.Dockerfile
@@ -185,6 +190,11 @@ services:
   # Dev Backend Service
   dev-backend:
     image: netra-dev-backend:latest
+    container_name: dev-backend
+    networks:
+      default:
+        aliases:
+          - backend
     build:
       context: .
       dockerfile: ./docker/backend.Dockerfile

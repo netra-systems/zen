@@ -16,7 +16,8 @@ if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+# SSOT COMPLIANCE: Import from facade that redirects to SSOT
+from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.tools.data_helper import DataHelper
@@ -65,11 +66,12 @@ class DataHelperAgent(BaseAgent):
         Returns:
             DataHelperAgent instance configured for the user context
         """
-        from netra_backend.app.llm.llm_manager import LLMManager
-        from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
+        from netra_backend.app.llm.llm_manager import create_llm_manager
+        # SSOT COMPLIANCE: Import from facade that redirects to SSOT
+        from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
         
-        # Create dependencies (these will be injected later by the factory)
-        llm_manager = LLMManager()
+        # Create dependencies with proper user isolation
+        llm_manager = create_llm_manager(user_context)
         tool_dispatcher = UnifiedToolDispatcher.create_for_user(user_context)
         
         # Create agent with correct constructor signature

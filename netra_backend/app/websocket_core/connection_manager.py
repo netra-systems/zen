@@ -13,30 +13,86 @@ Following CLAUDE.md SSOT principles by creating proper aliases rather than dupli
 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.logging_config import central_logger
+from typing import Dict, Any, Optional
+from datetime import datetime
 
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketConnectionManager(UnifiedWebSocketManager):
-    """
-    SSOT alias for WebSocket connection management.
+class ConnectionInfo:
+    """Information about a WebSocket connection."""
     
-    This class serves as the primary interface for WebSocket connection management,
-    providing backward compatibility for tests that expect WebSocketConnectionManager
-    while delegating to the unified implementation.
+    def __init__(self, connection_id: str, user_id: str = None, metadata: Dict[str, Any] = None):
+        self.connection_id = connection_id
+        self.user_id = user_id
+        self.metadata = metadata or {}
+        self.created_at = datetime.utcnow()
+        self.last_activity = datetime.utcnow()
     
-    Following CLAUDE.md principle: Search First, Create Second - this aliases
-    existing functionality rather than duplicating it.
-    """
+    def update_activity(self):
+        """Update last activity timestamp."""
+        self.last_activity = datetime.utcnow()
     
-    def __init__(self, *args, **kwargs):
-        """Initialize WebSocket connection manager."""
-        super().__init__(*args, **kwargs)
-        logger.debug("WebSocketConnectionManager initialized (SSOT alias)")
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary representation."""
+        return {
+            'connection_id': self.connection_id,
+            'user_id': self.user_id,
+            'metadata': self.metadata,
+            'created_at': self.created_at.isoformat(),
+            'last_activity': self.last_activity.isoformat()
+        }
+
+
+# SSOT COMPLIANCE: Use direct alias instead of class inheritance
+# DEPRECATED: WebSocketConnectionManager is now an alias to UnifiedWebSocketManager
+# Use UnifiedWebSocketManager directly for new code
+# This eliminates the duplicate class definition while maintaining backward compatibility
+WebSocketConnectionManager = UnifiedWebSocketManager
 
 
 # SSOT alias for backward compatibility
 ConnectionManager = WebSocketConnectionManager
 
+
+# ===== COMPATIBILITY CLASSES =====
+
+class ConnectionInfo:
+    """
+    COMPATIBILITY CLASS: Connection information for legacy test compatibility.
+    
+    This class provides backward compatibility for tests that expect connection
+    information objects. In the SSOT implementation, connection info is handled
+    directly by the WebSocketManager.
+    """
+    
+    def __init__(self, connection_id: str, user_id: str, connected_at: float = None):
+        import time
+        self.connection_id = connection_id
+        self.user_id = user_id
+        self.connected_at = connected_at or time.time()
+        self.is_active = True
+        self.last_activity = self.connected_at
+    
+    def update_activity(self):
+        """Update last activity timestamp."""
+        import time
+        self.last_activity = time.time()
+    
+    def disconnect(self):
+        """Mark connection as disconnected."""
+        self.is_active = False
+    
+    def to_dict(self):
+        """Convert to dictionary representation."""
+        return {
+            "connection_id": self.connection_id,
+            "user_id": self.user_id,
+            "connected_at": self.connected_at,
+            "is_active": self.is_active,
+            "last_activity": self.last_activity
+        }
+
+
 # Export for backward compatibility
-__all__ = ['WebSocketConnectionManager', 'ConnectionManager']
+__all__ = ['WebSocketConnectionManager', 'ConnectionManager', 'ConnectionInfo']

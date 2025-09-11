@@ -77,7 +77,7 @@ except ImportError as e:
 
 # WebSocket notifier - critical for event delivery
 try:
-    from netra_backend.app.websocket_core.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     WEBSOCKET_NOTIFIER_AVAILABLE = True
     WEBSOCKET_NOTIFIER_ERROR = None
 except ImportError as e:

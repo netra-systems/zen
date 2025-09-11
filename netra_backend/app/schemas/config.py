@@ -12,6 +12,8 @@ from typing import Any, Dict, List, Optional
 
 # Use backend-specific isolated environment
 from shared.isolated_environment import get_env
+# SSOT: Import SERVICE_ID constant
+from shared.constants.service_identifiers import SERVICE_ID
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -167,6 +169,27 @@ class LLMConfig(BaseModel):
 
 class WebSocketConfig(BaseModel):
     ws_url: str = Field(default="ws://localhost:8000/ws", description="The WebSocket URL for the frontend to connect to.")
+    
+    # CRITICAL: Cloud-native timeout configuration for $200K+ MRR reliability
+    # These timeouts are managed by timeout_configuration.py for environment awareness
+    connection_timeout: int = Field(default=60, description="WebSocket connection timeout (seconds)")
+    recv_timeout: int = Field(default=35, description="WebSocket receive timeout (seconds) - MUST be > agent execution timeout")
+    send_timeout: int = Field(default=30, description="WebSocket send timeout (seconds)")
+    heartbeat_timeout: int = Field(default=90, description="WebSocket heartbeat timeout (seconds)")
+    heartbeat_interval: int = Field(default=30, description="WebSocket heartbeat interval (seconds)")
+    
+    # PHASE 1 FEATURE FLAG: SSOT consolidation control
+    ssot_consolidation_enabled: bool = Field(
+        default=False, 
+        description="Enable WebSocket SSOT consolidation to eliminate race conditions (Phase 1: backward compatibility)"
+    )
+    
+    def __init__(self, **kwargs):
+        # Override with environment variable if not explicitly set
+        if 'ssot_consolidation_enabled' not in kwargs:
+            env_value = get_env().get("WEBSOCKET_SSOT_CONSOLIDATION", "false").lower()
+            kwargs['ssot_consolidation_enabled'] = env_value in ("true", "1", "yes", "on")
+        super().__init__(**kwargs)
 
 class AppConfig(BaseModel):
     """Base configuration class."""
@@ -276,13 +299,20 @@ class AppConfig(BaseModel):
         description="Disable HTTPS-only mode for sessions (dev/testing)"
     )
     
-    # Agent Configuration
+    # Agent Configuration - CRITICAL: Timeout hierarchy coordination for $200K+ MRR reliability
     agent_cache_ttl: int = Field(default=300, description="Agent cache TTL in seconds")
     agent_max_cache_size: int = Field(default=1000, description="Agent maximum cache entries")
     agent_redis_ttl: int = Field(default=3600, description="Agent Redis cache TTL in seconds")
-    agent_default_timeout: float = Field(default=30.0, description="Agent default timeout in seconds")
+    
+    # PRIORITY 3 FIX: Cloud-native timeout configuration with WebSocket coordination
+    # These values are environment-aware and managed by timeout_configuration.py
+    agent_default_timeout: float = Field(default=30.0, description="Agent default execution timeout (seconds) - MUST be < WebSocket recv timeout")
+    agent_thinking_timeout: float = Field(default=25.0, description="Agent thinking phase timeout (seconds)")
+    agent_tool_timeout: float = Field(default=20.0, description="Agent tool execution timeout (seconds)")
+    agent_completion_timeout: float = Field(default=15.0, description="Agent completion timeout (seconds)")
     agent_long_timeout: float = Field(default=300.0, description="Agent long operation timeout in seconds")
     agent_recovery_timeout: float = Field(default=45.0, description="Agent recovery timeout in seconds")
+    
     agent_default_user_id: str = Field(default="default_user", description="Agent default user ID")
     agent_admin_user_id: str = Field(default="admin", description="Agent admin user ID")
     agent_max_retries: int = Field(default=3, description="Agent maximum retry attempts")
@@ -303,7 +333,7 @@ class AppConfig(BaseModel):
     auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
     auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
-    service_id: str = Field(default="netra-backend", description="Service ID for cross-service authentication")
+    service_id: str = Field(default=SERVICE_ID, description="Service ID for cross-service authentication (SSOT)")
     service_secret: Optional[str] = Field(
         default=None, 
         description="Shared secret for secure cross-service authentication. Must be at least 32 characters and different from JWT secret."
@@ -365,6 +395,19 @@ class AppConfig(BaseModel):
     fast_startup_mode: str = Field(default="false", description="Fast startup mode flag")
     skip_migrations: str = Field(default="false", description="Skip migrations flag")
     disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
+    
+    # OpenTelemetry configuration
+    otel_enabled: str = Field(default="auto", description="OpenTelemetry telemetry enabled (auto/true/false)")
+    otel_service_name: Optional[str] = Field(default=None, description="Service name for telemetry")
+    otel_exporter_otlp_endpoint: Optional[str] = Field(default=None, description="OTLP endpoint for trace export")
+    otel_exporter_otlp_headers: Optional[str] = Field(default=None, description="OTLP headers in key=value,key=value format")
+    otel_console_exporter: str = Field(default="false", description="Enable console exporter for debugging")
+    otel_instrument_fastapi: str = Field(default="true", description="Enable FastAPI automatic instrumentation")
+    otel_instrument_requests: str = Field(default="true", description="Enable requests automatic instrumentation")
+    otel_instrument_redis: str = Field(default="true", description="Enable Redis automatic instrumentation")
+    otel_instrument_sqlalchemy: str = Field(default="true", description="Enable SQLAlchemy automatic instrumentation")
+    otel_excluded_urls: str = Field(default="/health,/metrics,/docs,/openapi.json", description="URLs to exclude from telemetry")
+    otel_resource_attributes: Optional[str] = Field(default=None, description="Additional resource attributes")
     
     # Service availability flags for staging infrastructure (pragmatic degradation)
     redis_optional_in_staging: bool = Field(default=False, description="Allow staging to run without Redis (graceful degradation)")
@@ -549,6 +592,11 @@ class DevelopmentConfig(AppConfig):
     log_level: str = "DEBUG"
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
+    
+    # Development telemetry settings
+    otel_enabled: str = "true"
+    otel_console_exporter: str = "true"  # Enable console output for development
+    otel_service_name: Optional[str] = "netra-backend-dev"
     
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(
@@ -744,6 +792,11 @@ class ProductionConfig(AppConfig):
     environment: str = "production"
     debug: bool = False
     log_level: str = "INFO"
+    
+    # Production telemetry settings
+    otel_enabled: str = "true"
+    otel_console_exporter: str = "false"  # Disable console output for production
+    otel_service_name: Optional[str] = "netra-backend"
     
     def _load_database_url_from_unified_config_production(self, data: dict) -> None:
         """Load database URL from environment using DatabaseURLBuilder SSOT.
@@ -948,6 +1001,11 @@ class StagingConfig(AppConfig):
     environment: str = "staging"
     debug: bool = False
     log_level: str = "INFO"
+    
+    # Staging telemetry settings
+    otel_enabled: str = "true"
+    otel_console_exporter: str = "false"  # Disable console output for staging
+    otel_service_name: Optional[str] = "netra-backend-staging"
     
     # CRITICAL: Remove optional flags - services are MANDATORY
     redis_optional_in_staging: bool = False  # Redis is MANDATORY
@@ -1202,6 +1260,11 @@ class NetraTestingConfig(AppConfig):
     jwt_secret_key: str = "mock_jwt_auth_key_for_checking_32_chars_minimum_required_length"  # Test-safe JWT secret
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Test-safe Fernet key (same as dev)
     secret_key: str = "mock-fastapi-session-secret-key-for-testing-32-chars-minimum-required"  # Test-safe SECRET_KEY (32+ chars)
+    
+    # Testing telemetry settings
+    otel_enabled: str = "false"  # Disabled by default for tests to avoid overhead
+    otel_console_exporter: str = "true"  # Enable console output when telemetry is enabled for debugging
+    otel_service_name: Optional[str] = "netra-backend-test"
     
     def __init__(self, **data):
         """Initialize test configuration using DatabaseURLBuilder."""

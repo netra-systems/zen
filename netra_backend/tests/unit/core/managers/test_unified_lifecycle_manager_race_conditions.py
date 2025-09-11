@@ -26,8 +26,8 @@ from unittest.mock import Mock, AsyncMock, MagicMock, patch
 from dataclasses import dataclass
 
 from netra_backend.app.core.managers.unified_lifecycle_manager import (
-    UnifiedLifecycleManager,
-    LifecycleManagerFactory,
+    SystemLifecycle as UnifiedLifecycleManager,  # Use new name with backward compatibility alias
+    SystemLifecycleFactory as LifecycleManagerFactory,  # Use new name with backward compatibility alias
     LifecyclePhase,
     ComponentType,
     ComponentStatus,

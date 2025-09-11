@@ -1,3 +1,29 @@
+"""
+🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+
+This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
+
+MIGRATION REQUIRED:
+- Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- This file will be REMOVED in the next release
+
+SECURITY FIX: Multiple ExecutionEngine implementations caused WebSocket user 
+isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH.
+"""
+
+"""
+🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+
+This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
+
+MIGRATION REQUIRED:
+- Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+- This file will be REMOVED in the next release
+
+SECURITY FIX: Multiple ExecutionEngine implementations caused WebSocket user 
+isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH.
+"""
+
 """RequestScopedExecutionEngine for per-request isolated agent execution.
 
 This module provides the RequestScopedExecutionEngine class that handles agent execution
@@ -26,9 +52,9 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
     PipelineStep,
 )
-from netra_backend.app.agents.supervisor.execution_context_manager import (
-    ExecutionContextManager,
-    RequestExecutionScope
+from netra_backend.app.agents.supervisor.agent_execution_context_manager import (
+    AgentExecutionContextManager as ExecutionContextManager,
+    # RequestExecutionScope,  # This class doesn't exist, commenting out for now
 )
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
@@ -90,6 +116,14 @@ class RequestScopedExecutionEngine:
             TypeError: If user_context is not a UserExecutionContext
             ValueError: If any required parameters are invalid
         """
+        # DEPRECATION WARNING: This execution engine is being phased out in favor of UserExecutionEngine
+        import warnings
+        warnings.warn(
+            "This execution engine is deprecated. Use UserExecutionEngine via ExecutionEngineFactory.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         # Validate user context immediately
         self.user_context = validate_user_context(user_context)
         

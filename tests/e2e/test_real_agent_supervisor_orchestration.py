@@ -40,8 +40,8 @@ except ImportError:
 
 # WebSocket services
 try:
-    from netra_backend.app.services.websocket_notifier import WebSocketNotifier
-    from netra_backend.app.services.websocket_connection_manager import WebSocketConnectionManager
+    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+    from netra_backend.app.websocket_core.connection_manager import WebSocketConnectionManager
     WEBSOCKET_SERVICES_AVAILABLE = True
 except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False
@@ -328,7 +328,7 @@ class TestRealAgentSupervisorOrchestration(BaseE2ETest):
         user_id = user_id or self.test_user_id
         
         if WEBSOCKET_SERVICES_AVAILABLE:
-            notifier = WebSocketNotifier()
+            notifier = WebSocketNotifier.create_for_user()
             
             # Hook into notifier for event capture
             original_send = notifier.send_to_user

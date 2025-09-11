@@ -26,7 +26,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import auth_db
-from auth_service.auth_core.redis_manager import auth_redis_manager
+from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 from auth_service.auth_core.oauth_manager import OAuthManager
 
 

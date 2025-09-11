@@ -35,7 +35,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.supervisor_factory import create_websocket_supervisor
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
-from netra_backend.app.core.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 

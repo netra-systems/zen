@@ -560,8 +560,8 @@ def cleanup_test_state():
 @pytest.fixture
 async def real_redis():
     """Real Redis connection for tests."""
-    from auth_service.auth_core.redis_manager import AuthRedisManager
-    manager = AuthRedisManager()
+    from netra_backend.app.redis_manager import redis_manager
+    manager = redis_manager
     try:
         await manager.initialize()
         await manager.ping()
@@ -570,7 +570,7 @@ async def real_redis():
         import logging
         logging.warning(f"Redis not available: {e} - using stub implementation")
         
-        class StubAuthRedisManager:
+        class StubRedisManager:
             async def initialize(self):
                 pass
             
@@ -588,7 +588,7 @@ async def real_redis():
                 logging.info(f"[STUB] Would set session for user {user_id}")
                 pass
         
-        yield StubAuthRedisManager()
+        yield StubRedisManager()
     finally:
         try:
             await manager.cleanup()

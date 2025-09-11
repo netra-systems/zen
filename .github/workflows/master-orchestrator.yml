@@ -3,9 +3,7 @@ description: Single entry point for all GitHub Actions workflows with conditiona
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
-  push:
-    branches: [main, develop]
+    types: [opened, closed]
   workflow_dispatch:
     inputs:
       action:

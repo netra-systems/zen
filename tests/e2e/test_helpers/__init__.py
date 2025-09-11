@@ -33,6 +33,14 @@ import sys
 
 def setup_test_path():
     """Setup test path for e2e tests."""
+    # Navigate from tests/e2e/test_helpers/ -> project_root/
+    current_file = Path(__file__).resolve()
+    project_root = current_file.parent.parent.parent.parent
+    
+    project_root_str = str(project_root)
+    if project_root_str not in sys.path:
+        sys.path.insert(0, project_root_str)
+    
     return project_root
 
 def stress_test_connections():

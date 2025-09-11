@@ -31,13 +31,14 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 # CLAUDE.MD COMPLIANT: Absolute imports only - corrected import paths
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.isolated_environment import get_env
 
 
@@ -133,20 +134,42 @@ class RealAgentOrchestrationTester:
         self.llm_manager = LLMManager(self.config)
         
         # REAL services - no mocks allowed per Claude.md
-        self.websocket_manager = get_websocket_manager()
+        # WebSocket manager will be created with factory pattern during async initialization
+        self.websocket_manager = None
         self.agent_registry = AgentRegistry()
         self.execution_engine = ExecutionEngine()
-        self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
+        self.websocket_notifier = None  # Will be set during async init
         self.bridge = AgentWebSocketBridge.get_instance()
         
-        # Real WebSocket testing helper
-        self.websocket_helper = RealWebSocketTestHelper(self.websocket_manager)
+        # Real WebSocket testing helper will be set during async init
+        self.websocket_helper = None
         
         # State tracking
         self.active_agents = {}
         self.coordination_events = []
         self.orchestration_metrics = {}
         self.websocket_events = []
+    
+    async def async_init(self, user_context: Optional[UserExecutionContext] = None):
+        """Initialize async components with secure factory pattern."""
+        if not user_context:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            user_context = UserExecutionContext(
+                user_id="test_orchestration",
+                run_id=f"test_run_{int(time.time())}",
+                thread_id="test_thread"
+            )
+        
+        # Create WebSocket manager using secure factory pattern
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        self.websocket_manager = await create_websocket_manager(user_context=user_context)
+        
+        # Initialize dependent components
+        from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+        from tests.e2e.helpers.websocket_helpers import RealWebSocketTestHelper
+        
+        self.websocket_notifier = WebSocketNotifier.create_for_user(self.websocket_manager)
+        self.websocket_helper = RealWebSocketTestHelper(self.websocket_manager)
     
     async def create_orchestration_context(self, name: str, user_id: str) -> Dict[str, Any]:
         """Create real orchestration context with WebSocket bridge."""
@@ -402,6 +425,8 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
     async def orchestration_tester(self):
         """Initialize REAL orchestration tester with actual services."""
         tester = RealAgentOrchestrationTester()
+        # Initialize async components with secure factory pattern
+        await tester.async_init()
         # Initialize the bridge and ensure services are ready
         await tester.bridge.ensure_integration()
         return tester
@@ -695,6 +720,8 @@ class TestCriticalRealOrchestrationScenarios(SSotBaseTestCase):
     async def enterprise_tester(self):
         """Enterprise-grade orchestration tester."""
         tester = RealAgentOrchestrationTester()
+        # Initialize async components with secure factory pattern
+        await tester.async_init()
         await tester.bridge.ensure_integration()
         return tester
     

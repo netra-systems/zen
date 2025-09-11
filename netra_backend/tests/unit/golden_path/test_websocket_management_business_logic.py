@@ -25,7 +25,7 @@ from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
 from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
 from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.websocket.connection_handler import ConnectionHandler
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -131,7 +131,7 @@ class TestWebSocketConnectionBusinessLogic:
         mock_websocket.send = AsyncMock()
         
         # Create notifier for business event generation
-        notifier = WebSocketNotifier(websocket=mock_websocket, user_id="event-user-456")
+        notifier = WebSocketNotifier.create_for_user(websocket=mock_websocket, user_id="event-user-456")
         
         # Business Rule: Must generate required golden path events
         critical_events = [
@@ -306,7 +306,7 @@ class TestWebSocketConnectionBusinessLogic:
             # Simulate error in WebSocket operation
             mock_websocket.send.side_effect = error
             
-            notifier = WebSocketNotifier(websocket=mock_websocket, user_id="error-test-user")
+            notifier = WebSocketNotifier.create_for_user(websocket=mock_websocket, user_id="error-test-user")
             
             # Business Rule: Errors should not crash the notifier
             try:
@@ -391,7 +391,7 @@ class TestWebSocketNotificationBusinessLogic:
     async def test_notification_event_formatting_business_rules(self):
         """Test notification events follow business formatting standards."""
         mock_websocket = AsyncMock()
-        notifier = WebSocketNotifier(websocket=mock_websocket, user_id="format-user")
+        notifier = WebSocketNotifier.create_for_user(websocket=mock_websocket, user_id="format-user")
         
         # Business Rule: Events must include required business context
         business_event_data = {
@@ -420,7 +420,7 @@ class TestWebSocketNotificationBusinessLogic:
     async def test_golden_path_event_sequence_business_logic(self):
         """Test golden path event sequence follows business workflow."""
         mock_websocket = AsyncMock()
-        notifier = WebSocketNotifier(websocket=mock_websocket, user_id="sequence-user")
+        notifier = WebSocketNotifier.create_for_user(websocket=mock_websocket, user_id="sequence-user")
         
         # Business Rule: Golden path must send all required events in sequence
         golden_path_sequence = [
@@ -457,8 +457,8 @@ class TestWebSocketNotificationBusinessLogic:
         mock_websocket_1 = AsyncMock()
         mock_websocket_2 = AsyncMock()
         
-        notifier_1 = WebSocketNotifier(websocket=mock_websocket_1, user_id="isolated-user-1")
-        notifier_2 = WebSocketNotifier(websocket=mock_websocket_2, user_id="isolated-user-2")
+        notifier_1 = WebSocketNotifier.create_for_user(websocket=mock_websocket_1, user_id="isolated-user-1")
+        notifier_2 = WebSocketNotifier.create_for_user(websocket=mock_websocket_2, user_id="isolated-user-2")
         
         # Send different events to different users
         await notifier_1.send_event("user_specific_event", {"user_data": "user1_data"})
@@ -484,7 +484,7 @@ class TestWebSocketNotificationBusinessLogic:
     async def test_notification_performance_business_requirements(self):
         """Test notification performance meets business requirements."""
         mock_websocket = AsyncMock()
-        notifier = WebSocketNotifier(websocket=mock_websocket, user_id="performance-user")
+        notifier = WebSocketNotifier.create_for_user(websocket=mock_websocket, user_id="performance-user")
         
         # Business Rule: Notifications should be fast (< 10ms each)
         import time
@@ -517,9 +517,7 @@ class TestWebSocketNotificationBusinessLogic:
         ]
         
         for error_case in connection_errors:
-            notifier = WebSocketNotifier(
-                websocket=mock_websocket, 
-                user_id=f"recovery-user-{hash(str(error_case['error'])) & 0xFFFF}"
+            notifier = WebSocketNotifier.create_for_user(websocket=mock_websocket, user_id=f"recovery-user-{hash(str(error_case['error'])) & 0xFFFF}"
             )
             
             # Business Rule: Error handling should be consistent with business requirements

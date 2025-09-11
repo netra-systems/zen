@@ -51,7 +51,7 @@ from netra_backend.app.websocket_core import (
     get_message_router
 )
 from netra_backend.app.websocket_core.utils import is_websocket_connected
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.core.websocket_message_handler import WebSocketMessageHandler
 
 logger = logging.getLogger(__name__)
@@ -332,7 +332,7 @@ class TestWebSocketStateConsistencyIntegration(BaseIntegrationTest):
             test_websockets.append(ws)
         
         # Create WebSocketNotifier
-        websocket_notifier = WebSocketNotifier(websocket_manager=None)
+        websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager=None)
         
         # Track notifier state checks
         notifier_state_tracker = WebSocketStateTracker()
@@ -361,8 +361,7 @@ class TestWebSocketStateConsistencyIntegration(BaseIntegrationTest):
             for check_round in range(50):  # Many state checks
                 for ws in test_websockets:
                     await notifier_state_tracker.record_component_state(
-                        "websocket_notifier",
-                        ws,
+                        "websocket_notifier", ws,
                         {"check_round": check_round, "websocket_name": ws.test_name}
                     )
                 await asyncio.sleep(0.002)  # Very frequent monitoring

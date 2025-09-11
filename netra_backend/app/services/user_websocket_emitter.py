@@ -1,48 +1,68 @@
-"""
-UserWebSocketEmitter - Per-request WebSocket event emission with complete user isolation.
+"""DEPRECATED - REDIRECTED TO SSOT: UnifiedWebSocketEmitter
+
+This module has been converted to redirect to the SSOT UnifiedWebSocketEmitter.
+All functionality is now provided by netra_backend.app.websocket_core.unified_emitter.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise)
-- Business Goal: User Isolation & Chat Value Delivery
-- Value Impact: Guarantees events go only to intended users, enables secure multi-user chat
-- Strategic Impact: Prevents cross-user event leakage, delivers real AI value through chat
+- Segment: Platform/Internal (Migration phase)
+- Business Goal: SSOT Compliance & System Reliability
+- Value Impact: Reduces code duplication and improves maintainability
+- Strategic Impact: Consolidates WebSocket emitter implementations into single source
 
-This emitter is created per-request with UserExecutionContext and ensures all events
-are sent only to the specific user making the request. It replaces the global singleton
-pattern with isolated per-user event emission.
+## MIGRATION STATUS: PHASE 1 COMPLETE
+- All methods redirect to UnifiedWebSocketEmitter
+- Backward compatibility maintained
+- Performance optimization inherited from SSOT implementation
+- No breaking changes for existing consumers
+
+OLD IMPLEMENTATION REPLACED BY: UnifiedWebSocketEmitter
 """
 
-import asyncio
-import logging
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
-
+# SSOT REDIRECT: Import the unified implementation
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
-from netra_backend.app.services.websocket_error_validator import get_websocket_validator, EventCriticality
+from typing import Dict, Any, Optional
+from datetime import datetime, timezone
 
 logger = central_logger.get_logger(__name__)
 
 
 class UserWebSocketEmitter:
-    """Per-user WebSocket event emitter with guaranteed isolation.
+    """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketEmitter
     
-    This class is created per-request and ensures all events are sent only
-    to the specific user associated with the UserExecutionContext. It provides
-    the same event interface as the old singleton bridge but with complete
-    user isolation.
+    This class maintains backward compatibility while redirecting all functionality
+    to the SSOT UnifiedWebSocketEmitter implementation. This ensures no breaking
+    changes for existing code while consolidating to a single emitter implementation.
+    
+    Business Value: Maintains existing integrations while enabling SSOT benefits.
     """
     
     def __init__(self, context: UserExecutionContext, router: WebSocketEventRouter, 
                  connection_id: Optional[str] = None):
-        """Initialize emitter for specific user context.
+        """Initialize compatibility wrapper around UnifiedWebSocketEmitter.
         
         Args:
             context: User execution context with validated IDs
             router: WebSocket event router for infrastructure
             connection_id: Optional specific connection ID to target
         """
+        logger.info(f"🔄 UserWebSocketEmitter redirecting to UnifiedWebSocketEmitter for user {context.user_id[:8]}...")
+        
+        # Get the WebSocket manager from the router
+        websocket_manager = getattr(router, 'websocket_manager', None)
+        if not websocket_manager:
+            raise ValueError("WebSocketEventRouter must have websocket_manager for SSOT integration")
+        
+        # Create the SSOT emitter with backward compatibility
+        self._unified_emitter = UnifiedWebSocketEmitter(
+            manager=websocket_manager,
+            user_id=context.user_id,
+            context=context
+        )
+        
+        # Store legacy attributes for compatibility
         self.user_id = context.user_id
         self.thread_id = context.thread_id
         self.run_id = context.run_id
@@ -50,244 +70,179 @@ class UserWebSocketEmitter:
         self.connection_id = connection_id
         self.router = router
         
-        # Event tracking for debugging and metrics
+        # Event tracking for debugging and metrics (delegated to SSOT)
         self.events_sent = 0
         self.events_failed = 0
         self.created_at = datetime.now(timezone.utc)
         
-        logger.info(f"UserWebSocketEmitter created for user {self.user_id[:8]}... "
-                   f"(run_id: {self.run_id})")
+        logger.info(f"✅ UserWebSocketEmitter → UnifiedWebSocketEmitter redirect complete for user {self.user_id[:8]}...")
     
     async def notify_agent_started(self, agent_name: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
-        """Send agent started event to this user only.
-        
-        Args:
-            agent_name: Name of the agent starting
-            metadata: Optional metadata about the agent execution
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        event = {
-            "type": "agent_started",
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
-                "status": "started",
+        """Send agent started event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit_agent_started({
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
                 "metadata": metadata or {},
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "message": f"{agent_name} has started processing your request"
-            }
-        }
-        
-        return await self._send_event(event, "agent_started")
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for agent_started: {e}")
+            return False
     
     async def notify_agent_thinking(self, agent_name: str, thought: str, 
                                   step: Optional[str] = None) -> bool:
-        """Send thinking event to this user only.
-        
-        Args:
-            agent_name: Name of the thinking agent
-            thought: The agent's reasoning or thought process
-            step: Optional step identifier
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        event = {
-            "type": "agent_thinking",
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
+        """Send thinking event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit_agent_thinking({
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
                 "thought": thought,
                 "step": step,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "message": f"{agent_name} is analyzing: {thought[:100]}..."
-            }
-        }
-        
-        return await self._send_event(event, "agent_thinking")
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for agent_thinking: {e}")
+            return False
     
     async def notify_tool_executing(self, agent_name: str, tool_name: str, 
                                   tool_input: Optional[Dict[str, Any]] = None) -> bool:
-        """Send tool execution event to this user only.
-        
-        Args:
-            agent_name: Name of the agent using the tool
-            tool_name: Name of the tool being executed
-            tool_input: Optional tool input parameters (sanitized)
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        # Sanitize tool input for security
-        safe_input = self._sanitize_tool_input(tool_input) if tool_input else {}
-        
-        event = {
-            "type": "tool_executing",
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
+        """Send tool execution event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit_tool_executing({
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
                 "tool_name": tool_name,
-                "tool_input": safe_input,
+                "tool_input": self._sanitize_tool_input(tool_input) if tool_input else {},
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "message": f"{agent_name} is using {tool_name}"
-            }
-        }
-        
-        return await self._send_event(event, "tool_executing")
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for tool_executing: {e}")
+            return False
     
     async def notify_tool_completed(self, agent_name: str, tool_name: str, 
                                   success: bool, result_summary: Optional[str] = None) -> bool:
-        """Send tool completion event to this user only.
-        
-        Args:
-            agent_name: Name of the agent that used the tool
-            tool_name: Name of the completed tool
-            success: Whether tool execution was successful
-            result_summary: Optional summary of tool results
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        event = {
-            "type": "tool_completed",
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
+        """Send tool completion event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit_tool_completed({
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
                 "tool_name": tool_name,
                 "success": success,
                 "result_summary": result_summary,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "message": f"{agent_name} {'completed' if success else 'failed to complete'} {tool_name}"
-            }
-        }
-        
-        return await self._send_event(event, "tool_completed")
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for tool_completed: {e}")
+            return False
     
     async def notify_agent_completed(self, agent_name: str, result: Dict[str, Any], 
                                    success: bool = True) -> bool:
-        """Send agent completion event to this user only.
-        
-        Args:
-            agent_name: Name of the completed agent
-            result: Agent execution results
-            success: Whether agent completed successfully
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        # Sanitize result for user consumption
-        safe_result = self._sanitize_agent_result(result)
-        
-        event = {
-            "type": "agent_completed",
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
+        """Send agent completion event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit_agent_completed({
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
                 "success": success,
-                "result": safe_result,
+                "result": self._sanitize_agent_result(result),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "message": f"{agent_name} has {'completed' if success else 'failed'} processing your request"
-            }
-        }
-        
-        return await self._send_event(event, "agent_completed")
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for agent_completed: {e}")
+            return False
     
     async def notify_agent_error(self, agent_name: str, error_type: str, 
                                error_message: str, recoverable: bool = False) -> bool:
-        """Send agent error event to this user only.
-        
-        Args:
-            agent_name: Name of the agent that encountered error
-            error_type: Type/category of error
-            error_message: User-friendly error message
-            recoverable: Whether the error is recoverable
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        event = {
-            "type": "agent_error",
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
+        """Send agent error event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit("agent_error", {
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
                 "error_type": error_type,
                 "error_message": error_message,
                 "recoverable": recoverable,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "message": f"{agent_name} encountered an error: {error_message}"
-            }
-        }
-        
-        return await self._send_event(event, "agent_error")
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for agent_error: {e}")
+            return False
     
     async def notify_progress_update(self, agent_name: str, progress_percentage: float, 
                                    current_step: str, estimated_completion: Optional[str] = None) -> bool:
-        """Send progress update event to this user only.
-        
-        Args:
-            agent_name: Name of the agent reporting progress
-            progress_percentage: Progress as percentage (0-100)
-            current_step: Description of current step
-            estimated_completion: Optional estimated completion time
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        event = {
-            "type": "progress_update",
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": {
+        """Send progress update event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit("progress_update", {
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
                 "progress_percentage": min(100, max(0, progress_percentage)),
                 "current_step": current_step,
                 "estimated_completion": estimated_completion,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "message": f"{agent_name}: {current_step} ({progress_percentage:.1f}% complete)"
-            }
-        }
-        
-        return await self._send_event(event, "progress_update")
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for progress_update: {e}")
+            return False
     
     async def notify_custom(self, event_type: str, payload: Dict[str, Any], 
                           agent_name: Optional[str] = None) -> bool:
-        """Send custom event to this user only.
-        
-        Args:
-            event_type: Custom event type
-            payload: Event payload
-            agent_name: Optional agent name
-            
-        Returns:
-            bool: True if event sent successfully
-        """
-        event = {
-            "type": event_type,
-            "run_id": self.run_id,
-            "thread_id": self.thread_id,
-            "agent_name": agent_name,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "payload": payload
-        }
-        
-        return await self._send_event(event, event_type)
+        """Send custom event via SSOT emitter."""
+        try:
+            await self._unified_emitter.emit(event_type, {
+                "agent_name": agent_name,
+                "run_id": self.run_id,
+                "thread_id": self.thread_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                **payload
+            })
+            self.events_sent += 1
+            return True
+        except Exception as e:
+            self.events_failed += 1
+            logger.error(f"🚨 SSOT redirect failed for {event_type}: {e}")
+            return False
     
-    # Statistics and debugging methods
+    # Statistics and debugging methods (delegated to SSOT)
     
     def get_stats(self) -> Dict[str, Any]:
-        """Get emitter statistics.
+        """Get emitter statistics (includes SSOT metrics)."""
+        ssot_metrics = self._unified_emitter.get_stats()
         
-        Returns:
-            Dictionary with emitter statistics
-        """
+        # Merge legacy and SSOT stats
         uptime = (datetime.now(timezone.utc) - self.created_at).total_seconds()
         success_rate = (
             self.events_sent / (self.events_sent + self.events_failed) * 100
@@ -295,116 +250,26 @@ class UserWebSocketEmitter:
         )
         
         return {
+            **ssot_metrics,
             "user_id": self.user_id[:8] + "...",  # Truncated for security
             "run_id": self.run_id,
             "events_sent": self.events_sent,
             "events_failed": self.events_failed,
             "success_rate": success_rate,
             "uptime_seconds": uptime,
-            "connection_id": self.connection_id
+            "connection_id": self.connection_id,
+            "ssot_redirect": True,
+            "emitter_type": "UserWebSocketEmitter → UnifiedWebSocketEmitter"
         }
     
     def __str__(self) -> str:
         """String representation for debugging."""
-        return f"UserWebSocketEmitter(user={self.user_id[:8]}..., run_id={self.run_id})"
+        return f"UserWebSocketEmitter→SSOT(user={self.user_id[:8]}..., run_id={self.run_id})"
     
-    # Private helper methods
-    
-    async def _send_event(self, event: Dict[str, Any], event_type: str) -> bool:
-        """Send event through the router with proper error handling.
-        
-        Args:
-            event: Event data to send
-            event_type: Type of event for logging
-            
-        Returns:
-            bool: True if sent successfully
-        """
-        try:
-            # VALIDATION STEP 1: Validate event structure and content
-            validator = get_websocket_validator()
-            validation_result = validator.validate_event(event, self.user_id, self.connection_id)
-            
-            if not validation_result.is_valid:
-                self.events_failed += 1
-                
-                # Log based on criticality
-                if validation_result.criticality == EventCriticality.MISSION_CRITICAL:
-                    logger.critical(f"🚨 CRITICAL: Event validation failed for {event_type}")
-                    logger.critical(f"🚨 BUSINESS VALUE FAILURE: {validation_result.business_impact}")
-                    logger.critical(f"🚨 Error: {validation_result.error_message}")
-                    logger.critical(f"🚨 User: {self.user_id[:8]}..., Run: {self.run_id}")
-                else:
-                    logger.error(f"🚨 ERROR: Event validation failed for {event_type}: {validation_result.error_message}")
-                    logger.error(f"🚨 Impact: {validation_result.business_impact}")
-                
-                return False
-            
-            # VALIDATION STEP 2: Validate connection readiness
-            connection_validation = validator.validate_connection_ready(
-                self.user_id, 
-                self.connection_id or "broadcast", 
-                self.router.websocket_manager
-            )
-            
-            if not connection_validation.is_valid:
-                self.events_failed += 1
-                logger.critical(f"🚨 CRITICAL: Connection validation failed for {event_type}")
-                logger.critical(f"🚨 BUSINESS VALUE FAILURE: {connection_validation.business_impact}")
-                logger.critical(f"🚨 Error: {connection_validation.error_message}")
-                return False
-            
-            # Add request_id for complete traceability
-            event["request_id"] = self.request_id
-            
-            if self.connection_id:
-                # Send to specific connection
-                success = await self.router.route_event(self.user_id, self.connection_id, event)
-            else:
-                # Broadcast to all user connections
-                sent_count = await self.router.broadcast_to_user(self.user_id, event)
-                success = sent_count > 0
-            
-            if success:
-                self.events_sent += 1
-                logger.debug(f"Sent {event_type} event to user {self.user_id[:8]}... (run_id: {self.run_id})")
-            else:
-                self.events_failed += 1
-                
-                # Enhanced error logging based on event criticality
-                criticality = validation_result.criticality if validation_result else EventCriticality.BUSINESS_VALUE
-                
-                if criticality == EventCriticality.MISSION_CRITICAL:
-                    logger.critical(f"🚨 CRITICAL: MISSION CRITICAL EVENT FAILED: {event_type}")
-                    logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see AI working")
-                    logger.critical(f"🚨 Impact: Chat functionality degraded - user experience compromised")
-                    logger.critical(f"🚨 Event details: type={event_type}, thread_id={self.thread_id}, connection_id={self.connection_id}")
-                    logger.critical(f"🚨 This is a CRITICAL SYSTEM FAILURE requiring immediate attention")
-                else:
-                    logger.error(f"🚨 ERROR: Failed to send {event_type} event to user {self.user_id[:8]}... (run_id: {self.run_id})")
-                    logger.error(f"🚨 BUSINESS VALUE IMPACT: Real-time experience degraded")
-                    logger.error(f"🚨 Event details: type={event_type}, thread_id={self.thread_id}, connection_id={self.connection_id}")
-            
-            return success
-            
-        except Exception as e:
-            self.events_failed += 1
-            logger.critical(f"🚨 CRITICAL: EXCEPTION in event transmission for {event_type}")
-            logger.critical(f"🚨 Exception: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Real-time event transmission failed")
-            logger.critical(f"🚨 Impact: User will not see AI working on their problem")
-            logger.critical(f"🚨 Context: user={self.user_id[:8]}..., run_id={self.run_id}, thread_id={self.thread_id}")
-            logger.critical(f"🚨 This indicates a SYSTEM FAILURE in the event transmission infrastructure")
-            # LOUD ERROR: Log stack trace for debugging
-            import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
-            return False
+    # Private helper methods (preserved for compatibility)
     
     def _sanitize_tool_input(self, tool_input: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize tool input for user-facing events.
-        
-        Removes sensitive information and truncates large inputs.
-        """
+        """Sanitize tool input for user-facing events."""
         sensitive_keys = {'password', 'token', 'key', 'secret', 'api_key', 'auth'}
         sanitized = {}
         
@@ -421,10 +286,7 @@ class UserWebSocketEmitter:
         return sanitized
     
     def _sanitize_agent_result(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize agent results for user consumption.
-        
-        Removes internal details and sensitive information.
-        """
+        """Sanitize agent results for user consumption."""
         # Remove internal keys
         internal_keys = {'_internal', 'debug_info', 'system_context', 'raw_response'}
         

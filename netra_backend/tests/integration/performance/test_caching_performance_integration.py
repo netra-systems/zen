@@ -22,8 +22,8 @@ import uuid
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
-from netra_backend.app.services.caching.cache_manager import CacheManager
-from netra_backend.app.services.caching.performance_optimizer import CachePerformanceOptimizer
+from netra_backend.app.services.cache_service import CacheConsistencyManager
+from netra_backend.app.services.state_persistence import StateCacheManager
 
 
 class TestCachingPerformanceIntegration(SSotBaseTestCase):

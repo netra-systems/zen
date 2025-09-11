@@ -37,7 +37,7 @@ from auth_service.auth_core.database.models import Base, AuthUser, AuthSession, 
 from auth_service.auth_core.database.database_manager import AuthDatabaseManager
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import redis_manager
 from auth_service.main import app
 
 # Import test framework utilities
@@ -150,7 +150,7 @@ class TestRealRedisConnections:
     @pytest.fixture
     async def real_redis_manager(self, isolated_test_env):
         """Create real Redis manager using test environment."""
-        manager = AuthRedisManager()
+        manager = redis_manager
         await manager.initialize()
         
         # Test connection
@@ -160,7 +160,7 @@ class TestRealRedisConnections:
             import logging
             logging.warning(f"Redis not available: {e} - using stub implementation")
             
-            class StubAuthRedisManager:
+            class StubRedisManager:
                 async def initialize(self):
                     pass
                 
@@ -182,7 +182,7 @@ class TestRealRedisConnections:
                     logging.info(f"[STUB] Would delete refresh token for user {user_id}")
                     pass
             
-            manager = StubAuthRedisManager()
+            manager = StubRedisManager()
             await manager.initialize()
             
         yield manager
@@ -531,7 +531,7 @@ class TestRealErrorHandling:
     async def test_redis_connection_failure_handling(self, isolated_test_env):
         """Test handling of Redis connection failures."""
         # Create Redis manager with invalid connection
-        invalid_manager = AuthRedisManager()
+        invalid_manager = redis_manager
         # Override Redis URL to invalid one
         invalid_manager.redis_url = "redis://invalid:9999"
         

@@ -398,11 +398,11 @@ class OptimizationsCoreSubAgent(BaseAgent):
         Returns:
             OptimizationsCoreSubAgent: Configured agent instance with proper context
         """
-        from netra_backend.app.llm.llm_manager import LLMManager
+        from netra_backend.app.llm.llm_manager import create_llm_manager
         from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
         
-        # Create dependencies (these will be injected later by the factory)
-        llm_manager = LLMManager()
+        # Create dependencies with proper user isolation
+        llm_manager = create_llm_manager(context)
         tool_dispatcher = UnifiedToolDispatcher.create_for_user(context)
         
         # Create agent with proper context following triage agent pattern

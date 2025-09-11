@@ -87,7 +87,14 @@ async def get_websocket_scoped_supervisor(
         )
         
         # Get required components for supervisor creation
-        components = await _get_websocket_supervisor_components(app_state)
+        # SSOT FIX: Create user context from WebSocket context for LLM isolation
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        user_context = UserExecutionContext(
+            user_id=context.user_id,
+            thread_id=context.thread_id,
+            session_id=context.connection_id  # Use connection_id as session
+        )
+        components = await _get_websocket_supervisor_components(app_state, user_context)
         
         # Update activity timestamp
         context.update_activity()
@@ -163,15 +170,17 @@ async def get_websocket_scoped_supervisor(
         )
 
 
-async def _get_websocket_supervisor_components(app_state = None) -> dict:
+async def _get_websocket_supervisor_components(app_state = None, user_context = None) -> dict:
     """Get required components for WebSocket supervisor creation.
     
+    SSOT MIGRATION: Updated to use factory pattern with user isolation.
     This internal function retrieves all the components needed to create a
     WebSocket supervisor. It handles both cases where app_state is provided
     (normal operation) and where it's not (testing/standalone usage).
     
     Args:
         app_state: Optional FastAPI app state object
+        user_context: Optional UserExecutionContext for user-scoped operations
         
     Returns:
         dict: Dictionary containing required components
@@ -182,10 +191,10 @@ async def _get_websocket_supervisor_components(app_state = None) -> dict:
     components = {}
     
     try:
-        # Get LLM client
+        # Get LLM client - SSOT FIX: Use factory pattern with user isolation
         from netra_backend.app.llm.client_unified import ResilientLLMClient
-        from netra_backend.app.llm.llm_manager import LLMManager
-        llm_manager = LLMManager()  # Create a new instance for this supervisor
+        from netra_backend.app.llm.llm_manager import create_llm_manager
+        llm_manager = create_llm_manager(user_context)  # Create user-isolated instance
         components["llm_client"] = ResilientLLMClient(llm_manager)
         
     except Exception as e:

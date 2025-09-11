@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 from typing import Dict, Any
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
@@ -46,7 +46,7 @@ class TestWebSocketEventValidationSerialization:
     @pytest.fixture
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocket notifier with serialization capture."""
-        return WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        return WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
     
     @pytest.fixture
     def mock_execution_context(self):

@@ -312,3 +312,10 @@ class MigrationTestHelper:
 def migration_helper(async_session_mock):
     """Create migration test helper."""
     return MigrationTestHelper(async_session_mock)
+
+# === Alias for ClickHouse Connection Pool ===
+
+@pytest.fixture
+def clickhouse_connection_pool(connection_pool):
+    """Alias for connection_pool fixture for ClickHouse compatibility."""
+    return connection_pool

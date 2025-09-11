@@ -210,9 +210,12 @@ class WebSocketRaceConditionTester:
                     }
                     await ws.send(json.dumps(test_msg))
                     
-                    # Try to get response
+                    # Try to get response - PRIORITY 3 FIX: Use cloud-native timeout
                     try:
-                        response = await asyncio.wait_for(ws.recv(), timeout=3)
+                        # Import centralized timeout configuration
+                        from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout
+                        cloud_timeout = get_websocket_recv_timeout()
+                        response = await asyncio.wait_for(ws.recv(), timeout=cloud_timeout)
                         return {
                             "id": conn_id,
                             "status": "success",

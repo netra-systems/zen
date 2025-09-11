@@ -31,7 +31,7 @@ from netra_backend.app.logging_config import central_logger
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory, UserExecutionContext, IsolatedExecutionEngine
     from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, UserWebSocketEmitter
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
@@ -285,8 +285,12 @@ class FactoryAdapter:
                     if not registry:
                         raise ValueError("Legacy mode requires 'registry' parameter")
                 
-                from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-                self._legacy_execution_engine = ExecutionEngine(registry, websocket_bridge)
+                from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+                unified_factory = UnifiedExecutionEngineFactory()
+                self._legacy_execution_engine = await unified_factory.create_execution_engine(
+                    registry=registry, 
+                    websocket_bridge=websocket_bridge
+                )
             
             creation_time_ms = (time.time() - start_time) * 1000
             

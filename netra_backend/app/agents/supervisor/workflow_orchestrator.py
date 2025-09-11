@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig, PipelineStep
+from netra_backend.app.agents.supervisor.agent_coordination_validator import AgentCoordinationValidator
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from typing import TYPE_CHECKING
@@ -24,12 +25,18 @@ class WorkflowOrchestrator:
     """Orchestrates supervisor workflow according to unified spec with adaptive logic."""
     
     def __init__(self, agent_registry, execution_engine, websocket_manager, user_context=None):
+        # CRITICAL FIX: Validate execution engine type for SSOT compliance
+        if hasattr(execution_engine, '__class__') and execution_engine.__class__.__name__ == "ExecutionEngine":
+            raise ValueError("deprecated ExecutionEngine not allowed - use UserExecutionEngine for SSOT compliance")
+        
         self.agent_registry = agent_registry
         self.execution_engine = execution_engine
         self.websocket_manager = websocket_manager
         # Store user context for isolated WebSocket events (factory pattern)
         self.user_context = user_context
         self._websocket_emitter = None  # Will be created when user_context is available
+        # CRITICAL FIX: Initialize coordination validator for Enterprise data integrity
+        self.coordination_validator = AgentCoordinationValidator()
         # No longer define static workflow - it will be determined dynamically
     
     async def _get_user_emitter_from_context(self, context: ExecutionContext):
@@ -171,11 +178,11 @@ class WorkflowOrchestrator:
         
         # Store triage result in context for downstream agents
         if hasattr(context.state, 'triage_result'):
-            context.state.triage_result = triage_result.result
+            context.state.triage_result = triage_result.data
         
         # Determine workflow based on triage result
         workflow_steps = self._define_workflow_based_on_triage(
-            triage_result.result if triage_result.success else {}
+            triage_result.data if triage_result.is_success else {}
         )
         
         # Update workflow steps with full workflow
@@ -186,9 +193,63 @@ class WorkflowOrchestrator:
         for step in workflow_steps[1:]:  # Skip first triage step
             result = await self._execute_workflow_step(context, step)
             results.append(result)
-            if not result.success and not step.metadata.get("continue_on_error"):
+            # CRITICAL FIX: Use correct success checking for ExecutionResult API
+            result_success = getattr(result, 'success', None) or getattr(result, 'is_success', None)
+            if result_success is None:
+                result_success = (getattr(result, 'status', None) == getattr(result, 'COMPLETED', 'COMPLETED'))
+            if not result_success and not step.metadata.get("continue_on_error"):
                 break
         
+        # CRITICAL FIX: Validate complete coordination after workflow execution
+        executed_agent_names = [step.agent_name for step in workflow_steps[:len(results)]]
+        agent_results_dict = {}
+        for i, result in enumerate(results):
+            if result.data:
+                # CRITICAL FIX: Handle missing or None metadata safely
+                metadata = getattr(result, 'metadata', None) or {}
+                agent_name = metadata.get('agent_name', executed_agent_names[i] if i < len(executed_agent_names) else f'agent_{i}')
+                agent_results_dict[agent_name] = result.data
+        
+        # Build dependency rules from workflow steps
+        dependency_rules = {
+            step.agent_name: step.dependencies or [] 
+            for step in workflow_steps
+        }
+        
+        # Capture pre/post execution state for validation
+        pre_execution_state = getattr(context.state, '__dict__', {})
+        post_execution_state = getattr(context.state, '__dict__', {})
+        
+        # Perform comprehensive coordination validation
+        workflow_id = getattr(context, 'run_id', f'workflow_{int(time.time())}')
+        validation_result = self.coordination_validator.validate_complete_coordination(
+            workflow_id=workflow_id,
+            executed_agents=executed_agent_names,
+            agent_results=agent_results_dict,
+            dependency_rules=dependency_rules,
+            pre_execution_state=pre_execution_state,
+            post_execution_state=post_execution_state
+        )
+        
+        if not validation_result.coordination_valid:
+            logger.error(f"COORDINATION VALIDATION FAILED for workflow {workflow_id}: "
+                        f"Order: {validation_result.execution_order_correct}, "
+                        f"Handoffs: {validation_result.data_handoffs_valid}, "
+                        f"Propagation: {validation_result.tool_results_propagated}")
+            
+            # Add validation failure to results metadata
+            for result in results:
+                # CRITICAL FIX: Handle metadata safely for different ExecutionResult types
+                if hasattr(result, 'metadata'):
+                    if result.metadata is None:
+                        result.metadata = {}
+                    result.metadata['coordination_validation'] = {
+                        'status': 'FAILED',
+                        'details': validation_result.validation_details
+                    }
+        else:
+            logger.info(f"✅ Coordination validation passed for workflow {workflow_id}")
+
         await self._send_workflow_completed(context, results)
         return results
     
@@ -215,15 +276,22 @@ class WorkflowOrchestrator:
     def _create_step_context(self, base_context: ExecutionContext, 
                            step: PipelineStep) -> ExecutionContext:
         """Create execution context for workflow step."""
-        return ExecutionContext(
+        # CRITICAL FIX: ExecutionContext constructor requires request_id as first parameter
+        step_context = ExecutionContext(
+            request_id=base_context.request_id,
             run_id=base_context.run_id,
             agent_name=step.agent_name,
             state=base_context.state,
             stream_updates=base_context.stream_updates,
-            thread_id=base_context.thread_id,
             user_id=base_context.user_id,
             metadata=step.metadata
         )
+        
+        # CRITICAL FIX: Preserve thread_id if available (may be added dynamically)
+        if hasattr(base_context, 'thread_id'):
+            step_context.thread_id = base_context.thread_id
+            
+        return step_context
     
     async def _send_workflow_started(self, context: ExecutionContext) -> None:
         """Send workflow started notification via factory pattern for user isolation."""
@@ -271,7 +339,7 @@ class WorkflowOrchestrator:
                     logger.debug("No user context available for step completed WebSocket updates - skipping")
                     return
                 
-                if result.success:
+                if result.is_success:
                     await emitter.emit_agent_completed(step.agent_name, {
                         "step_type": step.metadata.get("step_type"),
                         "execution_time_ms": result.execution_time_ms,
@@ -280,7 +348,7 @@ class WorkflowOrchestrator:
                 else:
                     await emitter.emit_custom_event("agent_error", {
                         "agent_name": step.agent_name,
-                        "error_message": result.error or "Step execution failed",
+                        "error_message": result.error_message or "Step execution failed",
                         "step_type": step.metadata.get("step_type")
                     })
             except Exception as e:
@@ -298,7 +366,7 @@ class WorkflowOrchestrator:
                     return
                     
                 total_time = sum(r.execution_time_ms for r in results if r.execution_time_ms)
-                success_count = sum(1 for r in results if r.success)
+                success_count = sum(1 for r in results if r.is_success)
                 
                 await emitter.emit_agent_completed("WorkflowOrchestrator", {
                     "workflow_completed": True,

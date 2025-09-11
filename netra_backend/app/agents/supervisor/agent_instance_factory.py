@@ -53,17 +53,26 @@ logger = central_logger.get_logger(__name__)
 
 
 class UserWebSocketEmitter:
-    """
-    Per-user WebSocket event emitter with complete isolation.
+    """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketEmitter
     
-    Each user gets their own emitter instance bound to their specific
-    user_id and thread_id. No cross-user contamination possible.
+    This class maintains backward compatibility while redirecting all functionality
+    to the SSOT UnifiedWebSocketEmitter implementation from the factory pattern.
     
     Business Value: Ensures WebSocket events reach correct users, prevents notification leaks
+    
+    ## MIGRATION STATUS: PHASE 1 COMPLETE
+    - Redirects to UnifiedWebSocketEmitter via AgentWebSocketBridge
+    - Maintains full backward compatibility
+    - No breaking changes for AgentInstanceFactory consumers
     """
     
     def __init__(self, user_id: str, thread_id: str, run_id: str, 
                  websocket_bridge: AgentWebSocketBridge):
+        """Initialize compatibility wrapper that uses the AgentWebSocketBridge.
+        
+        The AgentWebSocketBridge now internally uses UnifiedWebSocketEmitter,
+        so this wrapper maintains compatibility while getting SSOT benefits.
+        """
         self.user_id = user_id
         self.thread_id = thread_id
         self.run_id = run_id
@@ -72,7 +81,8 @@ class UserWebSocketEmitter:
         self._event_count = 0
         self._last_event_time = None
         
-        logger.debug(f"Created UserWebSocketEmitter for user={user_id}, thread={thread_id}, run={run_id}")
+        logger.info(f"🔄 UserWebSocketEmitter (factory pattern) → AgentWebSocketBridge → UnifiedWebSocketEmitter for user={user_id}, run={run_id}")
+        logger.debug(f"Factory UserWebSocketEmitter initialized with bridge type: {type(websocket_bridge).__name__}")
     
     async def notify_agent_started(self, agent_name: str, context: Optional[Dict[str, Any]] = None) -> bool:
         """Send agent started notification for this specific user."""
@@ -1185,6 +1195,41 @@ class AgentInstanceFactory:
             'contexts': contexts_summary,
             'summary_timestamp': datetime.now(timezone.utc).isoformat()
         }
+    
+    async def create_agent(self, 
+                          agent_name: str,
+                          user_context: UserExecutionContext,
+                          agent_class: Optional[Type[BaseAgent]] = None) -> BaseAgent:
+        """
+        COMPATIBILITY METHOD: create_agent() wrapper for create_agent_instance().
+        
+        This method provides backward compatibility for tests and code that expect
+        a create_agent() method on the AgentInstanceFactory. It wraps the standard
+        create_agent_instance() method with appropriate logging and deprecation warning.
+        
+        Args:
+            agent_name: Name of the agent to create
+            user_context: User execution context for isolation
+            agent_class: Optional specific agent class (if not using registry)
+            
+        Returns:
+            BaseAgent: Fresh agent instance configured for the user context
+            
+        Raises:
+            ValueError: If agent not found or invalid parameters
+            RuntimeError: If agent creation fails
+        """
+        logger.warning(
+            f"🔄 COMPATIBILITY: create_agent() method called - redirecting to create_agent_instance(). "
+            f"Consider updating calling code to use create_agent_instance() directly for {agent_name}"
+        )
+        
+        # Use the standard create_agent_instance method
+        return await self.create_agent_instance(
+            agent_name=agent_name,
+            user_context=user_context,
+            agent_class=agent_class
+        )
     
     async def cleanup_inactive_contexts(self, max_age_seconds: int = 3600) -> int:
         """

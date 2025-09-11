@@ -16,13 +16,42 @@ logger = central_logger.get_logger(__name__)
 
 
 def validate_oauth_credentials(oauth_config) -> Optional[RedirectResponse]:
-    """Validate OAuth credentials are configured."""
-    if not oauth_config.client_id or not oauth_config.client_secret:
-        logger.error("OAuth credentials not configured!")
-        frontend_url = get_frontend_url_for_environment()
-        error_msg = "OAuth not configured. Check server logs."
-        return RedirectResponse(url=f"{frontend_url}/auth/error?message={error_msg}")
-    return None
+    """
+    DEPRECATED: Validate OAuth credentials are configured.
+    
+    This function now delegates to SSOT OAuth validation.
+    Use shared.configuration.central_config_validator.validate_oauth_credentials_endpoint() instead.
+    """
+    try:
+        # SSOT OAuth validation - this replaces duplicate implementation
+        from shared.configuration.central_config_validator import validate_oauth_credentials_endpoint
+        
+        # Convert oauth_config to dict format for SSOT validation
+        credentials = {
+            "client_id": getattr(oauth_config, 'client_id', None),
+            "client_secret": getattr(oauth_config, 'client_secret', None)
+        }
+        
+        # Use SSOT OAuth credential validation
+        validation_result = validate_oauth_credentials_endpoint(credentials)
+        
+        if not validation_result["valid"]:
+            logger.error(f"SSOT OAuth validation failed: {'; '.join(validation_result['errors'])}")
+            frontend_url = get_frontend_url_for_environment()
+            error_msg = "OAuth not configured. Check server logs."
+            return RedirectResponse(url=f"{frontend_url}/auth/error?message={error_msg}")
+        
+        return None
+        
+    except ImportError:
+        # Fallback if SSOT not available
+        logger.warning("SSOT OAuth validation not available - using deprecated implementation")
+        if not oauth_config.client_id or not oauth_config.client_secret:
+            logger.error("OAuth credentials not configured!")
+            frontend_url = get_frontend_url_for_environment()
+            error_msg = "OAuth not configured. Check server logs."
+            return RedirectResponse(url=f"{frontend_url}/auth/error?message={error_msg}")
+        return None
 
 
 def build_proxy_url(oauth_config, request: Request) -> str:

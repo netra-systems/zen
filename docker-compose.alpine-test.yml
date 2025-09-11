@@ -131,6 +131,11 @@ services:
 
   alpine-test-backend:
     image: netra-alpine-test-backend:latest
+    container_name: alpine-test-backend
+    networks:
+      default:
+        aliases:
+          - backend
     build:
       context: .
       dockerfile: docker/backend.alpine.Dockerfile
@@ -179,8 +184,6 @@ services:
       timeout: 10s
       retries: 30
       start_period: 120s
-    networks:
-      - default
     deploy:
       resources:
         limits:
@@ -191,6 +194,11 @@ services:
 
   alpine-test-auth:
     image: netra-alpine-test-auth:latest
+    container_name: alpine-test-auth
+    networks:
+      default:
+        aliases:
+          - auth
     build:
       context: .
       dockerfile: docker/auth.alpine.Dockerfile
@@ -228,8 +236,6 @@ services:
       timeout: 10s
       retries: 30
       start_period: 120s
-    networks:
-      - default
     deploy:
       resources:
         limits:

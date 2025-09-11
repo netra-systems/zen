@@ -406,7 +406,7 @@ class TestAgentExecutionCore(BaseIntegrationTest):
     def test_circuit_breaker_fallback_business_continuity(self):
         """Test circuit breaker fallback ensures business continuity."""
         # Business Value: Provides degraded service instead of complete failure
-        from netra_backend.app.agents.execution_timeout_manager import CircuitBreakerOpenError
+        from netra_backend.app.core.agent_execution_tracker import CircuitBreakerOpenError
         
         context = AgentExecutionContext(
             run_id=str(RequestID("run-cb-123")),
@@ -448,7 +448,7 @@ class TestAgentExecutionCore(BaseIntegrationTest):
     def test_agent_state_phase_transitions(self):
         """Test agent execution state transitions for monitoring."""
         # Business Value: Enables real-time monitoring of agent execution pipeline
-        from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+        from netra_backend.app.core.agent_execution_tracker import AgentExecutionPhase
         
         context = AgentExecutionContext(
             run_id=str(RequestID("run-phase-123")),

@@ -41,7 +41,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
@@ -343,7 +343,13 @@ class TestRealWebSocketComponents:
     async def test_websocket_notifier_all_methods(self):
         """Test that WebSocketNotifier has ALL required methods and they work."""
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        # Create user context for SSOT pattern
+        user_context = UserExecutionContext(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+        notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(ws_manager, user_context)
         
         # Verify all methods exist
         required_methods = [
@@ -400,9 +406,9 @@ class TestRealWebSocketComponents:
             thread_id="test_thread"
         )
         
-        # Import and create WebSocket manager  
-        from netra_backend.app.websocket_core import get_websocket_manager
-        websocket_manager = get_websocket_manager()
+        # Import and create WebSocket manager using secure factory pattern
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        websocket_manager = await create_websocket_manager(user_context=user_context)
         
         # Test that tool dispatcher can be created and has proper integration points
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(
@@ -432,7 +438,9 @@ class TestRealWebSocketComponents:
         
         # Use real LLM manager instead of mock
         llm_manager = LLMManager()
-        ws_manager = get_websocket_manager()
+        # Use secure factory pattern for WebSocket manager
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        ws_manager = await create_websocket_manager(user_context=user_context)
         
         tool_dispatcher = UnifiedToolDispatcherFactory.create_for_request(
             user_context=user_context,
@@ -2836,7 +2844,10 @@ class TestAgentWebSocketIntegrationEnhanced:
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
-        websocket_notifier = WebSocketNotifier(user_context=user_context)
+        # Use SSOT pattern for WebSocketNotifier creation
+        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter=user_context, # Placeholder - would be actual emitter
+            exec_context=user_context
+        )
         execution_engine = ExecutionEngine()
         
         # Test WebSocket notifier initialization in execution engine
@@ -2875,7 +2886,10 @@ class TestAgentWebSocketIntegrationEnhanced:
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
-        websocket_notifier = WebSocketNotifier(user_context=user_context)
+        # Use SSOT pattern for WebSocketNotifier creation
+        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter=user_context, # Placeholder - would be actual emitter
+            exec_context=user_context
+        )
         
         # Create enhanced tool execution engine
         enhanced_tool_engine = UnifiedToolExecutionEngine(

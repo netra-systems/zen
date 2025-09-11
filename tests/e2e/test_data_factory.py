@@ -26,18 +26,7 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.schemas.registry import MessageType
 from tests.e2e.config import UnifiedTestConfig
-
-
-@dataclass
-@pytest.mark.e2e
-class TestUserData:
-    """Test user with enhanced tracking"""
-    id: str
-    email: str 
-    full_name: str
-    hashed_password: str
-    plan_tier: str
-    created_at: datetime
+from shared.types.user_types import TestUserData
 
 
 @dataclass
@@ -104,13 +93,21 @@ class TestDataFactory:
         return user_data
     
     def _build_user_data(self, email: Optional[str], password: str, tier: str) -> TestUserData:
-        """Build user data structure"""
+        """Build user data structure using SSOT TestUserData model"""
         user_id = self._create_unique_id("user_")
         user_email = email or f"{user_id}@test-factory.com"
         full_name = f"Test User {user_id[-8:]}"
         hashed_pw = self._hash_password(password)
         created_at = self._generate_timestamp()
-        return TestUserData(user_id, user_email, full_name, hashed_pw, tier, created_at)
+        
+        return TestUserData(
+            id=user_id,
+            email=user_email,
+            full_name=full_name,
+            hashed_password=hashed_pw,
+            plan_tier=tier,
+            created_at=created_at
+        )
     
     def create_test_message(self, user_id: str, content: str, thread_id: Optional[str] = None, message_type: MessageType = MessageType.USER) -> TestMessageData:
         """Create test message with user_id and content"""

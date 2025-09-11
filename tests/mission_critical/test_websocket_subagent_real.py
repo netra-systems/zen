@@ -30,7 +30,7 @@ from test_framework.real_services import get_real_services, RealServicesManager
 
 # Import production WebSocket components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 class RealWebSocketEventValidator:
@@ -114,7 +114,7 @@ class TestRealWebSocketSubAgent:
         
         # Create WebSocket components
         ws_manager = WebSocketManager()
-        notifier = WebSocketNotifier(ws_manager)
+        notifier = WebSocketNotifier.create_for_user(ws_manager)
         
         # Mock WebSocket that captures events
         class EventCapturingWebSocket:

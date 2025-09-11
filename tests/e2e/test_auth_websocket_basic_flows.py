@@ -13,6 +13,7 @@ Business Value Justification (BVJ):
 import asyncio
 import json
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
@@ -222,7 +223,17 @@ class TestAuthWebSocketIntegration:
     async def test_8_multiple_users_isolated_connections(self):
         """Test 8: Multiple users have isolated WebSocket connections"""
         jwt_helper = JWTTestHelper()
-        manager = get_websocket_manager()
+        # Use factory pattern for secure user isolation
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        
+        # Create base context for test setup (will create per-user contexts below)
+        base_context = UserExecutionContext(
+            user_id="test_base",
+            run_id=f"test_run_{uuid.uuid4()}",
+            thread_id="test_thread"
+        )
+        manager = await create_websocket_manager(user_context=base_context)
         
         # Create multiple users
         users = []
@@ -299,7 +310,17 @@ class TestCoreServiceCommunication:
     async def test_10_websocket_broadcasts_to_authenticated_users_only(self):
         """Test 10: WebSocket broadcasts messages only to authenticated users"""
         jwt_helper = JWTTestHelper()
-        manager = get_websocket_manager()
+        # Use factory pattern for secure user isolation in broadcasts
+        from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        
+        # Create base context for test setup
+        base_context = UserExecutionContext(
+            user_id="test_broadcast",
+            run_id=f"test_run_{uuid.uuid4()}",
+            thread_id="test_thread"
+        )
+        manager = await create_websocket_manager(user_context=base_context)
         
         # Create authenticated users
         auth_users = []

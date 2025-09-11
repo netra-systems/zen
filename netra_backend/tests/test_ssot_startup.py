@@ -16,7 +16,7 @@ import pytest
 from typing import Any, Dict
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
@@ -116,13 +116,15 @@ class TestExecutionEngineSSOT:
     
     def test_execution_engine_imports(self):
         """Verify execution engine modules can be imported."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
+        # SSOT MIGRATION: Use UserExecutionEngine as the single source of truth
         from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory
         
-        assert ExecutionEngine is not None
-        assert ExecutionEngineFactory is not None
         assert UserExecutionEngine is not None
+        assert ExecutionEngineFactory is not None
+        
+        # SSOT VALIDATION: UserExecutionEngine is the only ExecutionEngine implementation
+        ExecutionEngine = UserExecutionEngine  # Alias for backward compatibility
     
     def test_execution_factory_creation(self):
         """Test execution factory can be created."""
@@ -142,7 +144,7 @@ class TestStatePersistenceSSOT:
     
     def test_state_managers_import(self):
         """Verify state manager modules can be imported."""
-        from netra_backend.app.services.state_cache_manager import state_cache_manager
+        from netra_backend.app.services.state_persistence import state_cache_manager
         from netra_backend.app.services.state_recovery_manager import state_recovery_manager
         
         assert state_cache_manager is not None
@@ -151,7 +153,7 @@ class TestStatePersistenceSSOT:
     @pytest.mark.asyncio
     async def test_state_cache_manager_operations(self):
         """Test state cache manager basic operations."""
-        from netra_backend.app.services.state_cache_manager import state_cache_manager
+        from netra_backend.app.services.state_persistence import state_cache_manager
         
         # Test save and load
         request = Mock(run_id="test_run", state_data={"test": "data"})

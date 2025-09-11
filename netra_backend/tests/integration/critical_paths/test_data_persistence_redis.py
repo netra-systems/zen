@@ -10,7 +10,7 @@ import time
 import pytest
 import redis.asyncio as redis
 
-from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.redis_manager import redis_manager as RedisService
 from shared.isolated_environment import get_env
 
 

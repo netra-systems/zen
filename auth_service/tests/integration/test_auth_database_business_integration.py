@@ -39,7 +39,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import auth_db
 from auth_service.auth_core.database.models import AuthUser as User, AuthSession as Session, AuthAuditLog as AuditLog, Base
-from auth_service.auth_core.redis_manager import AuthRedisManager
+from netra_backend.app.redis_manager import redis_manager
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.services.auth_service import AuthService
 
@@ -63,7 +63,7 @@ class TestAuthDatabaseBusinessIntegration(BaseIntegrationTest):
         await self.db.initialize()
         
         # Real Redis cache connection
-        self.redis_manager = AuthRedisManager()
+        self.redis_manager = redis_manager
         await self.redis_manager.connect()
         
         # Test data for business scenarios

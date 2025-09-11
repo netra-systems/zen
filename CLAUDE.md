@@ -5,7 +5,7 @@
 **STABILITY FIRST:** Prove changes maintain system stability and don't introduce breaking changes.
 
 **NON-NEGOTIABLE RULES:**
-- SSOT compliance is mandatory
+- SSOT (Single Source of Truth) compliance is mandatory (within each service (5.1)). @SSOT_IMPORT_REGISTRY.md
 - This document overrides all other instructions
 - No "standalone" or "simple" files
 - No bypassing established patterns
@@ -121,6 +121,8 @@ Every task needs:
 - **Stability by Default:** Atomic changes, flag breaking changes
 
 **TEST DISCOVERY:** `python tests/unified_test_runner.py`
+Use the test gardner command if test collection issues.
+**COMPREHENSIVE TEST GUIDE:** See `TEST_EXECUTION_GUIDE.md` for complete test execution methodology, including how to run all tests without fast-fail and separate collection errors from test failures.
 **COMPLIANCE:** Save checklist after every session.
 
 ### 2.2. Complexity Management
@@ -252,6 +254,18 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 
 ## 7. PROJECT TOOLING
 
+### 7.0. Claude Code Commands
+**AUTOMATION HUB:** All development commands available through Claude Code slash commands
+
+**Essential Commands:**
+- `/tdd feature module` - Complete TDD workflow with real services (NO MOCKS)
+- `/test-real [category]` - Run tests with real databases and LLM
+- `/debug-error "error" N` - Five Whys root cause analysis with N agents
+- `/deploy-gcp [env]` - Deploy to GCP with compliance checks
+- `/ultimate-test-deploy-loop` - MISSION CRITICAL: Run until all 1000+ tests pass
+
+**Command Reference:** See `docs/COMMAND_INDEX.md` for all 36 available commands
+
 ### 7.1. Docker
 **Central Management:** All operations through UnifiedDockerManager
 
@@ -259,6 +273,7 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 ```bash
 python tests/unified_test_runner.py --real-services
 ```
+**TEST ON GCP STAGING** OR RUN NON DOCKER TESTS BY DEFAULT (Not using docker for tests)
 
 **Alpine Options:**
 - Default: Alpine containers with rebuild
@@ -299,10 +314,12 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
 ## 9. SYSTEM STATUS TRACKING
 
+SEE GIT ISSUES, GIT PRs.
+
 **Pre-Work Check:**
 - @reports/MASTER_WIP_STATUS.md - System health and compliance
 - @reports/DEFINITION_OF_DONE_CHECKLIST.md - Module checklists
-- Regenerate status after work completion
+- @SSOT_IMPORT_REGISTRY.md - Authoritative import reference (Completed)
 
 ## 10. EXECUTION CHECKLIST
 
@@ -324,10 +341,7 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
 ### 10.1. Git Commit Standards
 **Follow @git_commit_atomic_units.xml:**
-- Small, focused, conceptually similar units
-- Each commit reviewable in <1 minute
-- Complex refactors include MRO report reference
-- 1-10 commits per related work group
+- Stay on develop-long-lived branch as current branch.
 
 **FINAL REMINDER:** 
 - **GOLDEN PATH PRIORITY:** Users login → get AI responses

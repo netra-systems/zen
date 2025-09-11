@@ -25,10 +25,16 @@ class StagingConfig:
     # Frontend URL (when deployed)
     frontend_url: str = "https://app.staging.netrasystems.ai"
     
-    # Test configuration
-    timeout: int = 60  # seconds
+    # Test configuration - PRIORITY 3 FIX: Cloud-native timeout hierarchy
+    # CRITICAL: These timeouts coordinate with centralized timeout_configuration.py
+    timeout: int = 60  # seconds - general test timeout
     retry_count: int = 3
     retry_delay: float = 2.0  # seconds
+    
+    # Cloud-native WebSocket timeouts for staging (35s > 30s agent coordination)
+    websocket_recv_timeout: int = 35  # PRIORITY 3 FIX: 3s → 35s for Cloud Run
+    websocket_connection_timeout: int = 60
+    agent_execution_timeout: int = 30  # PRIORITY 3 FIX: 15s → 30s (< WebSocket timeout)
     
     # Authentication (for tests that need it)
     test_api_key: Optional[str] = os.environ.get("STAGING_TEST_API_KEY")
@@ -76,6 +82,26 @@ class StagingConfig:
             headers["Authorization"] = f"Bearer {self.test_jwt_token}"
             
         return headers
+    
+    def get_cloud_native_timeout(self) -> int:
+        """Get cloud-native WebSocket recv timeout for staging environment.
+        
+        PRIORITY 3 FIX: Returns 35-second timeout optimized for GCP Cloud Run
+        instead of hardcoded 3-second timeout that causes premature failures.
+        
+        This method integrates with centralized timeout_configuration.py for
+        environment-aware timeout management.
+        
+        Returns:
+            int: WebSocket recv timeout in seconds (35s for staging)
+        """
+        try:
+            # Use centralized timeout configuration if available
+            from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout
+            return get_websocket_recv_timeout()
+        except ImportError:
+            # Fallback to staging-specific timeout if centralized config not available
+            return self.websocket_recv_timeout
     
     def get_websocket_headers(self, token: Optional[str] = None) -> Dict[str, str]:
         """

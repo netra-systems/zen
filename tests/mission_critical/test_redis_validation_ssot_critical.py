@@ -32,13 +32,13 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from test_framework.ssot.base_test_case import SsotBaseTestCase, SsotTestContext, CategoryType
+from test_framework.ssot.base_test_case import SSotBaseTestCase, SsotTestContext, CategoryType
 from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
 
-class RedisValidationSsotCriticalTest(SsotBaseTestCase):
+class RedisValidationSsotCriticalTest(SSotBaseTestCase):
     """
     Mission Critical Redis Validation SSOT Compliance Test.
     

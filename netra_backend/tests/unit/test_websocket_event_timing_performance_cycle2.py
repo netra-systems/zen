@@ -16,7 +16,7 @@ import time
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from shared.types import UserID, ThreadID, RunID
 
@@ -41,7 +41,7 @@ class TestWebSocketEventTimingPerformance:
     @pytest.fixture
     def websocket_notifier(self, mock_websocket_manager):
         """Create WebSocket notifier with timing tracking."""
-        return WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        return WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
     
     @pytest.fixture
     def mock_execution_context(self):
@@ -124,9 +124,9 @@ class TestWebSocketEventTimingPerformance:
         Performance degradation with concurrent users loses revenue.
         """
         # Arrange: Create multiple notifiers for different users
-        notifier1 = WebSocketNotifier(websocket_manager=mock_websocket_manager)
-        notifier2 = WebSocketNotifier(websocket_manager=mock_websocket_manager)
-        notifier3 = WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        notifier1 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
+        notifier2 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager, exec_context=None)  # MANUAL_REVIEW: Validate exec_context
+        notifier3 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager, exec_context=None)  # MANUAL_REVIEW: Validate exec_context
         
         # Create contexts for 3 concurrent users
         contexts = []
@@ -183,7 +183,7 @@ class TestWebSocketEventTimingPerformance:
             return None
         
         mock_websocket_manager.send_to_user.side_effect = delayed_send_to_user
-        notifier = WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
         
         # Act: Send events with network delay
         start_time = time.time()
@@ -209,7 +209,7 @@ class TestWebSocketEventTimingPerformance:
         Business Value: Efficient event delivery prevents connection saturation.
         Overwhelmed connections drop events and break user experience.
         """
-        notifier = WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
         
         # Act: Send many rapid events (simulating very active agent)
         event_count = 10
@@ -244,7 +244,7 @@ class TestWebSocketEventTimingPerformance:
         import gc
         import sys
         
-        notifier = WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
         
         # Act: Generate many events and measure memory impact
         gc.collect()  # Clean start
@@ -286,7 +286,7 @@ class TestWebSocketEventTimingPerformance:
             return None  # Success on subsequent calls
         
         mock_websocket_manager.send_to_user.side_effect = error_then_success
-        notifier = WebSocketNotifier(websocket_manager=mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
         
         # Act: Send events with error recovery
         start_time = time.time()

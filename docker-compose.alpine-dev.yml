@@ -49,6 +49,11 @@ services:
       retries: 5
 
   dev-backend:
+    container_name: dev-backend
+    networks:
+      default:
+        aliases:
+          - backend
     build:
       context: .
       dockerfile: docker/backend.alpine.Dockerfile
@@ -81,6 +86,11 @@ services:
       retries: 5
 
   dev-auth:
+    container_name: dev-auth
+    networks:
+      default:
+        aliases:
+          - auth
     build:
       context: .
       dockerfile: docker/auth.alpine.Dockerfile

@@ -42,10 +42,9 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment
 
 # WebSocket core imports
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection, WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory, 
-    IsolatedWebSocketManager,
+    WebSocketManagerFactory,
     create_websocket_manager
 )
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
@@ -260,7 +259,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             
             # Validate manager isolation
             assert manager.user_context.user_id == user["id"]
-            assert isinstance(manager, IsolatedWebSocketManager)
+            assert isinstance(manager, WebSocketManager)
             
         # Test factory stats
         stats = factory.get_factory_stats()
@@ -298,7 +297,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         )
         
         # Create isolated manager and lifecycle manager
-        manager = IsolatedWebSocketManager(user_context)
+        manager = create_websocket_manager(user_context)
         lifecycle_manager = ConnectionLifecycleManager(user_context, manager)
         self._mark_component_initialized("ConnectionLifecycleManager")
         

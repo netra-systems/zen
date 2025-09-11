@@ -47,10 +47,9 @@ from netra_backend.app.agents.supervisor.agent_registry import get_agent_registr
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.websocket_core.unified_manager import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.core.execution_tracker import get_execution_tracker
-from netra_backend.app.agents.execution_timeout_manager import get_timeout_manager
-from netra_backend.app.agents.agent_state_tracker import get_agent_state_tracker
+from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
 
 # Test agent implementation for controlled testing
 from netra_backend.app.agents.base_agent import BaseAgent
@@ -193,8 +192,7 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         
         # Initialize core components with real services
         self.execution_tracker = get_execution_tracker()
-        self.timeout_manager = get_timeout_manager()
-        self.state_tracker = get_agent_state_tracker()
+        self.agent_tracker = AgentExecutionTracker()
         
         # Create WebSocket manager for event testing
         self.websocket_manager = create_websocket_manager()

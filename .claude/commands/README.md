@@ -1,9 +1,13 @@
 # Claude Code Custom Slash Commands Documentation
 
+> 📖 **📋 For comprehensive command documentation with cross-references, see:**  
+> **[`docs/COMMAND_INDEX.md`](../../docs/COMMAND_INDEX.md)** - Complete indexed command reference with usage patterns and integration links
+
 > 📝 **Maintenance Note**: When creating new slash commands, please update this README.md to include:
 > - Command name and purpose in the "Available Commands" section
 > - Usage examples
 > - Any new categories or patterns introduced
+> - **ALSO update the comprehensive index at `docs/COMMAND_INDEX.md`**
 > 
 > This ensures all team members can discover and use available commands effectively.
 

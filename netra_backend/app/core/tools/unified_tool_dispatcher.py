@@ -28,7 +28,7 @@ from enum import Enum
 
 if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from langchain_core.tools import BaseTool
     from netra_backend.app.agents.state import DeepAgentState
 
@@ -107,6 +107,18 @@ class UnifiedToolDispatcher:
     _max_dispatchers_per_user = 10
     _security_violations = 0  # Track security violations globally
     
+    # Enhanced metrics tracking (consolidated from competing implementations)
+    _global_metrics = {
+        'total_dispatchers_created': 0,
+        'total_tools_executed': 0,
+        'total_successful_executions': 0,
+        'total_failed_executions': 0,
+        'total_security_violations': 0,
+        'average_execution_time_ms': 0.0,
+        'peak_concurrent_dispatchers': 0,
+        'websocket_events_sent': 0
+    }
+    
     def __init__(self):
         """Private initializer - raises error to enforce factory usage."""
         raise RuntimeError(
@@ -129,6 +141,9 @@ class UnifiedToolDispatcher:
     ) -> 'UnifiedToolDispatcher':
         """Create isolated dispatcher for specific user context.
         
+        DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
+        Use ToolDispatcherFactory.create_for_request() directly instead.
+        
         SECURITY CRITICAL: This is the recommended way to create dispatcher instances.
         
         Args:
@@ -145,9 +160,270 @@ class UnifiedToolDispatcher:
             SecurityViolationError: If security constraints are violated
             PermissionError: If admin tools requested without admin permission
         """
-        # Validate user context
+        import warnings
+        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
+        
+        # Issue deprecation warning for SSOT compliance tracking
+        warnings.warn(
+            "UnifiedToolDispatcher.create_for_user() is deprecated. "
+            "Use ToolDispatcherFactory.create_for_request() directly for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            f"🔄 SSOT REDIRECT: UnifiedToolDispatcher.create_for_user() -> ToolDispatcherFactory.create_for_request() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
+        )
+        
+        # Validate user context (maintain same validation as original)
         if not user_context or not user_context.user_id:
             raise AuthenticationError("Valid UserExecutionContext required for dispatcher creation")
+        
+        # Convert websocket_bridge to websocket_manager for factory compatibility
+        websocket_manager = None
+        if websocket_bridge:
+            # If it's already a WebSocketManager, use it directly
+            if hasattr(websocket_bridge, 'send_event'):
+                websocket_manager = websocket_bridge
+            # If it's an AgentWebSocketBridge, create proper adapter
+            elif hasattr(websocket_bridge, 'notify_tool_executing'):
+                websocket_manager = cls._create_websocket_bridge_adapter(websocket_bridge, user_context)
+                logger.info(f"Created WebSocket bridge adapter for AgentWebSocketBridge (user: {user_context.user_id})")
+            # Otherwise wrap it
+            else:
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+                websocket_manager = UnifiedWebSocketManager()
+                logger.warning(f"Created fallback WebSocketManager - no bridge connection for user {user_context.user_id}")
+        
+        try:
+            # Get global SSOT ToolDispatcherFactory instance
+            factory = get_tool_dispatcher_factory()
+            
+            # Set websocket manager if available
+            if websocket_manager:
+                factory.set_websocket_manager(websocket_manager)
+            
+            # Redirect to SSOT ToolDispatcherFactory for Phase 2 compliance
+            tool_dispatcher = await factory.create_for_user(
+                user_context=user_context,
+                websocket_bridge=websocket_bridge,  # Pass original bridge for compatibility
+                tools=tools,
+                enable_admin_tools=enable_admin_tools
+            )
+            
+            logger.info(
+                f"✅ SSOT REDIRECT SUCCESS: Created dispatcher via ToolDispatcherFactory for user {user_context.user_id} "
+                f"(admin_tools: {enable_admin_tools})"
+            )
+            
+            # The ToolDispatcherFactory handles all compatibility wrapping
+            return tool_dispatcher
+            
+        except Exception as e:
+            logger.error(
+                f"🚨 SSOT REDIRECT FAILED: ToolDispatcherFactory creation failed for user {user_context.user_id}: {e}. "
+                f"Falling back to original implementation."
+            )
+            
+            # Fallback to original implementation if factory fails
+            return await cls._create_original_implementation(
+                user_context=user_context,
+                websocket_bridge=websocket_bridge,
+                tools=tools,
+                enable_admin_tools=enable_admin_tools
+            )
+    
+    @classmethod
+    @asynccontextmanager
+    async def create_scoped(
+        cls,
+        user_context: 'UserExecutionContext',
+        websocket_bridge: Optional[Any] = None,
+        tools: Optional[List['BaseTool']] = None,
+        enable_admin_tools: bool = False
+    ):
+        """Create scoped dispatcher with automatic cleanup.
+        
+        DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
+        Use ToolDispatcherFactory.create_scoped() directly instead.
+        
+        RECOMMENDED USAGE PATTERN:
+            async with ToolDispatcherFactory().create_scoped(user_context) as dispatcher:
+                result = await dispatcher.dispatch("my_tool", params)
+                # Automatic cleanup happens here
+        """
+        import warnings
+        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
+        
+        # Issue deprecation warning for SSOT compliance tracking
+        warnings.warn(
+            "UnifiedToolDispatcher.create_scoped() is deprecated. "
+            "Use ToolDispatcherFactory.create_scoped() directly for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            f"🔄 SSOT REDIRECT: UnifiedToolDispatcher.create_scoped() -> ToolDispatcherFactory.create_scoped() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
+        )
+        
+        # Get global SSOT ToolDispatcherFactory instance
+        factory = get_tool_dispatcher_factory()
+        
+        # Convert websocket_bridge to websocket_manager if needed
+        websocket_manager = None
+        if websocket_bridge:
+            if hasattr(websocket_bridge, 'send_event'):
+                websocket_manager = websocket_bridge
+            elif hasattr(websocket_bridge, 'notify_tool_executing'):
+                websocket_manager = cls._create_websocket_bridge_adapter(websocket_bridge, user_context)
+                logger.info(f"Created WebSocket bridge adapter for scoped dispatcher (user: {user_context.user_id})")
+        
+        # Set websocket manager if available
+        if websocket_manager:
+            factory.set_websocket_manager(websocket_manager)
+        
+        # Use SSOT factory's create_scoped method with compatibility support
+        async with factory.create_scoped(user_context, tools, websocket_manager) as dispatcher:
+            # If we have an AgentWebSocketBridge, wrap the dispatcher to provide compatibility
+            if websocket_bridge and hasattr(websocket_bridge, 'notify_tool_executing'):
+                # Create compatibility wrapper that provides the expected interface
+                dispatcher = factory._create_unified_compatibility_wrapper(dispatcher, websocket_bridge)
+            
+            logger.info(f"✅ SSOT SCOPED: Created scoped dispatcher via ToolDispatcherFactory for user {user_context.user_id}")
+            yield dispatcher
+    
+    @classmethod
+    def _wrap_factory_dispatcher(cls, tool_dispatcher, user_context, websocket_bridge):
+        """Wrap RequestScopedToolDispatcher to look like UnifiedToolDispatcher.
+        
+        This provides interface compatibility during Phase 1 of SSOT consolidation.
+        """
+        # Create a wrapper that implements the UnifiedToolDispatcher interface
+        class FactoryDispatcherWrapper:
+            """Wrapper to make RequestScopedToolDispatcher look like UnifiedToolDispatcher."""
+            
+            def __init__(self, dispatcher, user_context, websocket_bridge):
+                self._dispatcher = dispatcher
+                self.user_context = user_context
+                self._websocket_bridge = websocket_bridge
+                self.dispatcher_id = f"factory_wrapper_{user_context.user_id}_{user_context.run_id}_{int(time.time()*1000)}"
+                self.created_at = datetime.now(timezone.utc)
+                self._is_active = True
+                self.strategy = DispatchStrategy.DEFAULT
+                
+                # Provide compatibility properties
+                self.websocket_manager = getattr(dispatcher, 'websocket_emitter', None)
+                self._metrics = {
+                    'tools_executed': 0,
+                    'successful_executions': 0,
+                    'failed_executions': 0,
+                    'created_at': self.created_at,
+                    'user_id': user_context.user_id,
+                    'dispatcher_id': self.dispatcher_id
+                }
+                
+                logger.info(f"🎭 Created FactoryDispatcherWrapper {self.dispatcher_id} for SSOT compatibility")
+            
+            @property
+            def tools(self):
+                """Get tools from wrapped dispatcher."""
+                if hasattr(self._dispatcher, 'get_available_tools'):
+                    tool_names = self._dispatcher.get_available_tools()
+                    return {name: name for name in tool_names}  # Simple mapping
+                return {}
+            
+            @property
+            def has_websocket_support(self):
+                """Check if WebSocket support is available."""
+                return hasattr(self._dispatcher, 'websocket_emitter') and self._dispatcher.websocket_emitter is not None
+            
+            @property
+            def websocket_bridge(self):
+                """Compatibility property for tests expecting websocket_bridge."""
+                return self._websocket_bridge
+            
+            def has_tool(self, tool_name: str) -> bool:
+                """Check if a tool is available."""
+                if hasattr(self._dispatcher, 'has_tool'):
+                    return self._dispatcher.has_tool(tool_name)
+                if hasattr(self._dispatcher, 'get_available_tools'):
+                    return tool_name in self._dispatcher.get_available_tools()
+                return False
+            
+            def register_tool(self, tool) -> None:
+                """Register a tool with the wrapped dispatcher."""
+                if hasattr(self._dispatcher, 'register_tool'):
+                    self._dispatcher.register_tool(tool)
+                    logger.debug(f"Registered tool {getattr(tool, 'name', 'unknown')} via factory wrapper")
+                else:
+                    logger.warning(f"Cannot register tool - wrapped dispatcher doesn't support tool registration")
+            
+            def get_available_tools(self) -> List[str]:
+                """Get available tool names."""
+                if hasattr(self._dispatcher, 'get_available_tools'):
+                    return self._dispatcher.get_available_tools()
+                return []
+            
+            async def execute_tool(self, tool_name: str, parameters: Dict[str, Any] = None, **kwargs):
+                """Execute a tool through the wrapped dispatcher."""
+                self._metrics['tools_executed'] += 1
+                
+                try:
+                    # Use the factory dispatcher's execution method
+                    if hasattr(self._dispatcher, 'dispatch'):
+                        result = await self._dispatcher.dispatch(tool_name, **(parameters or {}))
+                    elif hasattr(self._dispatcher, 'execute_tool'):
+                        result = await self._dispatcher.execute_tool(tool_name, parameters or {})
+                    else:
+                        raise RuntimeError("Wrapped dispatcher has no execute_tool or dispatch method")
+                    
+                    self._metrics['successful_executions'] += 1
+                    return result
+                    
+                except Exception as e:
+                    self._metrics['failed_executions'] += 1
+                    logger.error(f"Tool execution failed in factory wrapper: {e}")
+                    raise
+            
+            async def dispatch_tool(self, tool_name: str, parameters: Dict[str, Any], **kwargs):
+                """Legacy compatibility method - redirects to execute_tool."""
+                return await self.execute_tool(tool_name, parameters)
+            
+            async def dispatch(self, tool_name: str, **kwargs):
+                """Legacy compatibility method - redirects to execute_tool."""
+                return await self.execute_tool(tool_name, kwargs)
+            
+            def get_metrics(self) -> Dict[str, Any]:
+                """Get wrapper metrics."""
+                return self._metrics.copy()
+            
+            async def cleanup(self):
+                """Clean up the wrapped dispatcher."""
+                if hasattr(self._dispatcher, 'cleanup'):
+                    await self._dispatcher.cleanup()
+                self._is_active = False
+                logger.info(f"🎭 Cleaned up FactoryDispatcherWrapper {self.dispatcher_id}")
+        
+        return FactoryDispatcherWrapper(tool_dispatcher, user_context, websocket_bridge)
+    
+    @classmethod
+    async def _create_original_implementation(
+        cls,
+        user_context: 'UserExecutionContext',
+        websocket_bridge: Optional[Any] = None,
+        tools: Optional[List['BaseTool']] = None,
+        enable_admin_tools: bool = False
+    ) -> 'UnifiedToolDispatcher':
+        """Fallback to original implementation if factory redirect fails.
+        
+        This preserves the original UnifiedToolDispatcher behavior for safety.
+        """
+        logger.warning(
+            f"⏪ FALLBACK: Using original UnifiedToolDispatcher implementation for user {user_context.user_id}"
+        )
         
         # Determine strategy based on admin tools
         strategy = DispatchStrategy.ADMIN if enable_admin_tools else DispatchStrategy.DEFAULT
@@ -164,7 +440,7 @@ class UnifiedToolDispatcher:
                 logger.info(f"Created WebSocket bridge adapter for AgentWebSocketBridge (user: {user_context.user_id})")
             # Otherwise wrap it
             else:
-                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
                 websocket_manager = UnifiedWebSocketManager()
                 logger.warning(f"Created fallback WebSocketManager - no bridge connection for user {user_context.user_id}")
         
@@ -181,36 +457,6 @@ class UnifiedToolDispatcher:
         instance._websocket_bridge = websocket_bridge
         
         return instance
-    
-    @classmethod
-    @asynccontextmanager
-    async def create_scoped(
-        cls,
-        user_context: 'UserExecutionContext',
-        websocket_bridge: Optional[Any] = None,
-        tools: Optional[List['BaseTool']] = None,
-        enable_admin_tools: bool = False
-    ):
-        """Create scoped dispatcher with automatic cleanup.
-        
-        RECOMMENDED USAGE PATTERN:
-            async with UnifiedToolDispatcher.create_scoped(user_context) as dispatcher:
-                result = await dispatcher.execute_tool("my_tool", params)
-                # Automatic cleanup happens here
-        """
-        dispatcher = await cls.create_for_user(
-            user_context=user_context,
-            websocket_bridge=websocket_bridge,
-            tools=tools,
-            enable_admin_tools=enable_admin_tools
-        )
-        
-        try:
-            yield dispatcher
-        finally:
-            # Ensure cleanup
-            if dispatcher._is_active:
-                await dispatcher.cleanup()
     
     @classmethod
     def _create_from_factory(
@@ -237,8 +483,9 @@ class UnifiedToolDispatcher:
         instance.created_at = datetime.now(timezone.utc)
         instance._is_active = True
         
-        # Track dispatcher for cleanup
+        # Track dispatcher for cleanup and global metrics
         cls._register_dispatcher(instance)
+        cls._update_global_metrics('dispatcher_created')
         
         # Initialize components
         instance._init_components(tools, **kwargs)
@@ -460,6 +707,11 @@ class UnifiedToolDispatcher:
         """Register a tool with the dispatcher."""
         self._ensure_active()
         
+        # ENHANCED VALIDATION: Consolidated from competing implementations
+        if not tool:
+            logger.error(f"Cannot register None tool in dispatcher {self.dispatcher_id}")
+            raise ValueError("Tool cannot be None")
+        
         # CRITICAL FIX: Check if tool has name attribute before accessing it
         if hasattr(tool, 'name') and tool.name:
             tool_name = tool.name
@@ -468,10 +720,21 @@ class UnifiedToolDispatcher:
             tool_name = getattr(tool, '__class__', type(tool)).__name__.lower()
             logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using fallback: {tool_name}")
         
+        # ENHANCED: Check for duplicate tool registration
+        if self.has_tool(tool_name):
+            logger.warning(f"⚠️ Tool {tool_name} already registered, skipping duplicate registration")
+            return
+        
         # Use the UniversalRegistry's register method with proper error handling
         try:
             self.registry.register(tool_name, tool)
             logger.debug(f"Registered tool {tool_name} in dispatcher {self.dispatcher_id}")
+            
+            # Track registration in metrics
+            if not hasattr(self._metrics, 'tools_registered'):
+                self._metrics['tools_registered'] = 0
+            self._metrics['tools_registered'] += 1
+            
         except ValueError as e:
             # CRITICAL FIX: Handle BaseModel validation failures gracefully
             if "BaseModel" in str(e) or "validation failed" in str(e).lower():
@@ -481,6 +744,32 @@ class UnifiedToolDispatcher:
             else:
                 # Re-raise other validation errors
                 raise
+        except Exception as e:
+            logger.error(f"🚨 Unexpected error registering tool {tool_name}: {e}")
+            raise
+    
+    def register_tools(self, tools: List['BaseTool']) -> int:
+        """Register multiple tools at once - pattern from competing implementations.
+        
+        Args:
+            tools: List of tools to register
+            
+        Returns:
+            Number of successfully registered tools
+        """
+        if not tools:
+            return 0
+            
+        successful_count = 0
+        for tool in tools:
+            try:
+                self.register_tool(tool)
+                successful_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to register tool {getattr(tool, 'name', 'unknown')}: {e}")
+                
+        logger.info(f"Registered {successful_count}/{len(tools)} tools in dispatcher {self.dispatcher_id}")
+        return successful_count
     
     def get_available_tools(self) -> List[str]:
         """Get list of available tool names."""
@@ -557,6 +846,8 @@ class UnifiedToolDispatcher:
             # Update metrics
             execution_time = (time.time() - start_time) * 1000
             self._update_metrics(success=True, execution_time=execution_time)
+            self.__class__._update_global_metrics('successful_execution')
+            self.__class__._update_global_metrics('execution_time', execution_time)
             
             # Emit tool_completed event
             if self.has_websocket_support:
@@ -578,6 +869,8 @@ class UnifiedToolDispatcher:
             # Update metrics
             execution_time = (time.time() - start_time) * 1000
             self._update_metrics(success=False, execution_time=execution_time)
+            self.__class__._update_global_metrics('failed_execution')
+            self.__class__._update_global_metrics('execution_time', execution_time)
             
             # Emit tool_completed with error
             if self.has_websocket_support:
@@ -651,6 +944,7 @@ class UnifiedToolDispatcher:
                 }
             )
             self._metrics['websocket_events_sent'] += 1
+            self.__class__._update_global_metrics('websocket_event')
         except Exception as e:
             logger.warning(f"Failed to emit tool_executing event: {e}")
     
@@ -686,6 +980,7 @@ class UnifiedToolDispatcher:
             
             await self.websocket_manager.send_event("tool_completed", event_data)
             self._metrics['websocket_events_sent'] += 1
+            self.__class__._update_global_metrics('websocket_event')
         except Exception as e:
             logger.warning(f"Failed to emit tool_completed event: {e}")
     
@@ -831,20 +1126,48 @@ class UnifiedToolDispatcher:
             logger.error(f"Error populating tools from registry: {e}")
     
     async def cleanup(self):
-        """Clean up dispatcher resources."""
+        """Clean up dispatcher resources with enhanced disposal pattern."""
         if not self._is_active:
             return
         
         self._is_active = False
         
-        # Clean up components
-        if hasattr(self, 'registry'):
-            self.registry.clear()
-        
-        # Unregister dispatcher
-        self._unregister_dispatcher(self)
-        
-        logger.info(f"Cleaned up dispatcher {self.dispatcher_id}")
+        # Enhanced cleanup from competing implementations
+        try:
+            # Clean up WebSocket connections
+            if hasattr(self, 'websocket_manager') and self.websocket_manager:
+                try:
+                    # Best-effort WebSocket cleanup
+                    if hasattr(self.websocket_manager, 'cleanup'):
+                        await self.websocket_manager.cleanup()
+                except Exception as e:
+                    logger.warning(f"WebSocket cleanup failed for {self.dispatcher_id}: {e}")
+            
+            # Clean up executor
+            if hasattr(self, 'executor') and self.executor:
+                try:
+                    if hasattr(self.executor, 'cleanup'):
+                        await self.executor.cleanup()
+                except Exception as e:
+                    logger.warning(f"Executor cleanup failed for {self.dispatcher_id}: {e}")
+            
+            # Clean up registry
+            if hasattr(self, 'registry'):
+                try:
+                    self.registry.clear()
+                except Exception as e:
+                    logger.warning(f"Registry cleanup failed for {self.dispatcher_id}: {e}")
+            
+            # Final metrics update
+            self._metrics['cleanup_time'] = datetime.now(timezone.utc)
+            
+            logger.info(f"✅ Cleaned up dispatcher {self.dispatcher_id}")
+            
+        except Exception as e:
+            logger.error(f"🚨 Cleanup failed for dispatcher {self.dispatcher_id}: {e}")
+        finally:
+            # Always unregister, even if cleanup partially fails
+            self._unregister_dispatcher(self)
     
     @classmethod
     def _register_dispatcher(cls, dispatcher: 'UnifiedToolDispatcher'):
@@ -878,6 +1201,47 @@ class UnifiedToolDispatcher:
             await dispatcher.cleanup()
         
         logger.info(f"Cleaned up {len(user_dispatchers)} dispatchers for user {user_id}")
+    
+    @classmethod
+    def _update_global_metrics(cls, metric_type: str, value: float = 1.0):
+        """Update global metrics for monitoring dispatcher health."""
+        if metric_type == 'dispatcher_created':
+            cls._global_metrics['total_dispatchers_created'] += 1
+            current_active = len(cls._active_dispatchers)
+            if current_active > cls._global_metrics['peak_concurrent_dispatchers']:
+                cls._global_metrics['peak_concurrent_dispatchers'] = current_active
+        elif metric_type == 'tool_executed':
+            cls._global_metrics['total_tools_executed'] += 1
+        elif metric_type == 'successful_execution':
+            cls._global_metrics['total_successful_executions'] += 1
+        elif metric_type == 'failed_execution':
+            cls._global_metrics['total_failed_executions'] += 1
+        elif metric_type == 'security_violation':
+            cls._global_metrics['total_security_violations'] += 1
+        elif metric_type == 'websocket_event':
+            cls._global_metrics['websocket_events_sent'] += 1
+        elif metric_type == 'execution_time':
+            # Update average execution time using running average
+            total_executions = (cls._global_metrics['total_successful_executions'] + 
+                              cls._global_metrics['total_failed_executions'])
+            if total_executions > 0:
+                current_avg = cls._global_metrics['average_execution_time_ms']
+                cls._global_metrics['average_execution_time_ms'] = (
+                    (current_avg * (total_executions - 1) + value) / total_executions
+                )
+    
+    @classmethod
+    def get_global_metrics(cls) -> Dict[str, Any]:
+        """Get global metrics for monitoring and diagnostics."""
+        return {
+            **cls._global_metrics.copy(),
+            'active_dispatchers': len(cls._active_dispatchers),
+            'security_violations': cls._security_violations,
+            'active_dispatcher_users': len(set(
+                d.user_context.user_id for d in cls._active_dispatchers.values()
+                if d._is_active
+            ))
+        }
 
 
 # ============================================================================
@@ -1066,6 +1430,132 @@ async def create_request_scoped_dispatcher(
 
 
 # ============================================================================
+# COMPATIBILITY LAYER FOR PHASE 4A MIGRATION
+# ============================================================================
+
+# Compatibility alias for RequestScopedToolDispatcher during SSOT migration
+# This allows existing code to use UnifiedToolDispatcher transparently
+RequestScopedToolDispatcher = UnifiedToolDispatcher
+
+
+class WebSocketBridgeAdapter:
+    """Adapter from WebSocketEventEmitter to AgentWebSocketBridge interface.
+    
+    This adapter allows UnifiedToolExecutionEngine to work with the new
+    WebSocketEventEmitter while maintaining backward compatibility with the
+    existing AgentWebSocketBridge interface.
+    
+    The adapter translates method calls and ensures proper user context isolation.
+    """
+    
+    def __init__(self, websocket_emitter, user_context):
+        """Initialize the adapter.
+        
+        Args:
+            websocket_emitter: The WebSocketEventEmitter to adapt
+            user_context: User context for validation and agent name generation
+        """
+        self.websocket_emitter = websocket_emitter
+        self.user_context = user_context
+    
+    async def notify_tool_executing(
+        self,
+        run_id: str,
+        agent_name: str,
+        tool_name: str,
+        parameters: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Notify that a tool is executing."""
+        return await self.websocket_emitter.notify_tool_executing(
+            run_id, agent_name, tool_name, parameters
+        )
+    
+    async def notify_tool_completed(
+        self,
+        run_id: str,
+        agent_name: str,
+        tool_name: str,
+        result: Optional[Dict[str, Any]] = None,
+        execution_time_ms: Optional[float] = None
+    ) -> bool:
+        """Notify that a tool has completed."""
+        return await self.websocket_emitter.notify_tool_completed(
+            run_id, agent_name, tool_name, result, execution_time_ms
+        )
+    
+    async def notify_agent_started(
+        self,
+        run_id: str,
+        agent_name: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Notify that an agent has started."""
+        return await self.websocket_emitter.notify_agent_started(
+            run_id, agent_name, context
+        )
+    
+    async def notify_agent_thinking(
+        self,
+        run_id: str,
+        agent_name: str,
+        reasoning: str,
+        step_number: Optional[int] = None,
+        progress_percentage: Optional[float] = None
+    ) -> bool:
+        """Notify that an agent is thinking."""
+        return await self.websocket_emitter.notify_agent_thinking(
+            run_id, agent_name, reasoning, step_number, progress_percentage
+        )
+    
+    async def notify_agent_completed(
+        self,
+        run_id: str,
+        agent_name: str,
+        result: Optional[Dict[str, Any]] = None,
+        execution_time_ms: Optional[float] = None
+    ) -> bool:
+        """Notify that an agent has completed."""
+        return await self.websocket_emitter.notify_agent_completed(
+            run_id, agent_name, result, execution_time_ms
+        )
+    
+    async def notify_agent_error(
+        self,
+        run_id: str,
+        agent_name: str,
+        error: str,
+        error_context: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Notify of an agent error."""
+        return await self.websocket_emitter.notify_agent_error(
+            run_id, agent_name, error, error_context
+        )
+    
+    async def notify_progress_update(
+        self,
+        run_id: str,
+        agent_name: str,
+        progress: Dict[str, Any]
+    ) -> bool:
+        """Notify of a progress update."""
+        return await self.websocket_emitter.notify_progress_update(
+            run_id, agent_name, progress
+        )
+    
+    async def notify_custom(
+        self,
+        run_id: str,
+        agent_name: str,
+        notification_type: str,
+        data: Dict[str, Any]
+    ) -> bool:
+        """Send custom notification."""
+        return await self.websocket_emitter.notify_custom(
+            run_id, agent_name, notification_type, data
+        )
+
+
+# ============================================================================
 # EXPORTS
 # ============================================================================
 
@@ -1073,6 +1563,10 @@ __all__ = [
     # Core classes
     'UnifiedToolDispatcher',
     'UnifiedToolDispatcherFactory',
+    
+    # Compatibility aliases
+    'RequestScopedToolDispatcher',
+    'WebSocketBridgeAdapter',
     
     # Data models
     'ToolDispatchRequest',

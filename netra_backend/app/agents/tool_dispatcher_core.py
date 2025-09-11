@@ -250,7 +250,10 @@ class ToolDispatcher:
     ):
         """Create request-scoped tool dispatcher with complete user isolation.
         
-        🟢 RECOMMENDED SECURE PATTERN: Use this method for new code instead of ToolDispatcher().
+        DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
+        Use ToolDispatcherFactory.create_for_request() directly instead.
+        
+        🟢 RECOMMENDED SECURE PATTERN: Use ToolDispatcherFactory for new code.
         This factory method creates proper per-request isolation and eliminates global state risks.
         
         ✅ SECURITY BENEFITS:
@@ -278,21 +281,44 @@ class ToolDispatcher:
             ValueError: If user_context is invalid or dependencies are unavailable
             
         Example:
-            # Secure pattern - each user gets isolated dispatcher
+            # DEPRECATED - use ToolDispatcherFactory instead
             dispatcher = await ToolDispatcher.create_request_scoped_dispatcher(
                 user_context=user_context,
                 tools=user_specific_tools,
                 websocket_manager=websocket_manager
             )
             result = await dispatcher.dispatch("my_tool", param="value")
+            
+            # RECOMMENDED - use SSOT factory
+            from netra_backend.app.factories import create_tool_dispatcher
+            dispatcher = await create_tool_dispatcher(
+                user_context=user_context,
+                tools=user_specific_tools,
+                websocket_manager=websocket_manager
+            )
         """
-        # Import here to avoid circular imports
-        from netra_backend.app.agents.tool_executor_factory import create_isolated_tool_dispatcher
+        import warnings
         
-        logger.info(f"🏭✅ Creating SECURE request-scoped dispatcher for user {user_context.user_id}")
-        logger.info("🔒 User context isolation enabled - no global state risks")
+        # Issue deprecation warning for Phase 2 consolidation
+        warnings.warn(
+            "ToolDispatcher.create_request_scoped_dispatcher() is deprecated. "
+            "Use ToolDispatcherFactory.create_for_request() for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        return await create_isolated_tool_dispatcher(
+        logger.warning(
+            f"🔄 DEPRECATED: ToolDispatcher.create_request_scoped_dispatcher() -> ToolDispatcherFactory.create_for_request() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
+        )
+        
+        # Import here to avoid circular imports - now using SSOT factory
+        from netra_backend.app.factories.tool_dispatcher_factory import create_tool_dispatcher
+        
+        logger.info(f"🏭✅ Creating SSOT request-scoped dispatcher for user {user_context.user_id}")
+        logger.info("🔒 User context isolation enabled via SSOT factory - no global state risks")
+        
+        return await create_tool_dispatcher(
             user_context=user_context,
             tools=tools,
             websocket_manager=websocket_manager
@@ -306,7 +332,10 @@ class ToolDispatcher:
     ):
         """Create scoped dispatcher context manager with automatic cleanup.
         
-        🟢 RECOMMENDED SECURE PATTERN: Use this for request handling with guaranteed cleanup.
+        DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
+        Use ToolDispatcherFactory.create_scoped() directly instead.
+        
+        🟢 RECOMMENDED SECURE PATTERN: Use ToolDispatcherFactory for request handling with guaranteed cleanup.
         This context manager ensures proper resource cleanup and prevents memory leaks.
         
         ✅ AUTOMATIC SAFETY FEATURES:
@@ -335,29 +364,55 @@ class ToolDispatcher:
             RuntimeError: If cleanup fails (logs warning but doesn't propagate)
             
         Example:
-            # RECOMMENDED PATTERN - automatic cleanup guaranteed
+            # DEPRECATED PATTERN - use ToolDispatcherFactory instead
             async with ToolDispatcher.create_scoped_dispatcher_context(user_context) as dispatcher:
-                # All operations are user-scoped and secure
                 result = await dispatcher.dispatch("my_tool", param="value")
-                tool_result = await dispatcher.dispatch_tool("other_tool", params, state, run_id)
+                # Automatic cleanup happens here
+                
+            # RECOMMENDED PATTERN - use SSOT factory
+            from netra_backend.app.factories import tool_dispatcher_scope
+            async with tool_dispatcher_scope(user_context) as dispatcher:
+                result = await dispatcher.dispatch("my_tool", param="value")
                 # Automatic cleanup happens here - no memory leaks
                 
-        ⚠️ IMPORTANT: Always use this context manager for request handling to ensure:
+        ⚠️ IMPORTANT: Always use context managers for request handling to ensure:
         - User data doesn't leak between requests
         - WebSocket events are properly routed
         - Resources are cleaned up even if exceptions occur
         """
-        # Import here to avoid circular imports
-        from netra_backend.app.agents.tool_executor_factory import isolated_tool_dispatcher_scope
+        import warnings
         
-        logger.info(f"🏭✅ Creating SECURE scoped dispatcher context for user {user_context.user_id}")
-        logger.info("🔒 Automatic cleanup enabled - memory and security safe")
+        # Issue deprecation warning for Phase 2 consolidation
+        warnings.warn(
+            "ToolDispatcher.create_scoped_dispatcher_context() is deprecated. "
+            "Use ToolDispatcherFactory.create_scoped() for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         
-        return isolated_tool_dispatcher_scope(
+        logger.warning(
+            f"🔄 DEPRECATED: ToolDispatcher.create_scoped_dispatcher_context() -> ToolDispatcherFactory.create_scoped() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
+        )
+        
+        # Import here to avoid circular imports - now using SSOT factory
+        from netra_backend.app.factories.tool_dispatcher_factory import tool_dispatcher_scope
+        
+        logger.info(f"🏭✅ Creating SSOT scoped dispatcher context for user {user_context.user_id}")
+        logger.info("🔒 Automatic cleanup enabled via SSOT factory - memory and security safe")
+        
+        return tool_dispatcher_scope(
             user_context=user_context,
             tools=tools,
             websocket_manager=websocket_manager
         )
     
     # Legacy compatibility methods removed - use factory methods only
+
+# ============================================================================
+# BACKWARD COMPATIBILITY EXPORTS
+# ============================================================================
+
+# Compatibility alias for existing code that imports ToolDispatcherCore
+ToolDispatcherCore = ToolDispatcher
     

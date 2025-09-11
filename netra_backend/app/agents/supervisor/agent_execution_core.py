@@ -41,17 +41,11 @@ from netra_backend.app.core.logging_context import (
 )
 from netra_backend.app.logging_config import central_logger
 
-# CRITICAL REMEDIATION: Import timeout management for preventing execution blocking
-from netra_backend.app.agents.execution_timeout_manager import (
-    get_timeout_manager,
-    TimeoutConfig,
+# CRITICAL REMEDIATION: Import consolidated agent execution tracker for preventing execution blocking
+from netra_backend.app.core.agent_execution_tracker import (
+    AgentExecutionTracker,
+    AgentExecutionPhase,
     CircuitBreakerOpenError
-)
-
-# CRITICAL REMEDIATION: Import state tracking for explicit execution phase monitoring
-from netra_backend.app.agents.agent_state_tracker import (
-    get_agent_state_tracker,
-    AgentExecutionPhase
 )
 
 logger = central_logger.get_logger(__name__)
@@ -75,15 +69,12 @@ class AgentExecutionCore:
         # trace_persistence removed - no longer needed
         self.persistence = None
         
-        # CRITICAL REMEDIATION: Initialize timeout manager for preventing execution blocking
-        self.timeout_manager = get_timeout_manager()
-        
-        # CRITICAL REMEDIATION: Initialize state tracker for explicit execution phase monitoring
-        self.state_tracker = get_agent_state_tracker()
+        # CRITICAL REMEDIATION: Initialize consolidated agent execution tracker
+        self.agent_tracker = AgentExecutionTracker()
         
         logger.info(
-            f"AgentExecutionCore initialized with timeout manager (default_timeout: {self.DEFAULT_TIMEOUT}s) "
-            f"and state tracker for comprehensive monitoring"
+            f"AgentExecutionCore initialized with consolidated agent execution tracker (default_timeout: {self.DEFAULT_TIMEOUT}s) "
+            f"for comprehensive monitoring"
         )
         
     def _ensure_user_execution_context(
@@ -174,17 +165,23 @@ class AgentExecutionCore:
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
-        # CRITICAL REMEDIATION: Start state tracking for comprehensive monitoring
-        state_exec_id = self.state_tracker.start_execution(
+        # CRITICAL REMEDIATION: Create and start execution tracking for comprehensive monitoring
+        state_exec_id = self.agent_tracker.create_execution(
             agent_name=context.agent_name,
-            run_id=str(context.run_id),
+            thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
+            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
             metadata={
                 'correlation_id': trace_context.correlation_id,
-                'thread_id': user_execution_context.thread_id,
+                'run_id': str(context.run_id),
                 'timeout': timeout or self.DEFAULT_TIMEOUT
             }
         )
+        
+        # Start the execution
+        started = self.agent_tracker.start_execution(state_exec_id)
+        if not started:
+            raise RuntimeError(f"Failed to start execution tracking for {state_exec_id}")
         
         # DISABLED: Heartbeat feature suppresses errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
         # The heartbeat system was found to:
@@ -206,21 +203,36 @@ class AgentExecutionCore:
                 # Start execution tracking
                 await self.execution_tracker.start_execution(exec_id)
                 
-                # CRITICAL REMEDIATION: Transition to websocket setup phase
-                await self.state_tracker.transition_phase(
+                # CRITICAL REMEDIATION: Transition through proper phase sequence
+                await self.agent_tracker.transition_state(
                     state_exec_id, 
                     AgentExecutionPhase.WEBSOCKET_SETUP,
                     websocket_manager=self.websocket_bridge
+                )
+                
+                # Transition to context validation
+                await self.agent_tracker.transition_state(
+                    state_exec_id, 
+                    AgentExecutionPhase.CONTEXT_VALIDATION,
+                    metadata={"user_context_valid": True}
                 )
                 
                 # Add trace event
                 trace_context.add_event("agent.started")
                 
                 # CRITICAL REMEDIATION: Transition to starting phase with WebSocket events
-                await self.state_tracker.transition_phase(
+                await self.agent_tracker.transition_state(
                     state_exec_id, 
                     AgentExecutionPhase.STARTING,
                     metadata={"trace_context": trace_context.correlation_id},
+                    websocket_manager=self.websocket_bridge
+                )
+                
+                # Transition to thinking phase before execution
+                await self.agent_tracker.transition_state(
+                    state_exec_id, 
+                    AgentExecutionPhase.THINKING,
+                    metadata={"agent_name": context.agent_name},
                     websocket_manager=self.websocket_bridge
                 )
                 
@@ -242,13 +254,13 @@ class AgentExecutionCore:
                     )
                     
                     # CRITICAL REMEDIATION: Transition to failed phase
-                    await self.state_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.FAILED,
                         metadata={"error": "Agent not found"},
                         websocket_manager=self.websocket_bridge
                     )
-                    self.state_tracker.complete_execution(state_exec_id, success=False)
+                    self.agent_tracker.update_execution_state(state_exec_id, {"success": False, "completed": True})
                     
                     # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
                     # Removing manual call to prevent duplicate notifications
@@ -271,12 +283,10 @@ class AgentExecutionCore:
                                 agent, context, user_execution_context, exec_id, None, timeout, trace_context
                             )
                     
-                    # CRITICAL: Execute agent with timeout manager to prevent blocking
-                    result = await self.timeout_manager.execute_agent_with_timeout(
-                        agent_execution_wrapper,
-                        context.agent_name,
-                        str(context.run_id),
-                        self.websocket_bridge
+                    # CRITICAL: Execute agent with timeout management to prevent blocking
+                    result = await asyncio.wait_for(
+                        agent_execution_wrapper(),
+                        timeout=timeout or self.DEFAULT_TIMEOUT
                     )
                     
                 except CircuitBreakerOpenError as e:
@@ -284,14 +294,14 @@ class AgentExecutionCore:
                     logger.error(f"🚫 Circuit breaker open for {context.agent_name}: {e}")
                     
                     # Transition to circuit breaker open phase
-                    await self.state_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.CIRCUIT_BREAKER_OPEN,
                         metadata={'error': str(e), 'error_type': 'circuit_breaker'},
                         websocket_manager=self.websocket_bridge
                     )
                     
-                    fallback_response = await self.timeout_manager.create_fallback_response(
+                    fallback_response = await self.agent_tracker.create_fallback_response(
                         context.agent_name,
                         e,
                         str(context.run_id),
@@ -310,7 +320,7 @@ class AgentExecutionCore:
                     logger.error(f"⏰ Agent {context.agent_name} timed out: {e}")
                     
                     # Transition to timeout phase
-                    await self.state_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.TIMEOUT,
                         metadata={'error': str(e), 'error_type': 'timeout'},
@@ -333,24 +343,43 @@ class AgentExecutionCore:
                     trace_context.add_event("agent.completed")
                     await self.execution_tracker.complete_execution(exec_id, result=result)
                     
-                    # Transition to completion phase
-                    await self.state_tracker.transition_phase(
+                    # Transition through proper completion sequence: THINKING -> TOOL_PREPARATION -> TOOL_EXECUTION -> RESULT_PROCESSING
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.TOOL_PREPARATION,
+                        metadata={"preparing_tools": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.TOOL_EXECUTION,
+                        metadata={"executing_tools": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.RESULT_PROCESSING,
+                        metadata={"processing_result": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.COMPLETING,
                         metadata={"success": True},
                         websocket_manager=self.websocket_bridge
                     )
-                    await self.state_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.COMPLETED,
                         metadata={"result": "success"},
                         websocket_manager=self.websocket_bridge
                     )
                     
-                    # NOTE: agent_completed event is automatically sent by state tracker during COMPLETED phase transition
+                    # NOTE: agent_completed event is automatically sent by agent tracker during COMPLETED phase transition
                     # No need to manually call notify_agent_completed here
                     
-                    self.state_tracker.complete_execution(state_exec_id, success=True)
+                    # Mark execution as successful in tracker state
+                    self.agent_tracker.update_execution_state(state_exec_id, {"success": True, "completed": True})
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
                     await self.execution_tracker.complete_execution(
@@ -359,13 +388,13 @@ class AgentExecutionCore:
                     )
                     
                     # Transition to failed phase
-                    await self.state_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.FAILED,
                         metadata={'error': result.error or 'Unknown error'},
                         websocket_manager=self.websocket_bridge
                     )
-                    self.state_tracker.complete_execution(state_exec_id, success=False)
+                    self.agent_tracker.update_execution_state(state_exec_id, {"success": False, "completed": True})
                     
                     # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
                     # Removing manual call to prevent duplicate notifications

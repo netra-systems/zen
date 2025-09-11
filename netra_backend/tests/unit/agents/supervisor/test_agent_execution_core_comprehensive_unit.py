@@ -75,7 +75,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
         async def mock_transition_phase(execution_id, phase, metadata=None, websocket_manager=None):
             """Mock transition_phase that simulates WebSocket notification behavior."""
             # Import the enum to compare phases correctly
-            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            from netra_backend.app.core.agent_execution_tracker import AgentExecutionPhase
             
             # If transitioning to COMPLETED phase and websocket_manager provided,
             # simulate the automatic notify_agent_completed call that happens in production
@@ -224,7 +224,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             
             # Verify centralized state tracking integration (Issue #161)
             # State tracker should have been called to transition to COMPLETED phase
-            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            from netra_backend.app.core.agent_execution_tracker import AgentExecutionPhase
             execution_core.state_tracker.transition_phase.assert_any_call(
                 "mock_state_exec_id",  # execution_id returned by start_execution
                 AgentExecutionPhase.COMPLETED,
@@ -275,7 +275,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             
             # Verify centralized error notification through state tracker
             # The state tracker should have transitioned to FAILED phase, which automatically sends error notification
-            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            from netra_backend.app.core.agent_execution_tracker import AgentExecutionPhase
             mock_state_tracker.transition_phase.assert_any_call(
                 mock_state_tracker.start_execution.return_value,
                 AgentExecutionPhase.FAILED,
@@ -340,7 +340,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
             
             # Verify centralized error notification through state tracker
             # The state tracker should have transitioned to FAILED phase, which automatically sends error notification
-            from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
+            from netra_backend.app.core.agent_execution_tracker import AgentExecutionPhase
             mock_state_tracker.transition_phase.assert_any_call(
                 mock_state_tracker.start_execution.return_value,
                 AgentExecutionPhase.FAILED,

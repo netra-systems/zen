@@ -42,9 +42,10 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
 from test_framework.ssot.websocket import WebSocketTestClient
 from shared.isolated_environment import get_env
+from netra_backend.app.core.network_constants import URLConstants
 
 # Core imports for E2E WebSocket notification testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 
 
@@ -65,8 +66,8 @@ class TestWebSocketNotifierCompleteE2E(SSotBaseTestCase):
         
         # E2E test URLs (will be set based on environment)
         if self.test_environment == "staging":
-            self.backend_url = "https://netra-staging-backend-925110776704.us-central1.run.app"
-            self.websocket_url = "wss://netra-staging-backend-925110776704.us-central1.run.app/ws"
+            self.backend_url = self.env.get("STAGING_BACKEND_URL", URLConstants.STAGING_BACKEND_URL)
+            self.websocket_url = self.env.get("STAGING_WEBSOCKET_URL", URLConstants.STAGING_WEBSOCKET_URL)
         else:
             self.backend_url = "http://localhost:8000"
             self.websocket_url = "ws://localhost:8000/ws"

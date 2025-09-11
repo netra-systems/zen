@@ -23,6 +23,9 @@ Any bugs here could cause catastrophic user data leakage.
 import asyncio
 import pytest
 import uuid
+import time
+import random
+import traceback
 from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, MagicMock
 from typing import Dict, Any, Optional
@@ -90,7 +93,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         
         # Verify optional fields have proper defaults
         assert context.db_session is None
-        assert context.websocket_connection_id is None
+        assert context.websocket_client_id is None
         assert isinstance(context.metadata, dict)
         assert len(context.metadata) == 0
         
@@ -109,7 +112,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             run_id=self.test_run_id,
             request_id=self.test_request_id,
             db_session=mock_db_session,
-            websocket_connection_id=self.test_websocket_id,
+            websocket_client_id=self.test_websocket_id,
             metadata=test_metadata
         )
         
@@ -119,7 +122,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         assert context.run_id == self.test_run_id
         assert context.request_id == self.test_request_id
         assert context.db_session == mock_db_session
-        assert context.websocket_connection_id == self.test_websocket_id
+        assert context.websocket_client_id == self.test_websocket_id
         
         # Verify metadata is copied (isolation)
         assert context.metadata == test_metadata
@@ -266,7 +269,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         assert context.run_id == self.test_run_id
         assert context.request_id is not None
         assert context.db_session is None
-        assert context.websocket_connection_id is None
+        assert context.websocket_client_id is None
         assert context.metadata == {}
 
     def test_from_request_with_all_parameters(self):
@@ -280,13 +283,13 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             run_id=self.test_run_id,
             request_id=self.test_request_id,
             db_session=mock_db_session,
-            websocket_connection_id=self.test_websocket_id,
+            websocket_client_id=self.test_websocket_id,
             metadata=test_metadata
         )
         
         assert context.request_id == self.test_request_id
         assert context.db_session == mock_db_session
-        assert context.websocket_connection_id == self.test_websocket_id
+        assert context.websocket_client_id == self.test_websocket_id
         assert context.metadata == test_metadata
 
     def test_from_request_auto_generated_request_id(self):
@@ -333,7 +336,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         assert child_context.user_id == parent_context.user_id
         assert child_context.thread_id == parent_context.thread_id
         assert child_context.run_id == parent_context.run_id
-        assert child_context.websocket_connection_id == parent_context.websocket_connection_id
+        assert child_context.websocket_client_id == parent_context.websocket_client_id
         assert child_context.db_session == parent_context.db_session
         
         # Child has new request_id
@@ -452,10 +455,10 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         new_context = original_context.with_websocket_connection(self.test_websocket_id)
         
         # Original context unchanged
-        assert original_context.websocket_connection_id is None
+        assert original_context.websocket_client_id is None
         
         # New context has WebSocket connection ID
-        assert new_context.websocket_connection_id == self.test_websocket_id
+        assert new_context.websocket_client_id == self.test_websocket_id
         
         # All other data preserved
         assert new_context.user_id == original_context.user_id
@@ -490,17 +493,17 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         
         # Original context unchanged
         assert original_context.db_session is None
-        assert original_context.websocket_connection_id is None
+        assert original_context.websocket_client_id is None
         
         # Each context has the expected modifications
         assert context_with_db.db_session == mock_db_session
-        assert context_with_db.websocket_connection_id is None
+        assert context_with_db.websocket_client_id is None
         
         assert context_with_ws.db_session is None
-        assert context_with_ws.websocket_connection_id == self.test_websocket_id
+        assert context_with_ws.websocket_client_id == self.test_websocket_id
         
         assert context_with_both.db_session == mock_db_session
-        assert context_with_both.websocket_connection_id == self.test_websocket_id
+        assert context_with_both.websocket_client_id == self.test_websocket_id
 
     # =========================================================================
     # ISOLATION VERIFICATION TESTS - CRITICAL FOR MULTI-USER SAFETY
@@ -580,7 +583,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             thread_id=self.test_thread_id,
             run_id=self.test_run_id,
             request_id=self.test_request_id,
-            websocket_connection_id=self.test_websocket_id,
+            websocket_client_id=self.test_websocket_id,
             metadata={"key": "value"}
         )
         
@@ -589,7 +592,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         # Verify all serializable fields are present
         expected_keys = {
             'user_id', 'thread_id', 'run_id', 'request_id',
-            'websocket_connection_id', 'created_at', 'metadata',
+            'websocket_client_id', 'created_at', 'metadata',
             'has_db_session'
         }
         assert set(result_dict.keys()) == expected_keys
@@ -599,7 +602,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         assert result_dict['thread_id'] == self.test_thread_id
         assert result_dict['run_id'] == self.test_run_id
         assert result_dict['request_id'] == self.test_request_id
-        assert result_dict['websocket_connection_id'] == self.test_websocket_id
+        assert result_dict['websocket_client_id'] == self.test_websocket_id
         assert result_dict['metadata'] == {"key": "value"}
         assert result_dict['has_db_session'] is False
         
@@ -906,7 +909,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             user_id="user_enterprise_001",
             thread_id="thread_cost_analysis",
             run_id="run_optimization_2024",
-            websocket_connection_id="ws_user1_connection",
+            websocket_client_id="ws_user1_connection",
             metadata={"subscription": "enterprise", "company": "TechCorp"}
         )
         
@@ -914,7 +917,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             user_id="user_free_002",
             thread_id="thread_basic_query",
             run_id="run_simple_chat",
-            websocket_connection_id="ws_user2_connection",
+            websocket_client_id="ws_user2_connection",
             metadata={"subscription": "free", "trial_days_left": 7}
         )
         
@@ -923,7 +926,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         assert user1_context.thread_id != user2_context.thread_id
         assert user1_context.run_id != user2_context.run_id
         assert user1_context.request_id != user2_context.request_id
-        assert user1_context.websocket_connection_id != user2_context.websocket_connection_id
+        assert user1_context.websocket_client_id != user2_context.websocket_client_id
         
         # Metadata should be isolated
         assert user1_context.metadata["subscription"] == "enterprise"
@@ -999,12 +1002,12 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         full_context = ws_context.with_db_session(mock_db_session)
         
         # Verify WebSocket routing data
-        assert full_context.websocket_connection_id == "ws_conn_abc123def456"
+        assert full_context.websocket_client_id == "ws_conn_abc123def456"
         assert full_context.db_session == mock_db_session
         
         # Verify context can be serialized for WebSocket events
         ws_event_data = full_context.to_dict()
-        assert ws_event_data["websocket_connection_id"] == "ws_conn_abc123def456"
+        assert ws_event_data["websocket_client_id"] == "ws_conn_abc123def456"
         assert ws_event_data["has_db_session"] is True
         
         # Verify correlation ID for event tracing
@@ -1183,7 +1186,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         assert ec2_analysis_context.run_id == user_session_context.run_id
         
         # VERIFICATION 2: WebSocket routing preserved
-        assert ec2_analysis_context.websocket_connection_id == "ws_production_connection_2024_q4"
+        assert ec2_analysis_context.websocket_client_id == "ws_production_connection_2024_q4"
         
         # VERIFICATION 3: Database session shared appropriately
         assert ec2_analysis_context.db_session == mock_db_session
@@ -1233,7 +1236,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         # VERIFICATION 8: Serialization for WebSocket events
         final_dict = ec2_analysis_context.to_dict()
         assert final_dict["user_id"] == "user_production_test_2024"
-        assert final_dict["websocket_connection_id"] == "ws_production_connection_2024_q4"
+        assert final_dict["websocket_client_id"] == "ws_production_connection_2024_q4"
         assert final_dict["has_db_session"] is True
         
         # VERIFICATION 9: Isolation verification passes
@@ -1394,13 +1397,13 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         
         # Each WebSocket context routes to correct user only
         for i, ws_ctx in enumerate(ws_contexts):
-            assert ws_ctx.websocket_connection_id == f"secure_channel_{i}"
+            assert ws_ctx.websocket_client_id == f"secure_channel_{i}"
             assert ws_ctx.user_id == f"enterprise_customer_{i:03d}"
             
             # Serialization for WebSocket events must maintain isolation
             ws_data = ws_ctx.to_dict()
             assert ws_data["user_id"] == f"enterprise_customer_{i:03d}"
-            assert ws_data["websocket_connection_id"] == f"secure_channel_{i}"
+            assert ws_data["websocket_client_id"] == f"secure_channel_{i}"
         
         # CRITICAL VALIDATION 4: Database session isolation
         db_sessions = []
@@ -1469,3 +1472,554 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         print("✅ MISSION CRITICAL TEST PASSED: UserExecutionContext maintains absolute user isolation")
         print(f"✅ Validated {len(all_contexts)} contexts with zero data leakage")
         print("✅ Business value CONFIRMED: Platform is safe for multi-user enterprise use")
+
+    # =========================================================================
+    # ENHANCED MEMORY EFFICIENCY AND FACTORY PATTERN TESTS
+    # =========================================================================
+
+    def test_memory_efficiency_under_300mb_requirement(self):
+        """Test 46: Memory efficiency must stay under 300MB for multiple users - BUSINESS CRITICAL."""
+        import gc
+        import os
+        
+        try:
+            import psutil
+            # Get current process
+            process = psutil.Process(os.getpid())
+        except ImportError:
+            pytest.skip("psutil not available - skipping memory efficiency test")
+        
+        # Clear garbage and get baseline memory
+        gc.collect()
+        baseline_memory_mb = process.memory_info().rss / 1024 / 1024
+        
+        # Create contexts for 100 concurrent users with substantial data
+        user_contexts = []
+        for i in range(100):
+            ctx = UserExecutionContext.from_request(
+                user_id=f"memory_test_user_{i:04d}",
+                thread_id=f"memory_test_thread_{i:04d}",
+                run_id=f"memory_test_run_{i:04d}",
+                metadata={
+                    "user_data": f"substantial_user_data_{i}" * 50,  # ~2KB per user
+                    "session_info": {
+                        "login_time": "2024-01-01T00:00:00Z",
+                        "permissions": [f"perm_{j}" for j in range(20)],
+                        "preferences": {f"pref_{k}": f"value_{k}" for k in range(10)}
+                    },
+                    "conversation_history": [f"message_{j}" for j in range(50)]
+                }
+            )
+            
+            # Create child contexts to simulate real usage
+            agent_ctx = ctx.create_child_context(f"agent_operation_{i}")
+            tool_ctx = agent_ctx.create_child_context(f"tool_execution_{i}")
+            
+            user_contexts.extend([ctx, agent_ctx, tool_ctx])
+        
+        # Force garbage collection and measure memory
+        gc.collect()
+        peak_memory_mb = process.memory_info().rss / 1024 / 1024
+        memory_used_mb = peak_memory_mb - baseline_memory_mb
+        
+        print(f"🔍 Memory Usage Analysis:")
+        print(f"   Baseline: {baseline_memory_mb:.2f} MB")
+        print(f"   Peak: {peak_memory_mb:.2f} MB") 
+        print(f"   Used: {memory_used_mb:.2f} MB")
+        print(f"   Contexts: {len(user_contexts)}")
+        print(f"   Memory per context: {memory_used_mb/len(user_contexts):.3f} MB")
+        
+        # CRITICAL REQUIREMENT: Must stay under 300MB for 300 contexts (100 users * 3 contexts each)
+        assert memory_used_mb < 300, f"MEMORY EFFICIENCY FAILURE: Used {memory_used_mb:.2f}MB > 300MB limit"
+        
+        # Additional efficiency checks
+        assert len(user_contexts) == 300  # Verify we created expected number
+        memory_per_context = memory_used_mb / len(user_contexts)
+        assert memory_per_context < 1.0, f"Each context uses {memory_per_context:.3f}MB - too much"
+        
+        # Cleanup
+        del user_contexts
+        gc.collect()
+        
+    def test_factory_pattern_no_singleton_behavior(self):
+        """Test 47: Factory pattern MUST create unique instances - NO SINGLETONS ALLOWED."""
+        
+        # Create multiple contexts with same parameters
+        identical_params = {
+            "user_id": "factory_test_user",
+            "thread_id": "factory_test_thread", 
+            "run_id": "factory_test_run"
+        }
+        
+        contexts = []
+        for i in range(50):
+            ctx = UserExecutionContext.from_request(**identical_params)
+            contexts.append(ctx)
+        
+        # CRITICAL: Each context must be a unique object instance
+        for i, ctx1 in enumerate(contexts):
+            for j, ctx2 in enumerate(contexts):
+                if i != j:
+                    # Different object instances (no singleton)
+                    assert ctx1 is not ctx2, f"SINGLETON VIOLATION: Contexts {i} and {j} are same object"
+                    
+                    # Different request IDs (factory generates unique IDs)
+                    assert ctx1.request_id != ctx2.request_id, f"Request ID collision: {ctx1.request_id}"
+                    
+                    # Same user data (proper factory behavior)
+                    assert ctx1.user_id == ctx2.user_id
+                    assert ctx1.thread_id == ctx2.thread_id
+                    assert ctx1.run_id == ctx2.run_id
+        
+        # Memory isolation test - modifying one context shouldn't affect others
+        test_ctx = contexts[0]
+        
+        # Can't modify directly (frozen), but test child creation isolation
+        child1 = test_ctx.create_child_context("child1", {"data": "child1_data"})
+        child2 = test_ctx.create_child_context("child2", {"data": "child2_data"})
+        
+        assert child1 is not child2
+        assert child1.metadata["data"] != child2.metadata["data"]
+        assert child1.request_id != child2.request_id
+        
+    def test_concurrent_user_race_condition_safety(self):
+        """Test 48: Concurrent user context creation must be race condition safe."""
+        import threading
+        import queue
+        
+        # Results collection
+        results_queue = queue.Queue()
+        errors_queue = queue.Queue()
+        
+        def create_user_context(user_index):
+            """Create context for a specific user in separate thread."""
+            try:
+                ctx = UserExecutionContext.from_request(
+                    user_id=f"concurrent_user_{user_index:03d}",
+                    thread_id=f"concurrent_thread_{user_index:03d}",
+                    run_id=f"concurrent_run_{user_index:03d}",
+                    metadata={
+                        "thread_id": threading.current_thread().ident,
+                        "user_index": user_index,
+                        "creation_timestamp": time.time()
+                    }
+                )
+                
+                # Create child contexts to stress test
+                child1 = ctx.create_child_context(f"operation_a_{user_index}")
+                child2 = ctx.create_child_context(f"operation_b_{user_index}")
+                
+                # Validate isolation immediately
+                assert ctx.verify_isolation(), f"Isolation failed for user {user_index}"
+                assert child1.verify_isolation(), f"Child1 isolation failed for user {user_index}"
+                assert child2.verify_isolation(), f"Child2 isolation failed for user {user_index}"
+                
+                results_queue.put((user_index, ctx, child1, child2))
+                
+            except Exception as e:
+                errors_queue.put((user_index, e, traceback.format_exc()))
+        
+        # Launch 20 concurrent threads
+        threads = []
+        for i in range(20):
+            thread = threading.Thread(target=create_user_context, args=(i,))
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+        
+        # Collect results
+        results = []
+        while not results_queue.empty():
+            results.append(results_queue.get())
+        
+        # Check for errors
+        errors = []
+        while not errors_queue.empty():
+            errors.append(errors_queue.get())
+        
+        # CRITICAL: No errors should occur
+        assert len(errors) == 0, f"Race condition errors: {errors}"
+        
+        # CRITICAL: All contexts should be created successfully
+        assert len(results) == 20, f"Expected 20 results, got {len(results)}"
+        
+        # Validate complete isolation between concurrent creations
+        contexts = [r[1] for r in results]  # Extract main contexts
+        
+        # All contexts must be unique objects
+        for i, ctx1 in enumerate(contexts):
+            for j, ctx2 in enumerate(contexts):
+                if i != j:
+                    assert ctx1 is not ctx2
+                    assert ctx1.user_id != ctx2.user_id
+                    assert ctx1.request_id != ctx2.request_id
+                    
+                    # Thread IDs in metadata should be different (different threads)
+                    thread1 = ctx1.metadata["thread_id"]
+                    thread2 = ctx2.metadata["thread_id"]
+                    # Note: Threads might reuse IDs, so we can't assert inequality
+                    assert isinstance(thread1, int)
+                    assert isinstance(thread2, int)
+        
+    def test_garbage_collection_and_memory_leak_prevention(self):
+        """Test 49: Contexts must be properly garbage collected - NO MEMORY LEAKS."""
+        import gc
+        import weakref
+        
+        # Track object lifecycle with weak references
+        context_refs = []
+        
+        def create_and_track_contexts():
+            """Create contexts and track them with weak references."""
+            local_contexts = []
+            
+            for i in range(100):
+                ctx = UserExecutionContext(
+                    user_id=f"gc_test_user_{i}",
+                    thread_id=f"gc_test_thread_{i}",
+                    run_id=f"gc_test_run_{i}",
+                    metadata={"large_data": "x" * 1000}  # 1KB per context
+                )
+                
+                # Create child context
+                child = ctx.create_child_context(f"gc_operation_{i}")
+                
+                local_contexts.extend([ctx, child])
+                
+                # Create weak references to track garbage collection
+                context_refs.append(weakref.ref(ctx))
+                context_refs.append(weakref.ref(child))
+            
+            return local_contexts
+        
+        # Phase 1: Create contexts in local scope
+        contexts = create_and_track_contexts()
+        
+        # All weak references should be alive
+        alive_refs = [ref for ref in context_refs if ref() is not None]
+        assert len(alive_refs) == len(context_refs), "Some contexts were prematurely garbage collected"
+        
+        # Phase 2: Delete references and force garbage collection
+        del contexts
+        gc.collect()
+        
+        # Phase 3: Verify garbage collection occurred
+        alive_after_gc = [ref for ref in context_refs if ref() is not None]
+        
+        # Some contexts should be garbage collected (depends on Python GC)
+        # We can't guarantee 100% collection due to GC timing, but significant reduction expected
+        print(f"🗑️  Garbage Collection Analysis:")
+        print(f"   Created: {len(context_refs)} contexts")
+        print(f"   Alive after GC: {len(alive_after_gc)}")
+        print(f"   Collection rate: {((len(context_refs) - len(alive_after_gc)) / len(context_refs) * 100):.1f}%")
+        
+        # At least 80% should be collected (allowing for GC timing variations)
+        collection_rate = (len(context_refs) - len(alive_after_gc)) / len(context_refs)
+        assert collection_rate > 0.8, f"Poor garbage collection: only {collection_rate:.1%} collected"
+        
+    def test_resource_cleanup_validation(self):
+        """Test 50: Resource cleanup must be complete when contexts are destroyed."""
+        import gc
+        import sys
+        
+        # Track object counts
+        initial_objects = len(gc.get_objects())
+        
+        # Create contexts with various resources
+        def create_resource_heavy_contexts():
+            contexts = []
+            for i in range(50):
+                ctx = UserExecutionContext.from_request(
+                    user_id=f"resource_user_{i}",
+                    thread_id=f"resource_thread_{i}",
+                    run_id=f"resource_run_{i}",
+                    metadata={
+                        "heavy_data": {
+                            "list_data": list(range(100)),
+                            "dict_data": {f"key_{j}": f"value_{j}" for j in range(50)},
+                            "nested_structure": {
+                                "level1": {
+                                    "level2": {
+                                        "data": [f"item_{k}" for k in range(25)]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                )
+                
+                # Add database session mock
+                mock_session = Mock(spec=AsyncSession)
+                ctx_with_db = ctx.with_db_session(mock_session)
+                
+                # Add WebSocket connection
+                ctx_with_ws = ctx_with_db.with_websocket_connection(f"ws_conn_{i}")
+                
+                # Create complex hierarchy
+                child1 = ctx_with_ws.create_child_context(f"child1_{i}")
+                child2 = child1.create_child_context(f"child2_{i}")
+                child3 = child2.create_child_context(f"child3_{i}")
+                
+                contexts.extend([ctx, ctx_with_db, ctx_with_ws, child1, child2, child3])
+            
+            return contexts
+        
+        # Create and immediately destroy contexts
+        heavy_contexts = create_resource_heavy_contexts()
+        context_count = len(heavy_contexts)
+        
+        # Get object count after creation
+        peak_objects = len(gc.get_objects())
+        
+        # Clean up
+        del heavy_contexts
+        gc.collect()
+        
+        # Get final object count
+        final_objects = len(gc.get_objects())
+        
+        print(f"🧹 Resource Cleanup Analysis:")
+        print(f"   Initial objects: {initial_objects}")
+        print(f"   Peak objects: {peak_objects}")
+        print(f"   Final objects: {final_objects}")
+        print(f"   Created contexts: {context_count}")
+        print(f"   Objects leaked: {final_objects - initial_objects}")
+        
+        # Should not leak significant objects (allow for test framework overhead)
+        leaked_objects = final_objects - initial_objects
+        max_allowed_leaks = context_count * 0.1  # Allow 10% overhead
+        
+        assert leaked_objects <= max_allowed_leaks, f"Memory leak detected: {leaked_objects} objects leaked"
+        
+    def test_factory_pattern_isolation_stress_test(self):
+        """Test 51: Factory pattern isolation under stress conditions."""
+        import random
+        
+        # Create contexts with random overlapping data to test isolation
+        all_contexts = []
+        
+        # Shared data pools that might cause isolation issues if not handled properly
+        shared_user_ids = [f"shared_user_{i}" for i in range(5)]
+        shared_thread_ids = [f"shared_thread_{i}" for i in range(3)]
+        shared_metadata_keys = ["company", "project", "session", "analysis"]
+        
+        for i in range(200):
+            # Randomly select from shared pools to test isolation
+            user_id = random.choice(shared_user_ids)
+            thread_id = random.choice(shared_thread_ids)
+            run_id = f"unique_run_{i}_{uuid.uuid4().hex[:8]}"  # Always unique
+            
+            # Create metadata with potential conflicts
+            metadata = {}
+            for key in random.sample(shared_metadata_keys, k=random.randint(1, 3)):
+                metadata[key] = f"{key}_value_{i}_{random.randint(1000, 9999)}"
+            
+            ctx = UserExecutionContext.from_request(
+                user_id=user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                metadata=metadata
+            )
+            
+            all_contexts.append(ctx)
+        
+        # Group contexts by user_id and thread_id
+        groups = {}
+        for ctx in all_contexts:
+            key = (ctx.user_id, ctx.thread_id)
+            if key not in groups:
+                groups[key] = []
+            groups[key].append(ctx)
+        
+        # Validate isolation within groups (same user/thread, different runs)
+        for (user_id, thread_id), group_contexts in groups.items():
+            print(f"🔍 Testing group {user_id}/{thread_id}: {len(group_contexts)} contexts")
+            
+            for i, ctx1 in enumerate(group_contexts):
+                for j, ctx2 in enumerate(group_contexts):
+                    if i != j:
+                        # Same user and thread
+                        assert ctx1.user_id == ctx2.user_id
+                        assert ctx1.thread_id == ctx2.thread_id
+                        
+                        # Different run_ids and request_ids (isolation)
+                        assert ctx1.run_id != ctx2.run_id
+                        assert ctx1.request_id != ctx2.request_id
+                        
+                        # Different object instances
+                        assert ctx1 is not ctx2
+                        
+                        # Metadata should be isolated
+                        assert ctx1.metadata is not ctx2.metadata
+                        
+                        # Verify isolation passes
+                        assert ctx1.verify_isolation()
+                        assert ctx2.verify_isolation()
+        
+        print(f"✅ Stress test completed: {len(all_contexts)} contexts in {len(groups)} groups")
+        
+    def test_multi_user_session_lifecycle_comprehensive(self):
+        """Test 52: Complete multi-user session lifecycle with factory pattern."""
+        """
+        This test simulates a realistic multi-user scenario:
+        - Multiple users log in simultaneously
+        - Each user has multiple sessions/threads
+        - Users perform overlapping operations
+        - Sessions are cleaned up independently
+        - No data bleeding between users
+        """
+        
+        # Define user profiles
+        user_profiles = [
+            {"tier": "enterprise", "company": "TechCorp", "users": 3},
+            {"tier": "professional", "company": "StartupCo", "users": 5}, 
+            {"tier": "free", "company": "Individual", "users": 10}
+        ]
+        
+        all_user_sessions = {}
+        
+        # Phase 1: Simulate user logins and session creation
+        for profile in user_profiles:
+            for user_num in range(profile["users"]):
+                user_id = f"{profile['tier']}_user_{user_num:03d}"
+                
+                # Each user can have multiple concurrent sessions
+                user_sessions = []
+                session_count = random.randint(1, 3)
+                
+                for session_num in range(session_count):
+                    # Create main session context
+                    session_ctx = UserExecutionContext.from_request(
+                        user_id=user_id,
+                        thread_id=f"session_{session_num}_{uuid.uuid4().hex[:8]}",
+                        run_id=f"login_session_{session_num}",
+                        metadata={
+                            "user_tier": profile["tier"],
+                            "company": profile["company"],
+                            "session_number": session_num,
+                            "login_timestamp": time.time(),
+                            "capabilities": ["chat", "analysis"] if profile["tier"] != "free" else ["chat"]
+                        }
+                    )
+                    
+                    # Add WebSocket connection
+                    ws_ctx = session_ctx.with_websocket_connection(f"ws_{user_id}_{session_num}")
+                    
+                    # Add database session for paid tiers
+                    if profile["tier"] != "free":
+                        mock_db = Mock(spec=AsyncSession)
+                        mock_db.user_tier = profile["tier"]
+                        db_ctx = ws_ctx.with_db_session(mock_db)
+                        user_sessions.append(db_ctx)
+                    else:
+                        user_sessions.append(ws_ctx)
+                
+                all_user_sessions[user_id] = user_sessions
+        
+        # Phase 2: Simulate concurrent operations per user
+        operation_contexts = {}
+        
+        for user_id, sessions in all_user_sessions.items():
+            user_operations = []
+            
+            for session_ctx in sessions:
+                # Each session can run multiple operations
+                operations = ["data_analysis", "optimization", "reporting"]
+                if "free" in user_id:
+                    operations = ["basic_chat"]  # Limited for free users
+                
+                for op_name in operations:
+                    op_ctx = session_ctx.create_child_context(
+                        op_name,
+                        {
+                            "operation_type": op_name,
+                            "priority": "high" if "enterprise" in user_id else "normal",
+                            "start_time": time.time()
+                        }
+                    )
+                    
+                    # Create tool execution contexts
+                    tool_ctx = op_ctx.create_child_context(f"{op_name}_tool")
+                    user_operations.extend([op_ctx, tool_ctx])
+            
+            operation_contexts[user_id] = user_operations
+        
+        # Phase 3: Comprehensive isolation validation
+        print(f"🏢 Multi-user validation: {len(all_user_sessions)} users, multiple tiers")
+        
+        # Validate user-level isolation
+        for user1_id, user1_sessions in all_user_sessions.items():
+            for user2_id, user2_sessions in all_user_sessions.items():
+                if user1_id != user2_id:
+                    # Different users should have completely isolated data
+                    for session1 in user1_sessions:
+                        for session2 in user2_sessions:
+                            assert session1.user_id != session2.user_id
+                            assert session1.metadata["company"] != session2.metadata["company"]
+                            assert session1.request_id != session2.request_id
+                            
+                            # WebSocket connections should be different
+                            assert session1.websocket_client_id != session2.websocket_client_id
+        
+        # Validate operation-level isolation
+        for user1_id, user1_ops in operation_contexts.items():
+            for user2_id, user2_ops in operation_contexts.items():
+                if user1_id != user2_id:
+                    for op1 in user1_ops:
+                        for op2 in user2_ops:
+                            # Operations from different users must be isolated
+                            assert op1.user_id != op2.user_id
+                            assert op1.request_id != op2.request_id
+                            assert op1 is not op2
+        
+        # Validate tier-based access patterns
+        enterprise_contexts = [ctx for user_id, sessions in all_user_sessions.items() 
+                             if "enterprise" in user_id for ctx in sessions]
+        free_contexts = [ctx for user_id, sessions in all_user_sessions.items() 
+                        if "free" in user_id for ctx in sessions]
+        
+        # Enterprise users should have database sessions
+        for ctx in enterprise_contexts:
+            assert ctx.db_session is not None
+            assert hasattr(ctx.db_session, 'user_tier')
+            assert ctx.db_session.user_tier == "enterprise"
+        
+        # Free users should not have database sessions (in this simulation)
+        for ctx in free_contexts:
+            if hasattr(ctx, 'db_session'):
+                # Free tier contexts created without db sessions in this test
+                pass
+        
+        # Phase 4: Cleanup simulation and validation
+        # Simulate individual user session cleanup
+        cleanup_user = list(all_user_sessions.keys())[0]
+        cleanup_sessions = all_user_sessions[cleanup_user]
+        
+        # Before cleanup - contexts exist
+        assert len(cleanup_sessions) > 0
+        for ctx in cleanup_sessions:
+            assert ctx.verify_isolation()
+        
+        # Simulate cleanup
+        del all_user_sessions[cleanup_user]
+        del operation_contexts[cleanup_user]
+        
+        # Remaining users should be unaffected
+        remaining_users = list(all_user_sessions.keys())
+        assert len(remaining_users) > 0
+        
+        for user_id in remaining_users:
+            for session_ctx in all_user_sessions[user_id]:
+                assert session_ctx.verify_isolation()
+                assert session_ctx.user_id == user_id
+        
+        print(f"✅ Multi-user lifecycle test completed successfully")
+        print(f"   - {len(user_profiles)} user tiers tested")
+        print(f"   - {sum(p['users'] for p in user_profiles)} total users")
+        print(f"   - Multiple sessions per user")
+        print(f"   - Complex operation hierarchies") 
+        print(f"   - Tier-based access controls")
+        print(f"   - Clean isolation maintained throughout")

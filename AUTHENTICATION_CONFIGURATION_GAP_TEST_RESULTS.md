@@ -53,7 +53,7 @@
 ### 3. Missing Service Authentication Environment Variables
 
 **Missing Variables:**
-- `SERVICE_ID` - Service identity for authentication  
+- `SERVICE_ID` - Service identity from SSOT constant (import from shared.constants.service_identifiers)  
 - `SERVICE_SECRET` - Service secret for secure communication  
 - `JWT_SECRET_KEY` - Not available in isolated environment context  
 

@@ -36,7 +36,7 @@ from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
 from fastapi.testclient import TestClient
 
-from test_framework.base_e2e_test import BaseE2ETest
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, E2EAuthConfig
 from shared.isolated_environment import get_env
@@ -44,7 +44,8 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, WebSocketID
 
 # Import auth-related components for testing race conditions
-from netra_backend.app.auth.websocket_auth import WebSocketAuthenticator
+from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuthenticator as WebSocketAuthenticator
+from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator as JWTValidator
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +125,7 @@ class AuthenticationTimingController:
         return self.race_conditions
 
 
-class TestWebSocketAuthenticationTimingE2E(BaseE2ETest):
+class TestWebSocketAuthenticationTimingE2E(SSotAsyncTestCase):
     """
     E2E tests for WebSocket authentication timing race conditions.
     

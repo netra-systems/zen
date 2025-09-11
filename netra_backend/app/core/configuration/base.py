@@ -110,13 +110,19 @@ class UnifiedConfigManager:
             # CRITICAL FIX: Ensure service_secret is loaded from environment if not set
             # This handles cases where the config class doesn't properly load it
             if not config.service_secret:
-                from shared.isolated_environment import get_env
-                env = get_env()
-                service_secret = env.get('SERVICE_SECRET')
-                if service_secret:
-                    # DEFENSIVE FIX: Strip whitespace from environment variable to prevent header issues
-                    config.service_secret = service_secret.strip()
-                    self._logger.info("Loaded SERVICE_SECRET from environment as fallback")
+                try:
+                    # Direct environment access to avoid circular import during startup
+                    import os
+                    service_secret = os.environ.get('SERVICE_SECRET') or os.environ.get('JWT_SECRET_KEY')
+                    if service_secret:
+                        config.service_secret = service_secret.strip()
+                        self._logger.info("Loaded SERVICE_SECRET from environment (avoiding startup circular import)")
+                    else:
+                        self._logger.warning("SERVICE_SECRET not found in environment variables")
+                except Exception as e:
+                    self._logger.error(f"Failed to load SERVICE_SECRET from environment: {e}")
+                    # SSOT COMPLIANT: Log critical failure but don't bypass SSOT
+                    # This maintains SSOT compliance even if configuration is unavailable
                     
             # DEFENSIVE FIX: Ensure service_id is also sanitized from environment
             # This prevents header value issues from Windows line endings or whitespace
@@ -281,11 +287,27 @@ def is_testing() -> bool:
     return config_manager.is_testing()
 
 
+# CRITICAL GOLDEN PATH COMPATIBILITY FUNCTION
+def get_config() -> AppConfig:
+    """Get the application configuration - Golden Path compatibility function.
+    
+    COMPATIBILITY LAYER: This function provides backward compatibility for Golden Path tests
+    that expect a get_config() function. Re-exports get_unified_config() functionality.
+    
+    Business Impact: Enables Golden Path test execution protecting $500K+ ARR
+    
+    Returns:
+        AppConfig: The application configuration
+    """
+    return get_unified_config()
+
+
 # Export compatibility functions
 __all__ = [
     "UnifiedConfigManager",
     "config_manager",
     "get_unified_config",
+    "get_config",  # Golden Path compatibility
     "reload_unified_config", 
     "validate_unified_config",
     "get_environment",

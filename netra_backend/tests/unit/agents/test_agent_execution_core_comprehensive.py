@@ -56,11 +56,11 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 # SSOT Dependencies
-from netra_backend.app.agents.execution_timeout_manager import (
+from netra_backend.app.core.agent_execution_tracker import (
     TimeoutConfig,
-    CircuitBreakerOpenError
+    CircuitBreakerOpenError,
+    AgentExecutionPhase
 )
-from netra_backend.app.agents.agent_state_tracker import AgentExecutionPhase
 from netra_backend.app.core.execution_tracker import ExecutionState
 
 # Import real services for testing integration points

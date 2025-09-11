@@ -115,6 +115,8 @@ Faker>=37.6.0
 # --- Performance Monitoring ---
 # Cross-platform library for process and system monitoring.
 psutil>=7.0.0
+# Memory profiler for performance testing and memory leak detection
+memory_profiler>=0.61.0
 # Docker API client for container resource monitoring and management
 docker>=7.1.0
 
@@ -134,3 +136,5 @@ opentelemetry-exporter-jaeger==1.21.0
 pytest>=8.4.1
 # Pytest plugin for testing asyncio code.
 pytest-asyncio>=1.1.0
+# Pytest plugin for adding timeouts to tests
+pytest-timeout>=2.1.0
