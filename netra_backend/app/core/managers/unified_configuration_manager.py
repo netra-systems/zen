@@ -659,7 +659,27 @@ class UnifiedConfigurationManager:
                 return default
         return value if isinstance(value, dict) else default
     
-    def set(self, key: str, value: Any, source: ConfigurationSource = ConfigurationSource.OVERRIDE) -> None:
+    def get_masked(self, key: str, default: Any = None) -> Any:
+        """
+        Get configuration value with sensitive values automatically masked.
+        
+        Args:
+            key: Configuration key
+            default: Default value if key not found
+        
+        Returns:
+            Configuration value (masked if sensitive)
+        """
+        with self._config_lock:
+            if key in self._configurations:
+                entry = self._configurations[key]
+                if entry.sensitive:
+                    return entry.get_display_value()
+                else:
+                    return entry.value
+            return default
+    
+    def set(self, key: str, value: Any, source: ConfigurationSource = ConfigurationSource.OVERRIDE, sensitive: bool = None) -> None:
         """
         Set configuration value.
         
@@ -667,10 +687,20 @@ class UnifiedConfigurationManager:
             key: Configuration key
             value: Configuration value
             source: Configuration source
+            sensitive: Whether this value is sensitive (overrides auto-detection)
         """
         with self._config_lock:
             # Get existing entry for metadata
             existing_entry = self._configurations.get(key)
+            
+            # Determine if sensitive (parameter overrides auto-detection)
+            is_sensitive = sensitive
+            if is_sensitive is None:
+                is_sensitive = existing_entry.sensitive if existing_entry else (key in self._sensitive_keys)
+                # Auto-detect sensitive patterns if not explicitly set
+                if not is_sensitive:
+                    sensitive_patterns = ['key', 'secret', 'password', 'token', 'credential', 'api_key']
+                    is_sensitive = any(pattern in key.lower() for pattern in sensitive_patterns)
             
             entry = ConfigurationEntry(
                 key=key,
@@ -678,7 +708,7 @@ class UnifiedConfigurationManager:
                 source=source,
                 scope=ConfigurationScope.USER if self.user_id else ConfigurationScope.GLOBAL,
                 data_type=existing_entry.data_type if existing_entry else type(value),
-                sensitive=existing_entry.sensitive if existing_entry else (key in self._sensitive_keys),
+                sensitive=is_sensitive,
                 required=existing_entry.required if existing_entry else (key in self._required_keys),
                 validation_rules=existing_entry.validation_rules if existing_entry else [],
                 description=existing_entry.description if existing_entry else "",
@@ -686,6 +716,12 @@ class UnifiedConfigurationManager:
                 service=self.service_name,
                 user_id=self.user_id
             )
+            
+            # Update sensitive keys set if needed
+            if is_sensitive:
+                self._sensitive_keys.add(key)
+            elif key in self._sensitive_keys and sensitive is False:
+                self._sensitive_keys.discard(key)
             
             # Validate if enabled
             if self.enable_validation and not entry.validate():

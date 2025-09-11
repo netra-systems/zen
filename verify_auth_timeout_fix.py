@@ -32,17 +32,17 @@ def verify_auth_timeout_fix():
     staging_graceful_degradation = auth_check.is_critical == False
     
     if staging_timeout_fixed:
-        print("   ✅ PASS: Staging timeout increased from 5s to 10s")
+        print("   PASS: Staging timeout increased from 5s to 10s")
     else:
-        print(f"   ❌ FAIL: Staging timeout is {auth_check.timeout_seconds}s, expected 10.0s")
+        print(f"   FAIL: Staging timeout is {auth_check.timeout_seconds}s, expected 10.0s")
     
     if staging_graceful_degradation:
-        print("   ✅ PASS: Graceful degradation enabled (is_critical=False)")
+        print("   PASS: Graceful degradation enabled (is_critical=False)")
     else:
-        print("   ❌ FAIL: Graceful degradation not enabled")
+        print("   FAIL: Graceful degradation not enabled")
     
     # Test 2: Production Configuration
-    print("\n📋 Test 2: Production Configuration")
+    print("\nTest 2: Production Configuration")
     prod_validator = GCPWebSocketInitializationValidator()
     prod_validator.update_environment_configuration('production', True)
     
@@ -57,17 +57,17 @@ def verify_auth_timeout_fix():
     prod_critical_maintained = prod_auth_check.is_critical == True
     
     if prod_timeout_fixed:
-        print("   ✅ PASS: Production timeout increased from 5s to 10s")
+        print("   PASS: Production timeout increased from 5s to 10s")
     else:
-        print(f"   ❌ FAIL: Production timeout is {prod_auth_check.timeout_seconds}s, expected 10.0s")
+        print(f"   FAIL: Production timeout is {prod_auth_check.timeout_seconds}s, expected 10.0s")
     
     if prod_critical_maintained:
-        print("   ✅ PASS: Production maintains critical behavior (is_critical=True)")
+        print("   PASS: Production maintains critical behavior (is_critical=True)")
     else:
-        print("   ❌ FAIL: Production should maintain is_critical=True")
+        print("   FAIL: Production should maintain is_critical=True")
     
     # Test 3: Non-GCP Configuration
-    print("\n📋 Test 3: Non-GCP Configuration")
+    print("\nTest 3: Non-GCP Configuration")
     local_validator = GCPWebSocketInitializationValidator()
     local_validator.update_environment_configuration('development', False)
     
@@ -80,17 +80,17 @@ def verify_auth_timeout_fix():
     local_critical_maintained = local_auth_check.is_critical == True
     
     if local_timeout_correct:
-        print("   ✅ PASS: Non-GCP timeout remains 20.0s")
+        print("   PASS: Non-GCP timeout remains 20.0s")
     else:
-        print(f"   ❌ FAIL: Non-GCP timeout is {local_auth_check.timeout_seconds}s, expected 20.0s")
+        print(f"   FAIL: Non-GCP timeout is {local_auth_check.timeout_seconds}s, expected 20.0s")
     
     if local_critical_maintained:
-        print("   ✅ PASS: Non-GCP maintains critical behavior")
+        print("   PASS: Non-GCP maintains critical behavior")
     else:
-        print("   ❌ FAIL: Non-GCP should maintain is_critical=True")
+        print("   FAIL: Non-GCP should maintain is_critical=True")
     
     # Test 4: Cumulative Timeout Analysis
-    print("\n📋 Test 4: Cumulative Timeout Analysis")
+    print("\nTest 4: Cumulative Timeout Analysis")
     cumulative_staging = auth_check.timeout_seconds + (auth_check.retry_count * auth_check.retry_delay)
     cumulative_prod = prod_auth_check.timeout_seconds + (prod_auth_check.retry_count * prod_auth_check.retry_delay)
     
@@ -99,7 +99,7 @@ def verify_auth_timeout_fix():
     
     # Overall validation
     print("\n" + "=" * 60)
-    print("📊 OVERALL VALIDATION RESULTS:")
+    print("OVERALL VALIDATION RESULTS:")
     
     all_tests_passed = (
         staging_timeout_fixed and 
@@ -111,16 +111,16 @@ def verify_auth_timeout_fix():
     )
     
     if all_tests_passed:
-        print("🟢 SUCCESS: All auth validation timeout fixes verified!")
+        print("SUCCESS: All auth validation timeout fixes verified!")
         print("   - GitHub Issue #265 fix properly implemented")
-        print("   - Staging timeout increased: 5s → 10s")
+        print("   - Staging timeout increased: 5s -> 10s")
         print("   - Staging graceful degradation: enabled")
-        print("   - Production timeout increased: 5s → 10s")
+        print("   - Production timeout increased: 5s -> 10s")
         print("   - Production critical behavior: maintained")
         print("   - Non-GCP configuration: unchanged")
         return True
     else:
-        print("🔴 FAILURE: Auth validation timeout fix validation failed!")
+        print("FAILURE: Auth validation timeout fix validation failed!")
         print("   Some configurations are not properly applied")
         return False
 

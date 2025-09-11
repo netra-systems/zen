@@ -72,9 +72,9 @@ from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.redis_manager import RedisManager
 
 
-        # ============================================================================
-        # E2E TEST DATA AND METRICS
-        # ============================================================================
+# ============================================================================
+# E2E TEST DATA AND METRICS
+# ============================================================================
 
 @dataclass
 class UserExperienceMetrics:
@@ -339,9 +339,9 @@ class RealServiceIntegrator:
             logger.info("🧹 HTTP session cleaned up")
 
 
-        # ============================================================================
-        # E2E USER EXPERIENCE TESTS
-        # ============================================================================
+# ============================================================================
+# E2E USER EXPERIENCE TESTS
+# ============================================================================
 
 class TestActionsAgentCompleteUserFlow:
     """E2E tests for complete ActionsAgent user experience."""
@@ -394,7 +394,7 @@ class TestActionsAgentCompleteUserFlow:
     @pytest.mark.critical
     async def test_complete_user_to_action_plan_journey(self, setup_complete_e2e_environment):
         """CRITICAL: Test complete user journey from request to action plan."""
-        logger.info("\n" + "🎯 STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
+        logger.info("\\n" + "🎯 STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
 
         # Create E2E test session
         session = E2ETestSession(
@@ -409,7 +409,7 @@ class TestActionsAgentCompleteUserFlow:
 
         try:
             # STEP 1: Create thread through real API
-            logger.info("📏 Step 1: Creating thread through real backend API...")
+            logger.info("📝 Step 1: Creating thread through real backend API...")
             session.thread_id = await self.service_integrator.create_thread(session.user_id)
 
             assert session.thread_id is not None, \
@@ -422,7 +422,7 @@ class TestActionsAgentCompleteUserFlow:
             ws_client = RealWebSocketClient()
 
             websocket_connected = await ws_client.connect(session.thread_id, session.user_id)
-            assert websocket_connected, \
+            assert websocket_connected, \\
                 "Failed to establish real WebSocket connection - WebSocket service may be down"
 
             session.websocket_connection = ws_client
@@ -449,636 +449,318 @@ class TestActionsAgentCompleteUserFlow:
 
             logger.info("✅ Real WebSocket connection established")
 
-        # STEP 3: Send realistic user message for action planning
-        # REMOVED_SYNTAX_ERROR: logger.info("💬 Step 3: Sending realistic user request...")
-        # REMOVED_SYNTAX_ERROR: user_request = ( )
-        # REMOVED_SYNTAX_ERROR: "I need to optimize our cloud costs while maintaining performance. "
-        # REMOVED_SYNTAX_ERROR: "Our monthly cloud bill is $50,000 and we"re seeing 15% month-over-month growth. "
-        # REMOVED_SYNTAX_ERROR: "We have compute, storage, and database services across multiple regions. "
-        # REMOVED_SYNTAX_ERROR: "Please analyze our setup and create a detailed action plan to reduce costs by 20-30% "
-        # REMOVED_SYNTAX_ERROR: "without impacting system performance or availability."
-        
+            # STEP 3: Send realistic user message for action planning
+            logger.info("💬 Step 3: Sending realistic user request...")
+            user_request = (
+                "I need to optimize our cloud costs while maintaining performance. "
+                "Our monthly cloud bill is $50,000 and we're seeing 15% month-over-month growth. "
+                "We have compute, storage, and database services across multiple regions. "
+                "Please analyze our setup and create a detailed action plan to reduce costs by 20-30% "
+                "without impacting system performance or availability."
+            )
 
-        # REMOVED_SYNTAX_ERROR: message_sent = await ws_client.send_user_message(user_request)
-        # REMOVED_SYNTAX_ERROR: assert message_sent, "Failed to send user message through WebSocket"
+            message_sent = await ws_client.send_user_message(user_request)
+            assert message_sent, "Failed to send user message through WebSocket"
 
-        # Also send through HTTP API for complete integration
-        # REMOVED_SYNTAX_ERROR: api_sent = await self.service_integrator.send_chat_message( )
-        # REMOVED_SYNTAX_ERROR: session.thread_id, session.user_id, user_request
-        
-        # REMOVED_SYNTAX_ERROR: assert api_sent, "Failed to send message through API"
+            # Also send through HTTP API for complete integration
+            api_sent = await self.service_integrator.send_chat_message(
+                session.thread_id, session.user_id, user_request
+            )
+            assert api_sent, "Failed to send message through API"
 
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ User request sent through both WebSocket and API")
+            logger.info("✅ User request sent through both WebSocket and API")
 
-        # STEP 4: Wait for and validate real-time agent events
-        # REMOVED_SYNTAX_ERROR: logger.info("⏳ Step 4: Waiting for real-time agent processing...")
+            # STEP 4: Wait for and validate real-time agent events
+            logger.info("⏳ Step 4: Waiting for real-time agent processing...")
 
-        # Wait for critical agent lifecycle events
-        # REMOVED_SYNTAX_ERROR: agent_events = await ws_client.wait_for_events( )
-        # REMOVED_SYNTAX_ERROR: expected_types=['agent_started', 'agent_thinking', 'agent_completed'],
-        # REMOVED_SYNTAX_ERROR: timeout=120.0  # Generous timeout for real LLM processing
-        
+            # Wait for critical agent lifecycle events
+            agent_events = await ws_client.wait_for_events(
+                expected_types=['agent_started', 'agent_thinking', 'agent_completed'],
+                timeout=120.0  # Generous timeout for real LLM processing
+            )
 
-        # Validate real-time responsiveness
-        # REMOVED_SYNTAX_ERROR: if agent_events:
-            # REMOVED_SYNTAX_ERROR: first_event_time = min(event['timestamp'] for event in agent_events)
-            # REMOVED_SYNTAX_ERROR: responsiveness_delay = first_event_time - journey_start_time
+            # Validate real-time responsiveness
+            if agent_events:
+                first_event_time = min(event['timestamp'] for event in agent_events)
+                responsiveness_delay = first_event_time - journey_start_time
 
-            # REMOVED_SYNTAX_ERROR: metrics.websocket_responsiveness_score = max(0.0, 1.0 - (responsiveness_delay / 10.0))
-            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-            # REMOVED_SYNTAX_ERROR: else:
-                # REMOVED_SYNTAX_ERROR: metrics.websocket_responsiveness_score = 0.0
-                # REMOVED_SYNTAX_ERROR: logger.warning("⚠️ No agent events received")
+                metrics.websocket_responsiveness_score = max(0.0, 1.0 - (responsiveness_delay / 10.0))
+                logger.info(f"⚡ Responsiveness delay: {responsiveness_delay:.2f}s (score: {metrics.websocket_responsiveness_score:.2f})")
+            else:
+                metrics.websocket_responsiveness_score = 0.0
+                logger.warning("⚠️ No agent events received")
 
-                # STEP 5: Validate action plan generation and quality
-                # REMOVED_SYNTAX_ERROR: logger.info("📋 Step 5: Validating action plan generation...")
+            # STEP 5: Validate action plan generation and quality
+            logger.info("📋 Step 5: Validating action plan generation...")
 
-                # Wait additional time for final results
-                # REMOVED_SYNTAX_ERROR: await asyncio.sleep(5.0)
+            # Wait additional time for final results
+            await asyncio.sleep(5.0)
 
-                # Check thread status through API
-                # REMOVED_SYNTAX_ERROR: thread_status = await self.service_integrator.get_thread_status(session.thread_id)
-                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+            # Check thread status through API
+            thread_status = await self.service_integrator.get_thread_status(session.thread_id)
+            logger.info(f"📋 Thread status: {thread_status}")
 
-                # Analyze action plan quality from received events
-                # REMOVED_SYNTAX_ERROR: final_reports = [item for item in []] in ['agent_completed', 'final_report']]
+            # Analyze action plan quality from received events
+            final_reports = [event for event in agent_events 
+                           if event['message_type'] in ['agent_completed', 'final_report']]
 
-                # REMOVED_SYNTAX_ERROR: if final_reports:
-                    # Extract action plan data
-                    # REMOVED_SYNTAX_ERROR: action_plan_data = final_reports[-1].get('data', {})
+            if final_reports:
+                # Extract action plan data
+                action_plan_data = final_reports[-1].get('data', {})
 
-                    # Quality scoring based on action plan content
-                    # REMOVED_SYNTAX_ERROR: quality_indicators = { )
-                    # REMOVED_SYNTAX_ERROR: 'has_recommendations': bool(action_plan_data.get('recommendations')),
-                    # REMOVED_SYNTAX_ERROR: 'has_steps': bool(action_plan_data.get('steps')),
-                    # REMOVED_SYNTAX_ERROR: 'addresses_cost_optimization': 'cost' in str(action_plan_data).lower(),
-                    # REMOVED_SYNTAX_ERROR: 'addresses_performance': 'performance' in str(action_plan_data).lower(),
-                    # REMOVED_SYNTAX_ERROR: 'has_specific_actions': len(str(action_plan_data)) > 200
-                    
+                # Quality scoring based on action plan content
+                quality_indicators = {
+                    'has_recommendations': bool(action_plan_data.get('recommendations')),
+                    'has_steps': bool(action_plan_data.get('steps')),
+                    'addresses_cost_optimization': 'cost' in str(action_plan_data).lower(),
+                    'addresses_performance': 'performance' in str(action_plan_data).lower(),
+                    'has_specific_actions': len(str(action_plan_data)) > 200
+                }
 
-                    # REMOVED_SYNTAX_ERROR: quality_score = sum(quality_indicators.values()) / len(quality_indicators)
-                    # REMOVED_SYNTAX_ERROR: metrics.action_plan_quality_score = quality_score
+                quality_score = sum(quality_indicators.values()) / len(quality_indicators)
+                metrics.action_plan_quality_score = quality_score
 
-                    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                    # REMOVED_SYNTAX_ERROR: for indicator, present in quality_indicators.items():
-                        # REMOVED_SYNTAX_ERROR: status = "✅" if present else "❌"
-                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                        # REMOVED_SYNTAX_ERROR: else:
-                            # REMOVED_SYNTAX_ERROR: metrics.action_plan_quality_score = 0.0
-                            # REMOVED_SYNTAX_ERROR: logger.warning("⚠️ No action plan received")
+                logger.info(f"🎯 Action plan quality score: {quality_score:.2f}")
+                for indicator, present in quality_indicators.items():
+                    status = "✅" if present else "❌"
+                    logger.info(f"  {status} {indicator}: {present}")
+            else:
+                metrics.action_plan_quality_score = 0.0
+                logger.warning("⚠️ No action plan received")
 
-                            # STEP 6: Measure overall chat value delivery
-                            # REMOVED_SYNTAX_ERROR: logger.info("💎 Step 6: Measuring chat value delivery...")
+            # STEP 6: Measure overall chat value delivery
+            logger.info("💎 Step 6: Measuring chat value delivery...")
 
-                            # REMOVED_SYNTAX_ERROR: total_events = len(agent_events)
-                            # REMOVED_SYNTAX_ERROR: event_types = [e['message_type'] for e in agent_events]
+            total_events = len(agent_events)
+            event_types = [e['message_type'] for e in agent_events]
 
-                            # Chat value indicators
-                            # REMOVED_SYNTAX_ERROR: value_indicators = { )
-                            # REMOVED_SYNTAX_ERROR: 'real_time_feedback': 'agent_thinking' in event_types,
-                            # REMOVED_SYNTAX_ERROR: 'processing_visibility': 'agent_started' in event_types,
-                            # REMOVED_SYNTAX_ERROR: 'completion_notification': any(t in event_types for t in ['agent_completed', 'final_report']),
-                            # REMOVED_SYNTAX_ERROR: 'sufficient_updates': total_events >= 3,
-                            # REMOVED_SYNTAX_ERROR: 'timely_response': metrics.websocket_responsiveness_score > 0.5
-                            
+            # Chat value indicators
+            value_indicators = {
+                'real_time_feedback': 'agent_thinking' in event_types,
+                'processing_visibility': 'agent_started' in event_types,
+                'completion_notification': any(t in event_types for t in ['agent_completed', 'final_report']),
+                'sufficient_updates': total_events >= 3,
+                'timely_response': metrics.websocket_responsiveness_score > 0.5
+            }
 
-                            # REMOVED_SYNTAX_ERROR: chat_value_score = sum(value_indicators.values()) / len(value_indicators)
-                            # REMOVED_SYNTAX_ERROR: metrics.chat_value_delivery_score = chat_value_score
+            chat_value_score = sum(value_indicators.values()) / len(value_indicators)
+            metrics.chat_value_delivery_score = chat_value_score
 
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+            logger.info(f"💎 Chat value delivery score: {chat_value_score:.2f}")
 
-                            # Calculate final metrics
-                            # REMOVED_SYNTAX_ERROR: journey_end_time = time.time()
-                            # REMOVED_SYNTAX_ERROR: metrics.request_to_response_time = journey_end_time - journey_start_time
-                            # REMOVED_SYNTAX_ERROR: metrics.performance_satisfaction_score = max(0.0, 1.0 - (metrics.request_to_response_time / 120.0))
+            # Calculate final metrics
+            journey_end_time = time.time()
+            metrics.request_to_response_time = journey_end_time - journey_start_time
+            metrics.performance_satisfaction_score = max(0.0, 1.0 - (metrics.request_to_response_time / 120.0))
 
-                            # REMOVED_SYNTAX_ERROR: overall_ux_score = metrics.calculate_overall_score()
+            overall_ux_score = metrics.calculate_overall_score()
 
-                            # CRITICAL VALIDATIONS
-                            # REMOVED_SYNTAX_ERROR: assert total_events > 0, \
-                            # REMOVED_SYNTAX_ERROR: "formatted_string"
+            # CRITICAL VALIDATIONS
+            assert total_events > 0, \\
+                f"No WebSocket events received - agent pipeline may be broken. Expected at least agent_started event."
 
-                            # REMOVED_SYNTAX_ERROR: assert metrics.websocket_responsiveness_score > 0.3, \
-                            # REMOVED_SYNTAX_ERROR: "formatted_string"
+            assert metrics.websocket_responsiveness_score > 0.3, \\
+                f"WebSocket responsiveness too low: {metrics.websocket_responsiveness_score:.2f} (min 0.3). Real-time feedback is failing."
 
-                            # REMOVED_SYNTAX_ERROR: assert metrics.request_to_response_time < 150.0, \
-                            # REMOVED_SYNTAX_ERROR: "formatted_string"
+            assert metrics.request_to_response_time < 150.0, \\
+                f"Request to response time too slow: {metrics.request_to_response_time:.2f}s (max 150s). Performance is unacceptable."
 
-                            # REMOVED_SYNTAX_ERROR: assert overall_ux_score >= 0.6, \
-                            # REMOVED_SYNTAX_ERROR: "formatted_string"
+            assert overall_ux_score >= 0.6, \\
+                f"Overall user experience score too low: {overall_ux_score:.2f} (min 0.6). System is not delivering business value."
 
-                            # SUCCESS REPORT
-                            # REMOVED_SYNTAX_ERROR: logger.info(" )
-                            # REMOVED_SYNTAX_ERROR: " + "🎉 E2E USER JOURNEY COMPLETED SUCCESSFULLY")
-                            # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
+            # SUCCESS REPORT
+            logger.info("\\n" + "🎉 E2E USER JOURNEY COMPLETED SUCCESSFULLY")
+            logger.info("=" * 60)
+            logger.info(f"WebSocket Responsiveness: {metrics.websocket_responsiveness_score:.2f}")
+            logger.info(f"Action Plan Quality: {metrics.action_plan_quality_score:.2f}")
+            logger.info(f"Chat Value Delivery: {metrics.chat_value_delivery_score:.2f}")
+            logger.info(f"Performance Satisfaction: {metrics.performance_satisfaction_score:.2f}")
+            logger.info(f"Total Response Time: {metrics.request_to_response_time:.2f}s")
+            logger.info(f"Overall UX Score: {overall_ux_score:.2f}")
+            logger.info(f"Events Received: {total_events} ({event_types})")
+            logger.info("=" * 60)
 
-                            # REMOVED_SYNTAX_ERROR: except Exception as e:
-                                # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                                # REMOVED_SYNTAX_ERROR: metrics.error_handling_ux_score = 0.0
-                                # REMOVED_SYNTAX_ERROR: raise
+        except Exception as e:
+            logger.error(f"🚨 E2E test failed: {e}")
+            metrics.error_handling_ux_score = 0.0
+            raise
 
-                                # REMOVED_SYNTAX_ERROR: finally:
-                                    # Cleanup WebSocket
-                                    # REMOVED_SYNTAX_ERROR: if session.websocket_connection:
-                                        # REMOVED_SYNTAX_ERROR: await session.websocket_connection.disconnect()
+        finally:
+            # Cleanup WebSocket
+            if session.websocket_connection:
+                await session.websocket_connection.disconnect()
 
-                                        # Removed problematic line: @pytest.mark.asyncio
-                                        # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-                                        # REMOVED_SYNTAX_ERROR: @pytest.fixture
-                                        # Removed problematic line: async def test_concurrent_user_sessions_e2e(self):
-                                            # REMOVED_SYNTAX_ERROR: """CRITICAL: Test multiple concurrent user sessions E2E."""
-                                            # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                            # REMOVED_SYNTAX_ERROR: " + "👥 STARTING CONCURRENT USER SESSIONS E2E TEST")
 
-                                            # REMOVED_SYNTAX_ERROR: concurrent_users = 3
-                                            # REMOVED_SYNTAX_ERROR: user_sessions = []
+# ============================================================================
+# ADDITIONAL E2E TEST METHODS
+# ============================================================================
 
-                                            # Create concurrent user sessions
-                                            # REMOVED_SYNTAX_ERROR: for i in range(concurrent_users):
-                                                # REMOVED_SYNTAX_ERROR: session = E2ETestSession( )
-                                                # REMOVED_SYNTAX_ERROR: session_id="formatted_string",
-                                                # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                                # REMOVED_SYNTAX_ERROR: thread_id=""
-                                                
-                                                # REMOVED_SYNTAX_ERROR: user_sessions.append(session)
-                                                # REMOVED_SYNTAX_ERROR: self.test_sessions.append(session)
+    @pytest.mark.asyncio
+    @pytest.mark.critical
+    async def test_concurrent_user_sessions_e2e(self, setup_complete_e2e_environment):
+        """CRITICAL: Test multiple concurrent user sessions E2E."""
+        logger.info("\\n" + "👥 STARTING CONCURRENT USER SESSIONS E2E TEST")
 
-                                                # Execute concurrent user journeys
-# REMOVED_SYNTAX_ERROR: async def run_concurrent_user_journey(session: E2ETestSession, user_index: int):
-    # REMOVED_SYNTAX_ERROR: try:
-        # Create thread
-        # REMOVED_SYNTAX_ERROR: session.thread_id = await self.service_integrator.create_thread(session.user_id)
-        # REMOVED_SYNTAX_ERROR: if not session.thread_id:
-            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-            # REMOVED_SYNTAX_ERROR: return {'success': False, 'error': 'Thread creation failed', 'user_index': user_index}
+        concurrent_users = 3
+        user_sessions = []
 
-            # Connect WebSocket
-            # REMOVED_SYNTAX_ERROR: ws_client = RealWebSocketClient()
-            # REMOVED_SYNTAX_ERROR: connected = await ws_client.connect(session.thread_id, session.user_id)
-            # REMOVED_SYNTAX_ERROR: if not connected:
-                # REMOVED_SYNTAX_ERROR: return {'success': False, 'error': 'WebSocket connection failed', 'user_index': user_index}
+        # Create concurrent user sessions
+        for i in range(concurrent_users):
+            session = E2ETestSession(
+                session_id=f"concurrent-test-{i}-{uuid.uuid4()}",
+                user_id=f"concurrent-user-{i}-{uuid.uuid4()}",
+                thread_id=""
+            )
+            user_sessions.append(session)
+            self.test_sessions.append(session)
 
-                # REMOVED_SYNTAX_ERROR: session.websocket_connection = ws_client
+        async def run_concurrent_user_journey(session: E2ETestSession, user_index: int):
+            try:
+                # Create thread
+                session.thread_id = await self.service_integrator.create_thread(session.user_id)
+                if not session.thread_id:
+                    return {'success': False, 'error': 'Thread creation failed', 'user_index': user_index}
+
+                # Connect WebSocket
+                ws_client = RealWebSocketClient()
+                connected = await ws_client.connect(session.thread_id, session.user_id)
+                if not connected:
+                    return {'success': False, 'error': 'WebSocket connection failed', 'user_index': user_index}
+
+                session.websocket_connection = ws_client
 
                 # Send user request
-                # REMOVED_SYNTAX_ERROR: user_request = "formatted_string"
+                user_request = f"User {user_index}: Create an optimization plan for our system performance."
 
-                # REMOVED_SYNTAX_ERROR: await ws_client.send_user_message(user_request)
+                await ws_client.send_user_message(user_request)
 
                 # Wait for agent response
-                # REMOVED_SYNTAX_ERROR: events = await ws_client.wait_for_events( )
-                # REMOVED_SYNTAX_ERROR: expected_types=['agent_started', 'agent_completed'],
-                # REMOVED_SYNTAX_ERROR: timeout=60.0
-                
-
-                # REMOVED_SYNTAX_ERROR: return { )
-                # REMOVED_SYNTAX_ERROR: 'success': True,
-                # REMOVED_SYNTAX_ERROR: 'user_index': user_index,
-                # REMOVED_SYNTAX_ERROR: 'events_received': len(events),
-                # REMOVED_SYNTAX_ERROR: 'thread_id': session.thread_id
-                
-
-                # REMOVED_SYNTAX_ERROR: except Exception as e:
-                    # REMOVED_SYNTAX_ERROR: return {'success': False, 'error': str(e), 'user_index': user_index}
-
-                    # Run all sessions concurrently
-                    # REMOVED_SYNTAX_ERROR: start_time = time.time()
-                    # REMOVED_SYNTAX_ERROR: tasks = [run_concurrent_user_journey(user_sessions[i], i) for i in range(concurrent_users)]
-                    # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks, return_exceptions=True)
-                    # REMOVED_SYNTAX_ERROR: total_time = time.time() - start_time
-
-                    # Analyze concurrent results
-                    # REMOVED_SYNTAX_ERROR: successful_sessions = [item for item in []]
-                    # REMOVED_SYNTAX_ERROR: success_rate = len(successful_sessions) / concurrent_users
-
-                    # Validate concurrent performance
-                    # REMOVED_SYNTAX_ERROR: assert success_rate >= 0.67, \
-                    # REMOVED_SYNTAX_ERROR: "formatted_string"
-
-                    # REMOVED_SYNTAX_ERROR: assert total_time < 90.0, \
-                    # REMOVED_SYNTAX_ERROR: "formatted_string"
-
-                    # Log results
-                    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                    # REMOVED_SYNTAX_ERROR: for result in results:
-                        # REMOVED_SYNTAX_ERROR: if isinstance(result, dict):
-                            # REMOVED_SYNTAX_ERROR: if result['success']:
-                                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                # REMOVED_SYNTAX_ERROR: else:
-                                    # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
-
-                                    # Removed problematic line: @pytest.mark.asyncio
-                                    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-                                    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-                                    # Removed problematic line: async def test_error_recovery_user_experience(self):
-                                        # REMOVED_SYNTAX_ERROR: """CRITICAL: Test error recovery from user experience perspective."""
-                                        # REMOVED_SYNTAX_ERROR: pass
-                                        # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                        # REMOVED_SYNTAX_ERROR: " + "🛠️ STARTING ERROR RECOVERY USER EXPERIENCE TEST")
-
-                                        # Create session
-                                        # REMOVED_SYNTAX_ERROR: session = E2ETestSession( )
-                                        # REMOVED_SYNTAX_ERROR: session_id="formatted_string",
-                                        # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
-                                        # REMOVED_SYNTAX_ERROR: thread_id=""
-                                        
-                                        # REMOVED_SYNTAX_ERROR: self.test_sessions.append(session)
-
-                                        # REMOVED_SYNTAX_ERROR: try:
-                                            # Setup normal connection
-                                            # REMOVED_SYNTAX_ERROR: session.thread_id = await self.service_integrator.create_thread(session.user_id)
-                                            # REMOVED_SYNTAX_ERROR: assert session.thread_id, "Thread creation failed for error recovery test"
-
-                                            # REMOVED_SYNTAX_ERROR: ws_client = RealWebSocketClient()
-                                            # REMOVED_SYNTAX_ERROR: connected = await ws_client.connect(session.thread_id, session.user_id)
-                                            # REMOVED_SYNTAX_ERROR: assert connected, "WebSocket connection failed for error recovery test"
-
-                                            # REMOVED_SYNTAX_ERROR: session.websocket_connection = ws_client
-
-                                            # Test error scenarios that users might encounter
-                                            # REMOVED_SYNTAX_ERROR: error_scenarios = [ )
-                                            # REMOVED_SYNTAX_ERROR: "",  # Empty message
-                                            # REMOVED_SYNTAX_ERROR: "x" * 10000,  # Very long message
-                                            # REMOVED_SYNTAX_ERROR: "Invalid request with no clear intent or structure that might confuse the system"
-                                            
-
-                                            # REMOVED_SYNTAX_ERROR: recovery_scores = []
-
-                                            # REMOVED_SYNTAX_ERROR: for i, error_scenario in enumerate(error_scenarios):
-                                                # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-
-                                                # Send problematic request
-                                                # REMOVED_SYNTAX_ERROR: await ws_client.send_user_message(error_scenario)
-
-                                                # Wait for system response
-                                                # REMOVED_SYNTAX_ERROR: start_time = time.time()
-                                                # REMOVED_SYNTAX_ERROR: events = await ws_client.wait_for_events( )
-                                                # REMOVED_SYNTAX_ERROR: expected_types=['agent_started', 'agent_completed', 'error'],
-                                                # REMOVED_SYNTAX_ERROR: timeout=45.0
-                                                
-                                                # REMOVED_SYNTAX_ERROR: recovery_time = time.time() - start_time
-
-                                                # Analyze recovery quality
-                                                # REMOVED_SYNTAX_ERROR: if events:
-                                                    # System responded - good
-                                                    # REMOVED_SYNTAX_ERROR: recovery_score = max(0.0, 1.0 - (recovery_time / 30.0))  # 30s = 0 score
-
-                                                    # Bonus for graceful error handling
-                                                    # REMOVED_SYNTAX_ERROR: event_types = [e['message_type'] for e in events]
-                                                    # REMOVED_SYNTAX_ERROR: if any('error' not in t.lower() for t in event_types):
-                                                        # REMOVED_SYNTAX_ERROR: recovery_score += 0.2  # Bonus for non-error response
-
-                                                        # REMOVED_SYNTAX_ERROR: recovery_scores.append(min(1.0, recovery_score))
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                                        # REMOVED_SYNTAX_ERROR: else:
-                                                            # REMOVED_SYNTAX_ERROR: recovery_scores.append(0.0)
-                                                            # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
-
-                                                            # Brief pause between scenarios
-                                                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(2.0)
-
-                                                            # Overall error recovery assessment
-                                                            # REMOVED_SYNTAX_ERROR: avg_recovery_score = sum(recovery_scores) / len(recovery_scores)
-
-                                                            # REMOVED_SYNTAX_ERROR: assert avg_recovery_score >= 0.5, \
-                                                            # REMOVED_SYNTAX_ERROR: "formatted_string"
-
-                                                            # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-
-                                                            # REMOVED_SYNTAX_ERROR: except Exception as e:
-                                                                # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                                                                # REMOVED_SYNTAX_ERROR: raise
-
-                                                                # REMOVED_SYNTAX_ERROR: finally:
-                                                                    # REMOVED_SYNTAX_ERROR: if session.websocket_connection:
-                                                                        # REMOVED_SYNTAX_ERROR: await session.websocket_connection.disconnect()
-
-
-                                                                        # ============================================================================
-                                                                        # PERFORMANCE AND SCALABILITY E2E TESTS
-                                                                        # ============================================================================
-
-# REMOVED_SYNTAX_ERROR: class TestActionsAgentE2EPerformance:
-    # REMOVED_SYNTAX_ERROR: """E2E performance and scalability tests under realistic conditions."""
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: async def setup_performance_e2e_environment(self):
-    # REMOVED_SYNTAX_ERROR: """Setup environment for performance E2E testing."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Setting up performance E2E environment...")
-
-    # REMOVED_SYNTAX_ERROR: self.docker_manager = UnifiedDockerManager()
-    # Removed problematic line: await self.docker_manager.ensure_services_running([ ))
-    # REMOVED_SYNTAX_ERROR: 'postgres', 'redis', 'backend'
-    
-
-    # REMOVED_SYNTAX_ERROR: self.env = IsolatedEnvironment()
-    # REMOVED_SYNTAX_ERROR: self.service_integrator = RealServiceIntegrator(self.env)
-    # REMOVED_SYNTAX_ERROR: await self.service_integrator.initialize_session()
-
-    # REMOVED_SYNTAX_ERROR: yield
-
-    # REMOVED_SYNTAX_ERROR: await self.service_integrator.cleanup()
-    # REMOVED_SYNTAX_ERROR: await self.docker_manager.cleanup_if_needed()
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-    # Removed problematic line: async def test_sustained_load_e2e_performance(self):
-        # REMOVED_SYNTAX_ERROR: """CRITICAL: Test sustained load performance E2E."""
-        # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: logger.info(" )
-        # REMOVED_SYNTAX_ERROR: " + "⚡ STARTING SUSTAINED LOAD E2E PERFORMANCE TEST")
-
-        # REMOVED_SYNTAX_ERROR: load_users = 5
-        # REMOVED_SYNTAX_ERROR: requests_per_user = 3
-        # REMOVED_SYNTAX_ERROR: total_requests = load_users * requests_per_user
-
-        # Performance tracking
-        # REMOVED_SYNTAX_ERROR: performance_metrics = { )
-        # REMOVED_SYNTAX_ERROR: 'successful_requests': 0,
-        # REMOVED_SYNTAX_ERROR: 'failed_requests': 0,
-        # REMOVED_SYNTAX_ERROR: 'total_response_time': 0.0,
-        # REMOVED_SYNTAX_ERROR: 'response_times': [],
-        # REMOVED_SYNTAX_ERROR: 'websocket_events': 0
-        
-
-# REMOVED_SYNTAX_ERROR: async def simulate_user_load(user_index: int):
-    # REMOVED_SYNTAX_ERROR: """Simulate sustained user load."""
-    # REMOVED_SYNTAX_ERROR: user_results = []
-
-    # REMOVED_SYNTAX_ERROR: for request_index in range(requests_per_user):
-        # REMOVED_SYNTAX_ERROR: try:
-            # Create unique session
-            # REMOVED_SYNTAX_ERROR: user_id = "formatted_string"
-            # REMOVED_SYNTAX_ERROR: thread_id = await self.service_integrator.create_thread(user_id)
-
-            # REMOVED_SYNTAX_ERROR: if not thread_id:
-                # REMOVED_SYNTAX_ERROR: user_results.append({'success': False, 'error': 'Thread creation failed'})
-                # REMOVED_SYNTAX_ERROR: continue
-
-                # WebSocket connection
-                # REMOVED_SYNTAX_ERROR: ws_client = RealWebSocketClient()
-                # REMOVED_SYNTAX_ERROR: connected = await ws_client.connect(thread_id, user_id)
-
-                # REMOVED_SYNTAX_ERROR: if not connected:
-                    # REMOVED_SYNTAX_ERROR: user_results.append({'success': False, 'error': 'WebSocket connection failed'})
-                    # REMOVED_SYNTAX_ERROR: continue
-
-                    # Send request and measure performance
-                    # REMOVED_SYNTAX_ERROR: request_start = time.time()
-
-                    # REMOVED_SYNTAX_ERROR: user_request = "formatted_string"
-                    # REMOVED_SYNTAX_ERROR: await ws_client.send_user_message(user_request)
-
-                    # Wait for completion
-                    # REMOVED_SYNTAX_ERROR: events = await ws_client.wait_for_events( )
-                    # REMOVED_SYNTAX_ERROR: expected_types=['agent_completed', 'final_report'],
-                    # REMOVED_SYNTAX_ERROR: timeout=60.0
-                    
-
-                    # REMOVED_SYNTAX_ERROR: response_time = time.time() - request_start
-
-                    # REMOVED_SYNTAX_ERROR: user_results.append({ ))
-                    # REMOVED_SYNTAX_ERROR: 'success': len(events) > 0,
-                    # REMOVED_SYNTAX_ERROR: 'response_time': response_time,
-                    # REMOVED_SYNTAX_ERROR: 'events_count': len(events),
-                    # REMOVED_SYNTAX_ERROR: 'user_index': user_index,
-                    # REMOVED_SYNTAX_ERROR: 'request_index': request_index
-                    
-
-                    # Cleanup
-                    # REMOVED_SYNTAX_ERROR: await ws_client.disconnect()
-
-                    # Brief pause to avoid overwhelming
-                    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.5)
-
-                    # REMOVED_SYNTAX_ERROR: except Exception as e:
-                        # REMOVED_SYNTAX_ERROR: user_results.append({ ))
-                        # REMOVED_SYNTAX_ERROR: 'success': False,
-                        # REMOVED_SYNTAX_ERROR: 'error': str(e),
-                        # REMOVED_SYNTAX_ERROR: 'user_index': user_index,
-                        # REMOVED_SYNTAX_ERROR: 'request_index': request_index
-                        
-
-                        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-                        # REMOVED_SYNTAX_ERROR: return user_results
-
-                        # Execute sustained load
-                        # REMOVED_SYNTAX_ERROR: total_start_time = time.time()
-                        # REMOVED_SYNTAX_ERROR: tasks = [simulate_user_load(i) for i in range(load_users)]
-                        # REMOVED_SYNTAX_ERROR: all_user_results = await asyncio.gather(*tasks, return_exceptions=True)
-                        # REMOVED_SYNTAX_ERROR: total_duration = time.time() - total_start_time
-
-                        # Aggregate results
-                        # REMOVED_SYNTAX_ERROR: all_results = []
-                        # REMOVED_SYNTAX_ERROR: for user_results in all_user_results:
-                            # REMOVED_SYNTAX_ERROR: if isinstance(user_results, list):
-                                # REMOVED_SYNTAX_ERROR: all_results.extend(user_results)
-
-                                # Calculate performance metrics
-                                # REMOVED_SYNTAX_ERROR: successful_results = [item for item in []]
-                                # REMOVED_SYNTAX_ERROR: failed_results = [item for item in []]
-
-                                # REMOVED_SYNTAX_ERROR: success_rate = len(successful_results) / len(all_results) if all_results else 0
-
-                                # REMOVED_SYNTAX_ERROR: if successful_results:
-                                    # REMOVED_SYNTAX_ERROR: response_times = [item for item in []]
-                                    # REMOVED_SYNTAX_ERROR: avg_response_time = sum(response_times) / len(response_times) if response_times else 0
-                                    # REMOVED_SYNTAX_ERROR: max_response_time = max(response_times) if response_times else 0
-                                    # REMOVED_SYNTAX_ERROR: total_events = sum(r.get('events_count', 0) for r in successful_results)
-                                    # REMOVED_SYNTAX_ERROR: else:
-                                        # REMOVED_SYNTAX_ERROR: avg_response_time = 0
-                                        # REMOVED_SYNTAX_ERROR: max_response_time = 0
-                                        # REMOVED_SYNTAX_ERROR: total_events = 0
-
-                                        # Performance validations
-                                        # REMOVED_SYNTAX_ERROR: assert success_rate >= 0.7, \
-                                        # REMOVED_SYNTAX_ERROR: "formatted_string"
-
-                                        # REMOVED_SYNTAX_ERROR: assert avg_response_time < 45.0, \
-                                        # REMOVED_SYNTAX_ERROR: "formatted_string"
-
-                                        # REMOVED_SYNTAX_ERROR: assert total_duration < 240.0, \
-                                        # REMOVED_SYNTAX_ERROR: "formatted_string"
-
-                                        # Calculate throughput
-                                        # REMOVED_SYNTAX_ERROR: requests_per_second = len(successful_results) / total_duration if total_duration > 0 else 0
-
-                                        # REMOVED_SYNTAX_ERROR: assert requests_per_second > 0.05, \
-                                        # REMOVED_SYNTAX_ERROR: "formatted_string"
-
-                                        # Performance report
-                                        # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                        # REMOVED_SYNTAX_ERROR: " + "📊 SUSTAINED LOAD PERFORMANCE REPORT")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("=" * 50)
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                        # REMOVED_SYNTAX_ERROR: logger.info("=" * 50)
-
-                                        # REMOVED_SYNTAX_ERROR: if failed_results:
-                                            # REMOVED_SYNTAX_ERROR: logger.warning("Failed requests:")
-                                            # REMOVED_SYNTAX_ERROR: for failure in failed_results[:5]:  # Show first 5 failures
-                                            # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
-
-
-                                            # ============================================================================
-                                            # COMPREHENSIVE E2E TEST SUITE
-                                            # ============================================================================
-
-                                            # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
-                                            # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
-# REMOVED_SYNTAX_ERROR: class TestActionsAgentE2EComprehensive:
-    # REMOVED_SYNTAX_ERROR: """Comprehensive E2E test suite for ActionsAgent complete workflow."""
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_complete_e2e_validation_suite(self):
-        # REMOVED_SYNTAX_ERROR: """Run complete E2E validation for ActionsAgent."""
-        # REMOVED_SYNTAX_ERROR: logger.info(" )
-        # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-        # REMOVED_SYNTAX_ERROR: logger.info("RUNNING COMPLETE ACTIONS AGENT E2E VALIDATION SUITE")
-        # REMOVED_SYNTAX_ERROR: logger.info("TESTING: Complete user journey with REAL services")
-        # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
-
-        # Initialize real services
-        # REMOVED_SYNTAX_ERROR: docker_manager = UnifiedDockerManager()
-        # Removed problematic line: services_ready = await docker_manager.ensure_services_running([ ))
-        # REMOVED_SYNTAX_ERROR: 'postgres', 'redis', 'backend'
-        
-
-        # REMOVED_SYNTAX_ERROR: if not services_ready:
-            # REMOVED_SYNTAX_ERROR: pytest.skip("Real services not available for E2E testing")
-
-            # REMOVED_SYNTAX_ERROR: env = IsolatedEnvironment()
-            # REMOVED_SYNTAX_ERROR: service_integrator = RealServiceIntegrator(env)
-            # REMOVED_SYNTAX_ERROR: await service_integrator.initialize_session()
-
-            # REMOVED_SYNTAX_ERROR: try:
-                # E2E validation metrics
-                # REMOVED_SYNTAX_ERROR: e2e_metrics = UserExperienceMetrics()
-
-                # REMOVED_SYNTAX_ERROR: logger.info("🌐 Testing basic E2E connectivity...")
-
-                # Test 1: Basic connectivity
-                # REMOVED_SYNTAX_ERROR: test_user_id = "formatted_string"
-                # REMOVED_SYNTAX_ERROR: test_thread_id = await service_integrator.create_thread(test_user_id)
-
-                # REMOVED_SYNTAX_ERROR: if test_thread_id:
-                    # REMOVED_SYNTAX_ERROR: e2e_metrics.chat_value_delivery_score += 0.2
-                    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                    # REMOVED_SYNTAX_ERROR: else:
-                        # REMOVED_SYNTAX_ERROR: logger.error("❌ Backend API connectivity failed")
-
-                        # Test 2: WebSocket connectivity
-                        # REMOVED_SYNTAX_ERROR: if test_thread_id:
-                            # REMOVED_SYNTAX_ERROR: ws_client = RealWebSocketClient()
-                            # REMOVED_SYNTAX_ERROR: ws_connected = await ws_client.connect(test_thread_id, test_user_id)
-
-                            # REMOVED_SYNTAX_ERROR: if ws_connected:
-                                # REMOVED_SYNTAX_ERROR: e2e_metrics.websocket_responsiveness_score += 0.3
-                                # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket connectivity established")
-
-                                # Test message sending
-                                # REMOVED_SYNTAX_ERROR: message_sent = await ws_client.send_user_message("E2E validation test message")
-                                # REMOVED_SYNTAX_ERROR: if message_sent:
-                                    # REMOVED_SYNTAX_ERROR: e2e_metrics.websocket_responsiveness_score += 0.3
-                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket message sending works")
-
-                                    # REMOVED_SYNTAX_ERROR: await ws_client.disconnect()
-                                    # REMOVED_SYNTAX_ERROR: else:
-                                        # REMOVED_SYNTAX_ERROR: logger.error("❌ WebSocket connectivity failed")
-
-                                        # Test 3: Agent processing pipeline
-                                        # REMOVED_SYNTAX_ERROR: logger.info("🤖 Testing agent processing pipeline...")
-                                        # REMOVED_SYNTAX_ERROR: if test_thread_id:
-                                            # Send realistic request
-                                            # REMOVED_SYNTAX_ERROR: api_sent = await service_integrator.send_chat_message( )
-                                            # REMOVED_SYNTAX_ERROR: test_thread_id,
-                                            # REMOVED_SYNTAX_ERROR: test_user_id,
-                                            # REMOVED_SYNTAX_ERROR: "E2E test: Create action plan for system optimization"
-                                            
-
-                                            # REMOVED_SYNTAX_ERROR: if api_sent:
-                                                # REMOVED_SYNTAX_ERROR: e2e_metrics.action_plan_quality_score += 0.4
-                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Agent processing request sent")
-
-                                                # Check status after processing time
-                                                # REMOVED_SYNTAX_ERROR: await asyncio.sleep(10.0)
-                                                # REMOVED_SYNTAX_ERROR: status = await service_integrator.get_thread_status(test_thread_id)
-
-                                                # REMOVED_SYNTAX_ERROR: if status.get('status') != 'error':
-                                                    # REMOVED_SYNTAX_ERROR: e2e_metrics.action_plan_quality_score += 0.4
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                                    # REMOVED_SYNTAX_ERROR: else:
-                                                        # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
-                                                        # REMOVED_SYNTAX_ERROR: else:
-                                                            # REMOVED_SYNTAX_ERROR: logger.error("❌ Agent processing request failed")
-
-                                                            # Test 4: Performance validation
-                                                            # REMOVED_SYNTAX_ERROR: logger.info("⚡ Testing performance characteristics...")
-                                                            # REMOVED_SYNTAX_ERROR: start_time = time.time()
-
-                                                            # Simulate realistic performance test
-                                                            # REMOVED_SYNTAX_ERROR: performance_thread = await service_integrator.create_thread("formatted_string")
-                                                            # REMOVED_SYNTAX_ERROR: if performance_thread:
-                                                                # REMOVED_SYNTAX_ERROR: perf_ws = RealWebSocketClient()
-                                                                # Removed problematic line: if await perf_ws.connect(performance_thread, test_user_id):
-                                                                    # REMOVED_SYNTAX_ERROR: await perf_ws.send_user_message("Performance test: quick optimization plan")
-
-                                                                    # REMOVED_SYNTAX_ERROR: events = await perf_ws.wait_for_events( )
-                                                                    # REMOVED_SYNTAX_ERROR: expected_types=['agent_started'],
-                                                                    # REMOVED_SYNTAX_ERROR: timeout=15.0
-                                                                    
-
-                                                                    # REMOVED_SYNTAX_ERROR: if events:
-                                                                        # REMOVED_SYNTAX_ERROR: performance_time = time.time() - start_time
-                                                                        # REMOVED_SYNTAX_ERROR: e2e_metrics.performance_satisfaction_score = max(0.0, 1.0 - (performance_time / 20.0))
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-
-                                                                        # REMOVED_SYNTAX_ERROR: await perf_ws.disconnect()
-
-                                                                        # Calculate overall E2E score
-                                                                        # REMOVED_SYNTAX_ERROR: overall_e2e_score = e2e_metrics.calculate_overall_score()
-
-                                                                        # E2E validation report
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                                                        # REMOVED_SYNTAX_ERROR: " + "🎯 E2E VALIDATION REPORT")
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("=" * 40)
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info(f"")
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-
-                                                                        # Validation threshold
-                                                                        # REMOVED_SYNTAX_ERROR: e2e_threshold = 0.5  # 50% E2E functionality required
-
-                                                                        # REMOVED_SYNTAX_ERROR: if overall_e2e_score >= e2e_threshold:
-                                                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ E2E VALIDATION PASSED")
-                                                                            # REMOVED_SYNTAX_ERROR: else:
-                                                                                # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
-
-                                                                                # REMOVED_SYNTAX_ERROR: finally:
-                                                                                    # REMOVED_SYNTAX_ERROR: await service_integrator.cleanup()
-                                                                                    # REMOVED_SYNTAX_ERROR: await docker_manager.cleanup_if_needed()
-
-
-                                                                                    # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                                                                        # Run with: python tests/e2e/test_actions_agent_full_flow.py
-                                                                                        # Or: pytest tests/e2e/test_actions_agent_full_flow.py -v
-                                                                                        # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])
-                                                                                        # REMOVED_SYNTAX_ERROR: pass
+                events = await ws_client.wait_for_events(
+                    expected_types=['agent_started', 'agent_completed'],
+                    timeout=60.0
+                )
+
+                return {
+                    'success': True,
+                    'user_index': user_index,
+                    'events_received': len(events),
+                    'thread_id': session.thread_id
+                }
+
+            except Exception as e:
+                return {'success': False, 'error': str(e), 'user_index': user_index}
+
+        # Run all sessions concurrently
+        start_time = time.time()
+        tasks = [run_concurrent_user_journey(user_sessions[i], i) for i in range(concurrent_users)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        total_time = time.time() - start_time
+
+        # Analyze concurrent results
+        successful_sessions = [result for result in results if isinstance(result, dict) and result.get('success')]
+        success_rate = len(successful_sessions) / concurrent_users
+
+        # Validate concurrent performance
+        assert success_rate >= 0.67, \\
+            f"Concurrent session success rate too low: {success_rate:.2f} (min 0.67). System cannot handle multiple users."
+
+        assert total_time < 90.0, \\
+            f"Concurrent execution too slow: {total_time:.2f}s (max 90s). Performance degrades under load."
+
+        # Log results
+        logger.info(f"✅ Concurrent test completed: {len(successful_sessions)}/{concurrent_users} successful")
+        for result in results:
+            if isinstance(result, dict):
+                if result['success']:
+                    logger.info(f"  ✅ User {result['user_index']}: {result['events_received']} events")
+                else:
+                    logger.warning(f"  ❌ User {result['user_index']}: {result['error']}")
+
+    @pytest.mark.asyncio 
+    @pytest.mark.critical
+    async def test_error_recovery_user_experience(self, setup_complete_e2e_environment):
+        """CRITICAL: Test error recovery from user experience perspective."""
+        logger.info("\\n" + "🛠️ STARTING ERROR RECOVERY USER EXPERIENCE TEST")
+
+        # Create session
+        session = E2ETestSession(
+            session_id=f"error-recovery-{uuid.uuid4()}",
+            user_id=f"recovery-user-{uuid.uuid4()}",
+            thread_id=""
+        )
+        self.test_sessions.append(session)
+
+        try:
+            # Setup normal connection
+            session.thread_id = await self.service_integrator.create_thread(session.user_id)
+            assert session.thread_id, "Thread creation failed for error recovery test"
+
+            ws_client = RealWebSocketClient()
+            connected = await ws_client.connect(session.thread_id, session.user_id)
+            assert connected, "WebSocket connection failed for error recovery test"
+
+            session.websocket_connection = ws_client
+
+            # Test error scenarios that users might encounter
+            error_scenarios = [
+                "",  # Empty message
+                "x" * 10000,  # Very long message
+                "Invalid request with no clear intent or structure that might confuse the system"
+            ]
+
+            recovery_scores = []
+
+            for i, error_scenario in enumerate(error_scenarios):
+                logger.info(f"🧪 Testing error scenario {i+1}: {error_scenario[:50]}...")
+
+                # Send problematic request
+                await ws_client.send_user_message(error_scenario)
+
+                # Wait for system response
+                start_time = time.time()
+                events = await ws_client.wait_for_events(
+                    expected_types=['agent_started', 'agent_completed', 'error'],
+                    timeout=45.0
+                )
+                recovery_time = time.time() - start_time
+
+                # Analyze recovery quality
+                if events:
+                    # System responded - good
+                    recovery_score = max(0.0, 1.0 - (recovery_time / 30.0))  # 30s = 0 score
+
+                    # Bonus for graceful error handling
+                    event_types = [e['message_type'] for e in events]
+                    if any('error' not in t.lower() for t in event_types):
+                        recovery_score += 0.2  # Bonus for non-error response
+
+                    recovery_scores.append(min(1.0, recovery_score))
+                    logger.info(f"✅ Recovery time: {recovery_time:.2f}s, score: {recovery_score:.2f}")
+                else:
+                    recovery_scores.append(0.0)
+                    logger.warning(f"❌ No response to error scenario {i+1}")
+
+                # Brief pause between scenarios
+                await asyncio.sleep(2.0)
+
+            # Overall error recovery assessment
+            avg_recovery_score = sum(recovery_scores) / len(recovery_scores)
+
+            assert avg_recovery_score >= 0.5, \\
+                f"Error recovery score too low: {avg_recovery_score:.2f} (min 0.5). System does not handle errors gracefully."
+
+            logger.info(f"✅ Error recovery test passed: {avg_recovery_score:.2f} average score")
+
+        except Exception as e:
+            logger.error(f"🚨 Error recovery test failed: {e}")
+            raise
+
+        finally:
+            if session.websocket_connection:
+                await session.websocket_connection.disconnect()
+
+
+if __name__ == "__main__":
+    # Run with: python tests/e2e/test_actions_agent_full_flow.py
+    # Or: pytest tests/e2e/test_actions_agent_full_flow.py -v
+    pytest.main([__file__, "-v", "--tb=short"])
