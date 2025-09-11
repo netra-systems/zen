@@ -104,25 +104,33 @@ class AgentExecutionCore:
         
     def _validate_user_execution_context(
         self, 
-<<<<<<< HEAD
         user_context: UserExecutionContext,
         execution_context: AgentExecutionContext
-=======
-        state: Union[Any, UserExecutionContext],
-        context: AgentExecutionContext
->>>>>>> origin/develop-long-lived
     ) -> UserExecutionContext:
         """
         CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation.
         
         This method ensures we have a valid UserExecutionContext with proper user isolation,
         preventing any cross-user data contamination vulnerabilities.
+        
+        Phase 1 Migration: Only UserExecutionContext accepted (DeepAgentState eliminated)
         """
         if not isinstance(user_context, UserExecutionContext):
-            raise ValueError(f"Expected UserExecutionContext, got {type(user_context)}. "
-                           f"DeepAgentState is no longer supported due to security risks.")
+            # Check if this is a DeepAgentState attempt for better error message
+            if hasattr(user_context, '__class__') and 'DeepAgentState' in user_context.__class__.__name__:
+                raise ValueError(
+                    f"🚨 SECURITY VULNERABILITY: DeepAgentState is FORBIDDEN due to user isolation risks. "
+                    f"Agent '{execution_context.agent_name}' (run_id: {execution_context.run_id}) "
+                    f"attempted to use DeepAgentState which can cause data leakage between users. "
+                    f"MIGRATION REQUIRED: Use UserExecutionContext pattern immediately. "
+                    f"See issue #271 remediation plan for migration guide."
+                )
+            else:
+                raise ValueError(
+                    f"Expected UserExecutionContext, got {type(user_context)}. "
+                    f"DeepAgentState is no longer supported due to security risks."
+                )
         
-<<<<<<< HEAD
         # Validate context integrity
         if not user_context.user_id:
             raise ValueError("UserExecutionContext missing required user_id")
@@ -132,47 +140,11 @@ class AgentExecutionCore:
             raise ValueError("UserExecutionContext missing required run_id")
             
         return user_context
-=======
-        elif hasattr(state, '__class__') and 'DeepAgentState' in state.__class__.__name__:
-            # DEPRECATED: Issue warning and migrate to secure pattern
-            import warnings
-            warnings.warn(
-                f"🚨 SECURITY WARNING: DeepAgentState is deprecated due to USER ISOLATION RISKS. "
-                f"Agent '{context.agent_name}' (run_id: {context.run_id}) is using DeepAgentState "
-                f"which may cause data leakage between users. Migrate to UserExecutionContext pattern "
-                f"immediately. See EXECUTION_PATTERN_TECHNICAL_DESIGN.md for migration guide.",
-                DeprecationWarning,
-                stacklevel=3
-            )
-            
-            # Convert to secure UserExecutionContext
-            return UserExecutionContext.from_agent_execution_context(
-                user_id=getattr(state, 'user_id', None) or 'unknown',
-                thread_id=getattr(state, 'thread_id', None) or context.thread_id or 'unknown',
-                run_id=getattr(state, 'run_id', None) or str(context.run_id),
-                agent_context={
-                    'agent_name': context.agent_name,
-                    'user_request': getattr(state, 'user_request', 'default_request'),
-                    'agent_input': getattr(state, 'agent_input', {}),
-                },
-                audit_metadata={
-                    'migration_source': 'DeepAgentState',
-                    'migration_timestamp': time.time(),
-                    'original_state_type': type(state).__name__
-                }
-            )
-        else:
-            raise ValueError(f"Unsupported state type: {type(state)}. Must be UserExecutionContext (DeepAgentState is deprecated for security reasons).")
->>>>>>> origin/develop-long-lived
     
     async def execute_agent(
         self, 
         context: AgentExecutionContext,
-<<<<<<< HEAD
         user_context: UserExecutionContext,
-=======
-        state: Union[Any, UserExecutionContext],
->>>>>>> origin/develop-long-lived
         timeout: Optional[float] = None
     ) -> AgentExecutionResult:
         """Execute agent with full lifecycle tracking and death detection."""

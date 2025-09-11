@@ -723,13 +723,14 @@ class TestExecutionEngine(TestUnifiedTestRunnerIntegration):
         BUSINESS IMPACT: Parallel execution reduces CI/CD time while preventing
         resource conflicts that could destabilize business validation.
         """
-        # Test parallel execution planning
-        parallel_groups = self.test_runner.category_system.create_parallel_groups([
+        # Test parallel execution planning using create_execution_plan
+        category_system = self.test_runner.category_system
+        execution_plan = category_system.create_execution_plan([
             "unit", "integration", "api"
         ])
         
-        self.assertIsInstance(parallel_groups, list)
-        self.assertGreater(len(parallel_groups), 0)
+        self.assertIsInstance(execution_plan.phases, list)
+        self.assertGreater(len(execution_plan.phases), 0)
         
         # Test resource requirement analysis
         resource_requirements = self.test_runner.category_system.analyze_resource_requirements([
@@ -1681,4 +1682,12 @@ class MockConcurrencyCoordinator:
 
 
 class MockFailureRecoveryManager:
-    """Mo
+    """Mock failure recovery manager."""
+    pass
+
+
+
+
+if __name__ == "__main__":
+    # Run tests with real infrastructure
+    pytest.main([__file__, "-v", "--tb=short"])
