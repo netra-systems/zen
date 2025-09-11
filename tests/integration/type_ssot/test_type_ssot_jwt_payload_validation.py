@@ -20,8 +20,8 @@ import time
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone, timedelta
-from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.real_services_test_fixtures import real_services_fixture
+from test_framework.ssot.base_test_case import SSotBaseTestCase  
+from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from shared.types.core_types import UserID, SessionID, TokenString
 
 
@@ -81,7 +81,7 @@ class ExtendedJWTPayload(StandardJWTPayload):
         )
 
 
-class TestJWTPayloadSSotCompliance(BaseIntegrationTest):
+class TestJWTPayloadSSotCompliance(SSotBaseTestCase):
     """Integration tests for JWT payload SSOT compliance across services."""
     
     @pytest.mark.integration

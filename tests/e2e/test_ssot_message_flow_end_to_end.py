@@ -33,7 +33,7 @@ import aiohttp
 # SSOT Imports - Absolute imports only
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EAuthConfig
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.logging_config import central_logger
@@ -54,7 +54,7 @@ class TestSSotMessageFlowEndToEnd:
     def __init__(self):
         self.env = IsolatedEnvironment()
         self.auth_helper = E2EAuthHelper()
-        self.db_helper = DatabaseTestUtility(service="netra_backend")
+        self.db_helper = DatabaseTestUtilities(service="netra_backend")
         self.message_repository = MessageRepository()
         self.thread_repository = ThreadRepository()
         

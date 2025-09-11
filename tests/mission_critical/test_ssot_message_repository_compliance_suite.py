@@ -38,7 +38,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.logging_config import central_logger
@@ -57,7 +57,7 @@ class TestSSotMessageRepositoryCompliance:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) if hasattr(super(), '__init__') else None
         self.message_repository = MessageRepository()
-        self.db_helper = DatabaseTestUtility(service="netra_backend")
+        self.db_helper = DatabaseTestUtilities(service="netra_backend")
         
     async def setup_method(self):
         """Setup for each test with clean database state."""
@@ -418,7 +418,7 @@ class TestSSotMessageRepositoryIntegration:
         This test ensures both creation methods handle transactions properly
         and expose any transaction handling differences.
         """
-        db_helper = DatabaseTestUtility(service="netra_backend")
+        db_helper = DatabaseTestUtilities(service="netra_backend")
         message_repository = MessageRepository()
         test_thread_id = f"thread_{uuid.uuid4().hex[:8]}"
         

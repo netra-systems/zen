@@ -18,12 +18,12 @@ import pytest
 import uuid
 from datetime import datetime, timezone
 
-from test_framework.base_integration_test import BaseIntegrationTest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from netra_backend.app.clients.auth_client_core import AuthClientCore
 
 
-class TestAuthServiceIntegrationRealServices(BaseIntegrationTest):
+class TestAuthServiceIntegrationRealServices(SSotBaseTestCase):
     """Test authentication service integration with real services."""
     
     @pytest.mark.integration

@@ -16,7 +16,7 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 
 from .session_leak_tracker import SessionLeakTracker, track_session_lifecycle
@@ -44,7 +44,7 @@ class SessionLeakTestBase(SSotBaseTestCase, ABC):
     session_tracker: Optional[SessionLeakTracker] = None
     session_monitor: Optional[DatabaseSessionMonitor] = None
     test_engine: Optional[AsyncEngine] = None
-    db_utility: Optional[DatabaseTestUtility] = None
+    db_utility: Optional[DatabaseTestUtilities] = None
     auth_helper: Optional[E2EAuthHelper] = None
     
     async def setup_session_leak_testing(
@@ -60,7 +60,7 @@ class SessionLeakTestBase(SSotBaseTestCase, ABC):
             monitoring_interval: Database pool monitoring interval
         """
         # Set up database connection for testing
-        self.db_utility = DatabaseTestUtility(service="netra_backend")
+        self.db_utility = DatabaseTestUtilities(service="netra_backend")
         await self.db_utility.initialize()
         self.test_engine = self.db_utility.async_engine
         

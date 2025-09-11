@@ -21,7 +21,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine, EnhancedToolExecutionEngine
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from shared.types import UserID, ThreadID, RunID
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.ssot.websocket import WebSocketTestClient
 
 

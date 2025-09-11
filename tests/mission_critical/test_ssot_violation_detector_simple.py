@@ -23,7 +23,7 @@ import pytest
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.db.models_postgres import Message
 
@@ -34,12 +34,12 @@ class TestSSOTViolationDetection:
     
     This test compares message creation between:
     1. Proper SSOT MessageRepository (correct method)
-    2. Test framework DatabaseTestUtility (violation method)
+    2. Test framework DatabaseTestUtilities (violation method)
     """
     
     def __init__(self):
         self.message_repository = MessageRepository()
-        self.db_helper = DatabaseTestUtility(service="netra_backend")
+        self.db_helper = DatabaseTestUtilities(service="netra_backend")
         self.test_thread_id = f"thread_{uuid.uuid4().hex[:8]}"
         
     @pytest.mark.asyncio
