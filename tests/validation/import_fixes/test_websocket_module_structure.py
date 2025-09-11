@@ -287,7 +287,10 @@ class TestWebSocketModuleStructure(SSotBaseTestCase):
             from netra_backend.app.websocket_core.manager import WebSocketManager
             # If this succeeds, check for common WebSocket dependencies
             import asyncio
-            import websockets if 'websockets' in dir() else None
+            try:
+                import websockets
+            except ImportError:
+                pass  # websockets module is optional
             
         except ModuleNotFoundError as e:
             dependency_errors.append(f"WebSocket manager dependency error: {e}")
