@@ -70,7 +70,8 @@
       "Bash(git merge:*)",
       "Bash(cat:*)",
       "Bash(gcloud secrets versions list:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(git rev-parse:*)"
     ],
     "deny": [],
     "ask": []
