@@ -165,17 +165,23 @@ class AgentExecutionCore:
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
-        # CRITICAL REMEDIATION: Start execution tracking for comprehensive monitoring
-        state_exec_id = self.agent_tracker.start_execution(
+        # CRITICAL REMEDIATION: Create and start execution tracking for comprehensive monitoring
+        state_exec_id = self.agent_tracker.create_execution(
             agent_name=context.agent_name,
-            run_id=str(context.run_id),
+            thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
+            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
             metadata={
                 'correlation_id': trace_context.correlation_id,
-                'thread_id': user_execution_context.thread_id,
+                'run_id': str(context.run_id),
                 'timeout': timeout or self.DEFAULT_TIMEOUT
             }
         )
+        
+        # Start the execution
+        started = self.agent_tracker.start_execution(state_exec_id)
+        if not started:
+            raise RuntimeError(f"Failed to start execution tracking for {state_exec_id}")
         
         # DISABLED: Heartbeat feature suppresses errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
         # The heartbeat system was found to:
