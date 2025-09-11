@@ -217,6 +217,17 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager 
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # Implementation
 ```
 
+#### WebSocket Manager Factory Import (GOLDEN PATH FIX):
+```python
+# ISSUE: ModuleNotFoundError: No module named 'netra_backend.app.websocket_core.websocket_manager_factory'
+# SOLUTION: Created websocket_manager_factory.py compatibility module for Golden Path tests
+
+# WORKING IMPORTS:
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
+```
+
 #### E2E Test Helper Modules (IMPORT COMPATIBILITY):
 ```python
 # ISSUE: Missing E2E helper modules causing test collection failures
