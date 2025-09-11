@@ -99,6 +99,57 @@ class UserWebSocketContext:
 
 
 @dataclass
+class WebSocketEvent:
+    """WebSocket event structure for validation (SSOT compatibility layer).
+    
+    This dataclass provides compatibility with existing test infrastructure while
+    redirecting to the SSOT WebSocket event implementations in the unified emitter.
+    
+    Business Value: Enables test validation of WebSocket events critical for chat functionality.
+    """
+    event_type: str
+    payload: Dict[str, Any]
+    timestamp: float = field(default_factory=time.time)
+    user_id: str = ""
+    thread_id: Optional[str] = None
+    run_id: Optional[str] = None
+    connection_id: Optional[str] = None
+    agent_name: Optional[str] = None
+    tool_name: Optional[str] = None
+    validation_errors: List[str] = field(default_factory=list)
+    delivery_latency_ms: Optional[float] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert event to dictionary for transmission (SSOT compatibility)."""
+        return {
+            "type": self.event_type,
+            "user_id": self.user_id,
+            "thread_id": self.thread_id,
+            "run_id": self.run_id,
+            "timestamp": self.timestamp,
+            "payload": self.payload,
+            "agent_name": self.agent_name,
+            "tool_name": self.tool_name,
+            "connection_id": self.connection_id
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'WebSocketEvent':
+        """Create WebSocketEvent from dictionary (SSOT compatibility)."""
+        return cls(
+            event_type=data.get("type", ""),
+            payload=data.get("payload", {}),
+            timestamp=data.get("timestamp", time.time()),
+            user_id=data.get("user_id", ""),
+            thread_id=data.get("thread_id"),
+            run_id=data.get("run_id"),
+            connection_id=data.get("connection_id"),
+            agent_name=data.get("agent_name"),
+            tool_name=data.get("tool_name")
+        )
+
+
+@dataclass
 class WebSocketFactoryConfig:
     """Configuration for WebSocketBridgeFactory (redirected to SSOT)."""
     max_events_per_user: int = 1000
