@@ -14,6 +14,23 @@ import time
 logger = logging.getLogger(__name__)
 
 
+class HTTPError(Exception):
+    """HTTP error exception for external API calls.
+    
+    Raised when HTTP requests fail or return error status codes.
+    """
+    
+    def __init__(self, message: str, status_code: Optional[int] = None, response_data: Optional[Dict[str, Any]] = None):
+        super().__init__(message)
+        self.status_code = status_code
+        self.response_data = response_data or {}
+        
+    def __str__(self) -> str:
+        if self.status_code:
+            return f"HTTP {self.status_code}: {super().__str__()}"
+        return super().__str__()
+
+
 class HTTPMethod(Enum):
     """HTTP methods."""
     GET = "GET"
