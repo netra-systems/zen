@@ -124,7 +124,7 @@ class UnifiedConfigManager:
         }
         
         config_class = config_classes.get(environment, DevelopmentConfig)
-        self._logger.info(f"Creating {config_class.__name__} for environment: {environment}")
+        self._get_logger().info(f"Creating {config_class.__name__} for environment: {environment}")
         
         try:
             config = config_class()
@@ -139,11 +139,11 @@ class UnifiedConfigManager:
                     service_secret = env.get('SERVICE_SECRET') or env.get('JWT_SECRET_KEY')
                     if service_secret:
                         config.service_secret = service_secret.strip()
-                        self._logger.info("Loaded SERVICE_SECRET from IsolatedEnvironment (SSOT compliant)")
+                        self._get_logger().info("Loaded SERVICE_SECRET from IsolatedEnvironment (SSOT compliant)")
                     else:
-                        self._logger.warning("SERVICE_SECRET not found in environment variables")
+                        self._get_logger().warning("SERVICE_SECRET not found in environment variables")
                 except Exception as e:
-                    self._logger.error(f"Failed to load SERVICE_SECRET from environment: {e}")
+                    self._get_logger().error(f"Failed to load SERVICE_SECRET from environment: {e}")
                     # SSOT COMPLIANT: Log critical failure but don't bypass SSOT
                     # This maintains SSOT compliance even if configuration is unavailable
                     
@@ -153,7 +153,7 @@ class UnifiedConfigManager:
                 original_service_id = config.service_id
                 config.service_id = str(config.service_id).strip()
                 if config.service_id != original_service_id:
-                    self._logger.warning(f"SERVICE_ID contained whitespace - sanitized from {repr(original_service_id)} to {repr(config.service_id)}")
+                    self._get_logger().warning(f"SERVICE_ID contained whitespace - sanitized from {repr(original_service_id)} to {repr(config.service_id)}")
                     
             return config
         except Exception as e:
