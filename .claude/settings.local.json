@@ -76,7 +76,9 @@
       "Bash(PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest tests/ -v --tb=short --disable-warnings --timeout=30 -p no:cov)",
       "Bash(xargs ls:*)",
       "Bash(grep:*)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(./scripts/validate_issue_308_fixes.sh:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
