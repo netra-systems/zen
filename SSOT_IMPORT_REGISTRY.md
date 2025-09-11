@@ -1,7 +1,7 @@
 # SSOT IMPORT REGISTRY  
 **SINGLE SOURCE OF TRUTH - MASTER IMPORT REFERENCE**
 
-Generated: 2025-09-09
+Generated: 2025-09-11
 Mission: Provide authoritative import mappings for all Netra services
 
 ## SERVICE IMPORT PATTERNS
@@ -21,13 +21,17 @@ from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionTracker, get_execution_tracker
 from netra_backend.app.core.execution_tracker import get_execution_tracker, ExecutionState
 
-# User Context Management (CRITICAL SECURITY - NEW 2025-09-10)
-from netra_backend.app.services.user_execution_context import UserContextManager, InvalidContextError, ContextIsolationError
+# User Context Management (CRITICAL SECURITY - VERIFIED 2025-09-11)
+from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager
+from netra_backend.app.services.user_execution_context import InvalidContextError, ContextIsolationError
 from netra_backend.app.services.user_execution_context import managed_user_context, validate_user_context
 from netra_backend.app.services.user_execution_context import create_isolated_execution_context
 
-# WebSocket Agent Bridge (CRITICAL - Fixed 2025-09-10)
+# WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
+
+# Request Scoped Execution (VERIFIED 2025-09-11)
+from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
 
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
@@ -103,10 +107,10 @@ from auth_service.app.schemas.auth import UserCreate, UserLogin, TokenResponse  
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
-# Database Testing Utilities (CORRECTED 2025-09-11)
-from test_framework.database_test_utilities import DatabaseTestUtilities  # ✅ CORRECT CLASS NAME
+# Database Testing Utilities (VERIFIED 2025-09-11)  
+from test_framework.database_test_utilities import DatabaseTestUtilities  # ✅ VERIFIED WORKING
 
-# Shared Environment Access
+# Shared Environment Access (VERIFIED 2025-09-11)
 from shared.isolated_environment import IsolatedEnvironment, get_env
 ```
 

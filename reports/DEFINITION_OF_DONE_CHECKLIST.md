@@ -1,6 +1,7 @@
 # Definition of Done (DoD) & Completion Checklist for Netra Platform
 
 **Created:** 2025-08-31  
+**Last Updated:** 2025-09-11  
 **Purpose:** Comprehensive checklist for reviewing all critical files when making changes to major modules  
 **Requirement:** ULTRA THINK DEEPLY - This checklist ensures system-wide coherence and stability
 
@@ -40,11 +41,19 @@
 - [ ] **SSOT Compliance:** Ensure new classes don't duplicate existing functionality - check for 110 duplicate type definitions
 - [ ] **Mock Usage Audit:** Avoid unjustified mocks (1,147 current violations) - use real services in tests
 
-### 2. String Literals Validation
-- [ ] Validate all string literals: `python scripts/query_string_literals.py validate "your_string"`
-- [ ] Update index after changes: `python scripts/scan_string_literals.py`
+### 2. Documentation Infrastructure Maintenance (NEW - 2025-09-11)
+**Required for ALL changes that affect system architecture or imports:**
+- [ ] **SSOT Import Registry:** Verify new imports are added to [`SSOT_IMPORT_REGISTRY.md`](../SSOT_IMPORT_REGISTRY.md) with verification status
+- [ ] **Master WIP Status:** Update [`reports/MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) if system health changes
+- [ ] **String Literals Validation:** Validate new literals: `python3 scripts/query_string_literals.py validate "your_string"`
+- [ ] **String Literals Index:** Update after changes: `python3 scripts/scan_string_literals.py`
+- [ ] **Documentation Consistency:** Ensure all cross-references between docs remain valid
 
-### 3. 🚨 ARCHITECTURAL MIGRATION REQUIREMENTS (NEW - WHY #4 Fix)
+### 3. String Literals Validation
+- [ ] Validate all string literals: `python3 scripts/query_string_literals.py validate "your_string"`  
+- [ ] Update index after changes: `python3 scripts/scan_string_literals.py`
+
+### 4. 🚨 ARCHITECTURAL MIGRATION REQUIREMENTS (NEW - WHY #4 Fix)
 **Required for ALL changes involving:**
 - Singleton → Factory pattern changes
 - Dependency injection updates  

@@ -53,6 +53,9 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
         """Set up test environment with vulnerable and secure contexts."""
         super().setup_method(method)
         
+        # Create test run ID first (needed by context creation)
+        self.test_run_id = f"test_run_{uuid.uuid4().hex[:8]}"
+        
         # Create ReportingSubAgent instance for testing
         self.reporting_agent = ReportingSubAgent()
         
@@ -61,9 +64,6 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
         
         # Create secure UserExecutionContext (should be accepted after migration)
         self.secure_context = self._create_secure_user_execution_context()
-        
-        # Create test run ID
-        self.test_run_id = f"test_run_{uuid.uuid4().hex[:8]}"
     
     def _create_vulnerable_deep_agent_state(self) -> DeepAgentState:
         """Create DeepAgentState that demonstrates security vulnerability."""
@@ -121,19 +121,17 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
         EXPECTED: Should FAIL before migration, PASS after migration
         """
         # Attempt to call execute_modern with DeepAgentState (vulnerable pattern)
-        with pytest.raises(TypeError, match=r".*DeepAgentState.*not.*supported.*security.*vulnerability.*"):
+        # The method now expects user_context parameter, and should reject DeepAgentState
+        
+        # Test that DeepAgentState is properly rejected
+        with pytest.raises(ValueError, match=r".*SECURITY VULNERABILITY.*DeepAgentState.*FORBIDDEN.*"):
             result = await self.reporting_agent.execute_modern(
-                state=self.vulnerable_state,
-                run_id=self.test_run_id,
+                user_context=self.vulnerable_state,  # This should be rejected with security error
                 stream_updates=False
             )
         
-        # If no exception is raised, the vulnerability exists (test should fail initially)
-        # This assertion will fail BEFORE migration, proving vulnerability
-        assert False, (
-            "🚨 SECURITY VULNERABILITY DETECTED: execute_modern() accepted DeepAgentState parameter. "
-            "This creates cross-user data contamination risks. Migration to UserExecutionContext required."
-        )
+        # If we reach here, the security validation is working correctly
+        # The migration successfully blocks DeepAgentState usage
 
     async def test_execute_modern_accepts_userexecutioncontext_parameter(self):
         """
@@ -153,7 +151,7 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
             # This should work after migration
             try:
                 result = await self.reporting_agent.execute_modern(
-                    context=self.secure_context,  # Note: parameter name changed to 'context'
+                    user_context=self.secure_context,  # Correct parameter name: user_context
                     stream_updates=False
                 )
                 
@@ -183,24 +181,14 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
         # Test 1: Completely invalid parameters should be rejected
         with pytest.raises((TypeError, ValueError)):
             await self.reporting_agent.execute_modern(
-                state="invalid_string_parameter",  # Wrong type
-                run_id=self.test_run_id,
+                user_context="invalid_string_parameter",  # Wrong type
                 stream_updates=False
             )
         
         # Test 2: None parameters should be handled gracefully  
         with pytest.raises((TypeError, ValueError)):
             await self.reporting_agent.execute_modern(
-                state=None,
-                run_id=self.test_run_id,
-                stream_updates=False
-            )
-        
-        # Test 3: Mixed valid/invalid parameters should be rejected
-        with pytest.raises((TypeError, ValueError)):
-            await self.reporting_agent.execute_modern(
-                state=self.vulnerable_state,
-                run_id=None,  # Invalid None run_id
+                user_context=None,
                 stream_updates=False
             )
 
@@ -319,13 +307,13 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
             try:
                 # Execute for User A
                 result_a = await self.reporting_agent.execute_modern(
-                    context=user_a_context,
+                    user_context=user_a_context,
                     stream_updates=False
                 )
                 
                 # Execute for User B
                 result_b = await self.reporting_agent.execute_modern(
-                    context=user_b_context,
+                    user_context=user_b_context,
                     stream_updates=False
                 )
                 

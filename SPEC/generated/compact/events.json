@@ -7,6 +7,7 @@
     "auth_event",
     "broadcast:",
     "broadcast_event",
+    "broadcast_user_event",
     "business_event",
     "connect",
     "def\\s+process_event",
@@ -30,12 +31,16 @@
     "ping",
     "pong",
     "privacy_event",
+    "route_user_event",
     "security_event",
     "send_event",
+    "store_fallback_event",
     "subscribe",
     "test_event",
     "trigger_event",
     "unsubscribe",
+    "validate_user_event",
+    "websocket_event",
     "websocket_send_event"
   ]
 }
