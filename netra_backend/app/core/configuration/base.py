@@ -191,7 +191,7 @@ class UnifiedConfigManager:
             validation_result = self._validator.validate_complete_config(config)
             return validation_result.is_valid
         except Exception as e:
-            self._logger.error(f"Configuration validation failed: {e}")
+            self._get_logger().error(f"Configuration validation failed: {e}")
             return False
     
     def get_environment_name(self) -> str:
