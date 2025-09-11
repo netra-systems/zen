@@ -1,32 +1,36 @@
 """
-Comprehensive Integration Tests for UnifiedTestRunner (CRITICAL INFRASTRUCTURE SSOT)
+Comprehensive Integration Tests for UnifiedTestRunner Infrastructure (CRITICAL SSOT)
 
-This module tests the UnifiedTestRunner - a 3,505-line MEGA CLASS that serves as the Single 
-Source of Truth for ALL test execution across the entire Netra Apex platform.
+This module tests the UnifiedTestRunner test infrastructure components - focusing on test 
+discovery, categorization, error handling, and execution coordination rather than Docker 
+orchestration (which is tested in test_unified_test_runner_integration.py).
 
 BUSINESS CRITICAL IMPACT:
-- Protects $2M+ ARR through comprehensive test validation
+- Protects $2M+ ARR through comprehensive test validation infrastructure
 - Manages ~10,383 unit tests discovery and execution
-- Coordinates Docker service orchestration for real service testing
 - Enables Golden Path test validation protecting $500K+ ARR functionality
 - Provides test infrastructure that enables all other business value validation
+- Validates SSOT compliance and mock policy enforcement
 
 CRITICAL TEST DISCOVERY ISSUES ADDRESSED:
 - Only ~1.5% test discovery rate (~160 of ~10,383 tests found)
 - Syntax errors in WebSocket test files blocking pytest collection
-- Docker connectivity issues preventing real service validation
 - Test categorization protecting business-critical functionality
+- Error handling and comprehensive reporting capabilities
 
-NO MOCKS ALLOWED - Uses real test execution, Docker orchestration, and service integration.
+STRATEGIC MOCKING - Uses strategic mocking for test infrastructure components to enable
+focused testing of the test discovery and execution coordination logic.
 
 Requirements:
 - Test framework SSOT base classes only
-- Real pytest collection and execution
-- Real Docker service orchestration
-- Test the actual UnifiedTestRunner functionality
-- Validate business-critical test infrastructure
+- Real pytest collection and execution testing
+- Test infrastructure validation and error handling
+- Test the actual UnifiedTestRunner infrastructure functionality
+- Validate business-critical test infrastructure patterns
 
 Inherits from: test_framework.ssot.base_test_case.SSotBaseTestCase (SSOT compliance)
+
+COMPLEMENTARY TO: test_unified_test_runner_integration.py (Docker orchestration focus)
 """
 
 import asyncio
