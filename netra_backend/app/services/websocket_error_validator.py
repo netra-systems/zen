@@ -27,7 +27,6 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-<<<<<<< HEAD
 class WebSocketErrorType(Enum):
     """WebSocket error types for validation."""
     CONNECTION_FAILED = "connection_failed"
