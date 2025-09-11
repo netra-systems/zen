@@ -45,8 +45,9 @@ def test_with_undefined_marker():
             
             # Verify collection fails with strict markers
             assert result.returncode != 0, "Collection should fail with undefined marker"
-            assert "not found in markers" in result.stderr, \
-                f"Expected marker error message. stderr: {result.stderr}"
+            full_output = result.stdout + result.stderr
+            assert "not found in `markers` configuration option" in full_output, \
+                f"Expected marker error message. Full output: {full_output}"
             
         finally:
             if temp_file.exists():
@@ -81,10 +82,11 @@ def test_with_undefined_marker():
                     str(full_path)
                 ], capture_output=True, text=True)
                 
-                if result.returncode != 0 and "staging_compatible" in result.stderr:
+                full_output = result.stdout + result.stderr
+                if result.returncode != 0 and "staging_compatible" in full_output:
                     collection_failures.append({
                         'file': file_path,
-                        'error': result.stderr.strip()
+                        'error': full_output.strip()
                     })
         
         # We expect to find at least some files that fail due to staging_compatible marker

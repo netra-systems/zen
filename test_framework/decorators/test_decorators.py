@@ -264,6 +264,99 @@ def experimental_test(func: Callable) -> Callable:
     return marked_func
 
 
+def feature_flag(flag_name: str, enabled: bool = True):
+    """Decorator to mark tests that depend on feature flags.
+    
+    This decorator applies the 'feature_flag' pytest marker and allows
+    conditional test execution based on feature flag state.
+    
+    Args:
+        flag_name: Name of the feature flag
+        enabled: Whether the test should run when flag is enabled (default True)
+        
+    Returns:
+        Decorator function
+    """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        # Apply pytest marker with flag information
+        marked_func = pytest.mark.feature_flag(flag_name=flag_name, enabled=enabled)(wrapper)
+        
+        # Add metadata for test discovery
+        marked_func._feature_flag = flag_name
+        marked_func._feature_flag_enabled = enabled
+        marked_func._test_type = 'feature_flag'
+        
+        logger.debug(f"Test {func.__name__} marked with feature flag: {flag_name} (enabled: {enabled})")
+        
+        return marked_func
+    
+    return decorator
+
+
+def requires_feature(feature_name: str):
+    """Decorator to mark tests that require a specific feature to be enabled.
+    
+    This decorator applies the 'requires_feature' pytest marker and allows
+    conditional test execution based on feature availability.
+    
+    Args:
+        feature_name: Name of the feature required for the test
+        
+    Returns:
+        Decorator function
+    """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        # Apply pytest marker with feature information
+        marked_func = pytest.mark.requires_feature(feature_name=feature_name)(wrapper)
+        
+        # Add metadata for test discovery
+        marked_func._requires_feature = feature_name
+        marked_func._test_type = 'feature_dependent'
+        
+        logger.debug(f"Test {func.__name__} marked as requiring feature: {feature_name}")
+        
+        return marked_func
+    
+    return decorator
+
+
+def tdd_test(func: Callable) -> Callable:
+    """Decorator to mark tests as part of TDD (Test-Driven Development) workflow.
+    
+    This decorator applies the 'tdd' pytest marker and identifies tests
+    written as part of test-driven development process.
+    
+    Args:
+        func: Test function to decorate
+        
+    Returns:
+        Decorated test function with tdd marker
+    """
+    
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    
+    # Apply pytest marker
+    marked_func = pytest.mark.tdd(wrapper)
+    
+    # Add metadata for test discovery
+    marked_func._tdd_test = True
+    marked_func._test_type = 'tdd'
+    
+    logger.debug(f"Test {func.__name__} marked as TDD test")
+    
+    return marked_func
+
+
 # Export all decorators for easy importing
 __all__ = [
     'requires_real_database',
@@ -273,5 +366,8 @@ __all__ = [
     'requires_websocket',
     'mission_critical',
     'race_condition_test',
-    'experimental_test'
+    'experimental_test',
+    'feature_flag',
+    'requires_feature',
+    'tdd_test'
 ]
