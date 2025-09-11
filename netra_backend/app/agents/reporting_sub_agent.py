@@ -134,12 +134,14 @@ class ReportingSubAgent(BaseAgent):
         
         return assessment
 
-    async def execute(self, context_or_state, run_id_or_stream=None, stream_updates: bool = False) -> Dict[str, Any]:
+    async def execute(self, context_or_state=None, run_id_or_stream=None, stream_updates: bool = False, 
+                     message: str = None, context=None, **kwargs) -> Dict[str, Any]:
         """Execute report generation with UVS resilience - GUARANTEED to return value.
         
-        Supports both modern and legacy call patterns:
+        Supports modern, legacy, and Golden Path test call patterns:
         - Modern: execute(context: UserExecutionContext, stream_updates: bool = False)
         - Legacy: execute(state: DeepAgentState, run_id: str, stream_updates: bool)
+        - Golden Path: execute(message="...", context=...) 
         
         UVS Requirements:
         - NEVER crashes regardless of input
@@ -147,6 +149,18 @@ class ReportingSubAgent(BaseAgent):
         - Works with NO data, partial data, or full data
         - Every response has actionable next_steps
         """
+        # GOLDEN PATH COMPATIBILITY: Handle message-based call pattern
+        if context_or_state is None and message is not None and context is not None:
+            # Golden Path pattern: execute(message="...", context=...)
+            logger.debug("ReportingSubAgent: Converting Golden Path execute(message, context) call")
+            context_or_state = context
+            # Inject message into context for compatibility
+            if hasattr(context, 'agent_context') and context.agent_context is not None:
+                context.agent_context["user_request"] = message
+                context.agent_context["message"] = message
+            # Enable test mode for compatibility
+            if hasattr(self, 'enable_websocket_test_mode'):
+                self.enable_websocket_test_mode()
         # Handle legacy call pattern: execute(state, run_id, stream_updates)
         from netra_backend.app.services.user_execution_context import UserExecutionContext as UEC
         

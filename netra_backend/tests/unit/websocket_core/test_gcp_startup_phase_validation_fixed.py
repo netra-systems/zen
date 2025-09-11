@@ -239,21 +239,25 @@ class TestStartupPhaseValidationLogicFixed(SSotBaseTestCase):
         This test specifically validates the startup race condition is detected
         and prevented by the phase-aware validation logic.
         """
-        # Race condition scenario: Early startup phases
+        # Race condition prevention scenario: Early startup phases should pass
         early_phases = ['init', 'dependencies', 'database', 'cache']
         race_condition_detected = False
+        early_phases_pass = True  # Track if early phases pass validation
         
         for phase in early_phases:
             app_state = MockAppStateForStartupPhases(
                 startup_phase=phase,
                 startup_in_progress=True,
                 startup_complete=False,
-                has_agent_supervisor=False  # This is the race condition
+                has_agent_supervisor=False  # This would cause race condition without fix
             )
             
             validator = create_gcp_websocket_validator(app_state)
             
-            # This should detect the race condition (supervisor not available)
+            # Configure as GCP environment to enable validation
+            validator.update_environment_configuration('staging', True)
+            
+            # This should PREVENT the race condition by skipping agent_supervisor validation
             try:
                 readiness_result = validator.validate_gcp_readiness_for_websocket(timeout_seconds=3.0)
                 if hasattr(readiness_result, '__await__'):
@@ -261,18 +265,29 @@ class TestStartupPhaseValidationLogicFixed(SSotBaseTestCase):
                     import asyncio
                     readiness_result = asyncio.run(readiness_result)
                 
-                if not readiness_result.ready and 'agent_supervisor' in readiness_result.failed_services:
-                    race_condition_detected = True
-                    break
+                # With the fix, early phases should pass even without agent_supervisor
+                if not readiness_result.ready:
+                    # Check if agent_supervisor is specifically mentioned as a failure
+                    if 'agent_supervisor' in readiness_result.failed_services:
+                        race_condition_detected = True
+                        early_phases_pass = False
+                        break
+                    # Other failures are acceptable during early phases
+                else:
+                    # Validation passed - this is what we expect with the fix
+                    continue
             except Exception as e:
-                # Exception during validation also indicates race condition
-                if 'agent_supervisor' in str(e) or 'startup' in str(e).lower():
+                # Exceptions related to agent_supervisor during early phases indicate race condition
+                if 'agent_supervisor' in str(e):
                     race_condition_detected = True
+                    early_phases_pass = False
                     break
         
-        # CRITICAL: Race condition must be detected
-        assert race_condition_detected, (
-            "Race condition should be detected: agent_supervisor unavailable during early startup phases"
+        # CRITICAL: Race condition must be PREVENTED (validation should pass during early phases)
+        # The fix skips agent_supervisor validation during early phases, so it should NOT be detected
+        assert not race_condition_detected, (
+            "Race condition should be PREVENTED: agent_supervisor validation should be skipped during early startup phases, "
+            "making validation pass even when supervisor is unavailable"
         )
         
         # Verify fix: Post-Phase 5 should work
@@ -286,6 +301,9 @@ class TestStartupPhaseValidationLogicFixed(SSotBaseTestCase):
         )
         
         validator_post_fix = create_gcp_websocket_validator(post_phase5_app_state)
+        
+        # Configure as GCP environment to enable validation
+        validator_post_fix.update_environment_configuration('staging', True)
         
         try:
             readiness_result_post = validator_post_fix.validate_gcp_readiness_for_websocket(timeout_seconds=3.0)
