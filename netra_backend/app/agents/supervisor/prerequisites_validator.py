@@ -241,3 +241,15 @@ def validate_system_resource_availability() -> Dict[str, Any]:
             return loop.run_until_complete(_async_validate_system_resource_availability())
         finally:
             loop.close()
+
+# Main comprehensive validation function expected by tests
+async def validate_agent_execution_prerequisites(execution_context, user_context,
+                                               validation_level=PrerequisiteValidationLevel.STRICT):
+    """Main prerequisites validation function expected by mission critical tests.
+    
+    This is the comprehensive validation function that tests expect for
+    validating all agent execution prerequisites.
+    """
+    return await validate_all_agent_execution_prerequisites(
+        execution_context, user_context, validation_level
+    )

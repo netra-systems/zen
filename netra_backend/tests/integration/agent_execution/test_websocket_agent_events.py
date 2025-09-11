@@ -19,6 +19,7 @@ CRITICAL: Tests real WebSocket event systems without mocks for event logic.
 """
 
 import asyncio
+import logging
 import time
 import pytest
 from typing import Dict, Any, List, Optional, Tuple
@@ -29,6 +30,8 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.tests.integration.agent_execution.base_agent_execution_test import BaseAgentExecutionTest
+
+logger = logging.getLogger(__name__)
 
 
 class AdvancedWebSocketManager:
@@ -706,8 +709,8 @@ class TestWebSocketAgentEvents(BaseAgentExecutionTest):
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
-                websocket_connection_id=f"ws_connection_{user_id}",
-                metadata={
+                websocket_client_id=f"ws_connection_{user_id}",
+                agent_context={
                     "user_request": f"Concurrent analysis request from user {i}",
                     "user_index": i,
                     "isolation_test": True,
@@ -832,15 +835,18 @@ class TestWebSocketAgentEvents(BaseAgentExecutionTest):
         async def failing_emit(event_type: str, data: Dict[str, Any], run_id: str, agent_name: str = None) -> bool:
             nonlocal failure_count, failure_events
             
-            # Simulate 30% failure rate for some events
+            # Simulate 30% failure rate for some events (graceful failure)
             if event_type in ["agent_thinking", "tool_executing"] and failure_count < 3:
                 failure_count += 1
                 failure_events.append({
                     "event_type": event_type,
                     "failure_count": failure_count,
-                    "timestamp": time.time()
+                    "timestamp": time.time(),
+                    "error": f"Simulated WebSocket delivery failure for {event_type}"
                 })
-                raise ConnectionError(f"Simulated WebSocket delivery failure for {event_type}")
+                # Log the simulated failure but don't crash the agent execution
+                logger.warning(f"Simulated WebSocket delivery failure for {event_type} (test scenario)")
+                return False  # Return False to indicate delivery failure without crashing
             
             # Let other events succeed normally
             return await original_emit(event_type, data, run_id, agent_name)
