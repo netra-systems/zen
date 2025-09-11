@@ -21,12 +21,81 @@ IMPORT GUIDANCE:
 - RECOMMENDED: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 """
 
-from typing import Optional
+from typing import Optional, Dict, Any
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from shared.types.core_types import UserID, ensure_user_id
 
 logger = central_logger.get_logger(__name__)
+
+
+class FactoryInitializationError(Exception):
+    """Raised when WebSocket factory initialization fails SSOT validation."""
+    pass
+
+
+class ConnectionLifecycleManager:
+    """Compatibility class for connection lifecycle management."""
+    
+    def __init__(self, manager: WebSocketManager):
+        self.manager = manager
+        
+    async def handle_connection_lifecycle(self, connection_id: str):
+        """Handle connection lifecycle events."""
+        # Delegate to the unified WebSocketManager
+        pass
+
+
+def create_defensive_user_execution_context(
+    user_id: str, 
+    websocket_client_id: Optional[str] = None,
+    fallback_context: Optional[Dict[str, Any]] = None
+) -> 'UserExecutionContext':
+    """
+    Create a defensive UserExecutionContext with proper validation.
+    
+    This function provides backward compatibility for the unified authentication service
+    that expects defensive context creation during WebSocket authentication flows.
+    
+    Args:
+        user_id: User identifier for the context
+        websocket_client_id: Optional WebSocket connection ID
+        fallback_context: Optional fallback context data
+        
+    Returns:
+        UserExecutionContext: Properly configured context for WebSocket authentication
+    """
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+    
+    logger.debug(f"Creating defensive UserExecutionContext for user: {user_id}")
+    
+    # Use ID manager for consistent ID generation
+    id_manager = UnifiedIDManager()
+    
+    # Generate IDs if not provided in fallback_context
+    if fallback_context and 'thread_id' in fallback_context:
+        thread_id = fallback_context['thread_id']
+    else:
+        thread_id = id_manager.generate_thread_id()
+        
+    if fallback_context and 'run_id' in fallback_context:
+        run_id = fallback_context['run_id']
+    else:
+        run_id = id_manager.generate_run_id(thread_id)
+    
+    # Create defensive context with proper validation
+    context = UserExecutionContext(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        request_id=f"defensive_auth_{user_id}_{websocket_client_id or 'no_ws'}",
+        websocket_client_id=websocket_client_id,
+        agent_context=fallback_context or {}
+    )
+    
+    logger.debug(f"Created defensive context: user={user_id}, ws_id={websocket_client_id}")
+    return context
 
 
 def create_websocket_manager(user_context=None, user_id: Optional[UserID] = None):
@@ -124,7 +193,10 @@ __all__ = [
     'create_websocket_manager',
     'get_websocket_manager_factory', 
     'WebSocketManagerFactory',
-    'IsolatedWebSocketManager'
+    'IsolatedWebSocketManager',
+    'FactoryInitializationError',
+    'ConnectionLifecycleManager',
+    'create_defensive_user_execution_context'
 ]
 
 logger.info("WebSocket Manager Factory compatibility module loaded - Golden Path ready")

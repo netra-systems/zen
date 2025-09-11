@@ -473,10 +473,14 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> UnifiedWebSoc
     return WebSocketManager(user_context=user_context)
 
 
+# Create alias for backward compatibility
+WebSocketManagerAdapter = _LegacyWebSocketManagerAdapter
+
 __all__ = [
     "get_legacy_websocket_manager",
-    "migrate_singleton_usage"
+    "migrate_singleton_usage",
+    "WebSocketManagerAdapter"
 ]
 
-# DEPRECATED: WebSocketManagerAdapter removed for SSOT compliance
+# DEPRECATED: WebSocketManagerAdapter is now an alias for _LegacyWebSocketManagerAdapter
 # Use WebSocketManagerFactory directly from websocket_manager_factory module
