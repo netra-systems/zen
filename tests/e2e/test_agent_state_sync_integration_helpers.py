@@ -109,11 +109,9 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
         import logging
         self.logger = logging.getLogger(__name__)
     
-    async def async_setup_method(self):
-        """Setup real services for each test method."""
-        await super().async_setup_method()
-        
-        # Setup real in-memory database
+    def setup_database(self):
+        """Setup database components (sync part)."""
+        # Setup real in-memory database  
         self.db_engine = create_async_engine(
             "sqlite+aiosqlite:///:memory:",
             poolclass=StaticPool,
@@ -126,6 +124,13 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
             class_=AsyncSession,
             expire_on_commit=False
         )
+    
+    async def async_setup_method(self):
+        """Setup real services for each test method."""
+        await super().async_setup_method()
+        
+        # Setup database components
+        self.setup_database()
         
         # Setup database schema (simplified for testing)
         async with self.db_engine.begin() as conn:
