@@ -1,35 +1,114 @@
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 """
-Comprehensive unit tests for BaseAgent functionality
-Focus: Uncovered areas with minimal mocking
-Coverage Target: Timing, Correlation ID, Configuration, Logging, User Management
+Comprehensive Unit Test Suite for Base Agent Core Module
+
+Business Value Justification (BVJ):
+- **Segment:** All customer segments (Free through Enterprise)
+- **Goal:** Stability and reliability of core agent execution patterns
+- **Value Impact:** Ensures 90% of platform value (chat functionality) works reliably
+- **Revenue Impact:** Protects $500K+ ARR by validating core agent execution patterns
+
+This test suite validates the BaseAgent SSOT implementation with focus on:
+1. Lifecycle management and state transitions 
+2. User context isolation (Enterprise security requirement)
+3. WebSocket integration for real-time chat updates
+4. Reliability infrastructure (circuit breakers, retries) 
+5. Modern execution patterns (UserExecutionContext)
+6. Token management and cost optimization
+
+Test Categories:
+- Lifecycle Management: Agent state transitions and validation
+- User Isolation: Concurrent user execution without cross-contamination
+- WebSocket Integration: Real-time event emission for chat functionality
+- Reliability Infrastructure: Circuit breakers and error handling
+- Modern Execution Patterns: UserExecutionContext compliance
+- Token Management: Cost tracking and optimization features
+
+Created: 2025-09-10
+Last Updated: 2025-09-10
 """
 
 import pytest
-import uuid
-from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.agent import SubAgentLifecycle
-from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector
-from netra_backend.app.core.config import get_config
 import asyncio
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-from shared.isolated_environment import IsolatedEnvironment
+import time
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from typing import Dict, Any, Optional
+from dataclasses import dataclass
+
+# Test framework imports
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+
+# Import classes under test
+from netra_backend.app.agents.base_agent import BaseAgent, AgentState
+from netra_backend.app.schemas.agent import SubAgentLifecycle
+from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
+
+# Import supporting types and enums
+from shared.types.core_types import UserID, ThreadID, RunID
 
 
-class ConcreteConcreteTestAgent(BaseAgent):
-    """Concrete test implementation of BaseAgent"""
+class TestBaseAgent(BaseAgent):
+    """Test agent implementation for comprehensive testing."""
+    
+    def __init__(self, *args, **kwargs):
+        # Add test-specific initialization
+        self._test_execution_results = []
+        self._test_thinking_events = []
+        self._test_tool_events = []
+        super().__init__(*args, **kwargs)
+    
+    async def _execute_with_user_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
+        """Test implementation of modern execution pattern."""
+        # Simulate agent thinking
+        if stream_updates:
+            await self.emit_thinking("Processing user request", 1, context)
+            await self.emit_tool_executing("test_tool", {"param": "value"})
+            await self.emit_tool_completed("test_tool", {"result": "success"})
+        
+        # Store execution for validation
+        self._test_execution_results.append({
+            "user_id": context.user_id,
+            "thread_id": context.thread_id,
+            "run_id": context.run_id,
+            "request_id": context.request_id,
+            "stream_updates": stream_updates,
+            "timestamp": time.time()
+        })
+        
+        # Simulate successful execution
+        result = {
+            "status": "success",
+            "message": "Test agent execution completed",
+            "user_id": context.user_id,
+            "execution_id": len(self._test_execution_results)
+        }
+        
+        return result
+    
+    def get_test_executions(self):
+        """Get all test executions for validation."""
+        return self._test_execution_results.copy()
+    
+    def reset_test_state(self):
+        """Reset test state for clean test runs."""
+        self._test_execution_results.clear()
+        self._test_thinking_events.clear() 
+        self._test_tool_events.clear()
 
-    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
-        """Test execute implementation"""
-        pass
 
-        async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
-            """Test entry conditions implementation"""
-            return True
+class LegacyTestAgent(BaseAgent):
+    """Legacy agent implementation for compatibility testing."""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._legacy_executions = []
+    
+    async def execute_core_logic(self, context) -> Dict[str, Any]:
+        """Legacy execution pattern for compatibility testing."""
+        self._legacy_executions.append({
+            "execution_time": time.time(),
+            "context_type": type(context).__name__
+        })
+        return {"status": "legacy_success"}
 
 
         class TestBaseAgentComprehensive:
