@@ -57,7 +57,7 @@ from netra_backend.app.db.postgres_core import (
 )
 from netra_backend.app.database import get_db, get_database_url, get_engine, get_sessionmaker
 from shared.isolated_environment import get_env
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 
 
 class TestMockSessionFactoryRemoval:
@@ -325,8 +325,8 @@ class TestRealDatabaseSessions:
     
     @pytest.mark.asyncio
     async def test_real_session_creation_with_database_test_utility(self):
-        """Test real session creation using DatabaseTestUtility (NO MOCKS)."""
-        async with DatabaseTestUtility("netra_backend") as db_util:
+        """Test real session creation using DatabaseTestUtilities (NO MOCKS)."""
+        async with DatabaseTestUtilities("netra_backend") as db_util:
             # Get a real session
             session = await db_util.get_test_session()
             
@@ -426,7 +426,7 @@ class TestRealDatabaseSessions:
     @pytest.mark.asyncio
     async def test_database_operations_with_real_persistence(self):
         """Test that database operations actually persist data (not mocked)."""
-        async with DatabaseTestUtility("netra_backend") as db_util:
+        async with DatabaseTestUtilities("netra_backend") as db_util:
             # Use committed transaction scope to actually persist data
             async with db_util.committed_transaction_scope() as session:
                 # Create a test table if it doesn't exist
@@ -566,7 +566,7 @@ class TestPytestCurrentTestBehavior:
         
         try:
             # Verify we can still create real database connections
-            async with DatabaseTestUtility("netra_backend") as db_util:
+            async with DatabaseTestUtilities("netra_backend") as db_util:
                 session = await db_util.get_test_session()
                 
                 # Verify it's still a real session despite test env vars
@@ -596,7 +596,7 @@ class TestConcurrentSessionIsolation:
     @pytest.mark.asyncio
     async def test_concurrent_session_creation_all_real(self):
         """Test that concurrent session creation produces only real sessions."""
-        async with DatabaseTestUtility("netra_backend") as db_util:
+        async with DatabaseTestUtilities("netra_backend") as db_util:
             # Create multiple sessions concurrently
             num_concurrent_sessions = 10
             sessions_created = []
@@ -644,7 +644,7 @@ class TestConcurrentSessionIsolation:
     @pytest.mark.asyncio
     async def test_concurrent_database_operations_isolation(self):
         """Test that concurrent database operations are properly isolated."""
-        async with DatabaseTestUtility("netra_backend") as db_util:
+        async with DatabaseTestUtilities("netra_backend") as db_util:
             # Create test table for isolation testing
             async with db_util.committed_transaction_scope() as setup_session:
                 await setup_session.execute(text("""
@@ -736,7 +736,7 @@ class TestConcurrentSessionIsolation:
         async def thread_database_operation(thread_id: int):
             """Database operation to run in separate thread."""
             try:
-                async with DatabaseTestUtility("netra_backend") as db_util:
+                async with DatabaseTestUtilities("netra_backend") as db_util:
                     session = await db_util.get_test_session()
                     
                     # Verify session is real in thread context
@@ -812,7 +812,7 @@ class TestDifficultEdgeCases:
                 memory_pressure.append(bytearray(1024 * 1024))  # 1MB per allocation
             
             # Try to create database session under memory pressure
-            async with DatabaseTestUtility("netra_backend") as db_util:
+            async with DatabaseTestUtilities("netra_backend") as db_util:
                 session = await db_util.get_test_session()
                 
                 # Verify it's still a real session despite memory pressure
@@ -838,7 +838,7 @@ class TestDifficultEdgeCases:
     @pytest.mark.asyncio
     async def test_rapid_session_creation_destruction_no_mocks(self):
         """Test rapid session creation/destruction doesn't cause mock fallback."""
-        async with DatabaseTestUtility("netra_backend") as db_util:
+        async with DatabaseTestUtilities("netra_backend") as db_util:
             # Rapidly create and destroy sessions
             for iteration in range(50):
                 session = await db_util.get_test_session()
@@ -875,7 +875,7 @@ class TestDifficultEdgeCases:
                 
                 # Should raise the exception, not return mock
                 with pytest.raises((exception_class, RuntimeError)) as exc_info:
-                    async with DatabaseTestUtility("netra_backend") as db_util:
+                    async with DatabaseTestUtilities("netra_backend") as db_util:
                         await db_util.get_test_session()
                 
                 # Verify error message doesn't suggest mock fallback
@@ -991,7 +991,7 @@ class TestRealSessionValidation:
         """Test that all database entry points create real sessions."""
         entry_points_to_test = [
             ("get_db context manager", lambda: get_db()),
-            ("DatabaseTestUtility", lambda: DatabaseTestUtility("netra_backend").__aenter__()),
+            ("DatabaseTestUtilities", lambda: DatabaseTestUtilities("netra_backend").__aenter__()),
         ]
         
         for entry_point_name, entry_point_func in entry_points_to_test:
@@ -1060,7 +1060,7 @@ class TestRealSessionValidation:
     @pytest.mark.asyncio
     async def test_session_lifecycle_events_are_real(self):
         """Test that session lifecycle events are real, not mocked."""
-        async with DatabaseTestUtility("netra_backend") as db_util:
+        async with DatabaseTestUtilities("netra_backend") as db_util:
             session = await db_util.get_test_session()
             
             # Track lifecycle events

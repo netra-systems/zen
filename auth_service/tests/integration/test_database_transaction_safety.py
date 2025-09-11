@@ -42,7 +42,7 @@ from sqlalchemy.orm.exc import StaleDataError
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ensure_user_id
 from test_framework.ssot.base_test_case import SSotBaseTestCase  
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database import (
     auth_db, get_db_session, AuthUser, AuthSession, AuthAuditLog,
@@ -76,7 +76,7 @@ class TestDatabaseTransactionSafety(SSotBaseTestCase):
         self.auth_config = AuthConfig()
         
         # Initialize database components
-        self.database_utility = DatabaseTestUtility("auth_service")
+        self.database_utility = DatabaseTestUtilities("auth_service")
         
         # CRITICAL: Real service instances for database testing
         self.redis_service = RedisService(self.auth_config)

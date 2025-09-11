@@ -44,7 +44,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.ssot.integration_auth_manager import (
     IntegrationAuthServiceManager,
     IntegrationTestAuthHelper
@@ -98,7 +98,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
     @pytest.fixture
     async def database_session(self):
         """Provide isolated database session for auth operations."""
-        async with DatabaseTestUtility("auth_service").session_scope() as session:
+        async with DatabaseTestUtilities("auth_service").session_scope() as session:
             yield session
     
     @pytest.fixture

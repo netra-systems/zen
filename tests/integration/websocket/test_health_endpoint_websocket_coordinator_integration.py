@@ -21,14 +21,14 @@ from unittest.mock import MagicMock, patch, AsyncMock
 from typing import Dict, Any, Optional
 
 # Test Framework Imports (following claude.md absolute import rules)
-from test_framework.ssot.base_test_case import BaseTestCase
-from test_framework.ssot.real_services_test_fixtures import RealServicesTestFixtures
+from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.ssot.real_services_test_fixtures import E2ETestFixture
 
 # System Imports
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestHealthEndpointWebSocketCoordinatorIntegration(BaseTestCase):
+class TestHealthEndpointWebSocketCoordinatorIntegration(SSotBaseTestCase):
     """Integration tests for health endpoint and WebSocket coordinator.
     
     These tests validate that health endpoints properly coordinate with
@@ -39,7 +39,7 @@ class TestHealthEndpointWebSocketCoordinatorIntegration(BaseTestCase):
         """Setup test environment with real service integration."""
         super().setUp()
         self.env = IsolatedEnvironment()
-        self.fixtures = RealServicesTestFixtures()
+        self.fixtures = E2ETestFixture()
         
         # Integration test configuration
         self.health_endpoint_url = "http://localhost:8000/health/ready"

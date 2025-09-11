@@ -24,7 +24,7 @@ from unittest.mock import patch, MagicMock
 
 # SSOT imports - absolute imports from package root
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.ssot.websocket import WebSocketTestUtility
 from test_framework.conftest_real_services import real_services_fixture
 from shared.isolated_environment import get_env
@@ -52,7 +52,7 @@ class TestDatabaseErrorRecovery(SSotAsyncTestCase):
         BUSINESS IMPACT: Database connection failures should not prevent
         users from accessing cached data or receiving helpful error messages.
         """
-        db_utility = DatabaseTestUtility()
+        db_utility = DatabaseTestUtilities()
         real_db = real_services_fixture["database"]
         
         # Ensure real database connection is working first
@@ -134,7 +134,7 @@ class TestDatabaseErrorRecovery(SSotAsyncTestCase):
         prevent data corruption and maintain data consistency.
         """
         real_db = real_services_fixture["database"]
-        db_utility = DatabaseTestUtility()
+        db_utility = DatabaseTestUtilities()
         
         # Set up transaction scenario with real database
         async with db_utility.get_transaction_context(real_db) as tx:
@@ -463,7 +463,7 @@ class TestAgentExecutionErrorPropagation(SSotAsyncTestCase):
         crash the agent workflow or leave users without responses.
         """
         real_services = real_services_fixture
-        db_utility = DatabaseTestUtility()
+        db_utility = DatabaseTestUtilities()
         
         agent_registry = AgentRegistry()
         await agent_registry.initialize_with_real_services(real_services)
