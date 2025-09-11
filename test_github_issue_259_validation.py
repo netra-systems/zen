@@ -19,6 +19,7 @@ def test_staging_test_defaults_availability():
     print("🧪 Testing staging test defaults availability...")
     
     env = IsolatedEnvironment()
+    env.complete_reset_for_testing()  # Ensure clean state 
     env.enable_isolation()
     
     # Simulate test context
@@ -51,6 +52,7 @@ def test_production_test_defaults_availability():
     print("🧪 Testing production test defaults availability...")
     
     env = IsolatedEnvironment()
+    env.complete_reset_for_testing()  # Ensure clean state
     env.enable_isolation()
     
     # Simulate test context
@@ -82,6 +84,7 @@ def test_security_isolation():
     print("🔒 Testing security isolation (non-test context)...")
     
     env = IsolatedEnvironment()
+    env.complete_reset_for_testing()  # Ensure clean state
     env.enable_isolation()
     
     # Ensure no test context
