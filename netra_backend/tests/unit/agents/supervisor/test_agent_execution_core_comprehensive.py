@@ -118,6 +118,9 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         mock_websocket_bridge = AsyncMock()
         mock_agent = AsyncMock()
         
+        # Mock the agent's run method to return an awaitable result
+        mock_agent.run = AsyncMock()
+        
         # Create system under test
         execution_core = AgentExecutionCore(
             registry=mock_registry,
