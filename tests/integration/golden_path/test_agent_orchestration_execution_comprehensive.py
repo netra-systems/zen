@@ -446,6 +446,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with real tool dispatcher
         factory = get_agent_instance_factory()
+        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance("data_helper", user_context)
         
         # Mock tool dispatcher with realistic tool execution
@@ -631,6 +632,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with failure scenarios
         factory = get_agent_instance_factory()
+        await self._ensure_agent_factory_configured()
         agent = await factory.create_agent_instance("data_helper", user_context)
         
         # Mock tool dispatcher that fails initially then succeeds

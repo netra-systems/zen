@@ -92,7 +92,7 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
             
             # Validate token structure (should be JWT-like)
             access_token = response_data["access_token"]
-            self.assertIsInstance(access_token, str, "Access token should be a string")
+            assert isinstance(access_token, str), "Access token should be a string"
             self.assertGreater(len(access_token), 10, "Access token should be substantial")
             
             # Record success metrics
@@ -418,7 +418,7 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
             
             # Validate user structure
             user_data = response_data["user"]
-            self.assertIsInstance(user_data, dict, "user should be object")
+            assert isinstance(user_data, dict), "user should be object"
             self.assertIn("id", user_data, "user should have id")
             self.assertIn("email", user_data, "user should have email")
             
