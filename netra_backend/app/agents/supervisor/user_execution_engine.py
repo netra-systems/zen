@@ -122,15 +122,17 @@ class MinimalFallbackManager:
     async def create_fallback_result(
         self, 
         context: 'AgentExecutionContext', 
-        state: 'DeepAgentState', 
+        user_context: 'UserExecutionContext', 
         error: Exception, 
         start_time: float
     ) -> 'AgentExecutionResult':
         """Create a fallback result for failed agent execution.
         
+        SECURITY: Updated to use secure UserExecutionContext instead of vulnerable DeepAgentState.
+        
         Args:
             context: Agent execution context
-            state: Deep agent state
+            user_context: Secure user execution context
             error: The exception that caused the failure
             start_time: When execution started (for timing)
         
@@ -149,7 +151,7 @@ class MinimalFallbackManager:
             agent_name=context.agent_name,
             duration=execution_time,
             error=f"Agent execution failed: {str(error)}",
-            data=state,
+            data=user_context,
             metadata={
                 'fallback_result': True,
                 'original_error': str(error),

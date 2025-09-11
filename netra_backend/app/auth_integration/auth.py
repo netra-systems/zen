@@ -193,8 +193,9 @@ async def get_current_user_optional(
         logger.debug(f"Optional auth failed: {e}")
         return None
 
-# Alias for backward compatibility
+# Aliases for backward compatibility
 get_current_active_user = get_current_user
+validate_jwt_token = _validate_token_with_auth_service  # Compatibility alias for tests
 
 async def get_current_user_with_db(
     credentials: HTTPAuthorizationCredentials = Depends(security),

@@ -515,6 +515,191 @@ class UnifiedIdGenerator:
         while delegating to the module-level reset function to maintain SSOT.
         """
         reset_global_counter()
+    
+    # PHASE 1 COMPATIBILITY METHODS - ID Pattern Translation
+    
+    @staticmethod
+    def normalize_id_format(id_string: str) -> str:
+        """Normalize ID format to standard SSOT pattern for compatibility.
+        
+        PHASE 1 SSOT REMEDIATION: This method enables gradual migration by
+        translating legacy ID patterns to SSOT-compliant format.
+        
+        Args:
+            id_string: ID to normalize (legacy or SSOT format)
+            
+        Returns:
+            ID in standard SSOT format: prefix_timestamp_counter_random
+        """
+        if not id_string or not isinstance(id_string, str):
+            return id_string
+        
+        # Already in SSOT format
+        parsed = UnifiedIdGenerator.parse_id(id_string)
+        if parsed:
+            return id_string
+        
+        # Handle legacy patterns
+        # Pattern: "thread_operation_counter_random" -> "thread_operation_timestamp_counter_random"
+        parts = id_string.split('_')
+        
+        # Detect if this is a legacy thread/run ID without timestamp
+        if len(parts) >= 3 and parts[0] in ['thread', 'run', 'req']:
+            try:
+                # Check if third part is a counter (not timestamp)
+                potential_counter = int(parts[2])
+                if potential_counter < 1000000:  # Likely a counter, not timestamp
+                    # Insert current timestamp to make SSOT compliant
+                    current_timestamp = int(time.time() * 1000)
+                    normalized_parts = parts[:2] + [str(current_timestamp)] + parts[2:]
+                    return '_'.join(normalized_parts)
+            except ValueError:
+                pass
+        
+        # Handle websocket_factory_timestamp pattern (simple legacy format)
+        if 'websocket_factory' in id_string:
+            # Check if this is a legacy websocket_factory format without proper SSOT structure
+            if len(parts) == 4 and parts[0] == 'thread' and parts[1] == 'websocket_factory':
+                # This is "thread_websocket_factory_XXXX" - legacy format needing normalization
+                timestamp = str(int(time.time() * 1000))
+                counter = _get_next_counter()
+                random_part = secrets.token_hex(4)
+                return f"thread_websocket_factory_{timestamp}_{counter}_{random_part}"
+            elif len(parts) == 3 and parts[2].isdigit():
+                # This is "websocket_factory_timestamp" format
+                timestamp = parts[2]
+                counter = _get_next_counter()
+                random_part = secrets.token_hex(4)
+                return f"thread_websocket_factory_{timestamp}_{counter}_{random_part}"
+        
+        # Return as-is if no pattern match
+        return id_string
+    
+    @staticmethod
+    def extract_pattern_info(id_string: str) -> Dict[str, str]:
+        """Extract pattern information from ID for cleanup matching.
+        
+        PHASE 1 SSOT REMEDIATION: This method enables resource cleanup logic
+        to work with both legacy and SSOT ID patterns by extracting common
+        elements that can be used for matching.
+        
+        Args:
+            id_string: ID to analyze
+            
+        Returns:
+            Dictionary with pattern information for matching
+        """
+        if not id_string or not isinstance(id_string, str):
+            return {}
+        
+        # Parse SSOT format first
+        parsed = UnifiedIdGenerator.parse_id(id_string)
+        if parsed:
+            # Extract operation from prefix
+            prefix_parts = parsed.prefix.split('_')
+            operation = prefix_parts[1] if len(prefix_parts) > 1 else prefix_parts[0]
+            
+            return {
+                'id_type': prefix_parts[0],
+                'operation': operation,
+                'user_context': '_'.join(prefix_parts[:2]) if len(prefix_parts) > 1 else prefix_parts[0],
+                'timestamp': str(parsed.timestamp),
+                'format': 'ssot',
+                'normalized_id': id_string
+            }
+        
+        # Handle legacy patterns
+        parts = id_string.split('_')
+        
+        if len(parts) >= 2:
+            id_type = parts[0]
+            operation = parts[1] if len(parts) > 1 else 'unknown'
+            
+            # Extract context for matching
+            if 'websocket_factory' in id_string:
+                user_context = 'websocket_factory'
+                timestamp = parts[-1] if parts[-1].isdigit() else '0'
+            elif len(parts) >= 3:
+                user_context = '_'.join(parts[:2])
+                timestamp = parts[2] if parts[2].isdigit() else '0'
+            else:
+                user_context = parts[0]
+                timestamp = '0'
+            
+            return {
+                'id_type': id_type,
+                'operation': operation,
+                'user_context': user_context,
+                'timestamp': timestamp,
+                'format': 'legacy',
+                'normalized_id': UnifiedIdGenerator.normalize_id_format(id_string)
+            }
+        
+        return {'format': 'unknown', 'normalized_id': id_string}
+    
+    @staticmethod
+    def ids_match_for_cleanup(id1: str, id2: str) -> bool:
+        """Check if two IDs should be considered a match for resource cleanup.
+        
+        PHASE 1 SSOT REMEDIATION: This method enables WebSocket resource cleanup
+        to work correctly even when ID patterns don't exactly match, by comparing
+        semantic equivalence rather than string equality.
+        
+        Args:
+            id1: First ID to compare
+            id2: Second ID to compare
+            
+        Returns:
+            True if IDs represent the same logical resource
+        """
+        if not id1 or not id2:
+            return False
+        
+        # Exact match
+        if id1 == id2:
+            return True
+        
+        # Extract pattern info for both
+        pattern1 = UnifiedIdGenerator.extract_pattern_info(id1)
+        pattern2 = UnifiedIdGenerator.extract_pattern_info(id2)
+        
+        # Both must have valid patterns
+        if not pattern1 or not pattern2:
+            return False
+        
+        # Same ID type and operation context = match
+        # This allows thread_websocket_factory_123_456_789 to match thread_websocket_factory_999_888_777
+        return (
+            pattern1.get('id_type') == pattern2.get('id_type') and
+            pattern1.get('user_context') == pattern2.get('user_context')
+        )
+    
+    @staticmethod
+    def translate_legacy_context_ids(user_id: str, thread_id: str, run_id: str, 
+                                   operation: str = "compatibility") -> Tuple[str, str, str]:
+        """Translate legacy context IDs to SSOT format for compatibility.
+        
+        PHASE 1 SSOT REMEDIATION: This method enables gradual migration by
+        translating existing legacy IDs to SSOT-compliant format without
+        breaking existing functionality.
+        
+        Args:
+            user_id: User identifier
+            thread_id: Existing thread ID (any format)
+            run_id: Existing run ID (any format)
+            operation: Operation context for new IDs
+            
+        Returns:
+            Tuple of (normalized_thread_id, normalized_run_id, new_request_id)
+        """
+        # Normalize existing IDs
+        normalized_thread_id = UnifiedIdGenerator.normalize_id_format(thread_id)
+        normalized_run_id = UnifiedIdGenerator.normalize_id_format(run_id)
+        
+        # Generate new request ID for this translation
+        new_request_id = UnifiedIdGenerator.generate_base_id(f"req_{operation}", True, 8)
+        
+        return normalized_thread_id, normalized_run_id, new_request_id
 
 
 # Convenience functions for common use cases

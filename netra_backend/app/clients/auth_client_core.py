@@ -1250,6 +1250,15 @@ class AuthServiceClient:
         except Exception as e:
             logger.error(f"Token creation failed: {e}")
             return None
+
+    async def create_access_token(self, user_id: str, email: str = None) -> Optional[Dict]:
+        """Create access token for user through auth service."""
+        token_data = {
+            "user_id": user_id,
+            "email": email or f"{user_id}@example.com",
+            "token_type": "access"
+        }
+        return await self.create_token(token_data)
     
     # SSOT COMPLIANCE: _local_validate method REMOVED
     # All validation must go through auth service to maintain SSOT architecture
@@ -1804,6 +1813,9 @@ class AuthServiceClient:
 
 # Global client instance
 auth_client = AuthServiceClient()
+
+# Compatibility alias for integration tests (Issue #308)
+AuthClientCore = AuthServiceClient  # Main class alias for integration test compatibility
 
 
 # Convenience function for backward compatibility with auth_resilience_service

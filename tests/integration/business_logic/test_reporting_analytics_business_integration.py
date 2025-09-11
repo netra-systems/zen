@@ -33,7 +33,7 @@ from test_framework.websocket_helpers import assert_websocket_events_sent
 from shared.isolated_environment import get_env
 
 
-class TestReportingAnalyticsBusinessIntegration(BaseIntegrationTest, DatabaseIntegrationTest):
+class TestReportingAnalyticsBusinessIntegration(DatabaseIntegrationTest):
     """
     Integration tests for automated reporting and analytics generation.
     Tests delivery of business intelligence through automated report generation.

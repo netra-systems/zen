@@ -34,7 +34,7 @@ from test_framework.websocket_helpers import assert_websocket_events_sent
 from shared.isolated_environment import get_env
 
 
-class TestDataProcessingBusinessIntegration(BaseIntegrationTest, DatabaseIntegrationTest):
+class TestDataProcessingBusinessIntegration(DatabaseIntegrationTest):
     """
     Integration tests for data collection and processing pipeline workflows.
     Tests actual business value delivery through automated data intelligence.

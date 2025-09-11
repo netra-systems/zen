@@ -393,11 +393,11 @@ analysis = optimizer.optimize_execution_performance(results, duration)
 Real-time system resource monitoring.
 
 ```python
-from test_framework.resource_monitor import ResourceMonitor
+from test_framework.resource_monitor import DockerResourceMonitor
 
-monitor = ResourceMonitor()
-monitor.start_monitoring()
-load = monitor.get_current_load()
+monitor = DockerResourceMonitor()
+snapshot = monitor.check_system_resources()
+resource_usage = monitor.get_resource_usage()
 ```
 
 ### Configuration API

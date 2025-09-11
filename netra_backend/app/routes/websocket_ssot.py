@@ -344,9 +344,32 @@ class WebSocketSSOTRouter:
             if hasattr(websocket, 'scope') and 'app' in websocket.scope:
                 app_state = websocket.scope['app'].state
             
+            # PERFORMANCE OPTIMIZATION: Environment-aware timeout configuration (2025-09-11)
+            # PREVIOUS ISSUE: Fixed 30s timeout caused severe performance regression
+            # NEW APPROACH: Environment-aware timeouts balance speed vs safety
+            # 
+            # TIMEOUT REDUCTIONS:
+            # - Local/Test: 30s → 1.0s (97% faster)
+            # - Development/Staging: 30s → 3.0s (90% faster) 
+            # - Production: 30s → 5.0s (83% faster)
+            #
+            # SAFETY MAINTAINED: Cloud Run race condition protection preserved
+            # ROLLBACK: Change values back to 30.0 if issues occur
+            current_env = get_current_environment()
+            if current_env in ['staging', 'development']:
+                # Optimized timeout for faster environments: 3s allows quick connection
+                # while still preventing race conditions in Cloud Run
+                readiness_timeout = 3.0
+            elif current_env == 'production':
+                # Conservative timeout for production: maintain reliability
+                readiness_timeout = 5.0
+            else:
+                # Local/test environments: very fast timeout for immediate feedback
+                readiness_timeout = 1.0
+            
             if app_state:
                 try:
-                    async with gcp_websocket_readiness_guard(app_state, timeout=30.0) as readiness_result:
+                    async with gcp_websocket_readiness_guard(app_state, timeout=readiness_timeout) as readiness_result:
                         if not readiness_result.ready:
                             # Race condition detected - reject connection to prevent 1011 error
                             logger.error(
@@ -382,7 +405,7 @@ class WebSocketSSOTRouter:
             
             if not auth_result.success:
                 logger.error(f"[MAIN MODE] Authentication failed: {auth_result.error}")
-                await safe_websocket_send(websocket, create_error_message("Authentication failed"))
+                await safe_websocket_send(websocket, create_error_message("AUTH_FAILED", "Authentication failed"))
                 await safe_websocket_close(websocket, 1008, "Authentication failed")
                 return
             
@@ -395,7 +418,7 @@ class WebSocketSSOTRouter:
             ws_manager = await self._create_websocket_manager(user_context)
             if not ws_manager:
                 logger.error("[MAIN MODE] Failed to create WebSocket manager")
-                await safe_websocket_send(websocket, create_error_message("Service initialization failed"))
+                await safe_websocket_send(websocket, create_error_message("SERVICE_INIT_FAILED", "Service initialization failed"))
                 await safe_websocket_close(websocket, 1011, "Service initialization failed")
                 return
             
@@ -660,7 +683,7 @@ class WebSocketSSOTRouter:
         """Create WebSocket manager with emergency fallback."""
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            return await create_websocket_manager(user_context)
+            return create_websocket_manager(user_context)
         except Exception as e:
             logger.error(f"WebSocket manager creation failed: {e}")
             return self._create_emergency_websocket_manager(user_context)
@@ -706,8 +729,9 @@ class WebSocketSSOTRouter:
             message_router = get_message_router()
             if message_router:
                 # Create agent handler for the user
-                from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge
-                agent_bridge = await create_agent_websocket_bridge(user_context)
+                from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+                # Fix: create_agent_websocket_bridge is synchronous, not async
+                agent_bridge = create_agent_websocket_bridge(user_context)
                 
                 # Register handler with router
                 async def agent_handler(user_id: str, websocket: WebSocket, message: Dict[str, Any]):
@@ -721,8 +745,9 @@ class WebSocketSSOTRouter:
     async def _create_agent_websocket_bridge(self, user_context):
         """Create agent WebSocket bridge for isolated mode."""
         try:
-            from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge
-            return await create_agent_websocket_bridge(user_context)
+            from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+            # Fix: create_agent_websocket_bridge is synchronous, not async
+            return create_agent_websocket_bridge(user_context)
         except Exception as e:
             logger.error(f"Agent bridge creation failed: {e}")
             return None
@@ -762,7 +787,7 @@ class WebSocketSSOTRouter:
                     await safe_websocket_send(websocket, heartbeat_msg)
                 except json.JSONDecodeError as e:
                     logger.error(f"[MAIN MODE] JSON decode error: {e}")
-                    error_msg = create_error_message("Invalid JSON format")
+                    error_msg = create_error_message("JSON_PARSE_ERROR", "Invalid JSON format")
                     await safe_websocket_send(websocket, error_msg)
                     
         except WebSocketDisconnect:
@@ -894,7 +919,20 @@ class WebSocketSSOTRouter:
         
         try:
             if is_websocket_connected(websocket):
-                error_message = create_error_message(f"Connection error in {mode.value} mode")
+                # FIVE WHYS FIX: Convert ErrorMessage to ServerMessage for proper WebSocket sending
+                # Root Cause: Organizational culture prioritizing velocity over architectural discipline
+                # WHY #1: ErrorMessage passed directly to safe_websocket_send() which expects ServerMessage
+                # WHY #2: No type conversion layer between message types
+                # WHY #3: Architecture violates interface design principles  
+                # WHY #4: Missing quality validation in development process
+                # WHY #5: Organization values feature velocity over engineering excellence
+                error_data = {
+                    "error_code": "CONNECTION_ERROR",
+                    "error_message": f"Connection error in {mode.value} mode",
+                    "details": {"error_type": str(type(error).__name__), "mode": mode.value},
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                error_message = create_server_message("error", error_data)
                 await safe_websocket_send(websocket, error_message)
                 await safe_websocket_close(websocket, 1011, f"{mode.value} mode error")
         except Exception as cleanup_error:

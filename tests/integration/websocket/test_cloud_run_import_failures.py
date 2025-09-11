@@ -24,7 +24,7 @@ import pytest
 # SSOT Test Framework imports (required per CLAUDE.md)
 from test_framework.ssot.base_test_case import BaseTestCase
 from test_framework.ssot.real_websocket_connection_manager import RealWebSocketConnectionManager
-from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthTestHelper
+from test_framework.ssot.websocket_auth_test_helpers import WebSocketAuthenticationTester
 from test_framework.ssot.integration_test_base import IntegrationTestBase
 
 # Import SSOT authentication helper

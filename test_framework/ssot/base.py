@@ -512,8 +512,8 @@ class DatabaseTestCase(BaseTestCase):
         """Get database session for testing."""
         if self._db_session is None:
             # Import here to avoid circular dependencies
-            from test_framework.ssot.database import DatabaseTestUtility
-            db_util = DatabaseTestUtility()
+            from test_framework.database_test_utilities import DatabaseTestUtilities
+            db_util = DatabaseTestUtilities()
             self._db_session = await db_util.get_test_session()
             self.track_resource(self._db_session)
         

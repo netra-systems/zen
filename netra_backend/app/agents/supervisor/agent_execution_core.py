@@ -9,18 +9,16 @@ to prevent agent execution pipeline blocking that prevents users from receiving 
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional
 from uuid import UUID
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-# CRITICAL SECURITY FIX: Migrating from DeepAgentState to UserExecutionContext
-# DeepAgentState creates user isolation risks and will be removed
-import warnings
+# CRITICAL SECURITY FIX: Migration to UserExecutionContext completed
+# DeepAgentState removed to eliminate user isolation risks
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.state import DeepAgentState  # DEPRECATED - will be removed
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -51,6 +49,33 @@ from netra_backend.app.core.agent_execution_tracker import (
 logger = central_logger.get_logger(__name__)
 
 
+def get_agent_state_tracker() -> AgentExecutionTracker:
+    """Factory function to get an instance of AgentExecutionTracker.
+    
+    This function provides the expected interface for creating agent state trackers
+    as required by the test suite and other components.
+    
+    Returns:
+        AgentExecutionTracker: A new instance of the agent execution tracker
+    """
+    return AgentExecutionTracker()
+
+
+def create_agent_execution_context(**kwargs) -> AgentExecutionContext:
+    """Factory function to create an AgentExecutionContext.
+    
+    This is a convenience wrapper around AgentExecutionContext constructor
+    to provide a consistent factory interface.
+    
+    Args:
+        **kwargs: Arguments passed to AgentExecutionContext constructor
+        
+    Returns:
+        AgentExecutionContext: A new execution context instance
+    """
+    return AgentExecutionContext(**kwargs)
+
+
 class AgentExecutionCore:
     """Enhanced agent execution with death detection and recovery.
     
@@ -77,61 +102,55 @@ class AgentExecutionCore:
             f"for comprehensive monitoring"
         )
         
-    def _ensure_user_execution_context(
+    def _validate_user_execution_context(
         self, 
-        state: Union[DeepAgentState, UserExecutionContext],
-        context: AgentExecutionContext
+        user_context: UserExecutionContext,
+        execution_context: AgentExecutionContext
     ) -> UserExecutionContext:
         """
-        CRITICAL SECURITY FIX: Ensure we have proper UserExecutionContext for user isolation.
+        CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation.
         
-        This method handles the migration from deprecated DeepAgentState to secure
-        UserExecutionContext pattern, preventing user data isolation vulnerabilities.
+        This method ensures we have a valid UserExecutionContext with proper user isolation,
+        preventing any cross-user data contamination vulnerabilities.
+        
+        Phase 1 Migration: Only UserExecutionContext accepted (DeepAgentState eliminated)
         """
-        if isinstance(state, UserExecutionContext):
-            # Already using secure UserExecutionContext
-            return state
+        if not isinstance(user_context, UserExecutionContext):
+            # Check if this is a DeepAgentState attempt for better error message
+            if hasattr(user_context, '__class__') and 'DeepAgentState' in user_context.__class__.__name__:
+                raise ValueError(
+                    f"🚨 SECURITY VULNERABILITY: DeepAgentState is FORBIDDEN due to user isolation risks. "
+                    f"Agent '{execution_context.agent_name}' (run_id: {execution_context.run_id}) "
+                    f"attempted to use DeepAgentState which can cause data leakage between users. "
+                    f"MIGRATION REQUIRED: Use UserExecutionContext pattern immediately. "
+                    f"See issue #271 remediation plan for migration guide."
+                )
+            else:
+                raise ValueError(
+                    f"Expected UserExecutionContext, got {type(user_context)}. "
+                    f"DeepAgentState is no longer supported due to security risks."
+                )
         
-        elif isinstance(state, DeepAgentState):
-            # DEPRECATED: Issue warning and migrate to secure pattern
-            warnings.warn(
-                f"🚨 SECURITY WARNING: DeepAgentState is deprecated due to USER ISOLATION RISKS. "
-                f"Agent '{context.agent_name}' (run_id: {context.run_id}) is using DeepAgentState "
-                f"which may cause data leakage between users. Migrate to UserExecutionContext pattern "
-                f"immediately. See EXECUTION_PATTERN_TECHNICAL_DESIGN.md for migration guide.",
-                DeprecationWarning,
-                stacklevel=3
-            )
+        # Validate context integrity
+        if not user_context.user_id:
+            raise ValueError("UserExecutionContext missing required user_id")
+        if not user_context.thread_id:
+            raise ValueError("UserExecutionContext missing required thread_id") 
+        if not user_context.run_id:
+            raise ValueError("UserExecutionContext missing required run_id")
             
-            # Convert to secure UserExecutionContext
-            return UserExecutionContext.from_agent_execution_context(
-                user_id=getattr(state, 'user_id', None) or 'unknown',
-                thread_id=getattr(state, 'thread_id', None) or context.thread_id or 'unknown',
-                run_id=getattr(state, 'run_id', None) or str(context.run_id),
-                agent_context={
-                    'agent_name': context.agent_name,
-                    'user_request': getattr(state, 'user_request', 'default_request'),
-                    'agent_input': getattr(state, 'agent_input', {}),
-                },
-                audit_metadata={
-                    'migration_source': 'DeepAgentState',
-                    'migration_timestamp': time.time(),
-                    'original_state_type': type(state).__name__
-                }
-            )
-        else:
-            raise ValueError(f"Unsupported state type: {type(state)}. Must be UserExecutionContext or DeepAgentState.")
+        return user_context
     
     async def execute_agent(
         self, 
         context: AgentExecutionContext,
-        state: Union[DeepAgentState, UserExecutionContext],
+        user_context: UserExecutionContext,
         timeout: Optional[float] = None
     ) -> AgentExecutionResult:
         """Execute agent with full lifecycle tracking and death detection."""
         
-        # CRITICAL SECURITY FIX: Handle DeepAgentState deprecation and migration
-        user_execution_context = self._ensure_user_execution_context(state, context)
+        # CRITICAL SECURITY: Validate UserExecutionContext for proper user isolation
+        user_execution_context = self._validate_user_execution_context(user_context, context)
         
         # Get or create trace context
         parent_trace = get_unified_trace_context()
@@ -156,13 +175,16 @@ class AgentExecutionCore:
             }
         )
         
-        # Register execution with tracker
-        exec_id = await self.execution_tracker.register_execution(
+        # Create execution with tracker
+        exec_id = self.execution_tracker.create_execution(
             agent_name=context.agent_name,
-            correlation_id=trace_context.correlation_id,
             thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
-            timeout_seconds=timeout or self.DEFAULT_TIMEOUT
+            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
+            metadata={
+                'correlation_id': trace_context.correlation_id,
+                'run_id': str(context.run_id)
+            }
         )
         
         # CRITICAL REMEDIATION: Create and start execution tracking for comprehensive monitoring
@@ -201,7 +223,9 @@ class AgentExecutionCore:
         async with TraceContextManager(trace_context):
             try:
                 # Start execution tracking
-                await self.execution_tracker.start_execution(exec_id)
+                started = self.execution_tracker.start_execution(exec_id)
+                if not started:
+                    raise RuntimeError(f"Failed to start execution tracking for {exec_id}")
                 
                 # CRITICAL REMEDIATION: Transition through proper phase sequence
                 await self.agent_tracker.transition_state(
@@ -248,8 +272,9 @@ class AgentExecutionCore:
                 agent = self._get_agent_or_error(context.agent_name)
                 if isinstance(agent, AgentExecutionResult):
                     # Agent not found - mark as failed
-                    await self.execution_tracker.complete_execution(
+                    self.execution_tracker.update_execution_state(
                         exec_id, 
+                        ExecutionState.FAILED,
                         error=f"Agent {context.agent_name} not found"
                     )
                     
@@ -316,8 +341,14 @@ class AgentExecutionCore:
                     )
                     
                 except TimeoutError as e:
-                    # Agent execution timed out
-                    logger.error(f"⏰ Agent {context.agent_name} timed out: {e}")
+                    # Agent execution timed out - provide detailed context
+                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
+                    logger.error(
+                        f"⏰ TIMEOUT: Agent '{context.agent_name}' exceeded timeout limit of {timeout_duration}s. "
+                        f"User: {user_execution_context.user_id}, Thread: {user_execution_context.thread_id}, "
+                        f"Run ID: {context.run_id}. This may indicate the agent is stuck or processing "
+                        f"a complex request. Original error: {e}"
+                    )
                     
                     # Transition to timeout phase
                     await self.agent_tracker.transition_state(
@@ -327,10 +358,15 @@ class AgentExecutionCore:
                         websocket_manager=self.websocket_bridge
                     )
                     
+                    # Create detailed timeout result with enhanced context
+                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
                     result = AgentExecutionResult(
                         success=False,
                         agent_name=context.agent_name,
-                        error=str(e),
+                        error=f"Agent '{context.agent_name}' timed out after {timeout_duration}s. "
+                              f"Execution exceeded maximum allowed time, possibly due to complex processing "
+                              f"or external resource delays. User: {user_execution_context.user_id}, "
+                              f"Run ID: {context.run_id}.",
                         duration=0.0
                     )
             
@@ -341,7 +377,11 @@ class AgentExecutionCore:
                 # CRITICAL REMEDIATION: Mark execution complete with state tracking
                 if result.success:
                     trace_context.add_event("agent.completed")
-                    await self.execution_tracker.complete_execution(exec_id, result=result)
+                    self.execution_tracker.update_execution_state(
+                        exec_id, 
+                        ExecutionState.COMPLETED,
+                        result=result
+                    )
                     
                     # Transition through proper completion sequence: THINKING -> TOOL_PREPARATION -> TOOL_EXECUTION -> RESULT_PROCESSING
                     await self.agent_tracker.transition_state(
@@ -382,8 +422,9 @@ class AgentExecutionCore:
                     self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
-                    await self.execution_tracker.complete_execution(
+                    self.execution_tracker.update_execution_state(
                         exec_id, 
+                        ExecutionState.FAILED,
                         error=result.error or "Unknown error"
                     )
                     
@@ -421,8 +462,9 @@ class AgentExecutionCore:
                 trace_context.finish_span(span)
                 
                 # Ensure execution is marked as failed
-                await self.execution_tracker.complete_execution(
+                self.execution_tracker.update_execution_state(
                     exec_id,
+                    ExecutionState.FAILED,
                     error=f"Unexpected error: {str(e)}"
                 )
                 
@@ -483,11 +525,19 @@ class AgentExecutionCore:
                     
         except asyncio.TimeoutError:
             duration = time.time() - start_time
-            logger.error(f"Agent {context.agent_name} timed out after {timeout_seconds}s")
+            logger.error(
+                f"⏰ EXECUTION TIMEOUT: Agent '{context.agent_name}' exceeded execution timeout "
+                f"of {timeout_seconds}s (duration: {duration:.2f}s). User: {user_execution_context.user_id}, "
+                f"Thread: {user_execution_context.thread_id}, Run ID: {context.run_id}. "
+                f"This indicates the agent may be stuck in processing or waiting for external resources."
+            )
             return AgentExecutionResult(
                 success=False,
                 agent_name=context.agent_name,
-                error=f"Agent execution timeout after {timeout_seconds}s",
+                error=f"Agent '{context.agent_name}' execution timeout after {timeout_seconds}s. "
+                      f"The agent exceeded the maximum allowed execution time, possibly due to "
+                      f"complex processing or external resource delays. User: {user_execution_context.user_id}, "
+                      f"Run ID: {context.run_id}.",
                 duration=duration,
                 metrics=self._calculate_performance_metrics(start_time, heartbeat)
             )
@@ -736,8 +786,8 @@ class AgentExecutionCore:
         heartbeat: Optional[Any] = None  # Disabled - was AgentHeartbeat
     ) -> dict:
         """Collect comprehensive metrics for the execution."""
-        # Get metrics from execution tracker
-        tracker_metrics = await self.execution_tracker.collect_metrics(exec_id)
+        # Get metrics from execution tracker  
+        tracker_metrics = self.execution_tracker.get_metrics()
         
         # Combine with result metrics
         metrics = tracker_metrics or {}

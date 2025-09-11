@@ -1,0 +1,122 @@
+# Failing Test Gardener Worklog - E2E Agent Value Tests
+
+**Generated:** 2025-09-10 23:16:30  
+**Test Focus:** e2e agent value  
+**Scope:** Agent value delivery tests, business critical chat functionality, WebSocket agent events  
+
+## Executive Summary
+
+Discovered critical test infrastructure issues preventing execution of business-critical agent value tests. Primary issue is widespread `ModuleNotFoundError: No module named 'test_framework'` affecting agent value delivery validation tests.
+
+**Business Impact:** Cannot validate 90% of platform value (chat functionality with substantive AI responses) due to test collection/execution failures.
+
+## Discovered Issues
+
+### Issue #1: Missing test_framework Module (CRITICAL)
+**Severity:** HIGH  
+**Category:** uncollectable-test-infrastructure-critical  
+**Affected Tests:** Agent value delivery tests across mission critical, integration, and e2e categories  
+
+**Error Pattern:**
+```
+ModuleNotFoundError: No module named 'test_framework'
+```
+
+**Affected Files:**
+- `tests/mission_critical/test_agent_execution_business_value.py` (Line 41)
+- `tests/integration/test_agent_execution_business_value.py` (Line 40) 
+- `tests/e2e/test_complete_chat_conversations_business_value.py` (Line 37)
+
+**Import Failures:**
+```python
+# Failing imports:
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user, get_test_jwt_token
+```
+
+**Business Impact:** 
+- Cannot validate agent execution delivering business value
+- Cannot test authenticated chat conversations (primary revenue driver)
+- Cannot verify E2E agent workflows providing substantive AI responses
+
+### Issue #2: Docker Dependency Blocking E2E Tests (HIGH)
+**Severity:** HIGH  
+**Category:** failing-test-infrastructure-high  
+**Affected Tests:** E2E agent value tests requiring Docker services  
+
+**Error Pattern:**
+```
+[ERROR] Docker Desktop service is not running
+[WARNING] Docker services are not healthy!
+```
+
+**Business Impact:**
+- Cannot run end-to-end agent value tests
+- Cannot validate WebSocket agent events (critical for chat UX)
+- Cannot test real service integration for agent workflows
+
+### Issue #3: Test Category Discovery Issues (MEDIUM)
+**Severity:** MEDIUM  
+**Category:** failing-test-discovery-medium  
+
+**Error Pattern:**
+```
+Warning: Categories not found: {'mission_critical'}
+No categories to run based on selection criteria - SUCCESS (empty selection is valid)
+```
+
+**Business Impact:**
+- Mission critical test category not properly registered
+- Reduced confidence in business-critical functionality validation
+
+## GitHub Issues Created/Updated
+
+### Issue #1: test_framework Module → **Updated Issue #299**
+**Link:** https://github.com/netra-systems/netra-apex/issues/299  
+**Action:** Added detailed test_framework import failure evidence  
+**Status:** OPEN - SSOT TestRunner duplicate implementation blocking Golden Path validation  
+
+### Issue #2: Docker Dependency → **Updated Issue #291**  
+**Link:** https://github.com/netra-systems/netra-apex/issues/291  
+**Action:** Added agent value test execution evidence and business impact escalation  
+**Status:** OPEN - Docker daemon connectivity blocks integration tests  
+
+### Issue #3: Test Category Registration → **Created Issue #311**
+**Link:** https://github.com/netra-systems/netra-apex/issues/311  
+**Title:** failing-test-infrastructure-medium-test-category-discovery-mission-critical-not-found  
+**Status:** OPEN - Mission critical test category not discoverable  
+
+## Next Steps by Issue
+
+### Issue #299: test_framework Module (UPDATED)
+1. ✅ Documented import failures in GitHub issue
+2. Investigate test_framework module SSOT structure 
+3. Verify SSOT import registry has correct test_framework imports
+4. Resolve module import dependencies for agent value tests
+
+### Issue #291: Docker Dependency (UPDATED)
+1. ✅ Added agent value test impact analysis to GitHub issue  
+2. Restore Docker daemon connectivity
+3. Validate agent value tests with real services
+4. Ensure WebSocket event validation with Docker services
+
+### Issue #311: Test Category Registration (NEW)
+1. ✅ Created GitHub issue for category discovery problems
+2. Verify mission_critical test category configuration in unified_test_runner.py
+3. Update test discovery mechanism for proper category recognition
+4. Enable direct execution of mission-critical agent value tests
+
+## Test Discovery Summary
+
+**Attempted Test Runs:**
+1. ✅ Syntax validation: 4930 files passed
+2. ❌ E2E agent tests: Blocked by Docker dependency
+3. ❌ Mission critical tests: Category not found
+4. ❌ Unit tests with value pattern: Failed execution
+5. ❌ Direct test execution: ModuleNotFoundError
+
+**Key Finding:** Test infrastructure issues preventing validation of the 90% of platform value delivered through chat functionality.
+
+---
+*Generated by Failing Test Gardener - Claude Code*

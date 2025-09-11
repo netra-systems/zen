@@ -20,6 +20,7 @@ import asyncio
 import threading
 from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
+from .thread_performance_utils import ThreadPerformanceUtils
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
@@ -253,6 +254,9 @@ thread_test_factory = ThreadTestDataFactory()
 thread_context_manager = ThreadContextManager()
 thread_websocket_fixtures = ThreadWebSocketFixtures()
 
+# Create performance utils instance
+performance_utils = ThreadPerformanceUtils()
+
 # Create some default test users
 test_users = thread_test_factory.create_test_users(5)
 
@@ -260,12 +264,12 @@ test_users = thread_test_factory.create_test_users(5)
 __all__ = [
     'ThreadContextManager',
     'ThreadTestDataFactory', 
-    'ThreadWebSocketFixtures',
+    'ThreadWebSocketFixtures', 'ThreadPerformanceUtils',
     'ThreadTestUser',
     'test_users',
     'thread_context_manager',
     'thread_test_factory', 
-    'thread_websocket_fixtures'
+    'thread_websocket_fixtures', 'performance_utils'
 ]
 
 async def unified_harness(test_user: ThreadTestUser, test_scenario: Callable) -> Dict[str, Any]:
@@ -566,7 +570,7 @@ __all__ = [
     'ThreadTestUser',
     'ThreadContextManager',
     'ThreadTestDataFactory',
-    'ThreadWebSocketFixtures', 
+    'ThreadWebSocketFixtures', 'ThreadPerformanceUtils', 
     'ThreadIsolationValidator',
     'WebSocketThreadManager',
     'unified_harness',
@@ -575,5 +579,5 @@ __all__ = [
     'thread_isolation_validator',
     'test_users',
     'thread_test_factory',
-    'thread_websocket_fixtures'
+    'thread_websocket_fixtures', 'performance_utils'
 ]

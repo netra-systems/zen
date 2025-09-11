@@ -219,9 +219,10 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
         await user_session.set_websocket_manager(websocket_manager, user_context)
         
         # Create WebSocket bridge using SSOT factory
-        bridge = await create_agent_websocket_bridge(
-            user_context=user_context,
-            websocket_manager=websocket_manager
+        # Fix: create_agent_websocket_bridge is synchronous, not async
+        # Also fix: function doesn't take websocket_manager parameter
+        bridge = create_agent_websocket_bridge(
+            user_context=user_context
         )
         
         # Create request-scoped execution engine

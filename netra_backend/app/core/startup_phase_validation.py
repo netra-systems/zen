@@ -17,7 +17,6 @@ CRITICAL: This prevents the exact architectural integration failures identified
 in the WebSocket bridge Five Whys analysis.
 """
 
-import logging
 import asyncio
 from typing import Dict, Any, List, Optional, Callable
 from dataclasses import dataclass
@@ -30,8 +29,9 @@ from netra_backend.app.core.app_state_contracts import (
     AppStateContractViolation,
     enforce_app_state_contracts
 )
+from netra_backend.app.logging_config import central_logger
 
-logger = logging.getLogger(__name__)
+logger = central_logger.get_logger(__name__)
 
 
 class StartupValidationError(Exception):

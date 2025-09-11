@@ -15,6 +15,7 @@ import time
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Set
+from unittest.mock import AsyncMock
 
 import psutil
 import pytest
@@ -32,17 +33,17 @@ async def create_connection(user_id: str, conn_idx: int, connection_metrics: Dic
 
 def _create_mock_websocket(user_id: str, conn_idx: int) -> AsyncMock:
     # Mock: Generic component isolation for controlled unit testing
-    mock_ws = AsyncNone  # TODO: Use real service instance
+    mock_ws = AsyncMock()  # TODO: Use real service instance
     mock_ws.user_id = user_id
     mock_ws.connection_id = f"{user_id}_conn_{conn_idx}"
     mock_ws.connected_at = datetime.now(UTC)
     mock_ws.state = websockets.State.OPEN
     # Mock: Generic component isolation for controlled unit testing
-    mock_ws.send = AsyncNone  # TODO: Use real service instance
+    mock_ws.send = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock_ws.recv = AsyncNone  # TODO: Use real service instance
+    mock_ws.recv = AsyncMock()  # TODO: Use real service instance
     # Mock: Generic component isolation for controlled unit testing
-    mock_ws.close = AsyncNone  # TODO: Use real service instance
+    mock_ws.close = AsyncMock()  # TODO: Use real service instance
     return mock_ws
 
 def _handle_connection_failure(e: Exception, connection_metrics: Dict) -> None:
@@ -135,7 +136,7 @@ async def test_rapid_connect_disconnect_cycles():
             # Connect
             start_connect = time.time()
             # Mock: Generic component isolation for controlled unit testing
-            mock_ws = AsyncNone  # TODO: Use real service instance
+            mock_ws = AsyncMock()  # TODO: Use real service instance
             mock_ws.state = websockets.State.OPEN
             await asyncio.sleep(0.001)  # Simulate connection time
             connection_times.append(time.time() - start_connect)

@@ -552,6 +552,7 @@ class AgentInstanceFactory:
                                            user_id: str,
                                            thread_id: str,
                                            run_id: str,
+                                           request_id: Optional[str] = None,
                                            db_session: Optional[AsyncSession] = None,
                                            websocket_client_id: Optional[str] = None,
                                            metadata: Optional[Dict[str, Any]] = None) -> UserExecutionContext:
@@ -562,6 +563,7 @@ class AgentInstanceFactory:
             user_id: Unique user identifier
             thread_id: Thread identifier for WebSocket routing
             run_id: Unique run identifier for this execution
+            request_id: Optional request identifier for this execution
             db_session: Optional request-scoped database session
             websocket_client_id: Optional WebSocket client ID
             metadata: Optional metadata for the context
@@ -593,6 +595,7 @@ class AgentInstanceFactory:
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
+                request_id=request_id,
                 db_session=db_session,
                 websocket_connection_id=websocket_client_id,
                 metadata=metadata or {}

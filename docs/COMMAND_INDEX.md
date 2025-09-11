@@ -4,7 +4,7 @@
 
 ## 📋 Overview
 
-This index catalogues all 37 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
+This index catalogues all 38 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
 
 **Location**: [`.claude/commands/`](../.claude/commands/) directory
 

@@ -12,14 +12,27 @@ Key Components:
 Business Value: Eliminates silent failures that cause 100% UX degradation.
 """
 
-from netra_backend.app.agents.execution_tracking.registry import ExecutionRegistry
-from netra_backend.app.agents.execution_tracking.heartbeat import HeartbeatMonitor
-from netra_backend.app.agents.execution_tracking.timeout import TimeoutManager
-from netra_backend.app.agents.execution_tracking.tracker import ExecutionTracker
-
-__all__ = [
-    "ExecutionRegistry",
-    "HeartbeatMonitor", 
-    "TimeoutManager",
-    "ExecutionTracker"
-]
+# SSOT Compatibility Layer: Import from SSOT implementation where available
+try:
+    from netra_backend.app.agents.execution_tracking.registry import ExecutionRegistry
+    from netra_backend.app.agents.execution_tracking.heartbeat import HeartbeatMonitor
+    from netra_backend.app.agents.execution_tracking.tracker import ExecutionTracker
+    
+    # TimeoutManager functionality is now consolidated in SSOT AgentExecutionTracker
+    from netra_backend.app.core.agent_execution_tracker import TimeoutConfig as TimeoutManager
+    
+    __all__ = [
+        "ExecutionRegistry",
+        "HeartbeatMonitor", 
+        "TimeoutManager",
+        "ExecutionTracker"
+    ]
+except ImportError as e:
+    # Fallback if some modules are missing
+    import warnings
+    warnings.warn(f"Execution tracking module import failed: {e}. Using SSOT fallbacks.", ImportWarning)
+    
+    from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker as ExecutionTracker
+    from netra_backend.app.core.agent_execution_tracker import TimeoutConfig as TimeoutManager
+    
+    __all__ = ["ExecutionTracker", "TimeoutManager"]

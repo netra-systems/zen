@@ -618,6 +618,74 @@ class GCPErrorValidationHelper:
         return expected_mapping.get(log_level.lower()) == gcp_severity
 
 
+# Missing Classes for Test Collection Compatibility
+
+class GCPErrorTestFixtures:
+    """GCP Error Test Fixtures helper class for compatibility."""
+    
+    def __init__(self):
+        self.error_scenarios = comprehensive_error_scenarios
+        self.environment_configs = gcp_environment_configurations  
+        self.mock_responses = mock_gcp_api_responses
+        self.user_contexts = user_context_scenarios
+        self.validation_helper = GCPErrorValidationHelper()
+        
+    def get_comprehensive_error_scenarios(self):
+        """Get comprehensive error scenarios."""
+        return self.error_scenarios()
+    
+    def get_gcp_environment_configurations(self):
+        """Get GCP environment configurations."""
+        return self.environment_configs()
+    
+    def get_mock_gcp_api_responses(self):
+        """Get mock GCP API responses."""
+        return self.mock_responses()
+
+
+def create_test_gcp_log_entry(
+    message: str,
+    severity: str = "ERROR",
+    service: str = "netra-backend",
+    trace_id: Optional[str] = None,
+    context: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    """Create a test GCP log entry for testing purposes.
+    
+    Args:
+        message: Log message
+        severity: Log severity level
+        service: Service name
+        trace_id: Optional trace ID
+        context: Additional context data
+        
+    Returns:
+        Dictionary representing a GCP log entry
+    """
+    entry = {
+        "timestamp": time.time(),
+        "severity": severity,
+        "message": message,
+        "resource": {
+            "type": "cloud_run_revision",
+            "labels": {
+                "service_name": service,
+                "revision_name": f"{service}-latest"
+            }
+        },
+        "jsonPayload": context or {},
+        "labels": {
+            "service": service,
+            "environment": "test"
+        }
+    }
+    
+    if trace_id:
+        entry["trace"] = f"projects/test-project/traces/{trace_id}"
+    
+    return entry
+
+
 # Export commonly used fixtures and helpers
 __all__ = [
     'comprehensive_error_scenarios',
@@ -631,5 +699,7 @@ __all__ = [
     'generate_test_trace_id',
     'generate_test_request_id', 
     'generate_test_user_id',
-    'GCPErrorValidationHelper'
+    'GCPErrorValidationHelper',
+    'GCPErrorTestFixtures',
+    'create_test_gcp_log_entry'
 ]

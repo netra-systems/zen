@@ -8,7 +8,6 @@ import time
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig, PipelineStep
 from netra_backend.app.agents.supervisor.agent_coordination_validator import AgentCoordinationValidator
 from netra_backend.app.logging_config import central_logger
@@ -58,7 +57,8 @@ class WorkflowOrchestrator:
                 )
                 
                 # Use factory to create isolated bridge
-                bridge = await create_agent_websocket_bridge(user_context)
+                # Fix: create_agent_websocket_bridge is synchronous, not async
+                bridge = create_agent_websocket_bridge(user_context)
                 return await bridge.create_user_emitter(user_context)
             else:
                 logger.debug("ExecutionContext missing required fields for user emitter")
@@ -78,7 +78,8 @@ class WorkflowOrchestrator:
             try:
                 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
                 # Use factory to create isolated bridge
-                bridge = await create_agent_websocket_bridge(self.user_context)
+                # Fix: create_agent_websocket_bridge is synchronous, not async
+                bridge = create_agent_websocket_bridge(self.user_context)
                 self._websocket_emitter = await bridge.create_user_emitter(self.user_context)
             except Exception as e:
                 logger.debug(f"Failed to create user emitter: {e}")

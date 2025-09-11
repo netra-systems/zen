@@ -908,21 +908,35 @@ async def get_request_scoped_supervisor(
         
         tool_dispatcher = legacy_supervisor.tool_dispatcher
         if not tool_dispatcher:
-            logger.error(f"Tool dispatcher is None. Supervisor: {type(legacy_supervisor)}, User: {context.user_id}")
+            logger.info(f"Tool dispatcher is None for user {context.user_id}, creating per-request instance")
             
-            # Check if this might be a UserContext-based architecture issue
-            if hasattr(request.app.state, 'tool_classes') and request.app.state.tool_classes:
-                logger.info("Detected UserContext-based tool configuration - attempting fallback creation")
-                # TODO: Implement tool dispatcher creation from tool_classes for UserContext architecture
-                # For now, return clear error about missing tool dispatcher
-                raise HTTPException(
-                    status_code=500,
-                    detail="Tool dispatcher not configured (UserContext-based architecture requires per-request tool creation)"
+            # Create tool dispatcher per-request for UserContext-based architecture
+            from netra_backend.app.core.tools.unified_tool_dispatcher import (
+                UnifiedToolDispatcherFactory,
+                create_request_scoped_dispatcher
+            )
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            
+            try:
+                # Create UserExecutionContext for tool dispatcher
+                user_context = UserExecutionContext(
+                    user_id=context.user_id,
+                    thread_id=context.thread_id,
+                    run_id=context.run_id,
+                    session_id=context.websocket_connection_id
                 )
-            else:
+                
+                # Create request-scoped tool dispatcher with user context
+                tool_dispatcher = await create_request_scoped_dispatcher(
+                    user_context=user_context,
+                    websocket_manager=websocket_bridge
+                )
+                logger.info(f"✅ Created request-scoped tool dispatcher for user {context.user_id}")
+            except Exception as e:
+                logger.error(f"Failed to create request-scoped tool dispatcher: {e}")
                 raise HTTPException(
                     status_code=500,
-                    detail="Tool dispatcher unavailable (check supervisor initialization and configuration validity)"
+                    detail=f"Failed to create tool dispatcher: {str(e)}"
                 )
         
         # Use core supervisor factory for consistency with WebSocket pattern

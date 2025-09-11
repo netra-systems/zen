@@ -1,0 +1,146 @@
+# Failing Test Gardener Worklog - E2E Tests
+**Date:** 2025-09-10 22:22
+**Focus:** E2E (End-to-End) Tests
+**Command:** `/failingtestsgardener e2e`
+
+## Executive Summary
+
+**CRITICAL INFRASTRUCTURE ISSUE DISCOVERED:** Docker daemon not running, preventing all E2E test execution.
+
+## Primary Issue Found
+
+### 1. Docker Daemon Connectivity Failure - CRITICAL
+**Type:** Infrastructure/Blocking
+**Severity:** Critical  
+**Status:** Blocks ALL E2E tests
+
+**Error Details:**
+```
+RuntimeError: Docker services required but could not be started after 3 attempts
+Cannot connect to the Docker daemon at unix:///Users/anthony/.docker/run/docker.sock. Is the docker daemon running?
+```
+
+**Impact:**
+- ALL E2E tests cannot run
+- No end-to-end validation possible
+- Golden Path testing blocked
+- Business critical user flows cannot be validated
+
+**Root Cause:**
+Docker Desktop/daemon is not running on the system.
+
+**Business Impact:**
+- $500K+ ARR at risk - cannot validate core user flows
+- E2E testing completely blocked
+- No validation of real WebSocket connections
+- Cannot test end-to-end chat functionality (90% of platform value)
+
+## Additional Issues Discovered
+
+### 2. Import Error in Golden Path WebSocket Test - HIGH PRIORITY  
+**Type:** Import/Collection Error
+**Severity:** High
+**Status:** Test collection blocked
+**File:** `tests/e2e/test_golden_path_websocket_auth_staging.py:28`
+
+**Error Details:**
+```
+ImportError: cannot import name 'StagingConfig' from 'tests.e2e.staging_config'
+```
+
+**Root Cause:**
+Test file trying to import `StagingConfig` but actual class name is `StagingTestConfig`
+
+**Business Impact:**
+- Golden Path WebSocket tests cannot run
+- Staging environment validation blocked
+- $500K+ ARR Golden Path flow cannot be tested
+
+### 3. Redis Libraries Not Available - MEDIUM PRIORITY
+**Type:** Dependency/Warning
+**Severity:** Medium  
+**Status:** Warning during test collection
+
+**Error Details:**
+```
+Redis libraries not available - Redis fixtures will fail
+```
+
+**Impact:**
+- Redis-dependent E2E tests will fail
+- Caching functionality cannot be tested
+- Session persistence tests blocked
+
+### 4. Empty E2E Test Files - LOW PRIORITY
+**Type:** Test Coverage Gap
+**Severity:** Low
+**Files:** Multiple e2e test files
+
+**Issue:**
+- Some e2e test files exist but collect 0 tests
+- May be placeholder files or incomplete implementations
+- Examples: `test_primary_chat_websocket_flow.py`, `test_real_agent_data_helper_flow.py`
+
+## Resolution Summary
+
+### ✅ COMPLETED ACTIONS
+
+#### 1. Docker Daemon Connectivity Issue - TRACKED
+- **GitHub Issue Created:** #291 - failing-test-infrastructure-critical-docker-daemon-connectivity
+- **Status:** Tracked for infrastructure team resolution
+- **URL:** https://github.com/netra-systems/netra-apex/issues/291
+
+#### 2. StagingConfig Import Error - RESOLVED ✅  
+- **GitHub Issue Created:** #293 - uncollectable-test-regression-high-staging-config-import-error
+- **Status:** FIXED - Import errors resolved in test file
+- **Fix Applied:** Updated imports in `tests/e2e/test_golden_path_websocket_auth_staging.py`
+- **URL:** https://github.com/netra-systems/netra-apex/issues/293
+
+#### 3. Redis Libraries Dependency - TRACKED
+- **GitHub Issue Created:** #294 - failing-test-new-medium-redis-libraries-dependency  
+- **Status:** Tracked for dependency installation
+- **Root Cause:** Missing `fakeredis` package in requirements.txt
+- **URL:** https://github.com/netra-systems/netra-apex/issues/294
+
+### 📊 IMPACT ASSESSMENT
+
+**Issues Resolved:** 1/3 (33% resolution rate)
+**Critical Issues Tracked:** 3/3 (100% tracking coverage)
+**Business Value Protected:** $500K+ ARR Golden Path flow import errors resolved
+
+### 🔄 REMAINING WORK
+
+1. **Infrastructure:** Docker daemon startup (requires manual intervention)
+2. **Dependencies:** Install fakeredis package 
+3. **Test Coverage:** Investigate empty test files (low priority)
+
+## Action Items
+
+1. ✅ **COMPLETED:** Create GitHub issues for discovered problems
+2. ✅ **COMPLETED:** Fix StagingConfig import error  
+3. 🔄 **IN PROGRESS:** Docker daemon startup (requires system administrator)
+4. 🔄 **PENDING:** Install missing Redis dependencies
+
+## Test Execution Attempts
+
+### Attempt 1: Standard E2E Test Run
+```bash
+python3 tests/unified_test_runner.py --category e2e --fail-fast-mode disabled
+```
+**Result:** FAILED - Docker daemon not running
+
+### Attempt 2: No-Docker E2E Test Run  
+```bash
+python3 tests/unified_test_runner.py --category e2e --no-docker --fail-fast-mode disabled
+```
+**Result:** FAILED - E2E tests require Docker (no fallback available)
+
+## Next Steps
+
+1. Investigate test collection issues using direct pytest
+2. Create GitHub issues for discovered infrastructure problems
+3. Document Docker requirements and setup procedures
+4. Investigate alternative testing approaches for Docker-free environments
+
+---
+*Generated by Failing Test Gardener v1.0*

@@ -20,8 +20,8 @@ import time
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone, timedelta
-from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.real_services_test_fixtures import real_services_fixture
+from test_framework.ssot.base_test_case import SSotBaseTestCase  
+from test_framework.ssot.real_services_test_fixtures import real_services_fixture
 from shared.types.core_types import UserID, SessionID, TokenString
 
 
@@ -54,11 +54,18 @@ class StandardJWTPayload:
 @dataclass
 class ExtendedJWTPayload(StandardJWTPayload):
     """Extended JWT payload with application-specific claims."""
-    email: str
-    permissions: List[str]
+    email: str = ""  # Required fields must have defaults due to parent class
+    permissions: List[str] = None  # Will be handled in __post_init__
     session_id: Optional[str] = None
     auth_method: str = "oauth"
     user_role: Optional[str] = None
+    
+    def __post_init__(self):
+        """Initialize default values properly."""
+        if self.permissions is None:
+            self.permissions = []
+        if not self.email:
+            raise ValueError("email is required")
     
     def to_dict(self) -> Dict[str, Any]:
         result = asdict(self)
@@ -81,7 +88,7 @@ class ExtendedJWTPayload(StandardJWTPayload):
         )
 
 
-class TestJWTPayloadSSotCompliance(BaseIntegrationTest):
+class TestJWTPayloadSSotCompliance(SSotBaseTestCase):
     """Integration tests for JWT payload SSOT compliance across services."""
     
     @pytest.mark.integration

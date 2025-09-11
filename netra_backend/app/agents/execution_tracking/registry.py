@@ -22,16 +22,36 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+# BACKWARD COMPATIBILITY: Import SSOT ExecutionState and create compatibility mapping
+from netra_backend.app.core.agent_execution_tracker import ExecutionState as _SSOT_ExecutionState
+import warnings
+
+# Create compatibility ExecutionState class that maps to SSOT values
 class ExecutionState(str, Enum):
-    """Execution state enumeration with clear transitions."""
-    PENDING = "PENDING"
-    INITIALIZING = "INITIALIZING"
-    RUNNING = "RUNNING"
-    SUCCESS = "SUCCESS"
-    FAILED = "FAILED"
-    TIMEOUT = "TIMEOUT"
-    ABORTED = "ABORTED"
-    RECOVERING = "RECOVERING"
+    """
+    DEPRECATED: Execution state enumeration with backward compatibility mapping.
+    
+    ⚠️  This ExecutionState is now mapped to the SSOT implementation.
+        New code should import directly:
+        from netra_backend.app.core.agent_execution_tracker import ExecutionState
+    """
+    # Map registry-specific values to SSOT canonical values
+    PENDING = _SSOT_ExecutionState.PENDING.value          # "pending"
+    INITIALIZING = _SSOT_ExecutionState.STARTING.value    # "starting"  
+    RUNNING = _SSOT_ExecutionState.RUNNING.value          # "running"
+    SUCCESS = _SSOT_ExecutionState.COMPLETED.value        # "completed"
+    FAILED = _SSOT_ExecutionState.FAILED.value            # "failed"
+    TIMEOUT = _SSOT_ExecutionState.TIMEOUT.value          # "timeout"
+    ABORTED = _SSOT_ExecutionState.CANCELLED.value        # "cancelled"
+    RECOVERING = _SSOT_ExecutionState.STARTING.value  # Map RECOVERING -> STARTING for recovery scenarios
+
+# Issue deprecation warning
+warnings.warn(
+    "ExecutionState from execution_tracking.registry is deprecated. "
+    "Use 'from netra_backend.app.core.agent_execution_tracker import ExecutionState' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class ExecutionProgress(BaseModel):

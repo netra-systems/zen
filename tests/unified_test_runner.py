@@ -136,7 +136,8 @@ except ImportError:
         managed_subprocess = None
 
 # Import test framework - using absolute imports from project root
-from test_framework.runner import UnifiedTestRunner as FrameworkRunner
+# SSOT CONSOLIDATION: Removed circular dependency to test_framework.runner
+# This module IS the canonical SSOT for UnifiedTestRunner - no need to import duplicates
 from test_framework.test_config import configure_dev_environment, configure_mock_environment
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
 from test_framework.test_discovery import TestDiscovery

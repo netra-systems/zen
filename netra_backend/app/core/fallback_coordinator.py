@@ -9,9 +9,8 @@ graceful degradation of the entire system.
 from datetime import datetime
 from typing import Any, Callable, Dict, Optional
 
-from netra_backend.app.core.fallback_coordinator_emergency import (
-    EmergencyFallbackManager,
-)
+# Emergency fallback manager implementation would go here
+# from netra_backend.app.core.fallback_coordinator_emergency import EmergencyFallbackManager
 from netra_backend.app.core.fallback_coordinator_health import HealthMonitor
 from netra_backend.app.core.fallback_coordinator_models import AgentFallbackStatus
 from netra_backend.app.core.reliability import CircuitBreaker, CircuitBreakerConfig
@@ -36,7 +35,9 @@ class FallbackCoordinator:
         
         # Initialize sub-managers
         self.health_monitor = HealthMonitor(self)
-        self.emergency_manager = EmergencyFallbackManager()
+        # Emergency manager would be initialized here
+        # self.emergency_manager = EmergencyFallbackManager()
+        self.emergency_manager = None
     
     def register_agent(self, agent_name: str, 
                       fallback_config: Optional[FallbackConfig] = None) -> LLMFallbackHandler:

@@ -34,7 +34,7 @@ import aiohttp
 import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.ssot.integration_auth_manager import (
     IntegrationAuthServiceManager,
     IntegrationTestAuthHelper,
@@ -81,7 +81,7 @@ class TestCriticalServiceAuthentication(SSotBaseTestCase):
     @pytest.fixture
     async def test_database(self):
         """Provide isolated test database session."""
-        async with DatabaseTestUtility("auth_service").transaction_scope() as db_session:
+        async with DatabaseTestUtilities("auth_service").transaction_scope() as db_session:
             yield db_session
     
     # === ULTRA-CRITICAL P0 TESTS ===

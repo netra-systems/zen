@@ -128,7 +128,8 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         )
         
         # Create WebSocket bridge for real-time communication
-        websocket_bridge = await create_agent_websocket_bridge(user_context=user_context)
+        # Fix: create_agent_websocket_bridge is synchronous, not async
+        websocket_bridge = create_agent_websocket_bridge(user_context=user_context)
         
         # Act - Send business problem chat message that requires AI analysis
         chat_message = {

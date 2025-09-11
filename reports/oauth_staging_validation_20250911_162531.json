@@ -1,0 +1,69 @@
+{
+  "timestamp": "2025-09-11T16:25:22.183523",
+  "backend_url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
+  "tests": [
+    {
+      "test": "Backend Health Check",
+      "status": "PASS",
+      "message": "Backend service healthy - netra-ai-platform v1.0.0",
+      "timestamp": "2025-09-11T16:25:22.555233",
+      "details": {
+        "response": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1757588122.5009117
+        },
+        "response_time_ms": 368.81199999999995
+      }
+    },
+    {
+      "test": "OAuth Import Validation",
+      "status": "FAIL",
+      "message": "No OAuth endpoints responding - import issues suspected",
+      "timestamp": "2025-09-11T16:25:23.988767",
+      "details": {}
+    },
+    {
+      "test": "Auth Service Endpoints",
+      "status": "PASS",
+      "message": "2/3 auth endpoints responding correctly",
+      "timestamp": "2025-09-11T16:25:25.679176",
+      "details": {
+        "working_endpoints": 2
+      }
+    },
+    {
+      "test": "Enterprise OAuth Features",
+      "status": "WARN",
+      "message": "Enterprise OAuth endpoints not directly testable - may need authentication",
+      "timestamp": "2025-09-11T16:25:27.329627",
+      "details": {}
+    },
+    {
+      "test": "Integration Health",
+      "status": "PASS",
+      "message": "Performance healthy - Avg: 342.0ms, Max: 572.9ms",
+      "timestamp": "2025-09-11T16:25:29.544312",
+      "details": {
+        "avg_response_time_ms": 342.04440116882324,
+        "max_response_time_ms": 572.9279518127441,
+        "total_time_ms": 1710.2420330047607,
+        "request_count": 5
+      }
+    },
+    {
+      "test": "OAuth Class Functionality",
+      "status": "WARN",
+      "message": "OAuth endpoints not directly accessible - may require authentication tokens",
+      "timestamp": "2025-09-11T16:25:30.879056",
+      "details": {}
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "passed": 3,
+    "failed": 1,
+    "warnings": 2
+  }
+}

@@ -398,7 +398,9 @@ class TestWebSocketCoreInterplay(BaseIntegrationTest):
         user_context = self._create_user_context("agent_events_user")
         
         # Create mock agent with WebSocket bridge
-        websocket_bridge = await create_agent_websocket_bridge(user_context, manager)
+        # Fix: create_agent_websocket_bridge is synchronous, not async
+        # Also fix: function only takes user_context parameter
+        websocket_bridge = create_agent_websocket_bridge(user_context)
         mock_agent = MockWebSocketAgent("test_agent", user_context, None, websocket_bridge)
         
         # Execute agent task (should send all 5 critical events)

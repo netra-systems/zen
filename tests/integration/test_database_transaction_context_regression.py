@@ -47,7 +47,7 @@ import pytest
 # SSOT imports from test framework
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.real_services_test_fixtures import real_services_fixture
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.performance_helpers import PerformanceTestHelper
 
 # Core system imports
@@ -270,7 +270,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
     @pytest.fixture(scope="function")
     async def database_helper(self):
         """Database test helper with real connection validation."""
-        helper = DatabaseTestUtility()
+        helper = DatabaseTestUtilities()
         await helper.setup()
         yield helper
         await helper.cleanup()
@@ -281,7 +281,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
         self,
         context_monitor: DatabaseTransactionContextMonitor,
         performance_monitor: PerformanceMonitor,
-        database_helper: DatabaseTestUtility
+        database_helper: DatabaseTestUtilities
     ):
         """
         Test database transaction context consistency between context creation and getter patterns.
@@ -369,7 +369,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
         self,
         context_monitor: DatabaseTransactionContextMonitor,
         performance_monitor: PerformanceMonitor,
-        database_helper: DatabaseTestUtility
+        database_helper: DatabaseTestUtilities
     ):
         """
         Test transaction rollback scenarios that preserve conversation context integrity.
@@ -467,7 +467,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
         self,
         context_monitor: DatabaseTransactionContextMonitor,
         performance_monitor: PerformanceMonitor,
-        database_helper: DatabaseTestUtility
+        database_helper: DatabaseTestUtilities
     ):
         """
         Test database session management maintains perfect context isolation between users.
@@ -582,7 +582,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
         self,
         context_monitor: DatabaseTransactionContextMonitor,
         performance_monitor: PerformanceMonitor,
-        database_helper: DatabaseTestUtility
+        database_helper: DatabaseTestUtilities
     ):
         """
         Test database connection context reuse vs creation patterns without context contamination.
@@ -725,7 +725,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
         self,
         context_monitor: DatabaseTransactionContextMonitor, 
         performance_monitor: PerformanceMonitor,
-        database_helper: DatabaseTestUtility
+        database_helper: DatabaseTestUtilities
     ):
         """
         Test multi-transaction conversation flows maintaining pristine session state.
@@ -847,7 +847,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
         self,
         context_monitor: DatabaseTransactionContextMonitor,
         performance_monitor: PerformanceMonitor, 
-        database_helper: DatabaseTestUtility
+        database_helper: DatabaseTestUtilities
     ):
         """
         Test database connection pooling never mixes user contexts under concurrent load.
@@ -1026,7 +1026,7 @@ class DatabaseTransactionContextRegressionTests(SSotBaseTestCase):
         self,
         context_monitor: DatabaseTransactionContextMonitor,
         performance_monitor: PerformanceMonitor,
-        database_helper: DatabaseTestUtility
+        database_helper: DatabaseTestUtilities
     ):
         """
         Comprehensive validation test that combines all regression scenarios.

@@ -82,7 +82,7 @@ async def create_transparent_emitter(context: 'UserExecutionContext') -> Transpa
     # Get or create WebSocket manager
     manager = getattr(context, 'websocket_manager', None)
     if not manager:
-        manager = await create_websocket_manager()
+        manager = await create_websocket_manager(user_context=context)
     
     # Create unified emitter with context
     emitter = WebSocketEmitterFactory.create_emitter(

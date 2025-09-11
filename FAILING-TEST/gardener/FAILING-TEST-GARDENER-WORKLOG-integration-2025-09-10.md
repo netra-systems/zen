@@ -106,6 +106,39 @@ Integration test collection failed with 10 critical errors preventing test execu
 - **Success Rate:** 0% (due to early exit after 10 failures)
 - **Estimated Integration Tests:** ~165 tests if collection succeeded
 
+## GitHub Issues Created/Updated
+
+### Sub-Agent Processing Results
+1. **Docker Daemon Connectivity** - Issue #291 UPDATED
+   - URL: https://github.com/netra-systems/netra-apex/issues/291
+   - Status: Updated with latest error details and business impact
+   - Priority: P1 - Infrastructure blocker
+
+2. **Import Dependency Chain Failures** - Issue #308 CREATED
+   - URL: https://github.com/netra-systems/netra-apex/issues/308
+   - Status: New comprehensive issue covering all import errors
+   - Priority: P0 - Collection blocker
+
+3. **Git Merge Conflict Syntax Error** - Issues #303/#312 RESOLVED
+   - Issue #303 URL: https://github.com/netra-systems/netra-apex/issues/303 (Updated & Closed)
+   - Issue #312 URL: https://github.com/netra-systems/netra-apex/issues/312 (Created Resolved)
+   - Status: RESOLVED - All merge conflicts fixed
+
+## Latest Infrastructure Issues (2025-09-10 Update)
+
+### 🚨 NEW CRITICAL FINDING: Docker Daemon Not Running
+- **Status:** ACTIVE BLOCKER
+- **Error:** `Failed to initialize Docker client (Docker daemon may not be running)`
+- **Impact:** ALL Docker-dependent integration tests blocked
+- **Business Impact:** Cannot validate Golden Path ($500K+ ARR)
+- **GitHub Issue:** #291 (Updated)
+
+### ✅ RESOLVED: Git Merge Conflict Syntax Error
+- **Status:** ✅ RESOLVED
+- **Was Blocking:** ALL test collection across entire system
+- **File:** `agent_execution_core.py:100`
+- **GitHub Issues:** #303 (Closed), #312 (Resolved documentation)
+
 ## Related Documentation
 - SSOT Import Registry: [SSOT_IMPORT_REGISTRY.md](../SSOT_IMPORT_REGISTRY.md)
 - Test Infrastructure: [TEST_EXECUTION_GUIDE.md](../TEST_EXECUTION_GUIDE.md)

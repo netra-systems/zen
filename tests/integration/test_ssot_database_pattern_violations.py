@@ -31,7 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # SSOT Imports - Absolute imports only
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.db.models_postgres import Message, Thread
@@ -51,7 +51,7 @@ class TestSSotDatabasePatternIntegration:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.db_helper = DatabaseTestUtility(service="netra_backend")
+        self.db_helper = DatabaseTestUtilities(service="netra_backend")
         self.message_repository = MessageRepository()
         self.thread_repository = ThreadRepository()
         
@@ -366,7 +366,7 @@ class TestSSotDatabaseConcurrencyIntegration:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
-        self.db_helper = DatabaseTestUtility(service="netra_backend")
+        self.db_helper = DatabaseTestUtilities(service="netra_backend")
         self.message_repository = MessageRepository()
         self.thread_repository = ThreadRepository()
         

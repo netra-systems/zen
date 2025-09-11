@@ -97,6 +97,7 @@ def concurrent_websocket_manager():
         return True
     
     ws_manager.send_event = thread_safe_send_event
+    ws_manager.send_to_thread = thread_safe_send_event  # Bridge calls send_to_thread, not send_event
     ws_manager.is_connected = Mock(return_value=True)
     ws_manager.get_connection_count = Mock(return_value=10)
     

@@ -1023,11 +1023,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
             'not_none': getattr(app.state, 'llm_manager', None) is not None,
             'type': type(getattr(app.state, 'llm_manager', None)).__name__
         }
-        deps_status['tool_dispatcher'] = {
-            'exists': hasattr(app.state, 'tool_dispatcher'),
-            'not_none': getattr(app.state, 'tool_dispatcher', None) is not None,
-            'type': type(getattr(app.state, 'tool_dispatcher', None)).__name__
-        }
+        # Tool dispatcher is now created per-request, not stored globally
         logger.info(f"🔍 DEPENDENCY STATUS: {deps_status}")
         
         # Validate staging environment readiness
@@ -1112,8 +1108,8 @@ def _build_supervisor_agent(app: FastAPI):
     app_state_attrs = [attr for attr in dir(app.state) if not attr.startswith('_')]
     logger.debug(f"Current app.state attributes: {app_state_attrs}")
     
-    # Check required dependencies
-    required_attrs = ['db_session_factory', 'llm_manager', 'tool_dispatcher']
+    # Check required dependencies (tool_dispatcher is now created per-request)
+    required_attrs = ['db_session_factory', 'llm_manager']
     missing = [attr for attr in required_attrs if not hasattr(app.state, attr)]
     
     if missing:

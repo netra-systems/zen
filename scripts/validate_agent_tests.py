@@ -21,7 +21,7 @@ import coverage
 import pytest
 
 # Import existing test framework components
-from test_framework.runner import UnifiedTestRunner
+from tests.unified_test_runner import UnifiedTestRunner
 from test_framework.test_discovery import TestDiscovery
 
 PROJECT_ROOT = Path(__file__).parent.parent

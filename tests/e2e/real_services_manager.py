@@ -1179,11 +1179,20 @@ def get_default_service_endpoints() -> List[ServiceEndpoint]:
 
 
 # =============================================================================
+# COMPATIBILITY ALIASES
+# =============================================================================
+
+# Compatibility alias for existing imports expecting "ServiceManager"
+ServiceManager = RealServicesManager
+
+
+# =============================================================================
 # EXPORT ALL CLASSES AND FUNCTIONS
 # =============================================================================
 
 __all__ = [
     'RealServicesManager',
+    'ServiceManager',  # Compatibility alias
     'AsyncHealthChecker',
     'HealthCheckConfig',
     'CircuitBreakerState',

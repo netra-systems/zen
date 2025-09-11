@@ -21,7 +21,7 @@ from unittest import mock
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services import get_real_services
-from test_framework.resource_monitor import ResourceMonitor
+from test_framework.resource_monitor import DockerResourceMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class TestResourceContentionAgentExecution(BaseIntegrationTest):
     def setup_method(self):
         """Set up resource monitoring for contention tests."""
         super().setup_method()
-        self.resource_monitor = ResourceMonitor()
+        self.resource_monitor = DockerResourceMonitor()
         self.initial_metrics = {
             'memory': psutil.Process().memory_info().rss,
             'cpu_percent': psutil.Process().cpu_percent()

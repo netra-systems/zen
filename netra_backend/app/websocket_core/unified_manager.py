@@ -188,7 +188,7 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
                 logger.warning(f"Pydantic model_dump failed completely: {e2}, using string fallback")
                 # Fall through to the string fallback at the end of the function
     
-    # Handle objects with to_dict method (DeepAgentState, etc.)
+    # Handle objects with to_dict method (UserExecutionContext, etc.)
     if hasattr(message, 'to_dict'):
         return message.to_dict()
     
@@ -488,7 +488,11 @@ class UnifiedWebSocketManager:
                     logger.error(f"Error processing queued messages for user {connection.user_id}: {e}")
     
     async def remove_connection(self, connection_id: Union[str, ConnectionID]) -> None:
-        """Remove a WebSocket connection with thread safety and type validation."""
+        """Remove a WebSocket connection with thread safety, type validation, and pattern-agnostic cleanup.
+        
+        PHASE 1 SSOT REMEDIATION: Enhanced with pattern-agnostic resource cleanup
+        to prevent WebSocket 1011 errors caused by ID pattern mismatches.
+        """
         # Convert to string for internal use
         validated_connection_id = str(connection_id)
         
@@ -506,21 +510,54 @@ class UnifiedWebSocketManager:
                 if connection_id in self._connections:
                     connection = self._connections[connection_id]
                     del self._connections[connection_id]
+                    
+                    # PHASE 1 SSOT REMEDIATION: Enhanced cleanup with pattern-agnostic matching
                     if connection.user_id in self._user_connections:
+                        # Remove exact match first
                         self._user_connections[connection.user_id].discard(connection_id)
+                        
+                        # CRITICAL FIX: Also remove pattern matches to prevent resource leaks
+                        # This prevents WebSocket 1011 errors by ensuring all related resources are cleaned up
+                        from netra_backend.app.websocket_core.utils import find_matching_resources
+                        try:
+                            # Find connections with matching patterns for this user
+                            user_connections_dict = {cid: cid for cid in self._user_connections[connection.user_id]}
+                            matching_connection_ids = find_matching_resources(validated_connection_id, user_connections_dict)
+                            
+                            for match_id in matching_connection_ids:
+                                if match_id in self._user_connections[connection.user_id]:
+                                    self._user_connections[connection.user_id].discard(match_id)
+                                    logger.debug(f"Pattern cleanup: removed matching connection {match_id} for {validated_connection_id}")
+                        except Exception as e:
+                            logger.warning(f"Pattern cleanup failed for connection {validated_connection_id}: {e}")
+                        
+                        # Clean up user entry if no connections remain
                         if not self._user_connections[connection.user_id]:
                             del self._user_connections[connection.user_id]
                     
-                    # Update compatibility mapping
+                    # Update compatibility mapping with pattern-agnostic cleanup
                     if connection.user_id in self.active_connections:
+                        # Remove exact matches
                         self.active_connections[connection.user_id] = [
                             c for c in self.active_connections[connection.user_id]
                             if c.connection_id != connection_id
                         ]
+                        
+                        # CRITICAL FIX: Also remove pattern matches from active connections
+                        try:
+                            from netra_backend.app.core.id_migration_bridge import validate_id_compatibility
+                            self.active_connections[connection.user_id] = [
+                                c for c in self.active_connections[connection.user_id]
+                                if not validate_id_compatibility(c.connection_id, validated_connection_id)
+                            ]
+                        except Exception as e:
+                            logger.warning(f"Pattern cleanup in active_connections failed for {validated_connection_id}: {e}")
+                        
+                        # Clean up user entry if no connections remain
                         if not self.active_connections[connection.user_id]:
                             del self.active_connections[connection.user_id]
                     
-                    logger.info(f"Removed connection {connection_id} (thread-safe)")
+                    logger.info(f"Removed connection {connection_id} with pattern-agnostic cleanup (thread-safe)")
     
     def get_connection(self, connection_id: Union[str, ConnectionID]) -> Optional[WebSocketConnection]:
         """Get a specific connection with type validation."""

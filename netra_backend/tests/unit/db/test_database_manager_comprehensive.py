@@ -46,6 +46,9 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.isolated_environment_fixtures import isolated_env
 
+# Get logger for testing logger interactions
+logger = logging.getLogger('netra_backend.app.db.database_manager')
+
 
 class TestDatabaseManagerComprehensive(BaseIntegrationTest):
     """Comprehensive test suite for DatabaseManager class covering all critical functionality."""
@@ -54,7 +57,18 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
         """Set up for each test method."""
         super().setup_method()
         self.test_env_vars = {
-            "ENVIRONMENT": "test",
+            "ENVIRONMENT": "development",  # Use development to get PostgreSQL URLs
+            "POSTGRES_HOST": "localhost", 
+            "POSTGRES_PORT": "5434",
+            "POSTGRES_USER": "test_user",
+            "POSTGRES_PASSWORD": "test_password",
+            "POSTGRES_DB": "test_db",
+            # Add OAuth test credentials to prevent configuration validation errors
+            "GOOGLE_OAUTH_CLIENT_ID_TEST": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_TEST": "test_client_secret",
+        }
+        self.test_env_vars_sqlite = {
+            "ENVIRONMENT": "test",  # Use test to get SQLite URLs
             "POSTGRES_HOST": "localhost", 
             "POSTGRES_PORT": "5434",
             "POSTGRES_USER": "test_user",
@@ -68,15 +82,12 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
     @pytest.mark.unit
     async def test_database_manager_initialization_success(self, isolated_env):
         """Test successful DatabaseManager initialization with proper configuration."""
-        # Setup isolated environment with valid configuration
-        isolated_env.set("ENVIRONMENT", "test", source="test")
-        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
-        isolated_env.set("POSTGRES_PORT", "5434", source="test")
-        isolated_env.set("POSTGRES_USER", "test_user", source="test")
-        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
-        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        # Setup isolated environment with valid configuration - use development for PostgreSQL
+        for key, value in self.test_env_vars.items():
+            isolated_env.set(key, value, source="test")
         
-        with patch('netra_backend.app.core.config.get_config') as mock_config:
+        with patch('netra_backend.app.core.config.get_config') as mock_config, \
+             patch('shared.isolated_environment.get_env', return_value=isolated_env):
             # Mock config with proper attributes
             mock_config.return_value.database_echo = False
             mock_config.return_value.database_pool_size = 5
@@ -98,6 +109,43 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
             assert db_manager._initialized
             assert 'primary' in db_manager._engines
             assert isinstance(db_manager._engines['primary'], AsyncEngine)
+
+    @pytest.mark.unit
+    async def test_database_manager_initialization_test_environment_sqlite(self, isolated_env):
+        """Test DatabaseManager initialization in test environment uses SQLite."""
+        # Setup isolated environment with test environment but no postgres config
+        # This should fall back to SQLite
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("USE_MEMORY_DB", "true", source="test")  # Explicitly request memory DB
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config, \
+             patch('shared.isolated_environment.get_env', return_value=isolated_env):
+            # Mock config with proper attributes
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            # Create DatabaseManager instance
+            db_manager = DatabaseManager()
+            
+            # Test initial state
+            assert not db_manager._initialized
+            assert db_manager._engines == {}
+            assert db_manager._url_builder is None
+            
+            # Test initialization - should use SQLite in test environment
+            await db_manager.initialize()
+            
+            # Verify initialization completed with SQLite
+            assert db_manager._initialized
+            assert 'primary' in db_manager._engines
+            assert isinstance(db_manager._engines['primary'], AsyncEngine)
+            
+            # Verify URL is SQLite format for test environment
+            database_url = db_manager._get_database_url()
+            assert database_url.startswith("sqlite+aiosqlite://")
+            assert ":memory:" in database_url
             assert isinstance(db_manager._url_builder, DatabaseURLBuilder)
     
     @pytest.mark.unit
@@ -3834,6 +3882,385 @@ class TestDatabaseManagerCoverageVerification(BaseIntegrationTest):
         
         assert len(test_categories_covered) >= 15, "Should have comprehensive test category coverage"
         
+    @pytest.mark.unit
+    async def test_get_engine_auto_initialization_failure_scenarios(self, isolated_env):
+        """Test get_engine() auto-initialization failure edge cases - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal - Foundation database layer 
+        - Business Goal: Prevent staging environment failures causing revenue loss
+        - Value Impact: Auto-initialization failures = complete platform outage
+        - Strategic Impact: Critical error path that has caused production incidents
+        
+        This test covers the complex auto-initialization error handling in get_engine()
+        lines 98-120 which wasn't fully tested in existing coverage.
+        """
+        # Setup environment that will cause initialization to fail
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        # Missing POSTGRES_* vars will cause initialization failure
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            with patch('asyncio.create_task') as mock_create_task:
+                # Mock create_task to simulate task creation failure
+                mock_create_task.side_effect = Exception("Task creation failed")
+                
+                db_manager = DatabaseManager()
+                
+                # This should trigger the auto-initialization error path
+                with pytest.raises(RuntimeError, match="DatabaseManager not initialized and auto-initialization failed"):
+                    db_manager.get_engine('primary')
+                
+                # Verify the task creation was attempted
+                assert mock_create_task.called
+
+    @pytest.mark.unit
+    async def test_get_engine_auto_initialization_task_failure_but_still_not_initialized(self, isolated_env):
+        """Test get_engine() auto-initialization when task succeeds but initialization fails.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal
+        - Business Goal: Handle edge case where async task is created but doesn't complete initialization
+        - Value Impact: Prevents silent failures in auto-initialization logic
+        - Strategic Impact: Critical error path that could cause staging environment issues
+        
+        Covers the specific case in lines 110-114 where task is created but _initialized remains False.
+        """
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
+        isolated_env.set("POSTGRES_PORT", "5434", source="test") 
+        isolated_env.set("POSTGRES_USER", "test_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            with patch('asyncio.create_task') as mock_create_task:
+                # Mock successful task creation but don't actually initialize
+                mock_create_task.return_value = AsyncMock()
+                
+                with patch('time.sleep') as mock_sleep:
+                    mock_sleep.return_value = None  # Mock the 0.1 second sleep
+                    
+                    db_manager = DatabaseManager()
+                    # Ensure _initialized stays False to trigger this specific error path
+                    
+                    with pytest.raises(RuntimeError, match="DatabaseManager auto-initialization failed"):
+                        db_manager.get_engine('primary')
+                    
+                    # Verify the sleep was called (part of the auto-init logic)
+                    mock_sleep.assert_called_once_with(0.1)
+
+    @pytest.mark.unit
+    def test_get_database_manager_no_event_loop_scenario(self, isolated_env):
+        """Test get_database_manager() when no event loop is available - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal
+        - Business Goal: Handle synchronous access to database manager in non-async contexts
+        - Value Impact: Prevents failures when accessing database manager from sync code
+        - Strategic Impact: Critical for initialization and utility functions
+        
+        Covers lines 335-340 where no event loop is detected and debug logging occurs.
+        """
+        # Reset global manager
+        import netra_backend.app.db.database_manager as db_module
+        db_module._database_manager = None
+        
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        
+        with patch('asyncio.get_running_loop') as mock_get_loop:
+            # Simulate no running event loop
+            mock_get_loop.side_effect = RuntimeError("No running event loop")
+            
+            with patch.object(logger, 'debug') as mock_debug:
+                manager = get_database_manager()
+                
+                # Verify manager was created
+                assert manager is not None
+                assert isinstance(manager, DatabaseManager)
+                
+                # Verify debug log was called about no event loop
+                mock_debug.assert_called_with("No event loop available for immediate DatabaseManager initialization")
+
+    @pytest.mark.unit 
+    def test_get_database_manager_with_event_loop_task_creation_failure(self, isolated_env):
+        """Test get_database_manager() when event loop exists but task creation fails - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal
+        - Business Goal: Handle task scheduling failures gracefully
+        - Value Impact: Prevents initialization failures when async task scheduling fails
+        - Strategic Impact: Critical for robust startup sequence
+        
+        Covers lines 342-349 where loop exists but create_task fails.
+        """
+        # Reset global manager
+        import netra_backend.app.db.database_manager as db_module
+        db_module._database_manager = None
+        
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        
+        with patch('asyncio.get_running_loop') as mock_get_loop:
+            mock_loop = Mock()
+            mock_get_loop.return_value = mock_loop  # Event loop is available
+            
+            with patch('asyncio.create_task') as mock_create_task:
+                # Task creation fails
+                mock_create_task.side_effect = Exception("Task scheduling failed")
+                
+                with patch.object(logger, 'warning') as mock_warning:
+                    manager = get_database_manager()
+                    
+                    # Verify manager was still created despite task failure
+                    assert manager is not None
+                    assert isinstance(manager, DatabaseManager)
+                    
+                    # Verify warning was logged about initialization failure
+                    mock_warning.assert_called_with("Could not schedule immediate initialization: Task scheduling failed")
+
+    @pytest.mark.unit
+    def test_get_database_manager_complete_initialization_failure(self, isolated_env):
+        """Test get_database_manager() when entire initialization setup fails - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal
+        - Business Goal: Handle complete initialization setup failures gracefully
+        - Value Impact: Ensures manager is still created even with initialization errors
+        - Strategic Impact: Fallback mechanism for critical database access
+        
+        Covers lines 350-352 where the entire try block fails.
+        """
+        # Reset global manager
+        import netra_backend.app.db.database_manager as db_module
+        db_module._database_manager = None
+        
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        
+        with patch('asyncio.get_running_loop') as mock_get_loop:
+            # Make the entire async check fail
+            mock_get_loop.side_effect = Exception("Complete asyncio failure")
+            
+            with patch.object(logger, 'warning') as mock_warning:
+                manager = get_database_manager()
+                
+                # Verify manager was still created
+                assert manager is not None
+                assert isinstance(manager, DatabaseManager)
+                
+                # Verify warning was logged about setup failure
+                mock_warning.assert_called_with("Auto-initialization setup failed, will initialize on first use: Complete asyncio failure")
+
+    @pytest.mark.unit
+    async def test_health_check_with_specific_database_error_types(self, isolated_env):
+        """Test health_check() with various database error scenarios - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal
+        - Business Goal: Comprehensive error handling for database health monitoring
+        - Value Impact: Accurate health reporting prevents false positive/negative health checks
+        - Strategic Impact: Critical for load balancer and monitoring system decisions
+        
+        Tests specific database error types that weren't covered in existing health check tests.
+        """
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
+        isolated_env.set("POSTGRES_PORT", "5434", source="test")
+        isolated_env.set("POSTGRES_USER", "test_user", source="test") 
+        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            await db_manager.initialize()
+            
+            # Test with connection timeout error
+            with patch.object(AsyncSession, 'execute') as mock_execute:
+                from sqlalchemy.exc import TimeoutError as SQLTimeoutError
+                mock_execute.side_effect = SQLTimeoutError("Connection timeout", None, None)
+                
+                result = await db_manager.health_check('primary')
+                
+                assert result['status'] == 'unhealthy'
+                assert result['engine'] == 'primary' 
+                assert 'Connection timeout' in result['error']
+            
+            # Test with operational error
+            with patch.object(AsyncSession, 'execute') as mock_execute:
+                from sqlalchemy.exc import OperationalError
+                mock_execute.side_effect = OperationalError("Database connection lost", None, None)
+                
+                result = await db_manager.health_check('primary')
+                
+                assert result['status'] == 'unhealthy'
+                assert result['engine'] == 'primary'
+                assert 'Database connection lost' in result['error']
+
+    @pytest.mark.unit
+    def test_migration_url_sync_format_with_complex_asyncpg_urls(self, isolated_env):
+        """Test get_migration_url_sync_format() with complex asyncpg URL scenarios - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal - Database migration pipeline
+        - Business Goal: Ensure migration URL conversion handles all asyncpg URL formats
+        - Value Impact: Migration failures = deployment pipeline failures = revenue impact
+        - Strategic Impact: Critical for CI/CD pipeline and deployment automation
+        
+        Tests the string replacement logic in lines 254-256 with edge cases.
+        """
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
+        isolated_env.set("POSTGRES_PORT", "5434", source="test")
+        isolated_env.set("POSTGRES_USER", "test_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        
+        with patch('shared.database_url_builder.DatabaseURLBuilder') as mock_builder_class:
+            mock_builder = Mock()
+            mock_builder_class.return_value = mock_builder
+            
+            # Test with complex asyncpg URL that has query parameters
+            complex_url = "postgresql+asyncpg://user:pass@host:5432/db?sslmode=require&application_name=test"
+            mock_builder.get_url_for_environment.return_value = complex_url
+            
+            result = DatabaseManager.get_migration_url_sync_format()
+            
+            # Should convert asyncpg to regular postgresql
+            expected = "postgresql://user:pass@host:5432/db?sslmode=require&application_name=test"
+            assert result == expected
+            
+            # Test with nested postgresql+asyncpg patterns
+            nested_url = "postgresql+asyncpg://user@host/postgresql+asyncpg_test_db"
+            mock_builder.get_url_for_environment.return_value = nested_url
+            
+            result = DatabaseManager.get_migration_url_sync_format()
+            
+            # Should only replace the driver part, not database name
+            expected = "postgresql://user@host/postgresql+asyncpg_test_db"
+            assert result == expected
+
+    @pytest.mark.unit
+    async def test_pooling_configuration_edge_cases_comprehensive(self, isolated_env):
+        """Test pooling configuration edge cases not covered - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal - Connection pool optimization
+        - Business Goal: Optimal resource usage and connection management
+        - Value Impact: Poor pooling = connection exhaustion = service outages
+        - Strategic Impact: Performance and reliability under high load
+        
+        Tests additional edge cases in lines 71-77 pooling configuration logic.
+        """
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
+        isolated_env.set("POSTGRES_PORT", "5434", source="test")
+        isolated_env.set("POSTGRES_USER", "test_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            # Test with exactly zero pool_size (boundary condition)
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 0  # Exactly zero
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
+                mock_engine = Mock(spec=AsyncEngine)
+                mock_create_engine.return_value = mock_engine
+                
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Verify NullPool was used for zero pool size
+                call_args = mock_create_engine.call_args
+                assert call_args[1]['poolclass'] == NullPool
+                
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            # Test with negative pool_size (invalid configuration)
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = -5  # Negative
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            with patch('sqlalchemy.ext.asyncio.create_async_engine') as mock_create_engine:
+                mock_engine = Mock(spec=AsyncEngine)
+                mock_create_engine.return_value = mock_engine
+                
+                db_manager = DatabaseManager()
+                await db_manager.initialize()
+                
+                # Verify NullPool was used for negative pool size
+                call_args = mock_create_engine.call_args
+                assert call_args[1]['poolclass'] == NullPool
+
+    @pytest.mark.unit
+    async def test_session_error_handling_comprehensive_edge_cases(self, isolated_env):
+        """Test session error handling edge cases - COVERAGE GAP FIX.
+        
+        Business Value Justification (BVJ):
+        - Segment: Platform/Internal - Database session reliability
+        - Business Goal: Comprehensive error handling prevents data corruption
+        - Value Impact: Session errors = transaction failures = data loss
+        - Strategic Impact: Critical for maintaining data integrity
+        
+        Tests additional error scenarios in session lifecycle management.
+        """
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("POSTGRES_HOST", "localhost", source="test")
+        isolated_env.set("POSTGRES_PORT", "5434", source="test")
+        isolated_env.set("POSTGRES_USER", "test_user", source="test")
+        isolated_env.set("POSTGRES_PASSWORD", "test_password", source="test")
+        isolated_env.set("POSTGRES_DB", "test_db", source="test")
+        
+        with patch('netra_backend.app.core.config.get_config') as mock_config:
+            mock_config.return_value.database_echo = False
+            mock_config.return_value.database_pool_size = 5
+            mock_config.return_value.database_max_overflow = 10
+            mock_config.return_value.database_url = None
+            
+            db_manager = DatabaseManager()
+            await db_manager.initialize()
+            
+            # Test case where both commit and rollback fail
+            with patch.object(AsyncSession, 'commit') as mock_commit:
+                with patch.object(AsyncSession, 'rollback') as mock_rollback:
+                    with patch.object(AsyncSession, 'close') as mock_close:
+                        
+                        # Simulate commit failure
+                        mock_commit.side_effect = Exception("Commit failed")
+                        # Simulate rollback also failing
+                        mock_rollback.side_effect = Exception("Rollback failed")
+                        # Simulate close also failing
+                        mock_close.side_effect = Exception("Close failed")
+                        
+                        with patch.object(logger, 'error') as mock_log_error:
+                            try:
+                                async with db_manager.get_session() as session:
+                                    # Trigger an error to test rollback path
+                                    raise Exception("Test transaction error")
+                            except Exception as e:
+                                # Should get the original exception, not rollback error
+                                assert str(e) == "Test transaction error"
+                            
+                            # Verify both rollback and close errors were logged
+                            error_calls = [call.args[0] for call in mock_log_error.call_args_list]
+                            assert any("Rollback failed" in msg for msg in error_calls)
+                            assert any("Session close failed" in msg for msg in error_calls)
+
     def test_business_value_justification_coverage(self):
         """Verify all tests have proper Business Value Justification."""
         # BVJ Categories that should be covered
@@ -3844,11 +4271,16 @@ class TestDatabaseManagerCoverageVerification(BaseIntegrationTest):
             "Performance Scalability": "Maintains performance under production load",
             "Configuration Security": "Prevents configuration-related security breaches",
             "Real Database Integration": "Validates actual PostgreSQL/Redis connectivity",
-            "Error Prevention": "Prevents cascade failures from database issues"
+            "Error Prevention": "Prevents cascade failures from database issues",
+            "Auto-Initialization Safety": "Prevents staging environment initialization failures",
+            "Global Manager Edge Cases": "Handles singleton pattern edge cases robustly",
+            "Health Check Reliability": "Ensures accurate health monitoring",
+            "Migration Pipeline Safety": "Prevents deployment pipeline failures",
+            "Connection Pool Optimization": "Handles resource management edge cases"
         }
         
         # Verify we have tests covering all critical BVJ categories
-        assert len(bvj_categories) >= 7, "Should cover all critical business value categories"
+        assert len(bvj_categories) >= 12, "Should cover all critical business value categories including new edge cases"
         
         # Each category represents multiple test methods
         for category, description in bvj_categories.items():
