@@ -316,8 +316,9 @@ class TestEventRetryLogic:
     
     @pytest.mark.asyncio
     async def test_event_retry_on_failure(self, event_tracker):
-        """Test that failed events are retried."""
+        """Test that failed events are only retried when retry callback is provided."""
         
+        # Create event WITHOUT retry callback
         event_id = event_tracker.track_event(
             event_type="tool_executing",
             user_id="test_user",
@@ -328,12 +329,122 @@ class TestEventRetryLogic:
         event_tracker.mark_event_sent(event_id)
         event_tracker.fail_event(event_id, "Network error")
         
-        # Wait a short time for retry to be scheduled
-        await asyncio.sleep(0.1)
+        # Wait a short time for any retry attempts
+        await asyncio.sleep(0.5)
         
-        # Check metrics show retry was attempted
+        # Check that NO retry was attempted because no callback was provided
+        metrics = event_tracker.get_metrics()
+        assert metrics.total_retries == 0  # No retry should happen without callback
+        assert metrics.events_failed == 1  # Event should still be marked as failed
+    
+    @pytest.mark.asyncio
+    async def test_retry_callback_functionality(self, event_tracker):
+        """Test the new retry callback functionality."""
+        
+        # Track calls to the retry callback
+        retry_calls = []
+        retry_success = True
+        
+        async def mock_retry_callback(event_id: str, event_type: str, data: dict) -> bool:
+            """Mock retry callback that tracks calls."""
+            retry_calls.append((event_id, event_type, data))
+            return retry_success
+        
+        # Create event with retry callback
+        test_data = {"tool_name": "test_tool", "parameters": {"test": "value"}}
+        event_id = event_tracker.track_event(
+            event_type="tool_executing",
+            user_id="test_user",
+            run_id="test_run",
+            data=test_data,
+            retry_callback=mock_retry_callback
+        )
+        
+        # Mark as sent then fail to trigger retry
+        event_tracker.mark_event_sent(event_id)
+        event_tracker.fail_event(event_id, "Mock failure")
+        
+        # Wait for retry to be scheduled and executed
+        await asyncio.sleep(2.0)
+        
+        # Verify retry callback was called
+        assert len(retry_calls) == 1
+        called_event_id, called_event_type, called_data = retry_calls[0]
+        assert called_event_id == event_id
+        assert called_event_type == "tool_executing"
+        assert called_data == test_data
+        
+        # Check that successful retry updated metrics
         metrics = event_tracker.get_metrics()
         assert metrics.total_retries >= 1
+        assert metrics.successful_retries >= 1
+    
+    @pytest.mark.asyncio
+    async def test_retry_callback_failure_handling(self, event_tracker):
+        """Test retry callback failure handling."""
+        
+        retry_calls = []
+        
+        async def failing_retry_callback(event_id: str, event_type: str, data: dict) -> bool:
+            """Mock retry callback that always fails."""
+            retry_calls.append((event_id, event_type, data))
+            return False  # Always fail
+        
+        # Create event with failing retry callback
+        event_id = event_tracker.track_event(
+            event_type="tool_executing",
+            user_id="test_user",
+            run_id="test_run",
+            retry_callback=failing_retry_callback
+        )
+        
+        # Mark as sent then fail to trigger retry
+        event_tracker.mark_event_sent(event_id)
+        event_tracker.fail_event(event_id, "Mock failure")
+        
+        # Wait for retry to execute
+        await asyncio.sleep(2.0)
+        
+        # Verify retry callback was called but failed
+        assert len(retry_calls) == 1
+        
+        # Check metrics show retry attempt but no success
+        metrics = event_tracker.get_metrics()
+        assert metrics.total_retries >= 1
+        # successful_retries should remain 0 since callback returned False
+    
+    @pytest.mark.asyncio
+    async def test_retry_callback_exception_handling(self, event_tracker):
+        """Test retry callback exception handling."""
+        
+        async def exception_retry_callback(event_id: str, event_type: str, data: dict) -> bool:
+            """Mock retry callback that raises an exception."""
+            raise Exception("Simulated callback exception")
+        
+        # Create event with exception-throwing retry callback
+        event_id = event_tracker.track_event(
+            event_type="tool_executing", 
+            user_id="test_user",
+            run_id="test_run",
+            retry_callback=exception_retry_callback
+        )
+        
+        # Mark as sent then fail to trigger retry
+        event_tracker.mark_event_sent(event_id)
+        event_tracker.fail_event(event_id, "Mock failure")
+        
+        # Wait for retry to execute
+        await asyncio.sleep(2.0)
+        
+        # Should not crash, but retry should be recorded as attempted
+        metrics = event_tracker.get_metrics()
+        assert metrics.total_retries >= 1
+        
+        # Check that the event has error information
+        tracked_event = event_tracker._tracked_events.get(event_id)
+        assert tracked_event is not None
+        assert len(tracked_event.retry_errors) > 0
+        assert "Simulated callback exception" in tracked_event.retry_errors[-1]
     
     @pytest.mark.asyncio
     async def test_event_timeout_handling(self, event_tracker):
