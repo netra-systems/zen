@@ -33,11 +33,15 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
+    # CRITICAL: Direct import of canonical SSOT (avoid circular import)
+    sys.path.insert(0, str(PROJECT_ROOT))
     from tests.unified_test_runner import UnifiedTestRunner as CanonicalUnifiedTestRunner
     CANONICAL_AVAILABLE = True
+    print("✅ SSOT BACKEND: Successfully connected to canonical UnifiedTestRunner")
 except ImportError as e:
     CANONICAL_AVAILABLE = False
-    warnings.warn(f"CRITICAL SSOT VIOLATION: Cannot import canonical UnifiedTestRunner: {e}")
+    print(f"⚠️  FALLBACK MODE: Cannot import canonical UnifiedTestRunner: {e}")
+    warnings.warn(f"FALLBACK MODE: Using legacy implementation for business continuity: {e}")
 
 class LegacyUnifiedTestRunnerWrapper:
     """
