@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict
 
 from netra_backend.app.db.models_postgres import User
+from netra_backend.app.core.exceptions_tools import ToolExecutionException
 
 if TYPE_CHECKING:
     from netra_backend.app.core.registry.universal_registry import ToolRegistry as UnifiedToolRegistry
@@ -88,9 +89,25 @@ class BasicToolHandlers:
                     {"name": "reporting", "type": "ReportingSubAgent", "capabilities": ["report_generation", "visualization"]},
                     {"name": "synthetic_data", "type": "SyntheticDataSubAgent", "capabilities": ["data_generation", "augmentation"]}
                 ]
+        except ImportError as e:
+            # Handle missing imports gracefully
+            agent_list = [{"name": "error", "type": "ImportError", "capabilities": [], "error": f"Import error: {str(e)}"}]
+        except AttributeError as e:
+            # Handle missing attributes or methods
+            agent_list = [{"name": "error", "type": "AttributeError", "capabilities": [], "error": f"Attribute error: {str(e)}"}]
         except Exception as e:
-            # Safe fallback if registry access fails
-            agent_list = [{"name": "error", "type": "Unknown", "capabilities": [], "error": str(e)}]
+            # Convert other exceptions to ToolExecutionException for better diagnostics
+            raise ToolExecutionException(
+                message=f"Failed to list agents: {str(e)}",
+                tool_id="list_agents",
+                tool_name="List Agents",
+                user_id=user.id if user else None,
+                execution_error=str(e),
+                details={
+                    'exception_type': type(e).__name__,
+                    'handler_function': '_list_agents_handler'
+                }
+            )
         
         return {
             "type": "text",

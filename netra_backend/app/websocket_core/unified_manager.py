@@ -337,6 +337,12 @@ class UnifiedWebSocketManager:
         self._message_recovery_queue: Dict[str, List[Dict]] = {}  # user_id -> [messages]
         self._connection_error_count: Dict[str, int] = {}  # user_id -> error_count
         self._last_error_time: Dict[str, datetime] = {}  # user_id -> last_error_timestamp
+        
+        # Transaction coordination support
+        self._transaction_coordinator = None  # Will be set by DatabaseManager
+        self._coordination_enabled = False
+        
+        logger.debug("🔗 WebSocket manager initialized with transaction coordination support")
         self._error_recovery_enabled = True
         
         # Background task monitoring system
@@ -2550,6 +2556,130 @@ class UnifiedWebSocketManager:
         """
         # Use existing is_connection_active method
         return self.is_connection_active(user_id)
+
+    def set_transaction_coordinator(self, coordinator):
+        """Set transaction coordinator for database-WebSocket coordination.
+        
+        Args:
+            coordinator: TransactionEventCoordinator instance from DatabaseManager
+        """
+        self._transaction_coordinator = coordinator
+        self._coordination_enabled = True
+        logger.info("🔗 Transaction coordinator linked to WebSocket manager")
+        
+    async def send_event_after_commit(self, transaction_id: str, event_type: str, event_data: Dict[str, Any],
+                                     connection_id: Optional[str] = None, user_id: Optional[str] = None,
+                                     thread_id: Optional[str] = None, priority: int = 0):
+        """Queue WebSocket event for sending after database transaction commit.
+        
+        This method ensures events are only sent AFTER database transactions commit,
+        preventing data inconsistency in the Golden Path user flow.
+        
+        Args:
+            transaction_id: Database transaction ID
+            event_type: Type of WebSocket event to send
+            event_data: Event data payload
+            connection_id: Optional specific connection ID
+            user_id: Optional user ID for targeting
+            thread_id: Optional thread ID for context
+            priority: Event priority (higher numbers sent first)
+        """
+        if not self._coordination_enabled or not self._transaction_coordinator:
+            # Fallback: send immediately if coordination not enabled
+            logger.warning(f"⚠️ Transaction coordination not enabled - sending WebSocket event '{event_type}' immediately")
+            return await self._send_event_immediate(event_type, event_data, connection_id, user_id)
+            
+        # Queue event for after transaction commit
+        await self._transaction_coordinator.add_pending_event(
+            transaction_id=transaction_id,
+            event_type=event_type,
+            event_data=event_data,
+            connection_id=connection_id,
+            user_id=user_id,
+            thread_id=thread_id,
+            priority=priority
+        )
+        
+        logger.debug(f"📤 Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+                    f"(user: {user_id}, priority: {priority})")
+        
+    async def _send_event_immediate(self, event_type: str, event_data: Dict[str, Any],
+                                   connection_id: Optional[str] = None, user_id: Optional[str] = None) -> bool:
+        """Send WebSocket event immediately (fallback when coordination disabled).
+        
+        Args:
+            event_type: Type of WebSocket event
+            event_data: Event data payload
+            connection_id: Optional specific connection ID
+            user_id: Optional user ID for targeting
+            
+        Returns:
+            True if sent successfully, False otherwise
+        """
+        try:
+            message = {
+                "type": event_type,
+                "data": event_data,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+            
+            if connection_id:
+                # Send to specific connection
+                if connection_id in self._connections:
+                    connection = self._connections[connection_id]
+                    await connection.websocket.send_json(_serialize_message_safely(message))
+                    logger.debug(f"📤 Sent WebSocket event '{event_type}' to connection {connection_id}")
+                    return True
+                else:
+                    logger.warning(f"⚠️ Connection {connection_id} not found for event '{event_type}'")
+                    return False
+                    
+            elif user_id:
+                # Send to all user connections
+                await self.send_to_user(user_id, message)
+                logger.debug(f"📤 Sent WebSocket event '{event_type}' to user {user_id}")
+                return True
+                
+            else:
+                logger.warning(f"⚠️ No connection_id or user_id specified for event '{event_type}'")
+                return False
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to send immediate WebSocket event '{event_type}': {type(e).__name__}: {e}")
+            return False
+            
+    def is_coordination_enabled(self) -> bool:
+        """Check if transaction coordination is enabled.
+        
+        Returns:
+            True if coordination is enabled, False otherwise
+        """
+        return self._coordination_enabled and self._transaction_coordinator is not None
+        
+    def get_coordination_status(self) -> Dict[str, Any]:
+        """Get current transaction coordination status.
+        
+        Returns:
+            Dictionary containing coordination status information
+        """
+        if not self._coordination_enabled:
+            return {
+                "enabled": False,
+                "reason": "Coordination not enabled"
+            }
+            
+        if not self._transaction_coordinator:
+            return {
+                "enabled": False,
+                "reason": "No transaction coordinator configured"
+            }
+            
+        return {
+            "enabled": True,
+            "coordinator_available": True,
+            "pending_events": self._transaction_coordinator.get_pending_events_count(),
+            "metrics": self._transaction_coordinator.get_coordination_metrics()
+        }
 
     def get_health_status(self) -> Dict[str, Any]:
         """Get health status for current operational mode."""

@@ -24,8 +24,13 @@ import asyncio
 import logging
 import re
 import time
-from typing import Dict, Any, Optional, List
+import uuid
+from typing import Dict, Any, Optional, List, Callable, Union
 from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from collections import defaultdict
+from datetime import datetime, timezone
+from enum import Enum
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncEngine
 from sqlalchemy.pool import NullPool, QueuePool, StaticPool
 from sqlalchemy.pool import AsyncAdaptedQueuePool
@@ -38,14 +43,312 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
+class CoordinationEventType(Enum):
+    """Events for multi-layer coordination."""
+    TRANSACTION_STARTED = "transaction_started"
+    TRANSACTION_COMMITTED = "transaction_committed" 
+    TRANSACTION_ROLLED_BACK = "transaction_rolled_back"
+    COORDINATION_FAILED = "coordination_failed"
+    LAYER_SYNC_ERROR = "layer_sync_error"
+    WEBSOCKET_EVENT_QUEUED = "websocket_event_queued"
+    WEBSOCKET_EVENT_SENT = "websocket_event_sent"
+
+
+@dataclass
+class RollbackNotification:
+    """Notification sent when operations fail and rollback."""
+    transaction_id: str
+    failed_operation: str
+    error_message: str
+    affected_layers: List[str]
+    recovery_actions: List[str]
+    user_message: str
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+@dataclass
+class PendingWebSocketEvent:
+    """WebSocket event queued for sending after transaction commit."""
+    event_type: str
+    event_data: Dict[str, Any]
+    connection_id: Optional[str] = None
+    user_id: Optional[str] = None
+    thread_id: Optional[str] = None
+    priority: int = 0  # Higher numbers = higher priority
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class TransactionEventCoordinator:
+    """Coordinates WebSocket events with database transaction boundaries.
+    
+    Business Value Justification (BVJ):
+    - Segment: ALL (Free → Enterprise) - Foundation for all real-time features
+    - Business Goal: Prevent WebSocket events being sent before database commits
+    - Value Impact: Eliminates data inconsistency in chat functionality
+    - Strategic Impact: CRITICAL - Protects $500K+ ARR Golden Path reliability
+    
+    This coordinator ensures that WebSocket events are only sent AFTER database
+    transactions have been successfully committed, preventing race conditions
+    where users see updates before data is actually persisted.
+    """
+    
+    def __init__(self, websocket_manager=None):
+        """Initialize transaction event coordinator.
+        
+        Args:
+            websocket_manager: Optional WebSocket manager for sending events
+        """
+        self.websocket_manager = websocket_manager
+        self.pending_events: Dict[str, List[PendingWebSocketEvent]] = defaultdict(list)
+        self.coordination_metrics: Dict[str, Any] = defaultdict(int)
+        self._lock = asyncio.Lock()
+        
+        logger.info("🔗 TransactionEventCoordinator initialized - ensuring WebSocket/DB coordination")
+        
+    def set_websocket_manager(self, websocket_manager):
+        """Set or update the WebSocket manager reference."""
+        self.websocket_manager = websocket_manager
+        logger.debug("🔄 WebSocket manager linked to TransactionEventCoordinator")
+        
+    async def add_pending_event(self, transaction_id: str, event_type: str, event_data: Dict[str, Any], 
+                               connection_id: Optional[str] = None, user_id: Optional[str] = None,
+                               thread_id: Optional[str] = None, priority: int = 0):
+        """Queue WebSocket event for sending after transaction commit.
+        
+        Args:
+            transaction_id: Unique identifier for the database transaction
+            event_type: Type of WebSocket event to send
+            event_data: Data payload for the event
+            connection_id: Optional WebSocket connection ID
+            user_id: Optional user ID for event targeting
+            thread_id: Optional thread ID for event context
+            priority: Event priority (higher numbers sent first)
+        """
+        async with self._lock:
+            event = PendingWebSocketEvent(
+                event_type=event_type,
+                event_data=event_data,
+                connection_id=connection_id,
+                user_id=user_id,
+                thread_id=thread_id,
+                priority=priority
+            )
+            
+            self.pending_events[transaction_id].append(event)
+            self.coordination_metrics["events_queued"] += 1
+            
+            logger.debug(f"📤 Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+                        f"(user: {user_id}, priority: {priority})")
+            
+    async def on_transaction_commit(self, transaction_id: str) -> int:
+        """Send all pending events after successful transaction commit.
+        
+        Args:
+            transaction_id: ID of the committed transaction
+            
+        Returns:
+            Number of events successfully sent
+        """
+        async with self._lock:
+            events = self.pending_events.pop(transaction_id, [])
+            
+        if not events:
+            logger.debug(f"🔄 No pending events for committed transaction {transaction_id[:8]}...")
+            return 0
+            
+        # Sort events by priority (highest first), then by creation time
+        events.sort(key=lambda e: (-e.priority, e.created_at))
+        
+        sent_count = 0
+        failed_count = 0
+        
+        logger.info(f"📤 Sending {len(events)} queued WebSocket events after transaction commit {transaction_id[:8]}...")
+        
+        for event in events:
+            try:
+                success = await self._send_websocket_event(event)
+                if success:
+                    sent_count += 1
+                else:
+                    failed_count += 1
+                    
+            except Exception as e:
+                failed_count += 1
+                logger.error(f"❌ Failed to send WebSocket event '{event.event_type}' after commit: {e}")
+                
+        self.coordination_metrics["events_sent_after_commit"] += sent_count
+        self.coordination_metrics["events_failed_after_commit"] += failed_count
+        
+        if failed_count > 0:
+            logger.warning(f"⚠️ Transaction {transaction_id[:8]}... commit coordination: "
+                          f"{sent_count} events sent, {failed_count} failed")
+        else:
+            logger.info(f"✅ Transaction {transaction_id[:8]}... commit coordination successful: "
+                       f"{sent_count} events sent")
+            
+        return sent_count
+            
+    async def on_transaction_rollback(self, transaction_id: str, error_message: str = "") -> RollbackNotification:
+        """Handle transaction rollback by clearing pending events and sending notification.
+        
+        Args:
+            transaction_id: ID of the rolled back transaction
+            error_message: Optional error message describing the failure
+            
+        Returns:
+            RollbackNotification object describing the rollback
+        """
+        async with self._lock:
+            events = self.pending_events.pop(transaction_id, [])
+            
+        affected_event_types = [e.event_type for e in events]
+        affected_users = list(set(e.user_id for e in events if e.user_id))
+        
+        rollback_notification = RollbackNotification(
+            transaction_id=transaction_id,
+            failed_operation="database_transaction",
+            error_message=error_message or "Database transaction failed and was rolled back",
+            affected_layers=["database", "websocket"],
+            recovery_actions=["Transaction rolled back", "WebSocket events cleared", "User notification sent"],
+            user_message="Operation failed and has been rolled back. Please try again."
+        )
+        
+        self.coordination_metrics["rollbacks_handled"] += 1
+        self.coordination_metrics["events_cleared_on_rollback"] += len(events)
+        
+        logger.warning(f"🔄 Transaction {transaction_id[:8]}... rolled back - cleared {len(events)} pending WebSocket events")
+        logger.info(f"📝 Rollback affected {len(affected_users)} users and event types: {affected_event_types}")
+        
+        # Send rollback notification to affected users
+        try:
+            await self._send_rollback_notification(rollback_notification, affected_users)
+        except Exception as e:
+            logger.error(f"❌ Failed to send rollback notification: {e}")
+            
+        return rollback_notification
+        
+    async def _send_websocket_event(self, event: PendingWebSocketEvent) -> bool:
+        """Send a single WebSocket event using the configured manager.
+        
+        Args:
+            event: Event to send
+            
+        Returns:
+            True if sent successfully, False otherwise
+        """
+        if not self.websocket_manager:
+            logger.warning(f"⚠️ No WebSocket manager configured - cannot send event '{event.event_type}'")
+            return False
+            
+        try:
+            # Attempt to send the event using the WebSocket manager
+            if hasattr(self.websocket_manager, 'send_to_connection') and event.connection_id:
+                # Send to specific connection
+                await self.websocket_manager.send_to_connection(
+                    event.connection_id, event.event_type, event.event_data
+                )
+            elif hasattr(self.websocket_manager, 'send_to_user') and event.user_id:
+                # Send to all user connections
+                await self.websocket_manager.send_to_user(
+                    event.user_id, event.event_type, event.event_data
+                )
+            elif hasattr(self.websocket_manager, 'send_event'):
+                # Generic send method
+                await self.websocket_manager.send_event(
+                    event.event_type, event.event_data
+                )
+            else:
+                logger.warning(f"⚠️ WebSocket manager missing compatible send methods for event '{event.event_type}'")
+                return False
+                
+            logger.debug(f"📤 Successfully sent WebSocket event '{event.event_type}' (user: {event.user_id})")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to send WebSocket event '{event.event_type}': {type(e).__name__}: {e}")
+            return False
+            
+    async def _send_rollback_notification(self, notification: RollbackNotification, affected_users: List[str]):
+        """Send rollback notification to affected users.
+        
+        Args:
+            notification: Rollback notification to send
+            affected_users: List of user IDs to notify
+        """
+        if not self.websocket_manager or not affected_users:
+            return
+            
+        rollback_event_data = {
+            "type": "transaction_rollback",
+            "transaction_id": notification.transaction_id,
+            "message": notification.user_message,
+            "error": notification.error_message,
+            "timestamp": notification.timestamp.isoformat(),
+            "recovery_actions": notification.recovery_actions
+        }
+        
+        for user_id in affected_users:
+            try:
+                if hasattr(self.websocket_manager, 'send_to_user'):
+                    await self.websocket_manager.send_to_user(
+                        user_id, "transaction_rollback", rollback_event_data
+                    )
+                logger.debug(f"📤 Sent rollback notification to user {user_id}")
+            except Exception as e:
+                logger.error(f"❌ Failed to send rollback notification to user {user_id}: {e}")
+                
+    def get_coordination_metrics(self) -> Dict[str, Any]:
+        """Get current coordination metrics for monitoring.
+        
+        Returns:
+            Dictionary containing coordination statistics
+        """
+        return dict(self.coordination_metrics)
+        
+    def get_pending_events_count(self) -> int:
+        """Get total number of pending events across all transactions.
+        
+        Returns:
+            Total count of pending events
+        """
+        return sum(len(events) for events in self.pending_events.values())
+        
+    async def cleanup_stale_transactions(self, max_age_minutes: int = 30):
+        """Clean up pending events for transactions that are older than max_age.
+        
+        Args:
+            max_age_minutes: Maximum age of transactions to keep
+        """
+        cutoff_time = datetime.now(timezone.utc) - datetime.timedelta(minutes=max_age_minutes)
+        stale_transactions = []
+        
+        async with self._lock:
+            for transaction_id, events in list(self.pending_events.items()):
+                if events and events[0].created_at < cutoff_time:
+                    stale_transactions.append(transaction_id)
+                    
+            for transaction_id in stale_transactions:
+                events = self.pending_events.pop(transaction_id, [])
+                self.coordination_metrics["stale_transactions_cleaned"] += 1
+                self.coordination_metrics["stale_events_cleared"] += len(events)
+                
+        if stale_transactions:
+            logger.warning(f"🧹 Cleaned up {len(stale_transactions)} stale transactions with pending events")
+            
+        return len(stale_transactions)
+
+
 class DatabaseManager:
-    """Centralized database connection and session management."""
+    """Centralized database connection and session management with transaction event coordination."""
     
     def __init__(self):
         self.config = get_config()
         self._engines: Dict[str, AsyncEngine] = {}
         self._initialized = False
         self._url_builder: Optional[DatabaseURLBuilder] = None
+        # Initialize transaction event coordinator for WebSocket coordination
+        self.transaction_coordinator = TransactionEventCoordinator()
+        logger.debug("🔗 DatabaseManager initialized with TransactionEventCoordinator")
     
     async def initialize(self):
         """Initialize database connections using DatabaseURLBuilder."""
@@ -216,6 +519,170 @@ class DatabaseManager:
                     logger.error(f"⚠️ Session close failed for {session_id} after {close_duration:.3f}s: {close_error}")
                     # Don't raise close errors - they shouldn't prevent completion
     
+    def set_websocket_manager(self, websocket_manager):
+        """Set WebSocket manager for transaction coordination.
+        
+        Args:
+            websocket_manager: WebSocket manager instance for event coordination
+        """
+        self.transaction_coordinator.set_websocket_manager(websocket_manager)
+        logger.info("🔗 WebSocket manager linked to DatabaseManager transaction coordinator")
+        
+    @asynccontextmanager
+    async def get_coordinated_session(self, engine_name: str = 'primary', user_id: Optional[str] = None, 
+                                    operation_type: str = "unknown", 
+                                    websocket_events: Optional[List[Dict[str, Any]]] = None):
+        """Get database session with WebSocket event coordination.
+        
+        This method ensures that WebSocket events are only sent AFTER database
+        transactions are successfully committed, preventing data inconsistency.
+        
+        Args:
+            engine_name: Name of the engine to use
+            user_id: User ID for session tracking
+            operation_type: Type of operation for logging
+            websocket_events: List of WebSocket events to send after commit
+            
+        Yields:
+            tuple: (session, transaction_id) for database operations and event queuing
+        """
+        transaction_id = str(uuid.uuid4())
+        session_start_time = time.time()
+        session_id = f"coord_sess_{int(session_start_time * 1000)}_{hash(user_id or 'system') % 10000}"
+        
+        logger.info(f"🔗 Starting coordinated database session {session_id} for {operation_type} "
+                   f"(user: {user_id or 'system'}, transaction: {transaction_id[:8]}...)")
+        
+        # CRITICAL FIX: Enhanced initialization safety
+        if not self._initialized:
+            logger.info(f"🔧 Auto-initializing DatabaseManager for coordinated session (operation: {operation_type})")
+            await self.initialize()
+        
+        engine = self.get_engine(engine_name)
+        async with AsyncSession(engine) as session:
+            original_exception = None
+            transaction_start_time = time.time()
+            
+            # Pre-queue any provided WebSocket events
+            if websocket_events:
+                for event in websocket_events:
+                    await self.transaction_coordinator.add_pending_event(
+                        transaction_id=transaction_id,
+                        event_type=event.get('type', 'unknown'),
+                        event_data=event.get('data', {}),
+                        connection_id=event.get('connection_id'),
+                        user_id=user_id,
+                        priority=event.get('priority', 0)
+                    )
+                    
+            logger.debug(f"📝 Coordinated transaction started for session {session_id} (transaction: {transaction_id[:8]}...)")
+            
+            try:
+                yield session, transaction_id
+                
+                # Commit database transaction
+                commit_start_time = time.time()
+                await session.commit()
+                commit_duration = time.time() - commit_start_time
+                
+                logger.debug(f"✅ Database commit successful for transaction {transaction_id[:8]}... in {commit_duration:.3f}s")
+                
+                # Send queued WebSocket events after successful commit
+                events_sent = await self.transaction_coordinator.on_transaction_commit(transaction_id)
+                
+                session_duration = time.time() - session_start_time
+                logger.info(f"✅ Coordinated session {session_id} completed successfully - "
+                           f"Operation: {operation_type}, User: {user_id or 'system'}, "
+                           f"Duration: {session_duration:.3f}s, Events sent: {events_sent}")
+                
+            except Exception as e:
+                original_exception = e
+                rollback_start_time = time.time()
+                
+                logger.critical(f"💥 COORDINATED TRANSACTION FAILURE in session {session_id}")
+                logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, "
+                           f"Transaction: {transaction_id[:8]}..., Error: {type(e).__name__}: {str(e)}")
+                
+                try:
+                    await session.rollback()
+                    rollback_duration = time.time() - rollback_start_time
+                    logger.warning(f"🔄 Database rollback completed for session {session_id} in {rollback_duration:.3f}s")
+                    
+                    # Handle rollback coordination and send notifications
+                    rollback_notification = await self.transaction_coordinator.on_transaction_rollback(
+                        transaction_id, str(e)
+                    )
+                    
+                    logger.info(f"📤 Rollback notification sent for transaction {transaction_id[:8]}... "
+                               f"affecting {len(rollback_notification.affected_layers)} layers")
+                    
+                except Exception as rollback_error:
+                    rollback_duration = time.time() - rollback_start_time
+                    logger.critical(f"💥 COORDINATED ROLLBACK FAILED for session {session_id} "
+                                  f"after {rollback_duration:.3f}s: {rollback_error}")
+                    logger.critical(f"DATABASE AND WEBSOCKET COORDINATION INTEGRITY AT RISK")
+                
+                session_duration = time.time() - session_start_time
+                logger.error(f"❌ Coordinated session {session_id} failed after {session_duration:.3f}s")
+                raise original_exception
+                
+            finally:
+                close_start_time = time.time()
+                try:
+                    await session.close()
+                    close_duration = time.time() - close_start_time
+                    logger.debug(f"🔒 Coordinated session {session_id} closed in {close_duration:.3f}s")
+                except Exception as close_error:
+                    close_duration = time.time() - close_start_time
+                    logger.error(f"⚠️ Coordinated session close failed for {session_id} "
+                               f"after {close_duration:.3f}s: {close_error}")
+                    
+    async def queue_websocket_event(self, transaction_id: str, event_type: str, event_data: Dict[str, Any],
+                                  connection_id: Optional[str] = None, user_id: Optional[str] = None,
+                                  thread_id: Optional[str] = None, priority: int = 0):
+        """Queue a WebSocket event to be sent after transaction commit.
+        
+        Args:
+            transaction_id: ID of the database transaction
+            event_type: Type of WebSocket event
+            event_data: Event data payload
+            connection_id: Optional WebSocket connection ID
+            user_id: Optional user ID for targeting
+            thread_id: Optional thread ID for context
+            priority: Event priority (higher numbers sent first)
+        """
+        await self.transaction_coordinator.add_pending_event(
+            transaction_id=transaction_id,
+            event_type=event_type,
+            event_data=event_data,
+            connection_id=connection_id,
+            user_id=user_id,
+            thread_id=thread_id,
+            priority=priority
+        )
+        
+        logger.debug(f"📤 Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+                    f"(user: {user_id}, priority: {priority})")
+        
+    def get_coordination_metrics(self) -> Dict[str, Any]:
+        """Get transaction coordination metrics for monitoring.
+        
+        Returns:
+            Dictionary containing coordination statistics
+        """
+        return self.transaction_coordinator.get_coordination_metrics()
+        
+    async def cleanup_stale_coordination(self, max_age_minutes: int = 30) -> int:
+        """Clean up stale transaction coordination data.
+        
+        Args:
+            max_age_minutes: Maximum age of transactions to keep
+            
+        Returns:
+            Number of stale transactions cleaned up
+        """
+        return await self.transaction_coordinator.cleanup_stale_transactions(max_age_minutes)
+
     async def health_check(self, engine_name: str = 'primary') -> Dict[str, Any]:
         """Perform health check on database connection with comprehensive logging.
         
