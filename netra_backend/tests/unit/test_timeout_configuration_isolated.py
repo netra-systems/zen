@@ -204,7 +204,7 @@ class TestTimeoutConfigurationIssues(SSotBaseTestCase):
                 "Timeout configurations should be applied consistently and produce meaningful error messages."
             )
     
-    def test_circuit_breaker_timeout_error_message_bug(self):
+    async def test_circuit_breaker_timeout_error_message_bug(self):
         """
         Test that reproduces circuit breaker timeout error message issues.
         
