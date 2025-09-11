@@ -180,7 +180,7 @@ class TestDeploymentSsotViolationPrevention(SSotBaseTestCase):
         
         ineffective_mechanisms = [
             mechanism for mechanism, status in prevention_mechanisms.items()
-            if status['active'] but not status['effective']
+            if status['active'] and not status['effective']
         ]
         
         # Record prevention analysis

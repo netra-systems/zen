@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 from shared.isolated_environment import get_env
 from test_framework.real_services import RealServicesManager, get_real_services
+from shared.types.user_types import TestUserData
 
 # Import service abstraction for --no-docker scenarios
 try:
@@ -87,8 +88,13 @@ class BaseIntegrationTest(ABC):
         pass
 
     # Helper methods for common integration test patterns
-    async def create_test_user_context(self, real_services: RealServicesManager, user_data: Optional[Dict] = None) -> Dict:
-        """Create isolated test user context with real database."""
+    async def create_test_user_context(self, real_services: RealServicesManager, user_data: Optional[Dict] = None) -> TestUserData:
+        """
+        Create isolated test user context with real database.
+        
+        Returns SSOT TestUserData object supporting both attribute and dict access.
+        Resolves interface mismatch preventing Golden Path agent conversation sessions.
+        """
         if not user_data:
             user_data = {
                 'email': f'test-{asyncio.current_task().get_name()}@example.com',
@@ -107,7 +113,9 @@ class BaseIntegrationTest(ABC):
         """, user_data['email'], user_data['name'], user_data['is_active'])
         
         user_data['id'] = str(user_id)
-        return user_data
+        
+        # Convert dict to SSOT TestUserData object supporting both access patterns
+        return TestUserData.from_dict(user_data)
 
     async def create_test_organization(self, real_services: RealServicesManager, user_id: str, org_data: Optional[Dict] = None) -> Dict:
         """Create real test organization with user membership."""

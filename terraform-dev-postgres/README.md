@@ -1,6 +1,36 @@
+# 🚨 DEPRECATED - WEEK 1 SSOT REMEDIATION
+
+**GitHub Issue #245: Deployment canonical source conflicts**
+
+## ⚠️ DEPRECATION WARNING
+
+**This terraform-dev-postgres/ directory is DEPRECATED.**
+
+**CANONICAL SOURCES:**
+- GCP Infrastructure: `terraform-gcp-staging/`
+- Local Development: `docker-compose --profile dev up`
+
+**Migration Path:**
+```bash
+# OLD: terraform-dev-postgres setup
+cd terraform-dev-postgres/ && terraform apply
+
+# NEW: Local development databases
+docker-compose --profile dev up postgres redis clickhouse
+
+# NEW: GCP staging infrastructure  
+cd terraform-gcp-staging/ && terraform apply
+```
+
+**See [DEPRECATION_NOTICE.md](./DEPRECATION_NOTICE.md) for complete migration guide.**
+
+**This directory will be removed in Week 3 of SSOT remediation.**
+
+---
+
 # LOCAL Development Database Infrastructure with Terraform
 
-**⚠️ IMPORTANT: This is for LOCAL DEVELOPMENT ONLY - NOT for staging or production!**
+**⚠️ IMPORTANT: This is DEPRECATED - Use docker-compose for local development!**
 
 This Terraform configuration sets up a complete LOCAL development database environment using Docker containers on your local machine for PostgreSQL, Redis, and ClickHouse.
 

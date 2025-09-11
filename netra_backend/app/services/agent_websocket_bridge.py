@@ -2874,7 +2874,116 @@ class WebSocketNotifier:
                 step_number=1  # Default step number
             )
         else:
-            logger.warning(f"Emitter does not support notify_agent_thinking: {type(self.emitter)}")
+            central_logger.warning(f"Emitter does not support notify_agent_thinking: {type(self.emitter)}")
+
+    async def send_agent_started(self, exec_context, agent_name: str = None):
+        """Send agent started event via WebSocket emitter.
+        
+        GOLDEN PATH CRITICAL: Event 1 of 5 required for complete user experience.
+        User must see that agent has begun processing their problem.
+        
+        Args:
+            exec_context: Agent execution context containing run_id, thread_id, user_id
+            agent_name: Optional agent name override (defaults to exec_context.agent_name)
+        """
+        try:
+            # Use provided agent_name or fallback to context
+            agent = agent_name or getattr(exec_context, 'agent_name', 'UnknownAgent')
+            
+            if hasattr(self.emitter, 'notify_agent_started'):
+                await self.emitter.notify_agent_started(
+                    agent,
+                    run_id=getattr(exec_context, 'run_id', None),
+                    thread_id=getattr(exec_context, 'thread_id', None)
+                )
+                central_logger.info(f"Agent started event sent for {agent} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+            else:
+                central_logger.warning(f"Emitter does not support notify_agent_started: {type(self.emitter)}")
+        except Exception as e:
+            central_logger.error(f"Failed to send agent_started event for {agent}: {e}")
+
+    async def send_tool_executing(self, exec_context, tool_name: str, tool_purpose: str = None, 
+                                estimated_duration_ms: int = None, parameters_summary: str = None):
+        """Send tool executing event via WebSocket emitter.
+        
+        GOLDEN PATH CRITICAL: Event 3 of 5 required for complete user experience.
+        Provides tool usage transparency to show problem-solving approach.
+        
+        Args:
+            exec_context: Agent execution context containing run_id, thread_id, user_id
+            tool_name: Name of the tool being executed
+            tool_purpose: Optional description of what the tool does
+            estimated_duration_ms: Optional estimated execution time in milliseconds
+            parameters_summary: Optional summary of tool parameters
+        """
+        try:
+            if hasattr(self.emitter, 'notify_tool_executing'):
+                await self.emitter.notify_tool_executing(
+                    tool_name=tool_name,
+                    tool_purpose=tool_purpose,
+                    run_id=getattr(exec_context, 'run_id', None),
+                    thread_id=getattr(exec_context, 'thread_id', None),
+                    agent_name=getattr(exec_context, 'agent_name', 'UnknownAgent'),
+                    estimated_duration_ms=estimated_duration_ms,
+                    parameters_summary=parameters_summary
+                )
+                central_logger.info(f"Tool executing event sent for {tool_name} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+            else:
+                central_logger.warning(f"Emitter does not support notify_tool_executing: {type(self.emitter)}")
+        except Exception as e:
+            central_logger.error(f"Failed to send tool_executing event for {tool_name}: {e}")
+
+    async def send_tool_completed(self, exec_context, tool_name: str, result: Dict[str, Any]):
+        """Send tool completed event via WebSocket emitter.
+        
+        GOLDEN PATH CRITICAL: Event 4 of 5 required for complete user experience.
+        Delivers tool results display to show actionable insights.
+        
+        Args:
+            exec_context: Agent execution context containing run_id, thread_id, user_id
+            tool_name: Name of the tool that completed
+            result: Tool execution result data
+        """
+        try:
+            if hasattr(self.emitter, 'notify_tool_completed'):
+                await self.emitter.notify_tool_completed(
+                    tool_name=tool_name,
+                    result=result,
+                    run_id=getattr(exec_context, 'run_id', None),
+                    thread_id=getattr(exec_context, 'thread_id', None),
+                    agent_name=getattr(exec_context, 'agent_name', 'UnknownAgent')
+                )
+                central_logger.info(f"Tool completed event sent for {tool_name} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+            else:
+                central_logger.warning(f"Emitter does not support notify_tool_completed: {type(self.emitter)}")
+        except Exception as e:
+            central_logger.error(f"Failed to send tool_completed event for {tool_name}: {e}")
+
+    async def send_agent_completed(self, exec_context, result: Dict[str, Any], execution_time_ms: float = None):
+        """Send agent completed event via WebSocket emitter.
+        
+        GOLDEN PATH CRITICAL: Event 5 of 5 required for complete user experience.
+        User must know when valuable response is ready.
+        
+        Args:
+            exec_context: Agent execution context containing run_id, thread_id, user_id  
+            result: Agent execution result data
+            execution_time_ms: Optional total execution time in milliseconds
+        """
+        try:
+            if hasattr(self.emitter, 'notify_agent_completed'):
+                await self.emitter.notify_agent_completed(
+                    agent_name=getattr(exec_context, 'agent_name', 'UnknownAgent'),
+                    result=result,
+                    run_id=getattr(exec_context, 'run_id', None),
+                    thread_id=getattr(exec_context, 'thread_id', None),
+                    execution_time_ms=execution_time_ms
+                )
+                central_logger.info(f"Agent completed event sent for {getattr(exec_context, 'agent_name', 'UnknownAgent')} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+            else:
+                central_logger.warning(f"Emitter does not support notify_agent_completed: {type(self.emitter)}")
+        except Exception as e:
+            central_logger.error(f"Failed to send agent_completed event for {getattr(exec_context, 'agent_name', 'UnknownAgent')}: {e}")
 
 
     async def _emit_with_retry(
