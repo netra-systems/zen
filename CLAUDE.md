@@ -351,9 +351,10 @@ SEE GIT ISSUES, GIT PRs.
 13. **Update Status:** Regenerate reports and learnings
 14. **Save Learnings:** @index.xml
 
-### 10.1. Git Commit Standards
+### 10.1. Git Standards
 **Follow @git_commit_atomic_units.xml:**
 - Stay on develop-long-lived branch as current branch.
+- ONLY use safe opreations, never filter branch etc.
 
 **FINAL REMINDER:** 
 - **GOLDEN PATH PRIORITY:** Users login → get AI responses

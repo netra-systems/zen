@@ -21,7 +21,7 @@ PROCESS INSTRUCTIONS START:
 0a: Git commit open ${1 : all} work in conceptual units as per SPEC\git_commit_atomic_units.xml
 0b: Pull and push.
 0c: SAFELY AND CAREFUL handle merge commits.
-LOG AND OUTPUT AND SAVE EVERY MERGE CHOICE AND JUSTIFICATION TO A NEW FRESH FILE NAMED: MERGEISSUE:{COMMIT DATE}.MD
+LOG AND OUTPUT AND SAVE EVERY MERGE CHOICE AND JUSTIFICATION TO A NEW FRESH FILE NAMED: MERGEISSUE-{COMMIT DATE}.MD
 saved in merges/ folder (create if doesn't exist)
 0d: Push and pull.
 0e: Doubel check work.
