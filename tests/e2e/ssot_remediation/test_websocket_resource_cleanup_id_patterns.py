@@ -74,12 +74,10 @@ class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
         Expected to FAIL before SSOT remediation due to ID pattern conflicts.
         """
         # Generate consistent SSOT IDs
-        user_id = ensure_user_id(self.unified_id_generator.generate_user_id())
-        thread_id = ensure_thread_id(self.unified_id_generator.generate_thread_id())
-        
-        # Generate run_id that's related to thread_id (SSOT pattern)
-        run_id_raw = self.unified_id_generator.generate_run_id_for_thread(str(thread_id))
-        run_id = ensure_run_id(run_id_raw)
+        thread_id_str, run_id_str, request_id_str = self.unified_id_generator.generate_user_context_ids("cleanup-test", "websocket")
+        user_id = ensure_user_id(self.unified_id_generator.generate_base_id("user"))
+        thread_id = ensure_thread_id(thread_id_str)
+        run_id = ensure_run_id(run_id_str)
         
         # Record the ID relationships
         self.record_metric("test_user_id", str(user_id))
@@ -179,7 +177,7 @@ class TestWebSocketResourceCleanupIdPatterns(SSotAsyncTestCase):
         Expected to detect mismatches before SSOT remediation.
         """
         # Create WebSocket manager with mixed ID patterns (simulating dual SSOT)
-        user_id = ensure_user_id(self.unified_id_generator.generate_user_id())  # SSOT pattern
+        user_id = ensure_user_id(self.unified_id_generator.generate_base_id("user"))  # SSOT pattern
         thread_id = ensure_thread_id("thread_uuid_" + str(time.time()))  # Non-SSOT pattern
         
         websocket_id = "mismatch-test-websocket"
