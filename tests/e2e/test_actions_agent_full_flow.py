@@ -42,7 +42,7 @@ if project_root not in sys.path:
 from loguru import logger
 
 # Import test infrastructure (REAL SERVICES ONLY)
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import production components for E2E testing
 try:
