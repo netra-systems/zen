@@ -640,6 +640,27 @@ class AgentRegistry(BaseAgentRegistry):
         if agent is None:
             raise KeyError(f"No factory registered for agent type: {agent_type}")
         
+        # Set WebSocket bridge on agent if available
+        print(f"DEBUG WebSocket setup: user_session has _websocket_bridge={hasattr(user_session, '_websocket_bridge')}, value={getattr(user_session, '_websocket_bridge', 'missing')}")
+        print(f"DEBUG WebSocket setup: agent has set_websocket_bridge={hasattr(agent, 'set_websocket_bridge')}")
+        print(f"DEBUG WebSocket setup: agent has _websocket_bridge attr={hasattr(agent, '_websocket_bridge')}")
+        print(f"DEBUG WebSocket setup: registry websocket_manager={getattr(self, 'websocket_manager', 'missing')}")
+        
+        if hasattr(user_session, '_websocket_bridge') and user_session._websocket_bridge:
+            if hasattr(agent, 'set_websocket_bridge'):
+                agent.set_websocket_bridge(user_session._websocket_bridge, user_context.run_id, agent_type)
+                print(f"✅ Set WebSocket bridge on agent {agent_type} for user {user_id}")
+            elif hasattr(agent, '_websocket_bridge'):
+                agent._websocket_bridge = user_session._websocket_bridge
+                agent._run_id = user_context.run_id
+                agent._agent_name = agent_type
+                print(f"✅ Set WebSocket bridge attributes on agent {agent_type} for user {user_id}")
+        else:
+            print(f"❌ No WebSocket bridge available for agent {agent_type} user {user_id}")
+            print(f"   user_session._websocket_bridge: {getattr(user_session, '_websocket_bridge', 'missing')}")
+            print(f"   user_session.websocket_manager: {getattr(user_session, '_websocket_manager', 'missing')}")
+            print(f"   registry.websocket_manager: {getattr(self, 'websocket_manager', 'missing')}")
+        
         # Register agent with user session
         await user_session.register_agent(agent_type, agent)
         
