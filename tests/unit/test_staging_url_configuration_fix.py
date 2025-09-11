@@ -172,15 +172,30 @@ class TestStagingUrlConfigurationFix(SSotBaseTestCase):
             pytest.skip(f"E2E test file not found: {e2e_test_file}")
         
         # Find the StagingEnvironmentConfig instantiation
-        # Look for the pattern where staging_config is created
-        # Use a more robust pattern that handles nested parentheses
-        config_pattern = r'self\.staging_config\s*=\s*StagingEnvironmentConfig\(\s*(.*?)\s*\)'
-        match = re.search(config_pattern, content, re.DOTALL)
+        # Use a more robust approach to find the complete config block
+        start_pattern = r'self\.staging_config\s*=\s*StagingEnvironmentConfig\('
+        start_match = re.search(start_pattern, content)
         
-        if not match:
+        if not start_match:
             pytest.fail("Could not find StagingEnvironmentConfig instantiation in E2E test")
         
-        config_params = match.group(1)
+        # Find the matching closing parenthesis for the constructor
+        start_pos = start_match.start()
+        paren_count = 0
+        current_pos = start_match.end() - 1  # Start at the opening parenthesis
+        
+        for i, char in enumerate(content[current_pos:], current_pos):
+            if char == '(':
+                paren_count += 1
+            elif char == ')':
+                paren_count -= 1
+                if paren_count == 0:
+                    end_pos = i + 1
+                    break
+        else:
+            pytest.fail("Could not find matching closing parenthesis for StagingEnvironmentConfig")
+        
+        config_params = content[start_pos:end_pos]
         
         # Check that it's not using hardcoded run.app URLs
         hardcoded_run_app_pattern = r'https://[^"]*\.run\.app[^"]*'
