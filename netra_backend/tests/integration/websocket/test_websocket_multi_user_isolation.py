@@ -36,6 +36,7 @@ from unittest.mock import patch
 
 import pytest
 import websockets
+from websockets.asyncio.client import ClientConnection
 
 # SSOT imports following CLAUDE.md absolute import requirements  
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -89,7 +90,7 @@ class TestWebSocketMultiUserIsolation(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.user_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.user_connections: Dict[str, ClientConnection] = {}
         self.user_events: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         self.isolation_violations: List[Dict[str, Any]] = []
         
@@ -112,7 +113,7 @@ class TestWebSocketMultiUserIsolation(BaseIntegrationTest):
         self, 
         user_id: str,
         user_email: Optional[str] = None
-    ) -> websockets.WebSocketServerProtocol:
+    ) -> ClientConnection:
         """
         Create an isolated WebSocket connection for a specific user.
         
@@ -150,7 +151,7 @@ class TestWebSocketMultiUserIsolation(BaseIntegrationTest):
     async def monitor_user_events(
         self,
         user_id: str,
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         duration: float = 15.0,
         expected_user_context: Optional[str] = None
     ) -> List[Dict[str, Any]]:
@@ -573,7 +574,7 @@ class TestWebSocketMultiUserIsolation(BaseIntegrationTest):
             # Each user sends multiple private messages concurrently
             sent_messages_by_user = {}
             
-            async def user_message_sender(user_id: str, websocket: websockets.WebSocketServerProtocol):
+            async def user_message_sender(user_id: str, websocket: ClientConnection):
                 """Send messages for a specific user."""
                 user_messages = []
                 for i in range(5):

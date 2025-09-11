@@ -33,6 +33,7 @@ import json
 import time
 import uuid
 import websockets
+from websockets.asyncio.client import ClientConnection
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
@@ -188,7 +189,7 @@ class WebSocketGoldenPathHelper:
         self.event_validator: Optional[AgentEventValidator] = None
         
         # Connection state
-        self.websocket: Optional[websockets.WebSocketServerProtocol] = None
+        self.websocket: Optional[ClientConnection] = None
         self.is_connected = False
         self.connection_start_time: Optional[float] = None
         

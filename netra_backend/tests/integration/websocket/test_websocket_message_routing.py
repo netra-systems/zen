@@ -35,6 +35,7 @@ from collections import defaultdict
 
 import pytest
 import websockets
+from websockets.asyncio.client import ClientConnection
 from websockets.exceptions import ConnectionClosed
 
 # SSOT imports following CLAUDE.md absolute import requirements  
@@ -77,7 +78,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         )
         
         self.auth_helper = E2EWebSocketAuthHelper(config=auth_config, environment="test")
-        self.websocket_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
+        self.websocket_connections: Dict[str, ClientConnection] = {}
         self.user_received_messages: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         
         # Test connectivity to real services
@@ -95,7 +96,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         self.websocket_connections.clear()
         await super().async_teardown()
     
-    async def create_authenticated_user_connection(self, user_id: str) -> websockets.WebSocketServerProtocol:
+    async def create_authenticated_user_connection(self, user_id: str) -> ClientConnection:
         """
         Create authenticated WebSocket connection for a specific user.
         
@@ -127,7 +128,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
     async def collect_user_messages(
         self, 
         user_id: str, 
-        websocket: websockets.WebSocketServerProtocol,
+        websocket: ClientConnection,
         duration: float = 10.0
     ) -> List[Dict[str, Any]]:
         """
