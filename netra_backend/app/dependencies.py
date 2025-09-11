@@ -945,7 +945,7 @@ async def get_request_scoped_supervisor(
                     user_id=context.user_id,
                     thread_id=context.thread_id,
                     run_id=context.run_id,
-                    session_id=context.websocket_connection_id
+                    websocket_client_id=context.websocket_connection_id
                 )
                 
                 # Create request-scoped tool dispatcher with user context
