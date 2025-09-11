@@ -24,11 +24,18 @@ logger = central_logger.get_logger(__name__)
 
 
 class WebSocketManagerMode(Enum):
-    """Operational modes for WebSocket manager."""
-    UNIFIED = "unified"        # Default full-featured mode
-    ISOLATED = "isolated"      # User-isolated mode with private state
-    EMERGENCY = "emergency"    # Emergency fallback with minimal features
-    DEGRADED = "degraded"      # Degraded service mode for last resort
+    """DEPRECATED: WebSocket manager modes - CONSOLIDATING TO UNIFIED SSOT.
+    
+    ALL MODES NOW REDIRECT TO UNIFIED MODE FOR SSOT COMPLIANCE.
+    User isolation is handled through UserExecutionContext, not manager modes.
+    
+    MIGRATION NOTICE: This enum will be removed in v2.0. 
+    Use WebSocketManager directly without specifying mode.
+    """
+    UNIFIED = "unified"        # SSOT: Single unified mode with UserExecutionContext isolation
+    ISOLATED = "unified"       # DEPRECATED: Redirects to UNIFIED (isolation via UserExecutionContext)
+    EMERGENCY = "unified"      # DEPRECATED: Redirects to UNIFIED (graceful degradation built-in)
+    DEGRADED = "unified"       # DEPRECATED: Redirects to UNIFIED (auto-recovery built-in)
 
 
 def _get_enum_key_representation(enum_key: Enum) -> str:
@@ -288,14 +295,18 @@ class UnifiedWebSocketManager:
     """
     
     def __init__(self, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None):
-        """Initialize UnifiedWebSocketManager with operational mode support.
+        """Initialize UnifiedWebSocketManager - ALL MODES CONSOLIDATED TO UNIFIED.
+        
+        SSOT MIGRATION NOTICE: All WebSocket modes now use unified initialization.
+        User isolation is achieved through UserExecutionContext, not separate modes.
         
         Args:
-            mode: Operational mode for the manager (unified, isolated, emergency, degraded)
-            user_context: User execution context for isolated mode
-            config: Configuration dictionary for emergency/degraded modes
+            mode: DEPRECATED - All modes redirect to UNIFIED (kept for backward compatibility)
+            user_context: User execution context for proper user isolation
+            config: Configuration dictionary (optional)
         """
-        self.mode = mode
+        # DEPRECATED: Mode is ignored - all instances use unified behavior
+        self.mode = WebSocketManagerMode.UNIFIED  # Force unified mode
         self.user_context = user_context
         self.config = config or {}
         
@@ -321,17 +332,8 @@ class UnifiedWebSocketManager:
             'auth_token_reuse_detected': 0
         }
         
-        # Mode-specific initialization
-        if mode == WebSocketManagerMode.ISOLATED:
-            if user_context is None:
-                raise ValueError("user_context is required for ISOLATED mode")
-            self._initialize_isolated_mode(user_context)
-        elif mode == WebSocketManagerMode.EMERGENCY:
-            self._initialize_emergency_mode(config or {})
-        elif mode == WebSocketManagerMode.DEGRADED:
-            self._initialize_degraded_mode(config or {})
-        else:  # UNIFIED mode
-            self._initialize_unified_mode()
+        # SSOT CONSOLIDATION: Always use unified initialization
+        self._initialize_unified_mode()
         
         # Add compatibility registry for legacy tests
         self.registry = RegistryCompat(self)
@@ -342,7 +344,7 @@ class UnifiedWebSocketManager:
         self.active_connections = {}  # Compatibility mapping
         self.connection_registry = {}  # Registry for connection objects
         
-        logger.info(f"UnifiedWebSocketManager initialized in {mode.value} mode")
+        logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
     
     def _initialize_unified_mode(self):
         """Initialize unified mode with full feature set."""
@@ -848,15 +850,8 @@ class UnifiedWebSocketManager:
     
     async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
         """Send a message to all connections for a user with thread safety and type validation."""
-        # Handle mode-specific behavior
-        if self.mode == WebSocketManagerMode.EMERGENCY:
-            return await self._send_emergency_message(user_id, message)
-        elif self.mode == WebSocketManagerMode.DEGRADED:
-            return await self._send_degraded_message(user_id, message)
-        elif self.mode == WebSocketManagerMode.ISOLATED:
-            return await self._send_isolated_message(user_id, message)
-        
-        # Unified mode (default) handling
+        # SSOT CONSOLIDATION: All modes use unified message handling
+        # (Mode-specific behavior has been consolidated for SSOT compliance)
         # Validate user_id
         validated_user_id = ensure_user_id(user_id)
         
