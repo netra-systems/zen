@@ -17,5 +17,14 @@ class ConnectionOperationBuilder:
     
     def build_state(self):
         """Build a basic state object for testing."""
-        from netra_backend.app.agents.state import DeepAgentState
-        return DeepAgentState(user_request=self.user_request)
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        import uuid
+        return UserExecutionContext(
+            user_id="test_user",
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4()),
+            agent_context={
+                'user_request': self.user_request,
+                'test_compatibility_mode': True
+            }
+        )
