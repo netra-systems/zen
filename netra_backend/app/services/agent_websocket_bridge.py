@@ -2824,8 +2824,12 @@ class WebSocketNotifier:
                 raise ValueError("User isolation violation detected")
         else:
             self._user_id = getattr(self.exec_context, 'user_id', None)
-        self.emitter = emitter
-        self.exec_context = exec_context
+        
+        # Validate emitter and exec_context are properly set (already done in __init__)
+        if not self.emitter:
+            raise ValueError("WebSocketNotifier emitter not properly initialized")
+        if not self.exec_context:
+            raise ValueError("WebSocketNotifier exec_context not properly initialized")
         
     async def send_agent_thinking(self, exec_context, message: str):
         """Send agent thinking event via WebSocket emitter."""
