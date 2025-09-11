@@ -10,7 +10,7 @@ Your goals are to:
 Context:
 1. You must keep going until all work is fully completed.
 2. Have sub agents use built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
-3. Focus areas (output this to console) of SSOT: ${1 : latest}
+3. E2E-TEST-FOCUS: ${1 : all}
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
 Use label: "claude-code-generated-issue"
@@ -32,20 +32,27 @@ WAIT for service revision success.
 
 1) 
 1.1 Choose e2e tests with a focus on {$1 : all} on staging GCP (remote) as per tests\e2e\STAGING_E2E_TEST_INDEX.md
-1.2 Read recent git issues and logs in e2e/test_results/ for tests with ongoing issues or recently passed tests to do last.
-Save the choice of tests a fresh E2E-DEPLOY-REMEDIATE-WORKLOG in e2e/test_results/ folder (or create it)
 
-1.1) GITHUB ISSUE INTEGRATION
-Update existing issue or create new GITHUB ISSUE 
-using tools shown in GITHUB_INTEGRATION_IMPLEMENTATION_REPORT.md or if missing tool local `gh` command.
-Tag issue with label: "claude-code-generated-issue"
-Output to console the issue path
+1.2 Read recent git issues 
+1.3 Read recent relevant logs in e2e/test_results/ 
+(for tests with ongoing issues or recently passed tests to do last.)
+1.4 Save the choice of tests a fresh E2E-DEPLOY-REMEDIATE-WORKLOG in e2e/test_results/ folder (or create it)
 
-2) Spawn a new sub agent to run real e2e staging tests with fail fast.
-Validate the test actually ran and is real e.g. real time running, real output that makes sense. If needed fix the test itself.
-Update the LOG with literal test output.
-This is aving the ACTUAL TEST OUTPUT prove it passes or fails in reports at each step. 
-Report failures back up to you
+2) SNST: E2E-TEST-FOCUS
+
+2.1 Run the tests as defined in E2E-TEST-FOCUS on staging GCP remote.
+Be sure to use the unified test runner.
+
+2.2 Validate the test actually ran and is real e.g. real time running, real output that makes sense. 
+2.3 If needed make small fixes to the test itself. (e.g. little import issues or test collection issues just fix it directly)
+If changes made then go back to 2.1
+
+2.4 do E2E-DEPLOY-REMEDIATE-WORKLOG-UPDATE
+Saving the actual test output to prove it passes or fails in reports at each step. 
+
+IF there is the need: Create a new git issue or update existing
+The issue format is E2E-DEPLOY-{human skimable name of failure reason}-{test short reference name}
+or update existing
 
 3) For each failure, spawn a multi-agent team to do a five whys bug fix per claude.md (Read the GCP staging logs for errors too). MUST BE SSOT. MUST solve the REAL ROOT ROOT ROOT ISSUE.
 Update LOG with status.
