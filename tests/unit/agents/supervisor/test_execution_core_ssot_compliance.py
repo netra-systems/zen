@@ -139,8 +139,7 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             success=True,
             data={"result": "test success"},
             agent_name="test_agent",
-            run_id="test-run-123",
-            execution_time_ms=1000
+            duration=1.0
         ))
         
         mock_registry.get_agent.return_value = mock_agent
@@ -221,8 +220,7 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             success=False,
             error="Test agent failure",
             agent_name="test_agent",
-            run_id="test-run-123",
-            execution_time_ms=500
+            duration=0.5
         ))
         
         mock_registry.get_agent.return_value = mock_agent
