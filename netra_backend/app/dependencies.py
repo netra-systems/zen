@@ -155,6 +155,16 @@ class RequestScopedContext:
     websocket_client_id: Optional[str] = None
     request_id: Optional[str] = None
     
+    @property
+    def websocket_connection_id(self) -> Optional[str]:
+        """Compatibility property for websocket_connection_id access.
+        
+        CRITICAL FIX for Issue #357: HTTP API agent execution requires this property
+        but RequestScopedContext only has websocket_client_id. This property alias
+        enables HTTP API fallback when WebSocket connections are unavailable.
+        """
+        return self.websocket_client_id
+    
     def __post_init__(self):
         # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID generation
         from shared.id_generation import UnifiedIdGenerator
