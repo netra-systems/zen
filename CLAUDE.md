@@ -5,7 +5,7 @@
 **STABILITY FIRST:** Prove changes maintain system stability and don't introduce breaking changes.
 
 **NON-NEGOTIABLE RULES:**
-- SSOT (Single Source of Truth) compliance is mandatory (within each service (5.1)). @SSOT_INDEX.md
+- SSOT (Single Source of Truth) compliance is mandatory (within each service (5.1)). @SSOT_IMPORT_REGISTRY.md
 - This document overrides all other instructions
 - No "standalone" or "simple" files
 - No bypassing established patterns
@@ -262,7 +262,7 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 - `/deploy-gcp [env]` - Deploy to GCP with compliance checks
 - `/ultimate-test-deploy-loop` - MISSION CRITICAL: Run until all 1000+ tests pass
 
-**Command Reference:** See `docs/COMMAND_INDEX.md` for all 25 available commands
+**Command Reference:** See `docs/COMMAND_INDEX.md` for all 36 available commands
 
 ### 7.1. Docker
 **Central Management:** All operations through UnifiedDockerManager
