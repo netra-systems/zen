@@ -224,10 +224,10 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         factory = get_agent_instance_factory()
         
         # Create agents in expected execution order
-        triage_agent = await factory.create_agent("triage", user_context)
-        data_agent = await factory.create_agent("data_helper", user_context) 
-        optimizer_agent = await factory.create_agent("apex_optimizer", user_context)
-        report_agent = await factory.create_agent("reporting", user_context)
+        triage_agent = await factory.create_agent_instance("triage", user_context)
+        data_agent = await factory.create_agent_instance("data_helper", user_context) 
+        optimizer_agent = await factory.create_agent_instance("apex_optimizer", user_context)
+        report_agent = await factory.create_agent_instance("reporting", user_context)
         
         # Mock tool execution for agents
         mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
@@ -296,7 +296,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with real tool dispatcher
         factory = get_agent_instance_factory()
-        agent = await factory.create_agent("data_helper", user_context)
+        agent = await factory.create_agent_instance("data_helper", user_context)
         
         # Mock tool dispatcher with realistic tool execution
         mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
@@ -411,7 +411,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Create supervisor with WebSocket tracking
-        supervisor = SupervisorAgent()
+        supervisor = SupervisorAgent(llm_manager=self.mock_llm_manager)
         event_tracker = []
         
         # Mock WebSocket bridge to capture all events
@@ -481,7 +481,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with failure scenarios
         factory = get_agent_instance_factory()
-        agent = await factory.create_agent("data_helper", user_context)
+        agent = await factory.create_agent_instance("data_helper", user_context)
         
         # Mock tool dispatcher that fails initially then succeeds
         failure_count = 0
@@ -534,7 +534,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with performance tracking
         factory = get_agent_instance_factory()
-        agent = await factory.create_agent("apex_optimizer", user_context)
+        agent = await factory.create_agent_instance("apex_optimizer", user_context)
         
         # Mock slow tool execution
         async def slow_tool_execution(*args, **kwargs):
@@ -587,9 +587,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Create multiple coordinated agents
         factory = get_agent_instance_factory()
         
-        data_agent = await factory.create_agent("data_helper", user_context)
-        optimizer_agent = await factory.create_agent("apex_optimizer", user_context)
-        report_agent = await factory.create_agent("reporting", user_context)
+        data_agent = await factory.create_agent_instance("data_helper", user_context)
+        optimizer_agent = await factory.create_agent_instance("apex_optimizer", user_context)
+        report_agent = await factory.create_agent_instance("reporting", user_context)
         
         # Setup inter-agent communication
         shared_context = {}
@@ -735,7 +735,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create agent with monitoring
         factory = get_agent_instance_factory()
-        agent = await factory.create_agent("data_helper", user_context)
+        agent = await factory.create_agent_instance("data_helper", user_context)
         
         # Setup monitoring collectors
         execution_logs = []
@@ -822,7 +822,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Create and execute multiple agents
         for i in range(5):
-            agent = await factory.create_agent("triage", user_context)
+            agent = await factory.create_agent_instance("triage", user_context)
             
             # Mock tool dispatcher
             mock_tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
@@ -897,8 +897,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         factory = get_agent_instance_factory()
         
         # Test access control for different agents
-        free_agent = await factory.create_agent("triage", free_user_context)
-        enterprise_agent = await factory.create_agent("apex_optimizer", enterprise_user_context)
+        free_agent = await factory.create_agent_instance("triage", free_user_context)
+        enterprise_agent = await factory.create_agent_instance("apex_optimizer", enterprise_user_context)
         
         # Mock permission checker
         def check_agent_permissions(agent_type: str, user_context: UserExecutionContext) -> bool:
@@ -968,7 +968,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             start_time = time.time()
             
             # Mock agent execution
-            agent = await get_agent_instance_factory().create_agent("data_helper", context)
+            agent = await get_agent_instance_factory().create_agent_instance("data_helper", context)
             agent.tool_dispatcher = AsyncMock(spec=EnhancedToolExecutionEngine)
             agent.tool_dispatcher.execute_tool.return_value = {"status": "success"}
             
@@ -1037,7 +1037,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             return service_availability.get(service_name, False)
         
         # Create agent with dependency checking
-        agent = await factory.create_agent("data_helper", user_context)
+        agent = await factory.create_agent_instance("data_helper", user_context)
         agent.check_service_availability = check_service_availability
         
         # Mock fallback behavior when LLM is unavailable
@@ -1092,7 +1092,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         execution_tracker = get_execution_tracker()
         
         factory = get_agent_instance_factory()
-        agent = await factory.create_agent("apex_optimizer", user_context)
+        agent = await factory.create_agent_instance("apex_optimizer", user_context)
         
         # Mock tool dispatcher with metrics
         async def metrics_tool_execution(*args, **kwargs):
@@ -1267,10 +1267,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         results = {}
         
         for profile_name, config in configurations.items():
-            agent = await factory.create_agent(
+            agent = await factory.create_agent_instance(
                 "data_helper", 
-                user_context,
-                configuration=config
+                user_context
             )
             
             # Mock tool dispatcher respecting configuration
@@ -1354,7 +1353,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         external_services["metrics_collector"].record_metrics.return_value = {"recorded": True}
         
         factory = get_agent_instance_factory()
-        agent = await factory.create_agent("apex_optimizer", user_context)
+        agent = await factory.create_agent_instance("apex_optimizer", user_context)
         
         # Mock tool dispatcher that calls external services
         async def external_service_tool_execution(tool_name: str, *args, **kwargs):
