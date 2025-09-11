@@ -121,6 +121,7 @@ Every task needs:
 - **Stability by Default:** Atomic changes, flag breaking changes
 
 **TEST DISCOVERY:** `python tests/unified_test_runner.py`
+Use the test gardner command if test collection issues.
 **COMPLIANCE:** Save checklist after every session.
 
 ### 2.2. Complexity Management
@@ -271,6 +272,7 @@ Propose trade-offs with BVJ justification, risk assessment, and debt mitigation 
 ```bash
 python tests/unified_test_runner.py --real-services
 ```
+**TEST ON GCP STAGING** OR RUN NON DOCKER TESTS BY DEFAULT (Not using docker for tests)
 
 **Alpine Options:**
 - Default: Alpine containers with rebuild
@@ -311,10 +313,12 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local
 
 ## 9. SYSTEM STATUS TRACKING
 
+SEE GIT ISSUES, GIT PRs.
+
 **Pre-Work Check:**
 - @reports/MASTER_WIP_STATUS.md - System health and compliance
 - @reports/DEFINITION_OF_DONE_CHECKLIST.md - Module checklists
-- Regenerate status after work completion
+- @SSOT_IMPORT_REGISTRY.md - Authoritative import reference (Completed)
 
 ## 10. EXECUTION CHECKLIST
 

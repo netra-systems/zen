@@ -1258,5 +1258,23 @@ async def setup_application_lifecycle(
 # BACKWARD COMPATIBILITY ALIASES  
 # ============================================================================
 
-# PHASE 3: Maintain factory backward compatibility during migration
+import warnings
+
+def _emit_deprecation_warning(old_name: str, new_name: str) -> None:
+    """Emit deprecation warning for old naming conventions."""
+    warnings.warn(
+        f"{old_name} is deprecated and will be removed in a future version. "
+        f"Please use {new_name} instead for business-focused naming compliance.",
+        DeprecationWarning,
+        stacklevel=4
+    )
+
+class _DeprecatedUnifiedLifecycleManager:
+    """Deprecated wrapper for UnifiedLifecycleManager → SystemLifecycle migration."""
+    def __new__(cls, *args, **kwargs):
+        _emit_deprecation_warning("UnifiedLifecycleManager", "SystemLifecycle")
+        return SystemLifecycle(*args, **kwargs)
+
+# PHASE 3: Maintain backward compatibility during migration
+UnifiedLifecycleManager = _DeprecatedUnifiedLifecycleManager
 LifecycleManagerFactory = SystemLifecycleFactory

@@ -246,6 +246,12 @@ class SSotMockFactory:
         
         # Agent event support (Golden Path requirement)
         mock_manager.send_agent_event = AsyncMock()
+        mock_manager.emit_critical_event = AsyncMock()
+        
+        # Connection health for emitter testing
+        mock_manager.is_connection_active = MagicMock(return_value=True)
+        mock_manager.get_connection_health = MagicMock(return_value={'has_active_connections': True})
+        mock_manager.get_connection = MagicMock(return_value=None)
         
         # User isolation support
         if user_isolation:
@@ -257,6 +263,36 @@ class SSotMockFactory:
         mock_manager._connection_registry = MagicMock()
         
         return mock_manager
+
+    @staticmethod
+    def create_mock_user_context(
+        user_id: str = "test_user",
+        thread_id: str = "test_thread",
+        run_id: str = "test_run",
+        request_id: str = "test_request"
+    ) -> MagicMock:
+        """
+        Create a standardized user execution context mock for testing.
+        
+        Args:
+            user_id: Mock user identifier
+            thread_id: Mock thread identifier
+            run_id: Mock run identifier
+            request_id: Mock request identifier
+            
+        Returns:
+            MagicMock configured for user context testing
+        """
+        mock_context = MagicMock()
+        mock_context.user_id = user_id
+        mock_context.thread_id = thread_id
+        mock_context.run_id = run_id
+        mock_context.request_id = request_id
+        mock_context.user_tier = "free"
+        mock_context.created_at = datetime.now(UTC)
+        mock_context.get_state = MagicMock(return_value={})
+        mock_context.set_state = MagicMock()
+        return mock_context
 
     @classmethod
     def create_mock_suite(cls, mock_types: List[str]) -> Dict[str, Any]:
