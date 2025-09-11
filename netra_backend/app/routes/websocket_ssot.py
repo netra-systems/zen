@@ -1321,7 +1321,10 @@ class WebSocketSSOTRouter:
                     "details": {"error_type": str(type(error).__name__), "mode": mode.value},
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
-                error_message = create_server_message("error", error_data)
+                error_message = create_server_message({
+                    "type": "error",
+                    **error_data
+                })
                 await safe_websocket_send(websocket, error_message)
                 await safe_websocket_close(websocket, 1011, f"{mode.value} mode error")
         except Exception as cleanup_error:
