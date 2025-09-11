@@ -204,7 +204,7 @@ class AgentExecutionCore:
                 await self.execution_tracker.start_execution(exec_id)
                 
                 # CRITICAL REMEDIATION: Transition to websocket setup phase
-                await self.agent_tracker.transition_phase(
+                await self.agent_tracker.transition_state(
                     state_exec_id, 
                     AgentExecutionPhase.WEBSOCKET_SETUP,
                     websocket_manager=self.websocket_bridge
@@ -214,7 +214,7 @@ class AgentExecutionCore:
                 trace_context.add_event("agent.started")
                 
                 # CRITICAL REMEDIATION: Transition to starting phase with WebSocket events
-                await self.agent_tracker.transition_phase(
+                await self.agent_tracker.transition_state(
                     state_exec_id, 
                     AgentExecutionPhase.STARTING,
                     metadata={"trace_context": trace_context.correlation_id},
@@ -239,7 +239,7 @@ class AgentExecutionCore:
                     )
                     
                     # CRITICAL REMEDIATION: Transition to failed phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.FAILED,
                         metadata={"error": "Agent not found"},
@@ -281,7 +281,7 @@ class AgentExecutionCore:
                     logger.error(f"🚫 Circuit breaker open for {context.agent_name}: {e}")
                     
                     # Transition to circuit breaker open phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.CIRCUIT_BREAKER_OPEN,
                         metadata={'error': str(e), 'error_type': 'circuit_breaker'},
@@ -307,7 +307,7 @@ class AgentExecutionCore:
                     logger.error(f"⏰ Agent {context.agent_name} timed out: {e}")
                     
                     # Transition to timeout phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.TIMEOUT,
                         metadata={'error': str(e), 'error_type': 'timeout'},
@@ -331,13 +331,13 @@ class AgentExecutionCore:
                     await self.execution_tracker.complete_execution(exec_id, result=result)
                     
                     # Transition to completion phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.COMPLETING,
                         metadata={"success": True},
                         websocket_manager=self.websocket_bridge
                     )
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.COMPLETED,
                         metadata={"result": "success"},
@@ -356,7 +356,7 @@ class AgentExecutionCore:
                     )
                     
                     # Transition to failed phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.FAILED,
                         metadata={'error': result.error or 'Unknown error'},
