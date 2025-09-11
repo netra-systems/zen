@@ -80,7 +80,7 @@ class TestSSotLoggingBootstrap(SSotBaseTestCase):
                 circular_dependencies.append(cycle)
             return original_import(name, *args, **kwargs)
         
-        original_import = __builtins__.__import__
+        original_import = __import__
         
         try:
             with patch('builtins.__import__', side_effect=track_imports):
@@ -262,7 +262,7 @@ class TestSSotLoggingBootstrap(SSotBaseTestCase):
                         reference_chain.append(recent)
             return original_import(name, *args, **kwargs)
         
-        original_import = __builtins__.__import__
+        original_import = __import__
         
         try:
             with patch('builtins.__import__', side_effect=track_configuration_access):
@@ -349,7 +349,7 @@ class TestLoggingBootstrapDependencyGraph(SSotBaseTestCase):
                 import_depth[name] -= 1
                 raise e
         
-        original_import = __builtins__.__import__
+        original_import = __import__
         
         try:
             with patch('builtins.__import__', side_effect=map_dependencies):
