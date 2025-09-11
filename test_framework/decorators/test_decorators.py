@@ -234,7 +234,7 @@ def race_condition_test(func: Callable) -> Callable:
     return marked_func
 
 
-def experimental_test(func: Callable) -> Callable:
+def experimental_test(description: str = None):
     """Decorator to mark tests as experimental.
     
     This decorator applies the 'experimental' pytest marker and logs
@@ -242,26 +242,38 @@ def experimental_test(func: Callable) -> Callable:
     Experimental tests may be unstable or under development.
     
     Args:
-        func: Test function to decorate
+        description: Optional description of the experimental test
         
     Returns:
-        Decorated test function with experimental marker
+        Decorator function or decorated test function
     """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        # Apply pytest marker
+        marker_args = {"description": description} if description else {}
+        marked_func = pytest.mark.experimental(**marker_args)(wrapper)
+        
+        # Add metadata for test discovery
+        marked_func._experimental_test = True
+        marked_func._experimental_description = description
+        marked_func._test_type = 'experimental'
+        
+        desc_str = f" ({description})" if description else ""
+        logger.debug(f"Test {func.__name__} marked as experimental test{desc_str}")
+        
+        return marked_func
     
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        return func(*args, **kwargs)
+    # If called without parentheses (as @experimental_test)
+    if callable(description):
+        func = description
+        description = None
+        return decorator(func)
     
-    # Apply pytest marker
-    marked_func = pytest.mark.experimental(wrapper)
-    
-    # Add metadata for test discovery
-    marked_func._experimental_test = True
-    marked_func._test_type = 'experimental'
-    
-    logger.debug(f"Test {func.__name__} marked as experimental test")
-    
-    return marked_func
+    # If called with parentheses (as @experimental_test("description"))
+    return decorator
 
 
 def feature_flag(flag_name: str, enabled: bool = True):

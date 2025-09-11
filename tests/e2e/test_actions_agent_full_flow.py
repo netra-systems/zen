@@ -248,85 +248,95 @@ class RealWebSocketClient:
             logger.info("🔌 WebSocket disconnected")
 
 
-# REMOVED_SYNTAX_ERROR: class RealServiceIntegrator:
-    # REMOVED_SYNTAX_ERROR: """Integrates with real backend services for E2E testing."""
+class RealServiceIntegrator:
+    """Integrates with real backend services for E2E testing."""
 
-# REMOVED_SYNTAX_ERROR: def __init__(self, env: IsolatedEnvironment):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.env = env
-    # REMOVED_SYNTAX_ERROR: self.base_url = env.get('BACKEND_URL', 'http://localhost:8000')
-    # REMOVED_SYNTAX_ERROR: self.session = None
+    def __init__(self, env: IsolatedEnvironment):
+        self.env = env
+        self.base_url = env.get('BACKEND_URL', 'http://localhost:8000')
+        self.session = None
 
-# REMOVED_SYNTAX_ERROR: async def initialize_session(self) -> aiohttp.ClientSession:
-    # REMOVED_SYNTAX_ERROR: """Initialize HTTP session for API calls."""
-    # REMOVED_SYNTAX_ERROR: connector = aiohttp.TCPConnector(limit=10, limit_per_host=5)
-    # REMOVED_SYNTAX_ERROR: self.session = aiohttp.ClientSession( )
-    # REMOVED_SYNTAX_ERROR: connector=connector,
-    # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=60.0)
-    
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return self.session
+    async def initialize_session(self) -> aiohttp.ClientSession:
+        """Initialize HTTP session for API calls."""
+        connector = aiohttp.TCPConnector(limit=10, limit_per_host=5)
+        self.session = aiohttp.ClientSession(
+            connector=connector,
+            timeout=aiohttp.ClientTimeout(total=60.0)
+        )
+        logger.info(f"🌐 HTTP session initialized for {self.base_url}")
+        return self.session
 
-# REMOVED_SYNTAX_ERROR: async def create_thread(self, user_id: str) -> str:
-    # REMOVED_SYNTAX_ERROR: """Create new thread through real API."""
-    # REMOVED_SYNTAX_ERROR: if not self.session:
-        # REMOVED_SYNTAX_ERROR: await self.initialize_session()
+    async def create_thread(self, user_id: str) -> str:
+        """Create new thread through real API."""
+        if not self.session:
+            await self.initialize_session()
 
-        # REMOVED_SYNTAX_ERROR: try:
-            # REMOVED_SYNTAX_ERROR: async with self.session.post( )
-            # REMOVED_SYNTAX_ERROR: "formatted_string",
-            # REMOVED_SYNTAX_ERROR: json={'user_id': user_id}
-            # REMOVED_SYNTAX_ERROR: ) as response:
-                # REMOVED_SYNTAX_ERROR: if response.status == 200:
-                    # REMOVED_SYNTAX_ERROR: data = await response.json()
-                    # REMOVED_SYNTAX_ERROR: return data['thread_id']
-                    # REMOVED_SYNTAX_ERROR: else:
-                        # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                        # REMOVED_SYNTAX_ERROR: return None
-                        # REMOVED_SYNTAX_ERROR: except Exception as e:
-                            # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: return None
+        try:
+            async with self.session.post(
+                f"{self.base_url}/api/threads/create",
+                json={'user_id': user_id}
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    thread_id = data.get('thread_id')
+                    logger.info(f"📄 Created thread {thread_id} for user {user_id}")
+                    return thread_id
+                else:
+                    logger.error(f"Thread creation failed: {response.status}")
+                    return None
+        except Exception as e:
+            logger.error(f"Thread creation error: {e}")
+            return None
 
-# REMOVED_SYNTAX_ERROR: async def send_chat_message(self, thread_id: str, user_id: str, message: str) -> bool:
-    # REMOVED_SYNTAX_ERROR: """Send chat message through real API."""
-    # REMOVED_SYNTAX_ERROR: if not self.session:
-        # REMOVED_SYNTAX_ERROR: await self.initialize_session()
+    async def send_chat_message(self, thread_id: str, user_id: str, message: str) -> bool:
+        """Send chat message through real API."""
+        if not self.session:
+            await self.initialize_session()
 
-        # REMOVED_SYNTAX_ERROR: try:
-            # REMOVED_SYNTAX_ERROR: async with self.session.post( )
-            # REMOVED_SYNTAX_ERROR: "formatted_string",
-            # REMOVED_SYNTAX_ERROR: json={ )
-            # REMOVED_SYNTAX_ERROR: 'thread_id': thread_id,
-            # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
-            # REMOVED_SYNTAX_ERROR: 'message': message
-            
-            # REMOVED_SYNTAX_ERROR: ) as response:
-                # REMOVED_SYNTAX_ERROR: return response.status == 200
-                # REMOVED_SYNTAX_ERROR: except Exception as e:
-                    # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                    # REMOVED_SYNTAX_ERROR: return False
+        try:
+            async with self.session.post(
+                f"{self.base_url}/api/chat/send",
+                json={
+                    'thread_id': thread_id,
+                    'user_id': user_id,
+                    'message': message
+                }
+            ) as response:
+                success = response.status == 200
+                if success:
+                    logger.info(f"📨 Message sent to thread {thread_id}")
+                else:
+                    logger.error(f"Message sending failed: {response.status}")
+                return success
+        except Exception as e:
+            logger.error(f"Message sending error: {e}")
+            return False
 
-# REMOVED_SYNTAX_ERROR: async def get_thread_status(self, thread_id: str) -> Dict:
-    # REMOVED_SYNTAX_ERROR: """Get thread status through real API."""
-    # REMOVED_SYNTAX_ERROR: if not self.session:
-        # REMOVED_SYNTAX_ERROR: await self.initialize_session()
+    async def get_thread_status(self, thread_id: str) -> Dict:
+        """Get thread status through real API."""
+        if not self.session:
+            await self.initialize_session()
 
-        # REMOVED_SYNTAX_ERROR: try:
-            # REMOVED_SYNTAX_ERROR: async with self.session.get( )
-            # REMOVED_SYNTAX_ERROR: "formatted_string"
-            # REMOVED_SYNTAX_ERROR: ) as response:
-                # REMOVED_SYNTAX_ERROR: if response.status == 200:
-                    # REMOVED_SYNTAX_ERROR: return await response.json()
-                    # REMOVED_SYNTAX_ERROR: else:
-                        # REMOVED_SYNTAX_ERROR: return {'status': 'unknown', 'error': 'formatted_string'}
-                        # REMOVED_SYNTAX_ERROR: except Exception as e:
-                            # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                            # REMOVED_SYNTAX_ERROR: return {'status': 'error', 'error': str(e)}
+        try:
+            async with self.session.get(
+                f"{self.base_url}/api/threads/{thread_id}/status"
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    logger.info(f"📋 Thread {thread_id} status: {data.get('status')}")
+                    return data
+                else:
+                    logger.error(f"Thread status check failed: {response.status}")
+                    return {'status': 'unknown', 'error': f'HTTP {response.status}'}
+        except Exception as e:
+            logger.error(f"Thread status error: {e}")
+            return {'status': 'error', 'error': str(e)}
 
-# REMOVED_SYNTAX_ERROR: async def cleanup(self):
-    # REMOVED_SYNTAX_ERROR: """Clean up HTTP session."""
-    # REMOVED_SYNTAX_ERROR: if self.session:
-        # REMOVED_SYNTAX_ERROR: await self.session.close()
+    async def cleanup(self):
+        """Clean up HTTP session."""
+        if self.session:
+            await self.session.close()
+            logger.info("🧹 HTTP session cleaned up")
 
 
         # ============================================================================

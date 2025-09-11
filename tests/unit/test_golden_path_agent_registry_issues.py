@@ -82,7 +82,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         )
         
         # This should fail with "No agent registry configured" error
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(RuntimeError) as exc_info:
             await factory.create_agent_instance("supervisor_orchestration", user_context)
         
         error_message = str(exc_info.value)
