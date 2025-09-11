@@ -48,7 +48,7 @@ from netra_backend.app.websocket_core.types import (
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.websocket_core.utils import is_websocket_connected
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.timestamp_utils import safe_convert_timestamp
 
 logger = central_logger.get_logger(__name__)
@@ -538,7 +538,7 @@ class TestAgentHandler(BaseMessageHandler):
                 thread_id=f"broadcast_{broadcast_id}",
                 run_id=f"broadcast_run_{user_id}_{broadcast_id}"
             )
-            ws_manager = await create_websocket_manager(context)
+            ws_manager = WebSocketManager(user_context=context)
             
             # Create broadcast message
             broadcast_data = {

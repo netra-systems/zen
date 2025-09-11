@@ -1053,19 +1053,19 @@ def _create_agent_supervisor(app: FastAPI) -> None:
             logger.error("🚨 CRITICAL: SupervisorAgent missing WebSocket bridge - agent events will be broken!")
             raise RuntimeError("SupervisorAgent must have WebSocket bridge for agent event notifications")
         
-        # Validate WebSocket manager factory is available for per-request enhancement  
-        # SSOT COMPLIANCE: Using factory pattern - no singleton WebSocket managers during startup
-        from netra_backend.app.websocket_core import get_websocket_manager_factory
+        # Validate WebSocket manager is available as SSOT import
+        # SSOT COMPLIANCE: Direct import from websocket_manager.py as single source of truth
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         try:
-            factory = get_websocket_manager_factory()
-            if not factory:
-                logger.error("🚨 CRITICAL: WebSocket manager factory not available - per-request tool dispatcher enhancement will fail!")
-                raise RuntimeError("WebSocket manager factory must be available for tool dispatcher enhancement")
-            logger.info("✅ SSOT COMPLIANCE: WebSocket factory pattern verified - no singleton manager calls during startup")
-            logger.debug("✅ WebSocket manager factory available for per-request enhancement")
+            # Verify the class is available - no factory needed for validation
+            if not WebSocketManager:
+                logger.error("🚨 CRITICAL: WebSocketManager class not available - per-request tool dispatcher enhancement will fail!")
+                raise RuntimeError("WebSocketManager class must be available for tool dispatcher enhancement")
+            logger.info("✅ SSOT COMPLIANCE: WebSocketManager direct import verified - factory pattern eliminated")
+            logger.debug("✅ WebSocketManager class available for per-request creation")
         except Exception as e:
-            logger.error(f"🚨 CRITICAL: Failed to get WebSocket manager factory: {e}")
-            raise RuntimeError(f"WebSocket manager factory initialization failed: {e}")
+            logger.error(f"🚨 CRITICAL: Failed to import WebSocketManager: {e}")
+            raise RuntimeError(f"WebSocketManager import failed: {e}")
         
         # Final verification
         if not hasattr(app.state, 'agent_supervisor') or app.state.agent_supervisor is None:
@@ -1160,18 +1160,16 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
     graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     try:
-        from netra_backend.app.websocket_core import (
-            get_websocket_manager_factory,
-            WebSocketManagerFactory,
-        )
-        # Initialize the WebSocket manager factory for per-request use
-        # SSOT COMPLIANCE: Factory pattern ensures UserExecutionContext isolation
-        factory = get_websocket_manager_factory()
-        
-        # Factory is initialized on creation - no additional initialization needed
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        # SSOT COMPLIANCE: Direct WebSocketManager import as single source of truth
         # Individual managers are created per-request with UserExecutionContext
-        logger.info("✅ SSOT COMPLIANCE: WebSocket components use factory pattern - no singleton violations")
-        logger.debug("WebSocket factory initialized for per-request manager creation")
+        
+        # Verify the class is available - no factory initialization needed
+        if not WebSocketManager:
+            raise RuntimeError("WebSocketManager class not available")
+        
+        logger.info("✅ SSOT COMPLIANCE: WebSocket components use direct SSOT import - factory pattern eliminated")
+        logger.debug("WebSocketManager class available for per-request creation")
         
         logger.debug("WebSocket components initialized")
     except Exception as e:

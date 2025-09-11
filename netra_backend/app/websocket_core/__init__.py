@@ -37,13 +37,46 @@ from netra_backend.app.websocket_core.unified_emitter import (
     WebSocketEmitterPool,
 )
 
-# CRITICAL SECURITY MIGRATION: Import factory pattern components
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
-    get_websocket_manager_factory,
-    create_websocket_manager
-)
+# SSOT COMPLIANCE: Factory pattern eliminated - use direct WebSocketManager import
+# from netra_backend.app.websocket_core.websocket_manager_factory import (
+#     WebSocketManagerFactory,
+#     IsolatedWebSocketManager,
+#     get_websocket_manager_factory,
+#     create_websocket_manager
+# )
+
+# Backward compatibility function for create_websocket_manager
+def create_websocket_manager(user_context=None):
+    """
+    COMPATIBILITY WRAPPER: Provides create_websocket_manager for backward compatibility.
+    
+    DEPRECATED: Use WebSocketManager(user_context=user_context) directly instead.
+    
+    Args:
+        user_context: Required UserExecutionContext for proper isolation
+    
+    Returns:
+        WebSocketManager instance
+        
+    Raises:
+        ValueError: If user_context is None (import-time initialization not allowed)
+    """
+    import warnings
+    warnings.warn(
+        "create_websocket_manager is deprecated. Use WebSocketManager(user_context=user_context) directly.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    if user_context is None:
+        # CRITICAL: Import-time initialization violates User Context Architecture
+        raise ValueError(
+            "WebSocket manager creation requires valid UserExecutionContext. "
+            "Import-time initialization is prohibited. Use request-scoped factory pattern instead. "
+            "See User Context Architecture documentation for proper implementation."
+        )
+    
+    return WebSocketManager(user_context=user_context)
 
 # Backward compatibility function using factory pattern
 async def get_websocket_manager(user_context=None):
@@ -65,7 +98,7 @@ async def get_websocket_manager(user_context=None):
     Raises:
         ValueError: If user_context is None (import-time initialization not allowed)
     
-    Note: For new code, use create_websocket_manager(user_context) directly.
+    Note: For new code, use WebSocketManager(user_context=user_context) directly.
     """
     if user_context is None:
         # CRITICAL: Import-time initialization violates User Context Architecture
@@ -75,7 +108,7 @@ async def get_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
     
-    return await create_websocket_manager(user_context)
+    return WebSocketManager(user_context=user_context)
 
 from netra_backend.app.websocket_core.migration_adapter import (
     get_legacy_websocket_manager,
@@ -96,7 +129,7 @@ from netra_backend.app.websocket_core.context import (
 
 # Backward compatibility aliases
 # WebSocketManager is now imported directly
-# SECURITY FIX: Removed singleton websocket_manager - use create_websocket_manager() instead
+# SECURITY FIX: Removed singleton websocket_manager - use WebSocketManager() directly instead
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 IsolatedWebSocketEventEmitter = UnifiedWebSocketEmitter
 UserWebSocketEmitter = UnifiedWebSocketEmitter
@@ -251,11 +284,11 @@ __all__ = [
     "WebSocketEmitterFactory",
     "WebSocketEmitterPool",
     
-    # CRITICAL SECURITY MIGRATION: Factory pattern exports
-    "WebSocketManagerFactory",
-    "IsolatedWebSocketManager",
-    "get_websocket_manager_factory",
-    "create_websocket_manager",
+    # SSOT COMPLIANCE: Factory pattern eliminated
+    # "WebSocketManagerFactory",
+    # "IsolatedWebSocketManager", 
+    # "get_websocket_manager_factory",
+    "create_websocket_manager",  # Backward compatibility
     "get_websocket_manager",  # Backward compatibility
     
     # Migration support

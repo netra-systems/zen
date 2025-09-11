@@ -13,7 +13,7 @@ from netra_backend.app.database import get_db
 from netra_backend.app.llm.client_unified import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # CRITICAL: Import for proper session lifecycle management
 from contextlib import asynccontextmanager
@@ -1350,7 +1350,7 @@ async def get_request_scoped_message_handler(
         
         # SSOT COMPLIANCE: Proper per-request WebSocket manager creation with error handling
         try:
-            websocket_manager = await create_websocket_manager(user_context)
+            websocket_manager = WebSocketManager(user_context=user_context)
             if not websocket_manager:
                 logger.warning(f"WebSocket manager creation returned None for user {context.user_id}")
                 websocket_manager = None

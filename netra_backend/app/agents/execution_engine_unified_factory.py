@@ -38,9 +38,19 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
 from netra_backend.app.agents.execution_engine_legacy_adapter import (
     ExecutionEngineFactory as AdapterFactory
 )
+# Import RequestScopedExecutionEngine for return type annotation
+try:
+    from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
+except ImportError:
+    # Fallback if not available - use IExecutionEngine
+    RequestScopedExecutionEngine = IExecutionEngine
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+
+# Simple configuration for engine creation
+EngineConfig = Dict[str, Any]
 
 
 class UnifiedExecutionEngineFactory:
@@ -92,6 +102,28 @@ class UnifiedExecutionEngineFactory:
         logger.info("UnifiedExecutionEngineFactory defaults configured")
     
     @classmethod
+    def configure(
+        cls,
+        config: Optional[EngineConfig] = None,
+        registry: Optional['AgentRegistry'] = None,
+        websocket_bridge: Optional['AgentWebSocketBridge'] = None,
+        tool_dispatcher: Optional['UnifiedToolDispatcher'] = None
+    ) -> None:
+        """Configure the unified factory with default dependencies.
+        
+        This method is required by the startup system to configure the factory
+        with necessary dependencies before creating engines.
+        
+        Args:
+            config: Default engine configuration
+            registry: Default agent registry
+            websocket_bridge: Default WebSocket bridge
+            tool_dispatcher: Default tool dispatcher
+        """
+        cls.set_defaults(config, registry, websocket_bridge, tool_dispatcher)
+        logger.info("UnifiedExecutionEngineFactory configured successfully")
+    
+    @classmethod
     async def create_engine(
         cls,
         config: Optional[Dict] = None,
@@ -119,16 +151,18 @@ class UnifiedExecutionEngineFactory:
             IExecutionEngine: Interface-compliant execution engine
         """
         # Use provided or default configuration
-        effective_config = config or cls._default_config or EngineConfig()
+        effective_config = config or cls._default_config or {}
         effective_registry = registry or cls._default_registry
         effective_websocket_bridge = websocket_bridge or cls._default_websocket_bridge
         effective_tool_dispatcher = tool_dispatcher or cls._default_tool_dispatcher
         
         # Auto-configure based on user context
         if user_context:
-            effective_config.enable_user_features = True
-            effective_config.require_user_context = True
-            effective_config.enable_request_scoping = True
+            effective_config.update({
+                'enable_user_features': True,
+                'require_user_context': True,
+                'enable_request_scoping': True
+            })
         
         logger.info(
             f"Creating UserExecutionEngine (SSOT) with user_context={user_context is not None}"
@@ -168,15 +202,15 @@ class UnifiedExecutionEngineFactory:
             IExecutionEngine: User-configured execution engine
         """
         # Create user-optimized configuration
-        user_config = config or EngineConfig(
-            enable_user_features=True,
-            enable_websocket_events=True,
-            require_user_context=True,
-            enable_request_scoping=True,
-            enable_metrics=True,
-            max_concurrent_agents=5,  # Conservative limit for per-user
-            agent_execution_timeout=30.0
-        )
+        user_config = config or {
+            'enable_user_features': True,
+            'enable_websocket_events': True,
+            'require_user_context': True,
+            'enable_request_scoping': True,
+            'enable_metrics': True,
+            'max_concurrent_agents': 5,  # Conservative limit for per-user
+            'agent_execution_timeout': 30.0
+        }
         
         logger.info(f"Creating user-specific engine for user: {user_context.user_id}")
         

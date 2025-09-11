@@ -26,24 +26,20 @@ This test simulates the complete migration process and validates:
 import unittest
 import asyncio
 import json
-import sys
 import time
 import logging
-from pathlib import Path
 from typing import Dict, Any, Optional, List
 from unittest.mock import Mock, patch
-
-# Add project root to Python path for imports
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 logger = logging.getLogger(__name__)
 
-class ImportPatternMigrationE2ETest(unittest.TestCase):
+class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
     """End-to-end test validating import migration doesn't break functionality."""
     
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.test_user_id = "migration_test_user_123"
         cls.test_session_id = "migration_session_456"
         cls.test_message = "Test message for migration validation"
