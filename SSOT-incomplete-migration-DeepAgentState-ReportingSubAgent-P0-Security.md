@@ -39,10 +39,26 @@
 - **Expected Behavior:** Tests FAIL before migration (proving vulnerability), PASS after migration (proving fix)
 - **Business Protection:** $500K+ ARR Golden Path functionality validated
 
+### Step 3: PLAN REMEDIATION OF SSOT ✅ COMPLETE
+**Migration Strategy Planned:** Comprehensive atomic migration following Phase 1 SSOT patterns
+- **Target:** Replace DeepAgentState with UserExecutionContext in all ReportingSubAgent methods
+- **Security:** Add validation following agent_execution_core.py security enforcement pattern
+- **Files to Modify:** `netra_backend/app/agents/reporting_sub_agent.py` (lines 16, 847, 893, 957, 1035, 1065)
+- **Approach:** 6-step atomic migration maintaining Golden Path functionality
+- **Validation:** All 5 migration tests must PASS after completion
+
+**Migration Steps:**
+1. Update execute_modern() method signature (DeepAgentState → UserExecutionContext)
+2. Add security validation with clear error messages  
+3. Update supporting methods (_create_execution_context, _create_fallback_*)
+4. Remove DeepAgentState import (security risk elimination)
+5. Update method implementation to use UserExecutionContext attributes
+6. Update calling code to pass UserExecutionContext instances
+
 ### Next Steps (PROCESS INSTRUCTIONS)
 - [x] Step 1: DISCOVER AND PLAN TEST ✅
 - [x] Step 2: EXECUTE THE TEST PLAN ✅
-- [ ] Step 3: PLAN REMEDIATION OF SSOT
+- [x] Step 3: PLAN REMEDIATION OF SSOT ✅
 - [ ] Step 4: EXECUTE THE REMEDIATION SSOT PLAN
 - [ ] Step 5: ENTER TEST FIX LOOP
 - [ ] Step 6: PR AND CLOSURE
