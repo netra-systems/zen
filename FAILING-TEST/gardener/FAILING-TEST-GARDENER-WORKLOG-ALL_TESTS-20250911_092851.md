@@ -20,6 +20,19 @@
 
 ## Discovered Issues
 
+### P2 - STAGING VALIDATOR ARCHITECTURAL ISSUES (Medium Priority)
+
+#### P2-1: Golden Path Validator Microservice Compatibility
+- **GitHub Issue:** #431 - [ENHANCEMENT] Golden Path Validator architectural redesign for microservice compatibility
+- **Error Pattern:** Validator assumes monolithic database schema but services are properly separated
+- **Test Evidence:** `tests/e2e/staging/test_golden_path_validation_staging_current.py` - Tests designed to fail to prove architectural flaw
+- **Impact:** Staging deployments blocked by false validator failures despite healthy services
+- **Root Cause:** Validator checks for auth tables in backend database (violates service boundaries)
+- **Related Issues:** Previously addressed in closed issue #144
+- **Documentation:** Comprehensive analysis in `reports/architecture/GOLDEN_PATH_VALIDATOR_ARCHITECTURAL_ANALYSIS_20250909.md`
+- **Priority Justification:** P2 (medium) - Affects deployment pipeline but services remain functional
+- **Status:** Issue created and documented
+
 ### P0 - CRITICAL FAILURES (Collection Blocking)
 
 #### P0-1: Missing Test Framework Module
