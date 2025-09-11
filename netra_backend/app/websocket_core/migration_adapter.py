@@ -481,8 +481,8 @@ WebSocketManagerAdapter = _LegacyWebSocketManagerAdapter
 __all__ = [
     "get_legacy_websocket_manager",
     "migrate_singleton_usage",
-    "WebSocketManagerAdapter"  # Backward compatibility
+    "WebSocketManagerAdapter"
 ]
 
-# DEPRECATED: WebSocketManagerAdapter removed for SSOT compliance
+# DEPRECATED: WebSocketManagerAdapter is now an alias for _LegacyWebSocketManagerAdapter
 # Use WebSocketManagerFactory directly from websocket_manager_factory module
