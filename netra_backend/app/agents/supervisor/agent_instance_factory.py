@@ -786,6 +786,11 @@ class AgentInstanceFactory:
                     if hasattr(agent, 'tool_dispatcher') and tool_dispatcher is not None:
                         agent.tool_dispatcher = tool_dispatcher
                         logger.debug(f"Injected tool_dispatcher into {agent_name}")
+                    
+                    # GOLDEN PATH COMPATIBILITY: Enable test mode when WebSocket bridge is unavailable
+                    if not self._websocket_bridge and hasattr(agent, 'enable_websocket_test_mode'):
+                        agent.enable_websocket_test_mode()
+                        logger.debug(f"Enabled WebSocket test mode for {agent_name} (no bridge available)")
                 else:
                     # FALLBACK: Use legacy constructor patterns (may trigger deprecation warnings)
                     logger.debug(f"⚠️ No factory method found for {agent_class_name}, using legacy constructor")
