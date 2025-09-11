@@ -182,10 +182,17 @@ Deploy and validate entire issue cluster resolution in staging:
 
 11) PR CREATION & CLUSTER CLOSURE : SNST :
 11.1) Git commit any remaining work in logical batches
-11.2) Create comprehensive PR covering entire issue cluster
+11.2) **SAFE PR CREATION**: Create comprehensive PR WITHOUT changing current branch:
+    - Record current branch (should be develop-long-lived): `git branch --show-current`
+    - Create feature branch remotely: `git push origin HEAD:feature/cluster-${PRIMARY_ISSUE_NUMBER}-$(date +%s)`
+    - Create PR from feature branch to current branch: `gh pr create --base develop-long-lived --head feature/cluster-${PRIMARY_ISSUE_NUMBER}-$(date +%s) --title "Fix: Issue Cluster #${PRIMARY_ISSUE_NUMBER} + Related" --body "Comprehensive cluster fix addressing multiple related issues"`
+    - VERIFY current branch unchanged: `git branch --show-current`
+    - **CRITICAL**: Never checkout different branches - work stays on develop-long-lived
+    - **PR MERGES TO**: Current working branch (develop-long-lived) - NEVER main
 11.3) Cross-link ALL issues in cluster for automatic closure
-11.4) Document cluster relationships and solution approach
-11.5) Final update covering entire cluster resolution following @GITHUB_STYLE_GUIDE.md
+11.4) Document cluster relationships and solution approach in PR description
+11.5) **PR TARGET VALIDATION**: Ensure PR merges back to current working branch (develop-long-lived)
+11.6) Final update covering entire cluster resolution following @GITHUB_STYLE_GUIDE.md
 
 END PROCESS INSTRUCTIONS
 
