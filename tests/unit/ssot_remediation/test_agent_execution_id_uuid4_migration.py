@@ -140,8 +140,8 @@ class TestAgentExecutionIdUuid4Migration(SSotBaseTestCase):
         execution_tracker = get_execution_tracker()
         
         # Generate multiple execution IDs to test pattern consistency
-        test_user_id = UserID(self.unified_id_manager.generate_base_id("user"))
-        test_agent_id = AgentID(self.unified_id_manager.generate_base_id("agent"))
+        test_user_id = UserID(self.unified_id_manager.generate_id(IDType.USER))
+        test_agent_id = AgentID(self.unified_id_manager.generate_id(IDType.AGENT))
         
         generated_ids = []
         for i in range(5):
