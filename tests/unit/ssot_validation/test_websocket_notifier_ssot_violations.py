@@ -229,7 +229,7 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
             
             # Test if singleton pattern exists
             notifier1 = WebSocketNotifier.create_for_user(user_id="user1")
-            notifier2 = WebSocketNotifier.create_for_user(user_id="user2", None)  # MANUAL_REVIEW: Validate exec_context
+            notifier2 = WebSocketNotifier.create_for_user(user_id="user2", exec_context=None)  # MANUAL_REVIEW: Validate exec_context
             
             # This test FAILS if singleton pattern exists (shared instance)
             if notifier1 is notifier2:

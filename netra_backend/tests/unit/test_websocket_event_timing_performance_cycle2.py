@@ -125,8 +125,8 @@ class TestWebSocketEventTimingPerformance:
         """
         # Arrange: Create multiple notifiers for different users
         notifier1 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager)
-        notifier2 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager, None)  # MANUAL_REVIEW: Validate exec_context
-        notifier3 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager, None)  # MANUAL_REVIEW: Validate exec_context
+        notifier2 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager, exec_context=None)  # MANUAL_REVIEW: Validate exec_context
+        notifier3 = WebSocketNotifier.create_for_user(websocket_manager=mock_websocket_manager, exec_context=None)  # MANUAL_REVIEW: Validate exec_context
         
         # Create contexts for 3 concurrent users
         contexts = []
