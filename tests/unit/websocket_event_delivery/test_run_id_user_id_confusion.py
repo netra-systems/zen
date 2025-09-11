@@ -198,27 +198,35 @@ class TestRunIdUserIdConfusion(SSotAsyncTestCase):
                         "exception": str(e)
                     })
             
-            # CRITICAL ASSERTION: This SHOULD FAIL - demonstrates silent failures
+            # PHASE 4 FIX VALIDATION: Now we expect proper error handling, not silent failures
             failed_events = [r for r in event_delivery_results if not r["result"]]
+            exception_events = [r for r in event_delivery_results if r["exception"]]
             
-            # Check if execution continued despite failures
+            # Check that critical events now properly raise exceptions instead of failing silently
             if len(failed_events) > 0:
-                # This assertion SHOULD FAIL - showing the silent failure pattern
-                assert len(failed_events) == 0, (
-                    f"ISSUE #373: {len(failed_events)} critical events failed delivery but execution continued silently. "
+                # PHASE 4 SUCCESS: System should now raise exceptions for failed critical events
+                assert len(exception_events) > 0, (
+                    f"ISSUE #373 FIXED: {len(failed_events)} critical events failed but no exceptions were raised. "
                     f"Failed events: {[e['event'] for e in failed_events]}. "
-                    f"Users receive no feedback when WebSocket connections fail."
+                    f"System should raise exceptions to prevent silent failures."
                 )
             
-            # Additional check: Verify no error propagation
-            # The system should fail fast when critical events can't be delivered
+            # Verify proper error propagation - critical events should raise exceptions
+            exceptions_raised = 0
             for result in event_delivery_results:
                 if result["exception"]:
-                    # This assertion SHOULD FAIL - exceptions should stop execution
-                    assert result["exception"] is None, (
-                        f"ISSUE #373: Event '{result['event']}' threw exception '{result['exception']}' "
-                        f"but execution continued. Critical events must be delivered or execution should fail."
+                    exceptions_raised += 1
+                    # Verify the exception indicates critical failure
+                    assert "CRITICAL" in result["exception"], (
+                        f"ISSUE #373 FIX: Event '{result['event']}' exception '{result['exception']}' "
+                        f"should indicate CRITICAL failure to prevent silent operation."
                     )
+            
+            # PHASE 4 SUCCESS CRITERIA: All failed events should raise exceptions
+            assert exceptions_raised == len(failed_events), (
+                f"ISSUE #373 PARTIALLY FIXED: {exceptions_raised} exceptions raised for {len(failed_events)} failed events. "
+                f"All critical event failures should raise exceptions to prevent silent execution."
+            )
 
     async def test_event_delivery_confirmation_missing(self):
         """
@@ -260,21 +268,27 @@ class TestRunIdUserIdConfusion(SSotAsyncTestCase):
             # Check how many delivery attempts were made
             actual_attempts = self.mock_websocket_manager.send_to_user.call_count
             
-            # CRITICAL ASSERTION: This SHOULD FAIL - demonstrates missing retry logic
+            # PHASE 4 FIX VALIDATION: Now we expect retry attempts
             expected_min_attempts = 3  # Should retry failed events
             
+            # With Phase 4 fix, we expect the retry mechanism to work
             assert actual_attempts >= expected_min_attempts, (
-                f"ISSUE #373: Only {actual_attempts} delivery attempts made, expected at least {expected_min_attempts}. "
-                f"No retry mechanism exists for failed event delivery. "
-                f"Critical events are lost when initial delivery fails."
+                f"ISSUE #373 STILL EXISTS: Only {actual_attempts} delivery attempts made, expected at least {expected_min_attempts}. "
+                f"Retry mechanism should make multiple attempts for failed event delivery. "
+                f"Critical events should not be lost when initial delivery fails."
             )
             
-            # Additional check: Verify delivery confirmation
-            # The method should return False when delivery fails, True when it succeeds
-            if call_count <= 2:  # If no retries happened, result should be False
+            # PHASE 4 SUCCESS CHECK: If retries worked and 3rd attempt succeeded, result should be True  
+            if call_count > 2:  # If retries happened and succeeded on 3rd attempt
                 assert result, (
-                    f"ISSUE #373: Event delivery returned {result} despite WebSocket failures. "
-                    f"Methods should return False when event delivery fails to enable proper error handling."
+                    f"ISSUE #373 RETRY SUCCESS: Event delivery should return True when retry succeeds on attempt {call_count}. "
+                    f"Actual result: {result}. Retry mechanism should enable successful delivery."
+                )
+            else:
+                # If retries failed completely, should raise exception (not return False silently)
+                pytest.fail(
+                    f"ISSUE #373 RETRY INCOMPLETE: Expected 3+ retry attempts but only got {actual_attempts}. "
+                    f"The retry mechanism may not be fully activated."
                 )
 
     async def test_websocket_connection_id_vs_user_id_mismatch(self):
@@ -370,11 +384,13 @@ class TestRunIdUserIdConfusion(SSotAsyncTestCase):
             )
             
             # Send events for each user concurrently
+            # PHASE 3 FIX: Pass user_context parameter to ensure proper routing
             tasks = []
             for context in user_contexts:
                 task = bridge.notify_agent_started(
-                    run_id=context.run_id,  # Current implementation uses run_id
-                    agent_name=f"Agent_for_user_{context.user_id}"
+                    run_id=context.run_id,
+                    agent_name=f"Agent_for_user_{context.user_id}",
+                    user_context=context  # CRITICAL: Pass user context for proper routing
                 )
                 tasks.append(task)
             
