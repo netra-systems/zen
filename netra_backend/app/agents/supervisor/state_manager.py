@@ -11,33 +11,68 @@ This module provides state management functionality for the supervisor agent sys
 """
 
 from typing import Any, Dict, Optional
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class AgentStateManager:
     """
-    Agent State Manager for backward compatibility.
+    Agent State Manager migrated to UserExecutionContext pattern.
     
-    This class provides minimal functionality for tests that still import AgentStateManager.
+    This class provides state management using UserExecutionContext for secure user isolation.
+    Deprecated methods maintain backward compatibility with deprecation warnings.
     The actual state management functionality has been consolidated into the unified system.
     """
     
     def __init__(self):
-        self.states: Dict[str, DeepAgentState] = {}
+        self.contexts: Dict[str, UserExecutionContext] = {}
     
-    async def get_state(self, agent_id: str) -> Optional[DeepAgentState]:
-        """Get agent state by ID."""
-        return self.states.get(agent_id)
+    async def get_context(self, agent_id: str) -> Optional[UserExecutionContext]:
+        """Get user execution context by agent ID."""
+        return self.contexts.get(agent_id)
     
-    async def save_state(self, agent_id: str, state: DeepAgentState) -> bool:
-        """Save agent state."""
-        self.states[agent_id] = state
+    async def get_state(self, agent_id: str) -> Optional[UserExecutionContext]:
+        """Get agent state by ID - deprecated, use get_context instead."""
+        import warnings
+        warnings.warn(
+            "get_state is deprecated, use get_context instead for UserExecutionContext pattern",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.contexts.get(agent_id)
+    
+    async def save_context(self, agent_id: str, user_context: UserExecutionContext) -> bool:
+        """Save user execution context."""
+        self.contexts[agent_id] = user_context
         return True
     
+    async def save_state(self, agent_id: str, user_context: UserExecutionContext) -> bool:
+        """Save agent state - deprecated, use save_context instead."""
+        import warnings
+        warnings.warn(
+            "save_state is deprecated, use save_context instead for UserExecutionContext pattern",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        self.contexts[agent_id] = user_context
+        return True
+    
+    async def delete_context(self, agent_id: str) -> bool:
+        """Delete user execution context."""
+        if agent_id in self.contexts:
+            del self.contexts[agent_id]
+            return True
+        return False
+    
     async def delete_state(self, agent_id: str) -> bool:
-        """Delete agent state."""
-        if agent_id in self.states:
-            del self.states[agent_id]
+        """Delete agent state - deprecated, use delete_context instead."""
+        import warnings
+        warnings.warn(
+            "delete_state is deprecated, use delete_context instead for UserExecutionContext pattern",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        if agent_id in self.contexts:
+            del self.contexts[agent_id]
             return True
         return False
     
@@ -46,10 +81,20 @@ class AgentStateManager:
         # Stub implementation for backward compatibility
         return True
     
-    async def restore_state(self, agent_id: str, checkpoint_id: str) -> Optional[DeepAgentState]:
-        """Restore agent state from checkpoint."""
+    async def restore_context(self, agent_id: str, checkpoint_id: str) -> Optional[UserExecutionContext]:
+        """Restore user execution context from checkpoint."""
         # Stub implementation for backward compatibility
-        return self.states.get(agent_id)
+        return self.contexts.get(agent_id)
+    
+    async def restore_state(self, agent_id: str, checkpoint_id: str) -> Optional[UserExecutionContext]:
+        """Restore agent state from checkpoint - deprecated, use restore_context instead."""
+        import warnings
+        warnings.warn(
+            "restore_state is deprecated, use restore_context instead for UserExecutionContext pattern",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return self.contexts.get(agent_id)
 
 
 class StateManager(AgentStateManager):
