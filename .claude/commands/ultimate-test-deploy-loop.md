@@ -3,12 +3,31 @@ description: "Real e2e test fix deploy loop (backend focused by default)"
 argument-hint: "[focus area]"
 ---
 
-You MUST repeat the entire PROCESS until ALL 1000 e2e real staging tests pass. WAIT AS LONG AS IT TAKES KEEP GOING ALL NIGHT. At least 8-20+ hours.
+Your goals are to:
+1. Run E2E tests. 
+2. If needed: Remediate issues & create a PR.
+
+Context:
+1. You must keep going until all work is fully completed.
+2. Have sub agents use built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+3. Focus areas (output this to console) of SSOT: ${1 : latest}
+4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
+5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
+6. FIRST DO NO HARM. Your mandate is to SAFELY see IF the PR can be merged.
+7. PR-WORKLOG = PR-WORKLOG-${1 : latest}-{date-time}.md
+8. PR-WORKLOG-UPDATE = Update PR-WORKLOG.
+9. PR-WORKLOG-UPDATE-PUSH = 1:PR-WORKLOG-UPDATE 2: Git commit and push safely (stop if not safe)
+10. UPDATE-PR-COMMENT = UPDATE a comment on the PR with the human readable noise-free updates (per @GITHUB_STYLE_GUIDE.md)
+11. -
+12. LIMIT SCOPE. Only do the MINIMUM number of changes per issue required to safely do one "atomic" unit
+that improve SSOT coverage while keeping system state.
+13. -
+14. PR = Pull Request
 
 PROCESS INSTRUCTIONS START:
 
-0) Deploy the backend service if it hasn't been deployed last few minutes. 
-WAIT for service revision success
+0) Deploy the backend service if it hasn't been deployed last few minutes (Check recent revisions) 
+WAIT for service revision success.
 
 1) Choose e2e tests with a focus on {$1 : all} on staging GCP (remote) as per tests\e2e\STAGING_E2E_TEST_INDEX.md
 Read recent logs in e2e/test_results/ for tests with ongoing issues or recently passed tests to do last.
