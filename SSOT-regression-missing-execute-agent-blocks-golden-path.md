@@ -8,7 +8,7 @@
 - **Created:** 2025-01-11
 
 ## Problem Statement
-During SSOT consolidation, the `execute_agent` function was removed from `agent_execution_core.py` but imports still reference it, causing ImportError and blocking golden path user flow.
+🚨 **CORRECTED DIAGNOSIS:** The `execute_agent` function EXISTS and works correctly. The actual issue is enhanced UserExecutionContext security validation now rejects Mock objects in tests, breaking 192 test files including Golden Path tests protecting $500K+ ARR.
 
 ## Business Impact
 - **Revenue Risk:** $500K+ ARR blocked
@@ -16,22 +16,24 @@ During SSOT consolidation, the `execute_agent` function was removed from `agent_
 - **Platform Value:** 90% of business value (chat functionality) broken
 
 ## Files Affected
-- `netra_backend/app/agents/supervisor/agent_execution_core.py` - Missing execute_agent function
-- Golden path user flow tests failing with import errors
+- **Root Cause:** Enhanced UserExecutionContext validation in `agent_execution_core.py` lines 118-142
+- **Impact:** 192 test files using Mock objects now fail with ValueError
+- **Critical Tests:** Golden Path, Mission Critical, and E2E tests blocked
 
 ## SSOT Gardener Progress Tracking
 
 ### Step 0: DISCOVER SSOT Issue ✅ COMPLETED
 - [x] SSOT audit completed by subagent
-- [x] Critical violation identified: missing execute_agent function
-- [x] GitHub issue created: #346
+- [x] 🚨 CORRECTED DIAGNOSIS: execute_agent function EXISTS - issue is Mock validation
+- [x] GitHub issue created: #346 (needs correction)
 - [x] Local progress tracker created
-- [x] Initial commit and push: PENDING
+- [x] Initial commit completed locally
 
-### Step 1: DISCOVER AND PLAN TEST (PENDING)
-- [ ] Discover existing tests protecting agent execution
-- [ ] Plan unit/integration tests for execute_agent function
-- [ ] Plan SSOT compliance tests
+### Step 1: DISCOVER AND PLAN TEST ✅ COMPLETED
+- [x] Discovered 192 test files affected by enhanced UserExecutionContext validation
+- [x] Identified Golden Path tests blocking $500K+ ARR
+- [x] Planned systematic migration from Mock objects to real UserExecutionContext
+- [x] Root cause: Security enhancement breaking existing test patterns
 
 ### Step 2: EXECUTE TEST PLAN (PENDING)
 - [ ] Create new SSOT tests (20% of work)
@@ -55,7 +57,41 @@ During SSOT consolidation, the `execute_agent` function was removed from `agent_
 - [ ] Link to issue #346 for auto-closure
 - [ ] Verify tests pass in CI
 
+## Critical Findings from Test Discovery
+
+### 🚨 High Priority Test Files (Golden Path - $500K+ ARR)
+```
+tests/integration/golden_path/test_agent_orchestration_execution_comprehensive.py
+tests/integration/golden_path/test_execution_state_propagation.py  
+tests/e2e/golden_path/test_complete_golden_path_user_journey_e2e.py
+tests/mission_critical/test_websocket_agent_events_suite.py
+```
+
+### Root Cause Details
+- Enhanced UserExecutionContext validation in `agent_execution_core.py` (lines 118-142)
+- Security fix rejects Mock objects: `ValueError: Expected UserExecutionContext, got <class 'unittest.mock.Mock'>`
+- 192 test files affected using old Mock patterns
+- This is actually GOOD security (prevents user isolation vulnerabilities)
+- BUT breaks existing test infrastructure
+
+### Required Migration Pattern
+```python
+# ❌ OLD PATTERN (FAILING):
+user_context = Mock()
+user_context.user_id = "user-123"
+
+# ✅ NEW PATTERN (REQUIRED):
+user_context = UserExecutionContext(
+    user_id="user-123",
+    thread_id="thread-456", 
+    run_id=context.run_id,
+    request_id="req-789"
+)
+```
+
 ## Notes
-- Function was removed during SSOT consolidation but imports remained
-- Critical for golden path: users login → get AI responses
-- Must maintain SSOT compliance while restoring functionality
+- execute_agent function EXISTS and works correctly - no missing functionality
+- Issue is enhanced security validation breaking test Mock patterns
+- 192 test files need migration from Mock to real UserExecutionContext
+- Priority: Golden Path tests first (restore $500K+ ARR protection)
+- Must maintain SSOT compliance and security enhancements
