@@ -1,0 +1,182 @@
+{
+  "scan_timestamp": "2025-09-10T23:30:59.485079",
+  "total_files_scanned": 3,
+  "baseline_violations": 0,
+  "regression_violations": 14,
+  "security_critical_count": 0,
+  "monitoring_config": {
+    "websocket_only": true,
+    "project_root": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "scan_duration_seconds": 0.421273
+  },
+  "violations": [
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\service_initialization_manager.py",
+      "line_number": 7,
+      "line_content": "CRITICAL: This replaces the dumb fallback handler creation with authentic",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.689621",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\ssot_service_initializer.py",
+      "line_number": 7,
+      "line_content": "CRITICAL: This eliminates fallback handler creation by providing authentic",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.703954",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_emitter.py",
+      "line_number": 820,
+      "line_content": "        Escalate failed authentication events to fallback channels.",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.750853",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_emitter.py",
+      "line_number": 828,
+      "line_content": "                f\"ESCALATING TO FALLBACK - Authentication event {event_type} \"",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.750853",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_emitter.py",
+      "line_number": 1115,
+      "line_content": "        self.auth_metrics['fallback_escalations'] += 1",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.753367",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_emitter.py",
+      "line_number": 1137,
+      "line_content": "        Send authentication event via fallback channel.",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.755469",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_emitter.py",
+      "line_number": 1148,
+      "line_content": "                f\"Using fallback channel for auth event {event_type} \"",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.755469",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_emitter.py",
+      "line_number": 1159,
+      "line_content": "                f\"AUTH FALLBACK TRIGGERED: {event_type} for user {self.user_id} - \"",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.755469",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_websocket_auth.py",
+      "line_number": 58,
+      "line_content": "    determine if this is an E2E test that should bypass strict authentication.",
+      "violation_type": "websocket_auth_bypass",
+      "description": "WebSocket authentication bypass mechanism",
+      "suggestion": "Remove auth bypass, enforce proper WebSocket authentication",
+      "severity": "ERROR",
+      "detection_timestamp": "2025-09-10T23:30:59.809385",
+      "issue_reference": "WebSocket security - No auth bypass allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_websocket_auth.py",
+      "line_number": 136,
+      "line_content": "            logger.info(\"DEMO MODE: Authentication bypass disabled, using full auth flow\")",
+      "violation_type": "websocket_auth_bypass",
+      "description": "WebSocket authentication bypass mechanism",
+      "suggestion": "Remove auth bypass, enforce proper WebSocket authentication",
+      "severity": "ERROR",
+      "detection_timestamp": "2025-09-10T23:30:59.811395",
+      "issue_reference": "WebSocket security - No auth bypass allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_websocket_auth.py",
+      "line_number": 1407,
+      "line_content": "    \"WebSocketAuthenticator\",  # Legacy alias",
+      "violation_type": "legacy_auth_patterns",
+      "description": "Legacy authentication patterns outside SSOT",
+      "suggestion": "Migrate to UnifiedAuthInterface SSOT pattern",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.828105",
+      "issue_reference": "SSOT compliance - Legacy auth removal",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\unified_websocket_auth.py",
+      "line_number": 1408,
+      "line_content": "    \"UnifiedWebSocketAuth\",  # Legacy alias",
+      "violation_type": "legacy_auth_patterns",
+      "description": "Legacy authentication patterns outside SSOT",
+      "suggestion": "Migrate to UnifiedAuthInterface SSOT pattern",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.828105",
+      "issue_reference": "SSOT compliance - Legacy auth removal",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\user_context_extractor.py",
+      "line_number": 223,
+      "line_content": "                logger.info(\"\ud83d\udd04 FALLBACK: Using auth_client_core for token validation\")",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.832165",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    },
+    {
+      "file_path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket_core\\user_context_extractor.py",
+      "line_number": 251,
+      "line_content": "                payload[\"source\"] = \"auth_service_fallback\"",
+      "violation_type": "auth_fallback_logic",
+      "description": "Authentication fallback logic bypassing SSOT",
+      "suggestion": "Remove fallbacks, implement proper error handling with UnifiedAuthInterface",
+      "severity": "WARNING",
+      "detection_timestamp": "2025-09-10T23:30:59.832165",
+      "issue_reference": "SSOT compliance - No auth fallbacks allowed",
+      "business_impact": null
+    }
+  ]
+}

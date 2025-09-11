@@ -51,25 +51,31 @@ from netra_backend.app.core.agent_execution_tracker import (
 logger = central_logger.get_logger(__name__)
 
 
-def get_agent_state_tracker():
-    """Compatibility function for legacy imports.
+def get_agent_state_tracker() -> AgentExecutionTracker:
+    """Factory function to get an instance of AgentExecutionTracker.
     
-    DEPRECATED: This function is provided for backward compatibility only.
-    Use get_execution_tracker() directly from netra_backend.app.core.execution_tracker.
+    This function provides the expected interface for creating agent state trackers
+    as required by the test suite and other components.
     
     Returns:
-        ExecutionTracker: The global execution tracker instance
+        AgentExecutionTracker: A new instance of the agent execution tracker
     """
-    import warnings
-    warnings.warn(
-        "get_agent_state_tracker() is deprecated. Use get_execution_tracker() directly.",
-        DeprecationWarning,
-        stacklevel=2
-    )
+    return AgentExecutionTracker()
+
+
+def create_agent_execution_context(**kwargs) -> AgentExecutionContext:
+    """Factory function to create an AgentExecutionContext.
     
-    # Return the same execution tracker instance
-    from netra_backend.app.core.execution_tracker import get_execution_tracker
-    return get_execution_tracker()
+    This is a convenience wrapper around AgentExecutionContext constructor
+    to provide a consistent factory interface.
+    
+    Args:
+        **kwargs: Arguments passed to AgentExecutionContext constructor
+        
+    Returns:
+        AgentExecutionContext: A new execution context instance
+    """
+    return AgentExecutionContext(**kwargs)
 
 
 class AgentExecutionCore:

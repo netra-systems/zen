@@ -26,6 +26,9 @@ from netra_backend.app.services.user_execution_context import UserContextManager
 from netra_backend.app.services.user_execution_context import managed_user_context, validate_user_context
 from netra_backend.app.services.user_execution_context import create_isolated_execution_context
 
+# Tools (Performance and Optimization)
+from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
+
 # Shared Types (Cross-Service)
 from shared.types.core_types import UserID, ThreadID, RunID
 ```
