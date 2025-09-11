@@ -37,7 +37,6 @@ from shared.isolated_environment import get_env
 
 
 class TestAgentOrchestrationBusinessIntegration(
-    BaseIntegrationTest, 
     ServiceOrchestrationIntegrationTest, 
     WebSocketIntegrationTest
 ):
