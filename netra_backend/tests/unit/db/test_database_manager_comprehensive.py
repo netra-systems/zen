@@ -86,7 +86,8 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
         for key, value in self.test_env_vars.items():
             isolated_env.set(key, value, source="test")
         
-        with patch('netra_backend.app.core.config.get_config') as mock_config:
+        with patch('netra_backend.app.core.config.get_config') as mock_config, \
+             patch('shared.isolated_environment.get_env', return_value=isolated_env):
             # Mock config with proper attributes
             mock_config.return_value.database_echo = False
             mock_config.return_value.database_pool_size = 5
@@ -112,11 +113,13 @@ class TestDatabaseManagerComprehensive(BaseIntegrationTest):
     @pytest.mark.unit
     async def test_database_manager_initialization_test_environment_sqlite(self, isolated_env):
         """Test DatabaseManager initialization in test environment uses SQLite."""
-        # Setup isolated environment with test environment - should use SQLite
-        for key, value in self.test_env_vars_sqlite.items():
-            isolated_env.set(key, value, source="test")
+        # Setup isolated environment with test environment but no postgres config
+        # This should fall back to SQLite
+        isolated_env.set("ENVIRONMENT", "test", source="test")
+        isolated_env.set("USE_MEMORY_DB", "true", source="test")  # Explicitly request memory DB
         
-        with patch('netra_backend.app.core.config.get_config') as mock_config:
+        with patch('netra_backend.app.core.config.get_config') as mock_config, \
+             patch('shared.isolated_environment.get_env', return_value=isolated_env):
             # Mock config with proper attributes
             mock_config.return_value.database_echo = False
             mock_config.return_value.database_pool_size = 5
