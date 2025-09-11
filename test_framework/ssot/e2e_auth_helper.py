@@ -1244,6 +1244,40 @@ def get_test_jwt_token(
     )
 
 
+def get_test_user_context(
+    user_id: Optional[str] = None,
+    email: Optional[str] = None,
+    permissions: Optional[List[str]] = None,
+    websocket_enabled: bool = True
+) -> Dict[str, Any]:
+    """Get test user context for integration tests.
+    
+    Convenience function that creates a complete user context including
+    authentication token and user data for testing purposes.
+    
+    Args:
+        user_id: User ID (generates if not provided)
+        email: User email (generates if not provided)
+        permissions: User permissions (defaults to ["read", "write"])
+        websocket_enabled: Whether to generate WebSocket client ID
+        
+    Returns:
+        Dictionary containing user context data including token and IDs
+    """
+    # Generate defaults
+    user_id = user_id or f"test_user_{uuid.uuid4().hex[:8]}"
+    email = email or f"{user_id}@test.netra.ai"
+    permissions = permissions or ["read", "write"]
+    
+    # Create authenticated user context
+    return create_authenticated_user_context(
+        user_id=user_id,
+        email=email,
+        permissions=permissions,
+        websocket_enabled=websocket_enabled
+    )
+
+
 # SSOT Export - All e2e tests MUST use these
 __all__ = [
     "AuthenticatedUser",
@@ -1256,6 +1290,7 @@ __all__ = [
     "validate_jwt_token",               # New SSOT function for JWT validation
     "create_authenticated_user",
     "create_authenticated_user_context",
+    "get_test_user_context",             # Convenience function for test context
     "get_test_jwt_token",
     # Compatibility functions for legacy tests
     "create_test_user",
