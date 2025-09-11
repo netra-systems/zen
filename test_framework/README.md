@@ -108,12 +108,13 @@ python scripts/docker_manual.py status    # Check status
 The framework now includes comprehensive resource monitoring to prevent system overload:
 
 ```python
-from test_framework.resource_monitor import ResourceMonitor
+from test_framework.resource_monitor import DockerResourceMonitor
 
-monitor = ResourceMonitor()
-monitor.start_monitoring()
-# Run tests...
-stats = monitor.get_stats()
+monitor = DockerResourceMonitor()
+# Check system resources
+snapshot = monitor.check_system_resources()
+# Run tests with resource monitoring...
+resource_usage = monitor.get_resource_usage()
 ```
 
 **Features:**

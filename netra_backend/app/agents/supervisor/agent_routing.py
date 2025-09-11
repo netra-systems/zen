@@ -44,7 +44,7 @@ class SupervisorAgentRouter:
         exec_context.max_retries = context.max_retries
         return await self.supervisor.engine.execute_agent(exec_context, user_context)
     
-    async def route_to_agent_with_circuit_breaker(self, state: DeepAgentState,
+    async def route_to_agent_with_circuit_breaker(self, user_context: UserExecutionContext,
                                                  context: 'AgentExecutionContext',
                                                  agent_name: str) -> 'AgentExecutionResult':
         """Route request to agent with circuit breaker protection."""
@@ -52,7 +52,7 @@ class SupervisorAgentRouter:
             AgentExecutionContext,
         )
         exec_context = self._create_agent_execution_context(context, agent_name)
-        return await self.supervisor.engine._execute_with_fallback(exec_context, state)
+        return await self.supervisor.engine._execute_with_fallback(exec_context, user_context)
     
     def _create_agent_execution_context(self, base_context, agent_name: str):
         """Create AgentExecutionContext from base context."""

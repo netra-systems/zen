@@ -169,7 +169,9 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
         )
         
         # Create mock user context
-        user_context = self.mock_factory.create_user_context_mock()
+        user_context = Mock()
+        user_context.user_id = "user-123"
+        user_context.thread_id = "thread-123"
         
         # Execute agent successfully
         result = await execution_core.execute_agent(context, user_context)
@@ -252,8 +254,13 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             user_id="user-123"
         )
         
+        # Create mock user context
+        user_context = Mock()
+        user_context.user_id = "user-123"
+        user_context.thread_id = "thread-123"
+        
         # Execute agent (should fail)
-        result = await execution_core.execute_agent(context)
+        result = await execution_core.execute_agent(context, user_context)
         
         # Verify failure
         self.assertFalse(result.success, "Agent execution should fail")
