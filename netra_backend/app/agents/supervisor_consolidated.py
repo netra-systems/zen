@@ -51,12 +51,13 @@ class SupervisorAgent(BaseAgent):
                  llm_manager: LLMManager,
                  websocket_bridge: Optional[AgentWebSocketBridge] = None,
                  db_session_factory=None,
-                 user_context: Optional[UserExecutionContext] = None):
+                 user_context: Optional[UserExecutionContext] = None,
+                 tool_dispatcher=None):
         """Initialize SupervisorAgent with UserExecutionContext pattern.
         
-        CRITICAL: No user context, session storage, or tool_dispatcher in constructor.
+        CRITICAL: Tool dispatcher can be provided OR created per-request.
         All user-specific data and tools come through execute() method via context.
-        Tool dispatcher is created per-request for complete isolation.
+        Tool dispatcher is created per-request for complete isolation when not provided.
         
         ARCHITECTURE: WebSocket bridge is now optional and will be created per-request
         when UserExecutionContext is available, following factory pattern.
@@ -66,6 +67,7 @@ class SupervisorAgent(BaseAgent):
             websocket_bridge: Optional WebSocket bridge (lazy initialized if None)
             db_session_factory: Optional database session factory  
             user_context: Optional user context (set per-request)
+            tool_dispatcher: Optional tool dispatcher (created per-request if None)
         """
         # Initialize BaseAgent with infrastructure (no global state)
         super().__init__(
@@ -83,6 +85,10 @@ class SupervisorAgent(BaseAgent):
         self.websocket_bridge = websocket_bridge
         self.db_session_factory = db_session_factory
         self.user_context = user_context
+        
+        # Tool dispatcher - created per-request if not provided
+        # This maintains backward compatibility while supporting per-request creation
+        self.tool_dispatcher = tool_dispatcher
         
         if websocket_bridge:
             logger.info(f"✅ SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
@@ -1251,21 +1257,24 @@ class SupervisorAgent(BaseAgent):
     @classmethod
     def create(cls,
                llm_manager: LLMManager,
-               websocket_bridge: AgentWebSocketBridge) -> 'SupervisorAgent':
+               websocket_bridge: AgentWebSocketBridge,
+               tool_dispatcher=None) -> 'SupervisorAgent':
         """Factory method to create SupervisorAgent with UserExecutionContext pattern.
         
-        CRITICAL: No tool_dispatcher parameter - created per-request for isolation.
+        CRITICAL: Tool dispatcher can be provided or created per-request for isolation.
         
         Args:
             llm_manager: LLM manager instance
             websocket_bridge: WebSocket bridge for agent notifications
+            tool_dispatcher: Optional tool dispatcher (created per-request if None)
             
         Returns:
             SupervisorAgent configured for UserExecutionContext pattern
         """
         supervisor = cls(
             llm_manager=llm_manager,
-            websocket_bridge=websocket_bridge
+            websocket_bridge=websocket_bridge,
+            tool_dispatcher=tool_dispatcher
         )
         
         # Agent instance factory will be configured per-request
