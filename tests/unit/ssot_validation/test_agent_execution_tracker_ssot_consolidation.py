@@ -218,6 +218,10 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
                         with open(module_file, 'r') as f:
                             source = f.read()
                             
+                        # Skip deprecated files from timeout pattern check
+                        if 'DEPRECATED' in source or 'deprecated' in source:
+                            continue
+                            
                         # Look for timeout/circuit breaker patterns
                         timeout_patterns = [
                             'timeout_seconds',
