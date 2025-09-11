@@ -47,6 +47,8 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
         super().setUp()
         self.security_violations = []
         self.vulnerability_evidence = {}
+        # Get logger from parent class
+        self.test_logger = getattr(self, 'logger', None) or self.get_logger()
         
     def test_mutable_default_argument_vulnerability(self):
         """
