@@ -104,7 +104,7 @@ class AgentExecutionCore:
         
     def _ensure_user_execution_context(
         self, 
-        state: Union[DeepAgentState, UserExecutionContext],
+        state: Union[Any, UserExecutionContext],
         context: AgentExecutionContext
     ) -> UserExecutionContext:
         """
@@ -117,8 +117,9 @@ class AgentExecutionCore:
             # Already using secure UserExecutionContext
             return state
         
-        elif isinstance(state, DeepAgentState):
+        elif hasattr(state, '__class__') and 'DeepAgentState' in state.__class__.__name__:
             # DEPRECATED: Issue warning and migrate to secure pattern
+            import warnings
             warnings.warn(
                 f"🚨 SECURITY WARNING: DeepAgentState is deprecated due to USER ISOLATION RISKS. "
                 f"Agent '{context.agent_name}' (run_id: {context.run_id}) is using DeepAgentState "
@@ -145,12 +146,12 @@ class AgentExecutionCore:
                 }
             )
         else:
-            raise ValueError(f"Unsupported state type: {type(state)}. Must be UserExecutionContext or DeepAgentState.")
+            raise ValueError(f"Unsupported state type: {type(state)}. Must be UserExecutionContext (DeepAgentState is deprecated for security reasons).")
     
     async def execute_agent(
         self, 
         context: AgentExecutionContext,
-        state: Union[DeepAgentState, UserExecutionContext],
+        state: Union[Any, UserExecutionContext],
         timeout: Optional[float] = None
     ) -> AgentExecutionResult:
         """Execute agent with full lifecycle tracking and death detection."""
