@@ -65,7 +65,8 @@
       "Bash(fi)",
       "Bash(done)",
       "Bash(sed:*)",
-      "Bash(netra_backend/tests/unit/websocket_core/test_gcp_startup_phase_validation.py)"
+      "Bash(netra_backend/tests/unit/websocket_core/test_gcp_startup_phase_validation.py)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
