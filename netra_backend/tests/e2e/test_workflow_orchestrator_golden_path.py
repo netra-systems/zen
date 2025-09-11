@@ -22,6 +22,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.execution_context import ExecutionStatus
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
@@ -33,9 +34,9 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
     After remediation, they should PASS to validate complete user flow.
     """
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test fixtures for golden path testing."""
-        super().setUp()
+        super().setup_method(method)
         
         # Golden path user context
         self.golden_user_context = UserExecutionContext(
@@ -57,38 +58,38 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         # Mock agent instances that return realistic responses
         mock_triage_agent = AsyncMock()
         mock_triage_agent.execute.return_value = ExecutionResult(
-            success=True,
-            result={
+            status=ExecutionStatus.COMPLETED,
+            request_id="golden_path_triage_test",
+            data={
                 "classification": "cost_optimization",
                 "data_sufficiency": "sufficient",
                 "confidence": 0.9,
                 "recommendations": ["analyze_compute_costs", "review_storage_optimization"]
             },
-            agent_name="triage",
             execution_time_ms=250
         )
         
         mock_data_agent = AsyncMock()
         mock_data_agent.execute.return_value = ExecutionResult(
-            success=True,
-            result={
+            status=ExecutionStatus.COMPLETED,
+            request_id="golden_path_data_test",
+            data={
                 "insights": ["high_compute_utilization", "unused_storage_volumes"],
                 "cost_analysis": {"current_monthly": 5000, "potential_savings": 1200},
                 "data_quality": "high"
             },
-            agent_name="data",
             execution_time_ms=800
         )
         
         mock_reporting_agent = AsyncMock()
         mock_reporting_agent.execute.return_value = ExecutionResult(
-            success=True,
-            result={
+            status=ExecutionStatus.COMPLETED,
+            request_id="golden_path_reporting_test",
+            data={
                 "summary": "Cost optimization recommendations identified $1,200 monthly savings",
                 "action_items": ["Resize compute instances", "Remove unused storage"],
                 "business_value": "24% cost reduction achievable"
             },
-            agent_name="reporting",
             execution_time_ms=400
         )
         
@@ -128,9 +129,9 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
             else:
                 # Fallback if agent not properly configured
                 return ExecutionResult(
-                    success=False,
-                    error=f"Agent {agent_name} not configured",
-                    agent_name=agent_name,
+                    status=ExecutionStatus.FAILED,
+                    request_id=f"golden_path_fallback_{agent_name}",
+                    error_message=f"Agent {agent_name} not configured",
                     execution_time_ms=0
                 )
         
@@ -195,11 +196,11 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         
         # Create execution context representing user's AI request
         golden_context = ExecutionContext(
+            request_id=self.golden_user_context.request_id,
             run_id=self.golden_user_context.run_id,
             agent_name="triage",  # Starting agent
             state=DeepAgentState(),
             stream_updates=True,  # User wants real-time updates
-            thread_id=self.golden_user_context.thread_id,
             user_id=self.golden_user_context.user_id,
             metadata={
                 "user_request": "Help me optimize my cloud costs to reduce spending",
@@ -253,11 +254,11 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         orchestrator._get_user_emitter_from_context = AsyncMock(return_value=mock_emitter)
         
         context = ExecutionContext(
+            request_id=self.golden_user_context.request_id,
             run_id=self.golden_user_context.run_id,
             agent_name="triage",
             state=DeepAgentState(),
             stream_updates=True,
-            thread_id=self.golden_user_context.thread_id,
             user_id=self.golden_user_context.user_id
         )
         
@@ -335,20 +336,20 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         
         # Execute golden paths concurrently
         context1 = ExecutionContext(
+            request_id=user1_context.request_id,
             run_id=user1_context.run_id,
             agent_name="triage",
             state=DeepAgentState(),
             stream_updates=True,
-            thread_id=user1_context.thread_id,
             user_id=user1_context.user_id
         )
         
         context2 = ExecutionContext(
+            request_id=user2_context.request_id,
             run_id=user2_context.run_id,
             agent_name="triage",
             state=DeepAgentState(),
             stream_updates=True,
-            thread_id=user2_context.thread_id,
             user_id=user2_context.user_id
         )
         
@@ -409,11 +410,11 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         
         # Execute golden path with business value tracking
         context = ExecutionContext(
+            request_id=self.golden_user_context.request_id,
             run_id=self.golden_user_context.run_id,
             agent_name="triage",
             state=DeepAgentState(),
             stream_updates=True,
-            thread_id=self.golden_user_context.thread_id,
             user_id=self.golden_user_context.user_id,
             metadata={
                 "business_context": "cost_optimization",

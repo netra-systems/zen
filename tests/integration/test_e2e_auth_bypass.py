@@ -288,7 +288,7 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
             )
             
             # Assertions - this demonstrates the original issue
-            self.assertIn(response.status_code, [401, 500], "Should fail when E2E key not configured")
+            self.assertIn(response.status_code, [401, 503], "Should fail when E2E key not configured")
             
             # Record configuration issue
             self.record_metric("configuration_error", "key_not_configured_anywhere")
@@ -351,28 +351,28 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                         "name": f"Test User {scenario['name']}"
                     }
                 )
-                    
-                    # Validate status code
-                    self.assertEqual(
-                        response.status_code,
-                        scenario["expected_status"],
-                        f"Status code mismatch for scenario {scenario['name']}"
-                    )
-                    
-                    # Validate response structure based on expected outcome
-                    response_data = response.json()
-                    if scenario["should_succeed"]:
-                        self.assertIn("access_token", response_data, f"Success response missing token for {scenario['name']}")
-                    else:
-                        self.assertIn("detail", response_data, f"Error response missing detail for {scenario['name']}")
-                    
-                    # Record scenario result
-                    self.record_metric(f"scenario_{scenario['name']}", {
-                        "status_code": response.status_code,
-                        "expected_status": scenario["expected_status"],
-                        "success": scenario["should_succeed"],
-                        "response_valid": True
-                    })
+                
+                # Validate status code
+                self.assertEqual(
+                    response.status_code,
+                    scenario["expected_status"],
+                    f"Status code mismatch for scenario {scenario['name']}"
+                )
+                
+                # Validate response structure based on expected outcome
+                response_data = response.json()
+                if scenario["should_succeed"]:
+                    self.assertIn("access_token", response_data, f"Success response missing token for {scenario['name']}")
+                else:
+                    self.assertIn("detail", response_data, f"Error response missing detail for {scenario['name']}")
+                
+                # Record scenario result
+                self.record_metric(f"scenario_{scenario['name']}", {
+                    "status_code": response.status_code,
+                    "expected_status": scenario["expected_status"],
+                    "success": scenario["should_succeed"],
+                    "response_valid": True
+                })
         
         # Record comprehensive test completion
         self.record_metric("comprehensive_flow_validation", "all_scenarios_tested")
@@ -395,6 +395,11 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 headers={
                     "X-E2E-Bypass-Key": bypass_key,
                     "Content-Type": "application/json"
+                },
+                json={
+                    "email": "format-test@staging.netrasystems.ai",
+                    "name": "Format Test User",
+                    "permissions": ["read", "write", "admin"]
                 }
             )
             
