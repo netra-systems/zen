@@ -69,6 +69,10 @@ from netra_backend.app.agents.reporting_agents.uvs_reporting_agent import UVSRep
 # CRITICAL: Fixed 2025-09-10 - This was causing $500K+ ARR Golden Path failure
 from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge  # ❌ BROKEN PATH
 # USE INSTEAD: from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+
+# CRITICAL: Fixed 2025-09-11 - IsolatedEnvironment import path correction (E2E test collection blocker)
+from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # ❌ BROKEN PATH
+# USE INSTEAD: from shared.isolated_environment import IsolatedEnvironment, get_env
 ```
 
 ---
