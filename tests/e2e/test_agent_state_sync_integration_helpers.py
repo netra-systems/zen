@@ -37,7 +37,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 import sqlalchemy as sa
@@ -104,6 +104,10 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
         self.id_manager = UnifiedIDManager()
         self.test_user_1 = "user_001_sync_test"
         self.test_user_2 = "user_002_isolation_test"
+        
+        # Setup logging
+        import logging
+        self.logger = logging.getLogger(__name__)
     
     async def async_setup_method(self):
         """Setup real services for each test method."""
@@ -250,8 +254,8 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
         mock_llm.is_available.return_value = True
         
         # Create mock tool dispatcher for agent dependencies
-        mock_tool_dispatcher = Mock(spec=UnifiedToolDispatcher)
-        mock_tool_dispatcher.is_available.return_value = True
+        mock_tool_dispatcher = Mock()
+        mock_tool_dispatcher.is_available = Mock(return_value=True)
         
         if agent_class == DataHelperAgent:
             agent = DataHelperAgent(llm_manager=mock_llm, tool_dispatcher=mock_tool_dispatcher)
