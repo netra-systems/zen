@@ -277,7 +277,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         )
         
         state = DeepAgentState(
-            user_request={"message": "Test immediate failure recovery"},
+            user_request="Test immediate failure recovery",
             user_id=recovery_user_context.user_id,
             chat_thread_id=recovery_user_context.thread_id,
             run_id=recovery_user_context.run_id,
@@ -344,7 +344,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         )
         
         state = DeepAgentState(
-            user_request={"message": "Test timeout handling"},
+            user_request="Test timeout handling",
             user_id=recovery_user_context.user_id,
             chat_thread_id=recovery_user_context.thread_id,
             run_id=recovery_user_context.run_id,
@@ -401,7 +401,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         )
         
         state = DeepAgentState(
-            user_request={"message": "Test silent failure detection"},
+            user_request="Test silent failure detection",
             user_id=recovery_user_context.user_id,
             chat_thread_id=recovery_user_context.thread_id,
             run_id=recovery_user_context.run_id,
@@ -456,7 +456,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         )
         
         state = DeepAgentState(
-            user_request={"message": "Test retry logic"},
+            user_request="Test retry logic",
             user_id=recovery_user_context.user_id,
             chat_thread_id=recovery_user_context.thread_id,
             run_id=recovery_user_context.run_id,
@@ -606,7 +606,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
             )
             
             state = DeepAgentState(
-                user_request={"message": f"Test {agent_name} cleanup"},
+                user_request=f"Test {agent_name} cleanup",
                 user_id=recovery_user_context.user_id,
                 chat_thread_id=recovery_user_context.thread_id,
                 run_id=context.run_id,
@@ -693,7 +693,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
                 engine.AGENT_EXECUTION_TIMEOUT = 0.3
             
             state = DeepAgentState(
-                user_request={"message": f"Concurrent failure test {user_index}"},
+                user_request=f"Concurrent failure test {user_index}",
                 user_id=context.user_id,
                 chat_thread_id=context.thread_id,
                 run_id=context.run_id,

@@ -454,7 +454,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         )
         
         state = DeepAgentState(
-            user_request={"message": "Optimize my $45k monthly AI costs"},
+            user_request="Optimize my $45k monthly AI costs",
             user_id=chat_user_context.user_id,
             chat_thread_id=chat_user_context.thread_id,
             run_id=chat_user_context.run_id,
@@ -640,7 +640,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         
         # Shared state for workflow
         workflow_state = DeepAgentState(
-            user_request={"message": "Complete workflow with coordinated events"},
+            user_request="Complete workflow with coordinated events",
             user_id=chat_user_context.user_id,
             chat_thread_id=chat_user_context.thread_id,
             run_id=chat_user_context.run_id,
@@ -758,7 +758,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         )
         
         state = DeepAgentState(
-            user_request={"message": "Test error handling"},
+            user_request="Test error handling",
             user_id=chat_user_context.user_id,
             chat_thread_id=chat_user_context.thread_id,
             run_id=chat_user_context.run_id,
@@ -843,7 +843,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
             )
             
             state = DeepAgentState(
-                user_request={"message": f"Concurrent user {user_index} request"},
+                user_request=f"Concurrent user {user_index} request",
                 user_id=context.user_id,
                 chat_thread_id=context.thread_id,
                 run_id=context.run_id,
