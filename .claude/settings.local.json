@@ -71,7 +71,8 @@
       "Bash(cat:*)",
       "Bash(gcloud secrets versions list:*)",
       "Bash(git restore:*)",
-      "Bash(git rev-parse:*)"
+      "Bash(git rev-parse:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
