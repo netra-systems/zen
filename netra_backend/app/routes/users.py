@@ -18,7 +18,7 @@ from netra_backend.app.db.repositories.user_repository import UserRepository
 from netra_backend.app.db.models_user import User as UserModel
 
 logger = central_logger.get_logger(__name__)
-router = APIRouter(prefix="/api/users", tags=["users"])
+router = APIRouter(prefix="/user", tags=["users"])
 tracing_manager = TracingManager()
 user_repository = UserRepository()
 

@@ -90,28 +90,43 @@ class _LegacyWebSocketManagerAdapter:
     # ============================================================================
     
     def create_isolated_manager(self, user_id: str, connection_id: str) -> UnifiedWebSocketManager:
-        """Delegate to main factory (DEPRECATED)."""
+        """Create isolated manager using direct instantiation (DEPRECATED)."""
         warnings.warn("Use WebSocketManagerFactory.create_isolated_manager instead", DeprecationWarning)
-        return self._factory.create_isolated_manager(user_id, connection_id)
+        # SSOT: Direct instantiation without factory dependency
+        user_context = self._create_default_user_context({
+            "user_id": user_id,
+            "connection_id": connection_id
+        })
+        return WebSocketManager(user_context=user_context)
     
     def get_manager_by_user(self, user_id: str) -> Optional[UnifiedWebSocketManager]:
-        """Delegate to main factory (DEPRECATED)."""
+        """Get manager by user from legacy managers (DEPRECATED)."""
         warnings.warn("Use WebSocketManagerFactory.get_manager_by_user instead", DeprecationWarning)
-        return self._factory.get_manager_by_user(user_id)
+        # SSOT: Look through our legacy managers instead of factory
+        with self._legacy_lock:
+            for manager in self._legacy_managers.values():
+                if manager.user_context.user_id == user_id:
+                    return manager
+        return None
     
     def get_active_connections_count(self) -> int:
-        """Delegate to main factory (DEPRECATED)."""
+        """Get active connections count from legacy managers (DEPRECATED)."""
         warnings.warn("Use WebSocketManagerFactory.get_active_connections_count instead", DeprecationWarning)
-        return self._factory.get_active_connections_count()
+        # SSOT: Count from our legacy managers instead of factory
+        total = 0
+        with self._legacy_lock:
+            for manager in self._legacy_managers.values():
+                total += len(manager.get_user_connections())
+        return total
     
     def get_manager(self) -> UnifiedWebSocketManager:
         """Create a default manager for legacy usage (DEPRECATED)."""
         warnings.warn("get_manager() is deprecated. Use create_isolated_manager() instead", DeprecationWarning)
-        # Create a default manager for legacy usage
+        # Create a default manager for legacy usage with direct instantiation
         import uuid
         user_id = f"legacy_user_{uuid.uuid4().hex[:8]}"
         connection_id = f"legacy_conn_{uuid.uuid4().hex[:8]}"
-        return self._factory.create_isolated_manager(user_id, connection_id)
+        return self.create_isolated_manager(user_id, connection_id)
     
     def _show_migration_warning(self, method_name: str, caller_info: str = "") -> None:
         """Show migration warning once per call site."""
@@ -188,8 +203,8 @@ class _LegacyWebSocketManagerAdapter:
                     del self._legacy_managers[context_key]
                     self._legacy_contexts.pop(context_key, None)
             
-            # Create new isolated manager
-            manager = self._factory.create_manager(user_context)
+            # Create new isolated manager using direct instantiation (SSOT)
+            manager = WebSocketManager(user_context=user_context)
             self._legacy_managers[context_key] = manager
             self._legacy_contexts[context_key] = user_context
             self._legacy_stats["managers_created"] += 1
@@ -475,7 +490,7 @@ def migrate_singleton_usage(user_context: UserExecutionContext) -> UnifiedWebSoc
 
 # ===== BACKWARD COMPATIBILITY ALIASES =====
 
-# For tests that still expect WebSocketManagerAdapter
+# Create alias for backward compatibility
 WebSocketManagerAdapter = _LegacyWebSocketManagerAdapter
 
 __all__ = [
@@ -484,5 +499,5 @@ __all__ = [
     "WebSocketManagerAdapter"  # Backward compatibility
 ]
 
-# DEPRECATED: WebSocketManagerAdapter removed for SSOT compliance
+# DEPRECATED: WebSocketManagerAdapter is now an alias for _LegacyWebSocketManagerAdapter
 # Use WebSocketManagerFactory directly from websocket_manager_factory module

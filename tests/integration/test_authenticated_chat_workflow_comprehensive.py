@@ -45,7 +45,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
@@ -121,8 +121,9 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         await agent_registry.initialize(user_context=user_context)
         
         # Create execution engine factory for business agent workflows
-        execution_factory = ExecutionEngineFactory()
-        execution_engine = await execution_factory.create_user_execution_engine(
+        execution_websocket_bridge = AgentWebSocketBridge()
+        execution_factory = ExecutionEngineFactory(websocket_bridge=execution_websocket_bridge)
+        execution_engine = await execution_factory.create_for_user(
             user_context=user_context
         )
         
@@ -302,8 +303,9 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         agent_registry = AgentRegistry()
         await agent_registry.initialize(user_context=user_context)
         
-        execution_factory = ExecutionEngineFactory()
-        execution_engine = await execution_factory.create_user_execution_engine(
+        execution_websocket_bridge = AgentWebSocketBridge()
+        execution_factory = ExecutionEngineFactory(websocket_bridge=execution_websocket_bridge)
+        execution_engine = await execution_factory.create_for_user(
             user_context=user_context
         )
         

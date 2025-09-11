@@ -344,6 +344,16 @@ class SSotBaseTestCase:
                 else:
                     self.set_env_var(key, original_value)
     
+    # Alias for backwards compatibility
+    def mock_environment_variables(self, env_vars: Dict[str, str]):
+        """
+        Context manager for mocking environment variables.
+        
+        Args:
+            env_vars: Dictionary of environment variables to set temporarily
+        """
+        return self.temp_env_vars(**env_vars)
+    
     # === DATABASE UTILITIES ===
     
     def increment_db_query_count(self, count: int = 1) -> None:
@@ -405,6 +415,55 @@ class SSotBaseTestCase:
         return self._metrics.llm_requests
     
     # === ASSERTION UTILITIES ===
+    
+    # Standard unittest-style assertion methods for compatibility
+    def assertIsNotNone(self, value, msg=None):
+        """Assert that value is not None."""
+        assert value is not None, msg or f"Expected not None, got None"
+    
+    def assertIsNone(self, value, msg=None):
+        """Assert that value is None."""
+        assert value is None, msg or f"Expected None, got {value}"
+    
+    def assertEqual(self, first, second, msg=None):
+        """Assert that first equals second."""
+        assert first == second, msg or f"Expected {first} == {second}"
+    
+    def assertNotEqual(self, first, second, msg=None):
+        """Assert that first does not equal second."""
+        assert first != second, msg or f"Expected {first} != {second}"
+    
+    def assertTrue(self, expr, msg=None):
+        """Assert that expr is true."""
+        assert expr, msg or f"Expected True, got {expr}"
+    
+    def assertFalse(self, expr, msg=None):
+        """Assert that expr is false."""
+        assert not expr, msg or f"Expected False, got {expr}"
+    
+    def assertIn(self, member, container, msg=None):
+        """Assert that member is in container."""
+        assert member in container, msg or f"Expected {member} in {container}"
+    
+    def assertNotIn(self, member, container, msg=None):
+        """Assert that member is not in container."""
+        assert member not in container, msg or f"Expected {member} not in {container}"
+    
+    def assertGreater(self, first, second, msg=None):
+        """Assert that first > second."""
+        assert first > second, msg or f"Expected {first} > {second}"
+    
+    def assertGreaterEqual(self, first, second, msg=None):
+        """Assert that first >= second."""
+        assert first >= second, msg or f"Expected {first} >= {second}"
+    
+    def assertLess(self, first, second, msg=None):
+        """Assert that first < second."""
+        assert first < second, msg or f"Expected {first} < {second}"
+    
+    def assertLessEqual(self, first, second, msg=None):
+        """Assert that first <= second."""
+        assert first <= second, msg or f"Expected {first} <= {second}"
     
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """

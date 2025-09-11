@@ -1,30 +1,33 @@
-"""WebSocket Error Validator - Test Compatibility Module
+"""WebSocket Error Validator - Enhanced Compatibility Module
 
-COMPATIBILITY MODULE: This module provides error validation functionality for
-WebSocket tests that expect structured error handling validation.
+COMPREHENSIVE COMPATIBILITY MODULE: This module provides advanced error validation 
+functionality for WebSocket tests that expect structured error handling validation,
+while maintaining backward compatibility with simple validation patterns.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (Test Infrastructure)
-- Business Goal: Enable comprehensive WebSocket error testing
-- Value Impact: Ensures WebSocket errors are properly validated and handled
-- Revenue Impact: Protects $500K+ ARR by ensuring chat reliability
+- Segment: Platform/Internal (Test Infrastructure + Production Monitoring)
+- Business Goal: Enable comprehensive WebSocket error testing and production monitoring
+- Value Impact: Ensures WebSocket errors are properly validated, handled, and recovered from
+- Revenue Impact: Protects $500K+ ARR by ensuring chat reliability and error resilience
 
 COMPLIANCE NOTES:
-- This is a COMPATIBILITY MODULE for test infrastructure
+- This is a COMPREHENSIVE COMPATIBILITY MODULE for test infrastructure and production use
 - Provides structured error validation for WebSocket operations
 - Follows SSOT principles by integrating with unified error handling
+- Maintains backward compatibility with simple validation patterns
+- Supports both basic and advanced error handling workflows
 """
 
 from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timezone
-
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
+<<<<<<< HEAD
 class WebSocketErrorType(Enum):
     """WebSocket error types for validation."""
     CONNECTION_FAILED = "connection_failed"
@@ -415,6 +418,76 @@ def reset_websocket_validator():
     pass
 
 
+# ===== ADDITIONAL COMPATIBILITY METHODS (FROM REMOTE) =====
+
+# Add simple validation methods from remote for backward compatibility
+def validate_error_response(error_data: Dict[str, Any]) -> bool:
+    """
+    COMPATIBILITY FUNCTION: Validate WebSocket error response format (simple version).
+    
+    This function provides the simple validation from the remote branch for
+    backward compatibility with tests expecting basic error validation.
+    
+    Args:
+        error_data: Error data dictionary
+        
+    Returns:
+        bool: True if valid error format
+    """
+    required_fields = ['error_type', 'message', 'timestamp']
+    is_valid = all(field in error_data for field in required_fields)
+    logger.debug(f"Simple error response validation: {is_valid}")
+    return is_valid
+
+
+def validate_websocket_message(message: Dict[str, Any]) -> List[str]:
+    """
+    COMPATIBILITY FUNCTION: Validate WebSocket message format (simple version).
+    
+    This function provides the simple message validation from the remote branch
+    for backward compatibility with tests expecting basic message validation.
+    
+    Args:
+        message: WebSocket message dictionary
+        
+    Returns:
+        List[str]: List of validation errors (empty if valid)
+    """
+    errors = []
+    
+    if not isinstance(message, dict):
+        errors.append("Message must be a dictionary")
+        return errors
+        
+    if 'type' not in message:
+        errors.append("Message must contain 'type' field")
+        
+    if 'data' not in message:
+        errors.append("Message must contain 'data' field")
+    
+    logger.debug(f"Simple message validation: {len(errors)} errors found")
+    return errors
+
+
+def is_valid_connection_state(state: str) -> bool:
+    """
+    COMPATIBILITY FUNCTION: Check if connection state is valid (simple version).
+    
+    This function provides the simple connection state validation from the remote
+    branch for backward compatibility with basic state checking.
+    
+    Args:
+        state: Connection state string
+        
+    Returns:
+        bool: True if valid state
+    """
+    valid_states = ['connecting', 'connected', 'disconnecting', 'disconnected', 'error']
+    is_valid = state in valid_states
+    logger.debug(f"Simple connection state validation for '{state}': {is_valid}")
+    return is_valid
+
+
 # Legacy alias for test compatibility
 WebSocketEventValidator = WebSocketErrorValidator
 
@@ -431,7 +504,11 @@ __all__ = [
     'create_websocket_error_validator',
     'create_websocket_error_handler',
     'get_websocket_validator',
-    'reset_websocket_validator'
+    'reset_websocket_validator',
+    # Simple compatibility functions from remote
+    'validate_error_response',
+    'validate_websocket_message',
+    'is_valid_connection_state'
 ]
 
 logger.info("WebSocket Error Validator compatibility module loaded")

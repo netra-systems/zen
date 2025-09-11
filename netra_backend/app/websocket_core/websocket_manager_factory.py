@@ -95,6 +95,58 @@ class FactoryMetrics:
         }
 
 
+def create_defensive_user_execution_context(
+    user_id: str, 
+    websocket_client_id: Optional[str] = None,
+    fallback_context: Optional[Dict[str, Any]] = None
+) -> 'UserExecutionContext':
+    """
+    Create a defensive UserExecutionContext with proper validation.
+    
+    This function provides backward compatibility for the unified authentication service
+    that expects defensive context creation during WebSocket authentication flows.
+    
+    Args:
+        user_id: User identifier for the context
+        websocket_client_id: Optional WebSocket connection ID
+        fallback_context: Optional fallback context data
+        
+    Returns:
+        UserExecutionContext: Properly configured context for WebSocket authentication
+    """
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
+    from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+    
+    logger.debug(f"Creating defensive UserExecutionContext for user: {user_id}")
+    
+    # Use ID manager for consistent ID generation
+    id_manager = UnifiedIDManager()
+    
+    # Generate IDs if not provided in fallback_context
+    if fallback_context and 'thread_id' in fallback_context:
+        thread_id = fallback_context['thread_id']
+    else:
+        thread_id = id_manager.generate_thread_id()
+        
+    if fallback_context and 'run_id' in fallback_context:
+        run_id = fallback_context['run_id']
+    else:
+        run_id = id_manager.generate_run_id(thread_id)
+    
+    # Create defensive context with proper validation
+    context = UserExecutionContext(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        request_id=f"defensive_auth_{user_id}_{websocket_client_id or 'no_ws'}",
+        websocket_client_id=websocket_client_id,
+        agent_context=fallback_context or {}
+    )
+    
+    logger.debug(f"Created defensive context: user={user_id}, ws_id={websocket_client_id}")
+    return context
+
+
 def create_websocket_manager(user_context=None, user_id: Optional[UserID] = None):
     """
     Factory function to create WebSocketManager instances with proper SSOT compliance.
@@ -255,30 +307,6 @@ def _validate_ssot_user_context_staging_safe(user_context) -> bool:
     return True
 
 
-class WebSocketManagerFactory:
-    """
-    COMPATIBILITY CLASS: Legacy factory class for backward compatibility.
-    
-    This class provides the same interface as the previous factory implementation
-    but uses the SSOT WebSocketManager under the hood.
-    """
-    
-    @staticmethod
-    def create(user_context=None, user_id: Optional[UserID] = None):
-        """Create WebSocket manager using static factory method."""
-        return create_websocket_manager(user_context=user_context, user_id=user_id)
-    
-    @classmethod
-    def create_for_user(cls, user_id: UserID):
-        """Create WebSocket manager for specific user ID."""
-        return create_websocket_manager(user_id=user_id)
-    
-    @classmethod  
-    def create_isolated(cls, user_context):
-        """Create isolated WebSocket manager with user context."""
-        return create_websocket_manager(user_context=user_context)
-
-
 # For compatibility with any tests that expect the manager class directly
 IsolatedWebSocketManager = WebSocketManager
 
@@ -338,52 +366,6 @@ class ConnectionLifecycleManager:
             await self.unregister_connection(conn_id)
         
         return len(stale_connections)
-
-
-def create_defensive_user_execution_context(user_id: UserID, **kwargs):
-    """
-    COMPATIBILITY FUNCTION: Create defensive user execution context.
-    
-    This function provides backward compatibility for tests that expect
-    defensive context creation patterns. The SSOT implementation handles
-    user context creation through the standard UserExecutionContext.
-    
-    Args:
-        user_id: User ID for context creation
-        **kwargs: Additional context parameters
-    
-    Returns:
-        UserExecutionContext: Configured user execution context
-    """
-    logger.info(f"Creating defensive user execution context for user: {user_id}")
-    
-    try:
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        # Ensure proper UserID type
-        typed_user_id = ensure_user_id(user_id)
-        
-        # Create defensive context with validation
-        context = UserExecutionContext(
-            user_id=typed_user_id,
-            request_id=kwargs.get("request_id", f"defensive_context_{typed_user_id}"),
-            environment=kwargs.get("environment", "test"),
-            thread_id=kwargs.get("thread_id"),
-            session_id=kwargs.get("session_id"),
-            features=kwargs.get("features", {}),
-            configuration_overrides=kwargs.get("configuration_overrides", {})
-        )
-        
-        # Add defensive validation
-        if not context.user_id:
-            raise FactoryInitializationError("User ID required for defensive context")
-        
-        logger.debug(f"Defensive user execution context created: {context.request_id}")
-        return context
-        
-    except Exception as e:
-        logger.error(f"Failed to create defensive user execution context: {e}")
-        raise FactoryInitializationError(f"Context creation failed: {e}")
 
 
 # ===== ENHANCED WEBSOCKET MANAGER FACTORY CLASS =====

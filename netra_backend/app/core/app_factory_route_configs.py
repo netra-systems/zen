@@ -119,7 +119,7 @@ def _get_tool_utility_configs(modules: dict) -> dict:
     """Get tool utility route configurations."""
     return {"demo": (modules["demo"].router, "", ["demo"]),
             "unified_tools": (modules["unified_tools"].router, "/api/tools", ["unified-tools"]),
-            "users": (modules["users"].router, "", ["users"])}
+            "users": (modules["users"].router, "/api/v1", ["users"])}
 
 
 def _get_factory_configs(modules: dict) -> dict:
