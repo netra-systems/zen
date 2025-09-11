@@ -2,11 +2,18 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-08T10:55:51.758187",
+    "generated_at": "2025-09-10T11:32:11.410211",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
-    "total_literals": 36
+    "total_literals": 37
   },
   "literals": {
+    ".websocket_event": {
+      "value": ".websocket_event",
+      "category": "events",
+      "locations": [
+        "netra_backend/app/core/exceptions/error_policy.py:347"
+      ]
+    },
     ":event": {
       "value": ":event",
       "category": "events",
@@ -63,8 +70,8 @@
         "netra_backend/app/db/connection_pool_monitor.py:133",
         "netra_backend/app/db/postgres_events.py:88",
         "netra_backend/app/db/postgres_events.py:144",
-        "netra_backend/app/websocket_core/types.py:47",
-        "netra_backend/app/websocket_core/types.py:343",
+        "netra_backend/app/websocket_core/types.py:50",
+        "netra_backend/app/websocket_core/types.py:420",
         "auth_service/auth_core/database/connection_events.py:152",
         "scripts/run_websocket_validation.py:436",
         "scripts/scan_string_literals.py:193"
@@ -82,8 +89,8 @@
       "category": "events",
       "locations": [
         "netra_backend/app/core/clickhouse_connection_manager.py:641",
-        "netra_backend/app/websocket_core/types.py:48",
-        "netra_backend/app/websocket_core/types.py:344",
+        "netra_backend/app/websocket_core/types.py:51",
+        "netra_backend/app/websocket_core/types.py:421",
         "scripts/comprehensive_error_hunter.py:118",
         "scripts/scan_string_literals.py:193"
       ]
@@ -99,14 +106,15 @@
       "value": "emit_agent_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/startup_module.py:890"
+        "netra_backend/app/startup_module.py:1045"
       ]
     },
     "emit_critical_event": {
       "value": "emit_critical_event",
       "category": "events",
       "locations": [
-        "netra_backend/app/websocket_core/protocols.py:288",
+        "netra_backend/app/websocket_core/protocols.py:292",
+        "netra_backend/app/websocket_core/protocols.py:714",
         "scripts/generate_websocket_mro_report.py:129"
       ]
     },
@@ -227,15 +235,15 @@
       "category": "events",
       "locations": [
         "netra_backend/app/core/cross_service_validators/performance_validators.py:111",
-        "netra_backend/app/routes/health.py:804",
-        "netra_backend/app/routes/health.py:816",
+        "netra_backend/app/routes/health.py:1012",
+        "netra_backend/app/routes/health.py:1024",
         "netra_backend/app/routes/mcp/websocket_handler.py:86",
         "netra_backend/app/routes/mcp/websocket_handler.py:141",
         "netra_backend/app/routes/utils/websocket_helpers.py:207",
         "netra_backend/app/routes/utils/websocket_helpers.py:278",
-        "netra_backend/app/routes/websocket.py:1552",
-        "netra_backend/app/routes/websocket_factory.py:320",
-        "netra_backend/app/routes/websocket_isolated.py:254"
+        "netra_backend/app/schemas/core_enums.py:62",
+        "netra_backend/app/schemas/core_enums.py:171",
+        "netra_backend/app/services/health/deep_checks.py:275"
       ]
     },
     "pong": {
@@ -246,12 +254,12 @@
         "netra_backend/app/routes/mcp/websocket_handler.py:145",
         "netra_backend/app/routes/utils/websocket_helpers.py:199",
         "netra_backend/app/routes/utils/websocket_helpers.py:311",
-        "netra_backend/app/routes/websocket.py:923",
-        "netra_backend/app/routes/websocket.py:1555",
-        "netra_backend/app/routes/websocket_factory.py:323",
-        "netra_backend/app/routes/websocket_isolated.py:257",
         "netra_backend/app/schemas/core_enums.py:63",
-        "netra_backend/app/schemas/core_enums.py:172"
+        "netra_backend/app/schemas/core_enums.py:172",
+        "netra_backend/app/websocket_core/types.py:55",
+        "netra_backend/app/websocket_core/types.py:418",
+        "frontend/providers/EnhancedWebSocketProvider.tsx:486",
+        "scripts/scan_string_literals.py:193"
       ]
     },
     "privacy_event": {

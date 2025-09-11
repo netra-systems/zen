@@ -18,81 +18,87 @@ This document provides a comprehensive index of all SSOT components in the Netra
 - **Impact**: One typo = cascade failure across entire system
 - **Business Value**: Without this, no chat, no agents, no value delivery
 
-#### 2. **UniversalRegistry Pattern**
-- **Location**: `netra_backend/app/core/registry/universal_registry.py`
-- **Purpose**: Generic SSOT for ALL registry patterns (eliminated 48 duplicates)
-- **Impact**: Thread-safe multi-user operations, factory pattern support
-- **Business Value**: Enables user isolation, reduces maintenance by 90%
-
-#### 3. **UnifiedWebSocketManager**
+#### 2. **UnifiedWebSocketManager (MEGA CLASS)**
 - **Location**: `netra_backend/app/websocket_core/unified_manager.py`
+- **Size**: 2,494 lines (⚠️ EXCEEDS 2000 line limit)
 - **Purpose**: Central WebSocket connection management
 - **Impact**: Controls 90% of platform value (real-time chat)
 - **Business Value**: No WebSocket = No real-time updates = Dead chat
 
-#### 4. **DatabaseManager (Mega Class)**
+#### 3. **DatabaseManager**
 - **Location**: `netra_backend/app/db/database_manager.py`
-- **Size**: 1825 lines (max 2000)
-- **Purpose**: Central SSOT for ALL database operations
+- **Size**: 361 lines
+- **Purpose**: Central SSOT for database operations using DatabaseURLBuilder
 - **Impact**: PostgreSQL, ClickHouse, Redis unified interface
 - **Business Value**: Database failures = Complete platform failure
+
+#### 4. **ClickHouse Module (MEGA CLASS)**
+- **Location**: `netra_backend/app/db/clickhouse.py`
+- **Size**: 1,470 lines (max 2000)
+- **Purpose**: SSOT for ClickHouse analytics operations
+- **Impact**: Analytics data collection, caching, query execution
+- **Business Value**: Critical for business intelligence and optimization
 
 ### 🟡 TIER 2: CRITICAL (8-9/10)
 *Major functionality broken without these*
 
-#### 5. **UnifiedLifecycleManager (Mega Class)**
-- **Location**: `netra_backend/app/core/managers/unified_lifecycle_manager.py`
-- **Size**: 1950 lines (max 2000)
-- **Purpose**: Consolidates 100+ legacy managers
-- **Impact**: Startup, shutdown, health monitoring
-- **Business Value**: Zero-downtime deployments, chat reliability
+#### 5. **AgentRegistry (MEGA CLASS)**
+- **Location**: `netra_backend/app/agents/supervisor/agent_registry.py`
+- **Size**: 1,469 lines (max 2000)
+- **Purpose**: SSOT for agent registration with hardened user isolation
+- **Impact**: Factory-based user isolation, agent lifecycle management
+- **Business Value**: Enables dynamic agent orchestration, prevents cross-user contamination
 
-#### 6. **UnifiedConfigurationManager (Mega Class)**
+#### 6. **UnifiedConfigurationManager (MEGA CLASS)**
 - **Location**: `netra_backend/app/core/managers/unified_configuration_manager.py`
-- **Size**: 1890 lines (max 2000)
-- **Purpose**: Consolidates 50+ config managers
+- **Size**: 1,200 lines (max 2000)
+- **Purpose**: SSOT for all configuration operations across services
 - **Impact**: Multi-source config with validation
 - **Business Value**: Eliminates config drift across environments
 
-#### 7. **UnifiedStateManager (Mega Class)**
-- **Location**: `netra_backend/app/core/managers/unified_state_manager.py`
-- **Size**: 1820 lines (max 2000)
-- **Purpose**: Consolidates 50+ state managers
-- **Impact**: Agent state consistency, WebSocket sync
-- **Business Value**: Multi-user state isolation
+#### 7. **UnifiedLifecycleManager (MEGA CLASS)**
+- **Location**: `netra_backend/app/core/managers/unified_lifecycle_manager.py`
+- **Size**: 1,251 lines (max 2000)
+- **Purpose**: SSOT for application lifecycle management
+- **Impact**: Centralized service startup, shutdown, and lifecycle coordination
+- **Business Value**: Zero-downtime deployments, chat reliability
 
-#### 8. **AgentRegistry**
-- **Location**: `netra_backend/app/agents/supervisor/agent_registry.py`
-- **Purpose**: Central agent registration using UniversalRegistry
-- **Impact**: All agent lifecycle and factory management
-- **Business Value**: Enables dynamic agent orchestration
+#### 8. **UnifiedStateManager (MEGA CLASS)**
+- **Location**: `netra_backend/app/core/managers/unified_state_manager.py`
+- **Size**: 1,311 lines (max 2000)
+- **Purpose**: SSOT for application state management
+- **Impact**: Centralized state persistence, user session management
+- **Business Value**: Multi-user state isolation, session consistency
 
 ### 🟢 TIER 3: IMPORTANT (6-7/10)
 *Degraded functionality without these*
 
-#### 9. **UnifiedAuthInterface**
+#### 9. **State Persistence Service (MEGA CLASS)**
+- **Location**: `netra_backend/app/services/state_persistence.py`
+- **Size**: 1,167 lines (max 2000)
+- **Purpose**: SSOT consolidated 3-tier state persistence (Redis/ClickHouse/PostgreSQL)
+- **Impact**: Consolidates StateCacheManager functionality, 3-tier architecture
+- **Business Value**: Performance optimization through intelligent caching
+
+#### 10. **UnifiedAuthInterface**
 - **Location**: `auth_service/auth_core/unified_auth_interface.py`
-- **Purpose**: Central authentication interface
-- **Impact**: All auth flows go through this
+- **Size**: 505 lines
+- **Purpose**: SSOT for all authentication operations
+- **Impact**: JWT handling, session management, security validation
 - **Business Value**: No auth = No user access
 
-#### 10. **LLMManager**
-- **Location**: `netra_backend/app/llm/llm_manager.py`
-- **Purpose**: Central LLM provider management
-- **Impact**: All AI operations depend on this
-- **Business Value**: Core AI functionality control
+#### 11. **UnifiedIDManager**
+- **Location**: `netra_backend/app/core/unified_id_manager.py`
+- **Size**: 820 lines
+- **Purpose**: SSOT for ID generation and management across platform
+- **Impact**: Unique ID generation for users, sessions, agents, tools, etc.
+- **Business Value**: Prevents ID collisions, ensures uniqueness
 
-#### 11. **RedisManager**
-- **Location**: `netra_backend/app/redis_manager.py`
-- **Purpose**: Central Redis connection management
-- **Impact**: Caching, session management
-- **Business Value**: Performance optimization
-
-#### 12. **UnifiedTestRunner (Mega Class)**
+#### 12. **UnifiedTestRunner (MEGA CLASS)**
 - **Location**: `tests/unified_test_runner.py`
-- **Size**: 1728 lines (max 2000)
-- **Purpose**: Central test orchestration
-- **Impact**: All test types coordination
+- **Size**: 3,501 lines (⚠️ EXCEEDS 2000 line limit)
+- **Purpose**: SSOT for test execution with advanced orchestration
+- **Impact**: Modern test runner with layer-based orchestration
 - **Business Value**: Quality assurance automation
 
 ## Mermaid Diagrams
@@ -599,10 +605,44 @@ python tests/unified_test_runner.py --real-services
 ## Critical Files to Never Break
 
 1. `SPEC/MISSION_CRITICAL_NAMED_VALUES_INDEX.xml` - Config values
-2. `netra_backend/app/core/registry/universal_registry.py` - Registry pattern
-3. `netra_backend/app/websocket_core/unified_manager.py` - WebSocket core
-4. `netra_backend/app/db/database_manager.py` - Database operations
-5. `netra_backend/app/core/managers/*.py` - Unified managers
+2. `netra_backend/app/websocket_core/unified_manager.py` - WebSocket core (2,494 lines)
+3. `netra_backend/app/db/database_manager.py` - Database operations
+4. `netra_backend/app/db/clickhouse.py` - ClickHouse SSOT (1,470 lines)
+5. `netra_backend/app/agents/supervisor/agent_registry.py` - Agent registry (1,469 lines)
+6. `netra_backend/app/core/managers/unified_configuration_manager.py` - Config SSOT (1,200 lines)
+7. `netra_backend/app/core/managers/unified_lifecycle_manager.py` - Lifecycle SSOT (1,251 lines)
+8. `netra_backend/app/core/managers/unified_state_manager.py` - State SSOT (1,311 lines)
+9. `netra_backend/app/services/state_persistence.py` - State persistence SSOT (1,167 lines)
+10. `auth_service/auth_core/unified_auth_interface.py` - Auth SSOT (505 lines)
+11. `netra_backend/app/core/unified_id_manager.py` - ID generation SSOT (820 lines)
+12. `tests/unified_test_runner.py` - Test runner SSOT (3,501 lines)
+13. `test_framework/unified_docker_manager.py` - Docker SSOT (5,091 lines)
+14. `test_framework/ssot/base_test_case.py` - Test base SSOT (599 lines)
+15. `netra_backend/app/core/reliability/unified_reliability_manager.py` - Reliability SSOT
+
+## 🔵 TIER 4: INFRASTRUCTURE COMPONENTS (5-6/10)
+*Critical infrastructure and testing SSOT classes*
+
+#### 13. **UnifiedDockerManager (MEGA CLASS)**
+- **Location**: `test_framework/unified_docker_manager.py`
+- **Size**: 5,091 lines (⚠️ SIGNIFICANTLY EXCEEDS 2000 line limit)
+- **Purpose**: SSOT for Docker operations and service orchestration
+- **Impact**: Cross-platform locking, health monitoring, memory optimization
+- **Business Value**: Reliable containerized development and testing
+
+#### 14. **SSOT BaseTestCase**
+- **Location**: `test_framework/ssot/base_test_case.py`
+- **Size**: 599 lines
+- **Purpose**: SSOT canonical base test case - ALL tests must inherit from this
+- **Impact**: Eliminates 6,096+ duplicate test implementations
+- **Business Value**: Consistent testing patterns, reduced maintenance
+
+#### 15. **UnifiedReliabilityManager**
+- **Location**: `netra_backend/app/core/reliability/unified_reliability_manager.py`
+- **Size**: Not measured (exists)
+- **Purpose**: SSOT for reliability patterns (circuit breakers, retries)
+- **Impact**: Centralized reliability and resilience management
+- **Business Value**: System stability under failure conditions
 
 ## 🔵 TIER 4: OPERATIONAL COMPONENTS (5-6/10)
 *See [SSOT_INDEX_TIER_4.md](./SSOT_INDEX_TIER_4.md) for complete documentation*
@@ -625,6 +665,28 @@ python tests/unified_test_runner.py --real-services
 
 ---
 
-**Last Updated**: 2025-01-05
-**Next Review**: Quarterly or when approaching size limits
+## 🚨 CRITICAL COMPLIANCE ISSUES
+
+### MEGA Classes Exceeding 2000-Line Limit
+1. **UnifiedWebSocketManager**: 2,494 lines (494 lines over limit)
+   - **Risk**: High maintenance burden, difficult to review
+   - **Action Required**: Refactor or request architectural exception
+   
+2. **UnifiedTestRunner**: 3,501 lines (1,501 lines over limit)  
+   - **Risk**: Complex test orchestration becoming unmaintainable
+   - **Action Required**: Split into focused components
+   
+3. **UnifiedDockerManager**: 5,091 lines (3,091 lines over limit)
+   - **Risk**: Massive MEGA class violating all size principles
+   - **Action Required**: Urgent architectural review and decomposition
+
+### Summary Statistics (UPDATED)
+- **Total SSOT Classes**: 15 major classes (previously 12)
+- **MEGA Classes (>1000 lines)**: 8 classes  
+- **Classes Exceeding Limits**: 3 classes require immediate attention
+- **Total SSOT Code Lines**: ~19,000+ lines
+- **Compliance Score**: 99%+ SSOT compliance, but size limit violations
+
+**Last Updated**: 2025-09-10 (Refreshed from actual codebase scan)
+**Next Review**: Monthly due to size limit violations
 **Owner**: Principal Engineer Role
