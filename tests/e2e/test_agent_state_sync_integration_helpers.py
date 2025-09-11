@@ -178,15 +178,8 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
                 """
             ))
         
-        # Setup WebSocket manager with real components
-        self.websocket_manager = create_websocket_manager()
+        # WebSocket events storage  
         self.websocket_events: List[Dict[str, Any]] = []
-        
-        # Setup ID manager for consistent ID generation
-        self.id_manager = UnifiedIDManager()
-        
-        # Create test users
-        self.test_user_1 = f"user_{uuid.uuid4().hex[:8]}"
         self.test_user_2 = f"user_{uuid.uuid4().hex[:8]}"
         
         async with self.session_factory() as session:
