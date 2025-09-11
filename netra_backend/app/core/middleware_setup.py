@@ -246,179 +246,61 @@ def _add_session_middleware_with_validation(app: FastAPI, session_config: dict, 
     )
 
 def _validate_and_get_secret_key(config, environment) -> str:
-    """Validate and get secret_key with enhanced GCP Secret Manager integration.
+    """Validate and get secret_key using unified secret management.
     
-    CRITICAL FIX for Issue #169: Enhanced SECRET_KEY validation with multiple fallback strategies:
-    1. Config secret_key (primary)
-    2. Direct environment variable access
-    3. GCP Secret Manager integration for staging/production
-    4. Development fallback for dev/test environments
+    CRITICAL FIX for Issue #169: Uses UnifiedSecretManager for consistent secret loading
+    across all deployment environments, eliminating the root cause of SessionMiddleware failures.
     
-    This addresses the root cause of SessionMiddleware failures where SECRET_KEY
-    validation was too strict or GCP secrets were not properly loaded.
+    This replaces multiple inconsistent secret loading patterns with a single SSOT approach.
     """
-    from shared.isolated_environment import get_env
+    from netra_backend.app.core.unified_secret_manager import get_session_secret
     
-    # First try config.secret_key
-    secret_key = getattr(config, 'secret_key', None)
+    # First try config.secret_key for backward compatibility
+    config_secret = getattr(config, 'secret_key', None)
+    if config_secret and config_secret != "default_secret_key" and len(config_secret) >= 32:
+        logger.info(f"Using config.secret_key for {environment.value} (length: {len(config_secret)})")
+        return config_secret
     
-    if not secret_key or secret_key == "default_secret_key" or len(secret_key) < 32:
-        logger.warning(f"Config secret_key invalid or missing (length: {len(secret_key) if secret_key else 0})")
-        
-        # Enhanced fallback chain
-        secret_key = _load_secret_key_with_fallbacks(environment)
-    
-    # Final validation
-    if len(secret_key) < 32:
-        raise ValueError(f"SECRET_KEY must be at least 32 characters long, got {len(secret_key)}")
-    
-    logger.info(f"SECRET_KEY validated successfully for {environment.value} (length: {len(secret_key)})")
-    return secret_key
-
-
-def _load_secret_key_with_fallbacks(environment) -> str:
-    """Load SECRET_KEY with comprehensive fallback strategies.
-    
-    Args:
-        environment: Current deployment environment
-        
-    Returns:
-        Valid SECRET_KEY string
-        
-    Raises:
-        ValueError: If no valid SECRET_KEY can be obtained for production environments
-    """
-    env = get_env()
-    
-    # Strategy 1: Direct environment variable
-    env_secret = env.get('SECRET_KEY')
-    if env_secret and len(env_secret.strip()) >= 32:
-        logger.info("Loaded SECRET_KEY from environment variable")
-        return env_secret.strip()
-    
-    # Strategy 2: GCP Secret Manager for staging/production
-    if environment.value in ['staging', 'production']:
-        gcp_secret = _load_secret_from_gcp('SECRET_KEY', env)
-        if gcp_secret and len(gcp_secret) >= 32:
-            logger.info(f"Loaded SECRET_KEY from GCP Secret Manager for {environment.value}")
-            return gcp_secret
-    
-    # Strategy 3: Alternative environment variable names
-    for alt_name in ['SESSION_SECRET_KEY', 'STARLETTE_SECRET_KEY', 'APP_SECRET_KEY']:
-        alt_secret = env.get(alt_name)
-        if alt_secret and len(alt_secret.strip()) >= 32:
-            logger.info(f"Loaded SECRET_KEY from alternative environment variable: {alt_name}")
-            return alt_secret.strip()
-    
-    # Strategy 4: Development fallback
-    if environment.value in ["development", "testing"]:
-        dev_secret = "dev-session-secret-key-32-chars-minimum-required-length-for-starlette-security"
-        logger.warning("Using development fallback SECRET_KEY")
-        return dev_secret
-    
-    # Strategy 5: Emergency staging fallback (prevents deployment failures)
-    if environment.value == "staging":
-        staging_secret = _generate_emergency_staging_secret(env)
-        logger.error(f"EMERGENCY: Using generated SECRET_KEY for staging (GCP secrets unavailable)")
-        return staging_secret
-    
-    # Production MUST have proper SECRET_KEY
-    raise ValueError(
-        f"CRITICAL: SECRET_KEY environment variable is required for {environment.value} but "
-        f"is missing or too short (minimum 32 characters). "
-        f"Checked: SECRET_KEY, SESSION_SECRET_KEY, STARLETTE_SECRET_KEY, APP_SECRET_KEY, GCP Secret Manager. "
-        f"Found lengths: {[len(env.get(name, '')) for name in ['SECRET_KEY', 'SESSION_SECRET_KEY', 'STARLETTE_SECRET_KEY', 'APP_SECRET_KEY']]}"
-    )
-
-
-def _load_secret_from_gcp(secret_name: str, env_manager) -> Optional[str]:
-    """Load secret from GCP Secret Manager.
-    
-    Args:
-        secret_name: Name of the secret to load
-        env_manager: Environment manager for project info
-        
-    Returns:
-        Secret value if available, None otherwise
-    """
+    # Use unified secret manager for comprehensive secret loading
     try:
-        project_id = env_manager.get('GCP_PROJECT_ID') or env_manager.get('GOOGLE_CLOUD_PROJECT')
-        if not project_id:
-            logger.debug("No GCP project ID found, skipping GCP Secret Manager")
-            return None
+        secret_info = get_session_secret(environment.value)
         
-        # Try to use existing secret manager infrastructure
-        try:
-            from shared.secret_manager_builder import SecretManagerBuilder
-            secret_builder = SecretManagerBuilder()
-            
-            # Access the secret through the builder
-            if hasattr(secret_builder, 'get_secret'):
-                secret_value = secret_builder.get_secret(secret_name)
-                if secret_value and len(secret_value) >= 32:
-                    return secret_value
-            
-        except ImportError:
-            logger.debug("SecretManagerBuilder not available, trying direct GCP access")
+        if secret_info.is_fallback:
+            logger.warning(f"Using fallback SECRET_KEY for {environment.value} "
+                          f"(source: {secret_info.source.value})")
         
-        # Fallback to direct GCP Secret Manager access
-        try:
-            from google.cloud import secretmanager
-            
-            client = secretmanager.SecretManagerServiceClient()
-            secret_path = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
-            
-            response = client.access_secret_version(request={"name": secret_path})
-            secret_value = response.payload.data.decode("UTF-8").strip()
-            
-            if len(secret_value) >= 32:
-                return secret_value
-            else:
-                logger.warning(f"GCP secret {secret_name} too short: {len(secret_value)} chars")
-                
-        except Exception as gcp_error:
-            logger.debug(f"GCP Secret Manager access failed: {gcp_error}")
-    
+        if secret_info.is_generated:
+            logger.error(f"Using generated SECRET_KEY for {environment.value} "
+                        f"- GCP Secret Manager may be unavailable")
+        
+        # Log validation notes for debugging
+        for note in secret_info.validation_notes:
+            logger.debug(f"SECRET_KEY validation: {note}")
+        
+        logger.info(f"SECRET_KEY loaded via UnifiedSecretManager for {environment.value} "
+                   f"(source: {secret_info.source.value}, length: {secret_info.length})")
+        
+        return secret_info.value
+        
     except Exception as e:
-        logger.debug(f"Error loading secret from GCP: {e}")
-    
-    return None
-
-
-def _generate_emergency_staging_secret(env_manager) -> str:
-    """Generate emergency SECRET_KEY for staging when GCP secrets are unavailable.
-    
-    This prevents staging deployment failures while maintaining security.
-    The generated key is deterministic based on environment but secure enough for staging.
-    
-    Args:
-        env_manager: Environment manager
+        logger.error(f"UnifiedSecretManager failed to load SECRET_KEY: {e}")
         
-    Returns:
-        Generated SECRET_KEY for staging use
-    """
-    import hashlib
-    import secrets
-    
-    # Use a combination of environment-specific and random data
-    project_id = env_manager.get('GCP_PROJECT_ID', 'netra-staging')
-    deployment_id = env_manager.get('K_SERVICE', 'netra-backend')
-    
-    # Create deterministic but secure key for staging
-    base_string = f"{project_id}-{deployment_id}-staging-emergency-secret"
-    hash_value = hashlib.sha256(base_string.encode()).hexdigest()
-    
-    # Add some randomness for additional security
-    random_suffix = secrets.token_urlsafe(8)
-    
-    emergency_key = f"{hash_value[:40]}{random_suffix}"[:64]  # Ensure exactly 64 chars
-    
-    logger.warning(
-        f"Generated emergency staging SECRET_KEY (project: {project_id}, service: {deployment_id}). "
-        "This should only be used when GCP Secret Manager is unavailable."
-    )
-    
-    return emergency_key
+        # Final emergency fallback to prevent deployment failures
+        if environment.value in ["development", "testing"]:
+            emergency_key = "emergency-dev-session-secret-key-32-chars-minimum-required-for-starlette"
+            logger.warning(f"Using emergency development SECRET_KEY for {environment.value}")
+            return emergency_key
+        else:
+            # For production/staging, we must fail if we can't get a proper secret
+            raise ValueError(
+                f"CRITICAL: Could not load SECRET_KEY for {environment.value} environment. "
+                f"UnifiedSecretManager error: {e}. "
+                "Check GCP Secret Manager configuration and environment variables."
+            )
+
+
+# Legacy secret loading functions removed - now handled by UnifiedSecretManager
+# This eliminates duplicate secret management code and consolidates to SSOT pattern
 
 def _add_fallback_session_middleware(app: FastAPI) -> None:
     """Add basic session middleware as fallback to prevent deployment failures.
