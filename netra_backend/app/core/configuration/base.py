@@ -157,7 +157,7 @@ class UnifiedConfigManager:
                     
             return config
         except Exception as e:
-            self._logger.error(
+            self._get_logger().error(
                 f"❌ VALIDATION FAILURE: Failed to create configuration for environment '{environment}'. "
                 f"Error: {e}. Falling back to basic AppConfig. This may cause missing configuration values."
             )
