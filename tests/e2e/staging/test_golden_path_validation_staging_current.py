@@ -43,7 +43,7 @@ class TestGoldenPathValidationStagingIssues:
     @pytest.fixture
     def validator(self):
         """Create validator configured for staging environment."""
-        return GoldenPathValidator(environment=EnvironmentType.STAGING)
+        return GoldenPathValidator()
 
     @pytest.fixture
     async def staging_auth_helper(self):
