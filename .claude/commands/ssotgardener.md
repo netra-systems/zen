@@ -14,6 +14,7 @@ Your goals are to:
 Context
 1. You must keep going until all work is fully completed.
 2. Have sub agents use built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+Stay on develop-long-lived branch as current branch.
 3. Focus areas (output this to console) of SSOT: ${1 : latest}
 4. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 5. ALL Github output (issues, comments, prs etc.) MUST follow @GITHUB_STYLE_GUIDE.md
