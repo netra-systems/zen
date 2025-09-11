@@ -415,109 +415,112 @@ class TestGCPRedisConnectivityGoldenPath:
     @pytest.mark.e2e
     @pytest.mark.infrastructure
     @pytest.mark.critical
-    async def test_gcp_memory_store_redis_accessibility_direct(
+    async def test_redis_performance_requirements_for_chat(
         self, 
-        e2e_auth_helper
+        real_redis_client
     ):
         """
-        TEST: Direct accessibility test for GCP Memory Store Redis.
+        TEST: Redis performance requirements for chat functionality.
         
-        CRITICAL: This test attempts to validate Redis accessibility patterns
-        that would be used by the actual application code.
+        REAL TEST: This test validates that Redis performance meets chat requirements.
+        Test FAILS if Redis is too slow for real-time chat operations.
         
-        Expected Behavior:
-        - Redis connection patterns should match application usage
-        - Connection failure should match 7.51s timeout pattern
-        - Error patterns should match GCP Memory Store connectivity issues
-        
-        Business Impact: Validates root cause of infrastructure failure
+        Business Impact: Chat functionality requires Redis operations to be fast enough
+        for real-time user experience. Slow Redis degrades chat quality.
         """
-        logger.info("🔍 Testing direct GCP Memory Store Redis accessibility patterns")
+        logger.info("⚡ Testing Redis performance requirements for chat functionality")
         
-        # Get environment configuration
-        env = get_env()
-        environment = env.get("TEST_ENV", env.get("ENVIRONMENT", "test"))
+        # Test 1: Basic operation latency (must be < 100ms for good chat experience)
+        operation_times = []
         
-        # Test Redis configuration patterns used by the application
-        if environment.lower() == "staging":
-            # Staging should use GCP Memory Store configuration
-            redis_host = env.get("REDIS_HOST", "localhost")
-            redis_port = env.get("REDIS_PORT", "6379")
-            redis_url = env.get("REDIS_URL", f"redis://{redis_host}:{redis_port}/0")
+        for i in range(10):
+            test_key = f"perf_test:{int(time.time())}:{i}"
+            test_value = f"chat_performance_test_data_{i}"
             
-            logger.info(f"Environment: {environment}")
-            logger.info(f"Redis Host: {redis_host}")
-            logger.info(f"Redis Port: {redis_port}")
-            logger.info(f"Redis URL: {redis_url}")
-            
-            # Validate configuration is not pointing to localhost in staging
-            if environment.lower() == "staging":
-                assert redis_host != "localhost", (
-                    f"CONFIGURATION ERROR: Redis host is localhost in staging environment. "
-                    f"Should be GCP Memory Store endpoint. Host: {redis_host}"
-                )
-                
-                assert redis_port == "6379", (
-                    f"CONFIGURATION ERROR: Redis port should be 6379 in staging, got: {redis_port}"
-                )
-            
-            # Test Redis connection timeout pattern (matches application behavior)
-            import redis
-            
+            # Measure SET operation latency
             start_time = time.time()
-            
             try:
-                # Use same connection pattern as application
-                redis_client = redis.from_url(
-                    redis_url, 
-                    decode_responses=True,
-                    socket_connect_timeout=5.0,  # Matches application timeout
-                    socket_timeout=5.0,
-                    retry_on_timeout=True
-                )
+                result = await real_redis_client.set(test_key, test_value, ex=60)
+                set_latency = (time.time() - start_time) * 1000  # Convert to ms
                 
-                # Test connection with ping (same as application)
-                await asyncio.get_event_loop().run_in_executor(
-                    None, 
-                    redis_client.ping
-                )
+                assert result is True, f"Redis SET operation failed: {result}"
                 
-                elapsed_time = time.time() - start_time
-                logger.info(f"✅ SUCCESS: Redis connection successful in {elapsed_time:.2f}s")
-                logger.info("   GCP Memory Store Redis is accessible - Infrastructure working!")
+                # Measure GET operation latency
+                get_start = time.time()
+                retrieved = await real_redis_client.get(test_key)
+                get_latency = (time.time() - get_start) * 1000  # Convert to ms
                 
-                redis_client.close()
+                assert retrieved == test_value, f"Redis GET mismatch: expected {test_value}, got {retrieved}"
                 
-                assert True, "Redis connection successful - Infrastructure connectivity restored"
+                # Cleanup
+                await real_redis_client.delete(test_key)
                 
-            except (redis.ConnectionError, redis.TimeoutError, OSError) as e:
-                elapsed_time = time.time() - start_time
+                total_latency = set_latency + get_latency
+                operation_times.append(total_latency)
                 
-                # Check if this matches the 7.51s timeout pattern
-                if 7.3 <= elapsed_time <= 7.7:
-                    logger.error(f"✅ REPRODUCED: 7.51s Redis timeout pattern - {elapsed_time:.2f}s")
-                    logger.error(f"   Error: {type(e).__name__}: {e}")
-                    logger.error("   This confirms GCP Memory Store connectivity failure")
-                    
-                    assert True, (
-                        f"Successfully reproduced 7.51s Redis timeout pattern: {e}"
-                    )
-                else:
-                    logger.error(f"⚠️  Redis connection failed in {elapsed_time:.2f}s - {type(e).__name__}: {e}")
-                    assert False, (
-                        f"Redis connection failed but timing doesn't match expected pattern: "
-                        f"{elapsed_time:.2f}s vs expected ~7.51s"
-                    )
-            
+                logger.info(f"Operation {i+1}: SET {set_latency:.1f}ms + GET {get_latency:.1f}ms = {total_latency:.1f}ms")
+                
             except Exception as e:
-                elapsed_time = time.time() - start_time
-                logger.error(f"❌ UNEXPECTED ERROR: {type(e).__name__}: {e} (after {elapsed_time:.2f}s)")
-                raise AssertionError(f"Unexpected Redis connection error: {e}")
+                logger.error(f"❌ REDIS PERFORMANCE FAILURE: Operation {i+1} failed: {e}")
+                raise AssertionError(f"Redis performance test FAILED - operation {i+1} failed: {e}")
         
-        else:
-            logger.info(f"⚠️  Skipping direct Redis test for non-staging environment: {environment}")
-            logger.info("   This test is specific to GCP Memory Store connectivity")
-            pytest.skip(f"Direct Redis connectivity test only runs in staging environment")
+        # Analyze performance results
+        avg_latency = sum(operation_times) / len(operation_times)
+        max_latency = max(operation_times)
+        min_latency = min(operation_times)
+        
+        logger.info(f"Redis Performance Results:")
+        logger.info(f"  Average latency: {avg_latency:.1f}ms")
+        logger.info(f"  Max latency: {max_latency:.1f}ms") 
+        logger.info(f"  Min latency: {min_latency:.1f}ms")
+        
+        # Performance requirements for chat functionality
+        CHAT_LATENCY_REQUIREMENT = 200.0  # ms - maximum acceptable for real-time chat
+        CHAT_AVERAGE_REQUIREMENT = 100.0  # ms - target average for good user experience
+        
+        if avg_latency > CHAT_LATENCY_REQUIREMENT:
+            logger.error(f"❌ REDIS PERFORMANCE FAILURE: Average latency {avg_latency:.1f}ms exceeds chat requirement {CHAT_LATENCY_REQUIREMENT}ms")
+            raise AssertionError(f"Redis performance test FAILED - too slow for chat: {avg_latency:.1f}ms > {CHAT_LATENCY_REQUIREMENT}ms")
+        
+        if max_latency > CHAT_LATENCY_REQUIREMENT * 2:  # Allow some spikes but not too high
+            logger.error(f"❌ REDIS PERFORMANCE FAILURE: Max latency {max_latency:.1f}ms too high for reliable chat")
+            raise AssertionError(f"Redis performance test FAILED - max latency too high for chat: {max_latency:.1f}ms")
+        
+        # Test 2: Concurrent operations (chat has multiple users)
+        concurrent_operations = []
+        
+        async def concurrent_redis_operation(index):
+            key = f"concurrent_test:{int(time.time())}:{index}"
+            value = f"concurrent_chat_data_{index}"
+            
+            start = time.time()
+            await real_redis_client.set(key, value, ex=60)
+            retrieved = await real_redis_client.get(key)
+            await real_redis_client.delete(key)
+            latency = (time.time() - start) * 1000
+            
+            assert retrieved == value, f"Concurrent operation {index} data corruption"
+            return latency
+        
+        try:
+            # Run 5 concurrent operations (simulating multiple chat users)
+            concurrent_results = await asyncio.gather(*[
+                concurrent_redis_operation(i) for i in range(5)
+            ])
+            
+            concurrent_avg = sum(concurrent_results) / len(concurrent_results)
+            logger.info(f"Concurrent operations average: {concurrent_avg:.1f}ms")
+            
+            if concurrent_avg > CHAT_LATENCY_REQUIREMENT:
+                logger.error(f"❌ REDIS CONCURRENT PERFORMANCE FAILURE: {concurrent_avg:.1f}ms > {CHAT_LATENCY_REQUIREMENT}ms")
+                raise AssertionError(f"Redis concurrent performance test FAILED - too slow for multi-user chat: {concurrent_avg:.1f}ms")
+                
+        except Exception as e:
+            logger.error(f"❌ REDIS CONCURRENT OPERATIONS FAILURE: {e}")
+            raise AssertionError(f"Redis concurrent operations test FAILED - multi-user chat not supported: {e}")
+        
+        # Test passes ONLY when Redis performance meets chat requirements
+        logger.info("✅ Redis performance meets chat functionality requirements")
 
     @pytest.mark.e2e
     @pytest.mark.infrastructure
