@@ -583,13 +583,20 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         mock_manager = AsyncMock()
         bridge._websocket_manager = mock_manager
         
+        # Mock the thread ID resolution method
+        async def mock_resolve_thread_id(run_id):
+            return self.test_thread_id  # Return our test thread ID
+        
+        bridge._resolve_thread_id_from_run_id = mock_resolve_thread_id
+        
         # Track bridge events
         bridge_events = []
         
-        async def capture_bridge_event(*args, **kwargs):
-            bridge_events.append({"args": args, "kwargs": kwargs})
+        async def capture_bridge_event(thread_id, notification):
+            bridge_events.append({"thread_id": thread_id, "notification": notification})
+            return True  # Simulate successful emission
         
-        mock_manager.send_event = capture_bridge_event
+        mock_manager.send_to_thread = capture_bridge_event
         
         # Test all bridge notification methods
         await bridge.notify_agent_started(
