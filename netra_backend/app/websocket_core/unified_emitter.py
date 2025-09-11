@@ -134,9 +134,25 @@ class UnifiedWebSocketEmitter:
         self.metrics = EmitterMetrics()
         self.metrics.critical_events = {event: 0 for event in self.CRITICAL_EVENTS}
         
-        # Event buffer for batching (future optimization)
+        # PHASE 2: Enhanced event batching and performance optimization
         self._event_buffer: List[Dict[str, Any]] = []
         self._buffer_lock = asyncio.Lock()
+        self._batch_size = 5 if performance_mode else 10  # Smaller batches for performance mode
+        self._batch_timeout = 0.05 if performance_mode else 0.1  # 50ms vs 100ms
+        self._batch_timer: Optional[asyncio.Task] = None
+        self._enable_batching = not performance_mode  # Disable batching in performance mode for lower latency
+        
+        # PHASE 2: Connection pool optimization state
+        self._connection_health_score = 100  # Start with perfect health
+        self._last_health_check = datetime.utcnow()
+        self._consecutive_failures = 0
+        self._circuit_breaker_open = False
+        self._circuit_breaker_timeout = 30.0  # 30 seconds
+        
+        # PHASE 2: High-throughput optimization settings
+        self._high_throughput_mode = performance_mode
+        self._throughput_threshold = 100 if performance_mode else 50  # events per minute
+        self._adaptive_batching = True
         
         # Security validation state (from agent_websocket_bridge.py)
         self._last_validated_run_id: Optional[str] = None
@@ -157,7 +173,11 @@ class UnifiedWebSocketEmitter:
         # Validate critical events are available
         self._validate_critical_events()
         
-        logger.info(f"UnifiedWebSocketEmitter created for user {user_id} (tier: {self._user_tier})")
+        logger.info(f"UnifiedWebSocketEmitter created for user {user_id} (tier: {self._user_tier}, performance_mode: {performance_mode}, batching: {self._enable_batching})")
+        
+        # PHASE 2: Start background event processor for batching
+        if self._enable_batching:
+            self._start_batch_processor()
     
     def _validate_critical_events(self):
         """
