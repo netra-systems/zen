@@ -225,7 +225,7 @@ class TestLoggingCircularDependencyPrevention(SSotBaseTestCase):
                 import_stack.pop()
                 raise e
         
-        original_import = __builtins__.__import__
+        original_import = __import__
         
         try:
             with patch('builtins.__import__', side_effect=track_runtime_imports):
@@ -305,7 +305,7 @@ class TestLoggingCircularDependencyPrevention(SSotBaseTestCase):
             else:
                 return original_import(name, *args, **kwargs)
         
-        original_import = __builtins__.__import__
+        original_import = __import__
         
         try:
             with patch('builtins.__import__', side_effect=lazy_import_wrapper):
@@ -379,7 +379,7 @@ class TestLoggingCircularDependencyPrevention(SSotBaseTestCase):
             else:
                 return original_import(name, *args, **kwargs)
         
-        original_import = __builtins__.__import__
+        original_import = __import__
         
         try:
             with patch('builtins.__import__', side_effect=dependency_injection_wrapper):
