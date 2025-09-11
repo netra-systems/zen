@@ -68,8 +68,27 @@ Deployment system has 7 conflicting entry points claiming canonical authority, c
 - ✅ Mission critical safeguards (Golden Path protection for $500K+ ARR)
 - ✅ Tests designed to FAIL on SSOT violations
 
-### ⏳ Step 3: PLAN REMEDIATION OF SSOT
-- [ ] Plan SSOT remediation strategy
+### ✅ Step 3: PLAN REMEDIATION OF SSOT
+- [x] Plan SSOT remediation strategy
+
+#### 3.1 Canonical Source Decision
+**APPROVED ARCHITECTURE:** Split deployment concerns
+- **UnifiedTestRunner** (`tests/unified_test_runner.py`) = PRIMARY deployment orchestration
+- **terraform-gcp-staging/** = Infrastructure provisioning (VPC, databases, secrets)
+- **ALL OTHER 5 SOURCES DEPRECATED**
+
+#### 3.2 5-Step Migration Strategy
+1. **Week 1:** Immediate deprecation of 5 sources with redirect wrappers
+2. **Week 2:** Configuration consolidation (terraform + script configs)
+3. **Week 3:** Developer migration (CI/CD updates, team training)
+4. **Week 4:** Legacy source removal after validation
+5. **Week 5:** SSOT compliance validation (60 tests total)
+
+#### 3.3 Risk Mitigation
+- Zero Golden Path impact via staged rollout
+- Rollback procedures at each step
+- Real-time monitoring during migration
+- Environment-specific validation for config safety
 
 ### ⏳ Step 4: EXECUTE REMEDIATION SSOT PLAN
 - [ ] Execute the remediation
