@@ -23,7 +23,7 @@ class SupervisorAgentRouter:
     def __init__(self, supervisor_agent):
         self.supervisor = supervisor_agent
     
-    async def route_to_agent(self, state: DeepAgentState, 
+    async def route_to_agent(self, user_context: UserExecutionContext, 
                            context: 'AgentExecutionContext', 
                            agent_name: str) -> 'AgentExecutionResult':
         """Route request to specific agent with basic execution."""
@@ -31,9 +31,9 @@ class SupervisorAgentRouter:
             AgentExecutionContext,
         )
         exec_context = self._create_agent_execution_context(context, agent_name)
-        return await self.supervisor.engine.execute_agent(exec_context, state)
+        return await self.supervisor.engine.execute_agent(exec_context, user_context)
     
-    async def route_to_agent_with_retry(self, state: DeepAgentState,
+    async def route_to_agent_with_retry(self, user_context: UserExecutionContext,
                                       context: 'AgentExecutionContext',
                                       agent_name: str) -> 'AgentExecutionResult':
         """Route request to agent with retry logic."""
@@ -42,7 +42,7 @@ class SupervisorAgentRouter:
         )
         exec_context = self._create_agent_execution_context(context, agent_name)
         exec_context.max_retries = context.max_retries
-        return await self.supervisor.engine.execute_agent(exec_context, state)
+        return await self.supervisor.engine.execute_agent(exec_context, user_context)
     
     async def route_to_agent_with_circuit_breaker(self, state: DeepAgentState,
                                                  context: 'AgentExecutionContext',
