@@ -79,6 +79,7 @@ def _register_core_agents(registry: AgentClassRegistry) -> None:
         from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
         from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         
         # Register core workflow agents
         registry.register(
@@ -143,6 +144,19 @@ def _register_core_agents(registry: AgentClassRegistry) -> None:
                 "category": "core",
                 "priority": "medium",
                 "workflow_stage": "reporting"
+            }
+        )
+        
+        registry.register(
+            "supervisor_orchestration",
+            SupervisorAgent,
+            "Orchestrates agent workflows and manages execution coordination",
+            version="2.0.0",
+            dependencies=[],
+            metadata={
+                "category": "core",
+                "priority": "critical",
+                "workflow_stage": "orchestration"
             }
         )
         
@@ -336,7 +350,7 @@ def _register_auxiliary_agents(registry: AgentClassRegistry) -> None:
 def _validate_registry(registry: AgentClassRegistry) -> None:
     """Validate the initialized registry."""
     # Check minimum required agents
-    required_agents = ["triage", "data", "optimization", "actions", "reporting"]
+    required_agents = ["triage", "data", "optimization", "actions", "reporting", "supervisor_orchestration"]
     missing_required = []
     
     for agent_name in required_agents:

@@ -284,7 +284,8 @@ __all__ = [
     'ExportPipelineManager',
     'ExportTestDataGenerator',
     'ExportFormatValidator',
-    'LargeDatasetGenerator'
+    'LargeDatasetGenerator',
+    'ExportRequestManager'
 ]
 
 class LargeDatasetGenerator:
@@ -333,6 +334,203 @@ class LargeDatasetGenerator:
             'record_count': min(record_count, self.max_records),
             'size_mb': min(record_count, self.max_records) * 0.0005,  # Smaller metric records
             'generated': True
+        }
+
+
+class ExportRequestManager:
+    """
+    Export Request Manager - Manages export requests for E2E testing
+    
+    CRITICAL: This class manages export requests and tracking for Enterprise customers.
+    Currently a placeholder implementation to resolve import issues.
+    
+    TODO: Implement full export request management:
+    - Request queuing and prioritization
+    - Progress tracking and notifications
+    - Export job scheduling
+    - Resource management
+    - Error handling and retries
+    """
+    
+    def __init__(self):
+        """Initialize export request manager"""
+        self.pending_requests = {}
+        self.completed_requests = {}
+        self.failed_requests = {}
+        self.request_counter = 0
+    
+    async def submit_export_request(self, user_id: str, export_config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Submit export request for processing
+        
+        Args:
+            user_id: User ID submitting the request
+            export_config: Export configuration parameters
+            
+        Returns:
+            Dict containing request submission results
+        """
+        
+        # PLACEHOLDER IMPLEMENTATION
+        # TODO: Implement actual export request submission:
+        # 1. Validate export configuration
+        # 2. Check user permissions
+        # 3. Queue request for processing
+        # 4. Return request tracking information
+        
+        self.request_counter += 1
+        request_id = f"export_req_{user_id}_{self.request_counter}"
+        
+        request_data = {
+            "request_id": request_id,
+            "user_id": user_id,
+            "export_config": export_config,
+            "status": "pending",
+            "submitted_at": time.time(),
+            "priority": export_config.get("priority", "normal"),
+            "estimated_completion": time.time() + 300,  # 5 minutes placeholder
+            "progress": 0
+        }
+        
+        self.pending_requests[request_id] = request_data
+        
+        return {
+            "success": True,
+            "request_id": request_id,
+            "status": "pending",
+            "estimated_completion": request_data["estimated_completion"]
+        }
+    
+    async def get_request_status(self, request_id: str) -> Dict[str, Any]:
+        """
+        Get status of export request
+        
+        Args:
+            request_id: Request ID to check
+            
+        Returns:
+            Dict containing request status information
+        """
+        
+        # Check all request queues
+        if request_id in self.pending_requests:
+            request = self.pending_requests[request_id]
+            return {
+                "request_id": request_id,
+                "status": "pending",
+                "progress": request.get("progress", 0),
+                "submitted_at": request["submitted_at"],
+                "estimated_completion": request["estimated_completion"]
+            }
+        elif request_id in self.completed_requests:
+            request = self.completed_requests[request_id]
+            return {
+                "request_id": request_id,
+                "status": "completed",
+                "progress": 100,
+                "completed_at": request["completed_at"],
+                "export_result": request.get("export_result")
+            }
+        elif request_id in self.failed_requests:
+            request = self.failed_requests[request_id]
+            return {
+                "request_id": request_id,
+                "status": "failed",
+                "progress": request.get("progress", 0),
+                "error": request.get("error"),
+                "failed_at": request["failed_at"]
+            }
+        else:
+            return {
+                "request_id": request_id,
+                "status": "not_found",
+                "error": "Request not found"
+            }
+    
+    async def cancel_export_request(self, request_id: str, user_id: str) -> Dict[str, Any]:
+        """
+        Cancel pending export request
+        
+        Args:
+            request_id: Request ID to cancel
+            user_id: User ID requesting cancellation
+            
+        Returns:
+            Dict containing cancellation results
+        """
+        
+        # PLACEHOLDER IMPLEMENTATION
+        # TODO: Implement actual request cancellation:
+        # 1. Validate user permission to cancel
+        # 2. Stop processing if in progress
+        # 3. Clean up resources
+        # 4. Notify user of cancellation
+        
+        if request_id not in self.pending_requests:
+            return {
+                "success": False,
+                "error": "Request not found or not cancellable"
+            }
+        
+        request = self.pending_requests[request_id]
+        
+        # Check if user owns the request
+        if request["user_id"] != user_id:
+            return {
+                "success": False,
+                "error": "Not authorized to cancel this request"
+            }
+        
+        # Move to failed requests with cancellation status
+        request["status"] = "cancelled"
+        request["cancelled_at"] = time.time()
+        request["cancelled_by"] = user_id
+        
+        self.failed_requests[request_id] = request
+        del self.pending_requests[request_id]
+        
+        return {
+            "success": True,
+            "request_id": request_id,
+            "status": "cancelled"
+        }
+    
+    def get_user_requests(self, user_id: str) -> List[Dict[str, Any]]:
+        """
+        Get all requests for a specific user
+        
+        Args:
+            user_id: User ID to get requests for
+            
+        Returns:
+            List of request information for the user
+        """
+        
+        user_requests = []
+        
+        # Check all request queues
+        for request_dict in [self.pending_requests, self.completed_requests, self.failed_requests]:
+            for request_id, request_data in request_dict.items():
+                if request_data["user_id"] == user_id:
+                    user_requests.append({
+                        "request_id": request_id,
+                        "status": request_data["status"],
+                        "submitted_at": request_data["submitted_at"],
+                        "export_config": request_data["export_config"]
+                    })
+        
+        # Sort by submission time (newest first)
+        user_requests.sort(key=lambda x: x["submitted_at"], reverse=True)
+        
+        return user_requests
+    
+    def get_queue_stats(self) -> Dict[str, Any]:
+        """Get export queue statistics"""
+        return {
+            "pending_requests": len(self.pending_requests),
+            "completed_requests": len(self.completed_requests),
+            "failed_requests": len(self.failed_requests),
+            "total_requests": self.request_counter
         }
 
 

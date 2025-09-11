@@ -582,6 +582,19 @@ class IsolatedEnvironment:
             else:
                 logger.info("Environment isolation enabled")
     
+    def enable_isolation_mode(self, backup_original: bool = True, refresh_vars: bool = True) -> None:
+        """
+        BACKWARDS COMPATIBILITY: Alias for enable_isolation method.
+        
+        This method maintains compatibility with existing test framework code
+        that calls enable_isolation_mode() instead of enable_isolation().
+        
+        Args:
+            backup_original: Whether to backup current os.environ state
+            refresh_vars: Whether to refresh isolated vars from current os.environ state
+        """
+        return self.enable_isolation(backup_original, refresh_vars)
+    
     def disable_isolation(self, restore_original: bool = False) -> None:
         """
         Disable isolation mode and optionally restore original environment.
@@ -632,14 +645,19 @@ class IsolatedEnvironment:
                     override_value = self._isolated_vars[key]
                     if override_value == "__UNSET__":
                         return default  # Variable was explicitly unset
-                    # Expand shell commands in the value if present
-                    return self._expand_shell_commands(override_value) if override_value else override_value
+                    # If value exists and is non-empty, return it
+                    if override_value:
+                        return self._expand_shell_commands(override_value)
+                    # If value is empty string, fall through to check test defaults
+                    # This allows test defaults to provide values for empty variables
                 
                 # If not in isolated vars but we're in test context, sync with os.environ
                 # This allows pytest patches to be picked up, but only if not already in isolated vars
                 if self._is_test_context() and key in os.environ:
                     value = os.environ[key]
-                    return self._expand_shell_commands(value) if value else value
+                    # Only return non-empty values, let empty values fall through to test defaults
+                    if value:
+                        return self._expand_shell_commands(value)
                 
                 # CRITICAL FIX: Provide OAuth test credentials as built-in defaults during test context
                 # This ensures CentralConfigurationValidator can always find required test OAuth credentials

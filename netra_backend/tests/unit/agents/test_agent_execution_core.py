@@ -37,9 +37,20 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         self.mock_registry = Mock()
         self.mock_websocket_bridge = AsyncMock()
         self.mock_execution_tracker = AsyncMock()
+        
+        # Create properly mocked agent with all required methods
         self.mock_agent = AsyncMock()
+        self.mock_agent.set_trace_context = AsyncMock()
+        self.mock_agent.set_websocket_bridge = AsyncMock()
+        self.mock_agent.execution_engine = AsyncMock()
+        self.mock_agent.execution_engine.set_websocket_bridge = AsyncMock()
         
         # Setup execution tracker mock
+        self.mock_execution_tracker.collect_metrics = AsyncMock(return_value={})
+        self.mock_execution_tracker.register_execution = AsyncMock()
+        self.mock_execution_tracker.start_execution = AsyncMock()
+        self.mock_execution_tracker.complete_execution = AsyncMock()
+        
         with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_execution_tracker') as mock_get_tracker:
             mock_get_tracker.return_value = self.mock_execution_tracker
             self.execution_core = AgentExecutionCore(

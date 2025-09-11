@@ -234,6 +234,141 @@ def race_condition_test(func: Callable) -> Callable:
     return marked_func
 
 
+def experimental_test(description: str = None):
+    """Decorator to mark tests as experimental.
+    
+    This decorator applies the 'experimental' pytest marker and logs
+    the experimental nature of the test for test infrastructure planning.
+    Experimental tests may be unstable or under development.
+    
+    Args:
+        description: Optional description of the experimental test
+        
+    Returns:
+        Decorator function or decorated test function
+    """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        # Apply pytest marker
+        marker_args = {"description": description} if description else {}
+        marked_func = pytest.mark.experimental(**marker_args)(wrapper)
+        
+        # Add metadata for test discovery
+        marked_func._experimental_test = True
+        marked_func._experimental_description = description
+        marked_func._test_type = 'experimental'
+        
+        desc_str = f" ({description})" if description else ""
+        logger.debug(f"Test {func.__name__} marked as experimental test{desc_str}")
+        
+        return marked_func
+    
+    # If called without parentheses (as @experimental_test)
+    if callable(description):
+        func = description
+        description = None
+        return decorator(func)
+    
+    # If called with parentheses (as @experimental_test("description"))
+    return decorator
+
+
+def feature_flag(flag_name: str, enabled: bool = True):
+    """Decorator to mark tests that depend on feature flags.
+    
+    This decorator applies the 'feature_flag' pytest marker and allows
+    conditional test execution based on feature flag state.
+    
+    Args:
+        flag_name: Name of the feature flag
+        enabled: Whether the test should run when flag is enabled (default True)
+        
+    Returns:
+        Decorator function
+    """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        # Apply pytest marker with flag information
+        marked_func = pytest.mark.feature_flag(flag_name=flag_name, enabled=enabled)(wrapper)
+        
+        # Add metadata for test discovery
+        marked_func._feature_flag = flag_name
+        marked_func._feature_flag_enabled = enabled
+        marked_func._test_type = 'feature_flag'
+        
+        logger.debug(f"Test {func.__name__} marked with feature flag: {flag_name} (enabled: {enabled})")
+        
+        return marked_func
+    
+    return decorator
+
+
+def requires_feature(*feature_names: str):
+    """Decorator to mark tests that require specific features to be enabled.
+    
+    This decorator applies the 'requires_feature' pytest marker and allows
+    conditional test execution based on feature availability.
+    
+    Args:
+        *feature_names: Names of the features required for the test
+        
+    Returns:
+        Decorator function
+    """
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        
+        # Apply pytest marker with feature information
+        marked_func = pytest.mark.requires_feature(feature_names=list(feature_names))(wrapper)
+        
+        # Add metadata for test discovery
+        marked_func._requires_feature = list(feature_names)
+        marked_func._test_type = 'feature_dependent'
+        
+        logger.debug(f"Test {func.__name__} marked as requiring features: {', '.join(feature_names)}")
+        
+        return marked_func
+    
+    return decorator
+
+
+def tdd_test(func: Callable) -> Callable:
+    """Decorator to mark tests as part of TDD (Test-Driven Development) workflow.
+    
+    This decorator applies the 'tdd' pytest marker and identifies tests
+    written as part of test-driven development process.
+    
+    Args:
+        func: Test function to decorate
+        
+    Returns:
+        Decorated test function with tdd marker
+    """
+    
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    
+    # Apply pytest marker
+    marked_func = pytest.mark.tdd(wrapper)
+    
+    # Add metadata for test discovery
+    marked_func._tdd_test = True
+    marked_func._test_type = 'tdd'
+    
+    logger.debug(f"Test {func.__name__} marked as TDD test")
+    
+    return marked_func
+
+
 # Export all decorators for easy importing
 __all__ = [
     'requires_real_database',
@@ -242,5 +377,9 @@ __all__ = [
     'requires_docker',
     'requires_websocket',
     'mission_critical',
-    'race_condition_test'
+    'race_condition_test',
+    'experimental_test',
+    'feature_flag',
+    'requires_feature',
+    'tdd_test'
 ]

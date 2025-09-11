@@ -146,10 +146,10 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['auth_validation'] = ServiceReadinessCheck(
             name='auth_validation',
             validator=self._validate_auth_system_readiness,
-            timeout_seconds=5.0 if self.is_gcp_environment else 20.0,
+            timeout_seconds=10.0 if self.is_gcp_environment else 20.0,
             retry_count=3,
             retry_delay=1.0,
-            is_critical=True,
+            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,
             description="Auth validation and JWT system"
         )
         

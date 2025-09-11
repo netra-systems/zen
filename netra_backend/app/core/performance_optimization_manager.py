@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Optional
 from datetime import datetime, timedelta
 
 from netra_backend.app.logging_config import central_logger
+# Import MemoryCache for compatibility export
+from netra_backend.app.core.performance_cache import MemoryCache
 
 logger = central_logger.get_logger(__name__)
 
@@ -172,4 +174,5 @@ performance_manager = PerformanceOptimizationManager()
 __all__ = [
     "PerformanceOptimizationManager",
     "performance_manager",
+    "MemoryCache",  # COMPATIBILITY EXPORT
 ]
