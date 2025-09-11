@@ -275,7 +275,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
             
             return {
                 "user_index": user_index,
-                "user_id": str(user_context.user_id),
+                "test_user_identifier": str(user_context.user_id),
                 "isolation_results": isolation_results,
                 "total_operations": len(isolation_results),
                 "successful_isolations": sum(1 for r in isolation_results if r.get("isolation_maintained"))
@@ -359,7 +359,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
                 
                 return {
                     "connection_index": connection_index,
-                    "user_id": str(user_context.user_id),
+                    "test_user_identifier": str(user_context.user_id),
                     "success": True,
                     "events_received": events_received,
                     "metrics": connection_metrics
@@ -369,7 +369,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
                 logger.error(f"WebSocket connection {connection_index} failed: {e}")
                 return {
                     "connection_index": connection_index,
-                    "user_id": str(user_context.user_id),
+                    "test_user_identifier": str(user_context.user_id),
                     "success": False,
                     "error": str(e),
                     "metrics": connection_metrics
@@ -463,7 +463,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
             """
             
             await db_session.execute(user_insert, {
-                "user_id": str(user_context.user_id),
+                "test_user_identifier": str(user_context.user_id),
                 "email": user_context.agent_context.get("user_email"),
                 "full_name": f"Concurrent Test User {user_context.agent_context.get('user_index')}",
                 "tier": user_context.agent_context.get("user_tier").value,
@@ -571,7 +571,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
         """
         
         await db_session.execute(operation_insert, {
-            "user_id": str(user_context.user_id),
+            "test_user_identifier": str(user_context.user_id),
             "op_index": op_index,
             "data": json.dumps({"operation": f"db_op_{op_index}", "timestamp": time.time()}),
             "created_at": datetime.now(timezone.utc)
@@ -584,7 +584,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
         cache_key = f"user_{user_context.user_id}_op_{op_index}"
         cache_data = {
             "operation": f"redis_op_{op_index}",
-            "user_id": str(user_context.user_id),
+            "test_user_identifier": str(user_context.user_id),
             "timestamp": time.time()
         }
         # In real implementation: await redis_client.set(cache_key, json.dumps(cache_data))
@@ -600,7 +600,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
                 "type": "agent_request",
                 "agent": agent_type,
                 "message": f"Execute {agent_type} for user {user_context.user_id}",
-                "user_id": str(user_context.user_id),
+                "test_user_identifier": str(user_context.user_id),
                 "timestamp": time.time()
             }
             
@@ -645,7 +645,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
                 WHERE user_id = %(user_id)s
             """
             result = await db_session.execute(user_data_query, {
-                "user_id": str(user_context.user_id)
+                "test_user_identifier": str(user_context.user_id)
             })
             user_data_count = result.scalar()
             
@@ -659,7 +659,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
                 )
             """
             result = await db_session.execute(other_data_query, {
-                "user_id": str(user_context.user_id)
+                "test_user_identifier": str(user_context.user_id)
             })
             cross_access_count = result.scalar()
             
@@ -810,7 +810,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
         
         await db_session.execute(data_insert, {
             "data_id": data_id,
-            "user_id": str(user_context.user_id),
+            "test_user_identifier": str(user_context.user_id),
             "content": json.dumps({"test_data": f"data_for_{user_context.user_id}"}),
             "created_at": datetime.now(timezone.utc)
         })
@@ -825,7 +825,7 @@ class TestConcurrentUserHighLoadIntegration(BaseIntegrationTest):
                 WHERE user_id != %(user_id)s
             """
             result = await db_session.execute(cross_access_query, {
-                "user_id": str(user_context.user_id)
+                "test_user_identifier": str(user_context.user_id)
             })
             other_users_data = result.scalar()
             
