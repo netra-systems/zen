@@ -538,7 +538,7 @@ class TestAgentCompensationIntegrationCore(SSotAsyncTestCase):
         agent_operations = [op for op in cached_usage.keys() if op.startswith('agent_')]
         assert len(agent_operations) > 0, "Should have agent operations in cache"
 
-    async def async_teardown_method(self, method=None):
+    def teardown_method(self, method=None):
         """Clean up after test execution."""
         # Clean up any remaining resources
         if hasattr(self, 'billing_engine'):
@@ -548,7 +548,7 @@ class TestAgentCompensationIntegrationCore(SSotAsyncTestCase):
         if hasattr(self, 'cost_tracker') and hasattr(self.cost_tracker, '_usage_cache'):
             self.cost_tracker._usage_cache.clear()
         
-        await super().async_teardown_method(method)
+        super().teardown_method(method)
 
 
 if __name__ == "__main__":

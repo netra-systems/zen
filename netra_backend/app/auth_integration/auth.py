@@ -413,6 +413,40 @@ def get_auth_client() -> AuthServiceClient:
     """
     return auth_client
 
+
+# Compatibility function for generate_access_token (DEPRECATED)
+async def generate_access_token(user_id: str, email: str = None, **kwargs) -> str:
+    """
+    Generate access token - Compatibility wrapper.
+    
+    DEPRECATED: This function provides backward compatibility for tests.
+    New code should use the auth service client directly.
+    
+    Args:
+        user_id: User ID for token generation
+        email: User email (optional)
+        **kwargs: Additional token parameters
+        
+    Returns:
+        Access token string
+        
+    Raises:
+        Exception: If token generation fails
+    """
+    logger.warning("DEPRECATED: generate_access_token used - please update to use auth service directly")
+    
+    try:
+        # Use the auth service client to generate the token
+        result = await auth_client.create_access_token(user_id=user_id, email=email or f"{user_id}@example.com")
+        if result and "access_token" in result:
+            return result["access_token"]
+        else:
+            raise Exception("Failed to generate access token via auth service")
+    except Exception as e:
+        logger.error(f"Error generating access token: {e}")
+        raise
+
+
 # NOTE: All JWT and password hashing logic has been moved to the auth service
 # This module ONLY handles FastAPI dependency injection
 # See auth_service for actual authentication implementation
