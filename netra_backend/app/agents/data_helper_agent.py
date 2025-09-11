@@ -133,7 +133,7 @@ class DataHelperAgent(BaseAgent):
             })
             
             # Store results using SSOT metadata storage (SECURE)
-            self.store_metadata_result(context, 'data_helper_result', data_request_result)
+            self.store_metadata_result(context, 'data_result', data_request_result)
             self.store_metadata_result(context, 'data_request_generated', True)
             
             # Log successful execution
