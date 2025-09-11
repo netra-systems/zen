@@ -156,7 +156,25 @@ class MockPostgresCursor:
                 }
                 self.client.token_blacklist_test.append(blacklist_record)
         
-        # Handle SELECT queries
+        # Handle SELECT queries - ORDER MATTERS: Most specific first
+        elif 'select count(*), user_id from oauth_users_test' in self.last_query and 'group by user_id' in self.last_query:
+            # Handle account counting query for multi-provider test
+            self.last_result = []
+            if params and len(params) >= 1:
+                email = params[0]
+                user_counts = {}
+                # Count how many entries each user_id has for the given email
+                for user in self.client.oauth_users_test:
+                    if user.get('email') == email:
+                        user_id = user.get('user_id')
+                        if user_id not in user_counts:
+                            user_counts[user_id] = 0
+                        user_counts[user_id] += 1
+                
+                # Return tuple format expected by the test: (count, user_id)
+                for user_id, count in user_counts.items():
+                    self.last_result.append((count, user_id))
+        
         elif 'select' in self.last_query and 'oauth_users_test' in self.last_query:
             self.last_result = []
             for user in self.client.oauth_users_test:
@@ -185,23 +203,6 @@ class MockPostgresCursor:
                             record.get('reason'),
                             'mocked_timestamp'  # Mock timestamp
                         ))
-        
-        elif 'select count(*), user_id from oauth_users_test' in self.last_query:
-            # Handle account counting query for multi-provider test
-            self.last_result = []
-            if params and len(params) >= 1:
-                email = params[0]
-                user_counts = {}
-                for user in self.client.oauth_users_test:
-                    if user.get('email') == email:
-                        user_id = user.get('user_id')
-                        if user_id not in user_counts:
-                            user_counts[user_id] = 0
-                        user_counts[user_id] += 1
-                
-                # Return tuple format expected by the test
-                for user_id, count in user_counts.items():
-                    self.last_result.append((count, user_id))
         
         return True
     
