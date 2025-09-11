@@ -1,240 +1,251 @@
 #!/usr/bin/env python
-# REMOVED_SYNTAX_ERROR: '''E2E TEST SUITE: ActionsAgent Complete Workflow with Real Services
+'''E2E TEST SUITE: ActionsAgent Complete Workflow with Real Services
 
-# REMOVED_SYNTAX_ERROR: THIS SUITE VALIDATES THE ENTIRE ACTIONS AGENT USER JOURNEY.
-# REMOVED_SYNTAX_ERROR: Business Value: $3M+ ARR - Complete user-to-action-plan pipeline
+THIS SUITE VALIDATES THE ENTIRE ACTIONS AGENT USER JOURNEY.
+Business Value: $3M+ ARR - Complete user-to-action-plan pipeline
 
-# REMOVED_SYNTAX_ERROR: This E2E test suite validates the complete workflow:
-    # REMOVED_SYNTAX_ERROR: 1. User request → Supervisor → ActionsAgent → Action Plan
-    # REMOVED_SYNTAX_ERROR: 2. Real WebSocket connections with real-time user experience
-    # REMOVED_SYNTAX_ERROR: 3. Real database persistence and state management
-    # REMOVED_SYNTAX_ERROR: 4. Real LLM interactions with actual API calls
-    # REMOVED_SYNTAX_ERROR: 5. Real Redis caching and session management
-    # REMOVED_SYNTAX_ERROR: 6. Complete chat value delivery pipeline
-    # REMOVED_SYNTAX_ERROR: 7. Performance under production-like conditions
-    # REMOVED_SYNTAX_ERROR: 8. End-to-end error recovery and user experience
+This E2E test suite validates the complete workflow:
+1. User request → Supervisor → ActionsAgent → Action Plan
+2. Real WebSocket connections with real-time user experience
+3. Real database persistence and state management
+4. Real LLM interactions with actual API calls
+5. Real Redis caching and session management
+6. Complete chat value delivery pipeline
+7. Performance under production-like conditions
+8. End-to-end error recovery and user experience
 
-    # REMOVED_SYNTAX_ERROR: CRITICAL: NO MOCKS - Tests complete production pipeline
-    # REMOVED_SYNTAX_ERROR: Real services, real data, real user experience measurement
-    # REMOVED_SYNTAX_ERROR: '''
+CRITICAL: NO MOCKS - Tests complete production pipeline
+Real services, real data, real user experience measurement
+'''
 
-    # REMOVED_SYNTAX_ERROR: import asyncio
-    # REMOVED_SYNTAX_ERROR: import json
-    # REMOVED_SYNTAX_ERROR: import os
-    # REMOVED_SYNTAX_ERROR: import sys
-    # REMOVED_SYNTAX_ERROR: import time
-    # REMOVED_SYNTAX_ERROR: import uuid
-    # REMOVED_SYNTAX_ERROR: import websockets
-    # REMOVED_SYNTAX_ERROR: from datetime import datetime, timedelta
-    # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Set, Any, Optional, Tuple
-    # REMOVED_SYNTAX_ERROR: import pytest
-    # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass, field
-    # REMOVED_SYNTAX_ERROR: from concurrent.futures import ThreadPoolExecutor
-    # REMOVED_SYNTAX_ERROR: import aiohttp
-    # REMOVED_SYNTAX_ERROR: import psutil
-    # REMOVED_SYNTAX_ERROR: from test_framework.docker.unified_docker_manager import UnifiedDockerManager
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+import asyncio
+import json
+import os
+import sys
+import time
+import uuid
+import websockets
+from datetime import datetime, timedelta
+from typing import Dict, List, Set, Any, Optional, Tuple
+import pytest
+from dataclasses import dataclass, field
+from concurrent.futures import ThreadPoolExecutor
+import aiohttp
+import psutil
+from test_framework.unified_docker_manager import UnifiedDockerManager
 
-    # CRITICAL: Add project root to Python path for imports
-    # REMOVED_SYNTAX_ERROR: project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-    # REMOVED_SYNTAX_ERROR: if project_root not in sys.path:
-        # REMOVED_SYNTAX_ERROR: sys.path.insert(0, project_root)
+# CRITICAL: Add project root to Python path for imports
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
-        # REMOVED_SYNTAX_ERROR: from loguru import logger
+from loguru import logger
 
-        # Import test infrastructure (REAL SERVICES ONLY)
-        # REMOVED_SYNTAX_ERROR: from test_framework.unified_docker_manager import UnifiedDockerManager
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+# Import test infrastructure (REAL SERVICES ONLY)
+from dev_launcher.isolated_environment import IsolatedEnvironment
 
-        # Import production components for E2E testing
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+# Import production components for E2E testing
+try:
+    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent as ActionsAgent
+except ImportError:
+    from netra_backend.app.agents.data_helper_agent import DataHelperAgent as ActionsAgent
 
-        # Import state and data structures
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import ( )
-        # REMOVED_SYNTAX_ERROR: DeepAgentState,
-        # REMOVED_SYNTAX_ERROR: OptimizationsResult,
-        # REMOVED_SYNTAX_ERROR: ActionPlanResult,
-        # REMOVED_SYNTAX_ERROR: PlanStep
-        
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.shared_types import DataAnalysisResponse
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
-        # Import services for complete E2E flow
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.database.run_repository import RunRepository
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.thread_service import ThreadService
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import RedisManager
+# Import state and data structures
+from netra_backend.app.agents.state import (
+    DeepAgentState
+)
+
+try:
+    from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+except ImportError:
+    from netra_backend.app.schemas.shared_types import DataAnalysisResponse as AgentExecutionResult
+
+# Import services for complete E2E flow
+from netra_backend.app.db.database_manager import DatabaseManager
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.redis_manager import RedisManager
 
 
         # ============================================================================
         # E2E TEST DATA AND METRICS
         # ============================================================================
 
-        # REMOVED_SYNTAX_ERROR: @dataclass
-# REMOVED_SYNTAX_ERROR: class UserExperienceMetrics:
-    # REMOVED_SYNTAX_ERROR: """Metrics measuring complete user experience."""
-    # REMOVED_SYNTAX_ERROR: request_to_response_time: float = 0.0
-    # REMOVED_SYNTAX_ERROR: websocket_responsiveness_score: float = 0.0
-    # REMOVED_SYNTAX_ERROR: action_plan_quality_score: float = 0.0
-    # REMOVED_SYNTAX_ERROR: chat_value_delivery_score: float = 0.0
-    # REMOVED_SYNTAX_ERROR: error_handling_ux_score: float = 0.0
-    # REMOVED_SYNTAX_ERROR: performance_satisfaction_score: float = 0.0
-    # REMOVED_SYNTAX_ERROR: overall_user_experience_score: float = 0.0
+@dataclass
+class UserExperienceMetrics:
+    """Metrics measuring complete user experience."""
+    request_to_response_time: float = 0.0
+    websocket_responsiveness_score: float = 0.0
+    action_plan_quality_score: float = 0.0
+    chat_value_delivery_score: float = 0.0
+    error_handling_ux_score: float = 0.0
+    performance_satisfaction_score: float = 0.0
+    overall_user_experience_score: float = 0.0
 
-# REMOVED_SYNTAX_ERROR: def calculate_overall_score(self) -> float:
-    # REMOVED_SYNTAX_ERROR: """Calculate weighted user experience score."""
-    # REMOVED_SYNTAX_ERROR: weights = { )
-    # REMOVED_SYNTAX_ERROR: 'websocket_responsiveness_score': 0.25,  # Real-time feedback critical
-    # REMOVED_SYNTAX_ERROR: 'action_plan_quality_score': 0.25,      # Core business value
-    # REMOVED_SYNTAX_ERROR: 'chat_value_delivery_score': 0.20,      # Chat is primary interface
-    # REMOVED_SYNTAX_ERROR: 'performance_satisfaction_score': 0.15,  # User satisfaction
-    # REMOVED_SYNTAX_ERROR: 'error_handling_ux_score': 0.10,        # Resilience UX
-    # REMOVED_SYNTAX_ERROR: 'request_to_response_time': 0.05        # Speed component
-    
+    def calculate_overall_score(self) -> float:
+        """Calculate weighted user experience score."""
+        weights = {
+            'websocket_responsiveness_score': 0.25,  # Real-time feedback critical
+            'action_plan_quality_score': 0.25,      # Core business value
+            'chat_value_delivery_score': 0.20,      # Chat is primary interface
+            'performance_satisfaction_score': 0.15,  # User satisfaction
+            'error_handling_ux_score': 0.10,        # Resilience UX
+            'request_to_response_time': 0.05        # Speed component
+        }
 
-    # Convert request_to_response_time to score (lower is better)
-    # REMOVED_SYNTAX_ERROR: time_score = max(0.0, 1.0 - (self.request_to_response_time / 60.0))  # 60s = 0 score
+        # Convert request_to_response_time to score (lower is better)
+        time_score = max(0.0, 1.0 - (self.request_to_response_time / 60.0))  # 60s = 0 score
 
-    # REMOVED_SYNTAX_ERROR: total = ( )
-    # REMOVED_SYNTAX_ERROR: self.websocket_responsiveness_score * weights['websocket_responsiveness_score'] +
-    # REMOVED_SYNTAX_ERROR: self.action_plan_quality_score * weights['action_plan_quality_score'] +
-    # REMOVED_SYNTAX_ERROR: self.chat_value_delivery_score * weights['chat_value_delivery_score'] +
-    # REMOVED_SYNTAX_ERROR: self.performance_satisfaction_score * weights['performance_satisfaction_score'] +
-    # REMOVED_SYNTAX_ERROR: self.error_handling_ux_score * weights['error_handling_ux_score'] +
-    # REMOVED_SYNTAX_ERROR: time_score * weights['request_to_response_time']
-    
+        total = (
+            self.websocket_responsiveness_score * weights['websocket_responsiveness_score'] +
+            self.action_plan_quality_score * weights['action_plan_quality_score'] +
+            self.chat_value_delivery_score * weights['chat_value_delivery_score'] +
+            self.performance_satisfaction_score * weights['performance_satisfaction_score'] +
+            self.error_handling_ux_score * weights['error_handling_ux_score'] +
+            time_score * weights['request_to_response_time']
+        )
 
-    # REMOVED_SYNTAX_ERROR: self.overall_user_experience_score = total
-    # REMOVED_SYNTAX_ERROR: return total
-
-
-    # REMOVED_SYNTAX_ERROR: @dataclass
-# REMOVED_SYNTAX_ERROR: class E2ETestSession:
-    # REMOVED_SYNTAX_ERROR: """Complete E2E test session with real service connections."""
-    # REMOVED_SYNTAX_ERROR: session_id: str
-    # REMOVED_SYNTAX_ERROR: user_id: str
-    # REMOVED_SYNTAX_ERROR: thread_id: str
-    # REMOVED_SYNTAX_ERROR: websocket_connection: Optional[Any] = None
-    # REMOVED_SYNTAX_ERROR: database_connection: Optional[Any] = None
-    # REMOVED_SYNTAX_ERROR: redis_connection: Optional[Any] = None
-    # REMOVED_SYNTAX_ERROR: start_time: float = field(default_factory=time.time)
-    # REMOVED_SYNTAX_ERROR: websocket_events: List[Dict] = field(default_factory=list)
-    # REMOVED_SYNTAX_ERROR: performance_metrics: Dict[str, float] = field(default_factory=dict)
-    # REMOVED_SYNTAX_ERROR: errors_encountered: List[str] = field(default_factory=list)
+        self.overall_user_experience_score = total
+        return total
 
 
-# REMOVED_SYNTAX_ERROR: class RealWebSocketClient:
-    # REMOVED_SYNTAX_ERROR: """Real WebSocket client for E2E testing."""
+@dataclass
+class E2ETestSession:
+    """Complete E2E test session with real service connections."""
+    session_id: str
+    user_id: str
+    thread_id: str
+    websocket_connection: Optional[Any] = None
+    database_connection: Optional[Any] = None
+    redis_connection: Optional[Any] = None
+    start_time: float = field(default_factory=time.time)
+    websocket_events: List[Dict] = field(default_factory=list)
+    performance_metrics: Dict[str, float] = field(default_factory=dict)
+    errors_encountered: List[str] = field(default_factory=list)
 
-# REMOVED_SYNTAX_ERROR: def __init__(self, base_url: str = "ws://localhost:8000"):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.base_url = base_url
-    # REMOVED_SYNTAX_ERROR: self.websocket = None
-    # REMOVED_SYNTAX_ERROR: self.received_messages: List[Dict] = []
-    # REMOVED_SYNTAX_ERROR: self.connection_established = False
-    # REMOVED_SYNTAX_ERROR: self.message_handlers: Dict[str, callable] = {}
-    # REMOVED_SYNTAX_ERROR: self._lock = asyncio.Lock()
 
-# REMOVED_SYNTAX_ERROR: async def connect(self, thread_id: str, user_id: str) -> bool:
-    # REMOVED_SYNTAX_ERROR: """Connect to real WebSocket endpoint."""
-    # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
+class RealWebSocketClient:
+    """Real WebSocket client for E2E testing."""
 
-        # Connect with real WebSocket
-        # REMOVED_SYNTAX_ERROR: self.websocket = await websockets.connect( )
-        # REMOVED_SYNTAX_ERROR: ws_url,
-        # REMOVED_SYNTAX_ERROR: ping_interval=20,
-        # REMOVED_SYNTAX_ERROR: ping_timeout=10,
-        # REMOVED_SYNTAX_ERROR: close_timeout=10
-        
+    def __init__(self, base_url: str = "ws://localhost:8000"):
+        self.base_url = base_url
+        self.websocket = None
+        self.received_messages: List[Dict] = []
+        self.connection_established = False
+        self.message_handlers: Dict[str, callable] = {}
+        self._lock = asyncio.Lock()
 
-        # REMOVED_SYNTAX_ERROR: self.connection_established = True
+    async def connect(self, thread_id: str, user_id: str) -> bool:
+        """Connect to real WebSocket endpoint."""
+        try:
+            ws_url = f"{self.base_url}/ws?thread_id={thread_id}&user_id={user_id}"
 
-        # Start message listener
-        # REMOVED_SYNTAX_ERROR: asyncio.create_task(self._message_listener())
+            # Connect with real WebSocket
+            self.websocket = await websockets.connect(
+                ws_url,
+                ping_interval=20,
+                ping_timeout=10,
+                close_timeout=10
+            )
 
-        # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-        # REMOVED_SYNTAX_ERROR: return True
+            self.connection_established = True
 
-        # REMOVED_SYNTAX_ERROR: except Exception as e:
-            # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-            # REMOVED_SYNTAX_ERROR: self.connection_established = False
-            # REMOVED_SYNTAX_ERROR: return False
+            # Start message listener
+            asyncio.create_task(self._message_listener())
 
-# REMOVED_SYNTAX_ERROR: async def _message_listener(self):
-    # REMOVED_SYNTAX_ERROR: """Listen for WebSocket messages."""
-    # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: async for message in self.websocket:
-            # REMOVED_SYNTAX_ERROR: try:
-                # REMOVED_SYNTAX_ERROR: data = json.loads(message)
-                # REMOVED_SYNTAX_ERROR: async with self._lock:
-                    # REMOVED_SYNTAX_ERROR: self.received_messages.append({ ))
-                    # REMOVED_SYNTAX_ERROR: 'data': data,
-                    # REMOVED_SYNTAX_ERROR: 'timestamp': time.time(),
-                    # REMOVED_SYNTAX_ERROR: 'message_type': data.get('type', 'unknown')
-                    
+            logger.info(f"✅ WebSocket connected to {ws_url}")
+            return True
 
-                    # Call handlers
-                    # REMOVED_SYNTAX_ERROR: message_type = data.get('type')
-                    # REMOVED_SYNTAX_ERROR: if message_type in self.message_handlers:
-                        # REMOVED_SYNTAX_ERROR: await self.message_handlers[message_type](data)
+        except Exception as e:
+            logger.error(f"❌ WebSocket connection failed: {e}")
+            self.connection_established = False
+            return False
 
-                        # REMOVED_SYNTAX_ERROR: except json.JSONDecodeError as e:
-                            # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
+    async def _message_listener(self):
+        """Listen for WebSocket messages."""
+        try:
+            async for message in self.websocket:
+                try:
+                    data = json.loads(message)
+                    async with self._lock:
+                        self.received_messages.append({
+                            'data': data,
+                            'timestamp': time.time(),
+                            'message_type': data.get('type', 'unknown')
+                        })
 
-                            # REMOVED_SYNTAX_ERROR: except websockets.exceptions.ConnectionClosed:
-                                # REMOVED_SYNTAX_ERROR: logger.info("WebSocket connection closed")
-                                # REMOVED_SYNTAX_ERROR: except Exception as e:
-                                    # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
+                        # Call handlers
+                        message_type = data.get('type')
+                        if message_type in self.message_handlers:
+                            await self.message_handlers[message_type](data)
 
-# REMOVED_SYNTAX_ERROR: def on_message(self, message_type: str, handler: callable):
-    # REMOVED_SYNTAX_ERROR: """Register message handler."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.message_handlers[message_type] = handler
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Invalid JSON in WebSocket message: {e}")
 
-# REMOVED_SYNTAX_ERROR: async def send_user_message(self, message: str) -> bool:
-    # REMOVED_SYNTAX_ERROR: """Send user message through WebSocket."""
-    # REMOVED_SYNTAX_ERROR: if not self.websocket or not self.connection_established:
-        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-        # REMOVED_SYNTAX_ERROR: return False
+        except websockets.exceptions.ConnectionClosed:
+            logger.info("WebSocket connection closed")
+        except Exception as e:
+            logger.error(f"WebSocket message listener error: {e}")
 
-        # REMOVED_SYNTAX_ERROR: try:
-            # Removed problematic line: await self.websocket.send(json.dumps({ )))
-            # REMOVED_SYNTAX_ERROR: 'type': 'user_message',
-            # REMOVED_SYNTAX_ERROR: 'message': message,
-            # REMOVED_SYNTAX_ERROR: 'timestamp': time.time()
-            
-            # REMOVED_SYNTAX_ERROR: return True
-            # REMOVED_SYNTAX_ERROR: except Exception as e:
-                # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-                # REMOVED_SYNTAX_ERROR: return False
+    def on_message(self, message_type: str, handler: callable):
+        """Register message handler."""
+        self.message_handlers[message_type] = handler
 
-# REMOVED_SYNTAX_ERROR: async def wait_for_events(self, expected_types: List[str], timeout: float = 60.0) -> List[Dict]:
-    # REMOVED_SYNTAX_ERROR: """Wait for specific WebSocket events."""
-    # REMOVED_SYNTAX_ERROR: start_time = time.time()
-    # REMOVED_SYNTAX_ERROR: found_events = []
+    async def send_user_message(self, message: str) -> bool:
+        """Send user message through WebSocket."""
+        if not self.websocket or not self.connection_established:
+            logger.error("WebSocket not connected")
+            return False
 
-    # REMOVED_SYNTAX_ERROR: while time.time() - start_time < timeout:
-        # REMOVED_SYNTAX_ERROR: async with self._lock:
-            # REMOVED_SYNTAX_ERROR: for message in self.received_messages:
-                # REMOVED_SYNTAX_ERROR: if message['message_type'] in expected_types:
-                    # REMOVED_SYNTAX_ERROR: found_events.append(message)
+        try:
+            await self.websocket.send(json.dumps({
+                'type': 'user_message',
+                'message': message,
+                'timestamp': time.time()
+            }))
+            logger.info(f"📤 Sent message: {message[:100]}...")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send WebSocket message: {e}")
+            return False
 
-                    # REMOVED_SYNTAX_ERROR: if len(set(msg['message_type'] for msg in found_events)) >= len(set(expected_types)):
-                        # REMOVED_SYNTAX_ERROR: break
+    async def wait_for_events(self, expected_types: List[str], timeout: float = 60.0) -> List[Dict]:
+        """Wait for specific WebSocket events."""
+        start_time = time.time()
+        found_events = []
+        expected_set = set(expected_types)
 
-                        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.5)
+        logger.info(f"⏳ Waiting for events: {expected_types}")
 
-                        # REMOVED_SYNTAX_ERROR: return found_events
+        while time.time() - start_time < timeout:
+            async with self._lock:
+                for message in self.received_messages:
+                    if message['message_type'] in expected_types and message not in found_events:
+                        found_events.append(message)
+                        logger.info(f"📨 Received event: {message['message_type']}")
 
-# REMOVED_SYNTAX_ERROR: async def disconnect(self):
-    # REMOVED_SYNTAX_ERROR: """Disconnect WebSocket."""
-    # REMOVED_SYNTAX_ERROR: if self.websocket:
-        # REMOVED_SYNTAX_ERROR: await self.websocket.close()
-        # REMOVED_SYNTAX_ERROR: self.connection_established = False
+                # Check if we have all expected event types
+                found_types = set(msg['message_type'] for msg in found_events)
+                if expected_set.issubset(found_types):
+                    logger.info(f"✅ All expected events received: {found_types}")
+                    return found_events
+
+            await asyncio.sleep(0.5)
+
+        logger.warning(f"⚠️ Timeout waiting for events. Expected: {expected_types}, Found: {[e['message_type'] for e in found_events]}")
+        return found_events
+
+    async def disconnect(self):
+        """Disconnect WebSocket."""
+        if self.websocket:
+            await self.websocket.close()
+            self.connection_established = False
+            logger.info("🔌 WebSocket disconnected")
 
 
 # REMOVED_SYNTAX_ERROR: class RealServiceIntegrator:

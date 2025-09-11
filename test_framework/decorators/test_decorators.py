@@ -297,14 +297,14 @@ def feature_flag(flag_name: str, enabled: bool = True):
     return decorator
 
 
-def requires_feature(feature_name: str):
-    """Decorator to mark tests that require a specific feature to be enabled.
+def requires_feature(*feature_names: str):
+    """Decorator to mark tests that require specific features to be enabled.
     
     This decorator applies the 'requires_feature' pytest marker and allows
     conditional test execution based on feature availability.
     
     Args:
-        feature_name: Name of the feature required for the test
+        *feature_names: Names of the features required for the test
         
     Returns:
         Decorator function
@@ -315,13 +315,13 @@ def requires_feature(feature_name: str):
             return func(*args, **kwargs)
         
         # Apply pytest marker with feature information
-        marked_func = pytest.mark.requires_feature(feature_name=feature_name)(wrapper)
+        marked_func = pytest.mark.requires_feature(feature_names=list(feature_names))(wrapper)
         
         # Add metadata for test discovery
-        marked_func._requires_feature = feature_name
+        marked_func._requires_feature = list(feature_names)
         marked_func._test_type = 'feature_dependent'
         
-        logger.debug(f"Test {func.__name__} marked as requiring feature: {feature_name}")
+        logger.debug(f"Test {func.__name__} marked as requiring features: {', '.join(feature_names)}")
         
         return marked_func
     
