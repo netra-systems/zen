@@ -64,6 +64,19 @@
 - **Location:** `netra_backend\app\services\corpus\core_unified.py:85`
 - **Impact:** Memory leaks, improper async handling
 
+### P1 - HIGH PRIORITY FAILURES (Service Connection Issues - NEW)
+
+#### P1-4: Service Connection Failures - E2E Resource Isolation Tests ➜ **Issue #473** (NEW)
+- **Status:** NEW ISSUE CREATED ✅
+- **URL:** https://github.com/netra-systems/netra-apex/issues/473
+- **Error:** `Service verification failed: All connection attempts failed`
+- **Impact:** E2E tests falling back to offline mode instead of testing real service interactions
+- **Test:** Resource isolation test suite
+- **Fallback Behavior:** Tests automatically switch to "CPU isolation offline mode"
+- **Business Risk:** Service reliability and integration points untested
+- **Priority:** P1 High (major feature impact, prevents real-world validation)
+- **Related Issues:** #426 (golden path service dependencies), #457 (Docker service unavailable), #443 (Docker infrastructure)
+
 ### P2 - MEDIUM PRIORITY FAILURES (Deprecation and Configuration)
 
 #### P2-1: Multiple Deprecation Warnings
@@ -112,6 +125,14 @@
 - **Labels:** `bug`, `infrastructure-dependency`, `claude-code-generated-issue`
 - **Priority:** P1 High (memory leaks, test reliability)
 
+#### P1-4: Service Connection Failures - E2E Resource Isolation Tests ➜ **Issue #473** (NEW)
+- **Status:** NEW ISSUE CREATED ✅
+- **URL:** https://github.com/netra-systems/netra-apex/issues/473
+- **Title:** failing-test-active-dev-P1-service-connection-failures-e2e-fallback
+- **Labels:** `bug`, `claude-code-generated-issue`, `infrastructure-dependency`, `P1`
+- **Priority:** P1 High (major feature impact, service integration untested)
+- **Related Issues:** Linked to #426, #457, #443, #372
+
 ### P2 - MEDIUM PRIORITY FAILURES
 
 #### P2-2: Test Class Collection Issues ➜ **Issue #293** (UPDATED)
@@ -130,11 +151,11 @@
 ### Summary of Actions Taken
 
 ✅ **1 Issue Reopened:** #344 (P0-1 critical import error)  
-✅ **2 New Issues Created:** #351 (async cancellation), #353 (coroutine leaks)  
+✅ **3 New Issues Created:** #351 (async cancellation), #353 (coroutine leaks), #473 (service connection failures)  
 ✅ **1 Issue Updated:** #293 (expanded with test class problems)  
 ✅ **0 Duplicate Issues:** Avoided creating duplicates by proper search  
 
-**Total Active Issues:** 4 issues now tracking all discovered problems  
+**Total Active Issues:** 5 issues now tracking all discovered problems  
 **Business Impact:** $500K+ ARR Golden Path protection restored through proper issue tracking
 
 ## Failure Patterns Identified
@@ -142,6 +163,7 @@
 1. **Import Path Inconsistency**: SSOT migration incomplete - mixed old/new import paths
 2. **Async Resource Management**: Background tasks not properly managed during test teardown  
 3. **Test Class Structure**: Test classes inadvertently inherit from business classes
+4. **Service Connectivity Issues**: E2E tests cannot connect to required services, forcing offline fallback modes
 
 ---
 
@@ -159,6 +181,11 @@
 10. **[09:42:00]** Created Issue #353 for P1-3 coroutine memory leaks
 11. **[09:43:00]** Updated worklog with complete GitHub issue tracking
 12. **[09:43:30]** ✅ FAILING-TEST-GARDENER PROCESS COMPLETED SUCCESSFULLY
+13. **[22:01:00]** NEW ISSUE: Service connection failures discovered in e2e resource isolation tests
+14. **[22:02:00]** Created Issue #473 for P1-4 service connection failures with e2e fallback
+15. **[22:03:00]** Linked Issue #473 to related service connectivity issues (#426, #457, #443, #372)
+16. **[22:04:00]** Updated worklog to include new P1-4 service connection failure issue
+17. **[22:05:00]** ✅ FAILING-TEST-GARDENER PROCESS UPDATED SUCCESSFULLY
 
 ## Final Status: ✅ COMPLETE
 
