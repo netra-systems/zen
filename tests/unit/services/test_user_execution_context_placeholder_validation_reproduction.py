@@ -73,51 +73,54 @@ class TestUserExecutionContextPlaceholderValidationReproduction(SSotBaseTestCase
             self.uc_logger.removeHandler(self.log_handler)
         super().teardown_method(method)
 
-    def test_default_user_validation_failure_reproduction(self):
+    def test_default_user_validation_fix_verification(self):
         """
-        REPRODUCER TEST: Exact reproduction of the GCP log error.
+        FIX VERIFICATION TEST: Verify that 'default_user' now works correctly.
         
-        This test reproduces the exact error from GCP logs:
+        This test verifies the fix for the GCP log error:
         'Field user_id appears to contain placeholder pattern: default_user'
         
-        Expected Behavior: This test SHOULD FAIL initially, demonstrating the issue.
-        After fix: This test should PASS.
+        Expected Behavior After Fix: 'default_user' should now be ALLOWED as a legitimate user ID.
         """
-        # This is the exact user_id causing the GCP error
-        problematic_user_id = "default_user"
+        # This is the exact user_id that was causing the GCP error
+        legitimate_user_id = "default_user"
         
         # Clear any previous log captures
         self.log_capture.clear()
         
-        # Attempt to create UserExecutionContext with problematic user_id
-        with pytest.raises(InvalidContextError) as exc_info:
+        # Create UserExecutionContext with what is now a legitimate user_id
+        try:
             context = UserExecutionContext(
-                user_id=problematic_user_id,
+                user_id=legitimate_user_id,
                 thread_id=self.valid_thread_id,
                 run_id=self.valid_run_id,
                 request_id=self.valid_request_id,
                 created_at=datetime.now(timezone.utc)
             )
+            
+            # Verify the context was created successfully
+            assert context.user_id == legitimate_user_id, (
+                f"Expected user_id to be {legitimate_user_id}, got {context.user_id}"
+            )
+            
+        except InvalidContextError as e:
+            pytest.fail(f"REGRESSION: 'default_user' should now be allowed but got error: {e}")
         
-        # Verify exact error message matches GCP logs
-        error_message = str(exc_info.value)
-        assert "appears to contain placeholder pattern" in error_message, (
-            f"Expected placeholder pattern error, got: {error_message}"
-        )
-        assert "default_user" in error_message, (
-            f"Expected 'default_user' in error message, got: {error_message}"
+        # Verify that debug logging shows this was explicitly allowed
+        debug_logs = [record for record in self.log_capture if record.levelno == logging.DEBUG]
+        allow_logs = [record for record in debug_logs if "VALIDATION ALLOW" in record.getMessage()]
+        
+        assert len(allow_logs) > 0, (
+            f"Expected debug log showing 'default_user' was allowed. "
+            f"Debug logs: {[r.getMessage() for r in debug_logs]}"
         )
         
-        # Verify detailed logging captured the issue
-        error_logs = [record for record in self.log_capture if record.levelno >= logging.ERROR]
-        assert len(error_logs) > 0, "Expected error log entries for validation failure"
-        
-        error_log = error_logs[0]
-        assert "VALIDATION FAILURE" in error_log.getMessage(), (
-            f"Expected VALIDATION FAILURE in log, got: {error_log.getMessage()}"
+        allow_log = allow_logs[0]
+        assert "default_user" in allow_log.getMessage(), (
+            f"Expected 'default_user' in allow log message, got: {allow_log.getMessage()}"
         )
-        assert "default_user" in error_log.getMessage(), (
-            f"Expected 'default_user' in log message, got: {error_log.getMessage()}"
+        assert "legitimate pattern" in allow_log.getMessage(), (
+            f"Expected 'legitimate pattern' in allow log message, got: {allow_log.getMessage()}"
         )
 
     def test_default_pattern_matching_logic(self):
@@ -277,21 +280,24 @@ class TestUserExecutionContextPlaceholderValidationReproduction(SSotBaseTestCase
     @pytest.mark.asyncio
     async def test_create_isolated_execution_context_with_default_user(self):
         """
-        INTEGRATION TEST: Test the factory function with the problematic user_id.
+        INTEGRATION TEST: Test the factory function with legitimate 'default_user' user_id.
         
         This tests the create_isolated_execution_context function which is commonly
-        used in production code and may be where the error occurs.
+        used in production code. After the fix, 'default_user' should work correctly.
         """
-        # This should fail with current validation logic
-        with pytest.raises(InvalidContextError) as exc_info:
+        # This should now succeed with the fixed validation logic
+        try:
             context = await create_isolated_execution_context(
                 user_id="default_user",
                 request_id="req_test_factory"
             )
-        
-        # Verify the error propagates correctly through the factory
-        assert "appears to contain placeholder pattern" in str(exc_info.value)
-        assert "default_user" in str(exc_info.value)
+            
+            # Verify the context was created successfully
+            assert context.user_id == "default_user"
+            assert context.request_id == "req_test_factory"
+            
+        except InvalidContextError as e:
+            pytest.fail(f"REGRESSION: Factory function should work with 'default_user' but got error: {e}")
 
     def test_logging_output_for_gcp_structured_logging(self):
         """
