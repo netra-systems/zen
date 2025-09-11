@@ -153,9 +153,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify basic orchestration success
-        self.assertIsNotNone(result)
-        self.assertIn("status", result)
-        self.assertEqual(result["status"], "completed")
+        assert result is not None
+        assert "status" in result
+        assert result["status"] == "completed"
         
         # Verify WebSocket events were sent
         websocket_bridge.send_event.assert_called()
@@ -163,8 +163,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Should have at least agent_started and agent_completed events
         event_types = [call[1]["event_type"] for call in event_calls]
-        self.assertIn("agent_started", event_types)
-        self.assertIn("agent_completed", event_types)
+        assert "agent_started" in event_types
+        assert "agent_completed" in event_types
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -194,15 +194,15 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         engine2 = await factory.create_user_execution_engine(user2_context)
         
         # Verify engines are different instances
-        self.assertIsNot(engine1, engine2)
-        self.assertNotEqual(engine1.user_context.user_id, engine2.user_context.user_id)
+        assert engine1 is not engine2
+        assert engine1.user_context.user_id != engine2.user_context.user_id
         
         # Verify user isolation - state should not leak
         engine1.set_execution_state("test_key", "user1_value")
         engine2.set_execution_state("test_key", "user2_value")
         
-        self.assertEqual(engine1.get_execution_state("test_key"), "user1_value")
-        self.assertEqual(engine2.get_execution_state("test_key"), "user2_value")
+        assert engine1.get_execution_state("test_key") == "user1_value"
+        assert engine2.get_execution_state("test_key") == "user2_value"
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -271,13 +271,13 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         execution_order.append("report")
         
         # Verify correct execution order
-        self.assertEqual(execution_order, ["triage", "data", "optimizer", "report"])
+        assert execution_order == ["triage", "data", "optimizer", "report"]
         
         # Verify each agent produced results
-        self.assertIsNotNone(triage_result)
-        self.assertIsNotNone(data_result)
-        self.assertIsNotNone(optimizer_result)
-        self.assertIsNotNone(report_result)
+        assert triage_result is not None
+        assert data_result is not None
+        assert optimizer_result is not None
+        assert report_result is not None
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -318,19 +318,19 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Verify tool was executed
         mock_tool_dispatcher.execute_tool.assert_called()
         tool_call = mock_tool_dispatcher.execute_tool.call_args
-        self.assertIn("cost_analyzer", str(tool_call))
+        assert "cost_analyzer" in str(tool_call)
         
         # Verify WebSocket events for tool execution
         emitter_calls = self.mock_emitter.send_event.call_args_list
         event_types = [call[1]["event_type"] for call in emitter_calls]
         
         # Should have tool execution events
-        self.assertIn("tool_executing", event_types)
-        self.assertIn("tool_completed", event_types)
+        assert "tool_executing" in event_types
+        assert "tool_completed" in event_types
         
         # Verify result contains tool output
-        self.assertIsNotNone(result)
-        self.assertIn("tool_results", result)
+        assert result is not None
+        assert "tool_results" in result
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -386,13 +386,13 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Verify context was preserved and used
         stored_context = engine.get_execution_state("infrastructure_analysis")
-        self.assertIsNotNone(stored_context)
-        self.assertEqual(stored_context["infrastructure_type"], "cloud_ml")
-        self.assertEqual(stored_context["monthly_spend"], 5000.00)
+        assert stored_context is not None
+        assert stored_context["infrastructure_type"] == "cloud_ml"
+        assert stored_context["monthly_spend"] == 5000.00
         
         # Verify both executions succeeded
-        self.assertIsNotNone(result1)
-        self.assertIsNotNone(result2)
+        assert result1 is not None
+        assert result2 is not None
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -447,21 +447,19 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         ]
         
         for required_event in required_events:
-            self.assertIn(required_event, event_types,
-                         f"Missing required WebSocket event: {required_event}")
+            assert required_event in event_types, f"Missing required WebSocket event: {required_event}"
         
         # Verify events are in logical order
         started_idx = event_types.index("agent_started")
         completed_idx = event_types.index("agent_completed")
-        self.assertLess(started_idx, completed_idx, 
-                       "agent_started should come before agent_completed")
+        assert started_idx < completed_idx, "agent_started should come before agent_completed"
         
         # Verify event data contains required fields
         for event in event_tracker:
-            self.assertIn("timestamp", event)
-            self.assertIsNotNone(event["data"])
+            assert "timestamp" in event
+            assert event["data"] is not None
             if "user_id" in event:
-                self.assertEqual(event["user_id"], self.test_user_id)
+                assert event["user_id"] == self.test_user_id
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -502,19 +500,19 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify recovery was successful
-        self.assertIsNotNone(result)
-        self.assertEqual(result.get("status"), "success")
+        assert result is not None
+        assert result.get("status") == "success"
         
         # Verify tool was called twice (failure + success)
-        self.assertEqual(mock_tool_dispatcher.execute_tool.call_count, 2)
+        assert mock_tool_dispatcher.execute_tool.call_count == 2
         
         # Verify error was logged and handled gracefully
         emitter_calls = self.mock_emitter.send_event.call_args_list
         event_types = [call[1]["event_type"] for call in emitter_calls]
         
         # Should have error handling events
-        self.assertIn("agent_error", event_types)
-        self.assertIn("agent_recovered", event_types)
+        assert "agent_error" in event_types
+        assert "agent_recovered" in event_types
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -557,16 +555,16 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         execution_time = time.time() - start_time
         
         # Verify execution completed within performance expectations
-        self.assertLess(execution_time, 5.0, "Agent execution exceeded timeout")
-        self.assertIsNotNone(result)
+        assert execution_time < 5.0, "Agent execution exceeded timeout"
+        assert result is not None
         
         # Verify performance metrics were recorded
         execution_tracker = get_execution_tracker()
         metrics = execution_tracker.get_execution_metrics(user_context.user_id)
         
-        self.assertIsNotNone(metrics)
-        self.assertIn("execution_time", metrics)
-        self.assertGreater(metrics["execution_time"], 0)
+        assert metrics is not None
+        assert "execution_time" in metrics
+        assert metrics["execution_time"] > 0
 
     @pytest.mark.integration 
     @pytest.mark.real_services
@@ -646,16 +644,16 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify agent coordination worked
-        self.assertIn("data_analysis", shared_context)
-        self.assertIn("optimization_plan", shared_context)
+        assert "data_analysis" in shared_context
+        assert "optimization_plan" in shared_context
         
         # Verify data flowed between agents
-        self.assertEqual(shared_context["data_analysis"]["cost_data"]["monthly"], 3500)
+        assert shared_context["data_analysis"]["cost_data"]["monthly"] == 3500
         expected_savings = 3500 * 0.2
-        self.assertEqual(shared_context["optimization_plan"]["estimated_savings"], expected_savings)
+        assert shared_context["optimization_plan"]["estimated_savings"] == expected_savings
         
         # Verify final report combines all agent outputs
-        self.assertIsNotNone(report_result)
+        assert report_result is not None
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -703,18 +701,18 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify aggregation includes all agent outputs
-        self.assertIn("triage_analysis", aggregated_result)
-        self.assertIn("data_analysis", aggregated_result) 
-        self.assertIn("optimization_results", aggregated_result)
+        assert "triage_analysis" in aggregated_result
+        assert "data_analysis" in aggregated_result 
+        assert "optimization_results" in aggregated_result
         
         # Verify summary metrics
-        self.assertIn("total_execution_time", aggregated_result)
+        assert "total_execution_time" in aggregated_result
         expected_total_time = 1.2 + 2.8 + 3.1
-        self.assertEqual(aggregated_result["total_execution_time"], expected_total_time)
+        assert aggregated_result["total_execution_time"] == expected_total_time
         
         # Verify business value calculations
-        self.assertIn("business_impact", aggregated_result)
-        self.assertEqual(aggregated_result["business_impact"]["potential_monthly_savings"], 840)
+        assert "business_impact" in aggregated_result
+        assert aggregated_result["business_impact"]["potential_monthly_savings"] == 840
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -783,19 +781,19 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify monitoring data was collected
-        self.assertGreater(len(execution_logs), 0)
-        self.assertGreater(len(performance_metrics), 0)
+        assert len(execution_logs) > 0
+        assert len(performance_metrics) > 0
         
         # Verify execution lifecycle was logged
         events = [log["event"] for log in execution_logs]
-        self.assertIn("execution_started", events)
-        self.assertIn("execution_completed", events)
+        assert "execution_started" in events
+        assert "execution_completed" in events
         
         # Verify performance metrics were captured
         metric = performance_metrics[0]
-        self.assertIn("execution_time", metric)
-        self.assertGreater(metric["execution_time"], 0)
-        self.assertTrue(metric["success"])
+        assert "execution_time" in metric
+        assert metric["execution_time"] > 0
+        assert metric["success"]
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -851,12 +849,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Verify memory was properly cleaned up
         # In real implementation, would check actual memory usage
-        self.assertLessEqual(post_cleanup_memory, post_creation_memory * 1.1,
-                            "Memory usage should decrease after cleanup")
+        assert post_cleanup_memory <= post_creation_memory * 1.1, "Memory usage should decrease after cleanup"
         
         # Verify all agents were marked as cleaned up
         for agent in agents:
-            self.assertTrue(hasattr(agent, '_cleaned_up'))
+            assert hasattr(agent, '_cleaned_up')
 
     def _get_memory_usage(self) -> int:
         """Mock memory usage measurement for testing."""
@@ -906,12 +903,12 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             return False
         
         # Verify free user can access basic agents
-        self.assertTrue(check_agent_permissions("triage", free_user_context))
-        self.assertFalse(check_agent_permissions("apex_optimizer", free_user_context))
+        assert check_agent_permissions("triage", free_user_context)
+        assert not check_agent_permissions("apex_optimizer", free_user_context)
         
         # Verify enterprise user can access all agents
-        self.assertTrue(check_agent_permissions("triage", enterprise_user_context))
-        self.assertTrue(check_agent_permissions("apex_optimizer", enterprise_user_context))
+        assert check_agent_permissions("triage", enterprise_user_context)
+        assert check_agent_permissions("apex_optimizer", enterprise_user_context)
         
         # Test execution with permission enforcement
         try:
@@ -920,9 +917,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 message="Basic analysis",
                 context=free_user_context
             )
-            self.assertIsNotNone(result)
+            assert result is not None
         except PermissionError:
-            self.fail("Free user should have access to triage agent")
+            pytest.fail("Free user should have access to triage agent")
         
         # Enterprise user should access advanced agent
         try:
@@ -930,9 +927,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 message="Advanced optimization", 
                 context=enterprise_user_context
             )
-            self.assertIsNotNone(result)
+            assert result is not None
         except PermissionError:
-            self.fail("Enterprise user should have access to optimizer agent")
+            pytest.fail("Enterprise user should have access to optimizer agent")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -990,19 +987,19 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         total_time = time.time() - start_time
         
         # Verify all executions completed successfully
-        self.assertEqual(len(results), 10)
+        assert len(results) == 10
         for result in results:
-            self.assertIsNotNone(result["result"])
-            self.assertIn("user_id", result)
+            assert result["result"] is not None
+            assert "user_id" in result
         
         # Verify performance under load
         avg_execution_time = sum(r["execution_time"] for r in results) / len(results)
-        self.assertLess(avg_execution_time, 5.0, "Average execution time should be reasonable")
-        self.assertLess(total_time, 10.0, "Total concurrent execution should be efficient")
+        assert avg_execution_time < 5.0, "Average execution time should be reasonable"
+        assert total_time < 10.0, "Total concurrent execution should be efficient"
         
         # Verify user isolation was maintained
         user_ids = [r["user_id"] for r in results]
-        self.assertEqual(len(set(user_ids)), 10, "All user IDs should be unique")
+        assert len(set(user_ids)) == 10, "All user IDs should be unique"
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1052,9 +1049,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify graceful degradation
-        self.assertIsNotNone(result)
-        self.assertEqual(result.get("status"), "degraded")
-        self.assertTrue(result.get("fallback_used"))
+        assert result is not None
+        assert result.get("status") == "degraded"
+        assert result.get("fallback_used")
         
         # Test with all services available
         service_availability["llm_service"] = True
@@ -1066,9 +1063,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         )
         
         # Verify normal operation
-        self.assertIsNotNone(result_normal)
-        self.assertNotEqual(result_normal.get("status"), "degraded")
-        self.assertIsNone(result_normal.get("fallback_used"))
+        assert result_normal is not None
+        assert result_normal.get("status") != "degraded"
+        assert result_normal.get("fallback_used") is None
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -1133,15 +1130,15 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             time_range=timedelta(minutes=1)
         )
         
-        self.assertIn("total_executions", analytics)
-        self.assertIn("avg_execution_time", analytics)
-        self.assertIn("total_tokens_used", analytics)
-        self.assertIn("success_rate", analytics)
+        assert "total_executions" in analytics
+        assert "avg_execution_time" in analytics
+        assert "total_tokens_used" in analytics
+        assert "success_rate" in analytics
         
         # Verify metrics are reasonable
-        self.assertGreater(analytics["total_executions"], 0)
-        self.assertGreater(analytics["avg_execution_time"], 0)
-        self.assertEqual(analytics["success_rate"], 1.0)  # 100% success rate
+        assert analytics["total_executions"] > 0
+        assert analytics["avg_execution_time"] > 0
+        assert analytics["success_rate"] == 1.0  # 100% success rate
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1209,16 +1206,16 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 retry_delay *= 2  # Exponential backoff
         
         # Verify execution eventually succeeded
-        self.assertEqual(execution_attempts, 3)
-        self.assertIsNotNone(result)
-        self.assertEqual(result["status"], "success")
-        self.assertTrue(result["recovered"])
+        assert execution_attempts == 3
+        assert result is not None
+        assert result["status"] == "success"
+        assert result["recovered"]
         
         # Verify state snapshots were saved
-        self.assertEqual(len(saved_states), 3)
+        assert len(saved_states) == 3
         for i, state in enumerate(saved_states):
-            self.assertEqual(state["attempt"], i + 1)
-            self.assertIn("timestamp", state)
+            assert state["attempt"] == i + 1
+            assert "timestamp" in state
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1297,20 +1294,14 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         aggressive_result = results["aggressive"]
         
         # Conservative should use fewer tokens
-        self.assertLessEqual(
-            conservative_result["tokens_used"], 
-            configurations["conservative"]["max_tokens"]
-        )
+        assert conservative_result["tokens_used"] <= configurations["conservative"]["max_tokens"]
         
         # Aggressive should potentially use more resources
-        self.assertLessEqual(
-            aggressive_result["tokens_used"],
-            configurations["aggressive"]["max_tokens"] 
-        )
+        assert aggressive_result["tokens_used"] <= configurations["aggressive"]["max_tokens"]
         
         # Verify configuration profiles work differently
-        self.assertEqual(conservative_result["configuration_applied"], "conservative")
-        self.assertEqual(aggressive_result["configuration_applied"], "aggressive")
+        assert conservative_result["configuration_applied"] == "conservative"
+        assert aggressive_result["configuration_applied"] == "aggressive"
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1383,20 +1374,20 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         external_services["metrics_collector"].record_metrics.assert_called_once()
         
         # Verify result contains data from external services
-        self.assertIsNotNone(result)
-        self.assertIn("external_data", result)
+        assert result is not None
+        assert "external_data" in result
         
         # Verify cost data was retrieved
         cost_data = result["external_data"].get("cost_analysis")
         if cost_data:
-            self.assertEqual(cost_data["monthly_cost"], 5500.75)
-            self.assertIn("breakdown", cost_data)
+            assert cost_data["monthly_cost"] == 5500.75
+            assert "breakdown" in cost_data
         
         # Verify optimization analysis was performed
         optimization_data = result["external_data"].get("optimization")
         if optimization_data:
-            self.assertIn("recommendations", optimization_data)
-            self.assertGreater(len(optimization_data["recommendations"]), 0)
+            assert "recommendations" in optimization_data
+            assert len(optimization_data["recommendations"]) > 0
 
     def teardown_method(self, method):
         """Cleanup after tests."""

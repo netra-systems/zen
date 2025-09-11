@@ -532,6 +532,66 @@ class UserWebSocketConnection:
         logger.debug(f"UserWebSocketConnection (SSOT mode) for user {user_id}")
 
 
+# WebSocket Event and Factory Metrics classes (for test compatibility)
+
+class WebSocketEvent:
+    """WebSocket event data class for test compatibility."""
+    
+    def __init__(self, event_type: str, data: Dict[str, Any], user_id: str = None, timestamp: datetime = None):
+        self.event_type = event_type
+        self.data = data
+        self.user_id = user_id
+        self.timestamp = timestamp or datetime.now(timezone.utc)
+        self.id = str(uuid.uuid4())
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert event to dictionary."""
+        return {
+            'id': self.id,
+            'event_type': self.event_type,
+            'data': self.data,
+            'user_id': self.user_id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None
+        }
+
+
+@dataclass
+class FactoryMetrics:
+    """Factory metrics data class for test compatibility."""
+    emitters_created: int = 0
+    emitters_active: int = 0
+    emitters_cleaned: int = 0
+    events_sent_total: int = 0
+    events_failed_total: int = 0
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    ssot_redirect: bool = True
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'FactoryMetrics':
+        """Create metrics from dictionary."""
+        return cls(
+            emitters_created=data.get('emitters_created', 0),
+            emitters_active=data.get('emitters_active', 0),
+            emitters_cleaned=data.get('emitters_cleaned', 0),
+            events_sent_total=data.get('events_sent_total', 0),
+            events_failed_total=data.get('events_failed_total', 0),
+            created_at=data.get('created_at', datetime.now(timezone.utc).isoformat()),
+            ssot_redirect=data.get('ssot_redirect', True)
+        )
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert metrics to dictionary."""
+        return {
+            'emitters_created': self.emitters_created,
+            'emitters_active': self.emitters_active,
+            'emitters_cleaned': self.emitters_cleaned,
+            'events_sent_total': self.events_sent_total,
+            'events_failed_total': self.events_failed_total,
+            'created_at': self.created_at,
+            'ssot_redirect': self.ssot_redirect
+        }
+
+
 # Exception classes (preserved for compatibility)
 
 class ConnectionNotFound(Exception):
