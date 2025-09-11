@@ -37,7 +37,7 @@ from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import real service utilities
-from test_framework.ssot.database_test_utility import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from shared.isolated_environment import get_env
 
 # CRITICAL: These imports should expose validation inconsistencies in real scenarios
@@ -92,7 +92,7 @@ class TestValidationConsistencyIntegration(SSotAsyncTestCase):
         await super().asyncSetUp()
         
         # Initialize database utility for real data
-        self.db_utility = DatabaseTestUtility()
+        self.db_utility = DatabaseTestUtilities()
         self.env = get_env()
         
         # Track import availability

@@ -66,7 +66,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 
 # SSOT Test Framework (per CLAUDE.md)
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.ssot.database import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from test_framework.ssot.websocket import WebSocketTestUtility
 
 # Test specific imports for database setup

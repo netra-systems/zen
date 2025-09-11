@@ -95,6 +95,30 @@ from auth_service.app.schemas.auth import UserCreate, UserLogin, TokenResponse  
 
 ---
 
+### test_framework Service
+
+#### ✅ VERIFIED IMPORTS (Working):
+```python
+# SSOT Test Infrastructure
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
+from test_framework.ssot.mock_factory import SSotMockFactory
+
+# Database Testing Utilities (CORRECTED 2025-09-11)
+from test_framework.database_test_utilities import DatabaseTestUtilities  # ✅ CORRECT CLASS NAME
+
+# Shared Environment Access
+from shared.isolated_environment import IsolatedEnvironment, get_env
+```
+
+#### ❌ BROKEN IMPORTS (Do Not Use):
+```python
+# THESE PATHS/CLASSES DO NOT EXIST:
+from test_framework.ssot.database_test_utility import DatabaseTestUtility  # ❌ WRONG MODULE/CLASS NAME
+# USE INSTEAD: from test_framework.database_test_utilities import DatabaseTestUtilities
+```
+
+---
+
 ## MOCK PATH REGISTRY
 
 ### netra_backend Mocks

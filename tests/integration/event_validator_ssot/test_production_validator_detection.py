@@ -39,7 +39,7 @@ from collections import defaultdict
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import real service utilities
-from test_framework.ssot.database_test_utility import DatabaseTestUtility
+from test_framework.database_test_utilities import DatabaseTestUtilities
 from shared.isolated_environment import get_env
 
 # CRITICAL: These imports should expose production validator conflicts
@@ -87,7 +87,7 @@ class TestProductionValidatorDetection(SSotAsyncTestCase):
         await super().asyncSetUp()
         
         # Initialize database utility for production-like data
-        self.db_utility = DatabaseTestUtility()
+        self.db_utility = DatabaseTestUtilities()
         self.env = get_env()
         
         # Track validator availability
