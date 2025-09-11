@@ -550,15 +550,19 @@ class BaseAgent(ABC):
     
     # === Abstract Methods ===
     
-    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
+    async def execute(self, context: UserExecutionContext = None, stream_updates: bool = False, 
+                     message: str = None, previous_result: Any = None, **kwargs) -> Any:
         """Execute the agent with user execution context.
         
-        MODERN: Only supports UserExecutionContext pattern - all legacy support removed.
-        This ensures proper session isolation and prevents parameter proliferation.
+        MODERN: Primary interface supports UserExecutionContext pattern for proper isolation.
+        COMPATIBILITY: Backward compatibility wrapper for legacy Golden Path tests.
         
         Args:
             context: User execution context containing all request-scoped state
             stream_updates: Whether to stream progress updates
+            message: (LEGACY) User message for backward compatibility
+            previous_result: (LEGACY) Previous result for chaining
+            **kwargs: Additional legacy parameters
             
         Returns:
             Execution result
@@ -567,6 +571,38 @@ class BaseAgent(ABC):
             TypeError: If context is not UserExecutionContext
             NotImplementedError: If agent doesn't implement _execute_with_user_context
         """
+        # GOLDEN PATH COMPATIBILITY: Handle legacy interface patterns
+        if context is None and message is not None:
+            # Legacy call pattern: agent.execute(message="...", context=...)
+            if 'context' in kwargs:
+                context = kwargs.pop('context')
+                logger.debug(f"Agent {self.name}: Converting legacy execute(message, context) call to modern pattern")
+            else:
+                raise ValueError(
+                    f"Agent {self.name}: Legacy execute() call missing context parameter. "
+                    f"Use execute(context=UserExecutionContext) or execute(message='...', context=UserExecutionContext)"
+                )
+        
+        if message is not None and context is not None:
+            # COMPATIBILITY MODE: Inject message into context.agent_context
+            logger.debug(f"Agent {self.name}: Compatibility mode - injecting message into UserExecutionContext")
+            
+            # Ensure context has agent_context dict
+            if not hasattr(context, 'agent_context') or context.agent_context is None:
+                # Create mutable agent_context if it doesn't exist
+                context.agent_context = {}
+            
+            # Inject message and previous_result into agent_context for legacy compatibility
+            context.agent_context["user_request"] = message
+            context.agent_context["message"] = message  # Alternative key for compatibility
+            if previous_result is not None:
+                context.agent_context["previous_result"] = previous_result
+            
+            # Inject any additional kwargs into agent_context
+            for key, value in kwargs.items():
+                if key not in ['stream_updates']:  # Exclude known parameters
+                    context.agent_context[key] = value
+        
         # Validate context type with comprehensive validation
         context = validate_user_context(context)
         
@@ -1244,6 +1280,108 @@ class BaseAgent(ABC):
         else:
             await self.emit_progress(message)
     
+    # === Golden Path Compatibility Methods ===
+    
+    async def execute_with_retry(self, message: str = None, context: UserExecutionContext = None, 
+                                max_retries: int = 3, **kwargs) -> Any:
+        """GOLDEN PATH COMPATIBILITY: Execute agent with retry logic.
+        
+        This method provides backward compatibility for Golden Path tests that expect
+        execute_with_retry() method with message parameter.
+        
+        Args:
+            message: User message for legacy compatibility
+            context: User execution context
+            max_retries: Maximum number of retry attempts
+            **kwargs: Additional parameters
+            
+        Returns:
+            Execution result from successful execution
+        """
+        for attempt in range(max_retries):
+            try:
+                # Use the main execute method with compatibility wrapper
+                result = await self.execute(
+                    context=context,
+                    message=message,
+                    stream_updates=kwargs.get('stream_updates', False),
+                    **kwargs
+                )
+                return result
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    # Final attempt failed
+                    logger.error(f"Agent {self.name} failed after {max_retries} retries: {e}")
+                    raise
+                else:
+                    # Log retry attempt
+                    logger.warning(f"Agent {self.name} attempt {attempt + 1} failed, retrying: {e}")
+                    await asyncio.sleep(0.1 * (attempt + 1))  # Simple backoff
+    
+    async def execute_with_fallback(self, message: str = None, context: UserExecutionContext = None,
+                                   fallback_responses: Dict[str, Any] = None, **kwargs) -> Any:
+        """GOLDEN PATH COMPATIBILITY: Execute agent with fallback responses.
+        
+        This method provides backward compatibility for Golden Path tests that expect
+        fallback behavior when services are unavailable.
+        
+        Args:
+            message: User message for legacy compatibility
+            context: User execution context
+            fallback_responses: Predefined responses for fallback scenarios
+            **kwargs: Additional parameters
+            
+        Returns:
+            Execution result or fallback response
+        """
+        try:
+            # Try normal execution first
+            result = await self.execute(
+                context=context,
+                message=message,
+                stream_updates=kwargs.get('stream_updates', False),
+                **kwargs
+            )
+            return result
+        except Exception as e:
+            # Check if we have a fallback for this error
+            if fallback_responses:
+                for fallback_key, fallback_response in fallback_responses.items():
+                    if fallback_key.lower() in str(e).lower():
+                        logger.info(f"Agent {self.name} using fallback response for {fallback_key}: {e}")
+                        return fallback_response
+            
+            # No fallback available, re-raise the error
+            logger.error(f"Agent {self.name} failed and no fallback available: {e}")
+            raise
+
+    async def cleanup(self) -> None:
+        """GOLDEN PATH COMPATIBILITY: Cleanup agent resources.
+        
+        This method provides backward compatibility for Golden Path tests that expect
+        a cleanup() method for resource management.
+        """
+        try:
+            # Mark agent as cleaned up for tests
+            self._cleaned_up = True
+            
+            # Clear any agent context safely
+            if hasattr(self, 'context'):
+                self.context.clear()
+            
+            # Reset WebSocket state
+            if hasattr(self, '_websocket_emitter'):
+                self._websocket_emitter = None
+            
+            # Clear user context
+            if hasattr(self, 'user_context'):
+                self.user_context = None
+            
+            logger.debug(f"Agent {self.name} cleanup completed")
+            
+        except Exception as e:
+            logger.warning(f"Agent {self.name} cleanup warning: {e}")
+
     # Backward compatibility for _send_update pattern
     async def send_legacy_update(self, run_id: str, status: str, message: str, 
                                result: Optional[Dict[str, Any]] = None) -> None:
