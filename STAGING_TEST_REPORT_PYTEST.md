@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-11 13:43:28
+**Generated:** 2025-09-11 13:58:53
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 4
+- **Total Tests:** 3
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
+- **Failed:** 3 (100.0%)
 - **Skipped:** 0
-- **Duration:** 23.74 seconds
+- **Duration:** 0.94 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,48 +19,57 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_auth_service_actually_works_in_staging | SKIP skipped | 0.000s | test_golden_path_validation_staging_current.py |
-| test_backend_service_actually_works_in_staging | SKIP skipped | 0.000s | test_golden_path_validation_staging_current.py |
-| test_staging_environment_service_architecture | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
-| test_recommended_validator_architecture_for_staging | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
+| test_ssot_validator_with_real_agent_execution | FAIL failed | 0.000s | test_ssot_event_validator_staging.py |
+| test_ssot_validator_performance_under_load | FAIL failed | 0.000s | test_ssot_event_validator_staging.py |
+| test_ssot_validator_staging_environment_integration | FAIL failed | 0.000s | test_ssot_event_validator_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_staging_environment_service_architecture
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_validation_staging_current.py
+### FAILED: test_ssot_validator_with_real_agent_execution
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_ssot_event_validator_staging.py
 - **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_golden_path_validation_staging_current.py:381: in test_staging_environment_service_architecture
-    assert validator_assumptions['conflicts_with_staging_reality'] is False, (
-E   AssertionError: STAGING REALITY vs VALIDATOR ASSUMPTIONS: Staging: {'auth_service': {'has_own_database': True, 'contains_tables': ['users', 'user_sessions', 'oauth_credentials'], 'accessible_from': ['auth_service_only']}, 'backend_service': {'has_own_database': True, 'contains_tables': ['chat_thre...
+- **Error:** tests\e2e\staging\test_ssot_event_validator_staging.py:146: in test_ssot_validator_with_real_agent_execution
+    self.assertEqual(
+test_framework\ssot\base_test_case.py:430: in assertEqual
+    assert first == second, msg or f"Expected {first} == {second}"
+           ^^^^^^^^^^^^^^^
+E   AssertionError: STAGING INTEGRATION FAILURE: 3 scenarios failed: [{'scenario': 'data_optimization_task', 'exception': "'llm_interaction_time'"}, {'scenario': 'cost_analysis_task', 'exception': "'llm_interaction_ti...
 
-### FAILED: test_recommended_validator_architecture_for_staging
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_validation_staging_current.py
+### FAILED: test_ssot_validator_performance_under_load
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_ssot_event_validator_staging.py
 - **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_golden_path_validation_staging_current.py:410: in test_recommended_validator_architecture_for_staging
-    assert False, (
-E   AssertionError: RECOMMENDED STAGING VALIDATOR ARCHITECTURE: {'auth_validation': {'method': 'HTTP call to auth service /health endpoint', 'validates': ['auth service availability', 'JWT capabilities'], 'database_access': 'none_from_backend'}, 'backend_validation': {'method': 'check backend database and components', 'validates': ['backend tables', 'ag...
+- **Error:** tests\e2e\staging\test_ssot_event_validator_staging.py:249: in test_ssot_validator_performance_under_load
+    self.assertEqual(
+test_framework\ssot\base_test_case.py:430: in assertEqual
+    assert first == second, msg or f"Expected {first} == {second}"
+           ^^^^^^^^^^^^^^^
+E   AssertionError: PERFORMANCE FAILURE: 4 load levels failed performance requirements: [{'user_count': 5, 'issue': 'load_test_exception', 'exception': "'TestSsotEventValidatorStaging' object has no attribute 'test_durat...
+
+### FAILED: test_ssot_validator_staging_environment_integration
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_ssot_event_validator_staging.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_ssot_event_validator_staging.py:280: in test_ssot_validator_staging_environment_integration
+    'endpoint': f"{self.staging_base_url}/health"
+                   ^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestSsotEventValidatorStaging' object has no attribute 'staging_base_url'...
 
 ## Pytest Output Format
 
 ```
-test_golden_path_validation_staging_current.py::test_auth_service_actually_works_in_staging SKIPPED
-test_golden_path_validation_staging_current.py::test_backend_service_actually_works_in_staging SKIPPED
-test_golden_path_validation_staging_current.py::test_staging_environment_service_architecture FAILED
-test_golden_path_validation_staging_current.py::test_recommended_validator_architecture_for_staging FAILED
+test_ssot_event_validator_staging.py::test_ssot_validator_with_real_agent_execution FAILED
+test_ssot_event_validator_staging.py::test_ssot_validator_performance_under_load FAILED
+test_ssot_event_validator_staging.py::test_ssot_validator_staging_environment_integration FAILED
 
 ==================================================
-<<<<<<< HEAD
-0 passed, 2 failed, 2 skipped in 0.17s
-=======
-0 passed, 0 failed in 23.74s
->>>>>>> origin/develop-long-lived
+0 passed, 3 failed in 0.94s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| Authentication | 1 | 0 | 0 | 0.0% |
+| Agent | 1 | 0 | 1 | 0.0% |
+| Performance | 1 | 0 | 1 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
