@@ -1382,6 +1382,16 @@ class BaseAgent(ABC):
         except Exception as e:
             logger.warning(f"Agent {self.name} cleanup warning: {e}")
 
+    def enable_websocket_test_mode(self) -> None:
+        """Enable WebSocket test mode for Golden Path compatibility.
+        
+        This method enables test mode in the WebSocket adapter, which prevents
+        RuntimeErrors when WebSocket bridge is not available during testing.
+        """
+        if hasattr(self, '_websocket_adapter') and self._websocket_adapter:
+            self._websocket_adapter.enable_test_mode()
+            logger.debug(f"Agent {self.name} enabled WebSocket test mode")
+
     # Backward compatibility for _send_update pattern
     async def send_legacy_update(self, run_id: str, status: str, message: str, 
                                result: Optional[Dict[str, Any]] = None) -> None:
