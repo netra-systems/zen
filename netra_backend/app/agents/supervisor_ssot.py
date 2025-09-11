@@ -23,7 +23,6 @@ from netra_backend.app.services.user_execution_context import (
     validate_user_context
 )
 from netra_backend.app.database.session_manager import (
-    managed_session,
     validate_agent_session_isolation
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
@@ -96,81 +95,80 @@ class SupervisorAgent(BaseAgent):
         if not context.db_session:
             raise ValueError("UserExecutionContext must contain a database session")
         
-        async with managed_session(context) as session_manager:
-            # Create UserExecutionEngine with proper context
-            engine = await self._create_user_execution_engine(context)
-            
-            try:
-                # CRITICAL FIX: Emit agent_started event
-                if self.websocket_bridge:
-                    await self.websocket_bridge.notify_agent_started(
-                        context.run_id,
-                        "Supervisor",
-                        context={"status": "starting", "isolated": True}
-                    )
-                    logger.info(f"📡 Emitted agent_started event for run {context.run_id}")
-                
-                # CRITICAL FIX: Emit agent_thinking event
-                if self.websocket_bridge:
-                    await self.websocket_bridge.notify_agent_thinking(
-                        context.run_id,
-                        "Supervisor",
-                        reasoning="Analyzing your request and selecting appropriate agents...",
-                        step_number=1
-                    )
-                    logger.info(f"📡 Emitted agent_thinking event for run {context.run_id}")
-                
-                # Execute using SSOT execution engine
-                result = await engine.execute_agent_pipeline(
-                    agent_name="supervisor_orchestration",
-                    execution_context=context,
-                    input_data={
-                        "user_request": context.metadata.get("user_request", ""),
-                        "stream_updates": stream_updates
-                    }
+        # Create UserExecutionEngine with proper context - session already exists in context
+        engine = await self._create_user_execution_engine(context)
+        
+        try:
+            # CRITICAL FIX: Emit agent_started event
+            if self.websocket_bridge:
+                await self.websocket_bridge.notify_agent_started(
+                    context.run_id,
+                    "Supervisor",
+                    context={"status": "starting", "isolated": True}
                 )
-                
-                # CRITICAL FIX: Emit agent_completed event
-                if self.websocket_bridge:
-                    await self.websocket_bridge.notify_agent_completed(
-                        context.run_id,
-                        "Supervisor",
-                        result={
-                            "supervisor_result": "completed",
-                            "orchestration_successful": result.success if hasattr(result, 'success') else True,
-                            "user_isolation_verified": True,
-                            "results": result.result if hasattr(result, 'result') else result
-                        },
-                        execution_time_ms=0  # TODO: Add proper timing
-                    )
-                    logger.info(f"📡 Emitted agent_completed event for run {context.run_id}")
-                
-                logger.info(f"✅ SSOT SupervisorAgent execution completed for user {context.user_id}")
-                
-                return {
-                    "supervisor_result": "completed",
-                    "orchestration_successful": result.success if hasattr(result, 'success') else True,
-                    "user_isolation_verified": True,
-                    "results": result.result if hasattr(result, 'result') else result,
-                    "user_id": context.user_id,
-                    "run_id": context.run_id
+                logger.info(f"📡 Emitted agent_started event for run {context.run_id}")
+            
+            # CRITICAL FIX: Emit agent_thinking event
+            if self.websocket_bridge:
+                await self.websocket_bridge.notify_agent_thinking(
+                    context.run_id,
+                    "Supervisor",
+                    reasoning="Analyzing your request and selecting appropriate agents...",
+                    step_number=1
+                )
+                logger.info(f"📡 Emitted agent_thinking event for run {context.run_id}")
+            
+            # Execute using SSOT execution engine
+            result = await engine.execute_agent_pipeline(
+                agent_name="supervisor_orchestration",
+                execution_context=context,
+                input_data={
+                    "user_request": context.metadata.get("user_request", ""),
+                    "stream_updates": stream_updates
                 }
-                
-            except Exception as e:
-                # CRITICAL FIX: Emit error event on failure
-                if self.websocket_bridge:
-                    await self.websocket_bridge.notify_agent_error(
-                        context.run_id,
-                        "Supervisor",
-                        error=f"Supervisor execution failed: {str(e)}",
-                        error_context={"error_type": type(e).__name__}
-                    )
-                    logger.error(f"📡 Emitted agent_error event for run {context.run_id}: {e}")
-                raise
-                
-            finally:
-                # Cleanup using SSOT cleanup
-                await engine.cleanup()
+            )
+            
+            # CRITICAL FIX: Emit agent_completed event
+            if self.websocket_bridge:
+                await self.websocket_bridge.notify_agent_completed(
+                    context.run_id,
+                    "Supervisor",
+                    result={
+                        "supervisor_result": "completed",
+                        "orchestration_successful": result.success if hasattr(result, 'success') else True,
+                        "user_isolation_verified": True,
+                        "results": result.result if hasattr(result, 'result') else result
+                    },
+                    execution_time_ms=0  # TODO: Add proper timing
+                )
+                logger.info(f"📡 Emitted agent_completed event for run {context.run_id}")
+            
+            logger.info(f"✅ SSOT SupervisorAgent execution completed for user {context.user_id}")
+            
+            return {
+                "supervisor_result": "completed",
+                "orchestration_successful": result.success if hasattr(result, 'success') else True,
+                "user_isolation_verified": True,
+                "results": result.result if hasattr(result, 'result') else result,
+                "user_id": context.user_id,
+                "run_id": context.run_id
+            }
+            
+        except Exception as e:
+            # CRITICAL FIX: Emit error event on failure
+            if self.websocket_bridge:
+                await self.websocket_bridge.notify_agent_error(
+                    context.run_id,
+                    "Supervisor",
+                    error=f"Supervisor execution failed: {str(e)}",
+                    error_context={"error_type": type(e).__name__}
+                )
+                logger.error(f"📡 Emitted agent_error event for run {context.run_id}: {e}")
+            raise
+            
+        finally:
+            # Cleanup using SSOT cleanup
+            await engine.cleanup()
 
     async def _create_user_execution_engine(self, context: UserExecutionContext) -> UserExecutionEngine:
         """Create UserExecutionEngine using SSOT factory patterns.

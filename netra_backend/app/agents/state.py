@@ -176,6 +176,7 @@ class DeepAgentState(BaseModel):
     ⚠️  USER DATA AT RISK: This pattern may cause data leakage between users
     """
     user_request: str = "default_request"  # Default for backward compatibility
+    user_prompt: str = "default_request"   # GOLDEN PATH FIX: Interface alignment for execution engines
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
     run_id: Optional[str] = None  # Unique identifier for this execution run
@@ -205,7 +206,16 @@ class DeepAgentState(BaseModel):
     agent_context: Dict[str, Any] = Field(default_factory=dict)
     
     def __init__(self, **data):
-        """Initialize DeepAgentState with deprecation warning."""
+        """Initialize DeepAgentState with deprecation warning and field synchronization."""
+        # GOLDEN PATH FIX: Synchronize user_request and user_prompt fields for backward compatibility
+        if 'user_prompt' in data and 'user_request' not in data:
+            data['user_request'] = data['user_prompt']
+        elif 'user_request' in data and 'user_prompt' not in data:
+            data['user_prompt'] = data['user_request']
+        elif 'user_prompt' in data and 'user_request' in data:
+            # If both are provided, prefer user_prompt as it's the expected interface
+            data['user_request'] = data['user_prompt']
+        
         # Issue comprehensive deprecation warning
         warnings.warn(
             f"🚨 CRITICAL DEPRECATION: DeepAgentState usage creates user isolation risks. "
@@ -249,6 +259,13 @@ class DeepAgentState(BaseModel):
         """Create a new instance with updated fields (immutable pattern)."""
         current_data = self.model_dump()
         current_data.update(updates)
+        
+        # GOLDEN PATH FIX: Maintain synchronization between user_request and user_prompt
+        if 'user_prompt' in updates and 'user_request' not in updates:
+            current_data['user_request'] = updates['user_prompt']
+        elif 'user_request' in updates and 'user_prompt' not in updates:
+            current_data['user_prompt'] = updates['user_request']
+        
         return DeepAgentState(**current_data)
     
     def increment_step_count(self) -> 'DeepAgentState':

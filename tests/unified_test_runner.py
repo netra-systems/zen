@@ -23,6 +23,10 @@ NETRA APEX UNIFIED TEST RUNNER
 ==============================
 Modern test runner with advanced categorization, progress tracking, and intelligent execution planning.
 
+📖 COMPLETE TEST EXECUTION GUIDE: See TEST_EXECUTION_GUIDE.md for comprehensive methodology
+   on running all tests without fast-fail, separating collection errors from test failures,
+   and understanding test infrastructure.
+
 NEW: ORCHESTRATION SYSTEM
 =========================
 Advanced layer-based test orchestration with 5 specialized agents:
