@@ -934,13 +934,16 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             performance_violations.append(violation)
         
         # Cleanup real baseline test resources
-        try:
-            if hasattr(engine, 'cleanup'):
-                await engine.cleanup()
-            await baseline_websocket_manager.cleanup()
-        except Exception as e:
-            logger.error(f"Baseline test cleanup error: {e}")
-            # Don't raise cleanup errors
+        async def cleanup_resources():
+            try:
+                if hasattr(engine, 'cleanup'):
+                    await engine.cleanup()
+                await baseline_websocket_manager.cleanup()
+            except Exception as e:
+                logger.error(f"Baseline test cleanup error: {e}")
+                # Don't raise cleanup errors
+        
+        asyncio.run(cleanup_resources())
         
         print(f"  ✅ Baseline performance comparison completed")
         
