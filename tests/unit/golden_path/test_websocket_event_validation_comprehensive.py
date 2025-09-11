@@ -650,8 +650,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         # Verify bridge event data
         event_types = []
         for event in bridge_events:
-            if event["args"]:
-                event_types.append(event["args"][0])  # First arg is usually event type
+            if "event_type" in event:
+                event_types.append(event["event_type"])  # Event type from our mock structure
         
         expected_bridge_types = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
         
