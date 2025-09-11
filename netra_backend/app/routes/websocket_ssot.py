@@ -919,7 +919,20 @@ class WebSocketSSOTRouter:
         
         try:
             if is_websocket_connected(websocket):
-                error_message = create_error_message("CONNECTION_ERROR", f"Connection error in {mode.value} mode")
+                # FIVE WHYS FIX: Convert ErrorMessage to ServerMessage for proper WebSocket sending
+                # Root Cause: Organizational culture prioritizing velocity over architectural discipline
+                # WHY #1: ErrorMessage passed directly to safe_websocket_send() which expects ServerMessage
+                # WHY #2: No type conversion layer between message types
+                # WHY #3: Architecture violates interface design principles  
+                # WHY #4: Missing quality validation in development process
+                # WHY #5: Organization values feature velocity over engineering excellence
+                error_data = {
+                    "error_code": "CONNECTION_ERROR",
+                    "error_message": f"Connection error in {mode.value} mode",
+                    "details": {"error_type": str(type(error).__name__), "mode": mode.value},
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                }
+                error_message = create_server_message("error", error_data)
                 await safe_websocket_send(websocket, error_message)
                 await safe_websocket_close(websocket, 1011, f"{mode.value} mode error")
         except Exception as cleanup_error:
