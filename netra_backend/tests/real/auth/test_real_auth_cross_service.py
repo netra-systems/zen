@@ -29,7 +29,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.docker_test_manager import UnifiedDockerManager
 from test_framework.helpers.auth_helpers import create_test_user_data, create_test_jwt_token
 from test_framework.database_helpers import get_test_db_session
-from netra_backend.models.user import User
+from netra_backend.app.db.models_user import User
 from netra_backend.app.core.database import get_database_session
 
 
