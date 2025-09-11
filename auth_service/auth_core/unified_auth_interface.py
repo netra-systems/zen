@@ -18,6 +18,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 # Session manager module was deleted - using AuthService session functionality
 from auth_service.auth_core.services.auth_service import AuthService
@@ -306,7 +308,7 @@ class UnifiedAuthInterface:
     
     def generate_secure_nonce(self) -> str:
         """Generate cryptographically secure nonce."""
-        return str(uuid.uuid4())
+        return UnifiedIdGenerator.generate_base_id("nonce")
     
     def validate_nonce(self, nonce: str) -> bool:
         """Validate nonce and prevent replay attacks."""
