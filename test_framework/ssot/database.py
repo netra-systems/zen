@@ -998,11 +998,15 @@ class DatabaseTestManager:
 # Legacy alias for backward compatibility
 DatabaseTestHelper = DatabaseTestUtility
 
+# Compatibility aliases for integration tests (Issue #308)
+SSotDatabaseTestMixin = DatabaseTestUtility  # Mixin-style compatibility alias
+
 # Export SSOT database utilities
 __all__ = [
     'DatabaseTestUtility',
     'DatabaseTestHelper',   # Legacy alias for DatabaseTestUtility
     'DatabaseTestManager',  # Added for legacy compatibility
+    'SSotDatabaseTestMixin', # Compatibility alias for integration tests
     'PostgreSQLTestUtility', 
     'ClickHouseTestUtility',
     'DatabaseTestMetrics',

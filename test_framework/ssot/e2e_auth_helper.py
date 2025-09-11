@@ -1317,3 +1317,6 @@ class E2EAuthenticatedTestCase(SSotBaseTestCase):
 
 # COMPATIBILITY ALIAS: Export create_authenticated_user as create_authenticated_test_user for backward compatibility
 create_authenticated_test_user = create_authenticated_user
+
+# Compatibility aliases for integration tests (Issue #308)
+get_test_user_context = create_authenticated_user_context  # Integration test compatibility alias
