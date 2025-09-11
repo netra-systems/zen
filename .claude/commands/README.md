@@ -13,13 +13,13 @@
 
 ## Overview
 
-This directory contains **37 custom slash commands** for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
+This directory contains **38 custom slash commands** for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
 
 **Command Categories:**
 - **12 Core Commands** - Development workflow and debugging
 - **4 Mission Critical** - Long-running validation and monitoring (8-20 hours)
 - **10 Testing & Development** - Comprehensive test creation and execution
-- **6 Repository Maintenance** - Git, issue, and test management
+- **7 Repository Maintenance** - Git, issue, and test management
 - **5 Analysis & Architecture** - SSOT compliance and system diagnostics
 
 ## Command Structure
@@ -475,7 +475,23 @@ $1, $2, $ARGUMENTS                  # Use arguments
 /gitissueprogressor
 ```
 
-### 31. `/prmergergit`
+### 31. `/issuecrush`
+**Purpose**: Intelligent similarity-based issue cluster processing  
+**Key Features**:
+- Analyzes ALL issues for intelligent similarity detection
+- Goes beyond labels - analyzes issue content, root causes, error patterns
+- Groups related issues by technical relationships and dependencies
+- Processes entire issue clusters with unified solutions
+- Merges duplicate/highly similar issues gracefully
+- Provides comprehensive fixes addressing root causes
+
+**Example**:
+```bash
+/issuecrush                  # Process latest issue with related cluster
+/issuecrush 123              # Process issue #123 with similar issues
+```
+
+### 32. `/prmergergit`
 **Purpose**: Safe pull request merging with validation  
 **Key Features**:
 - Pre-merge test validation
@@ -700,6 +716,7 @@ Brief description of what this command does.
 /gcploggardener           # Collect GCP log issues
 /gitcommitgardener        # Repository cleanup (8-20h)
 /gitissueprogressor       # Full day issue workflow
+/issuecrush               # Intelligent issue cluster processing
 /prmergergit              # Safe PR merging
 /ssotgardener             # SSOT violation fixes (8-30h)
 /e2e-fix-directly         # E2E test fix and deploy
