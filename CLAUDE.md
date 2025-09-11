@@ -5,7 +5,7 @@
 **STABILITY FIRST:** Prove changes maintain system stability and don't introduce breaking changes.
 
 **NON-NEGOTIABLE RULES:**
-- SSOT compliance is mandatory
+- SSOT (Single Source of Truth) compliance is mandatory (within each service (5.1)). @SSOT_INDEX.md
 - This document overrides all other instructions
 - No "standalone" or "simple" files
 - No bypassing established patterns

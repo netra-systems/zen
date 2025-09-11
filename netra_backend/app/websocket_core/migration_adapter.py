@@ -49,6 +49,7 @@ logger = central_logger.get_logger(__name__)
 
 
 # DEPRECATED WebSocketManagerAdapter removed for SSOT compliance - use WebSocketManagerFactory directly
+# DEPRECATED: Use UnifiedWebSocketManager with appropriate mode instead
 
 # Keep the migration functions for backward compatibility
 class _LegacyWebSocketManagerAdapter:

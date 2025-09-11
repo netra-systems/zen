@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_domain_development",
-    "generated_at": "2025-09-08T10:55:51.748480",
+    "generated_at": "2025-09-10T11:32:11.400532",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 4
   },
@@ -42,6 +42,7 @@
       "value": "ws://localhost:8000",
       "category": "critical_domain_development",
       "locations": [
+        "netra_backend/app/monitoring/configuration_drift_monitor.py:614",
         "scripts/scan_string_literals.py:94",
         "scripts/scan_string_literals.py:100",
         "scripts/verify_cold_start.py:173",
