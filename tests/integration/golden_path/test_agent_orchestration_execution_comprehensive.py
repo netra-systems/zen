@@ -120,7 +120,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_supervisor_agent_orchestration_basic_flow(self, real_services_fixture):
+    async def test_supervisor_agent_orchestration_basic_flow(self):
         """
         BVJ: All segments | Retention | Ensures basic agent orchestration works
         Test basic SupervisorAgent orchestration with sub-agent coordination.
@@ -168,7 +168,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_execution_engine_factory_user_isolation(self, real_services_fixture):
+    async def test_execution_engine_factory_user_isolation(self):
         """
         BVJ: All segments | Platform Stability | Ensures users don't interfere with each other
         Test ExecutionEngineFactory creates properly isolated user execution engines.
@@ -206,7 +206,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.real_services
-    async def test_sub_agent_execution_pipeline_sequencing(self, real_services_fixture):
+    async def test_sub_agent_execution_pipeline_sequencing(self):
         """
         BVJ: Early/Mid/Enterprise | Value Delivery | Ensures agents execute in correct order
         Test sub-agent pipeline execution with proper sequencing and coordination.
