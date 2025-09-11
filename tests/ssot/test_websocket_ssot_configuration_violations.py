@@ -61,7 +61,7 @@ class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
         
         try:
             # Factory config
-            from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             factory = WebSocketManagerFactory()
             factory_config_attrs = [attr for attr in dir(factory) if 'config' in attr.lower()]
             configuration_sources['factory_config'] = len(factory_config_attrs) > 0
@@ -171,7 +171,7 @@ class TestWebSocketSSotConfigurationViolations(SSotBaseTestCase):
         
         try:
             # Check factory defaults
-            from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             
             factory = WebSocketManagerFactory()
             factory_defaults = {}

@@ -57,7 +57,7 @@ class TestWebSocketSSotConnectionLifecycle(SSotAsyncTestCase):
             
             # Test factory-based creation
             try:
-                from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
                 factory = WebSocketManagerFactory()
                 factory_manager = factory.create_manager()
                 await factory_manager.add_connection(user_id, f"{connection_id}_factory", None)
