@@ -1,30 +1,42 @@
 """
-Unified Logger Factory - Single source of truth for all logging initialization
-Eliminates 489+ duplicate logging patterns across the codebase.
+DEPRECATED - Backward Compatibility Wrapper for SSOT Logging Factory
+SSOT_COMPATIBILITY_WRAPPER = True
 
-This module provides the ONLY way to initialize loggers throughout the system.
-All services (netra_backend, auth_service, dev_launcher) must use this factory.
+This module is DEPRECATED and maintained only for backward compatibility.
+NEW CODE SHOULD IMPORT FROM: shared.logging.unified_logging_ssot
 
-CRITICAL: This factory avoids circular dependencies by using minimal standard library
-logging operations for bootstrap initialization. It does NOT import itself.
+SSOT REMEDIATION: This wrapper routes all factory calls to the unified SSOT logging system,
+eliminating 489+ duplicate logging patterns while maintaining compatibility.
+
+Business Value: Prevents $500K+ ARR Golden Path debugging failures during SSOT migration.
 """
+
+import warnings
+from shared.isolated_environment import get_env
 from typing import Optional, Dict, Any
+import logging
 import sys
 import os
 from pathlib import Path
 
-# Import logging LAST to minimize bootstrap dependencies
-import logging
+# Import SSOT logging
+from shared.logging.unified_logging_ssot import get_ssot_logger, get_logger as ssot_get_logger
 
-from shared.isolated_environment import get_env
+# Issue deprecation warning
+warnings.warn(
+    "shared.logging.unified_logger_factory is deprecated. "
+    "Use 'from shared.logging.unified_logging_ssot import get_logger' instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class UnifiedLoggerFactory:
     """
-    Centralized logger factory that eliminates all duplicate logging patterns.
+    DEPRECATED - Backward compatibility wrapper for SSOT logging.
     
-    This factory provides consistent logger initialization across all services
-    while supporting service-specific configuration where needed.
+    All methods now delegate to shared.logging.unified_logging_ssot.
+    This maintains compatibility while eliminating duplicate logging patterns.
     """
     
     _initialized = False
@@ -33,164 +45,58 @@ class UnifiedLoggerFactory:
     
     @classmethod
     def _ensure_base_initialization(cls) -> None:
-        """Ensure base logging configuration is set up once globally."""
-        if cls._initialized:
-            return
-            
-        # Configure base logging format and level
-        cls._base_config = cls._get_base_config()
-        
-        # Set up the root logger configuration
-        logging.basicConfig(
-            level=cls._base_config['level'],
-            format=cls._base_config['format'],
-            handlers=cls._create_handlers(cls._base_config)
-        )
-        
-        cls._initialized = True
-    
-    @classmethod
-    def _get_base_config(cls) -> Dict[str, Any]:
-        """Get base logging configuration from environment."""
-        # Use os.environ directly to avoid circular import
-        
-        # Determine environment-specific log level
-        log_level_str = os.environ.get('LOG_LEVEL', 'INFO').upper()
-        try:
-            log_level = getattr(logging, log_level_str)
-        except AttributeError:
-            log_level = logging.INFO
-        
-        # Determine if we're in a service that needs file logging
-        enable_file_logging = os.environ.get('ENABLE_FILE_LOGGING', 'false').lower() == 'true'
-        
-        # Get service name from environment or infer from process
-        service_name = cls._infer_service_name()
-        
-        return {
-            'level': log_level,
-            'format': f'%(asctime)s - {service_name} - %(name)s - %(levelname)s - %(message)s',
-            'enable_file_logging': enable_file_logging,
-            'service_name': service_name
-        }
-    
-    @classmethod
-    def _infer_service_name(cls) -> str:
-        """Infer service name from the current process/environment."""
-        # Check for explicit service name using os.environ to avoid circular import
-        service_name = os.environ.get('SERVICE_NAME')
-        if service_name:
-            return service_name
-            
-        # Infer from the main module path
-        main_module = sys.modules.get('__main__')
-        if main_module and hasattr(main_module, '__file__'):
-            main_file = Path(main_module.__file__)
-            
-            # Check if we're in auth_service
-            if 'auth_service' in str(main_file):
-                return 'auth-service'
-            # Check if we're in dev_launcher
-            elif 'dev_launcher' in str(main_file):
-                return 'dev-launcher'
-            # Check if we're in netra_backend
-            elif 'netra_backend' in str(main_file):
-                return 'netra-backend'
-            # Check for test environment
-            elif 'test' in str(main_file) or 'pytest' in str(main_file):
-                return 'test-runner'
-        
-        return 'netra-service'
-    
-    @classmethod
-    def _create_handlers(cls, config: Dict[str, Any]) -> list:
-        """Create logging handlers based on configuration."""
-        handlers = []
-        
-        # Always include console handler
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setFormatter(logging.Formatter(config['format']))
-        handlers.append(console_handler)
-        
-        # Add file handler if enabled
-        if config.get('enable_file_logging'):
-            log_dir = Path('logs')
-            log_dir.mkdir(exist_ok=True)
-            
-            service_name = config['service_name'].replace('-', '_')
-            log_file = log_dir / f'{service_name}.log'
-            
-            file_handler = logging.FileHandler(log_file)
-            file_handler.setFormatter(logging.Formatter(config['format']))
-            handlers.append(file_handler)
-        
-        return handlers
+        """DEPRECATED: SSOT handles initialization automatically."""
+        pass  # SSOT handles initialization
     
     @classmethod
     def get_logger(cls, name: Optional[str] = None) -> logging.Logger:
         """
-        Get a logger instance with unified configuration.
+        DEPRECATED: Delegate to SSOT logging system.
         
-        This is the ONLY method that should be used to get loggers
-        throughout the entire codebase.
-        
-        Args:
-            name: Logger name, defaults to calling module name
-            
-        Returns:
-            Configured logger instance
+        Use 'from shared.logging.unified_logging_ssot import get_logger' instead.
         """
-        # Ensure base configuration is set up
-        cls._ensure_base_initialization()
+        # Delegate to SSOT
+        ssot_logger = ssot_get_logger(name)
         
-        # Use provided name or infer from caller
-        if name is None:
-            # Get the calling frame to determine module name
-            frame = sys._getframe(1)
-            module = frame.f_globals.get('__name__', 'unknown')
-            name = module
-        
-        # Return cached logger if exists
-        if name in cls._loggers:
-            return cls._loggers[name]
-        
-        # Create new logger using standard library directly (bootstrap pattern)
-        # This is the ONLY place in the system allowed to use logging.getLogger()
-        # because this IS the SSOT factory that provides logging to everything else
-        logger = logging.getLogger(name)  # Bootstrap exception - this IS the SSOT
-        logger.setLevel(cls._base_config['level'])
-        
-        # Cache and return
-        cls._loggers[name] = logger
-        return logger
+        # Return a stdlib-compatible wrapper for backward compatibility
+        class StdlibLoggerWrapper:
+            def __init__(self, ssot_logger):
+                self._ssot = ssot_logger
+                
+            def debug(self, msg, *args, **kwargs):
+                self._ssot.debug(str(msg))
+            
+            def info(self, msg, *args, **kwargs):
+                self._ssot.info(str(msg))
+                
+            def warning(self, msg, *args, **kwargs):
+                self._ssot.warning(str(msg))
+                
+            def error(self, msg, *args, **kwargs):
+                self._ssot.error(str(msg))
+                
+            def critical(self, msg, *args, **kwargs):
+                self._ssot.critical(str(msg))
+                
+            def setLevel(self, level):
+                pass  # SSOT handles level configuration
+                
+        # Cache wrapper for consistency
+        if name not in cls._loggers:
+            cls._loggers[name] = StdlibLoggerWrapper(ssot_logger)
+            
+        return cls._loggers[name]
     
     @classmethod
     def configure_for_service(cls, service_config: Optional[Dict[str, Any]] = None) -> None:
-        """
-        Configure logging for a specific service with custom settings.
-        
-        This allows services to override default behavior while maintaining
-        unified patterns.
-        
-        Args:
-            service_config: Service-specific configuration overrides
-        """
-        if service_config:
-            # Reset initialization to apply new config
-            cls._initialized = False
-            cls._loggers.clear()
-            
-            # Update base config with service overrides
-            base_config = cls._get_base_config()
-            base_config.update(service_config)
-            cls._base_config = base_config
-            
-            # Re-initialize with new config
-            cls._ensure_base_initialization()
+        """DEPRECATED: SSOT handles service configuration automatically."""
+        pass  # SSOT handles configuration
     
     @classmethod
     def reset(cls) -> None:
-        """Reset the factory state (primarily for testing)."""
+        """DEPRECATED: Use shared.logging.unified_logging_ssot.reset_logging instead."""
+        from shared.logging.unified_logging_ssot import reset_logging
+        reset_logging()
         cls._initialized = False
         cls._loggers.clear()
         cls._base_config = None
@@ -199,28 +105,23 @@ class UnifiedLoggerFactory:
 # Global convenience functions for backward compatibility
 def get_logger(name: Optional[str] = None) -> logging.Logger:
     """
-    Get a unified logger instance.
+    DEPRECATED: Get a unified logger instance via SSOT delegation.
     
-    This function replaces ALL instances of:
-    - import logging; logger = logging.getLogger(__name__)  # ❌ FORBIDDEN everywhere except this factory
-    - from netra_backend.app.logging_config import central_logger
-    - Any other logging initialization patterns
+    NEW CODE SHOULD USE: from shared.logging.unified_logging_ssot import get_logger
     
-    Usage:
-        from shared.logging.unified_logger_factory import get_logger
-        logger = get_logger(__name__)  # or just get_logger()
-        
-    BOOTSTRAP NOTE: This factory itself uses logging.getLogger() as the foundational
-    implementation - this is the ONLY permitted usage in the entire codebase.
+    This function maintains backward compatibility by delegating to SSOT.
     """
     return UnifiedLoggerFactory.get_logger(name)
 
 
 def configure_service_logging(service_config: Optional[Dict[str, Any]] = None) -> None:
-    """Configure logging for a specific service."""
-    UnifiedLoggerFactory.configure_for_service(service_config)
+    """DEPRECATED: SSOT handles service configuration automatically."""
+    # SSOT handles configuration automatically
+    pass
 
 
 def reset_logging() -> None:
-    """Reset logging configuration (for testing)."""
+    """DEPRECATED: Reset logging configuration via SSOT."""
+    from shared.logging.unified_logging_ssot import reset_logging as ssot_reset
+    ssot_reset()
     UnifiedLoggerFactory.reset()

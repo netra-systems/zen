@@ -40,7 +40,7 @@ from loguru import logger
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.websocket_core.manager import WebSocketHeartbeatManager, HeartbeatConfig
 from netra_backend.app.websocket_core.rate_limiter import get_rate_limiter
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from fastapi import WebSocket
 from fastapi.websockets import WebSocketState
@@ -292,13 +292,12 @@ class TestWebSocketConnectionStability:
         
         # Send messages to all connections
         logger.info("Sending messages to all connections...")
-        notifier = WebSocketNotifier(self.ws_manager)
+        notifier = WebSocketNotifier.create_for_user(self.ws_manager)
         
         send_tasks = []
         for thread_id in range(10):
             context = AgentExecutionContext(
-                run_id=f"stress_run_{thread_id}",
-                thread_id=f"stress_thread_{thread_id}",
+                run_id=f"stress_run_{thread_id}", thread_id=f"stress_thread_{thread_id}",
                 user_id=f"stress_user_{thread_id}",
                 agent_name="stress_test",
                 retry_count=0,
@@ -525,7 +524,7 @@ class TestWebSocketConnectionStability:
             connections.append((conn_id, mock_ws, thread_id))
         
         # Flood with messages
-        notifier = WebSocketNotifier(self.ws_manager)
+        notifier = WebSocketNotifier.create_for_user(self.ws_manager)
         
         flood_start = time.time()
         send_tasks = []
@@ -533,8 +532,7 @@ class TestWebSocketConnectionStability:
         for i in range(messages_per_connection):
             for thread_num in range(10):
                 context = AgentExecutionContext(
-                    run_id=f"flood_{i}_{thread_num}",
-                    thread_id=f"buffer_thread_{thread_num}",
+                    run_id=f"flood_{i}_{thread_num}", thread_id=f"buffer_thread_{thread_num}",
                     user_id=f"buffer_user_{thread_num}",
                     agent_name="flood_test",
                     retry_count=0,

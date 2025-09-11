@@ -41,7 +41,7 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
 # Core imports for WebSocket notifier integration testing
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
@@ -113,14 +113,12 @@ class TestWebSocketNotifierIntegration(SSotBaseTestCase):
         # Suppress deprecation warning for testing
         with patch('warnings.warn'):
             # Create WebSocket notifier with realistic manager
-            self.websocket_notifier = WebSocketNotifier(
-                websocket_manager=self.realistic_websocket_manager
+            self.websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager=self.realistic_websocket_manager
             )
         
         # Create realistic execution contexts for different scenarios
         self.enterprise_context = AgentExecutionContext(
-            agent_name="enterprise_optimizer",
-            run_id=uuid.uuid4(),
+            agent_name="enterprise_optimizer", run_id=uuid.uuid4(),
             retry_count=0,
             thread_id="enterprise_thread_abc123"
         )
@@ -283,7 +281,7 @@ class TestWebSocketNotifierIntegration(SSotBaseTestCase):
         failing_manager = RealisticWebSocketManager(simulate_failures=True)
         
         with patch('warnings.warn'):
-            failing_notifier = WebSocketNotifier(websocket_manager=failing_manager)
+            failing_notifier = WebSocketNotifier.create_for_user(websocket_manager=failing_manager)
         
         # Attempt to send notifications that will initially fail
         await failing_notifier.send_agent_started(self.startup_context)
@@ -291,8 +289,7 @@ class TestWebSocketNotifierIntegration(SSotBaseTestCase):
         # Send multiple messages to trigger failure and recovery
         for i in range(5):
             await failing_notifier.send_agent_thinking(
-                context=self.startup_context,
-                thought=f"Processing step {i + 1}",
+                context=self.startup_context, thought=f"Processing step {i + 1}",
                 step_number=i + 1
             )
         

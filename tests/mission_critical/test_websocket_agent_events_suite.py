@@ -349,7 +349,7 @@ class TestRealWebSocketComponents:
             thread_id="test_thread",
             run_id="test_run"
         )
-        notifier = AgentWebSocketBridge.WebSocketNotifier(ws_manager, user_context)
+        notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(ws_manager, user_context)
         
         # Verify all methods exist
         required_methods = [
@@ -2845,8 +2845,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         )
         
         # Use SSOT pattern for WebSocketNotifier creation
-        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier(
-            emitter=user_context,  # Placeholder - would be actual emitter
+        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter=user_context, # Placeholder - would be actual emitter
             exec_context=user_context
         )
         execution_engine = ExecutionEngine()
@@ -2888,8 +2887,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         )
         
         # Use SSOT pattern for WebSocketNotifier creation
-        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier(
-            emitter=user_context,  # Placeholder - would be actual emitter
+        websocket_notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter=user_context, # Placeholder - would be actual emitter
             exec_context=user_context
         )
         

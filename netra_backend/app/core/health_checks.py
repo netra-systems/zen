@@ -216,44 +216,34 @@ class HealthMonitor:
     async def _check_websocket(self) -> tuple[HealthStatus, str, Dict[str, Any]]:
         """Check WebSocket components health."""
         try:
-            # Check WebSocket factory pattern availability
+            # SECURITY FIX: Check factory pattern availability without creating instances
             try:
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-                # Factory is available - this is the expected pattern
-                return HealthStatus.HEALTHY, "WebSocket factory pattern available", {
+                from netra_backend.app.websocket_core.websocket_manager_factory import (
+                    get_websocket_manager_factory,
+                    create_websocket_manager
+                )
+                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                
+                # Check if factory is available and functional
+                factory = get_websocket_manager_factory()
+                if not factory:
+                    return HealthStatus.UNHEALTHY, "WebSocket factory not available", {}
+                
+                # Test factory functionality without user context (factory pattern check only)
+                # We cannot create actual managers without user context (security compliance)
+                return HealthStatus.HEALTHY, "WebSocket factory pattern available and secure", {
                     "pattern": "factory",
                     "per_user_isolation": True,
-                    "note": "Managers created per-user"
+                    "security_compliant": True,
+                    "note": "Factory available, managers created per-user only"
                 }
-            except ImportError:
-                # Fall back to checking legacy singleton (should not be used)
-                try:
-                    from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-                    
-                    manager = get_websocket_manager()
-                    
-                    # Check if manager exists
-                    if not manager:
-                        return HealthStatus.UNHEALTHY, "WebSocketManager not initialized", {}
-                    
-                    # Check active connections
-                    connection_count = len(manager.active_connections) if hasattr(manager, 'active_connections') else 0
-                    
-                    # Check if accepting new connections
-                    if hasattr(manager, 'is_accepting_connections'):
-                        if not manager.is_accepting_connections:
-                            return HealthStatus.DEGRADED, "Not accepting new connections", {
-                                "active_connections": connection_count
-                            }
-                    
-                    return HealthStatus.DEGRADED, f"Legacy singleton manager: {connection_count} connections", {
-                        "active_connections": connection_count,
-                        "pattern": "legacy",
-                        "warning": "Should migrate to factory pattern"
-                    }
-                    
-                except Exception:
-                    return HealthStatus.UNHEALTHY, "No WebSocket system available", {}
+                
+            except ImportError as e:
+                return HealthStatus.UNHEALTHY, f"WebSocket factory pattern not available: {str(e)}", {
+                    "pattern": "missing",
+                    "error": str(e),
+                    "recommendation": "Install WebSocket factory components"
+                }
             
         except Exception as e:
             return HealthStatus.UNHEALTHY, str(e), {"error": str(e)}

@@ -5,12 +5,12 @@ This service provides a unified interface for JWT token operations,
 following SSOT principles and maintaining service independence.
 """
 
+import logging
 from typing import Dict, Any, Optional
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.config import AuthConfig
 
-from shared.logging.unified_logger_factory import get_logger
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class JWTService:

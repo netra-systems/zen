@@ -41,7 +41,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.models.user_execution_context import UserExecutionContext
 from netra_backend.app.models.agent_execution import AgentExecution

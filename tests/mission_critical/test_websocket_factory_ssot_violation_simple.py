@@ -53,19 +53,15 @@ class TestWebSocketFactorySsotViolation:
         factory = WebSocketManagerFactory()
         
         # Create manager instances for two different users
-        context_1 = UserExecutionContext(
-            user_id=self.test_user_1,
-            thread_id="test_thread_1", 
-            run_id="test_run_1"
-        )
-        context_2 = UserExecutionContext(
-            user_id=self.test_user_2,
-            thread_id="test_thread_2",
-            run_id="test_run_2"
-        )
+        context_1 = UserExecutionContext(user_id=self.test_user_1)
+        context_2 = UserExecutionContext(user_id=self.test_user_2)
         
-        manager_1 = await factory.create_manager(context_1)
-        manager_2 = await factory.create_manager(context_2)
+        manager_1 = await factory.create_websocket_manager(
+            user_execution_context=context_1
+        )
+        manager_2 = await factory.create_websocket_manager(
+            user_execution_context=context_2
+        )
         
         # VIOLATION PROOF: These should be the SAME SSOT instance
         # Currently they are DIFFERENT instances (violates SSOT)
@@ -74,7 +70,7 @@ class TestWebSocketFactorySsotViolation:
         )
         
         # VIOLATION PROOF: Both instances have separate internal state
-        assert manager_1.active_connections is not manager_2.active_connections, (
+        assert manager_1._active_connections is not manager_2._active_connections, (
             "CURRENT STATE: Separate connection state per instance (SSOT violation)"
         )
         
@@ -92,14 +88,12 @@ class TestWebSocketFactorySsotViolation:
         directly instead of using the established SSOT UnifiedWebSocketManager.
         """
         factory = WebSocketManagerFactory()
-        context = UserExecutionContext(
-            user_id=self.test_user_1,
-            thread_id="test_thread_1",
-            run_id="test_run_1" 
-        )
+        context = UserExecutionContext(user_id=self.test_user_1)
         
         # Create manager through factory
-        factory_manager = await factory.create_manager(context)
+        factory_manager = await factory.create_websocket_manager(
+            user_execution_context=context
+        )
         
         # VIOLATION PROOF: Factory creates WebSocketManager instead of using SSOT
         assert isinstance(factory_manager, WebSocketManager), (
@@ -130,19 +124,11 @@ class TestWebSocketFactorySsotViolation:
         factory = WebSocketManagerFactory()
         
         # Create isolated contexts for different users
-        context_1 = UserExecutionContext(
-            user_id=self.test_user_1,
-            thread_id="test_thread_1",
-            run_id="test_run_1"
-        )
-        context_2 = UserExecutionContext(
-            user_id=self.test_user_2,
-            thread_id="test_thread_2", 
-            run_id="test_run_2"
-        )
+        context_1 = UserExecutionContext(user_id=self.test_user_1)
+        context_2 = UserExecutionContext(user_id=self.test_user_2)
         
-        manager_1 = await factory.create_manager(context_1)
-        manager_2 = await factory.create_manager(context_2)
+        manager_1 = await factory.create_websocket_manager(context_1)
+        manager_2 = await factory.create_websocket_manager(context_2)
         
         # Mock connection operations to test isolation
         from unittest.mock import MagicMock
@@ -154,8 +140,8 @@ class TestWebSocketFactorySsotViolation:
         await manager_2.add_connection("conn_2", mock_connection_2)
         
         # PROOF: User isolation works (business requirement satisfied)
-        manager_1_connections = set(manager_1.active_connections.keys())
-        manager_2_connections = set(manager_2.active_connections.keys())
+        manager_1_connections = set(manager_1._active_connections.keys())
+        manager_2_connections = set(manager_2._active_connections.keys())
         
         assert manager_1_connections == {"conn_1"}
         assert manager_2_connections == {"conn_2"}

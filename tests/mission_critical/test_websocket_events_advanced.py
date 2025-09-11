@@ -57,7 +57,7 @@
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import ( )
     # REMOVED_SYNTAX_ERROR: UnifiedToolExecutionEngine,
@@ -361,7 +361,7 @@
     # REMOVED_SYNTAX_ERROR: mock_ws.send_json = AsyncMock(side_effect=capture)
     # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
-    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
     # Simulate nested agent execution
 # REMOVED_SYNTAX_ERROR: async def execute_nested_agents():
@@ -420,7 +420,7 @@
     # REMOVED_SYNTAX_ERROR: mock_ws1.send_json = AsyncMock(side_effect=capture1)
     # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws1, conn_id)
 
-    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
     # Start execution
     # REMOVED_SYNTAX_ERROR: request_id = "disconnect-req"
@@ -479,7 +479,7 @@
         # REMOVED_SYNTAX_ERROR: mock_ws.send_json = AsyncMock(side_effect=capture_with_failures)
         # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
-        # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
         # Send many events with potential failures
         # REMOVED_SYNTAX_ERROR: for i in range(50):
@@ -539,7 +539,7 @@
     # REMOVED_SYNTAX_ERROR: mock_ws.send_json = AsyncMock(side_effect=capture)
     # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
-    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
     # Send events at maximum rate
     # REMOVED_SYNTAX_ERROR: start_time = time.time()
@@ -593,7 +593,7 @@
 
                 # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
-                # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+                # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
                 # Send many events
                 # REMOVED_SYNTAX_ERROR: for j in range(100):
@@ -639,7 +639,7 @@
     # REMOVED_SYNTAX_ERROR: mock_ws.send_json = AsyncMock(side_effect=capture)
     # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
-    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
     # Create large payload (just under 64KB limit)
     # REMOVED_SYNTAX_ERROR: large_content = "x" * 60000  # 60KB of data
@@ -690,7 +690,7 @@
     # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
     # Send event immediately
-    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
     # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(conn_id, "formatted_string", "agent")
 
     # Disconnect immediately
@@ -722,11 +722,11 @@
     # REMOVED_SYNTAX_ERROR: mock_ws.send_json = AsyncMock(side_effect=capture)
     # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
-    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
     # Test various Unicode and special characters
     # REMOVED_SYNTAX_ERROR: test_strings = [ )
-    # REMOVED_SYNTAX_ERROR: "Hello 世界 🌍",  # Emoji and Chinese
+    # REMOVED_SYNTAX_ERROR: "Hello 世界 🌍", # Emoji and Chinese
     # REMOVED_SYNTAX_ERROR: "Привет мир",  # Cyrillic
     # REMOVED_SYNTAX_ERROR: "مرحبا بالعالم",  # Arabic (RTL)
     # REMOVED_SYNTAX_ERROR: "
@@ -782,7 +782,7 @@
                 # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(user1_id, mock_ws1, user1_id)
                 # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(user2_id, mock_ws2, user2_id)
 
-                # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+                # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
                 # Send events to different users
                 # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(user1_id, "req-1", "agent")
@@ -825,7 +825,7 @@
     # REMOVED_SYNTAX_ERROR: mock_ws.send_json = AsyncMock(side_effect=capture)
     # REMOVED_SYNTAX_ERROR: await ws_manager.connect_user(conn_id, mock_ws, conn_id)
 
-    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier(ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = SimpleWebSocketNotifier.create_for_user(ws_manager)
 
     # Execute multiple requests in parallel
 # REMOVED_SYNTAX_ERROR: async def execute_request(req_id):

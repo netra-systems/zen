@@ -147,7 +147,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         
         try:
             # Try to create multiple instances through different paths
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier as SupervisorNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier as SupervisorNotifier
             notifier1 = SupervisorNotifier(user_id="violation_user")
             violations_detected.append("supervisor_notifier_created")
         except (ImportError, TypeError):
@@ -175,7 +175,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         event_handlers = {}
         
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             notifier = WebSocketNotifier(user_id="test")
             
             # Check available event methods
@@ -240,7 +240,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         
         try:
             # Try direct instantiation that should be blocked
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             notifier = WebSocketNotifier(user_id="direct_test")
             direct_instantiation_success.append("WebSocketNotifier")
         except (ImportError, TypeError):
@@ -357,7 +357,7 @@ class TestWebSocketNotifierSSOTServiceCoordination(SSotAsyncTestCase):
             try:
                 from netra_backend.app.websocket_core import WebSocketManager
                 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-                from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+                from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             except ImportError as e:
                 if 'circular' in str(e).lower():
                     self.fail(f"VIOLATION: Circular dependency detected: {e}")

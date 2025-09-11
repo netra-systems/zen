@@ -24,17 +24,18 @@ Key Features:
 
 import asyncio
 import json
+import logging
 import time
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
 
-from netra_backend.app.core.unified_logging import get_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.utils import safe_websocket_send, create_server_message, create_error_message, MessageType
 
 
-logger = get_logger(__name__)
+logger = central_logger.get_logger(__name__)
 
 
 class ServiceStatus(Enum):
@@ -110,7 +111,7 @@ class FallbackChatHandler:
     def __init__(self, degradation_level: DegradationLevel, websocket):
         self.degradation_level = degradation_level
         self.websocket = websocket
-        self.logger = get_logger(f"{__name__}.FallbackHandler")
+        self.logger = central_logger.get_logger(f"{__name__}.FallbackHandler")
         self.response_templates = self._initialize_response_templates()
         
         # MessageRouter interface compatibility
@@ -275,7 +276,7 @@ class GracefulDegradationManager:
     def __init__(self, websocket, app_state):
         self.websocket = websocket
         self.app_state = app_state
-        self.logger = get_logger(__name__)
+        self.logger = central_logger.get_logger(__name__)
         
         # Service monitoring
         self.service_health: Dict[str, ServiceHealth] = {}

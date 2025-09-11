@@ -35,9 +35,16 @@ from unittest.mock import patch, AsyncMock
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+from test_framework.service_availability import check_service_availability, ServiceUnavailableError
 from shared.isolated_environment import get_env
 
+# Check service availability at module level
+_service_status = check_service_availability(['postgresql'], timeout=2.0)
+_postgresql_available = _service_status['postgresql'] is True
+_postgresql_skip_reason = f"PostgreSQL unavailable: {_service_status['postgresql']}" if not _postgresql_available else None
 
+
+@pytest.mark.skipif(not _postgresql_available, reason=_postgresql_skip_reason)
 class TestStartupFinalizeDatabaseOperations(SSotBaseTestCase):
     """Integration tests for FINALIZE phase database system validation."""
     

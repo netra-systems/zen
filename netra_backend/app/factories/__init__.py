@@ -17,6 +17,7 @@ Key Factories:
 - RedisAccessFactory: User-scoped Redis contexts
 - ClickHouseFactory: User-isolated ClickHouse instances with connection pooling
 - RedisFactory: User-isolated Redis instances with connection management
+- ToolDispatcherFactory: SSOT factory for tool dispatcher creation (Phase 2 consolidation)
 """
 
 from netra_backend.app.factories.data_access_factory import (
@@ -34,6 +35,26 @@ from netra_backend.app.factories.redis_factory import (
     UserRedisClient,
     get_redis_factory
 )
+from netra_backend.app.factories.tool_dispatcher_factory import (
+    ToolDispatcherFactory,
+    get_tool_dispatcher_factory,
+    set_tool_dispatcher_factory_websocket_manager,
+    create_tool_dispatcher,
+    tool_dispatcher_scope,
+    # Backward compatibility (DEPRECATED)
+    create_isolated_tool_dispatcher,
+    isolated_tool_dispatcher_scope,
+)
+from netra_backend.app.factories.websocket_bridge_factory import (
+    WebSocketBridgeProtocol,
+    StandardWebSocketBridge,
+    create_standard_websocket_bridge,
+    create_agent_bridge_adapter,
+    create_emitter_bridge_adapter,
+    create_manager_bridge_adapter,
+    # Backward compatibility (DEPRECATED)
+    WebSocketBridgeAdapter,
+)
 
 __all__ = [
     "DataAccessFactory",
@@ -44,5 +65,22 @@ __all__ = [
     "get_clickhouse_factory",
     "RedisFactory",
     "UserRedisClient",
-    "get_redis_factory"
+    "get_redis_factory",
+    # SSOT Tool Dispatcher Factory
+    "ToolDispatcherFactory",
+    "get_tool_dispatcher_factory",
+    "set_tool_dispatcher_factory_websocket_manager",
+    "create_tool_dispatcher",
+    "tool_dispatcher_scope",
+    # SSOT WebSocket Bridge Factory
+    "WebSocketBridgeProtocol",
+    "StandardWebSocketBridge",
+    "create_standard_websocket_bridge",
+    "create_agent_bridge_adapter",
+    "create_emitter_bridge_adapter",
+    "create_manager_bridge_adapter",
+    # Backward Compatibility (DEPRECATED)
+    "create_isolated_tool_dispatcher",
+    "isolated_tool_dispatcher_scope",
+    "WebSocketBridgeAdapter",
 ]

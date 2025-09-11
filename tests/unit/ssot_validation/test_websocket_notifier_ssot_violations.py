@@ -57,7 +57,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
         
         # Test different import paths
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier as SupervisorNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier as SupervisorNotifier
             import_conflicts.append('supervisor.websocket_notifier')
         except ImportError:
             pass
@@ -83,7 +83,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
         implementations = []
         
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             implementations.append(('supervisor', WebSocketNotifier))
         except ImportError:
             pass
@@ -153,7 +153,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                            if 'WebSocketNotifier(' in content:
+                            if 'WebSocketNotifier.create_for_user(' in content:
                                 initialization_patterns.append(f"{file_path}:direct_init")
                             if 'create_websocket_notifier' in content:
                                 initialization_patterns.append(f"{file_path}:factory_create")
@@ -206,10 +206,10 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
     def test_direct_instantiation_bypasses_factory(self):
         """Test FAILS: Direct WebSocketNotifier instantiation bypasses factory pattern."""
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             # This should fail in proper SSOT implementation
-            notifier = WebSocketNotifier(user_id="test_user")
+            notifier = WebSocketNotifier.create_for_user(user_id="test_user")
             
             # This test FAILS because direct instantiation is allowed
             self.assertIsNotNone(notifier)
@@ -225,11 +225,11 @@ class TestWebSocketNotifierFactoryViolationDetection(SSotBaseTestCase):
     def test_singleton_pattern_breaks_user_isolation(self):
         """Test FAILS: Singleton pattern breaks user isolation."""
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             # Test if singleton pattern exists
-            notifier1 = WebSocketNotifier(user_id="user1")
-            notifier2 = WebSocketNotifier(user_id="user2")
+            notifier1 = WebSocketNotifier.create_for_user(user_id="user1")
+            notifier2 = WebSocketNotifier.create_for_user(user_id="user2", exec_context=None)  # MANUAL_REVIEW: Validate exec_context
             
             # This test FAILS if singleton pattern exists (shared instance)
             if notifier1 is notifier2:
@@ -450,7 +450,7 @@ class TestWebSocketNotifierLegacyCodeDetection(SSotBaseTestCase):
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
-                            if 'from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier' in content:
+                            if 'from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier' in content:
                                 if 'REMOVED_SYNTAX_ERROR' not in content:  # Exclude already commented lines
                                     deprecated_usage.append(file_path)
                     except (UnicodeDecodeError, PermissionError):
@@ -475,7 +475,7 @@ class TestWebSocketNotifierLegacyCodeDetection(SSotBaseTestCase):
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
                             # Look for old patterns
-                            if 'WebSocketNotifier()' in content:
+                            if 'WebSocketNotifier.create_for_user()' in content:
                                 old_patterns.append(f"{file_path}:bare_init")
                             if 'notifier = WebSocketNotifier' in content:
                                 old_patterns.append(f"{file_path}:direct_assignment")

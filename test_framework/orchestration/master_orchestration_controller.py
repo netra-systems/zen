@@ -64,7 +64,7 @@ from test_framework.progress_tracker import ProgressTracker, ProgressEvent, Prog
 # WebSocket integration 
 try:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
-    from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
     WEBSOCKET_AVAILABLE = True
 except ImportError:
@@ -293,7 +293,7 @@ class MasterOrchestrationController:
             self.config.websocket_thread_id = thread_id
             
             if websocket_manager:
-                self.websocket_notifier = WebSocketNotifier(websocket_manager)
+                self.websocket_notifier = WebSocketNotifier.create_for_user(websocket_manager)
                 self.logger.info(f"WebSocket manager configured for thread: {thread_id}")
                 
                 # Configure progress streamer if available

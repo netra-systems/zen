@@ -18,6 +18,7 @@ from netra_backend.app.websocket_core.connection_manager import WebSocketConnect
 
 # SSOT COMPLIANCE: Use direct alias instead of class inheritance  
 # This eliminates the duplicate class definition while maintaining backward compatibility
+# DEPRECATED: Use UnifiedWebSocketManager directly
 ConnectionManager = CoreManager
 
 

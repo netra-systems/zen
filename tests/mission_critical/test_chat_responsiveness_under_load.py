@@ -53,7 +53,7 @@ Priority: CRITICAL
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import ( )
             # REMOVED_SYNTAX_ERROR: UnifiedToolExecutionEngine,
@@ -1413,15 +1413,14 @@ Priority: CRITICAL
     # REMOVED_SYNTAX_ERROR: self.execution_engine = ExecutionEngine()
 
     # Set up WebSocket integration
-    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(self.ws_manager)
     # REMOVED_SYNTAX_ERROR: self.agent_registry.set_websocket_manager(self.ws_manager)
     # REMOVED_SYNTAX_ERROR: self.execution_engine.set_notifier(notifier)
 
     # Initialize supervisor agent
     # REMOVED_SYNTAX_ERROR: llm_manager = LLMManager()
     # REMOVED_SYNTAX_ERROR: self.supervisor_agent = SupervisorAgent( )
-    # REMOVED_SYNTAX_ERROR: llm_manager=llm_manager,
-    # REMOVED_SYNTAX_ERROR: registry=self.agent_registry,
+    # REMOVED_SYNTAX_ERROR: llm_manager=llm_manager, # REMOVED_SYNTAX_ERROR: registry=self.agent_registry,
     # REMOVED_SYNTAX_ERROR: execution_engine=self.execution_engine
     
 

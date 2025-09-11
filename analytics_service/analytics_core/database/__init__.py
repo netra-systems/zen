@@ -1,12 +1,19 @@
 """
-Database layer for Analytics Service - Updated for stub implementations
+Database layer for Analytics Service - SSOT Implementation
 
-IMPORTANT: The original ClickHouseManager and RedisManager were deleted.
-This module now provides stub implementations and imports from connection.py
-to maintain backward compatibility.
+Provides centralized database access through the ClickHouse Manager SSOT
+and backward-compatible stub implementations for development.
 """
 
-# Import stub implementations from connection.py
+# Import SSOT ClickHouse Manager implementation
+from .clickhouse_manager import (
+    ClickHouseManager,
+    ClickHouseConnectionError,
+    ClickHouseQueryError,
+    create_clickhouse_manager
+)
+
+# Import stub implementations from connection.py for backward compatibility
 from .connection import (
     StubClickHouseManager,
     StubRedisManager,
@@ -14,22 +21,11 @@ from .connection import (
     get_redis_manager as get_redis_manager_from_connection,
 )
 
-# Create aliases for backward compatibility
-ClickHouseManager = StubClickHouseManager
+# Keep Redis manager as stub (Redis not implemented in SSOT yet)
 RedisManager = StubRedisManager
 
 
-# Define stub exception classes to maintain compatibility
-class ClickHouseConnectionError(Exception):
-    """Stub ClickHouse connection error."""
-    pass
-
-
-class ClickHouseQueryError(Exception):
-    """Stub ClickHouse query error."""
-    pass
-
-
+# Define Redis exception for compatibility
 class RedisConnectionError(Exception):
     """Stub Redis connection error."""
     pass
@@ -54,14 +50,18 @@ async def close_redis():
 
 
 __all__ = [
+    # SSOT ClickHouse Manager (primary)
     'ClickHouseManager',
     'ClickHouseConnectionError', 
     'ClickHouseQueryError',
+    'create_clickhouse_manager',
+    # Redis (stub implementation)
     'RedisManager',
     'RedisConnectionError',
     'get_redis_manager',
     'initialize_redis',
     'close_redis',
+    # Backward compatibility stubs
     'StubClickHouseManager',
     'StubRedisManager',
 ]

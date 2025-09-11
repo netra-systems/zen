@@ -13,7 +13,7 @@ from typing import List, Set
 def find_files_with_deprecated_imports() -> List[str]:
     """Find all files with deprecated WebSocketNotifier imports."""
     cmd = ['grep', '-r', '-l', 
-           'from netra_backend.app.agents.supervisor.websocket_notifier import',
+           'from netra_backend.app.services.agent_websocket_bridge import',
            '.']
     
     try:

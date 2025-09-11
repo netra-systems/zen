@@ -8,6 +8,7 @@ Business Value: Enables seamless third-party authentication (Google, GitHub, etc
 that reduces signup friction and improves user conversion rates.
 """
 
+import logging
 import secrets
 import uuid
 from typing import Dict, Any, Optional, List
@@ -18,8 +19,7 @@ from auth_service.auth_core.oauth.google_oauth import GoogleOAuthProvider, Googl
 from auth_service.services.redis_service import RedisService
 from auth_service.services.user_service import UserService
 
-from shared.logging.unified_logger_factory import get_logger
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class OAuthService:

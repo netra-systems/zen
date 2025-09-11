@@ -48,7 +48,7 @@
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -166,12 +166,11 @@
     # Removed problematic line: async def test_websocket_notifier_has_all_required_methods(self):
         # REMOVED_SYNTAX_ERROR: """Test WebSocketNotifier has ALL 5 required methods."""
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+        # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(self.ws_manager)
 
         # Check all required methods exist
         # REMOVED_SYNTAX_ERROR: required_methods = [ )
-        # REMOVED_SYNTAX_ERROR: 'send_agent_started',
-        # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
+        # REMOVED_SYNTAX_ERROR: 'send_agent_started', # REMOVED_SYNTAX_ERROR: 'send_agent_thinking',
         # REMOVED_SYNTAX_ERROR: 'send_tool_executing',
         # REMOVED_SYNTAX_ERROR: 'send_tool_completed',
         # REMOVED_SYNTAX_ERROR: 'send_agent_completed'
@@ -255,13 +254,12 @@
             # REMOVED_SYNTAX_ERROR: """Test complete WebSocket event flow with all 5 required events."""
             # REMOVED_SYNTAX_ERROR: pass
             # Create WebSocket notifier
-            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+            # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(self.ws_manager)
 
             # Create execution context
             # REMOVED_SYNTAX_ERROR: thread_id = "test-thread-001"
             # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
-            # REMOVED_SYNTAX_ERROR: run_id="formatted_string",
-            # REMOVED_SYNTAX_ERROR: thread_id=thread_id,
+            # REMOVED_SYNTAX_ERROR: run_id="formatted_string", # REMOVED_SYNTAX_ERROR: thread_id=thread_id,
             # REMOVED_SYNTAX_ERROR: user_id="test-user",
             # REMOVED_SYNTAX_ERROR: agent_name="comprehensive_test_agent",
             # REMOVED_SYNTAX_ERROR: retry_count=0,
@@ -311,7 +309,7 @@
                 # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
                 # Removed problematic line: async def test_concurrent_websocket_events(self):
                     # REMOVED_SYNTAX_ERROR: """Test WebSocket events work with multiple concurrent users."""
-                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+                    # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(self.ws_manager)
 
                     # REMOVED_SYNTAX_ERROR: user_count = 3
 
@@ -320,8 +318,7 @@
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: thread_id = "formatted_string"
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
-    # REMOVED_SYNTAX_ERROR: run_id="formatted_string",
-    # REMOVED_SYNTAX_ERROR: thread_id=thread_id,
+    # REMOVED_SYNTAX_ERROR: run_id="formatted_string", # REMOVED_SYNTAX_ERROR: thread_id=thread_id,
     # REMOVED_SYNTAX_ERROR: user_id="formatted_string",
     # REMOVED_SYNTAX_ERROR: agent_name="formatted_string",
     # REMOVED_SYNTAX_ERROR: retry_count=0,
@@ -357,12 +354,11 @@
             # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
             # Removed problematic line: async def test_websocket_error_handling(self):
                 # REMOVED_SYNTAX_ERROR: """Test WebSocket events work properly during error conditions."""
-                # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier(self.ws_manager)
+                # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(self.ws_manager)
 
                 # REMOVED_SYNTAX_ERROR: thread_id = "error-test-thread"
                 # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
-                # REMOVED_SYNTAX_ERROR: run_id="error-test-run",
-                # REMOVED_SYNTAX_ERROR: thread_id=thread_id,
+                # REMOVED_SYNTAX_ERROR: run_id="error-test-run", # REMOVED_SYNTAX_ERROR: thread_id=thread_id,
                 # REMOVED_SYNTAX_ERROR: user_id="error-test-user",
                 # REMOVED_SYNTAX_ERROR: agent_name="error_test_agent",
                 # REMOVED_SYNTAX_ERROR: retry_count=0,

@@ -32,7 +32,8 @@ from datetime import datetime
 
 logger = central_logger.get_logger(__name__)
 
-# Export the unified manager as WebSocketManager for compatibility
+# Export the SSOT unified manager as WebSocketManager for compatibility
+# This creates a direct reference to the singleton WebSocketManager class
 WebSocketManager = UnifiedWebSocketManager
 
 # Export the protocol for type checking

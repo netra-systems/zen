@@ -44,8 +44,9 @@ import pytest
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+# CANONICAL IMPORT: Use direct import path for better SSOT compliance
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.config import get_config
 from shared.isolated_environment import get_env

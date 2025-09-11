@@ -4,6 +4,7 @@ Maintains 450-line limit with focused single responsibility
 """
 import base64
 import json
+import logging
 import os
 import time
 import uuid
@@ -22,8 +23,7 @@ from shared.isolated_environment import get_env
 # from netra_backend.app.redis_manager import redis_manager as auth_redis_manager
 auth_redis_manager = None  # Temporarily disabled
 
-from shared.logging.unified_logger_factory import get_logger
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 class JWTHandler:
     """Single Source of Truth for JWT operations"""

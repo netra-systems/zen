@@ -758,6 +758,10 @@ class IsolatedEnvironment:
             logger.debug(f"Deleted environment variable: {key} (source: {source})")
             return True
     
+    def clear_env_var(self, key: str) -> bool:
+        """Clear/delete an environment variable (alias for delete method)."""
+        return self.delete(key, source='test_clear')
+    
     def exists(self, key: str) -> bool:
         """Check if an environment variable exists."""
         with self._lock:

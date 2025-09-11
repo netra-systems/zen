@@ -208,7 +208,7 @@ class TestToolExecutionDispatch(SSotAsyncTestCase):
         self.tools_list = [self.business_tool, self.data_tool]
         
         # Create WebSocket notifier mock (represents real interface)
-        self.websocket_notifier = MockWebSocketNotifier()
+        self.websocket_notifier = MockWebSocketNotifier.create_for_user()
         
         # Record setup metrics
         self.record_metric("test_setup_time", time.time())

@@ -76,7 +76,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
 )
 from netra_backend.app.websocket_core.unified_manager import WebSocketManager as WebSocketConnectionManager
 from netra_backend.app.core import security
-from netra_backend.app.middleware.auth_middleware import AuthenticationMiddleware
+from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 
 
 class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):

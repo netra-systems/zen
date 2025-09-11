@@ -13,6 +13,7 @@ Focus areas (output this to console) is ISSUE: ${1 : latest}
  
 SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
 ALL Github output MUST follow @GITHUB_STYLE_GUIDE.md
+Stay on develop-long-lived branch as current branch.
 
 PROCESS INSTRUCTIONS START:
 

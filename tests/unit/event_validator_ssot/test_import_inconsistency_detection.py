@@ -25,6 +25,7 @@ Test Plan Phase 1b: Import Inconsistency Detection
 
 import pytest
 import sys
+import unittest
 import importlib
 import inspect
 from typing import Dict, Any, List, Set, Optional
@@ -34,7 +35,7 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestImportInconsistencyDetection(SSotBaseTestCase):
+class TestImportInconsistencyDetection(SSotBaseTestCase, unittest.TestCase):
     """
     Unit tests for EventValidator import inconsistency detection.
     

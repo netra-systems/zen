@@ -59,7 +59,8 @@ from netra_backend.app.schemas.agent_state import (
     CheckpointType,
     StatePersistenceRequest,
 )
-from netra_backend.app.services.state_cache_manager import state_cache_manager
+# SSOT CONSOLIDATION: StateCacheManager functionality integrated into StatePersistenceService
+from netra_backend.app.services.state_persistence import state_cache_manager
 from tests.fixtures.golden_datasets import (
     GOLDEN_HIGH_CONCURRENCY_FLOW,
     GOLDEN_LONG_RUNNING_FLOW,

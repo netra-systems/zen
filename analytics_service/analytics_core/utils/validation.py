@@ -153,7 +153,7 @@ class PIIDetector:
         return f"hash_{hashlib.sha256(value.encode()).hexdigest()[:16]}"
 
 
-class AnalyticsEventValidator:
+class EventValidator:
     """Validates analytics event data structures."""
     
     # Required fields for valid events
@@ -366,7 +366,7 @@ class RateLimitValidator:
 # Convenience functions for common validations
 def validate_analytics_event(event_data: Dict[str, Any], strict: bool = False) -> ValidationResult:
     """Convenience function for event validation."""
-    return AnalyticsEventValidator.validate_event(event_data, strict)
+    return EventValidator.validate_event(event_data, strict)
 
 
 def sanitize_user_input(data: Union[str, Dict[str, Any]]) -> Union[str, Dict[str, Any]]:
@@ -390,7 +390,7 @@ __all__ = [
     'ValidationResult', 
     'PIIType',
     'PIIDetector',
-    'AnalyticsEventValidator',
+    'EventValidator',
     'InputSanitizer',
     'RateLimitValidator',
     'validate_analytics_event',

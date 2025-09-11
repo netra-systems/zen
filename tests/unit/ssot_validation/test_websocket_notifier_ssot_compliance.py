@@ -42,7 +42,7 @@ class TestWebSocketNotifierImportPathValidation(SSotBaseTestCase):
         with self.assertWarns(DeprecationWarning):
             try:
                 # This path is deprecated but should warn, not fail
-                from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+                from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
                 # If it imports, ensure it warns about deprecation
                 self.assertTrue(hasattr(WebSocketNotifier, '__doc__'))
                 self.assertIn('DEPRECATION WARNING', WebSocketNotifier.__doc__)
@@ -142,11 +142,11 @@ class TestWebSocketNotifierFactoryPatternEnforcement(SSotBaseTestCase):
     def test_direct_websocket_notifier_instantiation_prevented(self):
         """Test that direct WebSocketNotifier instantiation is prevented."""
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             # Direct instantiation should either fail or issue warning
             with self.assertWarns(DeprecationWarning):
-                notifier = WebSocketNotifier(user_id="test")
+                notifier = WebSocketNotifier.create_for_user(user_id="test")
                 # If it creates, it should be deprecated
                 self.assertIsNotNone(notifier)
                 
@@ -301,7 +301,7 @@ class TestWebSocketNotifierSSOTImplementation(SSotBaseTestCase):
         implementations = []
         
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             implementations.append(('deprecated', WebSocketNotifier))
         except ImportError:
             pass
@@ -374,7 +374,7 @@ class TestWebSocketNotifierSSOTImplementation(SSotBaseTestCase):
             pass
         
         try:
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             implementations.append(WebSocketNotifier)
         except ImportError:
             pass

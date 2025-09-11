@@ -249,7 +249,7 @@ class MockEliminationValidator:
         
         try:
             from netra_backend.app.websocket_core.manager import WebSocketManager
-            from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
             
             # Setup real WebSocket connection
@@ -260,10 +260,9 @@ class MockEliminationValidator:
             await ws_manager.connect_user(conn_id, ws_client._websocket, conn_id)
             
             # Create notifier
-            notifier = WebSocketNotifier(ws_manager)
+            notifier = WebSocketNotifier.create_for_user(ws_manager)
             context = AgentExecutionContext(
-                run_id="validation-run-123",
-                thread_id=conn_id,
+                run_id="validation-run-123", thread_id=conn_id,
                 user_id=conn_id,
                 agent_name="validation_agent",
                 retry_count=0,

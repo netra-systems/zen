@@ -4,7 +4,7 @@
 
 ## 📋 Overview
 
-This index catalogues all 25 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
+This index catalogues all 36 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
 
 **Location**: [`.claude/commands/`](../.claude/commands/) directory
 
@@ -38,13 +38,22 @@ This index catalogues all 25 custom Claude Code slash commands available for the
 
 ### 🌙 Mission Critical (8-20 hours)
 - [`/ultimate-test-deploy-loop`](#ultimate-test-deploy-loop) - **CRITICAL** - Run until ALL 1000+ tests pass
-- [`/audit-gcp-logs-loop`](#audit-gcp-logs-loop) - **CRITICAL** - Continuous GCP monitoring
+- [`/audit-staging-logs-gcp-loop`](#audit-staging-logs-gcp-loop) - **CRITICAL** - Continuous GCP monitoring
 - [`/test-create-integration`](#test-create-integration) - Create 100+ integration tests 
 - [`/test-create-unit-coverage`](#test-create-unit-coverage) - Create unit tests for 100% coverage
 
-### 🛠️ Legacy/Specialized Commands
+### 🔧 Repository Maintenance & Long-Running Operations (8-30+ hours)
+- [`/ssotgardener`](#ssotgardener) - **CRITICAL** - SSOT violation discovery and remediation
+- [`/gitcommitgardener`](#gitcommitgardener) - **CRITICAL** - Safe repository management and cleanup
+- [`/gitissueprogressor`](#gitissueprogressor) - **CRITICAL** - Full day GitHub issue workflow
+- [`/audit-gcp-error-loop`](#audit-gcp-error-loop) - **CRITICAL** - GCP error monitoring with auto-debug
+
+### 🛠️ Specialized & GitHub Integration Commands
+- [`/action`](#action) - Process multiple items with Five Whys analysis
+- [`/prmergergit`](#prmergergit) - Safe pull request merging with validation
 - [`/test-update-e2e-fix-fakes`](#test-update-e2e-fix-fakes) - Fix fake tests to use real services
 - [`/refresh-update-tests`](#refresh-update-tests) - Refresh and update test suites
+- [`/test-fix-removed-syntax-error`](#test-fix-removed-syntax-error) - Fix tests with REMOVED_SYNTAX_ERROR markings
 
 ---
 
@@ -363,6 +372,85 @@ This index catalogues all 25 custom Claude Code slash commands available for the
 
 ---
 
+### Repository Maintenance Commands
+
+#### `/ssotgardener`
+**Purpose**: **CRITICAL** - SSOT violation discovery and remediation  
+**Usage**: `/ssotgardener [focus-area]`  
+**Key Features**:
+- Discovers and remediates SSOT violations blocking golden path
+- Fixes SSOT issues creating infinite or bad debugging loops
+- Addresses legacy issues and incomplete migrations to SSOT
+- Spawns sub-agents for each step with safety checks
+- **Time Expectation**: 8-30+ hours for complete SSOT remediation
+
+**Safety Features**:
+- Repository health monitoring before any changes
+- Test validation for all SSOT updates
+- Git safety with develop-long-lived branch protection
+- GitHub integration following style guide
+
+**Examples**:
+```bash
+/ssotgardener                    # Full SSOT audit and remediation
+/ssotgardener websocket          # Focus on WebSocket SSOT issues
+/ssotgardener database           # Focus on database SSOT patterns
+```
+
+---
+
+#### `/gitcommitgardener`
+**Purpose**: **CRITICAL** - Safe repository management and cleanup  
+**Usage**: `/gitcommitgardener`  
+**Key Features**:
+- Safe repository management with health monitoring
+- Git commit optimization and cleanup
+- **Time Expectation**: 8-20+ hours for complete repository gardening
+- Multi-agent coordination for complex git operations
+
+**Safety Features**:
+- Repository damage prevention
+- Branch protection (develop-long-lived focus)
+- Comprehensive backup validation
+- Health checks before and after operations
+
+---
+
+#### `/gitissueprogressor`
+**Purpose**: **CRITICAL** - Full day GitHub issue workflow  
+**Usage**: `/gitissueprogressor`  
+**Key Features**:
+- Complete GitHub issue management workflow
+- Full day operation with continuous monitoring
+- Issue progression with automated debugging
+- GitHub integration with proper labeling
+
+**Process Flow**:
+1. Issue identification and prioritization
+2. Automated investigation and analysis
+3. Multi-agent resolution approach
+4. Progress tracking and documentation
+5. Resolution validation and closure
+
+---
+
+#### `/audit-gcp-error-loop`
+**Purpose**: **CRITICAL** - GCP error monitoring with auto-debug  
+**Usage**: `/audit-gcp-error-loop <service> [hours]`  
+**Key Features**:
+- Continuous GCP error monitoring
+- Automatic Five Whys debugging for critical errors
+- **Time Expectation**: 8+ hours continuous monitoring
+- Real-time error pattern detection
+
+**Examples**:
+```bash
+/audit-gcp-error-loop                     # All services monitoring
+/audit-gcp-error-loop backend-staging 12  # Backend 12-hour monitoring
+```
+
+---
+
 ### Mission Critical Commands
 
 #### `/ultimate-test-deploy-loop`
@@ -394,20 +482,20 @@ This index catalogues all 25 custom Claude Code slash commands available for the
 
 ---
 
-#### `/audit-gcp-logs-loop`
-**Purpose**: **CRITICAL** - Continuous GCP monitoring with auto-debug  
-**Usage**: `/audit-gcp-logs-loop <service> [hours]`  
+#### `/audit-staging-logs-gcp-loop`
+**Purpose**: **CRITICAL** - Continuous staging GCP monitoring with auto-debug  
+**Usage**: `/audit-staging-logs-gcp-loop <service> [hours]`  
 **Key Features**:
-- Runs 100 continuous audit cycles
-- Auto-triggers debugging for critical errors
-- Production monitoring all night
-- Uses Five Whys methodology automatically
-- **Time Expectation**: Runs indefinitely (8+ hours)
+- Runs continuous staging audit cycles (8-30+ hours)
+- Auto-triggers Five Whys debugging for critical errors
+- Staging environment monitoring with error pattern detection
+- GitHub integration for issue tracking
+- **Time Expectation**: Long-running operations (8-30+ hours)
 
 **Examples**:
 ```bash
-/audit-gcp-logs-loop                     # All services, 100 cycles  
-/audit-gcp-logs-loop backend-staging 4   # Backend last 4 hours, loop
+/audit-staging-logs-gcp-loop                     # All services continuous monitoring
+/audit-staging-logs-gcp-loop backend-staging 12  # Backend 12-hour focused monitoring
 ```
 
 ---
@@ -488,6 +576,53 @@ This index catalogues all 25 custom Claude Code slash commands available for the
 - Load factor analysis
 - Performance monitoring
 - Canary deployment validation
+
+---
+
+### Specialized Commands
+
+#### `/action`
+**Purpose**: Process multiple items with Five Whys analysis  
+**Usage**: `/action`  
+**Key Features**:
+- Multi-item processing with systematic analysis
+- Five Whys methodology for each action item
+- Automated issue resolution workflow
+- GitHub integration for tracking
+
+**Process Flow**:
+1. Item identification and prioritization
+2. Five Whys analysis for each item
+3. Resolution planning and execution
+4. Progress documentation and tracking
+
+---
+
+#### `/prmergergit`
+**Purpose**: Safe pull request merging with validation  
+**Usage**: `/prmergergit`  
+**Key Features**:
+- Safe PR merging with pre-merge validation
+- Test execution before merge
+- Repository health checks
+- Git safety protocols
+
+**Safety Features**:
+- Pre-merge test validation
+- Conflict resolution assistance
+- Branch protection compliance
+- Repository state verification
+
+---
+
+#### `/test-fix-removed-syntax-error`
+**Purpose**: Fix tests with REMOVED_SYNTAX_ERROR markings  
+**Usage**: `/test-fix-removed-syntax-error`  
+**Key Features**:
+- Identifies tests marked with REMOVED_SYNTAX_ERROR
+- Systematic error resolution approach
+- Test restoration and validation
+- SSOT compliance during fixes
 
 ---
 
@@ -597,9 +732,17 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 ### Mission Critical (Long-Running)
 ```bash
 /ultimate-test-deploy-loop        # CRITICAL: Run until all 1000+ tests pass (hours)
-/audit-gcp-logs-loop             # CRITICAL: 100-cycle monitoring all night
+/audit-staging-logs-gcp-loop     # CRITICAL: Continuous staging monitoring (8-30+ hours)
 /test-create-integration         # Create 100+ integration tests (20 hours)
 /test-create-unit-coverage       # 100% coverage creation (8+ hours)
+```
+
+### Repository Maintenance (Long-Running)
+```bash
+/ssotgardener                    # CRITICAL: SSOT violation remediation (8-30+ hours)
+/gitcommitgardener              # CRITICAL: Repository cleanup (8-20+ hours)
+/gitissueprogressor             # CRITICAL: Full day GitHub workflow
+/audit-gcp-error-loop           # CRITICAL: GCP error monitoring with auto-debug
 ```
 
 ### Deployment & Monitoring
@@ -618,7 +761,7 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 | **< 5 min** | `/docker-rebuild`, `/compliance`, `/test-real`, `/websocket-test`, `/canary` | Quick checks and rebuilds |
 | **5-30 min** | `/tdd`, `/agent-test`, `/pre-commit`, `/deploy-gcp`, `/debug-error` | Standard development tasks |  
 | **1-4 hours** | `/analyze-repository`, `/run-*-tests`, `/audit-*-logs`, `/test-create` | Analysis and testing |
-| **8-20 hours** | `/ultimate-test-deploy-loop`, `/audit-gcp-logs-loop`, `/test-create-integration`, `/test-create-unit-coverage` | **Mission Critical** - Long-running validation |
+| **8-30+ hours** | `/ultimate-test-deploy-loop`, `/audit-staging-logs-gcp-loop`, `/test-create-integration`, `/test-create-unit-coverage`, `/ssotgardener`, `/gitcommitgardener`, `/gitissueprogressor`, `/audit-gcp-error-loop` | **Mission Critical & Repository Maintenance** - Long-running operations |
 
 ---
 
@@ -647,4 +790,4 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 ---
 
-*Last Updated: 2025-01-09 | Commands: 25 | Categories: 4 | Mission Critical Commands: 4*
+*Last Updated: 2025-01-09 | Commands: 36 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 4*

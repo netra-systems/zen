@@ -826,6 +826,25 @@ class UserExecutionContext:
         """
         return f"{self.user_id[:8]}:{self.thread_id[:8]}:{self.run_id[:8]}:{self.request_id[:8]}"
     
+    def get_scoped_key(self, component: str) -> str:
+        """
+        Generate user-scoped key for component isolation.
+        
+        This method ensures complete isolation by creating unique keys that
+        include user context, preventing any cross-user contamination.
+        
+        Args:
+            component: Component name requiring isolation
+            
+        Returns:
+            Unique scoped key for this user and component
+        """
+        if not component or not component.strip():
+            raise ValueError("Component name cannot be empty")
+        
+        # Create hierarchical scoping key
+        return f"{component}:{self.user_id}:{self.request_id}"
+    
     def get_audit_trail(self) -> Dict[str, Any]:
         """Get comprehensive audit trail for compliance and debugging.
         

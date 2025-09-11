@@ -44,7 +44,7 @@ except ImportError:
 
 # WebSocket services
 try:
-    from netra_backend.app.services.websocket_notifier import WebSocketNotifier
+    from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
     WEBSOCKET_SERVICES_AVAILABLE = True
 except ImportError:
     WEBSOCKET_SERVICES_AVAILABLE = False
@@ -435,7 +435,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
     async def _create_sequence_monitoring_notifier(self, user_id: str):
         """Create WebSocket notifier with sequence monitoring."""
         if WEBSOCKET_SERVICES_AVAILABLE:
-            notifier = WebSocketNotifier()
+            notifier = WebSocketNotifier.create_for_user()
             
             # Hook into notifier for sequence monitoring
             original_send = notifier.send_to_user

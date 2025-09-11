@@ -30,9 +30,7 @@ setup_exception_handler()
 from netra_backend.app.logging_config import central_logger
 
 # Configure loggers after unified logging is initialized
-from netra_backend.app.core.unified_logging import get_logger
-faker_logger = get_logger("faker")
-faker_logger.setLevel(logging.WARNING)
+logging.getLogger("faker").setLevel(logging.WARNING)
 
 from netra_backend.app.core.app_factory import create_app
 

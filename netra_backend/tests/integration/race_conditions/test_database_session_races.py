@@ -39,7 +39,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.metrics.session_metrics import SessionState, DatabaseSessionMetrics
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.database import DatabaseTestHelper
-from test_framework.ssot.real_services_test_fixtures import requires_real_database
+# Skip requires_real_database - using real services by default in integration tests
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
