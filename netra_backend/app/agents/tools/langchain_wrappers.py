@@ -82,9 +82,9 @@ class DataHelperTool(BaseTool):
         """Get or create the DataHelper instance."""
         if self._tool is None:
             if self.llm_manager is None:
-                logger.warning("🚨 DataHelperTool: No LLM manager provided, creating fallback with no user context")
-                from netra_backend.app.llm.llm_manager import create_llm_manager
-                self.llm_manager = create_llm_manager(None)  # Fallback for tools without user context
+                logger.warning("🚨 DataHelperTool: No LLM manager provided, creating default")
+                from netra_backend.app.llm.llm_manager import LLMManager
+                self.llm_manager = LLMManager()
             self._tool = DataHelper(self.llm_manager)
         return self._tool
     

@@ -47,6 +47,7 @@ from test_framework.ssot.mocks import MockFactory
 # Import components under test
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
+    IsolatedWebSocketManager,
     ConnectionLifecycleManager,
     FactoryMetrics,
     ManagerMetrics,
@@ -55,9 +56,6 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     _factory_instance,
     _factory_lock
 )
-
-# Import WebSocketManager (replacement for removed IsolatedWebSocketManager)
-from netra_backend.app.websocket_core.unified_manager import WebSocketManager as IsolatedWebSocketManager
 
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
@@ -178,14 +176,14 @@ class TestWebSocketManagerFactory(SSotAsyncTestCase):
             user_id="test_user_123",
             thread_id="test_thread_456", 
             run_id="test_run_789",
-            websocket_client_id="ws_connection_001"
+            websocket_connection_id="ws_connection_001"
         )
         
         self.second_user_context = UserExecutionContext.from_request(
             user_id="test_user_456",
             thread_id="test_thread_789",
             run_id="test_run_012",
-            websocket_client_id="ws_connection_002"
+            websocket_connection_id="ws_connection_002"
         )
         
         # Initialize mock factory

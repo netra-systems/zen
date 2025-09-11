@@ -63,13 +63,13 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
             pass
         
         try:
-            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge as CoreNotifier
+            from netra_backend.app.websocket_core.websocket_notifier import WebSocketNotifier as CoreNotifier
             import_conflicts.append('websocket_core.websocket_notifier')
         except ImportError:
             pass
         
         try:
-            from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge as ServiceNotifier
+            from netra_backend.app.services.websocket_notifier import WebSocketNotifier as ServiceNotifier
             import_conflicts.append('services.websocket_notifier')
         except ImportError:
             pass
@@ -79,7 +79,7 @@ class TestWebSocketNotifierMultiImplementationDetection(SSotBaseTestCase):
                           "VIOLATION: Multiple import paths for WebSocketNotifier exist")
     
     def test_inconsistent_class_interfaces(self):
-        """Test FAILS: AgentWebSocketBridge implementations have inconsistent interfaces."""
+        """Test FAILS: WebSocketNotifier implementations have inconsistent interfaces."""
         implementations = []
         
         try:

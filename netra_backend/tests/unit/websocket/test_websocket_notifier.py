@@ -4,7 +4,7 @@ Comprehensive Unit Test Suite for WebSocketNotifier - 100% Coverage Target
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure Mission Critical Agent Events ($75K+ MRR protection) 
-- Value Impact: AgentWebSocketBridge sends the 5 CRITICAL events that deliver chat business value
+- Value Impact: WebSocketNotifier sends the 5 CRITICAL events that deliver chat business value
 - Strategic Impact: MISSION CRITICAL - Agent events provide real-time feedback preventing user abandonment
 
 This test suite ensures 100% coverage of WebSocketNotifier, focusing on the 5 mission-critical

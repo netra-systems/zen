@@ -11,7 +11,7 @@ This test suite validates WebSocket Notifier functionality through integration
 testing with realistic components and message flows, focusing on component
 interaction patterns without requiring running services.
 
-⚠️ DEPRECATION NOTE: AgentWebSocketBridge is deprecated in favor of AgentWebSocketBridge.
+⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
 These tests validate integration patterns for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:

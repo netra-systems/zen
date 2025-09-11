@@ -11,7 +11,7 @@ This test suite validates the WebSocket Notifier functionality through focused
 unit testing, ensuring message formatting, event creation, and notification
 logic work correctly without external dependencies.
 
-⚠️ DEPRECATION NOTE: AgentWebSocketBridge is deprecated in favor of AgentWebSocketBridge.
+⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
 These tests validate the legacy functionality for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:
@@ -58,7 +58,7 @@ class TestWebSocketNotifierUnit(SSotBaseTestCase):
         # Suppress deprecation warning for testing
         with patch('warnings.warn'):
             # Create WebSocket notifier instance
-            self.websocket_notifier = AgentWebSocketBridge(
+            self.websocket_notifier = WebSocketNotifier(
                 websocket_manager=self.mock_websocket_manager
             )
         

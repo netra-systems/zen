@@ -318,7 +318,7 @@
 
     # Removed problematic line: @pytest.mark.asyncio
     # Removed problematic line: async def test_websocket_notifier_sends_all_critical_events(self):
-        # REMOVED_SYNTAX_ERROR: """MISSION CRITICAL: AgentWebSocketBridge MUST send all required event types."""
+        # REMOVED_SYNTAX_ERROR: """MISSION CRITICAL: WebSocketNotifier MUST send all required event types."""
         # REMOVED_SYNTAX_ERROR: pass
         # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
         # REMOVED_SYNTAX_ERROR: validator = MissionCriticalEventValidator()

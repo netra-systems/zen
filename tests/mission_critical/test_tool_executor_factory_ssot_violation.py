@@ -21,17 +21,30 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import get_env
 
-# Import both competing systems to prove violation
+# PHASE 2: Import SSOT factory and legacy systems to validate consolidation
 try:
-    from netra_backend.app.agents.tool_executor_factory import (
-        ToolExecutorFactory, 
-        get_tool_executor_factory
+    # NEW SSOT FACTORY (Phase 2 consolidation target)
+    from netra_backend.app.factories.tool_dispatcher_factory import (
+        ToolDispatcherFactory,
+        get_tool_dispatcher_factory,
+        create_tool_dispatcher
     )
-    TOOL_EXECUTOR_FACTORY_AVAILABLE = True
+    SSOT_TOOL_DISPATCHER_FACTORY_AVAILABLE = True
 except ImportError:
-    TOOL_EXECUTOR_FACTORY_AVAILABLE = False
+    SSOT_TOOL_DISPATCHER_FACTORY_AVAILABLE = False
 
 try:
+    # DEPRECATED: Legacy ToolExecutorFactory (should redirect to SSOT factory)
+    from netra_backend.app.agents.tool_executor_factory import (
+        ToolExecutorFactory as LegacyToolExecutorFactory, 
+        get_tool_executor_factory as get_legacy_tool_executor_factory
+    )
+    LEGACY_TOOL_EXECUTOR_FACTORY_AVAILABLE = True
+except ImportError:
+    LEGACY_TOOL_EXECUTOR_FACTORY_AVAILABLE = False
+
+try:
+    # DEPRECATED: UnifiedToolDispatcher (should redirect to SSOT factory)
     from netra_backend.app.core.tools.unified_tool_dispatcher import (
         UnifiedToolDispatcher,
         UnifiedToolDispatcherFactory
@@ -75,6 +88,45 @@ class TestToolExecutorFactorySSotViolation(SSotBaseTestCase):
             )
     
     @pytest.mark.mission_critical
+    def test_ssot_factory_consolidation_phase2_validation(self):
+        """
+        SHOULD PASS: Validate Phase 2 SSOT factory consolidation is working.
+        
+        This test validates that the SSOT ToolDispatcherFactory is operational
+        and legacy systems are properly redirecting with deprecation warnings.
+        """
+        if not SSOT_TOOL_DISPATCHER_FACTORY_AVAILABLE:
+            pytest.skip("SSOT ToolDispatcherFactory not available")
+        
+        # Test that SSOT factory is available and functional
+        ssot_factory = get_tool_dispatcher_factory()
+        assert ssot_factory is not None, "SSOT ToolDispatcherFactory should be available"
+        
+        # Validate factory type is correct
+        metrics = ssot_factory.get_factory_metrics()
+        assert metrics['factory_type'] == 'SSOT_ToolDispatcherFactory', f"Expected SSOT factory, got {metrics['factory_type']}"
+        
+        # Test that legacy redirects are working with deprecation warnings
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            
+            if LEGACY_TOOL_EXECUTOR_FACTORY_AVAILABLE:
+                legacy_factory = get_legacy_tool_executor_factory()
+                assert legacy_factory is not None, "Legacy factory should still work via redirect"
+                
+                # Verify deprecation warning was issued
+                deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]
+                assert len(deprecation_warnings) > 0, "Deprecation warning should be issued for legacy factory usage"
+        
+        # Validate memory optimization tracking
+        assert metrics['memory_optimization_bytes'] >= 0, "Memory optimization should be tracked"
+        
+        self.record_metric("ssot_consolidation_phase2", "validated")
+        self.record_metric("deprecation_warnings_working", True)
+        self.record_metric("memory_optimization_ready", True)
+
+    @pytest.mark.mission_critical
     def test_duplicate_tool_execution_systems_exist(self):
         """
         SHOULD FAIL: Prove both ToolExecutorFactory and UnifiedToolDispatcher exist.
@@ -83,7 +135,7 @@ class TestToolExecutorFactorySSotViolation(SSotBaseTestCase):
         When fixed, only one tool execution system should exist.
         """
         # Skip if modules not available
-        if not TOOL_EXECUTOR_FACTORY_AVAILABLE or not UNIFIED_TOOL_DISPATCHER_AVAILABLE:
+        if not LEGACY_TOOL_EXECUTOR_FACTORY_AVAILABLE or not UNIFIED_TOOL_DISPATCHER_AVAILABLE:
             pytest.skip("Tool execution modules not available")
         
         # Detect competing tool execution systems

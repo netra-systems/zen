@@ -20,13 +20,13 @@ information, and common configuration utilities exist in EXACTLY ONE PLACE.
 """
 
 import os
+import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Tuple, List
 from enum import Enum
 from shared.isolated_environment import IsolatedEnvironment
-from shared.logging.unified_logger_factory import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ConfigEnvironment(Enum):
@@ -58,7 +58,7 @@ class ConfigBuilderBase(ABC):
         Args:
             env_vars: Optional environment variables override. If None, uses os.environ
         """
-        self._logger = get_logger(f"{self.__class__.__module__}.{self.__class__.__name__}")
+        self._logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
         self.env = self._prepare_environment_variables(env_vars)
         self.environment = self._detect_environment()
     

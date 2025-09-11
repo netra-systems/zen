@@ -66,9 +66,8 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         super().setUp()
-        import uuid
-        self.test_user_id = str(uuid.uuid4())
-        self.test_connection_id = str(uuid.uuid4())
+        self.test_user_id = "test_user_golden_path"
+        self.test_connection_id = "test_conn_golden_path"
         self.mock_websocket = MockWebSocketConnection(
             user_id=self.test_user_id,
             connection_id=self.test_connection_id,
@@ -98,27 +97,14 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                     user_id=self.test_user_id,
                     connection_id=self.test_connection_id
                 )
-                # Manager creation succeeded as expected in fixed system
+                golden_path_violations.append("Manager creation unexpectedly succeeded")
                 
                 # Step 3: Add WebSocket connection (if manager creation succeeded)
                 try:
                     if hasattr(manager, 'add_connection'):
-                        # Import WebSocketConnection for proper object creation
-                        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-                        from datetime import datetime
-                        
-                        # Create proper WebSocketConnection object
-                        ws_connection = WebSocketConnection(
-                            connection_id=self.test_connection_id,
-                            user_id=self.test_user_id,
-                            websocket=self.mock_websocket,
-                            connected_at=datetime.now(),
-                            metadata={}
-                        )
-                        
-                        import asyncio
-                        asyncio.run(manager.add_connection(ws_connection))
-                        # Connection addition succeeded as expected
+                        result = manager.add_connection(self.test_user_id, self.mock_websocket)
+                        if not result:
+                            golden_path_violations.append("Connection addition failed")
                     else:
                         golden_path_violations.append("Manager missing add_connection method")
                         
@@ -127,18 +113,13 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                 
                 # Step 4: Test message sending
                 try:
-                    if hasattr(manager, 'send_to_user'):
-                        test_message = {"type": "agent_request", "content": "test message"}
-                        import asyncio
-                        asyncio.run(manager.send_to_user(self.test_user_id, test_message))
-                        # Message sending succeeded as expected
-                    elif hasattr(manager, 'send_message'):
+                    if hasattr(manager, 'send_message'):
                         test_message = {"type": "agent_request", "content": "test message"}
                         result = manager.send_message(self.test_user_id, test_message)
                         if not result:
                             golden_path_violations.append("Message sending failed")
                     else:
-                        golden_path_violations.append("Manager missing send_to_user or send_message method")
+                        golden_path_violations.append("Manager missing send_message method")
                         
                 except Exception as e:
                     golden_path_violations.append(f"Message sending error: {e}")
@@ -262,22 +243,14 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                             try:
                                 # Mock add connection first
                                 if hasattr(manager, 'add_connection'):
-                                    # Try proper WebSocketConnection object
+                                    # Try different connection signatures
                                     try:
-                                        from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-                                        from datetime import datetime
-                                        import asyncio
-                                        
-                                        ws_connection = WebSocketConnection(
-                                            connection_id=self.test_connection_id,
-                                            user_id=self.test_user_id,
-                                            websocket=self.mock_websocket,
-                                            connected_at=datetime.now(),
-                                            metadata={}
-                                        )
-                                        asyncio.run(manager.add_connection(ws_connection))
-                                    except Exception as e:
-                                        event_violations.append(f"{manager_name} connection failed: {e}")
+                                        manager.add_connection(self.mock_websocket)  # New signature
+                                    except TypeError:
+                                        try:
+                                            manager.add_connection(self.test_user_id, self.mock_websocket)  # Old signature
+                                        except Exception as e:
+                                            event_violations.append(f"{manager_name} connection failed: {e}")
                                 
                                 # Now try sending event
                                 result = manager.send_agent_event(
@@ -347,9 +320,8 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
             factory = WebSocketManagerFactory()
             
             # Create managers for different users
-            import uuid
             user_managers = {}
-            test_users = [str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4())]
+            test_users = ["user1", "user2", "user3"]
             
             for user_id in test_users:
                 try:
@@ -384,28 +356,8 @@ class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
                     
                     if hasattr(manager1, 'add_connection'):
                         try:
-                            from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-                            from datetime import datetime
-                            import asyncio
-                            
-                            # Create proper WebSocketConnection objects
-                            ws_connection1 = WebSocketConnection(
-                                connection_id=f"conn_{user_ids[0]}",
-                                user_id=user_ids[0],
-                                websocket=mock_ws1,
-                                connected_at=datetime.now(),
-                                metadata={}
-                            )
-                            ws_connection2 = WebSocketConnection(
-                                connection_id=f"conn_{user_ids[1]}",
-                                user_id=user_ids[1],
-                                websocket=mock_ws2,
-                                connected_at=datetime.now(),
-                                metadata={}
-                            )
-                            
-                            asyncio.run(manager1.add_connection(ws_connection1))
-                            asyncio.run(manager2.add_connection(ws_connection2))
+                            manager1.add_connection(user_ids[0], mock_ws1)
+                            manager2.add_connection(user_ids[1], mock_ws2)
                             
                             # Test that messages don't cross-contaminate
                             if hasattr(manager1, 'send_message'):

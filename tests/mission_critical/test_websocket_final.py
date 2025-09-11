@@ -73,8 +73,8 @@
 
 
 # REMOVED_SYNTAX_ERROR: def test_1_websocket_notifier_required_methods():
-    # REMOVED_SYNTAX_ERROR: """CRITICAL: AgentWebSocketBridge has all required methods."""
-    # REMOVED_SYNTAX_ERROR: print("Test 1: AgentWebSocketBridge required methods...")
+    # REMOVED_SYNTAX_ERROR: """CRITICAL: WebSocketNotifier has all required methods."""
+    # REMOVED_SYNTAX_ERROR: print("Test 1: WebSocketNotifier required methods...")
 
     # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
     # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(ws_manager)

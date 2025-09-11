@@ -176,7 +176,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         
         try:
             from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-            notifier = AgentWebSocketBridge(user_id="test")
+            notifier = WebSocketNotifier(user_id="test")
             
             # Check available event methods
             methods = [method for method in dir(notifier) if 'send' in method.lower()]
@@ -241,7 +241,7 @@ class TestWebSocketNotifierSSOTIntegrationPatterns(SSotAsyncTestCase, SSotDataba
         try:
             # Try direct instantiation that should be blocked
             from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-            notifier = AgentWebSocketBridge(user_id="direct_test")
+            notifier = WebSocketNotifier(user_id="direct_test")
             direct_instantiation_success.append("WebSocketNotifier")
         except (ImportError, TypeError):
             pass

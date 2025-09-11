@@ -8,7 +8,7 @@ import json
 from enum import Enum
 from typing import Dict, Optional, Set, Any, List, Union
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 
 from netra_backend.app.logging_config import central_logger
 from shared.types.core_types import (
@@ -20,6 +20,14 @@ from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # Import the protocol after it's defined to avoid circular imports
 logger = central_logger.get_logger(__name__)
+
+
+class WebSocketManagerMode(Enum):
+    """Operational modes for WebSocket manager."""
+    UNIFIED = "unified"        # Default full-featured mode
+    ISOLATED = "isolated"      # User-isolated mode with private state
+    EMERGENCY = "emergency"    # Emergency fallback with minimal features
+    DEGRADED = "degraded"      # Degraded service mode for last resort
 
 
 def _get_enum_key_representation(enum_key: Enum) -> str:
@@ -278,7 +286,19 @@ class UnifiedWebSocketManager:
     - Connection state validation prevents silent failures
     """
     
-    def __init__(self):
+    def __init__(self, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED, user_context: Optional[Any] = None, config: Optional[Dict[str, Any]] = None):
+        """Initialize UnifiedWebSocketManager with operational mode support.
+        
+        Args:
+            mode: Operational mode for the manager (unified, isolated, emergency, degraded)
+            user_context: User execution context for isolated mode
+            config: Configuration dictionary for emergency/degraded modes
+        """
+        self.mode = mode
+        self.user_context = user_context
+        self.config = config or {}
+        
+        # Core connection management
         self._connections: Dict[str, WebSocketConnection] = {}
         self._user_connections: Dict[str, Set[str]] = {}
         self._lock = asyncio.Lock()
@@ -286,6 +306,18 @@ class UnifiedWebSocketManager:
         # RACE CONDITION FIX: Add per-user connection locks
         self._user_connection_locks: Dict[str, asyncio.Lock] = {}
         self._connection_lock_creation_lock = asyncio.Lock()
+        
+        # Mode-specific initialization
+        if mode == WebSocketManagerMode.ISOLATED:
+            if user_context is None:
+                raise ValueError("user_context is required for ISOLATED mode")
+            self._initialize_isolated_mode(user_context)
+        elif mode == WebSocketManagerMode.EMERGENCY:
+            self._initialize_emergency_mode(config or {})
+        elif mode == WebSocketManagerMode.DEGRADED:
+            self._initialize_degraded_mode(config or {})
+        else:  # UNIFIED mode
+            self._initialize_unified_mode()
         
         # Add compatibility registry for legacy tests
         self.registry = RegistryCompat(self)
@@ -296,6 +328,10 @@ class UnifiedWebSocketManager:
         self.active_connections = {}  # Compatibility mapping
         self.connection_registry = {}  # Registry for connection objects
         
+        logger.info(f"UnifiedWebSocketManager initialized in {mode.value} mode")
+    
+    def _initialize_unified_mode(self):
+        """Initialize unified mode with full feature set."""
         # Enhanced error handling and recovery system
         self._message_recovery_queue: Dict[str, List[Dict]] = {}  # user_id -> [messages]
         self._connection_error_count: Dict[str, int] = {}  # user_id -> error_count
@@ -314,8 +350,71 @@ class UnifiedWebSocketManager:
         self._shutdown_requested = False  # Track intentional shutdown vs error-based disable
         self._last_health_check = datetime.utcnow()
         self._health_check_failures = 0
+    
+    def _initialize_isolated_mode(self, user_context):
+        """Initialize isolated mode for user-specific operation."""
+        self.user_context = user_context
+        self._connection_ids: Set[str] = set()
         
-        logger.info("UnifiedWebSocketManager initialized with connection-level thread safety and enhanced error handling")
+        # Private connection state for isolation
+        self._private_connections: Dict[str, Any] = {}
+        self._private_message_queue: List[Dict] = []
+        self._private_error_count = 0
+        self._is_healthy = True
+        
+        # Initialize minimal recovery system
+        self._message_recovery_queue: Dict[str, List[Dict]] = {}
+        self._connection_error_count: Dict[str, int] = {}
+        self._last_error_time: Dict[str, datetime] = {}
+        self._error_recovery_enabled = True
+        
+        # Disable background monitoring in isolated mode for performance
+        self._monitoring_enabled = False
+        self._background_tasks = {}
+        
+        logger.info(f"Isolated mode initialized for user context")
+    
+    def _initialize_emergency_mode(self, config: Dict[str, Any]):
+        """Initialize emergency mode for service continuity."""
+        self.user_id = config.get('user_id')
+        self.websocket_client_id = config.get('websocket_client_id')
+        self.thread_id = config.get('thread_id')
+        self.run_id = config.get('run_id')
+        self.emergency_mode = True
+        self.created_at = datetime.now(timezone.utc)
+        
+        # Minimal state tracking
+        self._emergency_connections = {}
+        self._emergency_message_queue = []
+        self._is_healthy = True
+        
+        # Minimal recovery system
+        self._message_recovery_queue: Dict[str, List[Dict]] = {}
+        self._connection_error_count: Dict[str, int] = {}
+        self._error_recovery_enabled = False  # Disabled in emergency mode
+        
+        # Disable monitoring in emergency mode
+        self._monitoring_enabled = False
+        self._background_tasks = {}
+        
+        logger.warning("Emergency mode initialized - minimal functionality only")
+    
+    def _initialize_degraded_mode(self, config: Dict[str, Any]):
+        """Initialize degraded mode for absolute last resort."""
+        self.degraded_mode = True
+        self.created_at = datetime.now(timezone.utc)
+        self._is_healthy = False
+        
+        # Minimal recovery system
+        self._message_recovery_queue: Dict[str, List[Dict]] = {}
+        self._connection_error_count: Dict[str, int] = {}
+        self._error_recovery_enabled = False
+        
+        # Disable all advanced features in degraded mode
+        self._monitoring_enabled = False
+        self._background_tasks = {}
+        
+        logger.error("Degraded mode initialized - system operating at minimal capacity")
     
     async def _get_user_connection_lock(self, user_id: str) -> asyncio.Lock:
         """Get or create user-specific connection lock for thread safety.
@@ -472,8 +571,90 @@ class UnifiedWebSocketManager:
         logger.warning(f"Timeout waiting for connection for user {user_id} after {timeout}s")
         return False
     
+    async def _send_emergency_message(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
+        """Send message in emergency mode with minimal error handling."""
+        try:
+            # Add emergency mode indicator to messages
+            emergency_message = {
+                **message,
+                'emergency_mode': True,
+                'manager_type': 'emergency_fallback',
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Find connection for user (simplified emergency logic)
+            connection_ids = self.get_user_connections(user_id)
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and hasattr(connection.websocket, 'send_json'):
+                    await connection.websocket.send_json(emergency_message)
+                    return
+                    
+            logger.warning(f"Emergency mode: No active connections for user {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Emergency manager send failed: {e}")
+    
+    async def _send_degraded_message(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
+        """Send message in degraded mode with service notification."""
+        try:
+            degraded_message = {
+                'type': 'degraded_service',
+                'message': 'Service operating in degraded mode - limited functionality available',
+                'original_message_type': message.get('type', 'unknown'),
+                'degraded_mode': True,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Find connection for user (minimal degraded logic)
+            connection_ids = self.get_user_connections(user_id)
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and hasattr(connection.websocket, 'send_json'):
+                    await connection.websocket.send_json(degraded_message)
+                    return
+                    
+        except Exception as e:
+            logger.error(f"Degraded manager send failed: {e}")
+    
+    async def _send_isolated_message(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
+        """Send message in isolated mode with user context validation."""
+        try:
+            # Validate user context for isolation
+            if self.user_context and hasattr(self.user_context, 'user_id'):
+                context_user_id = str(self.user_context.user_id)
+                if str(user_id) != context_user_id:
+                    logger.warning(f"Isolated mode: User ID mismatch {user_id} != {context_user_id}")
+                    return
+            
+            # Send message using private connection state
+            connection_ids = self.get_user_connections(user_id)
+            for conn_id in connection_ids:
+                connection = self.get_connection(conn_id)
+                if connection and connection.websocket:
+                    safe_message = _serialize_message_safely(message)
+                    await connection.websocket.send_json(safe_message)
+                    return
+                    
+            # Queue message if no active connections
+            if not connection_ids:
+                self._private_message_queue.append(message)
+                
+        except Exception as e:
+            logger.error(f"Isolated mode send failed: {e}")
+            self._private_error_count += 1
+    
     async def send_to_user(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> None:
         """Send a message to all connections for a user with thread safety and type validation."""
+        # Handle mode-specific behavior
+        if self.mode == WebSocketManagerMode.EMERGENCY:
+            return await self._send_emergency_message(user_id, message)
+        elif self.mode == WebSocketManagerMode.DEGRADED:
+            return await self._send_degraded_message(user_id, message)
+        elif self.mode == WebSocketManagerMode.ISOLATED:
+            return await self._send_isolated_message(user_id, message)
+        
+        # Unified mode (default) handling
         # Validate user_id
         validated_user_id = ensure_user_id(user_id)
         
@@ -2217,183 +2398,51 @@ class UnifiedWebSocketManager:
         """
         # Use existing is_connection_active method
         return self.is_connection_active(user_id)
-    
-    # =========================================================================
-    # PHASE 1 SSOT ENHANCEMENT: Interface Standardization Methods
-    # =========================================================================
-    
-    def get_connection_count(self) -> int:
-        """
-        Get the total number of active connections.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Provides basic metrics method missing from SSOT implementation.
-        
-        Returns:
-            Total count of active connections across all users
-        """
-        return len(self._connections)
-    
-    def get_connection_info(self, connection_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Get connection information as a simple dictionary.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Provides dict-based access instead of complex WebSocketConnection object.
-        
-        Args:
-            connection_id: Connection identifier to query
-            
-        Returns:
-            Dictionary with connection info, or None if connection not found
-        """
-        connection = self.get_connection(connection_id)
-        if not connection:
-            return None
-        
-        return {
-            "connection_id": connection.connection_id,
-            "user_id": connection.user_id,
-            "websocket_id": getattr(connection, 'websocket_id', None),
-            "connected_at": getattr(connection, 'connected_at', None),
-            "state": getattr(connection, 'state', 'unknown'),
-            "is_active": True  # If it's in _connections, it's active
-        }
-    
-    async def send_message(self, connection_id: str, message: Dict[str, Any]) -> None:
-        """
-        Send a message directly to a specific connection.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Provides direct connection messaging capability.
-        
-        Args:
-            connection_id: Target connection identifier
-            message: Message dictionary to send
-        """
-        connection = self.get_connection(connection_id)
-        if not connection:
-            logger.warning(f"Cannot send message to connection {connection_id}: connection not found")
-            return
-        
-        try:
-            # Serialize message safely for WebSocket transmission
-            serialized_message = _serialize_message_safely(message)
-            message_json = json.dumps(serialized_message)
-            
-            # Send to the WebSocket connection
-            await connection.websocket.send_text(message_json)
-            logger.debug(f"Sent message to connection {connection_id}: {message.get('type', 'unknown')}")
-            
-        except Exception as e:
-            logger.error(f"Failed to send message to connection {connection_id}: {e}")
-            # Remove connection if it's broken
-            await self.remove_connection(connection_id)
-    
-    async def broadcast_to_room(self, room: str, message: Dict[str, Any]) -> None:
-        """
-        Broadcast a message to all connections in a specific room.
-        
-        PHASE 1 SSOT FIX: Added to match MockWebSocketManager interface.
-        Implements room-based messaging functionality.
-        
-        Note: Current implementation treats all connections as in the same room.
-        Future enhancement could add proper room management.
-        
-        Args:
-            room: Room identifier (currently unused - broadcasts to all)
-            message: Message dictionary to broadcast
-        """
-        logger.debug(f"Broadcasting to room '{room}': {message.get('type', 'unknown')}")
-        # For now, broadcast to all connections (room management can be added later)
-        await self.broadcast(message)
-    
-    async def recv(self, timeout: Optional[float] = None) -> str:
-        """
-        Mock recv method for WebSocket interface compatibility.
-        
-        PHASE 1 SSOT FIX: Added for test compatibility with standard WebSocket interface.
-        Returns a mock message for testing purposes.
-        
-        Args:
-            timeout: Optional timeout (ignored in this implementation)
-            
-        Returns:
-            JSON-serialized mock message
-        """
-        # Return a mock message for testing compatibility
-        mock_message = {
-            "type": "connection_ready",
-            "data": "SSOT WebSocket manager ready",
-            "timestamp": datetime.utcnow().isoformat(),
-            "connection_count": self.get_connection_count(),
-            "source": "UnifiedWebSocketManager"
-        }
-        return json.dumps(mock_message)
-    
-    async def send(self, message: str) -> None:
-        """
-        Mock send method for WebSocket interface compatibility.
-        
-        PHASE 1 SSOT FIX: Added for test compatibility with standard WebSocket interface.
-        Parses string message and broadcasts to all connections.
-        
-        Args:
-            message: JSON string or plain text message to send
-        """
-        try:
-            # Try to parse as JSON
-            parsed_message = json.loads(message)
-        except json.JSONDecodeError:
-            # If not JSON, treat as plain text
-            parsed_message = {"type": "text", "data": message}
-        
-        # Broadcast the parsed message
-        await self.broadcast(parsed_message)
-        logger.debug(f"SSOT WebSocket manager sent: {parsed_message.get('type', 'text')}")
-    
-    # Alternative method names for enhanced compatibility
-    async def connect(self, connection_id: str, user_id: Optional[str] = None, **kwargs) -> None:
-        """
-        Compatibility method for MockWebSocketManager.connect() interface.
-        
-        PHASE 1 SSOT FIX: Alternative method name for add_connection().
-        Provides backward compatibility with mock interface.
-        
-        Args:
-            connection_id: Connection identifier
-            user_id: User identifier  
-            **kwargs: Additional connection parameters
-        """
-        # Create a WebSocketConnection object for the SSOT interface
-        # This is a simplified version for compatibility
-        connection_data = {
-            'connection_id': connection_id,
-            'user_id': user_id or "unknown_user",
-            'websocket': None,  # Mock websocket for compatibility
-            **kwargs
+
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get health status for current operational mode."""
+        base_status = {
+            'healthy': getattr(self, '_is_healthy', True),
+            'manager_type': f'unified_{self.mode.value}',
+            'mode': self.mode.value,
+            'created_at': getattr(self, 'created_at', datetime.now(timezone.utc)).isoformat(),
         }
         
-        # Create a minimal connection object
-        connection = type('MockConnection', (), connection_data)()
-        connection.websocket = type('MockWebSocket', (), {
-            'send_text': lambda msg: None,  # Mock send_text method
-            'state': 'OPEN'
-        })()
+        if self.mode == WebSocketManagerMode.UNIFIED:
+            return {
+                **base_status,
+                'functionality_level': 'full',
+                'error_recovery_enabled': getattr(self, '_error_recovery_enabled', True),
+                'monitoring_enabled': getattr(self, '_monitoring_enabled', True),
+                'connection_count': self.get_connection_count(),
+                'background_tasks': len(getattr(self, '_background_tasks', {}))
+            }
+        elif self.mode == WebSocketManagerMode.ISOLATED:
+            return {
+                **base_status,
+                'functionality_level': 'isolated',
+                'user_context': bool(self.user_context),
+                'private_error_count': getattr(self, '_private_error_count', 0),
+                'private_message_queue_size': len(getattr(self, '_private_message_queue', []))
+            }
+        elif self.mode == WebSocketManagerMode.EMERGENCY:
+            return {
+                **base_status,
+                'functionality_level': 'emergency',
+                'emergency_mode': True,
+                'queued_messages': len(getattr(self, '_emergency_message_queue', [])),
+                'uptime_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
+            }
+        elif self.mode == WebSocketManagerMode.DEGRADED:
+            return {
+                **base_status,
+                'healthy': False,
+                'functionality_level': 'minimal',
+                'degraded_mode': True,
+                'message': 'Operating in degraded mode - please retry connection'
+            }
         
-        await self.add_connection(connection)
-    
-    async def disconnect(self, connection_id: str) -> None:
-        """
-        Compatibility method for MockWebSocketManager.disconnect() interface.
-        
-        PHASE 1 SSOT FIX: Alternative method name for remove_connection().
-        Provides backward compatibility with mock interface.
-        
-        Args:
-            connection_id: Connection identifier to disconnect
-        """
-        await self.remove_connection(connection_id)
+        return base_status
 
 
 # SECURITY FIX: Replace singleton with factory pattern

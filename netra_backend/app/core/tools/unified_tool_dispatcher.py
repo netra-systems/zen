@@ -141,8 +141,8 @@ class UnifiedToolDispatcher:
     ) -> 'UnifiedToolDispatcher':
         """Create isolated dispatcher for specific user context.
         
-        DEPRECATED: This method redirects to ToolExecutorFactory for SSOT compliance.
-        Use ToolExecutorFactory.create_request_scoped_dispatcher() directly instead.
+        DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
+        Use ToolDispatcherFactory.create_for_request() directly instead.
         
         SECURITY CRITICAL: This is the recommended way to create dispatcher instances.
         
@@ -161,19 +161,19 @@ class UnifiedToolDispatcher:
             PermissionError: If admin tools requested without admin permission
         """
         import warnings
-        from netra_backend.app.agents.tool_executor_factory import get_tool_executor_factory
+        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
         
         # Issue deprecation warning for SSOT compliance tracking
         warnings.warn(
             "UnifiedToolDispatcher.create_for_user() is deprecated. "
-            "Use ToolExecutorFactory.create_request_scoped_dispatcher() directly for SSOT compliance.",
+            "Use ToolDispatcherFactory.create_for_request() directly for SSOT compliance.",
             DeprecationWarning,
             stacklevel=2
         )
         
         logger.warning(
-            f"🔄 REDIRECT: UnifiedToolDispatcher.create_for_user() -> ToolExecutorFactory.create_request_scoped_dispatcher() "
-            f"for user {user_context.user_id} (SSOT consolidation Phase 1)"
+            f"🔄 SSOT REDIRECT: UnifiedToolDispatcher.create_for_user() -> ToolDispatcherFactory.create_for_request() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
         )
         
         # Validate user context (maintain same validation as original)
@@ -197,38 +197,32 @@ class UnifiedToolDispatcher:
                 logger.warning(f"Created fallback WebSocketManager - no bridge connection for user {user_context.user_id}")
         
         try:
-            # Get global ToolExecutorFactory instance
-            factory = get_tool_executor_factory()
+            # Get global SSOT ToolDispatcherFactory instance
+            factory = get_tool_dispatcher_factory()
             
             # Set websocket manager if available
             if websocket_manager:
                 factory.set_websocket_manager(websocket_manager)
             
-            # Redirect to ToolExecutorFactory for SSOT compliance
-            tool_dispatcher = await factory.create_request_scoped_dispatcher(
+            # Redirect to SSOT ToolDispatcherFactory for Phase 2 compliance
+            tool_dispatcher = await factory.create_for_user(
                 user_context=user_context,
-                tools=tools,  # Pass tools directly - factory handles the list
-                websocket_manager=websocket_manager
+                websocket_bridge=websocket_bridge,  # Pass original bridge for compatibility
+                tools=tools,
+                enable_admin_tools=enable_admin_tools
             )
             
             logger.info(
-                f"✅ REDIRECT SUCCESS: Created dispatcher via ToolExecutorFactory for user {user_context.user_id} "
+                f"✅ SSOT REDIRECT SUCCESS: Created dispatcher via ToolDispatcherFactory for user {user_context.user_id} "
                 f"(admin_tools: {enable_admin_tools})"
             )
             
-            # TODO: Handle enable_admin_tools parameter properly in future phase
-            if enable_admin_tools:
-                logger.warning(
-                    f"⚠️ Admin tools requested but not yet supported in factory redirect. "
-                    f"This will be implemented in Phase 2 of SSOT consolidation."
-                )
-            
-            # Wrap RequestScopedToolDispatcher to look like UnifiedToolDispatcher
-            return cls._wrap_factory_dispatcher(tool_dispatcher, user_context, websocket_bridge)
+            # The ToolDispatcherFactory handles all compatibility wrapping
+            return tool_dispatcher
             
         except Exception as e:
             logger.error(
-                f"🚨 REDIRECT FAILED: ToolExecutorFactory creation failed for user {user_context.user_id}: {e}. "
+                f"🚨 SSOT REDIRECT FAILED: ToolDispatcherFactory creation failed for user {user_context.user_id}: {e}. "
                 f"Falling back to original implementation."
             )
             
@@ -251,24 +245,55 @@ class UnifiedToolDispatcher:
     ):
         """Create scoped dispatcher with automatic cleanup.
         
+        DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
+        Use ToolDispatcherFactory.create_scoped() directly instead.
+        
         RECOMMENDED USAGE PATTERN:
-            async with UnifiedToolDispatcher.create_scoped(user_context) as dispatcher:
-                result = await dispatcher.execute_tool("my_tool", params)
+            async with ToolDispatcherFactory().create_scoped(user_context) as dispatcher:
+                result = await dispatcher.dispatch("my_tool", params)
                 # Automatic cleanup happens here
         """
-        dispatcher = await cls.create_for_user(
-            user_context=user_context,
-            websocket_bridge=websocket_bridge,
-            tools=tools,
-            enable_admin_tools=enable_admin_tools
+        import warnings
+        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
+        
+        # Issue deprecation warning for SSOT compliance tracking
+        warnings.warn(
+            "UnifiedToolDispatcher.create_scoped() is deprecated. "
+            "Use ToolDispatcherFactory.create_scoped() directly for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
         )
         
-        try:
+        logger.warning(
+            f"🔄 SSOT REDIRECT: UnifiedToolDispatcher.create_scoped() -> ToolDispatcherFactory.create_scoped() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
+        )
+        
+        # Get global SSOT ToolDispatcherFactory instance
+        factory = get_tool_dispatcher_factory()
+        
+        # Convert websocket_bridge to websocket_manager if needed
+        websocket_manager = None
+        if websocket_bridge:
+            if hasattr(websocket_bridge, 'send_event'):
+                websocket_manager = websocket_bridge
+            elif hasattr(websocket_bridge, 'notify_tool_executing'):
+                websocket_manager = cls._create_websocket_bridge_adapter(websocket_bridge, user_context)
+                logger.info(f"Created WebSocket bridge adapter for scoped dispatcher (user: {user_context.user_id})")
+        
+        # Set websocket manager if available
+        if websocket_manager:
+            factory.set_websocket_manager(websocket_manager)
+        
+        # Use SSOT factory's create_scoped method with compatibility support
+        async with factory.create_scoped(user_context, tools, websocket_manager) as dispatcher:
+            # If we have an AgentWebSocketBridge, wrap the dispatcher to provide compatibility
+            if websocket_bridge and hasattr(websocket_bridge, 'notify_tool_executing'):
+                # Create compatibility wrapper that provides the expected interface
+                dispatcher = factory._create_unified_compatibility_wrapper(dispatcher, websocket_bridge)
+            
+            logger.info(f"✅ SSOT SCOPED: Created scoped dispatcher via ToolDispatcherFactory for user {user_context.user_id}")
             yield dispatcher
-        finally:
-            # Ensure cleanup
-            if dispatcher._is_active:
-                await dispatcher.cleanup()
     
     @classmethod
     def _wrap_factory_dispatcher(cls, tool_dispatcher, user_context, websocket_bridge):

@@ -40,10 +40,10 @@ class CircuitBreakerConfig:
         return UnifiedCircuitConfig(
             name=self.name,
             failure_threshold=self.failure_threshold,
-            recovery_timeout=int(self.recovery_timeout),
+            recovery_timeout=float(self.recovery_timeout),
             success_threshold=self.success_threshold,
-            timeout_seconds=self.timeout_seconds
-            # Note: half_open_max_calls doesn't exist in UnifiedCircuitConfig
+            timeout_seconds=self.timeout_seconds,
+            half_open_max_calls=self.half_open_max_calls
         )
 
 
@@ -79,8 +79,8 @@ class CircuitBreaker:
     
     def _update_legacy_metrics_on_failure(self) -> None:
         """Update legacy metrics on failure for compatibility."""
-        self.metrics.failure_count += 1
-        self.metrics.total_requests += 1
+        self.metrics.failed_calls += 1
+        self.metrics.total_calls += 1
         self.metrics.last_failure_time = time.time()
     
     def get_status(self) -> Dict[str, Any]:
@@ -107,10 +107,10 @@ class CircuitBreaker:
         """Build metrics data from unified breaker and legacy compatibility."""
         unified_metrics = unified_status.get("metrics", {})
         return {
-            "total_calls": self.metrics.total_requests + unified_metrics.get("total_calls", 0),
-            "successful_calls": self.metrics.success_count + unified_metrics.get("successful_calls", 0),
-            "failed_calls": self.metrics.failure_count + unified_metrics.get("failed_calls", 0),
-            "circuit_breaker_opens": 0 + unified_metrics.get("circuit_opened_count", 0),  # Legacy metrics don't track opens
+            "total_calls": self.metrics.total_calls + unified_metrics.get("total_calls", 0),
+            "successful_calls": self.metrics.successful_calls + unified_metrics.get("successful_calls", 0),
+            "failed_calls": self.metrics.failed_calls + unified_metrics.get("failed_calls", 0),
+            "circuit_breaker_opens": self.metrics.circuit_breaker_opens + unified_metrics.get("circuit_opened_count", 0),
             "state_changes": unified_metrics.get("state_changes", 0),
             "last_failure": self._format_last_failure_time()
         }
@@ -143,17 +143,17 @@ class CircuitBreaker:
     @property
     def is_open(self) -> bool:
         """Check if circuit breaker is open."""
-        return self._unified_breaker.state == UnifiedCircuitBreakerState.OPEN
+        return self._unified_breaker.is_open
     
     @property
     def is_closed(self) -> bool:
         """Check if circuit breaker is closed."""
-        return self._unified_breaker.state == UnifiedCircuitBreakerState.CLOSED
+        return self._unified_breaker.is_closed
     
     @property
     def is_half_open(self) -> bool:
         """Check if circuit breaker is half-open."""
-        return self._unified_breaker.state == UnifiedCircuitBreakerState.HALF_OPEN
+        return self._unified_breaker.is_half_open
     
     def can_execute(self) -> bool:
         """Check if operation can be executed through unified breaker."""

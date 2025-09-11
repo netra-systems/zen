@@ -1,5 +1,6 @@
 {
   "values": [
+    ".websocket_event",
     ":event",
     "_EVENT",
     "_event",

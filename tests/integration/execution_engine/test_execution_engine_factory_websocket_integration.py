@@ -889,6 +889,10 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
             # CRITICAL: Factory metrics must reflect cleanup
             post_cleanup_metrics = self.factory.get_factory_metrics()
             
+            # DEBUG: Print metrics for debugging
+            print(f"DEBUG: Initial metrics: {initial_factory_metrics}")
+            print(f"DEBUG: Post cleanup metrics: {post_cleanup_metrics}")
+            
             # CRITICAL: Factory cleanup was attempted
             cleanup_was_attempted = (
                 post_cleanup_metrics['total_engines_cleaned'] > initial_factory_metrics['total_engines_cleaned'] or

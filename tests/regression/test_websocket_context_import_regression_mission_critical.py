@@ -321,7 +321,7 @@ class TestWebSocketContextMissionCriticalRegression:
         
         # Test notifier initialization with context
         try:
-            notifier = AgentWebSocketBridge(context)
+            notifier = WebSocketNotifier(context)
             assert notifier is not None, "WebSocket notifier creation failed"
             
             # Test that notifier can handle context type validation

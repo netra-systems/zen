@@ -123,20 +123,20 @@ class TestEventValidatorSSOTViolations(SSotBaseTestCase):
             ssot_validator = AgentEventValidator()
             ssot_validator.record_event(self.sample_valid_event)
             ssot_result = ssot_validator.perform_full_validation()
-            implementations_found.append("UnifiedEventValidator_SSOT")
+            implementations_found.append("AgentEventValidator")
             validation_results["ssot_framework"] = {
                 "is_valid": ssot_result.is_valid,
                 "error_message": ssot_result.error_message,
                 "business_value_score": ssot_result.business_value_score
             }
-            logger.info(f"✓ Unified AgentEventValidator found and tested")
-            print(f"DEBUG: Unified AgentEventValidator found - {ssot_result.is_valid}")
+            logger.info(f"✓ AgentEventValidator found and tested")
+            print(f"DEBUG: AgentEventValidator found - {ssot_result.is_valid}")
         except ImportError as e:
-            logger.error(f"❌ Cannot import Unified AgentEventValidator: {e}")
-            print(f"DEBUG: Unified AgentEventValidator import failed: {e}")
+            logger.error(f"❌ Cannot import AgentEventValidator: {e}")
+            print(f"DEBUG: AgentEventValidator import failed: {e}")
         except Exception as e:
-            logger.error(f"❌ Unified AgentEventValidator test failed: {e}")
-            print(f"DEBUG: Unified AgentEventValidator exception: {e}")
+            logger.error(f"❌ AgentEventValidator test failed: {e}")
+            print(f"DEBUG: AgentEventValidator exception: {e}")
             
         # Log findings
         logger.critical(f"🚨 SSOT VIOLATION ANALYSIS:")

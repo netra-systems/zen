@@ -99,6 +99,9 @@ class ToolExecutorFactory:
     ) -> UnifiedToolExecutionEngine:
         """Create a request-scoped UnifiedToolExecutionEngine.
         
+        DEPRECATED: This method is being consolidated into ToolDispatcherFactory.
+        Use ToolDispatcherFactory.create_for_request() instead.
+        
         Args:
             user_context: User execution context for isolation
             websocket_manager: Optional WebSocket manager (uses factory default if None)
@@ -109,6 +112,21 @@ class ToolExecutorFactory:
         Raises:
             ValueError: If user_context is invalid or dependencies are unavailable
         """
+        import warnings
+        
+        # Issue deprecation warning for Phase 2 consolidation
+        warnings.warn(
+            "ToolExecutorFactory.create_tool_executor() is deprecated. "
+            "Use ToolDispatcherFactory.create_for_request() for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            f"🔄 DEPRECATED: ToolExecutorFactory.create_tool_executor() -> ToolDispatcherFactory.create_for_request() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
+        )
+        
         # Validate user context
         user_context = validate_user_context(user_context)
         
@@ -140,7 +158,7 @@ class ToolExecutorFactory:
             self._metrics['active_instances'] += 1
             self._metrics['last_creation_time'] = datetime.now(timezone.utc)
             
-            logger.info(f"🔧 Created UnifiedToolExecutionEngine for {user_context.get_correlation_id()} "
+            logger.info(f"🔧 DEPRECATED: Created UnifiedToolExecutionEngine for {user_context.get_correlation_id()} "
                        f"in {creation_time_ms:.1f}ms (WebSocket: {'enabled' if websocket_bridge else 'disabled'})")
             
             return executor
@@ -158,6 +176,9 @@ class ToolExecutorFactory:
     ) -> RequestScopedToolDispatcher:
         """Create a request-scoped tool dispatcher with integrated WebSocket events.
         
+        DEPRECATED: This method is being consolidated into ToolDispatcherFactory.
+        Use ToolDispatcherFactory.create_for_request() instead.
+        
         Args:
             user_context: User execution context for isolation
             tools: Optional list of tools to register initially
@@ -169,6 +190,21 @@ class ToolExecutorFactory:
         Raises:
             ValueError: If user_context is invalid or dependencies are unavailable
         """
+        import warnings
+        
+        # Issue deprecation warning for Phase 2 consolidation
+        warnings.warn(
+            "ToolExecutorFactory.create_request_scoped_dispatcher() is deprecated. "
+            "Use ToolDispatcherFactory.create_for_request() for SSOT compliance.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            f"🔄 DEPRECATED: ToolExecutorFactory.create_request_scoped_dispatcher() -> ToolDispatcherFactory.create_for_request() "
+            f"for user {user_context.user_id} (Phase 2 factory consolidation)"
+        )
+        
         # Validate user context
         user_context = validate_user_context(user_context)
         
@@ -201,7 +237,7 @@ class ToolExecutorFactory:
             self._metrics['active_instances'] += 1
             self._metrics['last_creation_time'] = datetime.now(timezone.utc)
             
-            logger.info(f"📦 Created RequestScopedToolDispatcher for {user_context.get_correlation_id()} "
+            logger.info(f"📦 DEPRECATED: Created RequestScopedToolDispatcher for {user_context.get_correlation_id()} "
                        f"in {creation_time_ms:.1f}ms (WebSocket: {'enabled' if websocket_emitter else 'disabled'})")
             
             return dispatcher
@@ -383,13 +419,31 @@ _global_tool_executor_factory: Optional[ToolExecutorFactory] = None
 def get_tool_executor_factory() -> ToolExecutorFactory:
     """Get the global ToolExecutorFactory instance.
     
+    DEPRECATED: This function is deprecated in favor of ToolDispatcherFactory.
+    Use get_tool_dispatcher_factory() for SSOT compliance.
+    
     Returns:
-        ToolExecutorFactory: Global factory instance
+        ToolExecutorFactory: Global factory instance (deprecated)
     """
+    import warnings
+    
+    # Issue deprecation warning for Phase 2 consolidation
+    warnings.warn(
+        "get_tool_executor_factory() is deprecated. "
+        "Use get_tool_dispatcher_factory() for SSOT compliance.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    logger.warning(
+        "🔄 DEPRECATED: get_tool_executor_factory() called. "
+        "Use get_tool_dispatcher_factory() for SSOT compliance."
+    )
+    
     global _global_tool_executor_factory
     if _global_tool_executor_factory is None:
         _global_tool_executor_factory = ToolExecutorFactory()
-        logger.info("🏭 Created global ToolExecutorFactory instance")
+        logger.info("🏭 DEPRECATED: Created global ToolExecutorFactory instance")
     return _global_tool_executor_factory
 
 
@@ -411,6 +465,9 @@ async def create_isolated_tool_executor(
 ) -> UnifiedToolExecutionEngine:
     """Convenience function to create an isolated tool executor.
     
+    DEPRECATED: This function is deprecated in favor of ToolDispatcherFactory.
+    Use create_tool_dispatcher() for SSOT compliance.
+    
     Args:
         user_context: User execution context
         websocket_manager: Optional WebSocket manager
@@ -418,6 +475,21 @@ async def create_isolated_tool_executor(
     Returns:
         UnifiedToolExecutionEngine: Isolated tool executor
     """
+    import warnings
+    
+    # Issue deprecation warning for Phase 2 consolidation
+    warnings.warn(
+        "create_isolated_tool_executor() is deprecated. "
+        "Use create_tool_dispatcher() for SSOT compliance.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    logger.warning(
+        f"🔄 DEPRECATED: create_isolated_tool_executor() called for user {user_context.user_id}. "
+        f"Use create_tool_dispatcher() for SSOT compliance."
+    )
+    
     factory = get_tool_executor_factory()
     return await factory.create_tool_executor(user_context, websocket_manager)
 

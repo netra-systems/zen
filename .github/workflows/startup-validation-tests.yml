@@ -2,7 +2,6 @@ name: Startup Validation - Deterministic Sequence
 
 on:
   pull_request:
-    types: [opened]
     branches: [ main, staging, production ]
     paths:
       - 'netra_backend/app/smd.py'
@@ -13,6 +12,12 @@ on:
       - 'tests/mission_critical/test_deterministic_startup_validation.py'
       - 'tests/mission_critical/test_startup_*'
       - '.github/workflows/startup-validation-tests.yml'
+  push:
+    branches: [ main, staging, production ]
+    paths:
+      - 'netra_backend/app/smd.py'
+      - 'netra_backend/app/main.py'
+      - 'netra_backend/app/routes/health*.py'
   workflow_dispatch:
   workflow_call:
     outputs:

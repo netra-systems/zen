@@ -44,8 +44,7 @@ def get_fallback_title() -> str:
 
 async def _call_llm_for_title(content: str) -> str:
     """Call LLM to generate title."""
-    from netra_backend.app.llm.llm_manager import create_llm_manager
-    llm_manager = create_llm_manager(None)  # Utility function without user context
+    llm_manager = LLMManager()
     prompt = build_title_generation_prompt(content)
     generated_title = await llm_manager.ask_llm(prompt, "triage")
     return clean_generated_title(generated_title)

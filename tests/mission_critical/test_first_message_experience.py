@@ -957,7 +957,7 @@ class TestFirstMessageIntegration:
         
     @pytest.mark.asyncio
     async def test_websocket_notifier_integration(self):
-        """Test: AgentWebSocketBridge sends all required events."""
+        """Test: WebSocketNotifier sends all required events."""
         logger.info("=" * 80)
         logger.info("TEST: WebSocket Notifier Event Generation")
         logger.info("=" * 80)
@@ -972,7 +972,7 @@ class TestFirstMessageIntegration:
         mock_manager = MockWSManager()
         
         # Create notifier
-        notifier = AgentWebSocketBridge(
+        notifier = WebSocketNotifier(
             websocket_manager=mock_manager,
             user_id="test_user",
             thread_id="test_thread"

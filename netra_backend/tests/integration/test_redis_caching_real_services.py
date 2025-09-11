@@ -22,7 +22,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional
 
 from netra_backend.app.redis_manager import RedisManager as RedisCacheManager
-# CacheKeyGenerator not available - will implement simple key generation in test
+from netra_backend.app.cache.cache_key_generator import CacheKeyGenerator
 from netra_backend.app.cache.business_cache_strategies import BusinessCacheStrategies
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_redis_fixture
