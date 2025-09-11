@@ -32,6 +32,17 @@ env_vars:
   WEBSOCKET_HEARTBEAT_TIMEOUT: "75"
   WEBSOCKET_CLEANUP_INTERVAL: "180"
   WEBSOCKET_STALE_TIMEOUT: "900"
+  
+  # OpenTelemetry Configuration for GCP Cloud Trace
+  OTEL_ENABLED: "true"
+  OTEL_SERVICE_NAME: netra-backend-staging
+  OTEL_SERVICE_VERSION: "1.0.0"
+  GOOGLE_CLOUD_PROJECT: netra-staging
+  OTEL_INSTRUMENT_FASTAPI: "true"
+  OTEL_INSTRUMENT_REQUESTS: "true"
+  OTEL_INSTRUMENT_SQLALCHEMY: "true"
+  OTEL_INSTRUMENT_REDIS: "true"
+  OTEL_EXCLUDED_URLS: "/health,/metrics,/docs,/openapi.json"
 
 # Secret Manager References
 # Format: env_var_name: secret_name:version

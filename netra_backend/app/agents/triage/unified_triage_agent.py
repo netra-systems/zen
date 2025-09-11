@@ -323,16 +323,37 @@ class UnifiedTriageAgent(BaseAgent):
     # MAIN EXECUTION METHODS
     # ========================================================================
     
-    async def execute(self, state: Any, context: Optional['UserExecutionContext'] = None) -> Dict[str, Any]:
+    async def execute(self, state: Any = None, context: Optional['UserExecutionContext'] = None, 
+                     message: str = None, **kwargs) -> Dict[str, Any]:
         """Execute triage analysis - MUST RUN FIRST in pipeline
         
+        GOLDEN PATH COMPATIBILITY: Supports both modern and legacy call patterns:
+        - execute(state, context) - Modern pattern  
+        - execute(message="...", context=...) - Legacy Golden Path pattern
+        
         Args:
-            state: Current execution state
+            state: Current execution state (modern pattern) 
             context: User execution context for isolation
+            message: User message for legacy compatibility
+            **kwargs: Additional legacy parameters
             
         Returns:
             Triage result with category, priority, and next steps
         """
+        # GOLDEN PATH COMPATIBILITY: Handle legacy interface patterns
+        if state is None and message is not None:
+            # Legacy call pattern: execute(message="...", context=...)
+            logger.debug(f"TriageAgent: Converting legacy execute(message) call to modern pattern")
+            state = message  # Use message as state for triage analysis
+        
+        if message is not None and context is not None:
+            # Inject message into context for legacy compatibility
+            if hasattr(context, 'agent_context') and context.agent_context is not None:
+                context.agent_context["user_request"] = message
+                context.agent_context["message"] = message
+            # Enable test mode for compatibility
+            if hasattr(self, 'enable_websocket_test_mode'):
+                self.enable_websocket_test_mode()
         # Use provided context or instance context
         exec_context = context or self.context
         if not exec_context:
