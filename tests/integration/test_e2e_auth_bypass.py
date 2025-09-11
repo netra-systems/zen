@@ -74,6 +74,11 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 headers={
                     "X-E2E-Bypass-Key": bypass_key,
                     "Content-Type": "application/json"
+                },
+                json={
+                    "email": "test-user@staging.netrasystems.ai",
+                    "name": "E2E Test User",
+                    "simulate_oauth": True
                 }
             )
             
@@ -115,6 +120,10 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 headers={
                     "X-E2E-Bypass-Key": invalid_key,
                     "Content-Type": "application/json"
+                },
+                json={
+                    "email": "test-user@staging.netrasystems.ai",
+                    "name": "E2E Test User"
                 }
             )
             
@@ -145,6 +154,10 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 "/api/auth/e2e/test-auth",
                 headers={
                     "Content-Type": "application/json"
+                },
+                json={
+                    "email": "test-user@staging.netrasystems.ai",
+                    "name": "E2E Test User"
                 }
             )
             
@@ -178,6 +191,10 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 headers={
                     "X-E2E-Bypass-Key": "should-never-work-in-production",
                     "Content-Type": "application/json"
+                },
+                json={
+                    "email": "test-user@production.netrasystems.ai",
+                    "name": "Production Test User"
                 }
             )
             
@@ -218,6 +235,10 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 headers={
                     "X-E2E-Bypass-Key": bypass_key,
                     "Content-Type": "application/json"
+                },
+                json={
+                    "email": "secret-manager-test@staging.netrasystems.ai",
+                    "name": "Secret Manager Test User"
                 }
             )
             
@@ -259,6 +280,10 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
                 headers={
                     "X-E2E-Bypass-Key": "any-key-should-fail",
                     "Content-Type": "application/json"
+                },
+                json={
+                    "email": "unconfigured-test@staging.netrasystems.ai",
+                    "name": "Unconfigured Test User"
                 }
             )
             
@@ -309,20 +334,23 @@ class TestE2EAuthBypass(SSotAsyncTestCase):
         ]
         
         for scenario in test_scenarios:
-            with self.subTest(scenario=scenario["name"]):
-                # Set up environment for scenario
-                with self.temp_env_vars(
-                    ENVIRONMENT=scenario["environment"],
-                    E2E_OAUTH_SIMULATION_KEY=scenario["env_key"]
-                ):
-                    # Make request
-                    response = self.client.post(
-                        "/api/auth/e2e/test-auth",
-                        headers={
-                            "X-E2E-Bypass-Key": scenario["request_key"],
-                            "Content-Type": "application/json"
-                        }
-                    )
+            # Set up environment for scenario
+            with self.temp_env_vars(
+                ENVIRONMENT=scenario["environment"],
+                E2E_OAUTH_SIMULATION_KEY=scenario["env_key"]
+            ):
+                # Make request
+                response = self.client.post(
+                    "/api/auth/e2e/test-auth",
+                    headers={
+                        "X-E2E-Bypass-Key": scenario["request_key"],
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "email": f"test-{scenario['name']}@staging.netrasystems.ai",
+                        "name": f"Test User {scenario['name']}"
+                    }
+                )
                     
                     # Validate status code
                     self.assertEqual(
