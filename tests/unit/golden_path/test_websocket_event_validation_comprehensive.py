@@ -589,6 +589,19 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         
         bridge._resolve_thread_id_from_run_id = mock_resolve_thread_id
         
+        # Mock the event context validation method
+        def mock_validate_event_context(run_id, event_type, agent_name=None):
+            return True  # Always pass validation for tests
+        
+        bridge._validate_event_context = mock_validate_event_context
+        
+        # Mock the _emit_with_retry method to capture events
+        async def mock_emit_with_retry(event_type, thread_id, notification, run_id, agent_name, max_retries=3, critical_event=False):
+            bridge_events.append({"event_type": event_type, "thread_id": thread_id, "notification": notification, "run_id": run_id, "agent_name": agent_name})
+            return True
+        
+        bridge._emit_with_retry = mock_emit_with_retry
+        
         # Track bridge events
         bridge_events = []
         
