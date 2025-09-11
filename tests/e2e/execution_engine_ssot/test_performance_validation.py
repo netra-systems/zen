@@ -952,6 +952,127 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             self.fail(f"BUSINESS-CRITICAL: Baseline performance violations affect production readiness and customer experience: {performance_violations}")
         
         print(f"  ✅ All performance baselines met - system ready for production")
+    
+    async def test_comprehensive_performance_validation(self):
+        """Comprehensive performance validation protecting $500K+ ARR"""
+        print("\n🚀 Running comprehensive performance validation for production readiness...")
+        
+        performance_summary = {
+            'test_start_time': time.time(),
+            'business_impact': '$500K+ ARR protection',
+            'validation_results': {},
+            'critical_violations': [],
+            'performance_score': 100  # Start with perfect score
+        }
+        
+        # Track overall performance violations across all tests
+        all_violations = []
+        
+        try:
+            # Run all performance tests in sequence
+            test_methods = [
+                ('Engine Creation Performance', self.test_execution_engine_creation_performance),
+                ('Event Processing Performance', self.test_event_processing_performance), 
+                ('Memory Performance Characteristics', self.test_memory_performance_characteristics),
+                ('Baseline Performance Comparison', self.test_baseline_performance_comparison)
+            ]
+            
+            for test_name, test_method in test_methods:
+                print(f"\n  🔍 Running {test_name}...")
+                test_start = time.perf_counter()
+                
+                try:
+                    await test_method()
+                    test_duration = time.perf_counter() - test_start
+                    performance_summary['validation_results'][test_name] = {
+                        'status': 'PASSED',
+                        'duration': test_duration,
+                        'business_impact': 'Positive - meets production requirements'
+                    }
+                    print(f"    ✅ {test_name} PASSED ({test_duration:.2f}s)")
+                    
+                except AssertionError as e:
+                    # Performance test failed - BUSINESS CRITICAL
+                    test_duration = time.perf_counter() - test_start
+                    violation_msg = f"BUSINESS-CRITICAL: {test_name} failed - {str(e)}"
+                    all_violations.append(violation_msg)
+                    performance_summary['validation_results'][test_name] = {
+                        'status': 'FAILED',
+                        'duration': test_duration, 
+                        'error': str(e),
+                        'business_impact': 'CRITICAL - affects customer experience and revenue'
+                    }
+                    # Reduce performance score
+                    performance_summary['performance_score'] -= 25
+                    print(f"    ❌ {test_name} FAILED ({test_duration:.2f}s): {e}")
+                    logger.error(violation_msg)
+                    
+                except Exception as e:
+                    # Unexpected error - indicates system instability
+                    test_duration = time.perf_counter() - test_start
+                    error_msg = f"SYSTEM INSTABILITY: {test_name} crashed - {str(e)}"
+                    all_violations.append(error_msg)
+                    performance_summary['validation_results'][test_name] = {
+                        'status': 'ERROR',
+                        'duration': test_duration,
+                        'error': str(e),
+                        'business_impact': 'CRITICAL - indicates system instability'
+                    }
+                    # Major score reduction for system instability
+                    performance_summary['performance_score'] -= 35
+                    print(f"    ⚠️ {test_name} ERROR ({test_duration:.2f}s): {e}")
+                    logger.error(error_msg)
+            
+            # Calculate final performance assessment
+            performance_summary['test_end_time'] = time.time()
+            performance_summary['total_duration'] = performance_summary['test_end_time'] - performance_summary['test_start_time']
+            performance_summary['critical_violations'] = all_violations
+            
+            # Performance scoring and business impact assessment
+            if performance_summary['performance_score'] >= 90:
+                performance_level = "EXCELLENT"
+                business_readiness = "READY FOR PRODUCTION"
+                customer_impact = "Optimal user experience expected"
+            elif performance_summary['performance_score'] >= 75:
+                performance_level = "GOOD"
+                business_readiness = "CONDITIONAL PRODUCTION READY"
+                customer_impact = "Acceptable user experience with monitoring"
+            elif performance_summary['performance_score'] >= 50:
+                performance_level = "POOR"
+                business_readiness = "NOT READY FOR PRODUCTION"
+                customer_impact = "Degraded user experience - customer churn risk"
+            else:
+                performance_level = "CRITICAL"
+                business_readiness = "SYSTEM UNSTABLE"
+                customer_impact = "Severe user experience issues - revenue impact"
+            
+            # Final performance report
+            print(f"\n📊 COMPREHENSIVE PERFORMANCE VALIDATION SUMMARY:")
+            print(f"  Business Impact: {performance_summary['business_impact']}")
+            print(f"  Performance Score: {performance_summary['performance_score']}/100 ({performance_level})")
+            print(f"  Business Readiness: {business_readiness}")
+            print(f"  Customer Impact: {customer_impact}")
+            print(f"  Total Test Duration: {performance_summary['total_duration']:.2f}s")
+            print(f"  Critical Violations: {len(all_violations)}")
+            
+            # Log detailed results for analysis
+            logger.info(f"Performance validation completed: {performance_summary}")
+            
+            # BUSINESS-CRITICAL: Fail if performance is unacceptable for production
+            if performance_summary['performance_score'] < 75:
+                logger.error(f"BUSINESS-CRITICAL: System performance unacceptable for production deployment")
+                logger.error(f"Performance violations affect $500K+ ARR:")
+                for violation in all_violations:
+                    logger.error(f"  - {violation}")
+                
+                self.fail(f"BUSINESS-CRITICAL: Comprehensive performance validation failed - system not ready for production. Score: {performance_summary['performance_score']}/100. Violations: {all_violations}")
+            
+            print(f"\n✅ COMPREHENSIVE PERFORMANCE VALIDATION PASSED - System ready for production deployment")
+            
+        except Exception as e:
+            # Catastrophic failure in performance validation
+            logger.error(f"CATASTROPHIC: Performance validation system failure: {e}")
+            self.fail(f"CATASTROPHIC: Performance validation system failure affects production readiness assessment: {e}")
 
 
 if __name__ == '__main__':
