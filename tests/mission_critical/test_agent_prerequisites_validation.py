@@ -44,9 +44,9 @@ class TestAgentPrerequisitesValidation(SSotAsyncTestCase):
     These tests should FAIL initially, demonstrating the current gap in prerequisite validation.
     """
     
-    def setUp(self):
+    async def asyncSetUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        await super().asyncSetUp()
         
         # Test data
         self.user_id = UserID(uuid4())
