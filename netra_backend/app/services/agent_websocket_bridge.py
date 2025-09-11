@@ -1303,25 +1303,56 @@ class AgentWebSocketBridge(MonitorableComponent):
             if trace_context:
                 notification["trace"] = trace_context
             
+            # PHASE 2 FIX: Track event delivery with confirmation and retry
+            event_id = None
+            try:
+                from netra_backend.app.websocket_core.event_delivery_tracker import get_event_delivery_tracker, EventPriority
+                
+                tracker = get_event_delivery_tracker()
+                event_id = tracker.track_event(
+                    event_type="agent_thinking",
+                    user_id=effective_user_context.user_id,
+                    run_id=run_id,
+                    thread_id=effective_user_context.thread_id,
+                    data=notification,
+                    priority=EventPriority.NORMAL,  # Real-time reasoning is nice to have
+                    timeout_s=30.0,
+                    max_retries=2
+                )
+                tracker.mark_event_sent(event_id)
+            except ImportError:
+                logger.debug("Event delivery tracker not available, proceeding without tracking")
+            
             # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
             user_id = effective_user_context.user_id
             
             # PHASE 1 FIX: Direct WebSocket emission using user_id
             success = await self._websocket_manager.send_to_user(user_id, notification)
             
-            if success:
-                logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → user={user_id} (run_id={run_id}, agent={agent_name})")
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("agent_thinking", run_id, True)
+            # PHASE 2 FIX: Update delivery tracking
+            if event_id:
+                try:
+                    if success:
+                        tracker.mark_event_confirmed(event_id)
+                        logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                    else:
+                        tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False")
+                        logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                except Exception as track_error:
+                    logger.warning(f"Event tracking update failed: {track_error}")
             else:
-                logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("agent_thinking", run_id, False)
+                if success:
+                    logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → user={user_id} (run_id={run_id}, agent={agent_name})")
+                else:
+                    logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
             
             return success
             
         except Exception as e:
             logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_thinking failed (run_id={run_id}, agent={agent_name}): {e}")
+            # PHASE 4 FIX: Propagate critical errors instead of silent failure
+            if "CRITICAL" in str(e) or "user_id" in str(e).lower():
+                raise  # Don't allow critical routing errors to fail silently
             return False
     
     async def notify_tool_executing(
@@ -1382,6 +1413,26 @@ class AgentWebSocketBridge(MonitorableComponent):
                 }
             }
             
+            # PHASE 2 FIX: Track event delivery with confirmation and retry
+            tracker_event_id = None
+            try:
+                from netra_backend.app.websocket_core.event_delivery_tracker import get_event_delivery_tracker, EventPriority
+                
+                tracker = get_event_delivery_tracker()
+                tracker_event_id = tracker.track_event(
+                    event_type="tool_executing",
+                    user_id=effective_user_context.user_id,
+                    run_id=run_id,
+                    thread_id=effective_user_context.thread_id,
+                    data=notification,
+                    priority=EventPriority.HIGH,  # Tool execution is important for UX
+                    timeout_s=30.0,
+                    max_retries=3
+                )
+                tracker.mark_event_sent(tracker_event_id)
+            except ImportError:
+                logger.debug("Event delivery tracker not available, proceeding without tracking")
+            
             # Include event_id for confirmation tracking if present
             if event_id:
                 notification["event_id"] = event_id
@@ -1392,39 +1443,46 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Direct WebSocket emission using user_id
             success = await self._websocket_manager.send_to_user(user_id, notification)
             
-            if success:
-                logger.debug(f"✅ EMISSION SUCCESS: tool_executing → user={user_id} (run_id={run_id}, tool={tool_name})")
-                
-                # Confirm event delivery if event_id is present
-                if event_id:
-                    try:
-                        tracker = get_event_delivery_tracker()
-                        tracker.confirm_event(event_id)
-                        logger.debug(f"Confirmed event delivery: {event_id}")
-                    except Exception as e:
-                        logger.warning(f"Failed to confirm event {event_id}: {e}")
-                
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("tool_executing", run_id, True)
+            # PHASE 2 FIX: Update delivery tracking
+            if tracker_event_id:
+                try:
+                    if success:
+                        tracker.mark_event_confirmed(tracker_event_id)
+                        logger.debug(f"✅ EMISSION SUCCESS: tool_executing → user={user_id} (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                    else:
+                        tracker.mark_event_failed(tracker_event_id, "WebSocket send_to_user returned False")
+                        logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                except Exception as track_error:
+                    logger.warning(f"Event tracking update failed: {track_error}")
             else:
-                logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name})")
-                
-                # Mark event as failed if event_id is present
-                if event_id:
-                    try:
-                        tracker = get_event_delivery_tracker()
-                        tracker.fail_event(event_id, "WebSocket send failed")
-                        logger.debug(f"Marked event as failed: {event_id}")
-                    except Exception as e:
-                        logger.warning(f"Failed to mark event as failed {event_id}: {e}")
-                
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("tool_executing", run_id, False)
+                if success:
+                    logger.debug(f"✅ EMISSION SUCCESS: tool_executing → user={user_id} (run_id={run_id}, tool={tool_name})")
+                else:
+                    logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name})")
+            
+            # Legacy event confirmation if event_id is present (from parameters)
+            if event_id and success:
+                try:
+                    tracker = get_event_delivery_tracker()
+                    tracker.mark_event_confirmed(event_id)
+                    logger.debug(f"Confirmed legacy event delivery: {event_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to confirm legacy event {event_id}: {e}")
+            elif event_id and not success:
+                try:
+                    tracker = get_event_delivery_tracker()
+                    tracker.mark_event_failed(event_id, "WebSocket send failed")
+                    logger.debug(f"Marked legacy event as failed: {event_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to mark legacy event as failed {event_id}: {e}")
             
             return success
             
         except Exception as e:
             logger.error(f"🚨 EMISSION EXCEPTION: notify_tool_executing failed (run_id={run_id}, tool={tool_name}): {e}")
+            # PHASE 4 FIX: Propagate critical errors instead of silent failure
+            if "CRITICAL" in str(e) or "user_id" in str(e).lower():
+                raise  # Don't allow critical routing errors to fail silently
             return False
     
     async def notify_tool_completed(
@@ -1488,6 +1546,26 @@ class AgentWebSocketBridge(MonitorableComponent):
                 }
             }
             
+            # PHASE 2 FIX: Track event delivery with confirmation and retry
+            tracker_event_id = None
+            try:
+                from netra_backend.app.websocket_core.event_delivery_tracker import get_event_delivery_tracker, EventPriority
+                
+                tracker = get_event_delivery_tracker()
+                tracker_event_id = tracker.track_event(
+                    event_type="tool_completed",
+                    user_id=effective_user_context.user_id,
+                    run_id=run_id,
+                    thread_id=effective_user_context.thread_id,
+                    data=notification,
+                    priority=EventPriority.HIGH,  # Tool results are important for UX
+                    timeout_s=30.0,
+                    max_retries=3
+                )
+                tracker.mark_event_sent(tracker_event_id)
+            except ImportError:
+                logger.debug("Event delivery tracker not available, proceeding without tracking")
+            
             # Include event_id for confirmation tracking if present
             if event_id:
                 notification["event_id"] = event_id
@@ -1498,39 +1576,46 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Direct WebSocket emission using user_id
             success = await self._websocket_manager.send_to_user(user_id, notification)
             
-            if success:
-                logger.debug(f"✅ EMISSION SUCCESS: tool_completed → user={user_id} (run_id={run_id}, tool={tool_name})")
-                
-                # Confirm event delivery if event_id is present
-                if event_id:
-                    try:
-                        tracker = get_event_delivery_tracker()
-                        tracker.confirm_event(event_id)
-                        logger.debug(f"Confirmed event delivery: {event_id}")
-                    except Exception as e:
-                        logger.warning(f"Failed to confirm event {event_id}: {e}")
-                
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("tool_completed", run_id, True)
+            # PHASE 2 FIX: Update delivery tracking
+            if tracker_event_id:
+                try:
+                    if success:
+                        tracker.mark_event_confirmed(tracker_event_id)
+                        logger.debug(f"✅ EMISSION SUCCESS: tool_completed → user={user_id} (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                    else:
+                        tracker.mark_event_failed(tracker_event_id, "WebSocket send_to_user returned False")
+                        logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                except Exception as track_error:
+                    logger.warning(f"Event tracking update failed: {track_error}")
             else:
-                logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name})")
+                if success:
+                    logger.debug(f"✅ EMISSION SUCCESS: tool_completed → user={user_id} (run_id={run_id}, tool={tool_name})")
+                else:
+                    logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name})")
                 
-                # Mark event as failed if event_id is present
-                if event_id:
-                    try:
-                        tracker = get_event_delivery_tracker()
-                        tracker.fail_event(event_id, "WebSocket send failed")
-                        logger.debug(f"Marked event as failed: {event_id}")
-                    except Exception as e:
-                        logger.warning(f"Failed to mark event as failed {event_id}: {e}")
-                
-                if hasattr(self, '_track_event_delivery'):
-                    await self._track_event_delivery("tool_completed", run_id, False)
+            # Legacy event confirmation if event_id is present (from result)
+            if event_id and success:
+                try:
+                    tracker = get_event_delivery_tracker()
+                    tracker.mark_event_confirmed(event_id)
+                    logger.debug(f"Confirmed legacy event delivery: {event_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to confirm legacy event {event_id}: {e}")
+            elif event_id and not success:
+                try:
+                    tracker = get_event_delivery_tracker()
+                    tracker.mark_event_failed(event_id, "WebSocket send failed")
+                    logger.debug(f"Marked legacy event as failed: {event_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to mark legacy event as failed {event_id}: {e}")
             
             return success
             
         except Exception as e:
             logger.error(f"🚨 EMISSION EXCEPTION: notify_tool_completed failed (run_id={run_id}, tool={tool_name}): {e}")
+            # PHASE 4 FIX: Propagate critical errors instead of silent failure
+            if "CRITICAL" in str(e) or "user_id" in str(e).lower():
+                raise  # Don't allow critical routing errors to fail silently
             return False
     
     async def notify_agent_completed(

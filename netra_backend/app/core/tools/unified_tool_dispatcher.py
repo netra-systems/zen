@@ -979,7 +979,30 @@ class UnifiedToolDispatcher:
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            # Track the event with critical priority (tool execution is critical for UX)
+            # Create retry callback for this event
+            async def retry_callback(event_id: str, event_type: str, data: Dict[str, Any]) -> bool:
+                """Retry callback to re-emit failed tool_executing events."""
+                try:
+                    # Use the correct WebSocket manager method
+                    if hasattr(self.websocket_manager, 'emit_critical_event'):
+                        await self.websocket_manager.emit_critical_event(
+                            user_id=self.user_context.user_id,
+                            event_type="tool_executing",
+                            data=data
+                        )
+                    elif hasattr(self.websocket_manager, 'send_event'):
+                        await self.websocket_manager.send_event("tool_executing", data)
+                    else:
+                        logger.error(f"WebSocket manager lacks send_event/emit_critical_event method")
+                        return False
+                    
+                    logger.info(f"Successfully retried tool_executing event {event_id}")
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to retry tool_executing event {event_id}: {e}")
+                    return False
+            
+            # Track the event with critical priority and retry callback
             event_id = tracker.track_event(
                 event_type="tool_executing",
                 user_id=self.user_context.user_id,
@@ -987,14 +1010,24 @@ class UnifiedToolDispatcher:
                 thread_id=self.user_context.thread_id,
                 data=event_data,
                 priority=EventPriority.CRITICAL,
-                timeout_s=30.0  # 30 second timeout for tool_executing events
+                timeout_s=30.0,  # 30 second timeout for tool_executing events
+                retry_callback=retry_callback
             )
             
             # Add event ID to the payload for confirmation tracking
             event_data["event_id"] = event_id
             
-            # Send the event
-            await self.websocket_manager.send_event("tool_executing", event_data)
+            # Send the event using the correct method
+            if hasattr(self.websocket_manager, 'emit_critical_event'):
+                await self.websocket_manager.emit_critical_event(
+                    user_id=self.user_context.user_id,
+                    event_type="tool_executing",
+                    data=event_data
+                )
+            elif hasattr(self.websocket_manager, 'send_event'):
+                await self.websocket_manager.send_event("tool_executing", event_data)
+            else:
+                raise RuntimeError("WebSocket manager lacks send_event/emit_critical_event method")
             
             # Mark event as sent
             tracker.mark_event_sent(event_id)
@@ -1049,7 +1082,30 @@ class UnifiedToolDispatcher:
             if execution_time:
                 event_data["execution_time_ms"] = execution_time
             
-            # Track the event with critical priority
+            # Create retry callback for this event
+            async def retry_callback(event_id: str, event_type: str, data: Dict[str, Any]) -> bool:
+                """Retry callback to re-emit failed tool_completed events."""
+                try:
+                    # Use the correct WebSocket manager method
+                    if hasattr(self.websocket_manager, 'emit_critical_event'):
+                        await self.websocket_manager.emit_critical_event(
+                            user_id=self.user_context.user_id,
+                            event_type="tool_completed",
+                            data=data
+                        )
+                    elif hasattr(self.websocket_manager, 'send_event'):
+                        await self.websocket_manager.send_event("tool_completed", data)
+                    else:
+                        logger.error(f"WebSocket manager lacks send_event/emit_critical_event method")
+                        return False
+                    
+                    logger.info(f"Successfully retried tool_completed event {event_id}")
+                    return True
+                except Exception as e:
+                    logger.error(f"Failed to retry tool_completed event {event_id}: {e}")
+                    return False
+            
+            # Track the event with critical priority and retry callback
             event_id = tracker.track_event(
                 event_type="tool_completed",
                 user_id=self.user_context.user_id,
@@ -1057,14 +1113,24 @@ class UnifiedToolDispatcher:
                 thread_id=self.user_context.thread_id,
                 data=event_data,
                 priority=EventPriority.CRITICAL,
-                timeout_s=30.0  # 30 second timeout for tool_completed events
+                timeout_s=30.0,  # 30 second timeout for tool_completed events
+                retry_callback=retry_callback
             )
             
             # Add event ID to the payload for confirmation tracking
             event_data["event_id"] = event_id
             
-            # Send the event
-            await self.websocket_manager.send_event("tool_completed", event_data)
+            # Send the event using the correct method
+            if hasattr(self.websocket_manager, 'emit_critical_event'):
+                await self.websocket_manager.emit_critical_event(
+                    user_id=self.user_context.user_id,
+                    event_type="tool_completed",
+                    data=event_data
+                )
+            elif hasattr(self.websocket_manager, 'send_event'):
+                await self.websocket_manager.send_event("tool_completed", event_data)
+            else:
+                raise RuntimeError("WebSocket manager lacks send_event/emit_critical_event method")
             
             # Mark event as sent
             tracker.mark_event_sent(event_id)
