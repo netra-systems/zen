@@ -78,7 +78,10 @@
       "Bash(grep:*)",
       "Read(//tmp/**)",
       "Bash(./scripts/validate_issue_308_fixes.sh:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(ENVIRONMENT=staging python tests/mission_critical/test_websocket_agent_events_suite.py)",
+      "Bash(time python:*)",
+      "Bash(gcloud auth configure-docker:*)"
     ],
     "deny": [],
     "ask": []
