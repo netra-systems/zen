@@ -114,7 +114,7 @@ class TestAgentCompensationIntegrationCore(SSotAsyncTestCase):
             
             # Create isolated execution context for this user
             thread_id = self.id_manager.generate_thread_id()
-            run_id = self.id_manager.generate_run_id()
+            run_id = self.id_manager.generate_run_id(thread_id)
             request_id = f'req_agent_cost_{uuid.uuid4()}'
             
             context = await create_isolated_execution_context(
