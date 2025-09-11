@@ -657,7 +657,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         
         # Verify bridge handles all critical event types
         for expected_type in expected_bridge_types:
-            assert any(expected_type in str(event) for event in bridge_events), f"Missing bridge event: {expected_type}"
+            assert expected_type in event_types, f"Missing bridge event type: {expected_type}. Got: {event_types}"
         
         logger.info("✅ WebSocket bridge agent integration validation passed")
 
