@@ -355,7 +355,7 @@ class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
         
         return "Signature Violations:\n" + "\n".join(violation_summary)
 
-    def test_runtime_deepagentstate_blocking(self):
+    async def test_runtime_deepagentstate_blocking(self):
         """
         Test that DeepAgentState usage is blocked at runtime.
         
