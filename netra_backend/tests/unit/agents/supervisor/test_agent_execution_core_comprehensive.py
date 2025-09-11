@@ -107,10 +107,30 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         3. Business metrics are collected
         4. User receives meaningful agent response
         """
-        # Arrange: Set up successful agent execution
+        # Arrange: Set up successful agent execution 
+        test_user_id = "test-user-123"
+        test_thread_id = "thread-456"
+        test_run_id = uuid4()
+        test_agent_name = "test-agent"
+        
+        # Create test contexts
+        execution_context = AgentExecutionContext(
+            agent_name=test_agent_name,
+            run_id=str(test_run_id),
+            thread_id=test_thread_id,
+            user_id=test_user_id,
+            correlation_id="corr-789"
+        )
+        
+        user_context = UserExecutionContext.from_request(
+            user_id=test_user_id,
+            thread_id=test_thread_id,
+            run_id=str(test_run_id)
+        )
+        
         expected_result = AgentExecutionResult(
             success=True,
-            agent_name=self.test_agent_name,
+            agent_name=test_agent_name,
             duration=2.5,
             data={"message": "Agent provided valuable insights on customer's AI optimization needs"},
             metadata={
@@ -133,8 +153,8 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
                                 
                                 # Act: Execute agent
                                 result = await self.execution_core.execute_agent(
-                                    context=self.execution_context,
-                                    state=self.user_context,
+                                    context=execution_context,
+                                    state=user_context,
                                     timeout=30.0
                                 )
         

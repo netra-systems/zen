@@ -593,10 +593,9 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         
         # Test all bridge notification methods
         await bridge.notify_agent_started(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
             agent_name="test_agent",
-            message="Starting test"
+            context={"message": "Starting test", "user_id": self.test_user_id, "thread_id": self.test_thread_id}
         )
         
         await bridge.notify_agent_thinking(
