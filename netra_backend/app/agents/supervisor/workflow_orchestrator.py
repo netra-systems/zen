@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import PipelineStepConfig, PipelineStep
+from netra_backend.app.agents.supervisor.agent_coordination_validator import AgentCoordinationValidator
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from typing import TYPE_CHECKING
@@ -30,6 +31,8 @@ class WorkflowOrchestrator:
         # Store user context for isolated WebSocket events (factory pattern)
         self.user_context = user_context
         self._websocket_emitter = None  # Will be created when user_context is available
+        # CRITICAL FIX: Initialize coordination validator for Enterprise data integrity
+        self.coordination_validator = AgentCoordinationValidator()
         # No longer define static workflow - it will be determined dynamically
     
     async def _get_user_emitter_from_context(self, context: ExecutionContext):
@@ -189,6 +192,51 @@ class WorkflowOrchestrator:
             if not result.success and not step.metadata.get("continue_on_error"):
                 break
         
+        # CRITICAL FIX: Validate complete coordination after workflow execution
+        executed_agent_names = [step.agent_name for step in workflow_steps[:len(results)]]
+        agent_results_dict = {
+            result.metadata.get('agent_name', executed_agent_names[i] if i < len(executed_agent_names) else f'agent_{i}'): result.data 
+            for i, result in enumerate(results) if result.data
+        }
+        
+        # Build dependency rules from workflow steps
+        dependency_rules = {
+            step.agent_name: step.dependencies or [] 
+            for step in workflow_steps
+        }
+        
+        # Capture pre/post execution state for validation
+        pre_execution_state = getattr(context.state, '__dict__', {})
+        post_execution_state = getattr(context.state, '__dict__', {})
+        
+        # Perform comprehensive coordination validation
+        workflow_id = getattr(context, 'run_id', f'workflow_{int(time.time())}')
+        validation_result = self.coordination_validator.validate_complete_coordination(
+            workflow_id=workflow_id,
+            executed_agents=executed_agent_names,
+            agent_results=agent_results_dict,
+            dependency_rules=dependency_rules,
+            pre_execution_state=pre_execution_state,
+            post_execution_state=post_execution_state
+        )
+        
+        if not validation_result.coordination_valid:
+            logger.error(f"COORDINATION VALIDATION FAILED for workflow {workflow_id}: "
+                        f"Order: {validation_result.execution_order_correct}, "
+                        f"Handoffs: {validation_result.data_handoffs_valid}, "
+                        f"Propagation: {validation_result.tool_results_propagated}")
+            
+            # Add validation failure to results metadata
+            for result in results:
+                if hasattr(result, 'metadata'):
+                    result.metadata = result.metadata or {}
+                    result.metadata['coordination_validation'] = {
+                        'status': 'FAILED',
+                        'details': validation_result.validation_details
+                    }
+        else:
+            logger.info(f"✅ Coordination validation passed for workflow {workflow_id}")
+
         await self._send_workflow_completed(context, results)
         return results
     
