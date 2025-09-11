@@ -57,7 +57,8 @@
       "Bash(gcloud compute networks vpc-access connectors list:*)",
       "Bash(echo:*)",
       "Bash(gcloud secrets list:*)",
-      "Bash(gcloud secrets versions access:*)"
+      "Bash(gcloud secrets versions access:*)",
+      "Bash(./scripts/enable_gcp_tracing_staging.sh:*)"
     ],
     "deny": [],
     "ask": []
