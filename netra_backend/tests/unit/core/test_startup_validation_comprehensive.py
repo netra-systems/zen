@@ -29,7 +29,7 @@ from netra_backend.app.core.startup_validation import (
     StartupValidator,
     ComponentValidation,
     ComponentStatus,
-    startup_validator,
+    get_startup_validator,
     validate_startup
 )
 
@@ -50,17 +50,18 @@ class TestStartupValidatorInitialization(BaseIntegrationTest):
 
     def test_global_startup_validator_instance(self):
         """Test global startup_validator instance is properly initialized."""
-        from netra_backend.app.core.startup_validation import startup_validator
+        validator = get_startup_validator()
         
-        assert startup_validator is not None
-        assert isinstance(startup_validator, StartupValidator)
-        assert startup_validator.validations == []
+        assert validator is not None
+        assert isinstance(validator, StartupValidator)
+        assert validator.validations == []
 
     def test_convenience_function_delegates_to_global_instance(self):
         """Test validate_startup convenience function delegates to global instance."""
         mock_app = Mock()
+        validator = get_startup_validator()
         
-        with patch.object(startup_validator, 'validate_startup', new_callable=AsyncMock) as mock_validate:
+        with patch.object(validator, 'validate_startup', new_callable=AsyncMock) as mock_validate:
             mock_validate.return_value = (True, {"test": "report"})
             
             # Call convenience function
