@@ -1,0 +1,78 @@
+{
+  "timestamp": "2025-09-11T09:24:53.077192",
+  "overall_status": "POST_FIX_VALIDATION",
+  "summary": {
+    "total_passed": 8,
+    "total_failed": 6,
+    "total_skipped": 0,
+    "total_execution_time": 10.5206937789917,
+    "phases_completed": 5
+  },
+  "phase_results": [
+    {
+      "phase_name": "Issue Demonstration",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "execution_time": 2.020920753479004,
+      "expected_to_pass": false,
+      "business_impact": "DEMONSTRATES_CRITICAL_ISSUE",
+      "status": "UNEXPECTED_RESULT"
+    },
+    {
+      "phase_name": "RFC 6455 Compliance",
+      "passed": 3,
+      "failed": 2,
+      "skipped": 0,
+      "execution_time": 2.0720369815826416,
+      "expected_to_pass": true,
+      "business_impact": "ENSURES_PROTOCOL_COMPLIANCE",
+      "status": "UNEXPECTED_RESULT"
+    },
+    {
+      "phase_name": "Remediation Validation",
+      "passed": 1,
+      "failed": 4,
+      "skipped": 0,
+      "execution_time": 2.272397994995117,
+      "expected_to_pass": true,
+      "business_impact": "VALIDATES_FIX_EFFECTIVENESS",
+      "status": "UNEXPECTED_RESULT"
+    },
+    {
+      "phase_name": "Business Value Preservation",
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "execution_time": 2.0189151763916016,
+      "expected_to_pass": true,
+      "business_impact": "PROTECTS_500K_ARR_FUNCTIONALITY",
+      "status": "PASS"
+    },
+    {
+      "phase_name": "Performance Regression",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "execution_time": 2.136422872543335,
+      "expected_to_pass": true,
+      "business_impact": "ENSURES_USER_EXPERIENCE_QUALITY",
+      "status": "PASS"
+    }
+  ],
+  "business_impact_analysis": {
+    "chat_functionality_risk": "CRITICAL",
+    "revenue_at_risk": "$500K+ ARR",
+    "business_health": "HEALTHY",
+    "critical_failures": 0,
+    "golden_path_status": "PROTECTED"
+  },
+  "recommendations": [
+    "\u26a0\ufe0f Issue demonstration tests are not failing - the handshake issue may already be fixed or tests need adjustment",
+    "\ud83d\udd27 RFC 6455 compliance issues detected - review subprotocol negotiation implementation",
+    "\ud83d\udea8 Remediation validation failing - handshake fix may not be working correctly",
+    "\ud83d\udcca Monitor business metrics after deploying handshake fixes",
+    "\ud83d\udd0d Validate with real user scenarios in staging environment",
+    "\ud83d\udccb Update documentation with new handshake requirements"
+  ]
+}
