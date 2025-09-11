@@ -683,7 +683,7 @@ class WebSocketSSOTRouter:
         """Create WebSocket manager with emergency fallback."""
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            return await create_websocket_manager(user_context)
+            return create_websocket_manager(user_context)
         except Exception as e:
             logger.error(f"WebSocket manager creation failed: {e}")
             return self._create_emergency_websocket_manager(user_context)
@@ -730,7 +730,8 @@ class WebSocketSSOTRouter:
             if message_router:
                 # Create agent handler for the user
                 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-                agent_bridge = await create_agent_websocket_bridge(user_context)
+                # Fix: create_agent_websocket_bridge is synchronous, not async
+                agent_bridge = create_agent_websocket_bridge(user_context)
                 
                 # Register handler with router
                 async def agent_handler(user_id: str, websocket: WebSocket, message: Dict[str, Any]):
@@ -745,7 +746,8 @@ class WebSocketSSOTRouter:
         """Create agent WebSocket bridge for isolated mode."""
         try:
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
-            return await create_agent_websocket_bridge(user_context)
+            # Fix: create_agent_websocket_bridge is synchronous, not async
+            return create_agent_websocket_bridge(user_context)
         except Exception as e:
             logger.error(f"Agent bridge creation failed: {e}")
             return None

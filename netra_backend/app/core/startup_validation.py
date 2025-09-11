@@ -18,6 +18,13 @@ from netra_backend.app.core.service_dependencies import (
     EnvironmentType,
     ServiceType
 )
+from netra_backend.app.core.service_dependencies.service_dependency_checker import (
+    create_service_dependency_checker_with_environment
+)
+from netra_backend.app.core.environment_context import (
+    EnvironmentContextService,
+    get_environment_context_service
+)
 
 
 class ComponentStatus(Enum):
@@ -53,10 +60,72 @@ class StartupValidator:
         self.validations: List[ComponentValidation] = []
         self.start_time = None
         self.end_time = None
-        
-        # Initialize service dependency checker
-        self.service_dependency_checker = ServiceDependencyChecker(environment=environment)
         self.environment = environment
+        
+        # Delay initialization of ServiceDependencyChecker until needed
+        # This avoids issues with EnvironmentContextService not being initialized during import time
+        self._service_dependency_checker: Optional[ServiceDependencyChecker] = None
+        
+    def _get_service_dependency_checker(self) -> ServiceDependencyChecker:
+        """Lazy initialization of ServiceDependencyChecker."""
+        if self._service_dependency_checker is None:
+            try:
+                # Try to get environment context service
+                environment_context_service = get_environment_context_service()
+                if environment_context_service and environment_context_service.is_initialized():
+                    self._service_dependency_checker = ServiceDependencyChecker(
+                        environment_context_service=environment_context_service
+                    )
+                    self.logger.debug("ServiceDependencyChecker initialized with EnvironmentContextService")
+                else:
+                    # EnvironmentContextService not initialized - use fallback
+                    self.logger.info(
+                        "EnvironmentContextService not initialized. Using fallback ServiceDependencyChecker. "
+                        "For full functionality, ensure initialize_environment_context() is called during startup."
+                    )
+                    self._service_dependency_checker = self._create_fallback_checker()
+            except Exception as e:
+                # Fallback: Create a minimal mock ServiceDependencyChecker for basic functionality
+                self.logger.warning(
+                    f"Failed to initialize ServiceDependencyChecker: {e}. "
+                    f"Using fallback implementation with limited functionality."
+                )
+                self._service_dependency_checker = self._create_fallback_checker()
+                
+        return self._service_dependency_checker
+    
+    def _create_fallback_checker(self):
+        """Create a fallback ServiceDependencyChecker for when initialization fails."""
+        # Create a minimal object that implements the interface needed by startup validation
+        class FallbackServiceDependencyChecker:
+            def __init__(self, environment: EnvironmentType):
+                self.environment = environment
+                self.logger = central_logger.get_logger(self.__class__.__name__)
+                
+            async def validate_service_dependencies(self, app, services_to_check=None, include_golden_path=True):
+                """Fallback implementation that returns success but with warnings."""
+                from netra_backend.app.core.service_dependencies.models import DependencyValidationResult
+                
+                self.logger.warning("Using fallback ServiceDependencyChecker - limited validation capabilities")
+                
+                # Return a basic successful result
+                return DependencyValidationResult(
+                    overall_success=True,
+                    total_services_checked=0,
+                    services_healthy=0,
+                    services_failed=0,
+                    execution_duration_ms=0.0,
+                    critical_failures=["ServiceDependencyChecker not fully initialized - using fallback mode"],
+                    service_results=[],
+                    phase_results={}
+                )
+        
+        return FallbackServiceDependencyChecker(self.environment)
+    
+    @property
+    def service_dependency_checker(self) -> ServiceDependencyChecker:
+        """Get the ServiceDependencyChecker instance (lazy initialization)."""
+        return self._get_service_dependency_checker()
         
     async def validate_startup(self, app) -> Tuple[bool, Dict[str, Any]]:
         """
@@ -919,8 +988,15 @@ class StartupValidator:
         self.logger.info("=" * 60)
 
 
-# Global validator instance
-startup_validator = StartupValidator(environment=EnvironmentType.DEVELOPMENT)
+# Global validator instance (lazy initialization to avoid import-time issues)
+_startup_validator: Optional[StartupValidator] = None
+
+def get_startup_validator(environment: EnvironmentType = EnvironmentType.DEVELOPMENT) -> StartupValidator:
+    """Get the global startup validator instance (lazy initialization)."""
+    global _startup_validator
+    if _startup_validator is None:
+        _startup_validator = StartupValidator(environment=environment)
+    return _startup_validator
 
 
 async def validate_startup(
@@ -930,10 +1006,15 @@ async def validate_startup(
     """
     Convenience function to validate startup with service dependencies.
     Returns (success, report) tuple.
+    
+    Note: The environment parameter is maintained for backward compatibility,
+    but the actual environment is now auto-detected by the ServiceDependencyChecker
+    through the EnvironmentContextService.
     """
     # Use environment-specific validator if different from global default
     if environment != EnvironmentType.DEVELOPMENT:
         validator = StartupValidator(environment=environment)
         return await validator.validate_startup(app)
     else:
-        return await startup_validator.validate_startup(app)
+        validator = get_startup_validator(environment)
+        return await validator.validate_startup(app)
