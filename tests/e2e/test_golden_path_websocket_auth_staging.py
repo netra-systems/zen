@@ -25,8 +25,8 @@ from unittest.mock import patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from tests.e2e.staging_test_base import StagingTestBase
-from tests.e2e.staging_config import StagingConfig
-from tests.e2e.staging_test_helpers import StagingTestHelpers
+from tests.e2e.staging_config import StagingTestConfig as StagingConfig
+from tests.e2e.staging_test_helpers import StagingTestSuite as StagingTestHelpers
 
 # Import authentication components for staging
 from tests.e2e.staging_auth_client import StagingAuthClient

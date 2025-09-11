@@ -4,7 +4,7 @@
 
 ## 📋 Overview
 
-This index catalogues all 36 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
+This index catalogues all 37 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
 
 **Location**: [`.claude/commands/`](../.claude/commands/) directory
 
@@ -52,8 +52,12 @@ This index catalogues all 36 custom Claude Code slash commands available for the
 - [`/action`](#action) - Process multiple items with Five Whys analysis
 - [`/prmergergit`](#prmergergit) - Safe pull request merging with validation
 - [`/test-update-e2e-fix-fakes`](#test-update-e2e-fix-fakes) - Fix fake tests to use real services
-- [`/refresh-update-tests`](#refresh-update-tests) - Refresh and update test suites
-- [`/test-fix-removed-syntax-error`](#test-fix-removed-syntax-error) - Fix tests with REMOVED_SYNTAX_ERROR markings
+- [`/refresh-upate-tests`](#refresh-upate-tests) - Refresh and update test suites (note: typo in filename)
+- [`/test-fix-REMOVED_SYNTAX_ERROR`](#test-fix-removed-syntax-error) - Fix tests with REMOVED_SYNTAX_ERROR markings
+- [`/e2e-fix-directly`](#e2e-fix-directly) - Real e2e test fix deploy loop
+- [`/failingtestsgardener`](#failingtestsgardener) - Collect test issues and create GitHub issues
+- [`/gcploggardener`](#gcploggardener) - GCP log issue collector and GitHub issue creator
+- [`/testgardener`](#testgardener) - Test management and organization
 
 ---
 
@@ -615,14 +619,111 @@ This index catalogues all 36 custom Claude Code slash commands available for the
 
 ---
 
-#### `/test-fix-removed-syntax-error`
+#### `/test-fix-REMOVED_SYNTAX_ERROR`
 **Purpose**: Fix tests with REMOVED_SYNTAX_ERROR markings  
-**Usage**: `/test-fix-removed-syntax-error`  
+**Usage**: `/test-fix-REMOVED_SYNTAX_ERROR`  
 **Key Features**:
 - Identifies tests marked with REMOVED_SYNTAX_ERROR
 - Systematic error resolution approach
 - Test restoration and validation
 - SSOT compliance during fixes
+
+---
+
+#### `/e2e-fix-directly`
+**Purpose**: Real e2e test fix deploy loop (backend focused by default)  
+**Usage**: `/e2e-fix-directly [focus-area]`  
+**Key Features**:
+- Runs E2E tests and remediates issues automatically
+- Creates PRs for fixes without human intervention
+- Backend focused by default
+- Continuous remediation until all tests pass
+- Repository safety checks before changes
+
+**Examples**:
+```bash
+/e2e-fix-directly           # Fix all E2E tests
+/e2e-fix-directly backend   # Backend-focused E2E fixes
+/e2e-fix-directly auth      # Auth-focused E2E fixes
+```
+
+---
+
+#### `/failingtestsgardener`
+**Purpose**: Collect test issues and create GitHub issues (no remediation)  
+**Usage**: `/failingtestsgardener [test-focus-area]`  
+**Key Features**:
+- Identifies all failing tests across unit, integration, and E2E
+- Creates GitHub issues for tracking failures
+- Does NOT attempt remediation (use gitissueprogressor for that)
+- Comprehensive test coverage analysis
+- Follows GitHub style guide for issues
+
+**Examples**:
+```bash
+/failingtestsgardener       # All test issues
+/failingtestsgardener unit  # Unit test issues only
+/failingtestsgardener e2e   # E2E test issues only
+```
+
+---
+
+#### `/gcploggardener`
+**Purpose**: GCP log issue collector and GitHub issue creator  
+**Usage**: `/gcploggardener [time-period] [service]`  
+**Key Features**:
+- Collects GCP log errors not yet in GitHub issues
+- Creates GitHub issues for tracking
+- Does NOT attempt remediation (use gitissueprogressor for that)
+- Comprehensive log analysis across services
+- Updates worklogs with findings
+
+**Examples**:
+```bash
+/gcploggardener                  # Latest GCP log issues
+/gcploggardener 24h backend      # Last 24h backend issues
+/gcploggardener 1w all          # Last week all services
+```
+
+---
+
+#### `/refresh-upate-tests`
+**Purpose**: Refresh, update, and align tests for existing areas  
+**Usage**: `/refresh-upate-tests [focus-area]`  
+**Key Features**:
+- Updates existing test suites to latest standards
+- Aligns with latest CLAUDE.md best practices
+- Creates new tests if gaps identified
+- Follows TEST_CREATION_GUIDE.md standards
+- Multi-agent planning and execution
+
+**Note**: Command filename has a typo ("upate" instead of "update")
+
+**Examples**:
+```bash
+/refresh-upate-tests auth        # Refresh auth tests
+/refresh-upate-tests agents      # Refresh agent tests
+/refresh-upate-tests websocket   # Refresh WebSocket tests
+```
+
+---
+
+#### `/testgardener`
+**Purpose**: Test management and organization  
+**Usage**: `/testgardener [focus-area]`  
+**Key Features**:
+- Comprehensive test organization and health assessment
+- Follows GitHub style guide for all operations
+- Repository safety focus with damage prevention
+- Covers unit, integration, and E2E staging tests
+- Progress issues safely through workflow
+
+**Examples**:
+```bash
+/testgardener              # General test gardening
+/testgardener integration  # Integration test focus
+/testgardener all          # All test categories
+```
 
 ---
 
@@ -790,4 +891,4 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 ---
 
-*Last Updated: 2025-01-09 | Commands: 36 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 4*
+*Last Updated: 2025-01-11 | Commands: 37 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6*
