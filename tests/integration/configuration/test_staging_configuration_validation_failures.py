@@ -256,9 +256,10 @@ class TestStagingConfigurationValidationFailures(SSotBaseTestCase):
                 enable_validation=True
             )
             
-            # Get configuration values through the unified manager
-            frontend_url = config_manager.get_str("frontend_url", "http://localhost:3010")  # Default from AppConfig
-            api_base_url = config_manager.get_str("api_base_url", "http://localhost:8000")    # Default from AppConfig
+            # Get configuration values through the unified manager - NO LOCALHOST DEFAULTS
+            # If the config system is working, it should provide staging URLs without localhost fallbacks  
+            frontend_url = config_manager.get_str("frontend_url", "MISSING")  # Should not use missing fallback
+            api_base_url = config_manager.get_str("api_base_url", "MISSING")    # Should not use missing fallback
             
             # CRITICAL ASSERTIONS: These should FAIL initially, proving the integration bug
             assert 'localhost' not in frontend_url.lower(), (
