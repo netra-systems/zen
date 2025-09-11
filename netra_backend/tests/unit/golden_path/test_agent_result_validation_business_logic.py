@@ -518,8 +518,8 @@ class AgentResultValidator:
         if tier == SubscriptionTier.ENTERPRISE:
             base_score = min(0.4, indicator_count * 0.08)  # Stricter for enterprise
         else:
-            # More generous for other tiers - single recommendation can meet threshold
-            base_score = min(0.8, max(0.7, indicator_count * 0.35))
+            # FIXED: Natural scoring without artificial floors - allows proper rejection
+            base_score = min(0.8, indicator_count * 0.2)  # Scales naturally from 0.0
         
         # Enterprise patterns (35% weight) - ONLY FOR ENTERPRISE TIER
         enterprise_score = 0.0
