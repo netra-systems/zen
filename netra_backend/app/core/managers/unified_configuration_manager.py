@@ -100,12 +100,16 @@ class ConfigurationEntry:
             self._display_value = self.value
     
     def get_display_value(self) -> Any:
-        """Get value safe for display/logging."""
+        """Get value safe for display/logging with consistent masking format."""
         if self.sensitive and isinstance(self.value, str):
-            if len(self.value) > 4:
-                return self.value[:2] + "*" * (len(self.value) - 4) + self.value[-2:]
-            else:
+            value_len = len(self.value)
+            if value_len <= 4:
                 return "***"
+            else:
+                # For longer values, show first 2 and last 2, mask everything in between
+                # Calculate mask length to match expected test format
+                mask_length = value_len - 4
+                return self.value[:2] + "*" * mask_length + self.value[-2:]
         return self.value
     
     def validate(self) -> bool:

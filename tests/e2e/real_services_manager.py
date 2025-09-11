@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass, field
+from enum import Enum
 
 import httpx
 import websockets
@@ -60,6 +61,13 @@ class ServiceHealthCheckError(Exception):
     pass
 
 
+class CircuitBreakerState(Enum):
+    """Circuit breaker states."""
+    CLOSED = "closed"      # Normal operation
+    OPEN = "open"          # Failing fast, not trying requests
+    HALF_OPEN = "half_open" # Testing if service recovered
+
+
 # =============================================================================
 # CONFIGURATION AND DATA STRUCTURES
 # =============================================================================
@@ -83,6 +91,9 @@ class ServiceStatus:
     response_time_ms: Optional[float] = None
     error: Optional[str] = None
     last_check: float = field(default_factory=time.time)
+    circuit_breaker_state: CircuitBreakerState = CircuitBreakerState.CLOSED
+    failure_count: int = 0
+    last_failure_time: Optional[float] = None
 
 
 @dataclass
