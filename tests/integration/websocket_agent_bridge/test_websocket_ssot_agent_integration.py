@@ -1,9 +1,9 @@
 """
 Integration Tests: WebSocket SSOT Agent Integration
 
-Purpose: Test WebSocket agent handler registration and bridge creation with real services.
-Issue: Import failures prevent agent handlers from being set up properly.
-Expected: FAIL with ModuleNotFoundError before fix, PASS with successful registration after fix.
+Purpose: Validate WebSocket agent handler registration and bridge creation with SSOT imports.
+Status: ISSUE #360 RESOLVED - All SSOT imports working correctly.
+Expected: All tests PASS validating successful SSOT implementation and preventing regression.
 """
 import pytest
 from unittest.mock import patch, MagicMock
