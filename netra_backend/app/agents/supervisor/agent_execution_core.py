@@ -394,7 +394,7 @@ class AgentExecutionCore:
                         metadata={'error': result.error or 'Unknown error'},
                         websocket_manager=self.websocket_bridge
                     )
-                    self.agent_tracker.update_execution_state(state_exec_id, {"success": False, "completed": True})
+                    self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
                     
                     # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
                     # Removing manual call to prevent duplicate notifications
