@@ -101,7 +101,7 @@ class PostDeploymentAuthTest:
                 else:
                     # For staging/production, use service token generation
                     response = await client.post(
-                        f"{self.auth_url}/auth/service/token",
+                        f"{self.auth_url}/auth/service-token",
                         json={
                             "service_id": "test-service",
                             "service_secret": env.get("SERVICE_SECRET", "test-secret")
