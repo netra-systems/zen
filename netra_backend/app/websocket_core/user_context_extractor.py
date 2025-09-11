@@ -66,38 +66,28 @@ class UserContextExtractor:
     
     def __init__(self):
         """Initialize the user context extractor."""
-        # JWT configuration (should match your auth service)
-        self.jwt_algorithm = "HS256"
-        self.jwt_secret_key = self._get_jwt_secret()
+        # SSOT COMPLIANCE: No direct JWT configuration in backend
+        # All JWT operations delegated to auth service
+        self.auth_service = self._get_auth_service()
         
         logger.debug("UserContextExtractor initialized")
     
-    def _get_jwt_secret(self) -> str:
+    def _get_auth_service(self):
         """
-        Get JWT secret key from environment.
+        Get auth service client for JWT validation.
         
-        Uses unified JWT secret manager to ensure consistency with auth service.
-        This prevents WebSocket authentication failures caused by JWT secret 
-        mismatches between services.
+        SSOT COMPLIANCE: All JWT operations must go through auth service.
+        WebSocket should never directly access JWT secrets or perform JWT decode.
         
         Returns:
-            JWT secret key string
-            
-        Raises:
-            RuntimeError: If JWT secret is not configured
+            Auth service client for JWT validation
         """
-        # Always use the unified JWT secret manager - no fallbacks
-        from shared.jwt_secret_manager import get_unified_jwt_secret
-        from shared.isolated_environment import get_env
-        
-        secret = get_unified_jwt_secret()
-        
-        # Log for debugging (without exposing the actual secret)
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
-        logger.debug(f"WebSocket using unified JWT secret for {environment} environment")
-        
-        return secret
+        # Use auth service SSOT for JWT operations
+        if get_unified_auth:
+            return get_unified_auth()
+        else:
+            # Fallback to auth client 
+            return auth_client
     
     def extract_jwt_from_websocket(self, websocket: WebSocket) -> Optional[str]:
         """
@@ -166,31 +156,20 @@ class UserContextExtractor:
         Returns:
             Decoded JWT payload if valid, None otherwise
         """
-        import hashlib
-        # JWT import removed - SSOT compliance: all JWT operations delegated to auth service
+        # SSOT COMPLIANCE: All JWT operations delegated to auth service
         from shared.isolated_environment import get_env
-        from shared.jwt_secret_manager import get_unified_jwt_secret, get_unified_jwt_algorithm
         
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
         
         # Enhanced diagnostic logging for staging
-        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Starting UNIFIED token validation in {environment}")
+        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Starting auth service token validation in {environment}")
         logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Fast path enabled: {fast_path_enabled}")
         logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Token length: {len(token) if token else 0}")
         logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Token prefix: {token[:20]}..." if token and len(token) > 20 else token)
         
-        # CRITICAL FIX: Use SAME JWT secret resolution as REST middleware
+        # SSOT COMPLIANCE: Use auth service for ALL JWT operations
         try:
-            # Get the unified JWT secret - same as REST middleware
-            jwt_secret = get_unified_jwt_secret()
-            jwt_algorithm = get_unified_jwt_algorithm()
-            
-            # Debug logging to confirm secret consistency
-            secret_hash = hashlib.md5(jwt_secret.encode()).hexdigest()[:16]
-            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Using UNIFIED JWT secret (hash: {secret_hash})")
-            logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Using algorithm: {jwt_algorithm}")
-            logger.info("🔍 WEBSOCKET JWT VALIDATION - Same secret resolution as REST middleware!")
             
             # SSOT COMPLIANCE: Remove JWT bypass - ALL validation through UnifiedAuthInterface
             # Previous JWT decode with verify_signature: False VIOLATES SSOT architecture
