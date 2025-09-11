@@ -53,19 +53,19 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         # Test 1: Correct usage (should work)
         try:
             result = real_create_error_message("AUTH_FAILED", "Authentication failed")
-            self.assertIsNotNone(result)
-            self.assertEqual(result.error_code, "AUTH_FAILED")
-            self.assertEqual(result.error_message, "Authentication failed")
+            assert result is not None
+            assert result.error_code == "AUTH_FAILED"
+            assert result.error_message == "Authentication failed"
         except Exception as e:
             pytest.fail(f"Real implementation with correct parameters failed: {e}")
         
         # Test 2: Incorrect usage that EXISTS in websocket_ssot.py (THIS SHOULD FAIL)
-        with self.assertRaises(TypeError) as context:
+        with pytest.raises(TypeError) as context:
             real_create_error_message("Authentication failed")  # Missing error_message parameter
         
         error_message = str(context.exception)
-        self.assertIn("missing 1 required positional argument", error_message)
-        self.assertIn("error_message", error_message)
+        assert "missing 1 required positional argument" in error_message
+        assert "error_message" in error_message
         
     def test_create_error_message_fallback_implementation_signature_validation(self):
         """
@@ -79,23 +79,23 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         # Test 1: Single parameter (should work with fallback)
         try:
             result = fallback_create_error_message("Authentication failed")
-            self.assertIsNotNone(result)
+            assert result is not None
             # Fallback returns dict, not pydantic model
-            self.assertIsInstance(result, dict)
-            self.assertIn("error_code", result)
-            self.assertEqual(result["error_code"], "Authentication failed")
+            assert isinstance(result, dict)
+            assert "error_code" in result
+            assert result["error_code"] == "Authentication failed"
         except Exception as e:
-            self.fail(f"Fallback implementation with single parameter failed: {e}")
+            pytest.fail(f"Fallback implementation with single parameter failed: {e}")
         
         # Test 2: Two parameters (should also work with fallback)
         try:
             result = fallback_create_error_message("AUTH_FAILED", "Authentication failed")
-            self.assertIsNotNone(result)
-            self.assertIsInstance(result, dict)
-            self.assertIn("error_code", result)
-            self.assertEqual(result["error_code"], "AUTH_FAILED")
+            assert result is not None
+            assert isinstance(result, dict)
+            assert "error_code" in result
+            assert result["error_code"] == "AUTH_FAILED"
         except Exception as e:
-            self.fail(f"Fallback implementation with two parameters failed: {e}")
+            pytest.fail(f"Fallback implementation with two parameters failed: {e}")
     
     def test_create_server_message_signature_compatibility(self):
         """
@@ -109,19 +109,19 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         # Test 1: Correct usage (should work)
         try:
             result = real_create_server_message("test_type", {"key": "value"})
-            self.assertIsNotNone(result)
-            self.assertEqual(result.type.value, "test_type")
-            self.assertEqual(result.data, {"key": "value"})
+            assert result is not None
+            assert result.type.value == "test_type"
+            assert result.data == {"key": "value"}
         except Exception as e:
-            self.fail(f"Real create_server_message with correct parameters failed: {e}")
+            pytest.fail(f"Real create_server_message with correct parameters failed: {e}")
         
         # Test 2: Missing data parameter (should fail)
-        with self.assertRaises(TypeError) as context:
+        with pytest.raises(TypeError) as context:
             real_create_server_message("test_type")  # Missing data parameter
         
         error_message = str(context.exception)
-        self.assertIn("missing 1 required positional argument", error_message)
-        self.assertIn("data", error_message)
+        assert "missing 1 required positional argument" in error_message
+        assert "data" in error_message
     
     def test_problematic_function_calls_in_websocket_ssot_py(self):
         """
@@ -140,7 +140,7 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         try:
             tree = ast.parse(content)
         except SyntaxError as e:
-            self.fail(f"Syntax error in websocket_ssot.py: {e}")
+            pytest.fail(f"Syntax error in websocket_ssot.py: {e}")
         
         problematic_calls = []
         for node in ast.walk(tree):
@@ -173,10 +173,10 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         try:
             from netra_backend.app.websocket_core.types import create_error_message
             # This should be the strict implementation requiring 2 parameters
-            with self.assertRaises(TypeError):
+            with pytest.raises(TypeError):
                 create_error_message("single_parameter")
         except ImportError:
-            self.fail("Direct import from types.py failed")
+            pytest.fail("Direct import from types.py failed")
         
         # Test 2: Package-level import from __init__.py
         try:
@@ -192,18 +192,18 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
             try:
                 # Try strict signature first
                 result = package_impl("AUTH_FAILED", "Authentication failed")
-                self.assertIsNotNone(result)
+                assert result is not None
             except TypeError:
                 # If strict signature fails, this might be the fallback implementation
                 try:
                     result = package_impl("Authentication failed")
-                    self.assertIsNotNone(result)
+                    assert result is not None
                     # If this works, we got the fallback implementation
                 except TypeError:
-                    self.fail("Neither strict nor fallback signature worked for package import")
+                    pytest.fail("Neither strict nor fallback signature worked for package import")
                     
         except ImportError:
-            self.fail("Package-level import failed")
+            pytest.fail("Package-level import failed")
     
     def test_websocket_ssot_import_pattern_analysis(self):
         """
@@ -223,8 +223,7 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
             if 'create_error_message' in line and ('import' in line or 'from' in line):
                 import_lines.append(f"Line {i}: {line.strip()}")
         
-        self.assertGreater(len(import_lines), 0, 
-                          "No import statements found for create_error_message")
+        assert len(import_lines) > 0, "No import statements found for create_error_message"
         
         # Check if it's a direct import from types (strict) or package import (potentially fallback)
         direct_import_found = False
@@ -248,9 +247,9 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         
         # If direct import from types is used, that explains why strict signature is required
         if direct_import_found:
-            self.assertTrue(True, "Direct import from types.py found - explains strict signature requirement")
+            assert True, "Direct import from types.py found - explains strict signature requirement"
         else:
-            self.fail("Expected to find direct import from types.py that causes signature mismatch")
+            pytest.fail("Expected to find direct import from types.py that causes signature mismatch")
     
     def test_function_signature_documentation_validation(self):
         """
@@ -266,17 +265,15 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
         real_params = list(real_sig.parameters.keys())
         
         # Real implementation should have error_code and error_message parameters
-        self.assertIn('error_code', real_params)
-        self.assertIn('error_message', real_params)
+        assert 'error_code' in real_params
+        assert 'error_message' in real_params
         
         # Both should be required (no default values)
         error_code_param = real_sig.parameters['error_code']
         error_message_param = real_sig.parameters['error_message']
         
-        self.assertEqual(error_code_param.default, inspect.Parameter.empty,
-                        "error_code should be required parameter")
-        self.assertEqual(error_message_param.default, inspect.Parameter.empty,
-                        "error_message should be required parameter")
+        assert error_code_param.default == inspect.Parameter.empty, "error_code should be required parameter"
+        assert error_message_param.default == inspect.Parameter.empty, "error_message should be required parameter"
     
     def test_regression_prevention_scan(self):
         """
@@ -314,7 +311,7 @@ class TestWebSocketMessageFunctionSignatureCompatibility(SSotBaseTestCase):
                         violations.append(f"{file_path}:{line_num}: {match.group()}")
         
         if violations:
-            self.fail(f"Found {len(violations)} potential signature violations:\n" + 
+            pytest.fail(f"Found {len(violations)} potential signature violations:\n" + 
                      "\n".join(violations))
 
 
@@ -326,10 +323,10 @@ class TestWebSocketMessageCreationEdgeCases(SSotBaseTestCase):
         from netra_backend.app.websocket_core.types import create_error_message
         
         # None values should be rejected
-        with self.assertRaises((TypeError, ValueError)):
+        with pytest.raises((TypeError, ValueError)):
             create_error_message(None, "message")
         
-        with self.assertRaises((TypeError, ValueError)):
+        with pytest.raises((TypeError, ValueError)):
             create_error_message("code", None)
     
     def test_error_message_with_empty_strings(self):
@@ -337,10 +334,10 @@ class TestWebSocketMessageCreationEdgeCases(SSotBaseTestCase):
         from netra_backend.app.websocket_core.types import create_error_message
         
         # Empty strings should be rejected
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             create_error_message("", "message")
         
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             create_error_message("code", "")
     
     def test_server_message_with_invalid_data_types(self):
@@ -348,11 +345,11 @@ class TestWebSocketMessageCreationEdgeCases(SSotBaseTestCase):
         from netra_backend.app.websocket_core.types import create_server_message
         
         # Non-dict data should be rejected  
-        with self.assertRaises((TypeError, ValueError)):
+        with pytest.raises((TypeError, ValueError)):
             create_server_message("test", "not_a_dict")
         
         # None data should be rejected
-        with self.assertRaises((TypeError, ValueError)):
+        with pytest.raises((TypeError, ValueError)):
             create_server_message("test", None)
 
 
@@ -386,32 +383,32 @@ class TestWebSocketFunctionCompatibilityMatrix(SSotBaseTestCase):
                 # Test 1: Real implementation with correct signature
                 try:
                     real_result = real_impl(error_code, error_message)
-                    self.assertIsNotNone(real_result)
-                    self.assertEqual(real_result.error_code, error_code)
-                    self.assertEqual(real_result.error_message, error_message)
+                    assert IsNotNone(real_result)
+                    assert real_result.error_code == error_code
+                    assert real_result.error_message == error_message
                 except Exception as e:
-                    self.fail(f"Real implementation failed with correct parameters: {e}")
+                    pytest.fail(f"Real implementation failed with correct parameters: {e}")
                 
                 # Test 2: Fallback implementation with two parameters
                 try:
                     fallback_result = fallback_impl(error_code, error_message)
-                    self.assertIsNotNone(fallback_result)
+                    assert IsNotNone(fallback_result)
                     # Fallback returns dict
-                    self.assertIsInstance(fallback_result, dict)
+                    assert IsInstance(fallback_result, dict)
                 except Exception as e:
-                    self.fail(f"Fallback implementation failed with two parameters: {e}")
+                    pytest.fail(f"Fallback implementation failed with two parameters: {e}")
                 
                 # Test 3: Real implementation with single parameter (should fail)
-                with self.assertRaises(TypeError):
+                with pytest.raises(TypeError):
                     real_impl(error_message)  # Single parameter should fail
                 
                 # Test 4: Fallback implementation with single parameter (should work)
                 try:
                     fallback_single_result = fallback_impl(error_message)
-                    self.assertIsNotNone(fallback_single_result)
-                    self.assertIsInstance(fallback_single_result, dict)
+                    assert IsNotNone(fallback_single_result)
+                    assert IsInstance(fallback_single_result, dict)
                 except Exception as e:
-                    self.fail(f"Fallback implementation failed with single parameter: {e}")
+                    pytest.fail(f"Fallback implementation failed with single parameter: {e}")
 
 
 if __name__ == "__main__":
