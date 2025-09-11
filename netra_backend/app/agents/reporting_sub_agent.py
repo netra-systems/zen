@@ -990,34 +990,6 @@ class ReportingSubAgent(BaseAgent):
             completed_at=datetime.now(timezone.utc)
         )
     
-    def _convert_to_user_context(self, context: ExecutionContext, state: DeepAgentState) -> UserExecutionContext:
-        """Convert ExecutionContext to UserExecutionContext for existing logic
-        
-        Args:
-            context: Execution context
-            state: Agent state
-            
-        Returns:
-            UserExecutionContext for UVS logic
-        """
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        # Convert state to metadata format expected by existing logic
-        metadata = {
-            "user_request": getattr(state, 'user_request', ''),
-            "action_plan_result": getattr(state, 'action_plan_result', None),
-            "optimizations_result": getattr(state, 'optimizations_result', None),
-            "data_result": getattr(state, 'data_result', None),
-            "triage_result": getattr(state, 'triage_result', None)
-        }
-        
-        return UserExecutionContext(
-            user_id=context.user_id or 'unknown',
-            thread_id=context.session_id or context.request_id,
-            run_id=context.request_id,
-            metadata=metadata
-        )
-    
     async def _execute_report_generation(self, context: UserExecutionContext, stream_updates: bool) -> Dict[str, Any]:
         """Execute report generation using existing UVS logic
         
