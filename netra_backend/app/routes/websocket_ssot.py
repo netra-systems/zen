@@ -74,7 +74,8 @@ from netra_backend.app.websocket_core import (
     create_server_message,
     create_error_message,
     MessageType,
-    WebSocketConfig
+    WebSocketConfig,
+    negotiate_websocket_subprotocol  # PRIORITY 4 FIX: JWT subprotocol negotiation
 )
 
 # Authentication and security (SSOT for all patterns)
