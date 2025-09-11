@@ -57,8 +57,8 @@ class TestCrossComponentIdCompatibility(SSotBaseTestCase):
         Expected to FAIL before SSOT remediation.
         """
         # Generate test IDs using unified generator
-        user_id_str = self.unified_id_generator.generate_user_id()
-        thread_id_str = self.unified_id_generator.generate_thread_id()
+        thread_id_str, run_id_str, request_id_str = self.unified_id_generator.generate_user_context_ids("test-user", "ssot-test")
+        user_id_str = self.unified_id_generator.generate_base_id("user")
         
         user_id = ensure_user_id(user_id_str)
         thread_id = ensure_thread_id(thread_id_str)
@@ -121,7 +121,7 @@ class TestCrossComponentIdCompatibility(SSotBaseTestCase):
         session_factory = RequestScopedSessionFactory()
         
         # Generate test user context
-        user_id = self.unified_id_generator.generate_user_id()
+        user_id = self.unified_id_generator.generate_base_id("user")
         
         try:
             # Test session creation with unified IDs
@@ -160,8 +160,9 @@ class TestCrossComponentIdCompatibility(SSotBaseTestCase):
         Expected to FAIL before SSOT remediation due to ID format incompatibility.
         """
         # Generate IDs through WebSocket factory path
-        user_id = ensure_user_id(self.unified_id_generator.generate_user_id())
-        thread_id = ensure_thread_id(self.unified_id_generator.generate_thread_id())
+        thread_id_str, run_id_str, request_id_str = self.unified_id_generator.generate_user_context_ids("test-user", "cross-lookup")
+        user_id = ensure_user_id(self.unified_id_generator.generate_base_id("user"))
+        thread_id = ensure_thread_id(thread_id_str)
         
         # Create WebSocket manager (this may use different ID generation internally)
         websocket_manager = create_websocket_manager(
@@ -327,8 +328,8 @@ class TestCrossComponentIdCompatibility(SSotBaseTestCase):
         across WebSocket and database components.
         """
         # Test 1: Both components should use UnifiedIdGenerator
-        unified_user_id = self.unified_id_generator.generate_user_id()
-        unified_thread_id = self.unified_id_generator.generate_thread_id()
+        unified_thread_id, unified_run_id, unified_request_id = self.unified_id_generator.generate_user_context_ids("ssot-consistency", "test")
+        unified_user_id = self.unified_id_generator.generate_base_id("user")
         
         # Test 2: WebSocket factory should accept unified IDs without issues
         websocket_manager = create_websocket_manager(
