@@ -385,7 +385,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
     @pytest.mark.e2e
     @pytest.mark.golden_path
     @pytest.mark.staging
-    @pytest.mark.concurrency
+    @pytest.mark.asyncio
     async def test_multi_user_golden_path_concurrency_staging(self):
         """
         BVJ: Mid/Enterprise | Multi-user Support | Validates concurrent user isolation

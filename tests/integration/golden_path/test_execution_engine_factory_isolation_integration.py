@@ -187,7 +187,7 @@ class TestExecutionEngineFactoryIsolationIntegration(SSotAsyncTestCase):
 
     @pytest.mark.integration
     @pytest.mark.golden_path
-    @pytest.mark.concurrency
+    @pytest.mark.asyncio
     async def test_concurrent_engine_creation_and_execution(self):
         """
         BVJ: Mid/Enterprise | Concurrent Users | Ensures factory handles concurrent load

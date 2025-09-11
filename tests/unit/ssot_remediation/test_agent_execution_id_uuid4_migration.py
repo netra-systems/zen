@@ -140,8 +140,8 @@ class TestAgentExecutionIdUuid4Migration(SSotBaseTestCase):
         execution_tracker = get_execution_tracker()
         
         # Generate multiple execution IDs to test pattern consistency
-        test_user_id = UserID("pattern-test-user")
-        test_agent_id = AgentID("pattern-test-agent")
+        test_user_id = UserID(self.unified_id_manager.generate_id(IDType.USER))
+        test_agent_id = AgentID(self.unified_id_manager.generate_id(IDType.AGENT))
         
         generated_ids = []
         for i in range(5):
@@ -209,8 +209,8 @@ class TestAgentExecutionIdUuid4Migration(SSotBaseTestCase):
         self.record_metric("execution_tracker_has_unified_manager", has_unified_manager)
         
         # Generate test execution and validate ID generation method
-        test_user_id = UserID("integration-test-user")
-        test_agent_id = AgentID("integration-test-agent")
+        test_user_id = UserID(unified_manager.generate_id(IDType.USER))
+        test_agent_id = AgentID(unified_manager.generate_id(IDType.AGENT))
         
         # Track ID generation method by checking execution tracker internals
         try:
@@ -389,8 +389,8 @@ class TestAgentExecutionIdUuid4Migration(SSotBaseTestCase):
         )
         
         # Test 2: Generate execution ID and analyze pattern
-        test_user_id = UserID("migration-status-user")
-        test_agent_id = AgentID("migration-status-agent")
+        test_user_id = UserID(execution_tracker.generate_id(IDType.USER) if hasattr(execution_tracker, 'generate_id') else "migration-status-user")
+        test_agent_id = AgentID(execution_tracker.generate_id(IDType.AGENT) if hasattr(execution_tracker, 'generate_id') else "migration-status-agent")
         
         try:
             execution_id = execution_tracker.create_execution_context(

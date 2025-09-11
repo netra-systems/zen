@@ -1,0 +1,391 @@
+name: 🚨 SSOT Compliance Check
+
+on:
+  pull_request:
+    branches: [ main, develop-long-lived ]
+    paths:
+      - 'netra_backend/**/*.py'
+      - 'auth_service/**/*.py'
+      - 'scripts/monitor_ssot_compliance.py'
+      - 'tests/mission_critical/**/*.py'
+  
+  push:
+    branches: [ main, develop-long-lived ]
+    paths:
+      - 'netra_backend/**/*.py'
+      - 'auth_service/**/*.py'
+  
+  workflow_dispatch:
+    inputs:
+      compliance_level:
+        description: 'Compliance strictness level'
+        required: false
+        default: 'standard'
+        type: choice
+        options:
+          - strict
+          - standard
+          - permissive
+      full_scan:
+        description: 'Run full backend scan (vs WebSocket only)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  # Business context
+  BUSINESS_IMPACT: "$500K+ ARR protected from WebSocket auth vulnerabilities"
+  
+  # Compliance settings
+  PYTHONPATH: ${{ github.workspace }}
+  COMPLIANCE_REPORTS_DIR: ${{ github.workspace }}/reports/ci_compliance
+
+jobs:
+  ssot-compliance-check:
+    runs-on: ubuntu-latest
+    name: 🔍 SSOT Compliance Validation
+    
+    # Skip on draft PRs unless specifically requested
+    if: github.event.pull_request.draft == false || contains(github.event.pull_request.labels.*.name, 'compliance-check')
+    
+    steps:
+    - name: 📋 Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Fetch full history for better violation detection
+        fetch-depth: 0
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: 📦 Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pytest
+        # Install monitoring dependencies
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+        # Install test framework dependencies
+        pip install pytest-asyncio pytest-mock
+    
+    - name: 🏗️ Create reports directory
+      run: |
+        mkdir -p ${{ env.COMPLIANCE_REPORTS_DIR }}
+        chmod 755 ${{ env.COMPLIANCE_REPORTS_DIR }}
+    
+    - name: 🔍 Run SSOT Compliance Check
+      id: compliance_check
+      run: |
+        echo "🚀 Starting SSOT Compliance Check"
+        echo "Business Impact: ${{ env.BUSINESS_IMPACT }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        
+        # Determine validation mode and compliance level
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          MODE="pr-validation"
+          COMPLIANCE_LEVEL="${{ inputs.compliance_level || 'standard' }}"
+          PR_NUMBER="${{ github.event.number }}"
+          echo "Mode: PR Validation (#$PR_NUMBER)"
+        elif [[ "${{ github.ref_name }}" == "main" ]]; then
+          MODE="deployment-gate"
+          COMPLIANCE_LEVEL="strict"
+          echo "Mode: Deployment Gate (Production)"
+        else
+          MODE="branch-protection"
+          COMPLIANCE_LEVEL="${{ inputs.compliance_level || 'standard' }}"
+          echo "Mode: Branch Protection"
+        fi
+        
+        echo "Compliance Level: $COMPLIANCE_LEVEL"
+        
+        # Run CI compliance validator
+        python scripts/ci_ssot_compliance_validator.py \
+          --mode="$MODE" \
+          --compliance-level="$COMPLIANCE_LEVEL" \
+          --environment="github-actions" \
+          --branch="${{ github.ref_name }}" \
+          --commit-sha="${{ github.sha }}" \
+          ${PR_NUMBER:+--pr-number="$PR_NUMBER"} \
+          --project-root="${{ github.workspace }}" \
+          --save-report \
+          --verbose
+      continue-on-error: true
+    
+    - name: 📊 Upload compliance report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ssot-compliance-report-${{ github.sha }}
+        path: ${{ env.COMPLIANCE_REPORTS_DIR }}/*.json
+        retention-days: 30
+    
+    - name: 📄 Generate compliance summary
+      if: always()
+      run: |
+        echo "## 🚨 SSOT Compliance Check Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Find the latest report
+        LATEST_REPORT=$(ls -t ${{ env.COMPLIANCE_REPORTS_DIR }}/*.json 2>/dev/null | head -1)
+        
+        if [[ -f "$LATEST_REPORT" ]]; then
+          echo "### 📊 Validation Summary" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract key metrics using jq
+          PASSED=$(jq -r '.validation_summary.passed' "$LATEST_REPORT")
+          CRITICAL=$(jq -r '.validation_summary.critical_violations' "$LATEST_REPORT")
+          ERRORS=$(jq -r '.validation_summary.error_violations' "$LATEST_REPORT")
+          WARNINGS=$(jq -r '.validation_summary.warning_violations' "$LATEST_REPORT")
+          
+          echo "- **Status**: $([ "$PASSED" = "true" ] && echo "✅ PASSED" || echo "❌ FAILED")" >> $GITHUB_STEP_SUMMARY
+          echo "- **Critical Violations**: $CRITICAL" >> $GITHUB_STEP_SUMMARY
+          echo "- **Error Violations**: $ERRORS" >> $GITHUB_STEP_SUMMARY  
+          echo "- **Warning Violations**: $WARNINGS" >> $GITHUB_STEP_SUMMARY
+          echo "- **Business Impact**: ${{ env.BUSINESS_IMPACT }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add violation details if any
+          if [[ "$CRITICAL" != "0" || "$ERRORS" != "0" ]]; then
+            echo "### 🔍 Violation Details" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Review the detailed compliance report artifact for specific violations and remediation steps." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Add recommendations
+          RECOMMENDATIONS=$(jq -r '.recommendations[]?' "$LATEST_REPORT")
+          if [[ -n "$RECOMMENDATIONS" ]]; then
+            echo "### 💡 Recommendations" >> $GITHUB_STEP_SUMMARY
+            echo "$RECOMMENDATIONS" | while read -r rec; do
+              echo "- $rec" >> $GITHUB_STEP_SUMMARY
+            done
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+        else
+          echo "⚠️ No compliance report generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Add context links
+        echo "### 🔗 Additional Resources" >> $GITHUB_STEP_SUMMARY
+        echo "- [SSOT Import Registry](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/SSOT_IMPORT_REGISTRY.md)" >> $GITHUB_STEP_SUMMARY
+        echo "- [Monitoring Script](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/scripts/monitor_ssot_compliance.py)" >> $GITHUB_STEP_SUMMARY
+        echo "- [Mission Critical Tests](https://github.com/${{ github.repository }}/tree/${{ github.sha }}/tests/mission_critical)" >> $GITHUB_STEP_SUMMARY
+    
+    - name: 🏷️ Add PR labels based on results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Find latest compliance report
+          const reportsDir = process.env.COMPLIANCE_REPORTS_DIR;
+          const files = fs.readdirSync(reportsDir).filter(f => f.endsWith('.json'));
+          
+          if (files.length === 0) {
+            console.log('No compliance report found');
+            return;
+          }
+          
+          const latestReport = path.join(reportsDir, files[files.length - 1]);
+          const report = JSON.parse(fs.readFileSync(latestReport, 'utf8'));
+          
+          const labels = [];
+          
+          // Add labels based on violations
+          if (report.validation_summary.critical_violations > 0) {
+            labels.push('🚨 critical-violations');
+            labels.push('security-risk');
+          }
+          
+          if (report.validation_summary.error_violations > 0) {
+            labels.push('⚠️ ssot-violations');
+          }
+          
+          if (report.validation_summary.warning_violations > 0) {
+            labels.push('📝 compliance-warnings');
+          }
+          
+          if (report.validation_summary.passed) {
+            labels.push('✅ compliance-passed');
+          }
+          
+          // Remove old compliance labels first
+          const existingLabels = await github.rest.issues.listLabelsOnIssue({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.pull_request.number
+          });
+          
+          const complianceLabels = existingLabels.data.filter(label => 
+            label.name.includes('critical-violations') ||
+            label.name.includes('ssot-violations') ||  
+            label.name.includes('compliance-')
+          );
+          
+          for (const label of complianceLabels) {
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              name: label.name
+            });
+          }
+          
+          // Add new labels
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: labels
+            });
+          }
+    
+    - name: 💬 Comment on PR with results
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Find latest compliance report
+          const reportsDir = process.env.COMPLIANCE_REPORTS_DIR;
+          const files = fs.readdirSync(reportsDir).filter(f => f.endsWith('.json'));
+          
+          if (files.length === 0) {
+            console.log('No compliance report found for PR comment');
+            return;
+          }
+          
+          const latestReport = path.join(reportsDir, files[files.length - 1]);
+          const report = JSON.parse(fs.readFileSync(latestReport, 'utf8'));
+          
+          const passed = report.validation_summary.passed;
+          const critical = report.validation_summary.critical_violations;
+          const errors = report.validation_summary.error_violations;
+          const warnings = report.validation_summary.warning_violations;
+          
+          let comment = `## 🚨 SSOT Compliance Check Results\n\n`;
+          
+          if (passed) {
+            comment += `✅ **PASSED** - All SSOT compliance checks passed!\n\n`;
+            comment += `This PR maintains proper security and architectural integrity.\n\n`;
+          } else {
+            comment += `❌ **FAILED** - SSOT compliance violations detected\n\n`;
+            comment += `This PR introduces violations that must be addressed before merging.\n\n`;
+          }
+          
+          comment += `### 📊 Summary\n`;
+          comment += `- 🔴 **Critical**: ${critical} (security vulnerabilities)\n`;
+          comment += `- 🟡 **Error**: ${errors} (SSOT violations)\n`;
+          comment += `- ⚪ **Warning**: ${warnings} (architectural concerns)\n\n`;
+          
+          if (critical > 0) {
+            comment += `### 🚨 Critical Security Issues\n`;
+            comment += `**IMMEDIATE ACTION REQUIRED** - These violations could compromise $500K+ ARR from WebSocket authentication vulnerabilities.\n\n`;
+            comment += `Critical violations include patterns from resolved GitHub Issue #300 that must not be reintroduced.\n\n`;
+          }
+          
+          if (errors > 0) {
+            comment += `### ⚠️ SSOT Violations\n`;
+            comment += `These violations bypass the UnifiedAuthInterface and must be fixed:\n`;
+            comment += `- Use UnifiedAuthInterface for all JWT operations\n`;
+            comment += `- Remove direct JWT library imports in backend\n`;
+            comment += `- Follow patterns in SSOT_IMPORT_REGISTRY.md\n\n`;
+          }
+          
+          comment += `### 🔗 Resources\n`;
+          comment += `- [SSOT Import Registry](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/${context.sha}/SSOT_IMPORT_REGISTRY.md)\n`;
+          comment += `- [Compliance Monitoring](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/${context.sha}/scripts/monitor_ssot_compliance.py)\n`;
+          comment += `- Download the compliance report artifact for detailed findings\n\n`;
+          
+          comment += `---\n`;
+          comment += `🤖 *Generated by SSOT Compliance Monitor* | Business Impact: ${process.env.BUSINESS_IMPACT}`;
+          
+          // Post comment
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.pull_request.number,
+            body: comment
+          });
+    
+    - name: 🚫 Fail job if critical violations found
+      if: always()
+      run: |
+        # Check the final exit code from compliance check
+        LATEST_REPORT=$(ls -t ${{ env.COMPLIANCE_REPORTS_DIR }}/*.json 2>/dev/null | head -1)
+        
+        if [[ -f "$LATEST_REPORT" ]]; then
+          EXIT_CODE=$(jq -r '.validation_summary.exit_code' "$LATEST_REPORT")
+          CRITICAL=$(jq -r '.validation_summary.critical_violations' "$LATEST_REPORT")
+          
+          echo "Exit code: $EXIT_CODE"
+          echo "Critical violations: $CRITICAL"
+          
+          if [[ "$EXIT_CODE" == "2" ]]; then
+            echo "🚨 CRITICAL SECURITY VIOLATIONS DETECTED"
+            echo "Blocking deployment due to security risks"
+            echo "Business Impact: ${{ env.BUSINESS_IMPACT }} at risk"
+            exit 2
+          elif [[ "$EXIT_CODE" == "1" ]]; then
+            echo "⚠️ SSOT VIOLATIONS DETECTED"
+            echo "Fix violations before merging"
+            exit 1
+          else
+            echo "✅ All compliance checks passed"
+            exit 0
+          fi
+        else
+          echo "❌ No compliance report found - validation failed"
+          exit 3
+        fi
+
+  # Optional job to run full monitoring in parallel for comprehensive analysis
+  full-monitoring-scan:
+    runs-on: ubuntu-latest
+    name: 📊 Full SSOT Monitoring (Optional)
+    if: github.event_name == 'workflow_dispatch' && inputs.full_scan == true
+    
+    steps:
+    - name: 📋 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: 📦 Install dependencies
+      run: |
+        pip install --upgrade pip
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+    
+    - name: 🔍 Run full monitoring scan
+      run: |
+        echo "🚀 Running comprehensive SSOT monitoring scan"
+        python scripts/monitor_ssot_compliance.py \
+          --full-scan \
+          --verbose \
+          --project-root="${{ github.workspace }}"
+    
+    - name: 📊 Upload full monitoring report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: full-ssot-monitoring-${{ github.sha }}
+        path: reports/ssot_compliance/*.json
+        retention-days: 30

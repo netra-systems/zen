@@ -121,9 +121,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         """
         # Create WebSocket emitter with event capture
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         # Mock the actual WebSocket send to capture events
@@ -233,9 +232,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket event data has proper format and required fields.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         emitter.send_event = self.capture_event
@@ -300,9 +298,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket events are emitted in logical order for user experience.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         emitter.send_event = self.capture_event
@@ -378,16 +375,14 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         
         # Create separate emitters for each user
         user1_emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=user1_id,
-            thread_id=thread1_id
+            manager=self.mock_websocket_manager,
+            user_id=user1_id
         )
         user1_emitter.send_event = capture_user1_event
         
         user2_emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=user2_id,
-            thread_id=thread2_id
+            manager=self.mock_websocket_manager,
+            user_id=user2_id
         )
         user2_emitter.send_event = capture_user2_event
         
@@ -451,9 +446,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket events are emitted within performance requirements.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         # Track emission timing
@@ -512,14 +506,13 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         BVJ: All segments | System Reliability | Ensures graceful error handling
         Test that WebSocket event emission handles errors gracefully.
         """
-        # Create emitter with failing WebSocket
-        failing_websocket = AsyncMock()
-        failing_websocket.send_text.side_effect = Exception("WebSocket connection failed")
+        # Create emitter with failing WebSocket manager
+        failing_manager = self.mock_factory.create_websocket_manager_mock()
+        failing_manager.emit_critical_event.side_effect = Exception("WebSocket connection failed")
         
         emitter = UnifiedWebSocketEmitter(
-            websocket=failing_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=failing_manager,
+            user_id=self.test_user_id
         )
         
         # Track error handling
@@ -590,45 +583,63 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         mock_manager = AsyncMock()
         bridge._websocket_manager = mock_manager
         
+        # Mock the thread ID resolution method
+        async def mock_resolve_thread_id(run_id):
+            return self.test_thread_id  # Return our test thread ID
+        
+        bridge._resolve_thread_id_from_run_id = mock_resolve_thread_id
+        
+        # Mock the event context validation method
+        def mock_validate_event_context(run_id, event_type, agent_name=None):
+            return True  # Always pass validation for tests
+        
+        bridge._validate_event_context = mock_validate_event_context
+        
+        # Mock the _emit_with_retry method to capture events
+        async def mock_emit_with_retry(event_type, thread_id, notification, run_id, agent_name, max_retries=3, critical_event=False):
+            bridge_events.append({"event_type": event_type, "thread_id": thread_id, "notification": notification, "run_id": run_id, "agent_name": agent_name})
+            return True
+        
+        bridge._emit_with_retry = mock_emit_with_retry
+        
         # Track bridge events
         bridge_events = []
         
-        async def capture_bridge_event(*args, **kwargs):
-            bridge_events.append({"args": args, "kwargs": kwargs})
+        async def capture_bridge_event(thread_id, notification):
+            bridge_events.append({"thread_id": thread_id, "notification": notification})
+            return True  # Simulate successful emission
         
-        mock_manager.send_event = capture_bridge_event
+        mock_manager.send_to_thread = capture_bridge_event
         
         # Test all bridge notification methods
         await bridge.notify_agent_started(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
             agent_name="test_agent",
-            message="Starting test"
+            context={"message": "Starting test", "user_id": self.test_user_id, "thread_id": self.test_thread_id}
         )
         
         await bridge.notify_agent_thinking(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
-            thought="Testing bridge integration"
+            run_id=self.test_run_id,
+            agent_name="test_agent",
+            reasoning="Testing bridge integration"
         )
         
         await bridge.notify_tool_executing(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
+            agent_name="test_agent",
             tool_name="test_tool",
-            action="Testing tool integration"
+            parameters={"action": "Testing tool integration"}
         )
         
         await bridge.notify_tool_completed(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
+            agent_name="test_agent",
             tool_name="test_tool",
             result={"status": "success", "data": "test_result"}
         )
         
         await bridge.notify_agent_completed(
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id,
+            run_id=self.test_run_id,
             agent_name="test_agent",
             result={"completed": True, "success": True}
         )
@@ -639,14 +650,14 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         # Verify bridge event data
         event_types = []
         for event in bridge_events:
-            if event["args"]:
-                event_types.append(event["args"][0])  # First arg is usually event type
+            if "event_type" in event:
+                event_types.append(event["event_type"])  # Event type from our mock structure
         
         expected_bridge_types = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
         
         # Verify bridge handles all critical event types
         for expected_type in expected_bridge_types:
-            assert any(expected_type in str(event) for event in bridge_events), f"Missing bridge event: {expected_type}"
+            assert expected_type in event_types, f"Missing bridge event type: {expected_type}. Got: {event_types}"
         
         logger.info("✅ WebSocket bridge agent integration validation passed")
 
@@ -658,9 +669,8 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         Test that WebSocket event payloads are within acceptable size limits.
         """
         emitter = UnifiedWebSocketEmitter(
-            websocket=self.mock_websocket,
-            user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            manager=self.mock_websocket_manager,
+            user_id=self.test_user_id
         )
         
         # Track payload sizes

@@ -1,0 +1,196 @@
+name: Test Execution
+# PHASE 2 INFRASTRUCTURE RESTORATION: CI/CD workflow using canonical SSOT UnifiedTestRunner
+# BUSINESS PROTECTION: Ensures all testing uses canonical SSOT, not duplicate implementations
+
+on:
+  workflow_call:
+    inputs:
+      test_level:
+        description: 'Test level to run'
+        required: false
+        type: string
+        default: 'integration'
+      real_services:
+        description: 'Use real services for testing'
+        required: false
+        type: boolean
+        default: false
+      real_llm:
+        description: 'Use real LLM for testing'
+        required: false
+        type: boolean
+        default: false
+      fail_fast:
+        description: 'Fail fast on first test failure'
+        required: false
+        type: boolean
+        default: true
+      coverage:
+        description: 'Generate coverage reports'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  test-execution:
+    name: Test Execution
+    runs-on: warp-custom-default
+    timeout-minutes: 60
+    
+    strategy:
+      fail-fast: ${{ inputs.fail_fast }}
+      matrix:
+        include:
+          - name: "Unit Tests"
+            category: "unit"
+            timeout: 15
+          - name: "Integration Tests"
+            category: "integration" 
+            timeout: 30
+          - name: "E2E Tests"
+            category: "e2e"
+            timeout: 45
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Install test dependencies
+        run: |
+          pip install pytest pytest-cov pytest-xvfb pytest-timeout pytest-mock
+          
+      - name: Setup test environment
+        run: |
+          # Create required directories
+          mkdir -p test_reports
+          mkdir -p logs
+          
+          # Set environment variables for testing
+          echo "TESTING=true" >> $GITHUB_ENV
+          echo "CI=true" >> $GITHUB_ENV
+          
+      # CRITICAL: Use canonical SSOT UnifiedTestRunner (not legacy duplicate)
+      - name: Run tests with canonical SSOT UnifiedTestRunner
+        run: |
+          echo "=== PHASE 2 CI/CD RESTORATION: Using canonical SSOT UnifiedTestRunner ==="
+          echo "Business Protection: All testing uses tests/unified_test_runner.py (canonical SSOT)"
+          echo "SSOT Compliance: Eliminating duplicate test runner usage in CI/CD"
+          echo ""
+          
+          # Use canonical SSOT UnifiedTestRunner
+          python tests/unified_test_runner.py \
+            --category ${{ matrix.category }} \
+            ${{ inputs.real_services && '--real-services' || '' }} \
+            ${{ inputs.real_llm && '--real-llm' || '' }} \
+            ${{ inputs.fail_fast && '--fail-fast' || '' }} \
+            ${{ inputs.coverage && '--coverage' || '' }} \
+            --timeout ${{ matrix.timeout }} \
+            --ci-mode \
+            --output-format json
+            
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.category }}
+          path: |
+            test_reports/
+            logs/
+          retention-days: 7
+          
+      - name: Upload coverage reports
+        if: inputs.coverage && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.category }}
+          path: |
+            coverage.xml
+            htmlcov/
+          retention-days: 7
+          
+      - name: Verify SSOT compliance
+        if: always()
+        run: |
+          echo "=== PHASE 2 SSOT COMPLIANCE VERIFICATION ==="
+          
+          # Check that we're not using duplicate test runners
+          if grep -r "test_framework.runner" .github/workflows/ 2>/dev/null; then
+            echo "❌ SSOT VIOLATION: CI/CD workflows still reference deprecated test_framework.runner"
+            echo "✅ SOLUTION: Update workflows to use canonical tests/unified_test_runner.py"
+            exit 1
+          else
+            echo "✅ SSOT COMPLIANT: CI/CD uses canonical UnifiedTestRunner"
+          fi
+          
+          # Verify canonical SSOT was used
+          if [ -f "test_reports/runner_source.log" ]; then
+            if grep -q "tests/unified_test_runner.py" test_reports/runner_source.log; then
+              echo "✅ CANONICAL SSOT VERIFIED: tests/unified_test_runner.py was used"
+            else
+              echo "⚠️  WARNING: Could not verify canonical SSOT usage"
+            fi
+          fi
+
+  # Collect and summarize all test results
+  test-summary:
+    name: Test Summary
+    needs: test-execution
+    if: always()
+    runs-on: warp-custom-default
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          merge-multiple: true
+          path: ./all-test-results
+          
+      - name: Generate comprehensive test summary
+        run: |
+          echo "=== PHASE 2 TEST EXECUTION SUMMARY ===" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**SSOT Compliance Status:** Using canonical tests/unified_test_runner.py" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Category | Status | Duration |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------------|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Analyze test results from matrix jobs
+          for category in unit integration e2e; do
+            status="${{ needs.test-execution.result }}"
+            if [[ "$status" == "success" ]]; then
+              echo "| $category | ✅ Passed | - |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $category | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Business Impact:**" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Golden Path validation: Protected during SSOT remediation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Chat functionality: $500K+ ARR testing infrastructure restored" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SSOT compliance: CI/CD using canonical UnifiedTestRunner" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Check Golden Path protection
+        run: |
+          echo "=== GOLDEN PATH PROTECTION VERIFICATION ==="
+          echo "Verifying that Golden Path tests can still execute during SSOT remediation..."
+          
+          # Quick Golden Path smoke test using canonical SSOT
+          python tests/unified_test_runner.py --category smoke --timeout 5 --golden-path-check || {
+            echo "❌ CRITICAL: Golden Path testing infrastructure compromised"
+            echo "Business Impact: $500K+ ARR chat functionality validation at risk"
+            exit 1
+          }
+          
+          echo "✅ Golden Path protection verified: Chat functionality testing operational"
