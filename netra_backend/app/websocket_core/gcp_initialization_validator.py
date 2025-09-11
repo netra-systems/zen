@@ -628,7 +628,7 @@ class GCPWebSocketInitializationValidator:
             
             # CRITICAL FIX: Wait for startup to reach services phase before validation
             # This prevents race condition where validation runs before Phase 5 completion
-            wait_timeout = min(timeout_seconds * 0.6, 20.0)  # Use 60% of total timeout, max 20s
+            wait_timeout = min(timeout_seconds * 0.4, 3.0)  # Use 40% of total timeout, max 3s for faster connections
             startup_ready = await self._wait_for_startup_phase_completion(
                 minimum_phase='services', 
                 timeout_seconds=wait_timeout
@@ -664,7 +664,7 @@ class GCPWebSocketInitializationValidator:
             self.logger.info("📋 Phase 1: Validating dependencies (Database, Redis, Auth)...")
             dependencies_ready = await self._validate_service_group([
                 'database', 'redis', 'auth_validation'
-            ], timeout_seconds=20.0)
+            ], timeout_seconds=3.0)
             
             if not dependencies_ready['success']:
                 failed_services.extend(dependencies_ready['failed'])
@@ -696,7 +696,7 @@ class GCPWebSocketInitializationValidator:
                 self.logger.info("📋 Phase 2: Validating services (Agent Supervisor, WebSocket Bridge)...")
                 services_ready = await self._validate_service_group([
                     'agent_supervisor', 'websocket_bridge'
-                ], timeout_seconds=10.0)
+                ], timeout_seconds=2.0)
                 
                 if not services_ready['success']:
                     failed_services.extend(services_ready['failed'])
@@ -710,7 +710,7 @@ class GCPWebSocketInitializationValidator:
                 self.logger.info("📋 Phase 3: Validating WebSocket integration...")
                 integration_ready = await self._validate_service_group([
                     'websocket_integration'
-                ], timeout_seconds=5.0)
+                ], timeout_seconds=1.0)
                 
                 if not integration_ready['success']:
                     failed_services.extend(integration_ready['failed'])

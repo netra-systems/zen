@@ -346,7 +346,7 @@ class WebSocketSSOTRouter:
             
             if app_state:
                 try:
-                    async with gcp_websocket_readiness_guard(app_state, timeout=30.0) as readiness_result:
+                    async with gcp_websocket_readiness_guard(app_state, timeout=5.0) as readiness_result:
                         if not readiness_result.ready:
                             # Race condition detected - reject connection to prevent 1011 error
                             logger.error(
