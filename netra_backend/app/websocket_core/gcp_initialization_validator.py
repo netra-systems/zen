@@ -122,33 +122,39 @@ class GCPWebSocketInitializationValidator:
     def _register_critical_service_checks(self) -> None:
         """Register critical service readiness checks using SSOT patterns."""
         
+        # PERFORMANCE OPTIMIZATION: Significantly reduced timeouts while maintaining safety
+        # Environment-aware configuration balances speed vs reliability
+        
         # Phase 2-3 Dependencies: Database, Redis, Auth
         self.readiness_checks['database'] = ServiceReadinessCheck(
             name='database',
             validator=self._validate_database_readiness,
-            timeout_seconds=8.0 if self.is_gcp_environment else 15.0,
-            retry_count=8 if self.is_gcp_environment else 3,
-            retry_delay=2.0 if self.is_gcp_environment else 1.0,
-            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,  # CRITICAL FIX: Non-critical in staging to allow graceful degradation
+            # OPTIMIZED: Reduced from 8.0s/15.0s to 3.0s/5.0s - database should be ready quickly
+            timeout_seconds=3.0 if self.is_gcp_environment else 5.0,
+            retry_count=4 if self.is_gcp_environment else 3,  # Reduced retries for speed
+            retry_delay=1.0 if self.is_gcp_environment else 1.0,  # Faster retry delay
+            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,
             description="Database session factory and connectivity"
         )
         
         self.readiness_checks['redis'] = ServiceReadinessCheck(
             name='redis',
             validator=self._validate_redis_readiness,
-            timeout_seconds=3.0 if self.is_gcp_environment else 10.0,  # FIXED: 3.0s for staging health checks, prevents /health/ready timeout
-            retry_count=4,  # Balanced retry count for reliability vs speed
-            retry_delay=1.5 if self.is_gcp_environment else 1.0,
-            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,  # CRITICAL FIX: Non-critical in staging to break circular dependency
+            # OPTIMIZED: Reduced from 3.0s/10.0s to 1.5s/3.0s - Redis should connect very quickly
+            timeout_seconds=1.5 if self.is_gcp_environment else 3.0,
+            retry_count=3,  # Reduced retry count for faster connection attempts
+            retry_delay=0.5 if self.is_gcp_environment else 1.0,  # Faster retry for Redis
+            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,
             description="Redis connection and caching system"
         )
         
         self.readiness_checks['auth_validation'] = ServiceReadinessCheck(
             name='auth_validation',
             validator=self._validate_auth_system_readiness,
-            timeout_seconds=10.0 if self.is_gcp_environment else 20.0,
-            retry_count=3,
-            retry_delay=1.0,
+            # OPTIMIZED: Reduced from 10.0s/20.0s to 2.0s/5.0s - auth validation is fast
+            timeout_seconds=2.0 if self.is_gcp_environment else 5.0,
+            retry_count=2,  # Reduced retries - auth should be available quickly
+            retry_delay=0.5,  # Fast retry for auth checks
             is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,
             description="Auth validation and JWT system"
         )
@@ -157,9 +163,10 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['agent_supervisor'] = ServiceReadinessCheck(
             name='agent_supervisor',
             validator=self._validate_agent_supervisor_readiness,
-            timeout_seconds=8.0 if self.is_gcp_environment else 30.0,
-            retry_count=10 if self.is_gcp_environment else 5,
-            retry_delay=2.0 if self.is_gcp_environment else 1.0,
+            # OPTIMIZED: Reduced from 8.0s/30.0s to 2.0s/8.0s - agent supervisor loads quickly after startup
+            timeout_seconds=2.0 if self.is_gcp_environment else 8.0,
+            retry_count=3 if self.is_gcp_environment else 4,  # Fewer retries for speed
+            retry_delay=0.5 if self.is_gcp_environment else 1.0,  # Faster retry intervals
             is_critical=True,
             description="Agent supervisor and chat pipeline"
         )
@@ -167,9 +174,10 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['websocket_bridge'] = ServiceReadinessCheck(
             name='websocket_bridge',
             validator=self._validate_websocket_bridge_readiness,
-            timeout_seconds=2.0 if self.is_gcp_environment else 30.0,
-            retry_count=5,
-            retry_delay=1.0,
+            # OPTIMIZED: Reduced from 2.0s/30.0s to 1.0s/3.0s - WebSocket bridge should be instant
+            timeout_seconds=1.0 if self.is_gcp_environment else 3.0,
+            retry_count=2,  # Minimal retries - bridge should be available immediately
+            retry_delay=0.5,  # Fast retry for bridge checks
             is_critical=True,
             description="AgentWebSocketBridge for real-time events"
         )
@@ -178,10 +186,11 @@ class GCPWebSocketInitializationValidator:
         self.readiness_checks['websocket_integration'] = ServiceReadinessCheck(
             name='websocket_integration',
             validator=self._validate_websocket_integration_readiness,
-            timeout_seconds=4.0 if self.is_gcp_environment else 20.0,
-            retry_count=3,
-            retry_delay=1.0,
-            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,  # CRITICAL FIX: Non-critical in staging to allow graceful degradation
+            # OPTIMIZED: Reduced from 4.0s/20.0s to 1.0s/5.0s - integration check is fast
+            timeout_seconds=1.0 if self.is_gcp_environment else 5.0,
+            retry_count=2,  # Minimal retries for fast completion
+            retry_delay=0.5,  # Quick retry intervals
+            is_critical=False if (self.is_gcp_environment and self.environment == 'staging') else True,
             description="Complete WebSocket integration and event delivery"
         )
     
@@ -628,7 +637,8 @@ class GCPWebSocketInitializationValidator:
             
             # CRITICAL FIX: Wait for startup to reach services phase before validation
             # This prevents race condition where validation runs before Phase 5 completion
-            wait_timeout = min(timeout_seconds * 0.4, 3.0)  # Use 40% of total timeout, max 3s for faster connections
+            # PERFORMANCE OPTIMIZATION: Reduced from 3.0s max to 1.5s max for faster validation
+            wait_timeout = min(timeout_seconds * 0.3, 1.5)  # Use 30% of total timeout, max 1.5s for faster connections
             startup_ready = await self._wait_for_startup_phase_completion(
                 minimum_phase='services', 
                 timeout_seconds=wait_timeout
@@ -661,10 +671,11 @@ class GCPWebSocketInitializationValidator:
             self.logger.info(f"✅ Startup phase requirement met - proceeding with service validation")
             
             # Phase 1: Validate Dependencies (Database, Redis, Auth) with GOLDEN PATH degradation
+            # PERFORMANCE OPTIMIZATION: Reduced timeout from 3.0s to 1.5s for faster dependency validation
             self.logger.info("📋 Phase 1: Validating dependencies (Database, Redis, Auth)...")
             dependencies_ready = await self._validate_service_group([
                 'database', 'redis', 'auth_validation'
-            ], timeout_seconds=3.0)
+            ], timeout_seconds=1.5)
             
             if not dependencies_ready['success']:
                 failed_services.extend(dependencies_ready['failed'])
