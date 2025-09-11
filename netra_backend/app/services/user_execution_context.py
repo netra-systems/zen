@@ -1305,7 +1305,7 @@ async def create_isolated_execution_context(
         thread_id = id_manager.generate_thread_id()
         
     if not run_id:
-        run_id = id_manager.generate_run_id()
+        run_id = id_manager.generate_run_id(thread_id)
     
     # Validate user exists in database if requested and session available
     if validate_user and database_session:
@@ -1386,9 +1386,1023 @@ async def create_isolated_execution_context(
 # Alias for compatibility with integration tests
 UserExecutionContextFactory = UserContextFactory
 
+# ============================================================================
+# USER CONTEXT MANAGER - SINGLE SOURCE OF TRUTH FOR CONTEXT MANAGEMENT
+# ============================================================================
+
+import threading
+import time
+from collections import defaultdict
+from typing import Optional, Set, Callable, Union, Coroutine
+import weakref
+import gc
+
+
+class UserContextManager:
+    """
+    Single Source of Truth for managing UserExecutionContext instances with enterprise-grade security.
+    
+    This class provides comprehensive multi-tenant isolation, preventing any form of data leakage
+    between user contexts while ensuring proper resource management and audit compliance.
+    
+    Business Value Justification (BVJ):
+    - Segment: Enterprise (highest security requirements)
+    - Business Goal: Prevent data leakage between users ($500K+ ARR protection)
+    - Value Impact: Validates multi-tenant isolation preventing security breaches
+    - Revenue Impact: Critical for compliance requirements enabling enterprise sales
+    
+    Security Features:
+    - Complete isolation between user contexts
+    - Memory isolation preventing shared state contamination
+    - Cross-contamination detection and prevention
+    - Comprehensive audit trails for compliance
+    - Resource limits and automatic cleanup
+    - Thread-safe concurrent operations
+    - Graceful error handling and recovery
+    
+    Key Design Principles:
+    - Zero tolerance for cross-user data leakage
+    - Fail-safe patterns - errors don't compromise other users
+    - Resource management - automatic cleanup prevents memory leaks
+    - Observability - comprehensive audit trails and monitoring
+    - Performance - efficient operations under high concurrency
+    """
+    
+    # Class constants for security limits
+    MAX_CONTEXTS_PER_USER = 100
+    DEFAULT_CONTEXT_TTL = 3600  # 1 hour default TTL in seconds
+    MAX_TOTAL_CONTEXTS = 10000  # System-wide limit
+    CLEANUP_INTERVAL = 300  # 5 minutes
+    
+    def __init__(
+        self,
+        isolation_level: str = "strict",
+        cross_contamination_detection: bool = True,
+        memory_isolation: bool = True,
+        enable_audit_trail: bool = True,
+        auto_cleanup: bool = True
+    ):
+        """
+        Initialize UserContextManager with security-first configuration.
+        
+        Args:
+            isolation_level: Isolation level ("strict" or "standard")
+            cross_contamination_detection: Enable cross-contamination detection
+            memory_isolation: Enable memory isolation validation
+            enable_audit_trail: Enable comprehensive audit trails
+            auto_cleanup: Enable automatic resource cleanup
+        """
+        self._isolation_level = isolation_level
+        self._cross_contamination_detection = cross_contamination_detection
+        self._memory_isolation = memory_isolation
+        self._enable_audit_trail = enable_audit_trail
+        self._auto_cleanup = auto_cleanup
+        
+        # Thread-safe context storage with isolation
+        self._contexts_lock = threading.RLock()
+        self._contexts: Dict[str, UserExecutionContext] = {}
+        self._context_metadata: Dict[str, Dict[str, Any]] = {}
+        self._context_timestamps: Dict[str, float] = {}
+        self._context_ttl: Dict[str, float] = {}
+        
+        # User-based context tracking for limits
+        self._user_contexts: Dict[str, Set[str]] = defaultdict(set)
+        self._user_contexts_lock = threading.RLock()
+        
+        # Audit trail storage
+        self._audit_trail: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        self._audit_lock = threading.RLock()
+        
+        # Memory isolation tracking
+        self._memory_references: Dict[str, Set[int]] = defaultdict(set)
+        self._memory_lock = threading.RLock()
+        
+        # Cleanup management
+        self._cleanup_callbacks: Dict[str, List[Callable]] = defaultdict(list)
+        self._last_cleanup = time.time()
+        
+        # Health monitoring
+        self._error_count = 0
+        self._operation_count = 0
+        self._healthy = True
+        
+        logger.info(
+            f"UserContextManager initialized: isolation_level={isolation_level}, "
+            f"cross_contamination_detection={cross_contamination_detection}, "
+            f"memory_isolation={memory_isolation}"
+        )
+        
+        # Initialize audit trail
+        if self._enable_audit_trail:
+            self._record_audit_event(
+                "system",
+                "manager_initialized",
+                {
+                    "isolation_level": isolation_level,
+                    "security_features": {
+                        "cross_contamination_detection": cross_contamination_detection,
+                        "memory_isolation": memory_isolation,
+                        "audit_trail": enable_audit_trail
+                    }
+                }
+            )
+    
+    def get_context(self, context_key: str) -> UserExecutionContext:
+        """
+        Retrieve user context with comprehensive isolation validation.
+        
+        Args:
+            context_key: Unique key for the context (typically user_id or user_id_request_id)
+            
+        Returns:
+            UserExecutionContext for the specified key
+            
+        Raises:
+            KeyError: If context doesn't exist
+            ContextIsolationError: If isolation validation fails
+            ValueError: If context_key is invalid
+        """
+        if not context_key or not isinstance(context_key, str):
+            raise ValueError("context_key must be a non-empty string")
+        
+        with self._contexts_lock:
+            self._operation_count += 1
+            
+            # Auto-cleanup expired contexts
+            if self._auto_cleanup:
+                self._cleanup_expired_contexts()
+            
+            # Check if context exists
+            if context_key not in self._contexts:
+                self._record_audit_event(
+                    context_key,
+                    "context_access_denied",
+                    {"reason": "context_not_found"}
+                )
+                raise KeyError(f"Context not found: {context_key}")
+            
+            # Check if context is expired
+            if self._is_context_expired(context_key):
+                self._cleanup_single_context(context_key)
+                self._record_audit_event(
+                    context_key,
+                    "context_access_denied",
+                    {"reason": "context_expired"}
+                )
+                raise KeyError(f"Context expired: {context_key}")
+            
+            context = self._contexts[context_key]
+            
+            # Validate isolation if enabled
+            if self._memory_isolation:
+                try:
+                    context.verify_isolation()
+                except ContextIsolationError as e:
+                    self._error_count += 1
+                    self._record_audit_event(
+                        context_key,
+                        "isolation_violation_detected",
+                        {"error": str(e), "severity": "CRITICAL"}
+                    )
+                    raise
+            
+            # Record successful access
+            self._record_audit_event(
+                context_key,
+                "context_accessed",
+                {
+                    "user_id": context.user_id,
+                    "thread_id": context.thread_id,
+                    "request_id": context.request_id
+                }
+            )
+            
+            return context
+    
+    def set_context(
+        self,
+        context_key: str,
+        context: UserExecutionContext,
+        ttl_seconds: Optional[float] = None
+    ) -> None:
+        """
+        Set user context with comprehensive security validation.
+        
+        Args:
+            context_key: Unique key for the context
+            context: UserExecutionContext to store
+            ttl_seconds: Time-to-live in seconds (optional)
+            
+        Raises:
+            ValueError: If parameters are invalid
+            InvalidContextError: If context validation fails
+            ContextIsolationError: If isolation validation fails
+            RuntimeError: If resource limits are exceeded
+        """
+        if not context_key or not isinstance(context_key, str):
+            raise ValueError("context_key must be a non-empty string")
+        
+        if context is None:
+            raise ValueError("context cannot be None")
+        
+        if not isinstance(context, UserExecutionContext):
+            raise InvalidContextError(f"Expected UserExecutionContext, got: {type(context)}")
+        
+        # Validate context integrity
+        try:
+            validate_user_context(context)
+        except (TypeError, InvalidContextError) as e:
+            self._error_count += 1
+            raise InvalidContextError(f"Context validation failed: {e}")
+        
+        # Validate isolation
+        try:
+            context.verify_isolation()
+        except ContextIsolationError as e:
+            self._error_count += 1
+            self._record_audit_event(
+                context_key,
+                "context_isolation_failure",
+                {"error": str(e), "severity": "CRITICAL"}
+            )
+            raise
+        
+        with self._contexts_lock:
+            self._operation_count += 1
+            
+            # Auto-cleanup if needed
+            if self._auto_cleanup:
+                self._cleanup_expired_contexts()
+            
+            # Check system-wide limits
+            if len(self._contexts) >= self.MAX_TOTAL_CONTEXTS:
+                raise RuntimeError(
+                    f"System-wide context limit exceeded: {self.MAX_TOTAL_CONTEXTS}"
+                )
+            
+            # Check per-user limits
+            with self._user_contexts_lock:
+                user_context_count = len(self._user_contexts.get(context.user_id, set()))
+                if user_context_count >= self.MAX_CONTEXTS_PER_USER:
+                    raise RuntimeError(
+                        f"User context limit exceeded for {context.user_id}: "
+                        f"{self.MAX_CONTEXTS_PER_USER}"
+                    )
+            
+            # Store context with deep copy for isolation
+            self._contexts[context_key] = copy.deepcopy(context)
+            
+            # Store metadata
+            current_time = time.time()
+            self._context_timestamps[context_key] = current_time
+            self._context_ttl[context_key] = ttl_seconds or self.DEFAULT_CONTEXT_TTL
+            self._context_metadata[context_key] = {
+                "created_at": current_time,
+                "user_id": context.user_id,
+                "thread_id": context.thread_id,
+                "request_id": context.request_id,
+                "ttl_seconds": ttl_seconds or self.DEFAULT_CONTEXT_TTL,
+                "has_db_session": context.db_session is not None,
+                "has_websocket": context.websocket_client_id is not None,
+                "isolation_validated": True
+            }
+            
+            # Track user contexts
+            with self._user_contexts_lock:
+                self._user_contexts[context.user_id].add(context_key)
+            
+            # Track memory references for isolation
+            if self._memory_isolation:
+                with self._memory_lock:
+                    memory_refs = set()
+                    if hasattr(context, 'agent_context') and context.agent_context:
+                        memory_refs.add(id(context.agent_context))
+                    if hasattr(context, 'audit_metadata') and context.audit_metadata:
+                        memory_refs.add(id(context.audit_metadata))
+                    if context.db_session:
+                        memory_refs.add(id(context.db_session))
+                    
+                    self._memory_references[context_key] = memory_refs
+            
+            # Record audit event
+            self._record_audit_event(
+                context_key,
+                "context_set",
+                {
+                    "user_id": context.user_id,
+                    "thread_id": context.thread_id,
+                    "request_id": context.request_id,
+                    "ttl_seconds": ttl_seconds or self.DEFAULT_CONTEXT_TTL,
+                    "isolation_level": self._isolation_level
+                }
+            )
+            
+            logger.debug(
+                f"Context set successfully: key={context_key}, user={context.user_id[:8]}..., "
+                f"total_contexts={len(self._contexts)}"
+            )
+    
+    def clear_context(self, context_key: str) -> bool:
+        """
+        Clear context with comprehensive cleanup.
+        
+        Args:
+            context_key: Key of the context to clear
+            
+        Returns:
+            True if context was cleared, False if it didn't exist
+        """
+        if not context_key or not isinstance(context_key, str):
+            raise ValueError("context_key must be a non-empty string")
+        
+        with self._contexts_lock:
+            self._operation_count += 1
+            
+            if context_key not in self._contexts:
+                return False
+            
+            # Get context for audit before cleanup
+            context = self._contexts[context_key]
+            user_id = context.user_id
+            
+            # Perform cleanup
+            self._cleanup_single_context(context_key)
+            
+            # Record audit event
+            self._record_audit_event(
+                context_key,
+                "context_cleared",
+                {"user_id": user_id, "manual_clear": True}
+            )
+            
+            logger.debug(f"Context cleared successfully: key={context_key}")
+            return True
+    
+    def validate_isolation(self, context_key: str) -> bool:
+        """
+        Validate context isolation and detect cross-contamination.
+        
+        Args:
+            context_key: Key of the context to validate
+            
+        Returns:
+            True if isolation is valid
+            
+        Raises:
+            KeyError: If context doesn't exist
+            ContextIsolationError: If isolation violations are detected
+        """
+        with self._contexts_lock:
+            if context_key not in self._contexts:
+                raise KeyError(f"Context not found: {context_key}")
+            
+            context = self._contexts[context_key]
+            
+            # Validate context isolation
+            try:
+                context.verify_isolation()
+            except ContextIsolationError as e:
+                self._record_audit_event(
+                    context_key,
+                    "isolation_validation_failed",
+                    {"error": str(e), "severity": "CRITICAL"}
+                )
+                raise
+            
+            # Cross-contamination detection
+            if self._cross_contamination_detection:
+                self._detect_cross_contamination(context_key, context)
+            
+            # Memory isolation validation
+            if self._memory_isolation:
+                self._validate_memory_isolation(context_key, context)
+            
+            self._record_audit_event(
+                context_key,
+                "isolation_validated",
+                {"user_id": context.user_id}
+            )
+            
+            return True
+    
+    def get_active_contexts(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Get information about all active contexts.
+        
+        Returns:
+            Dictionary mapping context keys to context metadata
+        """
+        with self._contexts_lock:
+            # Auto-cleanup expired contexts
+            if self._auto_cleanup:
+                self._cleanup_expired_contexts()
+            
+            return {
+                key: {
+                    "user_id": metadata["user_id"],
+                    "created_at": metadata["created_at"],
+                    "ttl_seconds": metadata["ttl_seconds"],
+                    "age_seconds": time.time() - metadata["created_at"],
+                    "has_db_session": metadata["has_db_session"],
+                    "has_websocket": metadata["has_websocket"]
+                }
+                for key, metadata in self._context_metadata.items()
+                if key in self._contexts
+            }
+    
+    def get_audit_trail(self, context_key: str) -> Optional[Dict[str, Any]]:
+        """
+        Get comprehensive audit trail for a context.
+        
+        Args:
+            context_key: Key of the context
+            
+        Returns:
+            Audit trail dictionary or None if context doesn't exist
+        """
+        if not self._enable_audit_trail:
+            return None
+        
+        with self._audit_lock:
+            if context_key not in self._audit_trail and context_key not in self._contexts:
+                return None
+            
+            # Get context metadata if available
+            context_info = {}
+            if context_key in self._context_metadata:
+                metadata = self._context_metadata[context_key]
+                context_info = {
+                    "context_set_at": metadata["created_at"],
+                    "user_id": metadata["user_id"],
+                    "thread_id": metadata["thread_id"],
+                    "request_id": metadata["request_id"],
+                    "ttl_seconds": metadata["ttl_seconds"],
+                    "has_db_session": metadata["has_db_session"],
+                    "has_websocket": metadata["has_websocket"]
+                }
+            
+            # Build comprehensive audit trail
+            audit_data = {
+                "context_key": context_key,
+                "context_source": "user_context_manager",
+                "isolation_verified": True,
+                "compliance_version": "1.0",
+                "events": self._audit_trail.get(context_key, []),
+                "total_events": len(self._audit_trail.get(context_key, [])),
+                **context_info
+            }
+            
+            return audit_data
+    
+    # ========================================================================
+    # INTEGRATION METHODS FOR WEBSOCKET, AGENT EXECUTION, AND DATABASE
+    # ========================================================================
+    
+    def create_isolated_context(
+        self,
+        user_id: str,
+        request_id: str,
+        **kwargs
+    ) -> UserExecutionContext:
+        """
+        Create isolated context using SSOT factory integration.
+        
+        Args:
+            user_id: User identifier
+            request_id: Request identifier
+            **kwargs: Additional arguments for create_isolated_execution_context
+            
+        Returns:
+            New isolated UserExecutionContext
+        """
+        # Use SSOT factory for context creation
+        context = asyncio.run(create_isolated_execution_context(
+            user_id=user_id,
+            request_id=request_id,
+            **kwargs
+        ))
+        
+        # Set the context in manager
+        self.set_context(f"{user_id}_{request_id}", context)
+        
+        return context
+    
+    def create_context_with_unified_ids(self, user_id: str) -> UserExecutionContext:
+        """
+        Create context with UnifiedIDManager integration.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            New UserExecutionContext with unified ID generation
+        """
+        id_manager = UnifiedIDManager()
+        thread_id = id_manager.generate_thread_id()
+        run_id = id_manager.generate_run_id()
+        request_id = str(uuid.uuid4())
+        
+        context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id
+        )
+        
+        # Set context in manager
+        self.set_context(f"{user_id}_{request_id}", context)
+        
+        return context
+    
+    def create_managed_context(
+        self,
+        user_id: str,
+        request_id: str,
+        **kwargs
+    ) -> UserExecutionContext:
+        """
+        Create managed context with factory integration.
+        
+        Args:
+            user_id: User identifier
+            request_id: Request identifier
+            **kwargs: Additional context arguments
+            
+        Returns:
+            New managed UserExecutionContext
+        """
+        # Use factory to create isolated context
+        context = asyncio.run(create_isolated_execution_context(
+            user_id=user_id,
+            request_id=request_id,
+            **kwargs
+        ))
+        
+        # Set context in manager with automatic key generation
+        context_key = f"{user_id}_{request_id}"
+        self.set_context(context_key, context)
+        
+        return context
+    
+    async def notify_context_change(self, user_id: str, event_type: str) -> None:
+        """
+        Notify WebSocket connections of context changes.
+        
+        Args:
+            user_id: User identifier
+            event_type: Type of change event
+        """
+        try:
+            # Import WebSocket manager (avoid circular imports)
+            from netra_backend.app.websocket_core.manager import WebSocketManager
+            
+            # Get WebSocket connection for user
+            ws_manager = WebSocketManager()
+            connection = ws_manager.get_connection(user_id)
+            
+            if connection:
+                await connection.send_json({
+                    "event": "context_change",
+                    "type": event_type,
+                    "user_id": user_id,
+                    "timestamp": time.time()
+                })
+                
+                self._record_audit_event(
+                    user_id,
+                    "websocket_notification_sent",
+                    {"event_type": event_type}
+                )
+        except Exception as e:
+            logger.warning(f"Failed to notify WebSocket for user {user_id}: {e}")
+    
+    async def send_event(
+        self,
+        user_id: str,
+        event_name: str,
+        event_data: Dict[str, Any]
+    ) -> None:
+        """
+        Send event to user's WebSocket connection.
+        
+        Args:
+            user_id: User identifier
+            event_name: Name of the event
+            event_data: Event data
+        """
+        try:
+            from netra_backend.app.websocket_core.notifier import WebSocketNotifier
+            
+            notifier = WebSocketNotifier()
+            await notifier.send_event(user_id, event_name, event_data)
+            
+            self._record_audit_event(
+                user_id,
+                "event_sent",
+                {"event_name": event_name, "has_data": bool(event_data)}
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send event {event_name} to user {user_id}: {e}")
+    
+    async def execute_with_agent(
+        self,
+        user_id: str,
+        agent_name: str,
+        parameters: Dict[str, Any]
+    ) -> Any:
+        """
+        Execute agent with proper context isolation.
+        
+        Args:
+            user_id: User identifier
+            agent_name: Name of the agent to execute
+            parameters: Agent parameters
+            
+        Returns:
+            Agent execution result
+        """
+        try:
+            from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
+            
+            # Get user context
+            context_key = self._find_context_key_for_user(user_id)
+            if not context_key:
+                raise ValueError(f"No active context found for user: {user_id}")
+            
+            context = self.get_context(context_key)
+            
+            # Execute agent with context
+            session = UserAgentSession()
+            result = await session.execute(
+                agent_name=agent_name,
+                parameters=parameters,
+                context=context
+            )
+            
+            self._record_audit_event(
+                context_key,
+                "agent_executed",
+                {
+                    "agent_name": agent_name,
+                    "user_id": user_id,
+                    "success": True
+                }
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Agent execution failed for user {user_id}: {e}")
+            
+            if context_key:
+                self._record_audit_event(
+                    context_key,
+                    "agent_execution_failed",
+                    {
+                        "agent_name": agent_name,
+                        "user_id": user_id,
+                        "error": str(e)
+                    }
+                )
+            
+            raise
+    
+    def create_context_with_transaction(self, user_id: str) -> UserExecutionContext:
+        """
+        Create context with database transaction.
+        
+        Args:
+            user_id: User identifier
+            
+        Returns:
+            UserExecutionContext with database transaction
+        """
+        from netra_backend.app.db.database_manager import DatabaseManager
+        
+        # Begin database transaction
+        db_manager = DatabaseManager()
+        transaction = db_manager.begin_transaction()
+        
+        # Create context with transaction
+        thread_id = f"tx_thread_{int(time.time())}"
+        run_id = f"tx_run_{int(time.time())}"
+        request_id = str(uuid.uuid4())
+        
+        context = UserExecutionContext.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            db_session=transaction
+        )
+        
+        # Set context in manager
+        context_key = f"{user_id}_tx_{request_id}"
+        self.set_context(context_key, context)
+        
+        return context
+    
+    async def execute_in_transaction(
+        self,
+        user_id: str,
+        query: str
+    ) -> Any:
+        """
+        Execute database query within user's transaction.
+        
+        Args:
+            user_id: User identifier
+            query: SQL query to execute
+            
+        Returns:
+            Query result
+        """
+        context_key = self._find_context_key_for_user(user_id)
+        if not context_key:
+            raise ValueError(f"No active context found for user: {user_id}")
+        
+        context = self.get_context(context_key)
+        
+        if not context.db_session:
+            raise ValueError(f"No database session found for user: {user_id}")
+        
+        # Execute query
+        result = await context.db_session.execute(query)
+        
+        self._record_audit_event(
+            context_key,
+            "database_query_executed",
+            {"user_id": user_id, "query_type": query.split()[0].upper()}
+        )
+        
+        return result
+    
+    async def cleanup_context(self, context_key: str) -> None:
+        """
+        Cleanup context with resource management.
+        
+        Args:
+            context_key: Key of the context to cleanup
+        """
+        with self._contexts_lock:
+            if context_key in self._contexts:
+                context = self._contexts[context_key]
+                
+                # Cleanup database session if present
+                if context.db_session:
+                    try:
+                        await context.db_session.close()
+                    except Exception as e:
+                        logger.warning(f"Error closing database session: {e}")
+                
+                # Execute cleanup callbacks
+                if context_key in self._cleanup_callbacks:
+                    for callback in self._cleanup_callbacks[context_key]:
+                        try:
+                            if asyncio.iscoroutinefunction(callback):
+                                await callback()
+                            else:
+                                callback()
+                        except Exception as e:
+                            logger.warning(f"Cleanup callback error: {e}")
+                
+                # Remove context
+                self._cleanup_single_context(context_key)
+    
+    def cleanup_all_contexts(self) -> int:
+        """
+        Cleanup all contexts (typically for shutdown).
+        
+        Returns:
+            Number of contexts cleaned up
+        """
+        with self._contexts_lock:
+            context_keys = list(self._contexts.keys())
+            
+            for context_key in context_keys:
+                try:
+                    self._cleanup_single_context(context_key)
+                except Exception as e:
+                    logger.warning(f"Error cleaning up context {context_key}: {e}")
+            
+            self._record_audit_event(
+                "system",
+                "all_contexts_cleaned",
+                {"contexts_cleaned": len(context_keys)}
+            )
+            
+            return len(context_keys)
+    
+    def is_healthy(self) -> bool:
+        """
+        Check if the UserContextManager is healthy.
+        
+        Returns:
+            True if healthy, False otherwise
+        """
+        # Simple health check based on error rate
+        if self._operation_count == 0:
+            return True
+        
+        error_rate = self._error_count / self._operation_count
+        return error_rate < 0.1  # Less than 10% error rate
+    
+    # ========================================================================
+    # PRIVATE METHODS FOR INTERNAL OPERATIONS
+    # ========================================================================
+    
+    def _cleanup_single_context(self, context_key: str) -> None:
+        """Remove single context and all associated data."""
+        context = self._contexts.get(context_key)
+        if not context:
+            return
+        
+        user_id = context.user_id
+        
+        # Remove from all tracking structures
+        self._contexts.pop(context_key, None)
+        self._context_metadata.pop(context_key, None)
+        self._context_timestamps.pop(context_key, None)
+        self._context_ttl.pop(context_key, None)
+        
+        # Remove from user contexts tracking
+        with self._user_contexts_lock:
+            if user_id in self._user_contexts:
+                self._user_contexts[user_id].discard(context_key)
+                if not self._user_contexts[user_id]:
+                    del self._user_contexts[user_id]
+        
+        # Remove memory references
+        with self._memory_lock:
+            self._memory_references.pop(context_key, None)
+        
+        # Remove cleanup callbacks
+        self._cleanup_callbacks.pop(context_key, None)
+    
+    def _cleanup_expired_contexts(self) -> None:
+        """Clean up expired contexts."""
+        current_time = time.time()
+        
+        # Only run cleanup if enough time has passed
+        if current_time - self._last_cleanup < self.CLEANUP_INTERVAL:
+            return
+        
+        expired_keys = []
+        
+        # Find expired contexts
+        for context_key, timestamp in self._context_timestamps.items():
+            ttl = self._context_ttl.get(context_key, self.DEFAULT_CONTEXT_TTL)
+            if current_time - timestamp > ttl:
+                expired_keys.append(context_key)
+        
+        # Clean up expired contexts
+        for context_key in expired_keys:
+            self._cleanup_single_context(context_key)
+            self._record_audit_event(
+                context_key,
+                "context_expired",
+                {"expired_at": current_time}
+            )
+        
+        self._last_cleanup = current_time
+        
+        if expired_keys:
+            logger.debug(f"Cleaned up {len(expired_keys)} expired contexts")
+    
+    def _is_context_expired(self, context_key: str) -> bool:
+        """Check if a context is expired."""
+        timestamp = self._context_timestamps.get(context_key)
+        if not timestamp:
+            return True
+        
+        ttl = self._context_ttl.get(context_key, self.DEFAULT_CONTEXT_TTL)
+        return time.time() - timestamp > ttl
+    
+    def _detect_cross_contamination(
+        self,
+        context_key: str,
+        context: UserExecutionContext
+    ) -> None:
+        """Detect potential cross-user contamination."""
+        if not self._cross_contamination_detection:
+            return
+        
+        # Check for suspicious data patterns
+        suspicious_patterns = []
+        
+        # Check agent context for other user IDs
+        if hasattr(context, 'agent_context') and context.agent_context:
+            for key, value in context.agent_context.items():
+                if isinstance(value, str) and 'user_' in value.lower():
+                    # Check if this contains other user IDs
+                    for other_key in self._contexts:
+                        if other_key != context_key:
+                            other_context = self._contexts[other_key]
+                            if other_context.user_id in str(value):
+                                suspicious_patterns.append(
+                                    f"Found other user ID {other_context.user_id} in agent_context"
+                                )
+        
+        if suspicious_patterns:
+            self._record_audit_event(
+                context_key,
+                "cross_contamination_detected",
+                {
+                    "patterns": suspicious_patterns,
+                    "severity": "HIGH",
+                    "user_id": context.user_id
+                }
+            )
+            
+            logger.warning(
+                f"Cross-contamination detected in context {context_key}: "
+                f"{suspicious_patterns}"
+            )
+    
+    def _validate_memory_isolation(
+        self,
+        context_key: str,
+        context: UserExecutionContext
+    ) -> None:
+        """Validate memory isolation between contexts."""
+        if not self._memory_isolation:
+            return
+        
+        with self._memory_lock:
+            context_refs = self._memory_references.get(context_key, set())
+            
+            # Check for shared memory references with other contexts
+            for other_key, other_refs in self._memory_references.items():
+                if other_key != context_key:
+                    shared_refs = context_refs & other_refs
+                    if shared_refs:
+                        self._record_audit_event(
+                            context_key,
+                            "memory_isolation_violation",
+                            {
+                                "shared_with": other_key,
+                                "shared_references": len(shared_refs),
+                                "severity": "CRITICAL"
+                            }
+                        )
+                        
+                        raise ContextIsolationError(
+                            f"Memory isolation violation: Context {context_key} "
+                            f"shares memory references with {other_key}"
+                        )
+    
+    def _find_context_key_for_user(self, user_id: str) -> Optional[str]:
+        """Find active context key for a user."""
+        with self._user_contexts_lock:
+            user_context_keys = self._user_contexts.get(user_id, set())
+            
+            if not user_context_keys:
+                return None
+            
+            # Return the most recently created context
+            most_recent_key = None
+            most_recent_time = 0
+            
+            for context_key in user_context_keys:
+                if context_key in self._context_timestamps:
+                    timestamp = self._context_timestamps[context_key]
+                    if timestamp > most_recent_time:
+                        most_recent_time = timestamp
+                        most_recent_key = context_key
+            
+            return most_recent_key
+    
+    def _record_audit_event(
+        self,
+        context_key: str,
+        event_type: str,
+        event_data: Dict[str, Any]
+    ) -> None:
+        """Record audit event for compliance."""
+        if not self._enable_audit_trail:
+            return
+        
+        with self._audit_lock:
+            event = {
+                "timestamp": time.time(),
+                "event_type": event_type,
+                "context_key": context_key,
+                "event_data": event_data,
+                "manager_id": id(self)
+            }
+            
+            self._audit_trail[context_key].append(event)
+            
+            # Limit audit trail size per context
+            max_events_per_context = 1000
+            if len(self._audit_trail[context_key]) > max_events_per_context:
+                self._audit_trail[context_key] = self._audit_trail[context_key][-max_events_per_context:]
+
+
 # Export all public classes and functions
 __all__ = [
     'UserExecutionContext',
+    'UserContextManager',  # NEW: Adding the UserContextManager class
     'UserContextFactory',
     'UserExecutionContextFactory',  # Alias for compatibility
     'InvalidContextError', 

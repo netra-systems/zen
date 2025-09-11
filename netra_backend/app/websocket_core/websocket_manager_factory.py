@@ -95,23 +95,6 @@ class FactoryMetrics:
         }
 
 
-class FactoryInitializationError(Exception):
-    """Raised when WebSocket factory initialization fails SSOT validation."""
-    pass
-
-
-class ConnectionLifecycleManager:
-    """Compatibility class for connection lifecycle management."""
-    
-    def __init__(self, manager: WebSocketManager):
-        self.manager = manager
-        
-    async def handle_connection_lifecycle(self, connection_id: str):
-        """Handle connection lifecycle events."""
-        # Delegate to the unified WebSocketManager
-        pass
-
-
 def create_defensive_user_execution_context(
     user_id: str, 
     websocket_client_id: Optional[str] = None,
@@ -286,55 +269,42 @@ def _validate_ssot_user_context(user_context) -> bool:
     return True
 
 
-class WebSocketManagerFactory:
+def _validate_ssot_user_context_staging_safe(user_context) -> bool:
     """
-    COMPATIBILITY CLASS: Legacy factory class for backward compatibility.
+    STAGING-SAFE COMPATIBILITY FUNCTION: Validate SSOT user context with staging environment safety.
     
-    This class provides the same interface as the previous factory implementation
-    but uses the SSOT WebSocketManager under the hood.
+    This function provides validation of user execution context specifically for staging
+    environments where additional safety checks may be required.
+    
+    Args:
+        user_context: UserExecutionContext to validate
+        
+    Returns:
+        bool: True if context is valid and staging-safe
     """
+    # First perform standard SSOT validation
+    if not _validate_ssot_user_context(user_context):
+        return False
     
-    def __init__(self, connection_pool=None, id_manager=None, config=None, user_context_factory=None, **kwargs):
-        """
-        Initialize WebSocketManagerFactory with validation.
-        
-        For SSOT validation tests, certain missing dependencies should raise errors.
-        """
-        # Store parameters for SSOT validation tests
-        self.connection_pool = connection_pool
-        self.id_manager = id_manager
-        self.config = config
-        self.user_context_factory = user_context_factory
-        self.kwargs = kwargs
-        
-        # SSOT validation - raise error if None values are explicitly provided for critical dependencies
-        none_dependencies = []
-        if connection_pool is None:
-            none_dependencies.append("connection_pool")
-        if id_manager is None:
-            none_dependencies.append("id_manager")
-        if user_context_factory is None:
-            none_dependencies.append("user_context_factory")
-            
-        if none_dependencies:
-            raise FactoryInitializationError(
-                f"SSOT violation: missing required dependencies: {', '.join(none_dependencies)}"
-            )
+    # Additional staging safety checks
+    if hasattr(user_context, 'environment') and user_context.environment == 'production':
+        logger.error("Production context in staging validation - potential configuration error")
+        return False
     
-    @staticmethod
-    def create(user_context=None, user_id: Optional[UserID] = None):
-        """Create WebSocket manager using static factory method."""
-        return create_websocket_manager(user_context=user_context, user_id=user_id)
+    # Validate test-specific attributes for staging safety
+    if hasattr(user_context, 'is_test_context') and not user_context.is_test_context:
+        logger.warning("Non-test context in staging validation - may not be safe")
     
-    @classmethod
-    def create_for_user(cls, user_id: UserID):
-        """Create WebSocket manager for specific user ID."""
-        return create_websocket_manager(user_id=user_id)
+    # Check for staging-specific isolation requirements
+    if hasattr(user_context, 'features') and user_context.features:
+        staging_unsafe_features = ['production_database', 'real_payment_processing', 'external_apis']
+        for feature in staging_unsafe_features:
+            if user_context.features.get(feature, False):
+                logger.error(f"Staging-unsafe feature '{feature}' enabled in context")
+                return False
     
-    @classmethod  
-    def create_isolated(cls, user_context):
-        """Create isolated WebSocket manager with user context."""
-        return create_websocket_manager(user_context=user_context)
+    logger.debug("User context validation passed - staging-safe and SSOT compliant")
+    return True
 
 
 # For compatibility with any tests that expect the manager class directly
@@ -396,52 +366,6 @@ class ConnectionLifecycleManager:
             await self.unregister_connection(conn_id)
         
         return len(stale_connections)
-
-
-def create_defensive_user_execution_context(user_id: UserID, **kwargs):
-    """
-    COMPATIBILITY FUNCTION: Create defensive user execution context.
-    
-    This function provides backward compatibility for tests that expect
-    defensive context creation patterns. The SSOT implementation handles
-    user context creation through the standard UserExecutionContext.
-    
-    Args:
-        user_id: User ID for context creation
-        **kwargs: Additional context parameters
-    
-    Returns:
-        UserExecutionContext: Configured user execution context
-    """
-    logger.info(f"Creating defensive user execution context for user: {user_id}")
-    
-    try:
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        # Ensure proper UserID type
-        typed_user_id = ensure_user_id(user_id)
-        
-        # Create defensive context with validation
-        context = UserExecutionContext(
-            user_id=typed_user_id,
-            request_id=kwargs.get("request_id", f"defensive_context_{typed_user_id}"),
-            environment=kwargs.get("environment", "test"),
-            thread_id=kwargs.get("thread_id"),
-            session_id=kwargs.get("session_id"),
-            features=kwargs.get("features", {}),
-            configuration_overrides=kwargs.get("configuration_overrides", {})
-        )
-        
-        # Add defensive validation
-        if not context.user_id:
-            raise FactoryInitializationError("User ID required for defensive context")
-        
-        logger.debug(f"Defensive user execution context created: {context.request_id}")
-        return context
-        
-    except Exception as e:
-        logger.error(f"Failed to create defensive user execution context: {e}")
-        raise FactoryInitializationError(f"Context creation failed: {e}")
 
 
 # ===== ENHANCED WEBSOCKET MANAGER FACTORY CLASS =====
@@ -512,9 +436,11 @@ __all__ = [
     'ManagerMetrics',
     '_factory_instance',
     '_factory_lock',
-    '_validate_ssot_user_context'
+    '_validate_ssot_user_context',
+    '_validate_ssot_user_context_staging_safe'
 ]
 
+<<<<<<< HEAD
 
 def _validate_ssot_user_context(user_context) -> None:
     """

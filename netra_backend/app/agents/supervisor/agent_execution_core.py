@@ -51,6 +51,27 @@ from netra_backend.app.core.agent_execution_tracker import (
 logger = central_logger.get_logger(__name__)
 
 
+def get_agent_state_tracker():
+    """Compatibility function for legacy imports.
+    
+    DEPRECATED: This function is provided for backward compatibility only.
+    Use get_execution_tracker() directly from netra_backend.app.core.execution_tracker.
+    
+    Returns:
+        ExecutionTracker: The global execution tracker instance
+    """
+    import warnings
+    warnings.warn(
+        "get_agent_state_tracker() is deprecated. Use get_execution_tracker() directly.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    # Return the same execution tracker instance
+    from netra_backend.app.core.execution_tracker import get_execution_tracker
+    return get_execution_tracker()
+
+
 class AgentExecutionCore:
     """Enhanced agent execution with death detection and recovery.
     
@@ -165,17 +186,23 @@ class AgentExecutionCore:
             timeout_seconds=timeout or self.DEFAULT_TIMEOUT
         )
         
-        # CRITICAL REMEDIATION: Start execution tracking for comprehensive monitoring
-        state_exec_id = self.agent_tracker.start_execution(
+        # CRITICAL REMEDIATION: Create and start execution tracking for comprehensive monitoring
+        state_exec_id = self.agent_tracker.create_execution(
             agent_name=context.agent_name,
-            run_id=str(context.run_id),
+            thread_id=user_execution_context.thread_id,
             user_id=user_execution_context.user_id,
+            timeout_seconds=timeout or self.DEFAULT_TIMEOUT,
             metadata={
                 'correlation_id': trace_context.correlation_id,
-                'thread_id': user_execution_context.thread_id,
+                'run_id': str(context.run_id),
                 'timeout': timeout or self.DEFAULT_TIMEOUT
             }
         )
+        
+        # Start the execution
+        started = self.agent_tracker.start_execution(state_exec_id)
+        if not started:
+            raise RuntimeError(f"Failed to start execution tracking for {state_exec_id}")
         
         # DISABLED: Heartbeat feature suppresses errors - see AGENT_RELIABILITY_ERROR_SUPPRESSION_ANALYSIS_20250903.md
         # The heartbeat system was found to:
@@ -197,21 +224,36 @@ class AgentExecutionCore:
                 # Start execution tracking
                 await self.execution_tracker.start_execution(exec_id)
                 
-                # CRITICAL REMEDIATION: Transition to websocket setup phase
-                await self.agent_tracker.transition_phase(
+                # CRITICAL REMEDIATION: Transition through proper phase sequence
+                await self.agent_tracker.transition_state(
                     state_exec_id, 
                     AgentExecutionPhase.WEBSOCKET_SETUP,
                     websocket_manager=self.websocket_bridge
+                )
+                
+                # Transition to context validation
+                await self.agent_tracker.transition_state(
+                    state_exec_id, 
+                    AgentExecutionPhase.CONTEXT_VALIDATION,
+                    metadata={"user_context_valid": True}
                 )
                 
                 # Add trace event
                 trace_context.add_event("agent.started")
                 
                 # CRITICAL REMEDIATION: Transition to starting phase with WebSocket events
-                await self.agent_tracker.transition_phase(
+                await self.agent_tracker.transition_state(
                     state_exec_id, 
                     AgentExecutionPhase.STARTING,
                     metadata={"trace_context": trace_context.correlation_id},
+                    websocket_manager=self.websocket_bridge
+                )
+                
+                # Transition to thinking phase before execution
+                await self.agent_tracker.transition_state(
+                    state_exec_id, 
+                    AgentExecutionPhase.THINKING,
+                    metadata={"agent_name": context.agent_name},
                     websocket_manager=self.websocket_bridge
                 )
                 
@@ -233,13 +275,13 @@ class AgentExecutionCore:
                     )
                     
                     # CRITICAL REMEDIATION: Transition to failed phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.FAILED,
                         metadata={"error": "Agent not found"},
                         websocket_manager=self.websocket_bridge
                     )
-                    self.agent_tracker.complete_execution(state_exec_id, success=False)
+                    self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
                     
                     # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
                     # Removing manual call to prevent duplicate notifications
@@ -263,11 +305,9 @@ class AgentExecutionCore:
                             )
                     
                     # CRITICAL: Execute agent with timeout management to prevent blocking
-                    result = await self.agent_tracker.execute_agent_with_timeout(
-                        agent_execution_wrapper,
-                        context.agent_name,
-                        str(context.run_id),
-                        self.websocket_bridge
+                    result = await asyncio.wait_for(
+                        agent_execution_wrapper(),
+                        timeout=timeout or self.DEFAULT_TIMEOUT
                     )
                     
                 except CircuitBreakerOpenError as e:
@@ -275,7 +315,7 @@ class AgentExecutionCore:
                     logger.error(f"🚫 Circuit breaker open for {context.agent_name}: {e}")
                     
                     # Transition to circuit breaker open phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.CIRCUIT_BREAKER_OPEN,
                         metadata={'error': str(e), 'error_type': 'circuit_breaker'},
@@ -297,21 +337,32 @@ class AgentExecutionCore:
                     )
                     
                 except TimeoutError as e:
-                    # Agent execution timed out
-                    logger.error(f"⏰ Agent {context.agent_name} timed out: {e}")
+                    # Agent execution timed out - provide detailed context
+                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
+                    logger.error(
+                        f"⏰ TIMEOUT: Agent '{context.agent_name}' exceeded timeout limit of {timeout_duration}s. "
+                        f"User: {user_execution_context.user_id}, Thread: {user_execution_context.thread_id}, "
+                        f"Run ID: {context.run_id}. This may indicate the agent is stuck or processing "
+                        f"a complex request. Original error: {e}"
+                    )
                     
                     # Transition to timeout phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.TIMEOUT,
                         metadata={'error': str(e), 'error_type': 'timeout'},
                         websocket_manager=self.websocket_bridge
                     )
                     
+                    # Create detailed timeout result with enhanced context
+                    timeout_duration = timeout or self.DEFAULT_TIMEOUT
                     result = AgentExecutionResult(
                         success=False,
                         agent_name=context.agent_name,
-                        error=str(e),
+                        error=f"Agent '{context.agent_name}' timed out after {timeout_duration}s. "
+                              f"Execution exceeded maximum allowed time, possibly due to complex processing "
+                              f"or external resource delays. User: {user_execution_context.user_id}, "
+                              f"Run ID: {context.run_id}.",
                         duration=0.0
                     )
             
@@ -324,14 +375,32 @@ class AgentExecutionCore:
                     trace_context.add_event("agent.completed")
                     await self.execution_tracker.complete_execution(exec_id, result=result)
                     
-                    # Transition to completion phase
-                    await self.agent_tracker.transition_phase(
+                    # Transition through proper completion sequence: THINKING -> TOOL_PREPARATION -> TOOL_EXECUTION -> RESULT_PROCESSING
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.TOOL_PREPARATION,
+                        metadata={"preparing_tools": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.TOOL_EXECUTION,
+                        metadata={"executing_tools": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
+                        state_exec_id, 
+                        AgentExecutionPhase.RESULT_PROCESSING,
+                        metadata={"processing_result": True},
+                        websocket_manager=self.websocket_bridge
+                    )
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.COMPLETING,
                         metadata={"success": True},
                         websocket_manager=self.websocket_bridge
                     )
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.COMPLETED,
                         metadata={"result": "success"},
@@ -341,7 +410,8 @@ class AgentExecutionCore:
                     # NOTE: agent_completed event is automatically sent by agent tracker during COMPLETED phase transition
                     # No need to manually call notify_agent_completed here
                     
-                    self.agent_tracker.complete_execution(state_exec_id, success=True)
+                    # Mark execution as successful in tracker state
+                    self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
                 else:
                     trace_context.add_event("agent.error", {"error": result.error})
                     await self.execution_tracker.complete_execution(
@@ -350,13 +420,13 @@ class AgentExecutionCore:
                     )
                     
                     # Transition to failed phase
-                    await self.agent_tracker.transition_phase(
+                    await self.agent_tracker.transition_state(
                         state_exec_id, 
                         AgentExecutionPhase.FAILED,
                         metadata={'error': result.error or 'Unknown error'},
                         websocket_manager=self.websocket_bridge
                     )
-                    self.agent_tracker.complete_execution(state_exec_id, success=False)
+                    self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.FAILED)
                     
                     # NOTE: Error notification is automatically sent by state_tracker during FAILED phase transition above
                     # Removing manual call to prevent duplicate notifications
@@ -445,11 +515,19 @@ class AgentExecutionCore:
                     
         except asyncio.TimeoutError:
             duration = time.time() - start_time
-            logger.error(f"Agent {context.agent_name} timed out after {timeout_seconds}s")
+            logger.error(
+                f"⏰ EXECUTION TIMEOUT: Agent '{context.agent_name}' exceeded execution timeout "
+                f"of {timeout_seconds}s (duration: {duration:.2f}s). User: {user_execution_context.user_id}, "
+                f"Thread: {user_execution_context.thread_id}, Run ID: {context.run_id}. "
+                f"This indicates the agent may be stuck in processing or waiting for external resources."
+            )
             return AgentExecutionResult(
                 success=False,
                 agent_name=context.agent_name,
-                error=f"Agent execution timeout after {timeout_seconds}s",
+                error=f"Agent '{context.agent_name}' execution timeout after {timeout_seconds}s. "
+                      f"The agent exceeded the maximum allowed execution time, possibly due to "
+                      f"complex processing or external resource delays. User: {user_execution_context.user_id}, "
+                      f"Run ID: {context.run_id}.",
                 duration=duration,
                 metrics=self._calculate_performance_metrics(start_time, heartbeat)
             )

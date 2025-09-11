@@ -37,9 +37,20 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         self.mock_registry = Mock()
         self.mock_websocket_bridge = AsyncMock()
         self.mock_execution_tracker = AsyncMock()
+        
+        # Create properly mocked agent with all required methods
         self.mock_agent = AsyncMock()
+        self.mock_agent.set_trace_context = AsyncMock()
+        self.mock_agent.set_websocket_bridge = AsyncMock()
+        self.mock_agent.execution_engine = AsyncMock()
+        self.mock_agent.execution_engine.set_websocket_bridge = AsyncMock()
         
         # Setup execution tracker mock
+        self.mock_execution_tracker.collect_metrics = AsyncMock(return_value={})
+        self.mock_execution_tracker.register_execution = AsyncMock()
+        self.mock_execution_tracker.start_execution = AsyncMock()
+        self.mock_execution_tracker.complete_execution = AsyncMock()
+        
         with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_execution_tracker') as mock_get_tracker:
             mock_get_tracker.return_value = self.mock_execution_tracker
             self.execution_core = AgentExecutionCore(
@@ -51,7 +62,9 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         self.test_run_id = uuid4()
         self.test_context = AgentExecutionContext(
             agent_name="test_agent",
-            run_id=self.test_run_id,
+            run_id=str(self.test_run_id),
+            thread_id="test_thread_123",
+            user_id="test_user_123",
             retry_count=0
         )
         
@@ -73,7 +86,11 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         self.mock_registry.get.return_value = self.mock_agent
         
         # Mock successful agent execution result
-        expected_result = {"success": True, "data": "test_result"}
+        expected_result = AgentExecutionResult(
+            success=True,
+            agent_name="test_agent",
+            data="test_result"
+        )
         self.mock_agent.execute.return_value = expected_result
         
         # Execute agent
@@ -229,7 +246,10 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
         self.mock_registry.get.return_value = self.mock_agent
-        self.mock_agent.execute.return_value = {"success": True}
+        self.mock_agent.execute.return_value = AgentExecutionResult(
+            success=True,
+            agent_name="test_agent"
+        )
         
         # Execute agent
         await self.execution_core.execute_agent(
@@ -304,7 +324,11 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
         self.mock_registry.get.return_value = self.mock_agent
-        self.mock_agent.execute.return_value = {"success": True, "data": "test"}
+        self.mock_agent.execute.return_value = AgentExecutionResult(
+            success=True,
+            agent_name="test_agent",
+            data="test"
+        )
         
         # Mock metrics collection
         test_metrics = {
@@ -344,7 +368,10 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
         self.mock_registry.get.return_value = self.mock_agent
-        self.mock_agent.execute.return_value = {"success": True}
+        self.mock_agent.execute.return_value = AgentExecutionResult(
+            success=True,
+            agent_name="test_agent"
+        )
         
         # Mock trace context creation
         with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_unified_trace_context') as mock_get_trace:
@@ -382,7 +409,10 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         exec_id = uuid4()
         self.mock_execution_tracker.register_execution.return_value = exec_id
         self.mock_registry.get.return_value = self.mock_agent
-        self.mock_agent.execute.return_value = {"success": True}
+        self.mock_agent.execute.return_value = AgentExecutionResult(
+            success=True,
+            agent_name="test_agent"
+        )
         
         # Execute agent
         result = await self.execution_core.execute_agent(

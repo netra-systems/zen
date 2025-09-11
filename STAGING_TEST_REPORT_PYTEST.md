@@ -1,44 +1,51 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-10 18:24:30
+**Generated:** 2025-09-10 22:32:01
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
-- **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Total Tests:** 2
+- **Passed:** 1 (50.0%)
+- **Failed:** 1 (50.0%)
 - **Skipped:** 0
-- **Duration:** 14.27 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 1.79 seconds
+- **Pass Rate:** 50.0%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_websocket_connection_real | FAIL failed | 13.583s | test_priority1_critical.py |
+| test_health_check | PASS passed | 0.317s | test_1_websocket_events_staging.py |
+| test_websocket_connection | FAIL failed | 0.163s | test_1_websocket_events_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_001_websocket_connection_real
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_priority1_critical.py
-- **Duration:** 13.583s
-- **Error:** tests\e2e\staging\test_priority1_critical.py:38: in test_001_websocket_connection_real
-    assert response.status_code == 200, f"Backend not healthy: {response.text}"
-E   AssertionError: Backend not healthy: Service Unavailable
-E   assert 503 == 200
-E    +  where 503 = <Response [503 Service Unavailable]>.status_code...
+### FAILED: test_websocket_connection
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py
+- **Duration:** 0.163s
+- **Error:** tests/e2e/staging_test_base.py:308: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/anthony/Documents/GitHub/netra-apex/tests/e2e/staging/test_1_websocket_events_staging.py:80: in test_websocket_connection
+    ???
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    awai...
 
 ## Pytest Output Format
 
 ```
-test_priority1_critical.py::test_001_websocket_connection_real FAILED
+test_1_websocket_events_staging.py::test_health_check PASSED
+test_1_websocket_events_staging.py::test_websocket_connection FAILED
 
 ==================================================
-0 passed, 1 failed in 14.27s
+1 passed, 1 failed in 1.79s
 ```
 
 ## Test Coverage Matrix

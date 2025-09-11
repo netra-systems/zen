@@ -1313,3 +1313,7 @@ class E2EAuthenticatedTestCase(SSotBaseTestCase):
         if self.test_user:
             await cleanup_test_user(self.test_user)
         await super().tearDown() if hasattr(super(), 'tearDown') else None
+
+
+# COMPATIBILITY ALIAS: Export create_authenticated_user as create_authenticated_test_user for backward compatibility
+create_authenticated_test_user = create_authenticated_user

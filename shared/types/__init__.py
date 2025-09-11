@@ -54,6 +54,31 @@ from .agent_types import (
     TypedAgentResult
 )
 
+# Environment and Service types - imported for compatibility
+try:
+    from netra_backend.app.schemas.startup_types import ServiceType
+except ImportError:
+    # Define ServiceType enum locally if netra_backend not available
+    from enum import Enum
+    class ServiceType(str, Enum):
+        """Service types for startup tracking."""
+        BACKEND = "backend"
+        FRONTEND = "frontend"
+
+# Environment types - imported from shared environment loading SSOT
+try:
+    from shared.environment_loading_ssot import EnvironmentType
+except ImportError:
+    # Define EnvironmentType enum locally as fallback
+    from enum import Enum
+    class EnvironmentType(str, Enum):
+        """Standard environment types."""
+        DEVELOPMENT = "development"
+        STAGING = "staging" 
+        PRODUCTION = "production"
+        TEST = "test"
+        LOCAL = "local"
+
 __all__ = [
     # Legacy types
     "PerformanceMetrics", 
@@ -93,5 +118,11 @@ __all__ = [
     
     # Migration and compatibility utilities
     "upgrade_legacy_context", "downgrade_to_legacy_context",
-    "to_string_dict", "from_string_dict"
+    "to_string_dict", "from_string_dict",
+    
+    # Service types
+    "ServiceType",
+    
+    # Environment types
+    "EnvironmentType"
 ]

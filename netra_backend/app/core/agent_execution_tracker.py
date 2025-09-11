@@ -1150,3 +1150,21 @@ async def shutdown_tracker():
     tracker = get_execution_tracker()
     await tracker.stop_monitoring()
     logger.info("Shutdown agent execution tracker")
+
+
+# COMPATIBILITY ALIAS: Export AgentExecutionTracker as ExecutionTracker for backward compatibility
+ExecutionTracker = AgentExecutionTracker
+
+
+# COMPATIBILITY FUNCTION: get_agent_state_tracker for backward compatibility
+def get_agent_state_tracker() -> AgentExecutionTracker:
+    """
+    Get the global agent state tracker instance.
+    
+    This is a compatibility function that returns the same instance as get_execution_tracker().
+    Added to support legacy imports that expect this function name.
+    
+    Returns:
+        AgentExecutionTracker: The global execution tracker instance
+    """
+    return get_execution_tracker()

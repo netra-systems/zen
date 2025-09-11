@@ -23,10 +23,14 @@ from netra_backend.app.websocket_core.websocket_manager import (
     _serialize_message_safely
 )
 
+# Import UnifiedWebSocketManager from unified_manager for compatibility
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+
 # Re-export for compatibility
 __all__ = [
     'WebSocketManager',
     'WebSocketConnection', 
     'WebSocketManagerProtocol',
-    '_serialize_message_safely'
+    '_serialize_message_safely',
+    'UnifiedWebSocketManager'
 ]
