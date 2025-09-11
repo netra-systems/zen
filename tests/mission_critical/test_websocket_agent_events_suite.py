@@ -52,6 +52,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 # Import WebSocket test utilities - REAL SERVICES ONLY per CLAUDE.md
 from tests.mission_critical.websocket_real_test_base import (
     # require_docker_services,  # Temporarily disabled - regression in GCP integration
+    require_docker_services_smart,  # Smart Docker check with graceful degradation
     RealWebSocketTestBase,  # Real WebSocket test base only
     RealWebSocketTestConfig,
     assert_agent_events_received,
@@ -63,6 +64,22 @@ from tests.mission_critical.websocket_real_test_base import (
 WebSocketTestBase = RealWebSocketTestBase
 from test_framework.test_context import TestContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
+
+
+# ============================================================================
+# SESSION-LEVEL DOCKER AVAILABILITY CHECK
+# ============================================================================
+
+@pytest.fixture(autouse=True, scope="session")
+def require_docker_services_session():
+    """Session-level Docker services requirement with graceful degradation.
+    
+    Prevents 120s+ hangs by using fast Docker availability check.
+    Skips entire test session if Docker unavailable.
+    
+    Business Impact: Prevents mission critical test suite blockage affecting $500K+ ARR validation.
+    """
+    require_docker_services_smart()
 
 
 # ============================================================================

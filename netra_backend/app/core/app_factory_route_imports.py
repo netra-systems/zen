@@ -103,12 +103,36 @@ def _import_auth_routers() -> dict:
 def _import_core_routers() -> dict:
     """Import core functionality routers"""
     from netra_backend.app.routes.llm_cache import router as llm_cache_router
-    from netra_backend.app.routes.mcp import router as mcp_router
     from netra_backend.app.routes.threads_route import router as threads_router
     from netra_backend.app.routes.messages import router as messages_router
     from netra_backend.app.routes.messages_root import router as messages_root_router
     from netra_backend.app.routes.events_stream import router as events_stream_router
-    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router, "messages_router": messages_router, "messages_root_router": messages_root_router, "events_stream_router": events_stream_router}
+    
+    # Conditionally import MCP router based on dependency availability
+    mcp_router = None
+    try:
+        from netra_backend.app.routes.mcp import router as mcp_router, is_mcp_available
+        if not is_mcp_available():
+            mcp_router = None
+            import logging
+            logging.getLogger(__name__).info("🔄 MCP router disabled - dependencies not available")
+    except ImportError as e:
+        import logging
+        logging.getLogger(__name__).warning(f"⚠️ MCP router not available: {e}")
+    
+    routers = {
+        "llm_cache_router": llm_cache_router, 
+        "threads_router": threads_router, 
+        "messages_router": messages_router, 
+        "messages_root_router": messages_root_router, 
+        "events_stream_router": events_stream_router
+    }
+    
+    # Only add MCP router if it's available
+    if mcp_router is not None:
+        routers["mcp_router"] = mcp_router
+        
+    return routers
 
 
 def _import_extended_routers() -> dict:

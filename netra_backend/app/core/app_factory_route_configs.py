@@ -32,12 +32,19 @@ def _get_auth_route_configs(modules: dict) -> dict:
 
 def _get_api_route_configs(modules: dict) -> dict:
     """Get API route configurations."""
-    return {"threads": (modules["threads_router"], "", ["threads"]),
+    configs = {
+        "threads": (modules["threads_router"], "", ["threads"]),
         "messages": (modules["messages_router"], "/api/chat", ["messages"]),
         "messages_root": (modules["messages_root_router"], "/api/messages", ["messages-root"]),
         "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
-        "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"]),
-        "events_stream": (modules["events_stream_router"], "/api/events", ["events"])}
+        "events_stream": (modules["events_stream_router"], "/api/events", ["events"])
+    }
+    
+    # Only include MCP router if it's available
+    if "mcp_router" in modules and modules["mcp_router"] is not None:
+        configs["mcp"] = (modules["mcp_router"], "/api/mcp", ["mcp"])
+    
+    return configs
 
 
 def _get_service_route_configs(modules: dict) -> dict:

@@ -285,15 +285,17 @@ class UnifiedWebSocketAuthenticator:
         self._websocket_auth_failures = 0
         self._connection_states_seen = {}
         
-        # PHASE 1 FIX: Authentication circuit breaker for race condition protection
+        # PHASE 1 FIX: Enhanced authentication circuit breaker for Cloud Run race condition protection
         self._circuit_breaker = {
             "failure_count": 0,
-            "failure_threshold": 5,  # Trip after 5 consecutive failures
-            "reset_timeout": 30.0,  # Reset after 30 seconds
+            "failure_threshold": 3,  # More sensitive for Cloud Run (trip after 3 failures)
+            "reset_timeout": 15.0,  # Faster reset for development velocity (15 seconds)
             "last_failure_time": None,
             "state": "CLOSED",  # CLOSED (normal), OPEN (failing), HALF_OPEN (testing)
             "concurrent_token_cache": {},  # Cache tokens during concurrent access
-            "token_cache_lock": asyncio.Lock()
+            "token_cache_lock": asyncio.Lock(),
+            "cloud_run_backoff": 0.0,  # Additional backoff for Cloud Run environments
+            "handshake_stabilization_delay": 0.2  # Cloud Run handshake stabilization
         }
         
         logger.info("UnifiedWebSocketAuthenticator initialized with SSOT compliance and circuit breaker protection")
@@ -854,7 +856,7 @@ class UnifiedWebSocketAuthenticator:
     
     async def _apply_handshake_timing_fix(self, websocket: WebSocket):
         """
-        PHASE 1 FIX: Apply timing fixes for WebSocket handshake completion.
+        PHASE 1 FIX: Apply timing fixes for WebSocket handshake completion with Cloud Run race protection.
         
         This method addresses race conditions in Cloud Run environments where
         authentication occurs before the WebSocket handshake is fully stable.
@@ -866,6 +868,7 @@ class UnifiedWebSocketAuthenticator:
             from shared.isolated_environment import get_env
             env = get_env()
             environment = env.get("ENVIRONMENT", "development").lower()
+            is_cloud_run = bool(env.get("K_SERVICE"))  # Detect Cloud Run
             
             # PHASE 1 FIX: Import Windows-safe asyncio patterns
             from netra_backend.app.core.windows_asyncio_safe import (
@@ -873,18 +876,36 @@ class UnifiedWebSocketAuthenticator:
                 windows_safe_progressive_delay
             )
             
-            if environment in ["staging", "production"]:
-                # Cloud Run environments need longer stabilization
-                logger.info("PHASE 1 FIX: Applying Cloud Run handshake stabilization")
-                await windows_safe_sleep(0.1)  # 100ms for Cloud Run stability
+            if is_cloud_run or environment in ["staging", "production"]:
+                # Cloud Run environments need enhanced race condition protection
+                base_delay = self._circuit_breaker["handshake_stabilization_delay"]
+                cloud_run_backoff = self._circuit_breaker["cloud_run_backoff"]
+                total_delay = base_delay + cloud_run_backoff
                 
-                # Progressive validation with retries
-                for attempt in range(3):
+                logger.info(f"PHASE 1 FIX: Applying Cloud Run handshake stabilization (delay: {total_delay:.3f}s)")
+                await windows_safe_sleep(total_delay)
+                
+                # Progressive validation with enhanced retry for Cloud Run
+                max_attempts = 5 if is_cloud_run else 3
+                for attempt in range(max_attempts):
                     from fastapi.websockets import WebSocketState
                     if hasattr(websocket, 'client_state') and websocket.client_state == WebSocketState.CONNECTED:
-                        logger.info(f"PHASE 1 FIX: WebSocket stabilized after {attempt + 1} attempts")
+                        logger.info(f"PHASE 1 FIX: WebSocket stabilized after {attempt + 1} attempts (Cloud Run)")
+                        # Reduce backoff on success
+                        if self._circuit_breaker["cloud_run_backoff"] > 0:
+                            self._circuit_breaker["cloud_run_backoff"] = max(0, 
+                                self._circuit_breaker["cloud_run_backoff"] - 0.05)
                         break
-                    await windows_safe_progressive_delay(attempt, 0.05, 0.15)
+                    
+                    # Progressive delay with Cloud Run consideration
+                    retry_delay = 0.05 * (attempt + 1) if is_cloud_run else 0.05
+                    await windows_safe_progressive_delay(attempt, retry_delay, 0.25)
+                else:
+                    # If stabilization failed, increase backoff for next connection
+                    if is_cloud_run:
+                        self._circuit_breaker["cloud_run_backoff"] = min(1.0,
+                            self._circuit_breaker["cloud_run_backoff"] + 0.1)
+                        logger.warning(f"PHASE 1 FIX: Cloud Run handshake stabilization incomplete, increased backoff to {self._circuit_breaker['cloud_run_backoff']:.3f}s")
                 
             else:
                 # Development/testing environments
@@ -899,8 +920,8 @@ class UnifiedWebSocketAuthenticator:
         websocket: WebSocket, 
         e2e_context: Optional[Dict[str, Any]] = None,
         preliminary_connection_id: Optional[str] = None,
-        max_retries: int = 3,
-        retry_delays: List[float] = [0.1, 0.2, 0.5]
+        max_retries: int = 5,  # Increased for Cloud Run race conditions
+        retry_delays: List[float] = [0.1, 0.2, 0.5, 1.0, 2.0]  # Progressive backoff
     ) -> Tuple[Any, Optional[UserExecutionContext]]:
         """
         PHASE 1 FIX: Authenticate WebSocket with retry mechanism for race condition protection.

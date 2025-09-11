@@ -333,14 +333,48 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     db_session = with_test_database
     env = get_env()
     
-    # Determine service URLs based on environment
-    backend_port = env.get("BACKEND_PORT", "8000")
-    auth_port = env.get("AUTH_SERVICE_PORT", "8081")
-    redis_port = env.get("REDIS_PORT", "6381")  # Test Redis port
+    # FIVE-WHYS FIX: Environment-aware service discovery for staging/production testing
+    environment = env.get("ENVIRONMENT", "development").lower()
+    is_staging = environment == "staging" or "staging" in env.get("GOOGLE_CLOUD_PROJECT", "").lower()
+    is_production = environment == "production" or "prod" in env.get("GOOGLE_CLOUD_PROJECT", "").lower()
     
-    backend_url = f"http://localhost:{backend_port}"
-    auth_url = f"http://localhost:{auth_port}"
-    redis_url = f"redis://localhost:{redis_port}"
+    # Determine service URLs based on environment
+    if is_staging:
+        # Staging GCP service URLs
+        backend_url = env.get("STAGING_BACKEND_URL", "https://api.staging.netrasystems.ai")
+        auth_url = env.get("STAGING_AUTH_URL", "https://auth.staging.netrasystems.ai") 
+        redis_url = env.get("STAGING_REDIS_URL", "redis://staging-redis:6379")
+        
+        # Extract ports from URLs for backward compatibility
+        backend_port = "443" if "https" in backend_url else "80"
+        auth_port = "443" if "https" in auth_url else "80"
+        redis_port = "6379"
+        
+        logger.info(f"FIVE-WHYS FIX: Using staging GCP service URLs - Backend: {backend_url}")
+        
+    elif is_production:
+        # Production GCP service URLs  
+        backend_url = env.get("PRODUCTION_BACKEND_URL", "https://api.netrasystems.ai")
+        auth_url = env.get("PRODUCTION_AUTH_URL", "https://auth.netrasystems.ai")
+        redis_url = env.get("PRODUCTION_REDIS_URL", "redis://production-redis:6379")
+        
+        backend_port = "443"
+        auth_port = "443" 
+        redis_port = "6379"
+        
+        logger.info(f"FIVE-WHYS FIX: Using production GCP service URLs - Backend: {backend_url}")
+        
+    else:
+        # Local development service URLs
+        backend_port = env.get("BACKEND_PORT", "8000")
+        auth_port = env.get("AUTH_SERVICE_PORT", "8081")
+        redis_port = env.get("REDIS_PORT", "6381")  # Test Redis port
+        
+        backend_url = f"http://localhost:{backend_port}"
+        auth_url = f"http://localhost:{auth_port}"
+        redis_url = f"redis://localhost:{redis_port}"
+        
+        logger.info(f"FIVE-WHYS FIX: Using local development service URLs - Backend: {backend_url}")
     
     # Validate services are reachable (optional - don't fail if not available)
     services_available = {
@@ -380,15 +414,25 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     except ImportError:
         logger.info("aiohttp not available - skipping service health checks")
     
+    # FIVE-WHYS FIX: Add missing configuration keys that E2E tests expect
+    websocket_url = backend_url.replace("http://", "ws://").replace("https://", "wss://") + "/ws"
+    
     yield {
         "backend_url": backend_url,
+        "backend_port": backend_port,  # FIX: Add missing backend_port key
         "auth_url": auth_url,
+        "auth_port": auth_port,  # Add auth_port for completeness
         "redis_url": redis_url,
+        "redis_port": redis_port,  # Add redis_port for completeness
+        "websocket_url": websocket_url,  # FIX: Add WebSocket URL for E2E tests
         "postgres": postgres_info["engine"],
         "db": db_session,
         "redis": redis_url,  # Add redis key for compatibility
         "database_url": postgres_info["database_url"],
         "environment": postgres_info["environment"],
+        "environment_name": environment,  # Add explicit environment name
+        "is_staging": is_staging,  # Add staging detection flag
+        "is_production": is_production,  # Add production detection flag
         "services_available": services_available,
         "database_available": postgres_info["available"],
         "redis_available": services_available["redis"]  # Add redis_available key
