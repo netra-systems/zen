@@ -85,13 +85,79 @@ latency: ~0.03-0.05s
 
 ---
 
+## TEST SUITE PLAN - COMPLETED
+
+### Test Categories & Expected Behavior
+
+#### Unit Tests (Easy - <30 seconds)
+**Import Path Validation**: Tests should **FAIL** with `ImportError: No module named 'netra_backend.app.agents.agent_websocket_bridge'` before fix, **PASS** after fix.
+
+**Key Tests**:
+- `test_agent_websocket_bridge_import_path_is_correct()` - **WILL FAIL** (ImportError)
+- `test_websocket_ssot_can_import_create_function()` - **WILL FAIL** (ImportError at lines 732/747)
+- `test_agent_websocket_bridge_function_signature()` - **WILL FAIL** (Cannot import to test)
+
+#### Integration Tests (Medium - 2-5 minutes, Real Services)  
+**WebSocket Agent Handler Registration**: Tests should **FAIL** with `ModuleNotFoundError` before fix, **PASS** with successful agent registration after fix.
+
+**Key Tests**:
+- `test_websocket_ssot_agent_handler_setup_with_real_user_context()` - **WILL FAIL** (ModuleNotFoundError)
+- `test_agent_message_routing_through_corrected_imports()` - **WILL FAIL** (422 errors on `/api/agent/v2/execute`)
+- `test_websocket_agent_event_delivery_after_import_fix()` - **WILL FAIL** (No WebSocket events delivered)
+
+#### E2E Tests (Hard - 5-10 minutes, GCP Staging)
+**Golden Path End-to-End**: Tests should **FAIL** with complete chat failure before fix, **PASS** with full workflow after fix.
+
+**Key Tests**:
+- `test_staging_chat_functionality_end_to_end()` - **WILL FAIL** (Complete chat failure in staging)
+- `test_staging_api_agent_execute_endpoint_success()` - **WILL FAIL** (422 Unprocessable Entity)
+- `test_staging_websocket_agent_events_real_browser()` - **WILL FAIL** (No agent events to browser)
+
+### Test Implementation Structure
+```
+tests/
+├── unit/websocket_ssot/test_import_path_validation.py
+├── integration/websocket_agent_bridge/test_websocket_ssot_agent_integration.py  
+└── e2e/staging/test_gcp_staging_websocket_agent_bridge_fix.py
+```
+
+### Golden Path Protection Focus
+- **$500K+ ARR Protection**: Complete chat workflow validation
+- **WebSocket Events**: All 5 business-critical events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
+- **Concurrent Users**: Multiple user agent execution validation
+- **No Silent Failures**: Explicit error detection and logging
+
+### Regression Prevention
+- Automated import path validation across all WebSocket files
+- Documentation consistency verification
+- CI/CD integration to catch future import errors
+- SSOT Import Registry compliance validation
+
+---
+
+## GITHUB ISSUE CREATED - COMPLETED
+
+**Issue URL**: https://github.com/netra-systems/netra-apex/issues/310  
+**Title**: CRITICAL: WebSocket Agent Bridge Import Error  
+**Labels**: claude-code-generated-issue  
+**Status**: Open  
+
+**Issue Content**:
+- Complete problem description with root cause analysis
+- Specific file and line numbers for the fix
+- Business impact explanation ($500K+ ARR)
+- Two-line fix implementation details
+
+---
+
 ## NEXT STEPS
 
 1. ✅ **Five Whys Analysis** (COMPLETED)
-2. **Test Suite Planning** (In Progress)
-3. **GitHub Issue Creation/Update**  
-4. **Module Implementation** → **Import Path Fix** 
-5. **System Stability Validation**
+2. ✅ **Test Suite Planning** (COMPLETED)  
+3. ✅ **GitHub Issue Creation/Update** (COMPLETED)
+4. **Test Suite Implementation** (In Progress)
+5. **Import Path Fix Implementation**
+6. **System Stability Validation**
 
 ---
 *Investigation continues below...*
