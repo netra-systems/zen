@@ -582,6 +582,19 @@ class IsolatedEnvironment:
             else:
                 logger.info("Environment isolation enabled")
     
+    def enable_isolation_mode(self, backup_original: bool = True, refresh_vars: bool = True) -> None:
+        """
+        BACKWARDS COMPATIBILITY: Alias for enable_isolation method.
+        
+        This method maintains compatibility with existing test framework code
+        that calls enable_isolation_mode() instead of enable_isolation().
+        
+        Args:
+            backup_original: Whether to backup current os.environ state
+            refresh_vars: Whether to refresh isolated vars from current os.environ state
+        """
+        return self.enable_isolation(backup_original, refresh_vars)
+    
     def disable_isolation(self, restore_original: bool = False) -> None:
         """
         Disable isolation mode and optionally restore original environment.
