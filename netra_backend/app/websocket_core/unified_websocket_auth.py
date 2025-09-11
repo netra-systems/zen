@@ -1294,6 +1294,42 @@ async def authenticate_websocket_ssot(
     Returns:
         WebSocketAuthResult with authentication outcome
     """
+    connection_id = preliminary_connection_id or str(uuid.uuid4())
+    
+    # Try infrastructure remediation first (Issue #372)
+    try:
+        from netra_backend.app.websocket_core.auth_remediation import (
+            authenticate_websocket_with_remediation
+        )
+        
+        # Extract token from WebSocket subprotocol or headers
+        token = _extract_token_from_websocket(websocket)
+        
+        # Use remediation authentication
+        success, user_context, error_message = await authenticate_websocket_with_remediation(
+            token, connection_id
+        )
+        
+        if success and user_context:
+            logger.info(f"Remediation auth successful for connection {connection_id}")
+            return WebSocketAuthResult(
+                success=True,
+                user_context=user_context,
+                connection_id=connection_id,
+                error_message=None
+            )
+        else:
+            logger.warning(f"Remediation auth failed for connection {connection_id}: {error_message}")
+            # Fall through to legacy authentication
+            
+    except ImportError:
+        logger.info(f"Remediation components not available for connection {connection_id} - using legacy auth")
+        # Fall through to legacy authentication
+    except Exception as e:
+        logger.error(f"Remediation authentication error for connection {connection_id}: {e}")
+        # Fall through to legacy authentication
+    
+    # Legacy SSOT authentication fallback
     authenticator = get_websocket_authenticator()
     return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context, preliminary_connection_id=preliminary_connection_id)
 
@@ -1559,6 +1595,61 @@ def _validate_critical_environment_configuration() -> Dict[str, Any]:
         logger.error(f"Environment validation failed with exception: {e}")
     
     return validation_result
+
+
+def _extract_token_from_websocket(websocket: WebSocket) -> Optional[str]:
+    """
+    Extract JWT token from WebSocket subprotocol or headers.
+    
+    This function extracts JWT tokens from WebSocket connections using standard methods:
+    - Sec-WebSocket-Protocol header (jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN formats)
+    - Authorization header (Bearer TOKEN format)
+    
+    Args:
+        websocket: WebSocket connection object
+        
+    Returns:
+        JWT token string if found, None otherwise
+    """
+    try:
+        # First check subprotocol headers (most common for WebSocket JWT)
+        if hasattr(websocket, 'headers') and websocket.headers:
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header:
+                # Parse comma-separated subprotocols
+                subprotocols = [p.strip() for p in subprotocol_header.split(",")]
+                
+                for subprotocol in subprotocols:
+                    # Check for jwt.TOKEN format
+                    if subprotocol.startswith('jwt.'):
+                        token = subprotocol[4:]  # Remove 'jwt.' prefix
+                        if len(token) > 10:
+                            return token
+                    
+                    # Check for jwt-auth.TOKEN format
+                    if subprotocol.startswith('jwt-auth.'):
+                        token = subprotocol[9:]  # Remove 'jwt-auth.' prefix
+                        if len(token) > 10:
+                            return token
+                    
+                    # Check for bearer.TOKEN format
+                    if subprotocol.startswith('bearer.'):
+                        token = subprotocol[7:]  # Remove 'bearer.' prefix
+                        if len(token) > 10:
+                            return token
+            
+            # Fallback to Authorization header
+            auth_header = websocket.headers.get("authorization", "")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header[7:]  # Remove 'Bearer ' prefix
+                if len(token) > 10:
+                    return token
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error extracting token from WebSocket: {e}")
+        return None
 
 
 def _validate_auth_service_health() -> Dict[str, Any]:
