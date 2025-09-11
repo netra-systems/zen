@@ -209,7 +209,11 @@ class TestUnifiedTestRunnerIntegration(SSotBaseTestCase, UnifiedTestRunnerTestMi
     def setUp(self):
         """Set up each test with fresh state."""
         super().setUp()
-        self.project_root = self.__class__.project_root  # Use class-level project_root
+        # Access project_root from the class - it's set in setUpClass
+        if hasattr(self.__class__, 'project_root'):
+            self.project_root = self.__class__.project_root
+        else:
+            self.project_root = Path(__file__).parent.parent.parent.parent
         self.test_discovery = TestDiscovery(self.project_root)
         self.test_validation = TestValidation(self.project_root)
         
