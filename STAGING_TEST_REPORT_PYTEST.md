@@ -1,82 +1,62 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-12-11 (Merge resolution - keeping superior test results)
+**Generated:** 2025-09-11 14:38:11
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 7
-- **Passed:** 6 (85.7%)
-- **Failed:** 1 (14.3%)
-- **Skipped:** 0
-- **Duration:** 12.61 seconds
-- **Pass Rate:** 85.7%
+- **Total Tests:** 4
+- **Passed:** 0 (0.0%)
+- **Failed:** 2 (50.0%)
+- **Skipped:** 2
+- **Duration:** 0.76 seconds
+- **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_unified_data_agent_real_execution | PASS passed | 0.745s | test_real_agent_execution_staging.py |
-| test_002_optimization_agent_real_execution | PASS passed | 0.743s | test_real_agent_execution_staging.py |
-| test_003_multi_agent_coordination_real | PASS passed | 0.728s | test_real_agent_execution_staging.py |
-| test_004_concurrent_user_isolation | PASS passed | 0.905s | test_real_agent_execution_staging.py |
-| test_005_error_recovery_resilience | FAIL failed | 0.709s | test_real_agent_execution_staging.py |
-| test_006_performance_benchmarks | PASS passed | 6.241s | test_real_agent_execution_staging.py |
-| test_007_business_value_validation | PASS passed | 2.170s | test_real_agent_execution_staging.py |
+| test_auth_service_actually_works_in_staging | SKIP skipped | 0.000s | test_golden_path_validation_staging_current.py |
+| test_backend_service_actually_works_in_staging | SKIP skipped | 0.000s | test_golden_path_validation_staging_current.py |
+| test_staging_environment_service_architecture | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
+| test_recommended_validator_architecture_for_staging | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
 
 ## Failed Tests Details
 
-### FAILED: test_005_error_recovery_resilience
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_real_agent_execution_staging.py
-- **Duration:** 0.709s
-- **Error:** tests\e2e\staging\test_real_agent_execution_staging.py:198: in create_authenticated_websocket
-    websocket = await asyncio.wait_for(
-C:\Program Files\Python313\Lib\asyncio\tasks.py:507: in wait_for
-    return await fut
-           ^^^^^^^^^
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: in __await_impl__
-    await self.connection.handshake(
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:114: in handshake
- ...
+### FAILED: test_staging_environment_service_architecture
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_validation_staging_current.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_golden_path_validation_staging_current.py:381: in test_staging_environment_service_architecture
+    assert validator_assumptions['conflicts_with_staging_reality'] is False, (
+E   AssertionError: STAGING REALITY vs VALIDATOR ASSUMPTIONS: Staging: {'auth_service': {'has_own_database': True, 'contains_tables': ['users', 'user_sessions', 'oauth_credentials'], 'accessible_from': ['auth_service_only']}, 'backend_service': {'has_own_database': True, 'contains_tables': ['chat_thre...
+
+### FAILED: test_recommended_validator_architecture_for_staging
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_validation_staging_current.py
+- **Duration:** 0.000s
+- **Error:** tests\e2e\staging\test_golden_path_validation_staging_current.py:410: in test_recommended_validator_architecture_for_staging
+    assert False, (
+E   AssertionError: RECOMMENDED STAGING VALIDATOR ARCHITECTURE: {'auth_validation': {'method': 'HTTP call to auth service /health endpoint', 'validates': ['auth service availability', 'JWT capabilities'], 'database_access': 'none_from_backend'}, 'backend_validation': {'method': 'check backend database and components', 'validates': ['backend tables', 'ag...
 
 ## Pytest Output Format
 
 ```
-<<<<<<< Updated upstream
-test_ssot_event_validator_staging.py::test_ssot_validator_with_real_agent_execution FAILED
-test_ssot_event_validator_staging.py::test_ssot_validator_performance_under_load FAILED
-test_ssot_event_validator_staging.py::test_ssot_validator_staging_environment_integration FAILED
+test_golden_path_validation_staging_current.py::test_auth_service_actually_works_in_staging SKIPPED
+test_golden_path_validation_staging_current.py::test_backend_service_actually_works_in_staging SKIPPED
+test_golden_path_validation_staging_current.py::test_staging_environment_service_architecture FAILED
+test_golden_path_validation_staging_current.py::test_recommended_validator_architecture_for_staging FAILED
 
 ==================================================
-0 passed, 3 failed in 0.94s
-=======
-test_real_agent_execution_staging.py::test_001_unified_data_agent_real_execution PASSED
-test_real_agent_execution_staging.py::test_002_optimization_agent_real_execution PASSED
-test_real_agent_execution_staging.py::test_003_multi_agent_coordination_real PASSED
-test_real_agent_execution_staging.py::test_004_concurrent_user_isolation PASSED
-test_real_agent_execution_staging.py::test_005_error_recovery_resilience FAILED
-test_real_agent_execution_staging.py::test_006_performance_benchmarks PASSED
-test_real_agent_execution_staging.py::test_007_business_value_validation PASSED
-
-==================================================
-6 passed, 1 failed in 12.61s
->>>>>>> Stashed changes
+0 passed, 2 failed, 2 skipped in 0.76s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-<<<<<<< Updated upstream
-| Agent | 1 | 0 | 1 | 0.0% |
-| Performance | 1 | 0 | 1 | 0.0% |
-=======
-| Agent | 3 | 3 | 0 | 100.0% |
-| Performance | 1 | 1 | 0 | 100.0% |
->>>>>>> Stashed changes
+| Authentication | 1 | 0 | 0 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
