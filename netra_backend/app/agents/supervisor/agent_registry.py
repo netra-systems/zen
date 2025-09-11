@@ -215,6 +215,9 @@ class UserAgentSession:
             # Use standard factory for real bridges
             bridge = create_agent_websocket_bridge(user_context)
         
+        # CRITICAL FIX: Set the WebSocket manager on the bridge so it can emit events
+        bridge.websocket_manager = manager
+        
         self._websocket_bridge = bridge
         logger.debug(f"WebSocket bridge set for user {self.user_id}: {type(bridge).__name__}")
         

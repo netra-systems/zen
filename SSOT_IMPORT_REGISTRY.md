@@ -26,6 +26,9 @@ from netra_backend.app.services.user_execution_context import UserContextManager
 from netra_backend.app.services.user_execution_context import managed_user_context, validate_user_context
 from netra_backend.app.services.user_execution_context import create_isolated_execution_context
 
+# WebSocket Agent Bridge (CRITICAL - Fixed 2025-09-10)
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
+
 # Tools (Performance and Optimization)
 from netra_backend.app.tools.performance_optimizer import ToolPerformanceOptimizer
 from netra_backend.app.tools.result_aggregator import ToolResultAggregator
@@ -55,6 +58,10 @@ from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearche
 # THESE PATHS DO NOT EXIST:
 from netra_backend.app.agents.optimization_agents.optimization_helper_agent import OptimizationHelperAgent  # ❌
 from netra_backend.app.agents.reporting_agents.uvs_reporting_agent import UVSReportingAgent  # ❌
+
+# CRITICAL: Fixed 2025-09-10 - This was causing $500K+ ARR Golden Path failure
+from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge  # ❌ BROKEN PATH
+# USE INSTEAD: from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 ```
 
 ---

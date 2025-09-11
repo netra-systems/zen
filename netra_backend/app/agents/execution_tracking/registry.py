@@ -43,7 +43,7 @@ class ExecutionState(str, Enum):
     FAILED = _SSOT_ExecutionState.FAILED.value            # "failed"
     TIMEOUT = _SSOT_ExecutionState.TIMEOUT.value          # "timeout"
     ABORTED = _SSOT_ExecutionState.CANCELLED.value        # "cancelled"
-    RECOVERING = "recovering"  # Keep unique value for now, could map to STARTING
+    RECOVERING = _SSOT_ExecutionState.STARTING.value  # Map RECOVERING -> STARTING for recovery scenarios
 
 # Issue deprecation warning
 warnings.warn(

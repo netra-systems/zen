@@ -262,6 +262,10 @@ class TestDiscoveryAndCollection(TestUnifiedTestRunnerIntegration):
         BUSINESS IMPACT: Currently only ~160 tests discoverable out of ~10,383 total.
         This test validates the infrastructure protecting $2M+ ARR business.
         """
+        # Ensure project_root is available
+        if not hasattr(self, 'project_root'):
+            self.project_root = Path(__file__).parent.parent.parent.parent
+            
         # Discover test files using real file system scan
         test_files = []
         
@@ -301,6 +305,10 @@ class TestDiscoveryAndCollection(TestUnifiedTestRunnerIntegration):
         BUSINESS IMPACT: Collection failures hide ~10,000+ tests, preventing validation
         of business-critical functionality.
         """
+        # Ensure project_root is available
+        if not hasattr(self, 'project_root'):
+            self.project_root = Path(__file__).parent.parent.parent.parent
+            
         # Run pytest collection on a sample test directory
         sample_test_dir = self.project_root / "tests" / "integration"
         if not sample_test_dir.exists():
@@ -359,6 +367,10 @@ class TestDiscoveryAndCollection(TestUnifiedTestRunnerIntegration):
         BUSINESS IMPACT: Syntax errors in WebSocket tests prevent collection of
         entire test suites, hiding business-critical validation.
         """
+        # Ensure project_root and other attributes are available
+        if not hasattr(self, 'project_root'):
+            self.project_root = Path(__file__).parent.parent.parent.parent
+            
         syntax_errors = []
         test_files_checked = 0
         
@@ -423,6 +435,11 @@ class TestDiscoveryAndCollection(TestUnifiedTestRunnerIntegration):
         BUSINESS IMPACT: Proper categorization ensures mission-critical tests
         protecting $500K+ ARR are identified and executed.
         """
+        # Ensure test_runner is available
+        if not hasattr(self, 'test_runner'):
+            from tests.unified_test_runner import UnifiedTestRunner
+            self.test_runner = UnifiedTestRunner()
+            
         # Initialize categorization system
         category_system = self.test_runner.category_system
         
