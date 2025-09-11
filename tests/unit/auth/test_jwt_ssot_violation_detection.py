@@ -14,8 +14,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 class TestJWTSSOTViolationDetection(SSotBaseTestCase):
     """Unit tests to detect JWT SSOT violations in backend service"""
     
-    def setUp(self):
-        super().setUp()
+    def setup_method(self):
+        super().setup_method()
         self.backend_path = Path(__file__).parent.parent.parent.parent / "netra_backend"
         self.auth_service_path = Path(__file__).parent.parent.parent.parent / "auth_service"
     

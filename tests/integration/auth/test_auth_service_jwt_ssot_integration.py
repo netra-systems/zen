@@ -13,8 +13,8 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestAuthServiceJWTSSOTIntegration(SSotAsyncTestCase):
     """Integration tests validating JWT SSOT through real auth service calls"""
     
-    def setUp(self):
-        super().setUp()
+    def setup_method(self):
+        super().setup_method()
         self.auth_service_base_url = "http://localhost:8001"  # Default auth service URL
         self.backend_service_base_url = "http://localhost:8000"  # Default backend URL
     
