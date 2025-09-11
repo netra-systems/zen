@@ -179,8 +179,16 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         user1_id = str(uuid.uuid4())
         user2_id = str(uuid.uuid4())
         
-        user1_context = UserExecutionContext(user_id=user1_id)
-        user2_context = UserExecutionContext(user_id=user2_id)
+        user1_context = UserExecutionContext(
+            user_id=user1_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
+        user2_context = UserExecutionContext(
+            user_id=user2_id,
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4())
+        )
         
         engine1 = await factory.create_user_execution_engine(user1_context)
         engine2 = await factory.create_user_execution_engine(user2_context)
@@ -206,7 +214,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Create execution context
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
         )
         
         # Create sub-agents through factory
@@ -277,7 +286,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | User Experience | Ensures tools execute properly with monitoring
         Test agent integration with tool execution and monitoring.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create agent with real tool dispatcher
         factory = get_agent_instance_factory()
@@ -328,7 +341,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
         )
         
         # Create execution engine for context management
@@ -387,7 +401,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | User Experience | Critical WebSocket events deliver transparency
         Test comprehensive WebSocket event integration across the agent execution pipeline.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create supervisor with WebSocket tracking
         supervisor = SupervisorAgent()
@@ -452,7 +470,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | System Reliability | Ensures graceful error handling
         Test agent error handling and recovery mechanisms during execution failures.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create agent with failure scenarios
         factory = get_agent_instance_factory()
@@ -501,7 +523,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | Performance SLA | Ensures agents complete within time limits
         Test agent timeout and performance management for SLA compliance.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create agent with performance tracking
         factory = get_agent_instance_factory()
@@ -551,7 +577,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
         )
         
         # Create multiple coordinated agents
@@ -637,7 +664,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | Result Quality | Ensures comprehensive result aggregation
         Test agent result compilation and aggregation from multiple execution steps.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create execution engine for result aggregation
         factory = ExecutionEngineFactory()
@@ -692,7 +723,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: Platform/Internal | Observability | Enables system monitoring and debugging
         Test agent execution monitoring and logging for observability.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create agent with monitoring
         factory = get_agent_instance_factory()
@@ -769,7 +804,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: Platform/Internal | System Stability | Prevents memory leaks in production
         Test agent memory management and proper resource cleanup.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create multiple agents to test memory usage
         factory = get_agent_instance_factory()
@@ -840,11 +879,15 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Create contexts for different user types
         free_user_context = UserExecutionContext(
             user_id=str(uuid.uuid4()),
-            user_tier="free"
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4()),
+            agent_context={"user_tier": "free"}
         )
         enterprise_user_context = UserExecutionContext(
-            user_id=str(uuid.uuid4()), 
-            user_tier="enterprise"
+            user_id=str(uuid.uuid4()),
+            thread_id=str(uuid.uuid4()),
+            run_id=str(uuid.uuid4()),
+            agent_context={"user_tier": "enterprise"}
         )
         
         factory = get_agent_instance_factory()
@@ -855,9 +898,10 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Mock permission checker
         def check_agent_permissions(agent_type: str, user_context: UserExecutionContext) -> bool:
-            if user_context.user_tier == "free":
+            user_tier = user_context.agent_context.get("user_tier", "unknown")
+            if user_tier == "free":
                 return agent_type in ["triage", "data_helper"]
-            elif user_context.user_tier == "enterprise":
+            elif user_tier == "enterprise":
                 return True  # Enterprise users have access to all agents
             return False
         
@@ -902,7 +946,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         for i in range(10):
             user_contexts.append(UserExecutionContext(
                 user_id=str(uuid.uuid4()),
-                thread_id=str(uuid.uuid4())
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4())
             ))
         
         factory = ExecutionEngineFactory()
@@ -966,7 +1011,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | System Reliability | Ensures proper service dependency handling
         Test agent dependency management and service availability handling.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Test with missing dependencies
         factory = get_agent_instance_factory()
@@ -1028,7 +1077,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: Platform/Internal | Business Intelligence | Provides execution analytics
         Test agent execution metrics and analytics collection.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Create execution tracker for metrics
         execution_tracker = get_execution_tracker()
@@ -1099,7 +1152,8 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         """
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            thread_id=self.test_thread_id
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
         )
         
         # Create execution engine with state management
@@ -1173,7 +1227,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: Mid/Enterprise | Customization | Enables tailored agent behavior
         Test agent configuration and customization capabilities.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Test different configuration profiles
         configurations = {
@@ -1261,7 +1319,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         BVJ: All segments | Platform Integration | Ensures external service connectivity
         Test agent integration with external services and APIs.
         """
-        user_context = UserExecutionContext(user_id=self.test_user_id)
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=self.test_thread_id,
+            run_id=self.test_run_id
+        )
         
         # Mock external services
         external_services = {
