@@ -111,32 +111,35 @@ class MockWebSocketBridge:
         self.notifications = []
         self.call_count = 0
     
-    async def notify_agent_started(self, run_id: str, agent_name: str, trace_context: Dict = None):
-        """Track agent started notification."""
+    async def notify_agent_started(self, run_id: str, agent_name: str, context: Dict = None):
+        """Track agent started notification - matches WebSocketBridgeProtocol signature."""
         self.call_count += 1
         self.notifications.append({
             "type": "agent_started",
             "run_id": run_id,
             "agent_name": agent_name,
-            "trace_context": trace_context,
+            "trace_context": context,  # Store as trace_context for backward compatibility
             "timestamp": time.time()
         })
     
-    async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str, trace_context: Dict = None):
-        """Track agent thinking notification."""
+    async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str, 
+                                  step_number: Optional[int] = None, progress_percentage: Optional[float] = None):
+        """Track agent thinking notification - matches WebSocketBridgeProtocol signature."""
         self.call_count += 1
         self.notifications.append({
             "type": "agent_thinking", 
             "run_id": run_id,
             "agent_name": agent_name,
             "reasoning": reasoning,
-            "trace_context": trace_context,
+            "step_number": step_number,
+            "progress_percentage": progress_percentage,
+            "trace_context": None,  # Keep for backward compatibility
             "timestamp": time.time()
         })
     
-    async def notify_agent_completed(self, run_id: str, agent_name: str, result: Dict, 
-                                   execution_time_ms: int, trace_context: Dict = None):
-        """Track agent completion notification."""
+    async def notify_agent_completed(self, run_id: str, agent_name: str, 
+                                   result: Optional[Dict] = None, execution_time_ms: Optional[float] = None):
+        """Track agent completion notification - matches WebSocketBridgeProtocol signature."""
         self.call_count += 1  
         self.notifications.append({
             "type": "agent_completed",
@@ -144,19 +147,48 @@ class MockWebSocketBridge:
             "agent_name": agent_name,
             "result": result,
             "execution_time_ms": execution_time_ms,
-            "trace_context": trace_context,
+            "trace_context": None,  # Keep for backward compatibility
             "timestamp": time.time()
         })
     
-    async def notify_agent_error(self, run_id: str, agent_name: str, error: str, trace_context: Dict = None):
-        """Track agent error notification."""
+    async def notify_agent_error(self, run_id: str, agent_name: str, error: str, 
+                               error_context: Optional[Dict] = None):
+        """Track agent error notification - matches WebSocketBridgeProtocol signature."""
         self.call_count += 1
         self.notifications.append({
             "type": "agent_error",
             "run_id": run_id,
             "agent_name": agent_name,
             "error": error,
-            "trace_context": trace_context,
+            "trace_context": error_context,  # Store as trace_context for consistency
+            "timestamp": time.time()
+        })
+    
+    async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, 
+                                  parameters: Optional[Dict[str, Any]] = None):
+        """Track tool executing notification - matches WebSocketBridgeProtocol signature."""
+        self.call_count += 1
+        self.notifications.append({
+            "type": "tool_executing",
+            "run_id": run_id,
+            "agent_name": agent_name,
+            "tool_name": tool_name,
+            "parameters": parameters,
+            "timestamp": time.time()
+        })
+    
+    async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str, 
+                                  result: Optional[Dict[str, Any]] = None, 
+                                  execution_time_ms: Optional[float] = None):
+        """Track tool completed notification - matches WebSocketBridgeProtocol signature."""
+        self.call_count += 1
+        self.notifications.append({
+            "type": "tool_completed",
+            "run_id": run_id,
+            "agent_name": agent_name,
+            "tool_name": tool_name,
+            "result": result,
+            "execution_time_ms": execution_time_ms,
             "timestamp": time.time()
         })
 
@@ -460,7 +492,8 @@ class TestAgentExecutionCoreComprehensiveIntegration:
                         run_id=run_id, 
                         agent_name=self.agent_name,
                         reasoning="Processing optimization request...",
-                        trace_context={}
+                        step_number=1,
+                        progress_percentage=50.0
                     )
                 
                 await asyncio.sleep(0.05)  # Tool execution simulation
