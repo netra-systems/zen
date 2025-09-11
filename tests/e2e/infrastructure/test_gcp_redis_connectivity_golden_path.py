@@ -525,76 +525,133 @@ class TestGCPRedisConnectivityGoldenPath:
     @pytest.mark.e2e
     @pytest.mark.infrastructure
     @pytest.mark.critical
-    async def test_startup_sequence_failure_cascade_from_redis(
+    async def test_redis_connection_resilience_for_chat_reliability(
         self, 
-        gcp_validator
+        real_redis_client
     ):
         """
-        TEST: Startup sequence failure cascade when Redis unavailable.
+        TEST: Redis connection resilience for chat reliability.
         
-        CRITICAL: This test validates that the deterministic startup sequence
-        correctly fails at the Redis dependency phase and prevents further
-        initialization that would cause more severe failures.
+        REAL TEST: This test validates Redis connection resilience patterns
+        that chat functionality depends on. Test FAILS if Redis is unreliable.
         
-        Expected Behavior:
-        - Startup should fail at Phase 1 (Dependencies) when Redis unavailable
-        - WebSocket phase should never be reached
-        - Failure should be clean and deterministic
-        
-        Business Impact: Prevents cascade failures and provides clear error indication
+        Business Impact: Chat must handle Redis connection variations gracefully
+        to maintain reliable user experience across network conditions.
         """
-        logger.info("🔄 Testing startup sequence failure cascade from Redis unavailability")
+        logger.info("🔄 Testing Redis connection resilience for chat reliability")
         
-        # Test with full timeout window to observe complete failure pattern
-        start_time = time.time()
+        # Test 1: Connection health monitoring (chat needs to know Redis status)
+        try:
+            # Test connection health checks that chat uses
+            health_results = []
+            
+            for i in range(5):
+                health_start = time.time()
+                ping_result = await real_redis_client.ping()
+                health_time = (time.time() - health_start) * 1000
+                
+                assert ping_result is True, f"Redis health check {i+1} failed: {ping_result}"
+                health_results.append(health_time)
+                
+                logger.info(f"Health check {i+1}: {health_time:.1f}ms")
+                
+                # Small delay between health checks
+                await asyncio.sleep(0.1)
+            
+            avg_health_time = sum(health_results) / len(health_results)
+            max_health_time = max(health_results)
+            
+            # Health checks must be fast for chat to maintain responsiveness
+            HEALTH_CHECK_REQUIREMENT = 50.0  # ms - health checks must be very fast
+            
+            if avg_health_time > HEALTH_CHECK_REQUIREMENT:
+                logger.error(f"❌ REDIS HEALTH CHECK FAILURE: Average {avg_health_time:.1f}ms > {HEALTH_CHECK_REQUIREMENT}ms")
+                raise AssertionError(f"Redis health check test FAILED - too slow for chat monitoring: {avg_health_time:.1f}ms")
+            
+            logger.info(f"✅ Redis health checks: avg {avg_health_time:.1f}ms, max {max_health_time:.1f}ms")
+            
+        except Exception as e:
+            logger.error(f"❌ REDIS HEALTH MONITORING FAILURE: {e}")
+            raise AssertionError(f"Redis health monitoring test FAILED - chat reliability compromised: {e}")
         
-        result = await gcp_validator.validate_gcp_readiness_for_websocket(
-            timeout_seconds=120.0
-        )
+        # Test 2: Key expiration handling (chat sessions have TTL)
+        try:
+            # Test TTL operations that chat sessions rely on
+            session_key = f"chat_session_test:{int(time.time())}"
+            session_data = json.dumps({
+                "user_id": "test_user",
+                "thread_id": "test_thread", 
+                "last_activity": datetime.now(timezone.utc).isoformat()
+            })
+            
+            # Set with 5 second expiration
+            await real_redis_client.set(session_key, session_data, ex=5)
+            
+            # Verify immediate retrieval
+            immediate_result = await real_redis_client.get(session_key)
+            assert immediate_result == session_data, f"Session data corruption: {immediate_result}"
+            
+            # Check TTL is set correctly
+            ttl = await real_redis_client.ttl(session_key)
+            assert 1 <= ttl <= 5, f"TTL not set correctly: {ttl}"
+            
+            logger.info(f"✅ Session key created with TTL: {ttl}s remaining")
+            
+            # Wait for expiration
+            logger.info("Waiting for key expiration...")
+            await asyncio.sleep(6)
+            
+            # Verify expiration worked
+            expired_result = await real_redis_client.get(session_key)
+            if expired_result is not None:
+                logger.error(f"❌ REDIS EXPIRATION FAILURE: Key should have expired but still exists: {expired_result}")
+                raise AssertionError(f"Redis expiration test FAILED - session cleanup not working: {expired_result}")
+            
+            logger.info("✅ Redis key expiration working correctly")
+            
+        except Exception as e:
+            logger.error(f"❌ REDIS EXPIRATION FAILURE: {e}")
+            raise AssertionError(f"Redis expiration test FAILED - session management unreliable: {e}")
         
-        elapsed_time = time.time() - start_time
+        # Test 3: Transaction consistency (chat needs atomic operations)
+        try:
+            # Test transaction operations that chat uses for consistency
+            user_id = "test_transaction_user"
+            thread_key = f"thread_state:{user_id}"
+            message_count_key = f"message_count:{user_id}"
+            
+            # Use pipeline for atomic operations (like chat does)
+            pipe = real_redis_client.pipeline()
+            pipe.multi()
+            
+            # Atomic operations for chat state
+            pipe.set(thread_key, json.dumps({"active": True, "thread_id": "test"}))
+            pipe.incr(message_count_key)
+            pipe.expire(thread_key, 3600)
+            pipe.expire(message_count_key, 3600)
+            
+            # Execute transaction
+            results = await pipe.execute()
+            
+            # Verify all operations succeeded
+            assert len(results) == 4, f"Transaction should have 4 results, got {len(results)}"
+            assert results[0] is True, f"Thread state set failed: {results[0]}"
+            assert isinstance(results[1], int), f"Message count increment failed: {results[1]}"
+            assert results[2] is True, f"Thread TTL set failed: {results[2]}"
+            assert results[3] is True, f"Message count TTL set failed: {results[3]}"
+            
+            logger.info(f"✅ Redis transaction successful: {results}")
+            
+            # Cleanup
+            await real_redis_client.delete(thread_key)
+            await real_redis_client.delete(message_count_key)
+            
+        except Exception as e:
+            logger.error(f"❌ REDIS TRANSACTION FAILURE: {e}")
+            raise AssertionError(f"Redis transaction test FAILED - chat state consistency unreliable: {e}")
         
-        logger.info(f"Startup validation result after {elapsed_time:.2f}s:")
-        logger.info(f"  Ready: {result.ready}")
-        logger.info(f"  State: {result.state.value}")
-        logger.info(f"  Failed Services: {result.failed_services}")
-        logger.info(f"  Warnings: {result.warnings}")
-        
-        if not result.ready:
-            # Validate failure occurs at correct phase (Dependencies, not later phases)
-            assert result.state in [
-                GCPReadinessState.FAILED,
-                GCPReadinessState.INITIALIZING
-            ], (
-                f"Expected failure at Dependencies phase, got state: {result.state.value}"
-            )
-            
-            # Validate Redis is identified as the failing service
-            assert "redis" in result.failed_services, (
-                f"Redis should be identified as failing service, got: {result.failed_services}"
-            )
-            
-            # Validate timing matches infrastructure failure pattern
-            if 7.3 <= elapsed_time <= 7.7:
-                logger.info(f"✅ CONFIRMED: 7.51s infrastructure failure pattern reproduced")
-            
-            logger.info("✅ EXPECTED: Startup sequence correctly fails at Redis dependency phase")
-            assert True, "Startup sequence failure cascade working correctly"
-            
-        else:
-            # If startup succeeds, Redis infrastructure is working
-            logger.info("✅ SUCCESS: Complete startup sequence successful - Redis infrastructure working!")
-            
-            # Validate successful startup reaches correct final state
-            assert result.state == GCPReadinessState.WEBSOCKET_READY, (
-                f"Expected WEBSOCKET_READY state when successful, got: {result.state.value}"
-            )
-            
-            assert len(result.failed_services) == 0, (
-                f"Expected no failed services when successful, got: {result.failed_services}"
-            )
-            
-            assert True, "Startup sequence successful - Redis infrastructure operational"
+        # Test passes ONLY when Redis demonstrates reliable connection patterns
+        logger.info("✅ Redis connection resilience meets chat reliability requirements")
 
 
     @pytest.mark.e2e
