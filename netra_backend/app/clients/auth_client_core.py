@@ -1814,6 +1814,9 @@ class AuthServiceClient:
 # Global client instance
 auth_client = AuthServiceClient()
 
+# Compatibility alias for integration tests (Issue #308)
+AuthClientCore = AuthServiceClient  # Main class alias for integration test compatibility
+
 
 # Convenience function for backward compatibility with auth_resilience_service
 async def validate_token_with_resilience(token: str, operation_type: AuthOperationType = AuthOperationType.TOKEN_VALIDATION) -> Dict[str, Any]:

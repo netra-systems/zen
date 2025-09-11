@@ -32,6 +32,11 @@ All changes must be made in websocket_ssot.py to maintain SSOT compliance.
 # SSOT REDIRECTION: All functionality consolidated into websocket_ssot.py
 # This file now serves as a compatibility layer that redirects to SSOT implementation
 
+# Compatibility classes for backward compatibility
+class WebSocketComponentError(Exception):
+    """Exception raised for WebSocket component validation errors."""
+    pass
+
 # Import SSOT router and all functions
 from netra_backend.app.routes.websocket_ssot import (
     router,
@@ -47,7 +52,8 @@ from netra_backend.app.routes.websocket_ssot import (
 # Re-export for backward compatibility
 __all__ = [
     'router',
-    'websocket_endpoint', 
+    'websocket_endpoint',
+    'WebSocketComponentError', 
     'websocket_health_check',
     'get_websocket_config',
     'websocket_detailed_stats',
