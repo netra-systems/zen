@@ -168,8 +168,11 @@ class TestAgentExecutionCoreSSotCompliance(SSotAsyncTestCase):
             user_id="user-123"
         )
         
+        # Create mock user context
+        user_context = self.mock_factory.create_user_context_mock()
+        
         # Execute agent successfully
-        result = await execution_core.execute_agent(context)
+        result = await execution_core.execute_agent(context, user_context)
         
         # Verify success
         self.assertTrue(result.success, "Agent execution should succeed")
