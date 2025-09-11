@@ -74,6 +74,10 @@ class SessionIsolationError(Exception):
 def validate_session_is_request_scoped_simple(session: AsyncSession) -> None:
     """Simple session validation for request scope."""
     if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
+        logger.error(
+            f"❌ VALIDATION FAILURE: Session {id(session)} is globally stored, violating request scoping. "
+            f"Session type: {type(session).__name__}. This is a critical isolation violation."
+        )
         raise SessionIsolationError("Session must be request-scoped, not globally stored")
     logger.debug(f"Session {id(session)} validated as request-scoped")
 
@@ -128,7 +132,11 @@ def _validate_session_type(session) -> None:
     try:
         validate_db_session(session, "dependencies_validation")
     except TypeError as e:
-        logger.error(f"Invalid session type: {type(session)}")
+        logger.error(
+            f"❌ VALIDATION FAILURE: Invalid session type during validation. "
+            f"Expected AsyncSession, got: {type(session).__name__}. "
+            f"Error: {e}. This indicates improper session injection."
+        )
         raise RuntimeError(str(e))
     
     # Tag session as request-scoped (only for real sessions)
@@ -854,7 +862,11 @@ async def get_request_scoped_supervisor(
     try:
         # CRITICAL: Validate that session is not globally stored
         if hasattr(db_session, '_global_storage_flag'):
-            logger.error("CRITICAL: Attempted to use globally stored session in request-scoped supervisor")
+            logger.error(
+                f"❌ VALIDATION FAILURE: Attempted to use globally stored session in request-scoped supervisor. "
+                f"Session ID: {id(db_session)}, User: {context.user_id}, "
+                f"This is a critical security violation - database sessions must be request-scoped only."
+            )
             raise RuntimeError("Database sessions must be request-scoped only")
             
         logger.debug(f"Creating request-scoped supervisor for user {context.user_id}, session {id(db_session)}")
