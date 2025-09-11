@@ -579,6 +579,14 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         # Create WebSocket bridge
         bridge = AgentWebSocketBridge()
         
+        # Set up user context for the bridge (required for event emission)
+        from unittest.mock import MagicMock
+        mock_user_context = MagicMock()
+        mock_user_context.user_id = self.test_user_id
+        mock_user_context.thread_id = self.test_thread_id
+        mock_user_context.run_id = self.test_run_id
+        bridge.user_context = mock_user_context
+        
         # Mock WebSocket manager
         mock_manager = AsyncMock()
         bridge._websocket_manager = mock_manager
@@ -595,21 +603,23 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         
         bridge._validate_event_context = mock_validate_event_context
         
-        # Mock the _emit_with_retry method to capture events
-        async def mock_emit_with_retry(event_type, thread_id, notification, run_id, agent_name, max_retries=3, critical_event=False):
-            bridge_events.append({"event_type": event_type, "thread_id": thread_id, "notification": notification, "run_id": run_id, "agent_name": agent_name})
-            return True
-        
-        bridge._emit_with_retry = mock_emit_with_retry
-        
-        # Track bridge events
+        # Track bridge events - MUST BE DEFINED BEFORE REFERENCED
         bridge_events = []
         
-        async def capture_bridge_event(thread_id, notification):
-            bridge_events.append({"thread_id": thread_id, "notification": notification})
+        # Mock the WebSocket manager's send_to_user method to capture events
+        async def mock_send_to_user(user_id, notification):
+            # Capture event details from the notification
+            event_data = {
+                "event_type": notification.get("type"),
+                "user_id": user_id,
+                "run_id": notification.get("run_id"),
+                "agent_name": notification.get("agent_name"),
+                "notification": notification
+            }
+            bridge_events.append(event_data)
             return True  # Simulate successful emission
         
-        mock_manager.send_to_thread = capture_bridge_event
+        mock_manager.send_to_user = mock_send_to_user
         
         # Test all bridge notification methods
         await bridge.notify_agent_started(
