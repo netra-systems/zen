@@ -54,11 +54,18 @@ class StandardJWTPayload:
 @dataclass
 class ExtendedJWTPayload(StandardJWTPayload):
     """Extended JWT payload with application-specific claims."""
-    email: str
-    permissions: List[str]
+    email: str = ""  # Required fields must have defaults due to parent class
+    permissions: List[str] = None  # Will be handled in __post_init__
     session_id: Optional[str] = None
     auth_method: str = "oauth"
     user_role: Optional[str] = None
+    
+    def __post_init__(self):
+        """Initialize default values properly."""
+        if self.permissions is None:
+            self.permissions = []
+        if not self.email:
+            raise ValueError("email is required")
     
     def to_dict(self) -> Dict[str, Any]:
         result = asdict(self)
