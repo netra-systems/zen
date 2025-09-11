@@ -287,11 +287,27 @@ def is_testing() -> bool:
     return config_manager.is_testing()
 
 
+# CRITICAL GOLDEN PATH COMPATIBILITY FUNCTION
+def get_config() -> AppConfig:
+    """Get the application configuration - Golden Path compatibility function.
+    
+    COMPATIBILITY LAYER: This function provides backward compatibility for Golden Path tests
+    that expect a get_config() function. Re-exports get_unified_config() functionality.
+    
+    Business Impact: Enables Golden Path test execution protecting $500K+ ARR
+    
+    Returns:
+        AppConfig: The application configuration
+    """
+    return get_unified_config()
+
+
 # Export compatibility functions
 __all__ = [
     "UnifiedConfigManager",
     "config_manager",
     "get_unified_config",
+    "get_config",  # Golden Path compatibility
     "reload_unified_config", 
     "validate_unified_config",
     "get_environment",
