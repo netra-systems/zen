@@ -122,14 +122,12 @@ class SupervisorAgent(BaseAgent):
                 )
                 logger.info(f"📡 Emitted agent_thinking event for run {context.run_id}")
             
-            # Execute using SSOT execution engine
-            result = await engine.execute_agent_pipeline(
-                agent_name="supervisor_orchestration",
-                execution_context=context,
-                input_data={
-                    "user_request": context.metadata.get("user_request", ""),
-                    "stream_updates": stream_updates
-                }
+            # Execute orchestration workflow directly (no circular dependency)
+            result = await self._execute_orchestration_workflow(
+                engine=engine,
+                context=context,
+                user_request=context.metadata.get("user_request", ""),
+                stream_updates=stream_updates
             )
             
             # CRITICAL FIX: Emit agent_completed event
