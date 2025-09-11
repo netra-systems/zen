@@ -74,7 +74,7 @@ class StartupPhaseValidator:
                            target_phase: ContractPhase,
                            skip_enforcement: bool = False) -> PhaseValidationResult:
         """
-        Validate specific startup phase
+        Validate specific startup phase with comprehensive service dependency logging
         
         Args:
             app_state: FastAPI app.state object
@@ -85,7 +85,10 @@ class StartupPhaseValidator:
             Phase validation results
         """
         start_time = time.time()
-        logger.info(f"🔍 Validating startup phase: {target_phase.value}")
+        logger.info(f"🔍 STARTUP PHASE VALIDATION: Starting {target_phase.value} validation")
+        
+        # Log service dependencies for this phase
+        await self._log_phase_service_dependencies(target_phase, app_state)
         
         try:
             # Validate contracts for this phase
@@ -111,17 +114,23 @@ class StartupPhaseValidator:
             self.validation_history.append(phase_result)
             
             if phase_result.success:
-                logger.info(f"✅ Phase {target_phase.value} validation passed: "
-                          f"{contract_results['passed_contracts']}/{contract_results['total_contracts']} "
-                          f"contracts validated in {duration:.2f}s")
+                logger.info(f"✅ STARTUP PHASE SUCCESS: {target_phase.value} validation passed "
+                          f"({contract_results['passed_contracts']}/{contract_results['total_contracts']} "
+                          f"contracts validated in {duration:.2f}s)")
+                
+                # Log successful service integrations
+                await self._log_successful_service_integrations(target_phase, app_state)
                 
                 self.current_phase = target_phase
                 if target_phase not in self.completed_phases:
                     self.completed_phases.append(target_phase)
                     
             else:
-                logger.error(f"❌ Phase {target_phase.value} validation failed: "
-                           f"{len(phase_result.errors)} critical errors")
+                logger.critical(f"🚨 STARTUP PHASE FAILURE: {target_phase.value} validation failed "
+                               f"({len(phase_result.errors)} critical errors)")
+                
+                # Log detailed service integration failures
+                await self._log_service_integration_failures(target_phase, phase_result.errors, app_state)
                 
                 for error in phase_result.errors:
                     logger.error(f"   - {error}")
@@ -138,7 +147,11 @@ class StartupPhaseValidator:
             
         except Exception as e:
             duration = time.time() - start_time
-            logger.error(f"💥 Phase {target_phase.value} validation exception: {e}")
+            logger.critical(f"🚨 STARTUP PHASE EXCEPTION: {target_phase.value} validation exception "
+                           f"(duration: {duration:.2f}s, exception: {type(e).__name__}: {e})")
+            
+            # Log service integration context for exception
+            await self._log_exception_service_context(target_phase, e, app_state)
             
             # Create error result
             phase_result = PhaseValidationResult(
