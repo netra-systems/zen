@@ -220,6 +220,43 @@ class TestBaseAgentForIntegration(BaseAgent):
             "timestamp": time.time(),
             "correlation_id": self.correlation_id
         })
+    
+    # Override WebSocket methods to track events even without bridge
+    async def emit_thinking(self, thought: str, step_number: Optional[int] = None, context: Optional[UserExecutionContext] = None) -> None:
+        """Override to track thinking events."""
+        self.track_websocket_event("thinking", {"thought": thought, "step": step_number})
+        try:
+            await super().emit_thinking(thought, step_number, context)
+        except RuntimeError:
+            # Ignore runtime errors in test mode when no bridge is available
+            pass
+    
+    async def emit_agent_started(self, message: Optional[str] = None) -> None:
+        """Override to track agent started events."""
+        self.track_websocket_event("agent_started", message)
+        try:
+            await super().emit_agent_started(message)
+        except RuntimeError:
+            # Ignore runtime errors in test mode when no bridge is available
+            pass
+    
+    async def emit_agent_completed(self, result: Optional[Dict] = None, context: Optional[UserExecutionContext] = None) -> None:
+        """Override to track agent completed events."""
+        self.track_websocket_event("agent_completed", result)
+        try:
+            await super().emit_agent_completed(result, context)
+        except RuntimeError:
+            # Ignore runtime errors in test mode when no bridge is available
+            pass
+    
+    async def emit_error(self, error_message: str, error_type: Optional[str] = None, error_details: Optional[Dict] = None) -> None:
+        """Override to track error events."""
+        self.track_websocket_event("error", {"message": error_message, "type": error_type, "details": error_details})
+        try:
+            await super().emit_error(error_message, error_type, error_details)
+        except RuntimeError:
+            # Ignore runtime errors in test mode when no bridge is available
+            pass
 
 
 class TestBaseAgentIntegration(SSotAsyncTestCase):
@@ -514,7 +551,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
         # Validate optimization metadata
         if "prompt_optimizations" in enhanced_context.metadata:
             optimizations = enhanced_context.metadata["prompt_optimizations"]
-            self.assertIsInstance(optimizations, list)
+            self.assertTrue(isinstance(optimizations, list))
         
         self.record_metric("token_tracking_success", True)
     
@@ -653,7 +690,7 @@ class TestBaseAgentIntegration(SSotAsyncTestCase):
         
         # Validate retry handler exists
         self.assertIsNotNone(agent.unified_reliability_handler)
-        self.assertIsInstance(agent.unified_reliability_handler, UnifiedRetryHandler)
+        self.assertTrue(isinstance(agent.unified_reliability_handler, UnifiedRetryHandler))
         
         # Test circuit breaker status
         cb_status = agent.get_circuit_breaker_status()
