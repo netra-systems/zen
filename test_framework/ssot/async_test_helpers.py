@@ -46,7 +46,7 @@ SSOT Patterns Enforced:
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import Any, List, Optional, Protocol, AsyncGenerator, Callable, Awaitable
+from typing import Any, Dict, List, Optional, Protocol, AsyncGenerator, Callable, Awaitable
 from unittest.mock import AsyncMock
 
 import pytest
@@ -320,6 +320,303 @@ class AsyncMockManager:
         return registry_mock
 
 
+class AsyncTestDatabase:
+    """
+    Async database testing utility providing standardized database operations.
+    
+    This class provides a unified interface for async database testing operations,
+    including transaction management, query execution, and test data cleanup.
+    
+    Business Value: Platform/Internal - Test Infrastructure Stability
+    - Provides consistent async database testing patterns
+    - Prevents common async database testing issues
+    - Ensures proper cleanup and resource management
+    
+    Usage:
+        helper = AsyncTestDatabase(async_session)
+        await helper.execute_query("SELECT * FROM users WHERE id = :id", {"id": 123})
+        await helper.cleanup()
+    """
+    
+    def __init__(self, session: 'AsyncSession'):
+        """
+        Initialize AsyncTestDatabase with an async session.
+        
+        Args:
+            session: SQLAlchemy AsyncSession instance
+        """
+        self.session = session
+        self._test_data_cleanup = []
+        self._active_transactions = []
+        
+    async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        """
+        Execute a raw SQL query with parameter binding.
+        
+        Args:
+            query: SQL query string
+            params: Query parameters dictionary
+            
+        Returns:
+            Query result
+        """
+        try:
+            from sqlalchemy import text
+            result = await self.session.execute(text(query), params or {})
+            return result
+        except Exception as e:
+            logger.error(f"AsyncTestDatabase query execution failed: {e}")
+            raise
+    
+    async def fetch_one(self, query: str, params: Optional[Dict[str, Any]] = None) -> Optional[Any]:
+        """
+        Execute query and fetch one result.
+        
+        Args:
+            query: SQL query string
+            params: Query parameters dictionary
+            
+        Returns:
+            Single query result or None
+        """
+        result = await self.execute_query(query, params)
+        return result.fetchone()
+    
+    async def fetch_all(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Any]:
+        """
+        Execute query and fetch all results.
+        
+        Args:
+            query: SQL query string
+            params: Query parameters dictionary
+            
+        Returns:
+            List of query results
+        """
+        result = await self.execute_query(query, params)
+        return result.fetchall()
+    
+    async def create_test_user(self, user_data: Dict[str, Any]) -> Any:
+        """
+        Create a test user in the database.
+        
+        Args:
+            user_data: User data dictionary
+            
+        Returns:
+            Created user result
+        """
+        try:
+            # Basic user creation query
+            query = """
+                INSERT INTO users (email, full_name, password_hash, is_active, created_at)
+                VALUES (:email, :full_name, :password_hash, :is_active, :created_at)
+                RETURNING id
+            """
+            
+            result = await self.execute_query(query, user_data)
+            user_row = result.fetchone()
+            
+            if user_row:
+                user_id = user_row[0]
+                self._track_test_data('user', user_id)
+                logger.debug(f"Created test user with ID: {user_id}")
+                return user_row
+                
+        except Exception as e:
+            logger.error(f"Failed to create test user: {e}")
+            raise
+    
+    async def create_test_thread(self, thread_data: Dict[str, Any]) -> Any:
+        """
+        Create a test thread in the database.
+        
+        Args:
+            thread_data: Thread data dictionary
+            
+        Returns:
+            Created thread result
+        """
+        try:
+            query = """
+                INSERT INTO threads (id, created_at, metadata_)
+                VALUES (:id, :created_at, :metadata_)
+                RETURNING id
+            """
+            
+            result = await self.execute_query(query, thread_data)
+            thread_row = result.fetchone()
+            
+            if thread_row:
+                thread_id = thread_row[0]
+                self._track_test_data('thread', thread_id)
+                logger.debug(f"Created test thread with ID: {thread_id}")
+                return thread_row
+                
+        except Exception as e:
+            logger.error(f"Failed to create test thread: {e}")
+            raise
+    
+    async def create_test_message(self, message_data: Dict[str, Any]) -> Any:
+        """
+        Create a test message in the database.
+        
+        Args:
+            message_data: Message data dictionary
+            
+        Returns:
+            Created message result
+        """
+        try:
+            query = """
+                INSERT INTO messages (id, thread_id, role, content, created_at)
+                VALUES (:id, :thread_id, :role, :content, :created_at)
+                RETURNING id
+            """
+            
+            result = await self.execute_query(query, message_data)
+            message_row = result.fetchone()
+            
+            if message_row:
+                message_id = message_row[0]
+                self._track_test_data('message', message_id)
+                logger.debug(f"Created test message with ID: {message_id}")
+                return message_row
+                
+        except Exception as e:
+            logger.error(f"Failed to create test message: {e}")
+            raise
+    
+    async def count_records(self, table_name: str, where_clause: str = "", params: Optional[Dict[str, Any]] = None) -> int:
+        """
+        Count records in a table with optional where clause.
+        
+        Args:
+            table_name: Name of the table
+            where_clause: Optional WHERE clause
+            params: Query parameters
+            
+        Returns:
+            Record count
+        """
+        query = f"SELECT COUNT(*) FROM {table_name}"
+        if where_clause:
+            query += f" WHERE {where_clause}"
+        
+        result = await self.execute_query(query, params or {})
+        count = result.scalar()
+        return count or 0
+    
+    async def table_exists(self, table_name: str) -> bool:
+        """
+        Check if a table exists in the database.
+        
+        Args:
+            table_name: Name of the table to check
+            
+        Returns:
+            True if table exists, False otherwise
+        """
+        try:
+            # PostgreSQL table existence check
+            query = """
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = :table_name
+                )
+            """
+            result = await self.execute_query(query, {"table_name": table_name})
+            return bool(result.scalar())
+        except Exception as e:
+            logger.warning(f"Error checking table existence for {table_name}: {e}")
+            return False
+    
+    async def begin_transaction(self):
+        """Begin a new database transaction."""
+        try:
+            transaction = await self.session.begin()
+            self._active_transactions.append(transaction)
+            return transaction
+        except Exception as e:
+            logger.error(f"Failed to begin transaction: {e}")
+            raise
+    
+    async def commit_transaction(self, transaction=None):
+        """Commit a database transaction."""
+        try:
+            if transaction:
+                await transaction.commit()
+                if transaction in self._active_transactions:
+                    self._active_transactions.remove(transaction)
+            else:
+                await self.session.commit()
+        except Exception as e:
+            logger.error(f"Failed to commit transaction: {e}")
+            raise
+    
+    async def rollback_transaction(self, transaction=None):
+        """Rollback a database transaction."""
+        try:
+            if transaction:
+                await transaction.rollback()
+                if transaction in self._active_transactions:
+                    self._active_transactions.remove(transaction)
+            else:
+                await self.session.rollback()
+        except Exception as e:
+            logger.error(f"Failed to rollback transaction: {e}")
+            raise
+    
+    def _track_test_data(self, data_type: str, data_id: Any):
+        """Track created test data for cleanup."""
+        self._test_data_cleanup.append((data_type, data_id))
+    
+    async def cleanup_test_data(self):
+        """Clean up all tracked test data."""
+        cleanup_errors = []
+        
+        # Clean up in reverse order (messages -> threads -> users)
+        for data_type, data_id in reversed(self._test_data_cleanup):
+            try:
+                if data_type == "message":
+                    await self.execute_query("DELETE FROM messages WHERE id = :id", {"id": data_id})
+                elif data_type == "thread":
+                    await self.execute_query("DELETE FROM threads WHERE id = :id", {"id": data_id})
+                elif data_type == "user":
+                    await self.execute_query("DELETE FROM users WHERE id = :id", {"id": data_id})
+                    
+                logger.debug(f"Cleaned up test {data_type} with ID: {data_id}")
+                
+            except Exception as e:
+                cleanup_error = f"Failed to cleanup {data_type} {data_id}: {str(e)}"
+                cleanup_errors.append(cleanup_error)
+                logger.warning(cleanup_error)
+        
+        self._test_data_cleanup.clear()
+        
+        if cleanup_errors:
+            logger.warning(f"Test data cleanup had {len(cleanup_errors)} errors")
+    
+    async def cleanup(self):
+        """Clean up all database resources and test data."""
+        try:
+            # Rollback any active transactions
+            for transaction in self._active_transactions[:]:
+                try:
+                    await transaction.rollback()
+                    self._active_transactions.remove(transaction)
+                except Exception as e:
+                    logger.warning(f"Error rolling back transaction during cleanup: {e}")
+            
+            # Clean up test data
+            await self.cleanup_test_data()
+            
+            logger.debug("AsyncTestDatabase cleanup completed")
+            
+        except Exception as e:
+            logger.error(f"AsyncTestDatabase cleanup failed: {e}")
+
+
 # Export all utilities
 __all__ = [
     'AsyncCleanupable',
@@ -330,4 +627,5 @@ __all__ = [
     'AsyncTestFixtureMixin',
     'create_async_cleanup_fixture',
     'AsyncMockManager',
+    'AsyncTestDatabase',
 ]
