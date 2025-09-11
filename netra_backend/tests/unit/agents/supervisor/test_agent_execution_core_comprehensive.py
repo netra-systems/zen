@@ -109,9 +109,13 @@ class TestAgentExecutionCoreBusinessLogic(SSotAsyncTestCase):
         # Arrange: Set up successful agent execution
         expected_result = AgentExecutionResult(
             success=True,
-            result="Agent provided valuable insights on customer's AI optimization needs",
-            execution_time=2.5,
-            metadata={"business_value": "high", "customer_satisfaction": 95}
+            agent_name=self.test_agent_name,
+            duration=2.5,
+            data={"message": "Agent provided valuable insights on customer's AI optimization needs"},
+            metadata={
+                "business_value": "high", 
+                "customer_satisfaction": 95
+            }
         )
         
         self.mock_agent.run.return_value = expected_result
