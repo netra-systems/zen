@@ -171,6 +171,164 @@ class StartupPhaseValidator:
             
             return phase_result
     
+    async def _log_phase_service_dependencies(self, phase: ContractPhase, app_state: Any) -> None:
+        """Log service dependencies for the current startup phase."""
+        phase_services = self._get_phase_required_services(phase)
+        available_services = self._get_available_services(app_state)
+        missing_services = [svc for svc in phase_services if svc not in available_services]
+        
+        logger.info(
+            f"🔍 PHASE SERVICE DEPENDENCIES: {phase.value} phase "
+            f"(required_services: {phase_services}, "
+            f"available_services: {list(available_services.keys())}, "
+            f"missing_services: {missing_services})"
+        )
+        
+        if missing_services:
+            logger.warning(
+                f"⚠️ MISSING SERVICES: {phase.value} phase missing required services "
+                f"(missing: {missing_services}, "
+                f"impact: Phase may fail or operate with reduced functionality)"
+            )
+    
+    async def _log_successful_service_integrations(self, phase: ContractPhase, app_state: Any) -> None:
+        """Log successful service integrations for the phase."""
+        available_services = self._get_available_services(app_state)
+        phase_services = self._get_phase_required_services(phase)
+        working_services = [svc for svc in phase_services if svc in available_services]
+        
+        if working_services:
+            logger.info(
+                f"✅ SERVICE INTEGRATIONS: {phase.value} phase service integrations successful "
+                f"(working_services: {working_services}, "
+                f"golden_path_status: {'enabled' if 'websocket_manager' in working_services else 'limited'})"
+            )
+    
+    async def _log_service_integration_failures(self, phase: ContractPhase, errors: List[str], app_state: Any) -> None:
+        """Log detailed service integration failures."""
+        available_services = self._get_available_services(app_state)
+        phase_services = self._get_phase_required_services(phase)
+        failed_services = [svc for svc in phase_services if svc not in available_services]
+        
+        # Analyze failure patterns
+        failure_patterns = self._analyze_failure_patterns(errors, failed_services)
+        golden_path_impact = self._assess_golden_path_impact_from_failures(failed_services)
+        
+        logger.critical(
+            f"🚨 SERVICE INTEGRATION FAILURES: {phase.value} phase integration failures "
+            f"(failed_services: {failed_services}, "
+            f"failure_patterns: {failure_patterns}, "
+            f"golden_path_impact: {golden_path_impact}, "
+            f"total_errors: {len(errors)})"
+        )
+        
+        # Log specific service failure context
+        for service in failed_services:
+            service_errors = [err for err in errors if service in err.lower()]
+            logger.critical(
+                f"🚨 SERVICE FAILURE DETAIL: {service} service failed "
+                f"(related_errors: {len(service_errors)}, "
+                f"phase: {phase.value}, "
+                f"impact: Service unavailable for {phase.value} operations)"
+            )
+    
+    async def _log_exception_service_context(self, phase: ContractPhase, exception: Exception, app_state: Any) -> None:
+        """Log service context when an exception occurs during phase validation."""
+        available_services = self._get_available_services(app_state)
+        phase_services = self._get_phase_required_services(phase)
+        
+        logger.critical(
+            f"🚨 SERVICE EXCEPTION CONTEXT: {phase.value} phase exception occurred "
+            f"(exception_type: {type(exception).__name__}, "
+            f"exception_message: {str(exception)}, "
+            f"available_services: {list(available_services.keys())}, "
+            f"required_services: {phase_services}, "
+            f"service_status: {self._get_service_health_summary(available_services)})"
+        )
+    
+    def _get_phase_required_services(self, phase: ContractPhase) -> List[str]:
+        """Get list of services required for a specific startup phase."""
+        phase_service_map = {
+            ContractPhase.INITIALIZATION: ["database", "redis"],
+            ContractPhase.CONFIGURATION: ["database", "redis", "auth_service"],
+            ContractPhase.INTEGRATION: ["database", "redis", "auth_service", "websocket_manager"],
+            ContractPhase.READINESS: ["database", "redis", "auth_service", "websocket_manager", "supervisor_service"]
+        }
+        return phase_service_map.get(phase, [])
+    
+    def _get_available_services(self, app_state: Any) -> Dict[str, Any]:
+        """Get dictionary of available services from app state."""
+        services = {}
+        
+        # Check for common service attributes in app state
+        service_attributes = [
+            "database_manager", "redis_client", "auth_service",
+            "websocket_manager", "websocket_connection_pool", 
+            "supervisor_service", "agent_registry"
+        ]
+        
+        for attr in service_attributes:
+            if hasattr(app_state, attr):
+                service_value = getattr(app_state, attr)
+                if service_value is not None:
+                    services[attr] = service_value
+        
+        return services
+    
+    def _analyze_failure_patterns(self, errors: List[str], failed_services: List[str]) -> Dict[str, int]:
+        """Analyze patterns in failure messages."""
+        patterns = {
+            "connection_errors": 0,
+            "timeout_errors": 0,
+            "auth_errors": 0,
+            "config_errors": 0,
+            "dependency_errors": 0
+        }
+        
+        for error in errors:
+            error_lower = error.lower()
+            if any(term in error_lower for term in ["connection", "connect", "refused"]):
+                patterns["connection_errors"] += 1
+            if any(term in error_lower for term in ["timeout", "timed out"]):
+                patterns["timeout_errors"] += 1
+            if any(term in error_lower for term in ["auth", "token", "permission"]):
+                patterns["auth_errors"] += 1
+            if any(term in error_lower for term in ["config", "configuration", "setting"]):
+                patterns["config_errors"] += 1
+            if any(term in error_lower for term in ["dependency", "depends", "require"]):
+                patterns["dependency_errors"] += 1
+        
+        return {k: v for k, v in patterns.items() if v > 0}
+    
+    def _assess_golden_path_impact_from_failures(self, failed_services: List[str]) -> str:
+        """Assess Golden Path impact from failed services."""
+        critical_for_golden_path = ["websocket_manager", "auth_service", "supervisor_service"]
+        important_for_golden_path = ["database", "redis"]
+        
+        critical_failures = [svc for svc in failed_services if svc in critical_for_golden_path]
+        important_failures = [svc for svc in failed_services if svc in important_for_golden_path]
+        
+        if critical_failures:
+            return f"CRITICAL - Golden Path blocked by {critical_failures}"
+        elif important_failures:
+            return f"HIGH - Golden Path may be degraded by {important_failures}"
+        elif failed_services:
+            return f"MEDIUM - Some functionality may be limited"
+        else:
+            return "LOW - No critical impact expected"
+    
+    def _get_service_health_summary(self, available_services: Dict[str, Any]) -> str:
+        """Get summary of service health status."""
+        total_services = len(available_services)
+        healthy_services = sum(1 for svc in available_services.values() if svc is not None)
+        
+        if total_services == 0:
+            return "no_services_registered"
+        elif healthy_services == total_services:
+            return f"all_healthy ({healthy_services}/{total_services})"
+        else:
+            return f"partial_health ({healthy_services}/{total_services})"
+    
     async def validate_startup_sequence(self, app_state: Any, 
                                       target_phase: ContractPhase = ContractPhase.READINESS,
                                       skip_enforcement: bool = False) -> Dict[str, Any]:
