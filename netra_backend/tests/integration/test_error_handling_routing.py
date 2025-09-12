@@ -31,7 +31,8 @@ from netra_backend.app.services.websocket.message_handler import MessageHandlerS
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler, websocket_error_handler
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 from netra_backend.app.schemas.core_enums import ErrorCategory

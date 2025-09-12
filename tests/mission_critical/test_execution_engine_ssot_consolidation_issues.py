@@ -42,13 +42,15 @@ import pytest
 from loguru import logger
 
 # Import all execution engine implementations to detect SSOT violations
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as SupervisorExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as SupervisorExecutionEngine
 from netra_backend.app.agents.execution_engine_consolidated import (
     ExecutionEngine as ConsolidatedExecutionEngine,
     RequestScopedExecutionEngine,
     ExecutionEngineFactory as ConsolidatedFactory
 )
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as CoreExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as CoreExecutionEngine
 from netra_backend.app.services.unified_tool_registry.execution_engine import (
     ToolExecutionEngine as ToolRegistryExecutionEngine
 )

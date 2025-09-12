@@ -64,7 +64,8 @@
 
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            # REMOVED_SYNTAX_ERROR: # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

@@ -313,7 +313,8 @@ class UserExecutionEngine(IExecutionEngine):
                 from netra_backend.app.services.user_execution_context import UserExecutionContext
                 import uuid
                 
-                anonymous_user_context = UserExecutionContext(
+                # Create UserExecutionContext using factory method for compatibility
+                anonymous_user_context = UserExecutionContext.from_request_supervisor(
                     user_id=f"legacy_compat_{uuid.uuid4().hex[:8]}",
                     thread_id=f"legacy_thread_{uuid.uuid4().hex[:8]}",
                     run_id=f"legacy_run_{uuid.uuid4().hex[:8]}",
@@ -335,35 +336,33 @@ class UserExecutionEngine(IExecutionEngine):
             # Validate user context
             user_context = validate_user_context(user_context)
             
-            # 2. Create AgentInstanceFactory from registry and websocket_bridge
+            # 2. Create AgentInstanceFactory (it doesn't take registry in constructor)
             from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
             
-            # Convert registry to agent_factory compatible format
-            if hasattr(registry, 'get_agents') or hasattr(registry, 'list_keys'):
-                # Standard AgentRegistry - wrap in factory
-                agent_factory = AgentInstanceFactory(
-                    registry=registry,
-                    websocket_bridge=websocket_bridge
-                )
-                logger.debug("🔄 Created AgentInstanceFactory from legacy AgentRegistry")
-            else:
-                raise ValueError(
-                    f"Registry type {type(registry)} not compatible with AgentInstanceFactory. "
-                    f"Expected AgentRegistry with get_agents() or list_keys() methods."
-                )
+            # Create AgentInstanceFactory (it initializes with default/empty components)
+            agent_factory = AgentInstanceFactory()
             
-            # 3. Create UserWebSocketEmitter from websocket_bridge
-            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+            # Set the registry and websocket bridge after creation if factory supports it
+            if hasattr(agent_factory, 'set_registry'):
+                agent_factory.set_registry(registry)
+            if hasattr(agent_factory, 'set_websocket_bridge'):
+                agent_factory.set_websocket_bridge(websocket_bridge)
+                
+            logger.debug("🔄 Created AgentInstanceFactory for compatibility mode")
+            
+            # 3. Create websocket emitter - Use a compatibility wrapper instead
+            # For compatibility, we'll use UserWebSocketEmitter from agent_instance_factory
+            from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
             
             if hasattr(websocket_bridge, 'notify_agent_started'):
-                # Standard AgentWebSocketBridge - wrap in UserWebSocketEmitter
-                websocket_emitter = UnifiedWebSocketEmitter(
+                # Create compatibility wrapper that uses the AgentWebSocketBridge
+                websocket_emitter = UserWebSocketEmitter(
                     user_id=user_context.user_id,
                     thread_id=user_context.thread_id,
                     run_id=user_context.run_id,
                     websocket_bridge=websocket_bridge
                 )
-                logger.debug("🔄 Created UnifiedWebSocketEmitter from legacy websocket_bridge")
+                logger.debug("🔄 Created UserWebSocketEmitter from legacy websocket_bridge")
             else:
                 raise ValueError(
                     f"WebSocket bridge type {type(websocket_bridge)} not compatible. "

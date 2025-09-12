@@ -40,7 +40,8 @@ import threading
 from datetime import datetime
 
 # SSOT imports for agent execution infrastructure
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,

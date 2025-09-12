@@ -27,7 +27,8 @@ from typing import Dict, List, Set, Any, Optional
 from unittest.mock import Mock, AsyncMock, MagicMock
 import pytest
 
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, get_agent_registry
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory as AgentFactory, get_agent_instance_factory as get_agent_factory
 from netra_backend.app.agents.state import DeepAgentState

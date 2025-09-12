@@ -35,7 +35,8 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import SSOT components for testing
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine, create_request_scoped_engine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine, create_request_scoped_engine
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
