@@ -18,7 +18,8 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import patch
 
 from test_framework.base import BaseTestCase
-from test_framework.fixtures.auth_fixtures import real_services_fixture, create_test_user_context
+from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.fixtures.auth_fixtures import test_user_token
 from test_framework.fixtures.websocket_fixtures import websocket_connection_fixture
 from netra_backend.app.services.tool_permission_service import (
     ToolPermissionService, 
@@ -37,7 +38,7 @@ class TestWebSocketRateLimitingUsageControl(BaseTestCase):
     """Integration tests for rate limiting and usage control in WebSocket context"""
 
     @pytest.fixture(autouse=True)
-    async def setup_services(self, real_services_fixture):
+    async def setup_services(self, real_services_fixture, test_user_token):
         """Setup real services for rate limiting and usage control testing"""
         self.redis_client = await RedisConnectionHandler().get_async_redis()
         self.permission_service = ToolPermissionService(self.redis_client)
