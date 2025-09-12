@@ -89,6 +89,8 @@ class PasswordPolicyValidator:
         """
         Validate password against business security policies.
         
+        Supports demo mode with relaxed validation requirements.
+        
         Args:
             password: Password string to validate
             
@@ -102,6 +104,10 @@ class PasswordPolicyValidator:
                     strength_score=0,
                     requirements_missing=["Password is required"]
                 )
+            
+            # Demo mode: relaxed password validation
+            if self.auth_env.is_demo_mode():
+                return self._validate_demo_mode_password(password)
             
             # Track missing requirements and recommendations
             missing_requirements = []
@@ -155,6 +161,54 @@ class PasswordPolicyValidator:
                 strength_score=0,
                 requirements_missing=["Password validation error occurred"]
             )
+    
+    def _validate_demo_mode_password(self, password: str) -> PasswordPolicyResult:
+        """
+        Validate password in demo mode with relaxed requirements.
+        
+        Demo mode allows:
+        - Minimum 4 characters (instead of 8)
+        - Simple passwords like "demo", "test", "1234"
+        - No complexity requirements
+        
+        Args:
+            password: Password string to validate
+            
+        Returns:
+            PasswordPolicyResult with demo mode validation
+        """
+        missing_requirements = []
+        demo_config = self.auth_env.get_demo_config()
+        min_length = demo_config.get("password_min_length", 4)
+        
+        # Demo mode: relaxed length requirement
+        if len(password) < min_length:
+            missing_requirements.append(f"Password must be at least {min_length} characters long (demo mode)")
+        
+        # Demo mode: allow simple passwords
+        simple_passwords = ["demo", "test", "1234", "admin", "password"]
+        if password.lower() in simple_passwords:
+            self.logger.info(f"Demo mode: Allowing simple password for testing")
+            # Give it a reasonable score for demo purposes
+            return PasswordPolicyResult(
+                meets_policy=True,
+                strength_score=50,  # Moderate score for demo
+                requirements_missing=[],
+                recommendations=["This password is acceptable in demo mode only"]
+            )
+        
+        # Calculate basic score for demo mode
+        strength_score = min(50 + len(password) * 3, 80)  # Cap at 80 for demo
+        meets_policy = len(missing_requirements) == 0
+        
+        self.logger.debug(f"Demo mode password validation: meets_policy={meets_policy}, strength_score={strength_score}")
+        
+        return PasswordPolicyResult(
+            meets_policy=meets_policy,
+            strength_score=strength_score,
+            requirements_missing=missing_requirements,
+            recommendations=["Demo mode: Relaxed password requirements enabled"]
+        )
     
     def _validate_length(self, password: str) -> tuple[int, List[str]]:
         """Validate password length and return score with issues."""

@@ -195,8 +195,9 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
 
 
 async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str, str]) -> User:
-    """Get or create user from database with JWT claims synchronization and comprehensive service dependency logging."""
+    """Get or create user from database with JWT claims synchronization and demo mode auto-creation."""
     from sqlalchemy import select
+    from netra_backend.app.core.configuration.demo import get_backend_demo_config
     from shared.database.session_validation import validate_db_session
     
     start_time = time.time()
@@ -291,20 +292,44 @@ async def _sync_jwt_claims_to_user_record(user: User, validation_result: Dict[st
         await db.rollback()
 
 async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[str, str]) -> User:
-    """Auto-create user from JWT claims."""
+    """Auto-create user from JWT claims with demo mode support."""
     from netra_backend.app.services.user_service import user_service
     from netra_backend.app.config import get_config
     from shared.database.session_validation import validate_db_session
+    from netra_backend.app.core.configuration.demo import get_backend_demo_config
     
     # Validate database session (handles both production and test scenarios)
     validate_db_session(db, "auto_create_user_if_needed")
     
     user_id = validation_result.get("user_id")
-    email = validation_result.get("email", f"user_{user_id}@example.com")
+    email = validation_result.get("email")
+    
+    # Demo mode: enhanced auto-creation with better email handling
+    demo_config = get_backend_demo_config()
+    if demo_config.is_demo_mode():
+        # Demo mode: be more permissive with email formats
+        if not email or email.startswith("user_"):
+            # Try to create a more user-friendly email for demo
+            if "@" not in email if email else True:
+                email = f"demo_{user_id[:8]}@demo.com" if user_id else f"demo_user@demo.com"
+        
+        logger.info(f"🎭 DEMO MODE: Auto-creating user with demo configuration (email: {email}, user_id: {user_id[:8]}...)")
+    else:
+        # Production mode: fallback to standard format
+        if not email:
+            email = f"user_{user_id}@example.com"
+    
     user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
     
+    # Apply demo mode permissions if enabled
+    if demo_config.is_demo_mode():
+        demo_settings = demo_config.get_demo_config()
+        if hasattr(user, 'role') and not user.role:
+            user.role = demo_settings.get("default_user_role", "user")
+            logger.info(f"🎭 DEMO MODE: Applied default role '{user.role}' to user {user_id[:8]}...")
+    
     config = get_config()
-    logger.warning(f"[U+1F511] USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}...)")
+    logger.warning(f"[🔑] USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}..., demo_mode: {demo_config.is_demo_mode()})")
     logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     return user
 
@@ -817,14 +842,6 @@ async def generate_access_token(user_id: str, email: str = None, **kwargs) -> st
     except Exception as e:
         logger.error(f"Error generating access token: {e}")
         raise
-
-
-# NOTE: All JWT and password hashing logic has been moved to the auth service
-# This module ONLY handles FastAPI dependency injection
-# See auth_service for actual authentication implementation
-
-
-class BackendAuthIntegration:
     """
     Backend authentication integration class for SSOT compliance.
     
