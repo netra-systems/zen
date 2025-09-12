@@ -1490,7 +1490,7 @@ class TestSSOTContinuousCompliance:
         assert len(critical_issues) == 0, f"Critical system health issues: {critical_issues}"
         assert len(warning_issues) <= 2, f"Too many warning health issues: {warning_issues}"
     
-    def test_continuous_regression_monitoring_real_performance(self):
+    async def test_continuous_regression_monitoring_real_performance(self):
         """
         REGRESSION CRITICAL: Monitor real system performance to detect regressions.
         This test tracks actual system metrics over time to detect gradual regression.
@@ -1522,8 +1522,8 @@ class TestSSOTContinuousCompliance:
             # Execute database operations
             for i in range(50):
                 key = f"regression_test_{self.test_id}_{i}"
-                await redis_client.set(key, f"test_data_{i}")
-                result = await redis_client.get(key)
+                await self.redis_client.set(key, f"test_data_{i}")
+                result = await self.redis_client.get(key)
                 if not result:
                     regression_issues.append({
                         'metric': 'database_operations',
@@ -1599,17 +1599,20 @@ class TestSSOTContinuousCompliance:
             isolation_start = time.time()
             
             # Test concurrent isolation operations
-            def quick_isolation_test(test_id):
+            async def quick_isolation_test(test_id):
                 context = TestContext(user_id=f"regression_user_{test_id}")
-                await redis_client.set(
+                await self.redis_client.set(
                     f"isolation_test:{test_id}",
                     f"data_{test_id}"
                 )
-                return await redis_client.get(f"isolation_test:{test_id}")
+                return await self.redis_client.get(f"isolation_test:{test_id}")
             
+            def run_quick_isolation_test(test_id):
+                return asyncio.run(quick_isolation_test(test_id))
+                
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [
-                    executor.submit(quick_isolation_test, i) 
+                    executor.submit(run_quick_isolation_test, i) 
                     for i in range(10)
                 ]
                 
@@ -1686,7 +1689,7 @@ class TestSSOTContinuousCompliance:
         assert len(performance_regressions) <= 2, f"Too many performance regressions: {performance_regressions}"
         assert len(regression_issues) <= 5, f"Too many total regression issues: {len(regression_issues)} detected"
     
-    def _check_real_service_health(self):
+    async def _check_real_service_health(self):
         """Check real service health metrics."""
         try:
             health_metrics = {
@@ -1697,7 +1700,7 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis connection
             start_time = time.time()
-            await redis_client.ping()
+            await self.redis_client.ping()
             health_metrics['service_response_times']['redis'] = time.time() - start_time
             
             # Test Database connection
@@ -1711,7 +1714,7 @@ class TestSSOTContinuousCompliance:
         except Exception as e:
             return {'error': str(e), 'healthy': False}
     
-    def _measure_real_service_load_time(self):
+    async def _measure_real_service_load_time(self):
         """Measure real service initialization load time."""
         start_time = time.time()
         
@@ -1722,7 +1725,7 @@ class TestSSOTContinuousCompliance:
             test_redis = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381)
             
             # Test basic operations
-            test_redis.ping()
+            await test_redis.ping()
             
             return time.time() - start_time
             
