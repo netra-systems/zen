@@ -260,13 +260,13 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
             self.assertTrue(len(staging_warnings) > 0, 
                           "Should warn about missing staging-specific OAuth variables")
 
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Clean up test environment."""
         # Restore original environment variables
         for var, value in self.original_env.items():
             os.environ[var] = value
             
-        super().tearDown()
+        super().teardown_method(method)
 
 
 if __name__ == "__main__":
