@@ -27,7 +27,8 @@ from test_framework.ssot.isolated_test_helper import IsolatedTestHelper
 from shared.isolated_environment import get_env
 
 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.business.agent_quality_validator import AgentQualityValidator
 from netra_backend.app.business.usage_tracker import UsageTracker
 

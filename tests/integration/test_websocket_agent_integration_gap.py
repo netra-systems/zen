@@ -78,7 +78,7 @@ class TestWebSocketAgentIntegrationGap(BaseIntegrationTest):
         
         try:
             # Import ExecutionEngine to test the integration
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             from netra_backend.app.websocket_core.agent_websocket_bridge import AgentWebSocketBridge
             from netra_backend.app.factories.execution_factory import ExecutionEngineFactory
             from netra_backend.app.factories.websocket_bridge_factory import WebSocketBridgeFactory
@@ -455,7 +455,7 @@ class TestWebSocketAgentIntegrationGap(BaseIntegrationTest):
             logger.info(f"Event monitored: {event_type}")
         
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             from netra_backend.app.factories.execution_factory import ExecutionEngineFactory
             
             # Create execution engine with monitoring

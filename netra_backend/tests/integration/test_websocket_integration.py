@@ -60,7 +60,8 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 
 # Import agent execution components
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
 # Import ID generation for SSOT compliance
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator

@@ -34,7 +34,7 @@ from netra_backend.app.services.user_execution_context import (
 # Agent System Imports
 try:
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.registry import AgentRegistry
     AGENT_SYSTEM_AVAILABLE = True
 except ImportError:

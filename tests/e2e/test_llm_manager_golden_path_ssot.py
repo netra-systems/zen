@@ -68,7 +68,7 @@ from netra_backend.app.dependencies import get_llm_manager
 # Import agent execution for golden path testing
 try:
     from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 except ImportError as e:
     logger.warning(f"Could not import agent components for E2E testing: {e}")

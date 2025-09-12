@@ -52,7 +52,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.base_agent import BaseAgent, AgentState

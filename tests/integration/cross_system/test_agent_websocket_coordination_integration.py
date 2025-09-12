@@ -35,7 +35,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 from shared.isolated_environment import get_env
 
 # System imports for integration testing
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
