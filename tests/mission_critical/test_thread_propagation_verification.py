@@ -71,30 +71,27 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
             try:
                 self.websocket_manager = UnifiedWebSocketManager()
                 self.message_handler = MessageHandlerService()
-                self.logger.info("Real services initialized for thread propagation testing")
+                logger.info("Real services initialized for thread propagation testing")
             except Exception as e:
-                self.logger.info(f"Using mock mode for services due to: {e}")
+                logger.info(f"Using mock mode for services due to: {e}")
                 self.websocket_manager = None
                 self.message_handler = None
         else:
-            self.logger.info("Real services not available - using mock mode")
+            logger.info("Real services not available - using mock mode")
             self.websocket_manager = None
             self.message_handler = None
         
         # Track thread propagation
         self.thread_capture_log = {}
         
-        # Setup logger
-        self.logger = logging.getLogger(__name__)
-        
-        self.logger.info(f"Thread propagation test setup - User: {self.user_id[:8]}, Thread: {self.thread_id[:8]}")
+        logger.info(f"Thread propagation test setup - User: {self.user_id[:8]}, Thread: {self.thread_id[:8]}")
     
     async def asyncTearDown(self):
         """Cleanup test resources."""
         try:
             await self.websocket_manager.shutdown()
         except Exception as e:
-            self.logger.warning(f"Websocket cleanup warning: {e}")
+            logger.warning(f"Websocket cleanup warning: {e}")
         
         await super().asyncTearDown()
     
@@ -106,7 +103,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
         This test is designed to FAIL initially to prove thread propagation
         is not working, then PASS when proper implementation is added.
         """
-        self.logger.info("Testing WebSocket to Message Handler thread propagation")
+        logger.info("Testing WebSocket to Message Handler thread propagation")
         
         # Create WebSocket test connection
         websocket_connection = await self.websocket_util.create_test_connection(
@@ -139,17 +136,17 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 
             except AssertionError as e:
                 # Expected failure - proves test works
-                self.logger.warning(f"Expected failure in WebSocket thread propagation: {e}")
+                logger.warning(f"Expected failure in WebSocket thread propagation: {e}")
                 raise
             except Exception as e:
                 # Any exception indicates thread propagation issues
-                self.logger.error(f"WebSocket thread propagation error: {e}")
+                logger.error(f"WebSocket thread propagation error: {e}")
                 raise
         else:
             # No WebSocket manager available - test fails as expected
             self.fail("WebSocket manager not available - thread propagation cannot be tested")
         
-        self.logger.info("WebSocket to Message Handler propagation test completed")
+        logger.info("WebSocket to Message Handler propagation test completed")
     
     @pytest.mark.asyncio  
     async def test_message_handler_to_agent_registry_propagation_FAIL_FIRST(self):
@@ -158,7 +155,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
         
         Designed to fail initially, proving thread context is not preserved.
         """
-        self.logger.info("Testing Message Handler thread context propagation")
+        logger.info("Testing Message Handler thread context propagation")
         
         # Test with mock context to prove thread propagation logic
         test_context = {
@@ -186,10 +183,10 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 self.fail("Message handler not available - thread propagation cannot be tested")
             
         except AssertionError as e:
-            self.logger.warning(f"Expected failure in message handler propagation: {e}")
+            logger.warning(f"Expected failure in message handler propagation: {e}")
             raise
         except Exception as e:
-            self.logger.error(f"Message handler error indicates thread propagation issue: {e}")
+            logger.error(f"Message handler error indicates thread propagation issue: {e}")
             raise
     
     @pytest.mark.asyncio
@@ -200,7 +197,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
         This test validates the business-critical requirement that each user's
         conversation thread remains isolated from other users.
         """
-        self.logger.info("Testing Thread Context Isolation")
+        logger.info("Testing Thread Context Isolation")
         
         # Create multiple user contexts  
         user_contexts = []
@@ -233,7 +230,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                         )
                         connection_results.append((ctx, connection_id))
                     except Exception as e:
-                        self.logger.error(f"Connection failed for user {ctx['user_id']}: {e}")
+                        logger.error(f"Connection failed for user {ctx['user_id']}: {e}")
                 
                 # FAILING ASSERTION: Thread contexts should be isolated
                 # This will fail if thread isolation is not properly implemented
@@ -250,13 +247,13 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 self.fail("WebSocket manager not available - thread isolation cannot be tested")
                 
         except AssertionError as e:
-            self.logger.warning(f"Expected failure in thread isolation: {e}")
+            logger.warning(f"Expected failure in thread isolation: {e}")
             raise
         except Exception as e:
-            self.logger.error(f"Thread isolation error: {e}")
+            logger.error(f"Thread isolation error: {e}")
             raise
         
-        self.logger.info("Thread Context Isolation test completed")
+        logger.info("Thread Context Isolation test completed")
     
 
 
