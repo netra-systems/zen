@@ -848,5 +848,6 @@ __all__ = [
     "get_streaming_timeout",
     "get_streaming_phase_timeout",
     "validate_timeout_hierarchy",
-    "get_timeout_hierarchy_info"
+    "get_timeout_hierarchy_info",
+    "get_environment_detection_info"  # Issue #586
 ]
