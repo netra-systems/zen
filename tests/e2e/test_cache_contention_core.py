@@ -818,7 +818,7 @@ class TestCacheContentionSuite:
         logger.info("Starting memory pressure cache eviction test")
         
         # Fill Redis with data until memory pressure
-        initial_memory = await self.suite.await redis_client.get_memory_usage()
+        initial_memory = await self.redis_client.get_memory_usage()
         target_memory = initial_memory + (50 * 1024 * 1024)  # Add 50MB
         
         keys_created = []
