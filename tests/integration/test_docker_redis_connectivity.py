@@ -21,7 +21,7 @@ import pytest
 import os
 import subprocess
 import time
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import json
 import socket
 from typing import Dict, Any, List, Optional, Tuple
@@ -117,7 +117,8 @@ class DockerRedisTestManager:
     def _test_redis_ping(self, host: str, port: int) -> bool:
         """Test Redis connectivity with ping."""
         try:
-            redis_client = redis.Redis(host=host, port=port, socket_timeout=5, socket_connect_timeout=5)
+            redis_client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(host=host, port=port, socket_timeout=5, socket_connect_timeout=5)
             redis_client.ping()
             redis_client.close()
             return True
@@ -263,7 +264,8 @@ class TestDockerRedisConnectivity:
             # Create multiple clients using the same pool
             clients = []
             for i in range(3):
-                client = redis.Redis(connection_pool=pool)
+                client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(connection_pool=pool)
                 clients.append(client)
             
             # Test that all clients can perform operations
@@ -409,14 +411,16 @@ class TestDockerRedisConnectivity:
         
         try:
             # Test different databases
-            redis_db0 = redis.Redis(
+            redis_db0 = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(
                 host=backend_env.get_redis_host(),
                 port=backend_env.get_redis_port(),
                 db=0,
                 socket_timeout=5
             )
             
-            redis_db1 = redis.Redis(
+            redis_db1 = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(
                 host=backend_env.get_redis_host(),
                 port=backend_env.get_redis_port(),
                 db=1,
@@ -561,7 +565,8 @@ class TestRedisDockerHealthChecks:
             assert startup_time < 30, f"Redis should start within 30 seconds, took {startup_time:.2f}s"
             
             # Test that Redis is immediately usable after health check passes
-            redis_client = redis.Redis(host="localhost", port=6381, socket_timeout=5)
+            redis_client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(host="localhost", port=6381, socket_timeout=5)
             
             operation_start = time.time()
             redis_client.ping()

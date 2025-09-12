@@ -22,8 +22,7 @@ from typing import Any, Dict, List, Optional, Set
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
-import redis
-
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 from test_framework.base_integration_test import BaseIntegrationTest
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services
