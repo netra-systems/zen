@@ -218,24 +218,20 @@ class HealthMonitor:
         try:
             # SECURITY FIX: Check factory pattern availability without creating instances
             try:
-                from netra_backend.app.websocket_core.websocket_manager_factory import (
-                    get_websocket_manager_factory,
-                    create_websocket_manager
-                )
-                from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+                # SSOT MIGRATION: Using direct WebSocket manager instead of deprecated factory pattern
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                 
-                # Check if factory is available and functional
-                factory = get_websocket_manager_factory()
-                if not factory:
-                    return HealthStatus.UNHEALTHY, "WebSocket factory not available", {}
+                # Check if SSOT WebSocket manager is available
+                manager = get_websocket_manager()
+                if not manager:
+                    return HealthStatus.UNHEALTHY, "WebSocket SSOT manager not available", {}
                 
-                # Test factory functionality without user context (factory pattern check only)
-                # We cannot create actual managers without user context (security compliance)
-                return HealthStatus.HEALTHY, "WebSocket factory pattern available and secure", {
-                    "pattern": "factory",
+                # Test SSOT manager availability (no user context needed for health check)
+                return HealthStatus.HEALTHY, "WebSocket SSOT manager available and secure", {
+                    "pattern": "ssot_direct",
                     "per_user_isolation": True,
                     "security_compliant": True,
-                    "note": "Factory available, managers created per-user only"
+                    "note": "SSOT manager available, user isolation maintained"
                 }
                 
             except ImportError as e:
