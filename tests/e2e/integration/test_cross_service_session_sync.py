@@ -249,7 +249,7 @@ class TestCrossServiceSessionSyncer:
         try:
             # Connect to WebSocket with token
             uri = f"{self.websocket_url}?token={token}"
-            websocket_client = await websockets.connect(uri, timeout=10)
+            websocket_client = await websockets.connect(uri, open_timeout=10)
             
             # Send ping to verify authenticated connection
             ping_message = {"type": "ping", "timestamp": time.time()}
@@ -361,7 +361,7 @@ class TestCrossServiceSessionSyncer:
             uri = f"{self.websocket_url}?token={token}"
             
             try:
-                websocket_client = await websockets.connect(uri, timeout=5)
+                websocket_client = await websockets.connect(uri, open_timeout=5)
                 # If connection succeeds, it should close quickly
                 try:
                     await asyncio.wait_for(websocket_client.recv(), timeout=2.0)
