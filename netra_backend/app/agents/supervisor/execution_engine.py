@@ -467,20 +467,63 @@ class ExecutionEngine:
                 f"User: {context.user_id}, Error: {type(e).__name__}"
             )
             raise RuntimeError(f"ExecutionEngine delegation failed: {e}")
+    
+    async def shutdown(self) -> None:
+        """Shutdown execution engine and clean up resources."""
+        logger.info("🔄 Issue #565: Shutting down ExecutionEngine with UserExecutionEngine delegation")
         
-        # LEGACY: Global state execution (deprecated)
-        logger.warning("Using legacy ExecutionEngine with global state - consider migrating to UserExecutionEngine")
+        if self._delegated_engine:
+            try:
+                await self._delegated_engine.cleanup()
+                logger.info("✅ Issue #565: Successfully cleaned up delegated UserExecutionEngine")
+            except Exception as e:
+                logger.error(f"❌ Issue #565: Error cleaning up delegated UserExecutionEngine: {e}")
         
-        # FAIL-FAST: Validate context before any processing
-        self._validate_execution_context(context)
+        self._delegated_engine = None
+        self._initialized = False
         
-        # NEW: Log user isolation status
-        if effective_user_context:
-            logger.debug(f"Executing agent {context.agent_name} with user isolation for user {effective_user_context.user_id}")
+    # Legacy property accessors for backward compatibility
+    
+    @property 
+    def user_context(self) -> Optional['UserExecutionContext']:
+        """Get user context from delegated engine if available."""
+        if self._delegated_engine:
+            return self._delegated_engine.get_user_context()
+        return self._user_context
+    
+    @property
+    def registry(self):
+        """Get registry for backward compatibility."""
+        return self._registry
+    
+    @property  
+    def websocket_bridge(self):
+        """Get websocket bridge for backward compatibility."""
+        return self._websocket_bridge
+    
+    async def get_execution_stats(self) -> Dict[str, Any]:
+        """Get execution statistics from delegated engine."""
+        if self._delegated_engine:
+            stats = await self._delegated_engine.get_execution_stats()
+            stats['delegation_info'] = self.get_delegation_info()
+            return stats
         else:
-            logger.warning(f"Executing agent {context.agent_name} without UserExecutionContext - isolation not guaranteed")
-        
-        queue_start_time = time.time()
+            return {
+                'delegation_active': True,
+                'initialized': False,
+                'message': 'UserExecutionEngine not yet initialized - call execute_agent() first'
+            }
+    
+    def __str__(self) -> str:
+        """String representation showing delegation status."""
+        if self._delegated_engine:
+            return f"ExecutionEngine(delegated_to={self._delegated_engine.engine_id}, compatibility_mode=True)"
+        else:
+            return f"ExecutionEngine(delegation_pending=True, compatibility_mode=True)"
+    
+    def __repr__(self) -> str:
+        """Detailed string representation."""
+        return self.__str__()
         
         # Create execution tracking record
         execution_id = self.execution_tracker.create_execution(
