@@ -52,7 +52,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from typing import Dict, List, Any, Optional
 from unittest.mock import patch
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import psycopg2
 from docker.errors import ContainerError, ImageNotFound, APIError
 
@@ -256,7 +256,8 @@ class TestRealDockerOrchestration(TestUnifiedTestRunnerIntegrationCore):
         postgres_port = postgres_container.attrs["NetworkSettings"]["Ports"]["5432/tcp"][0]["HostPort"]
         
         # Test Redis connection
-        redis_client = redis.Redis(host="localhost", port=int(redis_port), password="test_password")
+        redis_client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(host="localhost", port=int(redis_port), password="test_password")
         redis_client.ping()  # Should not raise exception
         redis_client.set("integration_test", "success")
         self.assertEqual(redis_client.get("integration_test"), b"success")

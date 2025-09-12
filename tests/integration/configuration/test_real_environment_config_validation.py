@@ -14,7 +14,7 @@ import time
 from unittest.mock import patch
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from shared.database_url_builder import DatabaseURLBuilder
 from shared.jwt_secret_manager import SharedJWTSecretManager

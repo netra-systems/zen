@@ -41,7 +41,7 @@ import time
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import psycopg2
 from typing import Dict, List, Any
 
@@ -196,7 +196,8 @@ class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
         original_redis = manager.redis_client
         
         # Temporarily replace with failing client
-        failing_client = redis.Redis(host='nonexistent-host', port=6379)
+        failing_client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(host='nonexistent-host', port=6379)
         manager.redis_client = failing_client
         
         # Operation should handle failure gracefully

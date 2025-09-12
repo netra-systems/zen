@@ -46,7 +46,7 @@ import gc
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Any, Set
 from unittest.mock import patch
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import psycopg2
 from psycopg2 import sql
 
@@ -805,7 +805,8 @@ class TestDisasterRecoveryIntegration(TestUnifiedIDManagerIntegrationCore):
         
         # Simulate Redis connection failure
         original_redis = self.id_manager.redis_client
-        self.id_manager.redis_client = redis.Redis(host='nonexistent-host', port=6379)
+        self.id_manager.redis_client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(host='nonexistent-host', port=6379)
         
         # ID generation should still work (fallback to database sequences)
         fallback_ids = []
