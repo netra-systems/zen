@@ -657,20 +657,56 @@ class RealServicesManager:
         return results
     
     async def _start_local_services(self, skip_frontend: bool = False) -> str:
-        """Start local services for testing."""
+        """Start local services for testing using UnifiedDockerManager."""
         try:
-            # Check if Docker Compose is available
-            import shutil
-            if shutil.which("docker-compose") or shutil.which("docker"):
-                logger.info("Docker available - assuming services managed by test runner")
-                return "Services managed by test runner/Docker"
-            else:
+            # Get Docker manager
+            docker_manager = await self._get_docker_manager()
+            
+            if docker_manager is None:
                 logger.warning("Docker not available - services must be started manually")
                 return "Docker not available - manual service startup required"
+            
+            # Check if services are already running
+            logger.info("Checking if Docker services are already running...")
+            services_status = await docker_manager.get_all_services_status()
+            
+            # Determine which services need to be started
+            required_services = ["postgres", "redis", "auth_service", "backend"]
+            if not skip_frontend:
+                required_services.append("frontend")
+            
+            services_to_start = []
+            for service in required_services:
+                if service not in services_status or not services_status[service].get("running", False):
+                    services_to_start.append(service)
+            
+            if not services_to_start:
+                logger.info("All required Docker services already running")
+                return "All required Docker services already running"
+            
+            # Start missing services
+            logger.info(f"Starting Docker services: {', '.join(services_to_start)}")
+            
+            for service in services_to_start:
+                try:
+                    result = await docker_manager.start_service(service)
+                    if result.get("success", False):
+                        logger.info(f"Successfully started {service}")
+                    else:
+                        logger.warning(f"Failed to start {service}: {result.get('error', 'Unknown error')}")
+                except Exception as e:
+                    logger.error(f"Error starting {service}: {e}")
+                    # Continue with other services
+            
+            # Give services time to initialize
+            logger.info("Waiting for services to initialize...")
+            await asyncio.sleep(5)
+            
+            return f"Started Docker services: {', '.join(services_to_start)}"
                 
         except Exception as e:
-            logger.error(f"Local service startup check failed: {e}")
-            return f"Service startup check failed: {str(e)}"
+            logger.error(f"Local service startup failed: {e}")
+            return f"Service startup failed: {str(e)}"
     
     async def _wait_for_services_healthy(self, timeout: float = 60) -> bool:
         """Wait for all services to become healthy."""
