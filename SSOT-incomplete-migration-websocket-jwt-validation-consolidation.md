@@ -44,11 +44,38 @@ Multiple JWT validation implementations across WebSocket authentication stack cr
 3. Standardize all modules to use AuthServiceClient → jwt_handler.py chain
 4. Eliminate fallback validation patterns creating SSOT violations
 
+## Test Discovery & Strategy (STEP 1)
+
+### Existing Tests Discovered (16 Critical Files)
+- **5 Mission Critical** - JWT bypass/SSOT compliance detection
+- **6 Integration** - JWT extraction and auth flow validation  
+- **3 Unit** - Competing auth implementation detection
+- **2 E2E/Staging** - End-to-end JWT authentication flows
+
+### Key SSOT Violations in Tests
+1. **UserContextExtractor** - Multiple JWT validation paths with fallbacks
+2. **UnifiedWebSocketAuth** - Legacy remediation authentication paths
+3. **AuthIntegration** - Local JWT validation vs SSOT delegation
+
+**Target SSOT:** `/auth_service/auth_core/core/jwt_handler.py` - `JWTHandler.validate_token()`
+
+### Test Strategy Plan
+- **60% Existing Test Updates** - 15 files need updates for single auth path
+- **20% New SSOT Tests** - 4 new files for SSOT compliance validation  
+- **20% Execution Strategy** - Unit/Integration/E2E staging (no Docker)
+- **47 JWT decode mocks** require replacement with SSOT delegation
+
+### Test Execution (No Docker Required)
+- Unit tests: Direct execution with mocks
+- Integration: Staging GCP environment 
+- E2E: Staging deployment validation
+- Mission Critical: Mocked or real services
+
 ## Work Progress
 
 - [x] **STEP 0:** SSOT audit completed - Critical P0 violation identified
 - [x] **STEP 0.2:** GitHub issue #525 created and local tracking file established
-- [ ] **STEP 1:** Discover and plan tests for SSOT violations
+- [x] **STEP 1:** Discover and plan tests - 16 test files identified, comprehensive strategy created
 - [ ] **STEP 2:** Execute test plan for new SSOT tests  
 - [ ] **STEP 3:** Plan SSOT remediation
 - [ ] **STEP 4:** Execute SSOT remediation plan
@@ -57,6 +84,6 @@ Multiple JWT validation implementations across WebSocket authentication stack cr
 
 ## Next Actions
 
-**IMMEDIATE:** Move to Step 1 - Discover existing tests protecting against breaking changes from SSOT refactor
+**IMMEDIATE:** Move to Step 2 - Execute test plan for 20% new SSOT-focused tests
 
-**PRIORITY:** Focus on Golden Path stability - users login → get AI responses
+**PRIORITY:** Golden Path protection during SSOT consolidation
