@@ -60,6 +60,65 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
+class AgentRegistryAdapter:
+    """Adapter to make AgentClassRegistry compatible with AgentExecutionCore interface.
+    
+    AgentExecutionCore expects a registry with a get() method that returns agent instances,
+    but AgentClassRegistry has a get() method that returns agent classes. This adapter
+    instantiates the classes using the agent factory.
+    """
+    
+    def __init__(self, agent_class_registry, agent_factory, user_context):
+        """Initialize the adapter.
+        
+        Args:
+            agent_class_registry: AgentClassRegistry instance
+            agent_factory: AgentInstanceFactory for creating agent instances
+            user_context: UserExecutionContext for agent creation
+        """
+        self.agent_class_registry = agent_class_registry
+        self.agent_factory = agent_factory
+        self.user_context = user_context
+        self._agent_cache = {}  # Cache instances to avoid recreating
+    
+    def get(self, agent_name: str):
+        """Get agent instance by name.
+        
+        Args:
+            agent_name: Name of the agent to get
+            
+        Returns:
+            Agent instance or None if not found
+        """
+        try:
+            # Check cache first
+            if agent_name in self._agent_cache:
+                logger.debug(f"Returning cached agent instance: {agent_name}")
+                return self._agent_cache[agent_name]
+            
+            # Get agent class from registry
+            agent_class = self.agent_class_registry.get(agent_name)
+            if not agent_class:
+                logger.debug(f"Agent class not found in registry: {agent_name}")
+                return None
+            
+            # Use factory to create instance
+            agent_instance = self.agent_factory.create_agent_instance(
+                agent_name,
+                self.user_context,
+                agent_class=agent_class
+            )
+            
+            # Cache the instance
+            self._agent_cache[agent_name] = agent_instance
+            logger.info(f"Created and cached agent instance: {agent_name}")
+            return agent_instance
+            
+        except Exception as e:
+            logger.error(f"Failed to create agent instance for {agent_name}: {e}")
+            return None
+
+
 class MinimalPeriodicUpdateManager:
     """Minimal adapter for periodic update manager interface compatibility.
     
@@ -613,10 +672,26 @@ class UserExecutionEngine(IExecutionEngine):
         # Note: These components should be stateless or request-scoped
         try:
             # Access infrastructure components through factory
+            registry = None
             if hasattr(self.agent_factory, '_agent_registry'):
                 registry = self.agent_factory._agent_registry
-            else:
-                raise ValueError("Agent registry not available in factory")
+            
+            # CRITICAL FIX: Try to get agent class registry if regular registry is not available
+            if not registry and hasattr(self.agent_factory, '_agent_class_registry'):
+                # Create adapter that provides the interface AgentExecutionCore expects
+                from netra_backend.app.agents.supervisor.user_execution_engine import AgentRegistryAdapter
+                agent_class_registry = self.agent_factory._agent_class_registry
+                registry = AgentRegistryAdapter(agent_class_registry, self.agent_factory, self.context)
+                logger.info("Using AgentClassRegistry with adapter for AgentExecutionCore")
+            
+            if not registry:
+                # Last resort: Try to initialize the registry
+                from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+                registry = initialize_agent_class_registry()
+                logger.warning("Initialized agent registry as fallback in UserExecutionEngine")
+            
+            if not registry:
+                raise ValueError("Agent registry not available in factory and initialization failed")
             
             if hasattr(self.agent_factory, '_websocket_bridge'):
                 websocket_bridge = self.agent_factory._websocket_bridge

@@ -52,7 +52,6 @@ class TestWebSocketSSoTGoldenPathStaging(SSotAsyncTestCase):
     @classmethod
     async def setup_class(cls):
         """Set up staging environment connection and validation"""
-        await super().setup_class()
         cls.env = IsolatedEnvironment()
         
         # Get staging environment configuration

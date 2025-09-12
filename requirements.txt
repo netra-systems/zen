@@ -6,126 +6,132 @@
 fastapi>=0.116.1
 # Starlette is the underlying ASGI framework for FastAPI. Version is managed by FastAPI's dependencies.
 starlette>=0.47.3
-# Uvicorn is the high-performance ASGI server. The [standard] extra includes uvloop and httptools for performance.
+
+# --- ASGI Server ---
+# uvicorn is the ASGI server for running FastAPI in production.
 uvicorn[standard]>=0.35.0
-# Gunicorn is the production-grade process manager for Uvicorn workers.
+# gunicorn provides process management for uvicorn in production environments.
 gunicorn>=23.0.0
-# ItsDangerous is used for signing data (e.g., for secure tokens/cookies).
-itsdangerous>=2.2.0
 
-# --- Data Validation ---
-# Pydantic is used for data validation and settings management. V2 is a major upgrade with a Rust core.
-pydantic>=2.11.7
-# Required for email validation within Pydantic models.
-email-validator>=2.3.0
-# Handles multipart/form-data parsing. Updated to patch critical DoS vulnerabilities.
-python-multipart>=0.0.20
-
-# --- Database (PostgreSQL with SQLAlchemy) ---
-# SQLAlchemy is the core ORM. Version 2.0+ uses a modern, explicit API.
+# --- Database ---
+# SQLAlchemy 2.0 is used for database ORM functionality with full async support.
 sqlalchemy>=2.0.43
-# SQLModel provides a seamless layer over SQLAlchemy and Pydantic.
+# SQLModel provides Pydantic integration with SQLAlchemy models.
 sqlmodel>=0.0.24
-# High-performance asyncio driver for PostgreSQL, compatible with SQLAlchemy 2.0 async support.
-asyncpg>=0.30.0
-# Alembic is the database migration tool for SQLAlchemy.
+# Alembic handles database migrations for SQLAlchemy.
 alembic>=1.16.4
-# Google Cloud SQL Connector for secure, IAM-based connections. The [asyncpg] extra is for async support.
-cloud-sql-python-connector[asyncpg]>=1.18.4
-# Synchronous PostgreSQL driver, often used for scripts or legacy code.
+# PostgreSQL adapter for SQLAlchemy
+asyncpg>=0.30.0
+# PostgreSQL driver with SSL support for both sync and async operations.
 psycopg2-binary>=2.9.10
 
-# --- In-Memory Cache ---
-# Redis client for Python.
-redis>=6.4.0
-
-# --- Analytics Database ---
-# ClickHouse drivers for Python (both needed for compatibility).
-clickhouse-driver>=0.2.9  # Native Python driver used by existing code
-clickhouse-connect>=0.8.18  # Alternative driver (may be used elsewhere)
-# LZ4 is a dependency for ClickHouse for fast compression.
-lz4>=4.4.4
-
-# --- Authentication & Security ---
-# PyJWT is the standard for handling JSON Web Tokens. Replaces the unmaintained python-jose.
+# --- Authentication ---
+# PyJWT handles JWT token operations with cryptographic extensions.
 PyJWT[cryptography]>=2.10.1
-# Argon2 is a modern, secure password hashing algorithm.
+# Argon2 for password hashing (more secure than bcrypt).
 argon2-cffi>=25.1.0
-# Bcrypt is another widely-used password hashing algorithm.
+# bcrypt for legacy password compatibility if needed.
 bcrypt>=4.3.0
-# Cryptography provides low-level cryptographic primitives. Essential to keep updated.
-cryptography>=45.0.6
 
-# --- HTTP & WebSockets ---
-# Modern async HTTP client, used by FastAPI's TestClient and many SDKs.
-httpx>=0.28.1
-# Another powerful async HTTP client/server library.
-aiohttp>=3.12.15
-# Library for building WebSocket clients and servers.
-websockets>=15.0.1
+# --- Validation ---
+# Pydantic v2 for data validation and serialization. Must be compatible with FastAPI.
+pydantic>=2.11.7
+# Email validation utilities.
+email-validator>=2.3.0
 
-# --- Environment & Configuration ---
-# Manages environment variables from.env files.
-python-dotenv>=1.1.1
-
-# --- Logging & Monitoring ---
-# A modern, easy-to-use logging library.
-loguru>=0.7.3
-# Client library for instrumenting code for Prometheus monitoring.
-prometheus-client>=0.22.1
-
-# --- AI/ML Libraries ---
-# LangChain has been modularized. Core contains base abstractions.
-langchain-core>=0.3.75
-# Community-contributed LangChain integrations.
-langchain-community>=0.3.28
-# OpenAI's official Python SDK. V1.x is a major rewrite from v0.x.
+# --- AI/ML Dependencies ---
+# OpenAI Python client for GPT integrations
 openai>=1.101.0
-# Anthropic's official Python SDK.
+# Anthropic Python client for Claude API
 anthropic>=0.64.0
-# The new, unified Google GenAI SDK, replacing the deprecated google-generativeai.
+# Google Generative AI client
 google-genai>=1.32.0
-# LangChain Google GenAI integration for structured output support
+# LangChain for agent frameworks
+langchain-core>=0.3.75
+langchain-community>=0.3.28
 langchain-google-genai>=2.1.10
-# FastMCP enables Model Context Protocol (MCP) integration for tool use and context sharing
+# Numerical computing
+numpy>=2.3.2
+# Data manipulation and analysis
+pandas>=2.3.2
+# FastMCP for Model Context Protocol
 fastmcp==2.11.3
 
-# --- Google Cloud Services ---
-# Google Cloud Secret Manager for secure secret management
-google-cloud-secret-manager>=2.20.0
-# Google Cloud Monitoring API client
-google-cloud-monitoring>=2.24.1
-# Google Cloud IAM API client
-google-cloud-iam>=2.17.0
+# --- Caching ---
+# Redis client for caching and session storage.
+redis>=6.4.0
+# In-memory caching utilities
+cachetools==5.5.0
+
+# --- HTTP Client ---
+# Modern HTTP client for API calls with async support.
+httpx>=0.28.1
+# Alternative HTTP client for specific use cases
+aiohttp>=3.12.15
+
+# --- Configuration & Environment ---
+# Loads environment variables from .env files.
+python-dotenv>=1.1.1
+# YAML parsing for configuration files.
+pyyaml>=6.0.2
+# Secure cookie signing.
+itsdangerous>=2.2.0
+
+# --- File Handling ---
+# Handles multipart form data for file uploads.
+python-multipart>=0.0.20
 
 # --- Utilities ---
-# General-purpose retrying library.
-tenacity>=9.1.2
-# Caching library with TTL (Time-To-Live) support for memory leak prevention
-cachetools==5.5.0
-# High-performance runtime type-checker.
-beartype>=0.21.0
-# Powerful extensions for Python's standard datetime module.
+# Date and time utilities beyond standard library.
 python-dateutil>=2.9.0.post0
-# YAML parser and emitter for Python.
-pyyaml>=6.0.2
-# Core libraries for data analysis and manipulation.
-pandas>=2.3.2
-numpy>=2.3.2
+# Rich console output for development and debugging.
 rich>=14.1.0
+# Retry logic for unreliable operations.
+tenacity>=9.1.2
+# Runtime type checking
+beartype>=0.21.0
+# System and process utilities
+psutil>=7.0.0
+# Fake data generation for testing
 Faker>=37.6.0
 
-# --- Performance Monitoring ---
-# Cross-platform library for process and system monitoring.
-psutil>=7.0.0
+# --- Security ---
+# Industry-standard cryptographic library.
+cryptography>=45.0.6
 
-# --- Distributed Tracing & Observability ---
-# OpenTelemetry API for distributed tracing
-# OpenTelemetry deps temporarily disabled due to conflicts
-# opentelemetry-api>=1.28.0
-# opentelemetry-sdk>=1.28.0
-# opentelemetry-instrumentation-fastapi>=0.49b0
-# opentelemetry-exporter-otlp>=1.28.0
+# --- Observability ---
+# Structured logging
+loguru>=0.7.3
+# Metrics collection
+prometheus-client>=0.22.1
+# OpenTelemetry for distributed tracing
+opentelemetry-api==1.24.0
+opentelemetry-sdk==1.24.0
+opentelemetry-exporter-otlp==1.24.0
+opentelemetry-exporter-jaeger==1.21.0
+opentelemetry-instrumentation-fastapi==0.45b0
+opentelemetry-instrumentation-redis==0.45b0
+opentelemetry-instrumentation-requests==0.45b0
+opentelemetry-instrumentation-sqlalchemy==0.45b0
+
+# --- Analytics ---
+# ClickHouse drivers for analytics database
+clickhouse-driver>=0.2.9
+clickhouse-connect>=0.8.18
+# Compression for ClickHouse data
+lz4>=4.4.4
+
+# --- Google Cloud ---
+# Google Cloud logging integration.
+google-cloud-logging>=3.12.1
+# Google Cloud Secret Manager for secure secret storage.
+google-cloud-secret-manager>=2.20.0
+# Cloud SQL Python connector for secure database connections.
+cloud-sql-python-connector[asyncpg]>=1.18.4
+
+# --- WebSocket ---
+# Modern WebSocket library with full async support.
+websockets>=15.0.1
 
 # --- Testing ---
 # The standard testing framework for Python.

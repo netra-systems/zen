@@ -853,17 +853,32 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
             }
             users.append(user)
             
-            # Create isolated tool dispatcher for each user
-            dispatcher = ToolDispatcher(
+            # Create isolated tool dispatcher for each user using factory
+            # First create UserExecutionContext for this user
+            user_context_factory = UserExecutionContextFactory()
+            user_context = user_context_factory.create_user_context(
                 user_id=user['id'],
-                allowed_tools=user['tool_context']['allowed_tools'],
-                isolation_context=f"tools:{user['id']}"
+                request_id=str(uuid.uuid4()),
+                thread_id=str(uuid.uuid4()),
+                run_id=str(uuid.uuid4()),
+                additional_context={
+                    'allowed_tools': user['tool_context']['allowed_tools'],
+                    'private_data': user['tool_context']['private_data'],
+                    'execution_limits': user['tool_context']['execution_limits'],
+                    'isolation_context': f"tools:{user['id']}"
+                }
+            )
+            
+            # Create dispatcher using factory
+            tool_dispatcher_factory = get_tool_dispatcher_factory()
+            dispatcher = await tool_dispatcher_factory.create_for_request(
+                user_context=user_context
             )
             tool_dispatchers.append(dispatcher)
         
         try:
             # Test tool execution isolation
-            async def test_tool_isolation(user_data: Dict, dispatcher: ToolDispatcher, execution_id: str):
+            async def test_tool_isolation(user_data: Dict, dispatcher, execution_id: str):
                 """Test tool execution is isolated per user."""
                 
                 # Execute tool with user-specific data

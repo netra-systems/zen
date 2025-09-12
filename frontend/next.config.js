@@ -1,6 +1,5 @@
-import type { NextConfig } from 'next';
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   productionBrowserSourceMaps: process.env.NODE_ENV !== 'production',
   output: 'standalone',
   eslint: {
@@ -212,4 +211,4 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+module.exports = nextConfig;

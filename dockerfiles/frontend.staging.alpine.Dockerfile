@@ -30,13 +30,13 @@ WORKDIR /build
 COPY frontend/package*.json ./
 
 # Install ALL dependencies (including dev) for build
-# Use npm install instead of npm ci to ensure all deps are installed
+# Use NODE_ENV=development to ensure devDependencies are installed
 RUN --mount=type=cache,target=/root/.npm \
-    npm install --silent && \
+    NODE_ENV=development npm install --legacy-peer-deps && \
     npm cache clean --force
 
 # Copy Next.js config files before source for better caching
-COPY frontend/next.config.ts ./
+COPY frontend/next.config.js ./
 COPY frontend/tsconfig.json ./
 COPY frontend/eslint.config.mjs ./
 COPY frontend/tailwind.config.ts ./
@@ -75,9 +75,9 @@ ENV NEXT_PUBLIC_AUTH_URL=https://auth.staging.netrasystems.ai
 ENV NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai
 ENV NEXT_PUBLIC_WEBSOCKET_URL=wss://api.staging.netrasystems.ai
 
-# Build with standalone output enabled directly
-# Set memory limit directly instead of using cross-env
+# Build with standalone output
 ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npx next build
 
 # ============================================

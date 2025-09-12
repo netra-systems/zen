@@ -223,6 +223,22 @@ class AgentClassRegistry:
         """
         return self._agent_classes.get(name)
     
+    def get(self, name: str) -> Optional[Type['BaseAgent']]:
+        """
+        Compatibility method for AgentExecutionCore interface.
+        
+        This method provides compatibility with existing code that expects
+        a `get` method on the registry. It delegates to get_agent_class.
+        
+        Args:
+            name: Name of the agent class to retrieve
+            
+        Returns:
+            Agent class if found, None otherwise
+        """
+        logger.debug(f"Registry compatibility: get({name}) -> get_agent_class({name})")
+        return self.get_agent_class(name)
+    
     def list_agent_names(self) -> List[str]:
         """
         List all registered agent names (RUNTIME - THREAD-SAFE).

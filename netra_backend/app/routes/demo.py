@@ -70,6 +70,16 @@ async def demo_chat(
     return await handle_demo_chat(request, background_tasks, demo_service, current_user)
 
 
+@router.post("/public-chat", response_model=DemoChatResponse)
+async def public_demo_chat(
+    request: DemoChatRequest, background_tasks: BackgroundTasks,
+    demo_service: DemoService = Depends(get_demo_service)
+) -> DemoChatResponse:
+    """Handle public demo chat interactions without authentication."""
+    # Pass None as current_user for public demo
+    return await handle_demo_chat(request, background_tasks, demo_service, None)
+
+
 @router.get("/industry/{industry}/templates", response_model=List[IndustryTemplate])
 async def get_industry_templates(
     industry: str, demo_service: DemoService = Depends(get_demo_service)

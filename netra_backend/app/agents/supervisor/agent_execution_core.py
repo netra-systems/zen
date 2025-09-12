@@ -110,6 +110,9 @@ class AgentExecutionCore:
                  websocket_bridge: Optional['AgentWebSocketBridge'] = None,
                  default_tier: Optional[TimeoutTier] = None,
                  prerequisite_validation_level: Optional[PrerequisiteValidationLevel] = None):
+        # CRITICAL FIX: Validate registry is not None to prevent NoneType errors
+        if registry is None:
+            raise ValueError("AgentExecutionCore requires a valid registry, got None")
         self.registry = registry
         self.websocket_bridge = websocket_bridge
         self.execution_tracker = get_execution_tracker()

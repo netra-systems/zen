@@ -40,8 +40,9 @@ export interface Agent {
 }
 
 export interface WebSocketData {
-  type: 'agent_update' | 'chat_response'
+  type: 'agent_started' | 'agent_thinking' | 'tool_executing' | 'tool_completed' | 'agent_completed' | 'agent_update' | 'chat_response'
   active_agent?: string
+  agent_name?: string
   response?: string
   optimization_metrics?: OptimizationMetrics
   agents_involved?: string[]
