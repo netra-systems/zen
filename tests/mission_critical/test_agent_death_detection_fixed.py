@@ -235,7 +235,7 @@
                                                 # REMOVED_SYNTAX_ERROR: mock_get_tracker.return_value = mock_tracker
 
                                                 # Import after patching
-                                                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                                                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
                                                 # Create mock dependencies
                                                 # REMOVED_SYNTAX_ERROR: mock_registry = Magic            websocket = TestWebSocketConnection()

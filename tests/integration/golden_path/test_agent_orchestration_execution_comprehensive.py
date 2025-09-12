@@ -53,7 +53,7 @@ from test_framework.user_execution_context_fixtures import (
 # Agent orchestration imports
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext

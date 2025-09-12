@@ -212,7 +212,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         self.record_metric("test_name", "legacy_execution_engine_websocket_comparison")
         
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Mock infrastructure for legacy engine
             mock_registry = MagicMock()

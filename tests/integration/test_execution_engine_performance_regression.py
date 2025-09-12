@@ -181,7 +181,7 @@ class TestExecutionEnginePerformanceRegression(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
             
         user_data = self.test_users[0]
         profiler = PerformanceProfiler()
@@ -276,7 +276,7 @@ class TestExecutionEnginePerformanceRegression(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
         
         concurrent_user_counts = [1, 3, 5]  # Test scaling
         performance_results = {}
@@ -389,7 +389,7 @@ class TestExecutionEnginePerformanceRegression(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
         
         # Track memory over multiple execution cycles
         memory_measurements = []
@@ -482,7 +482,7 @@ class TestExecutionEnginePerformanceRegression(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
         
         cleanup_times = []
         

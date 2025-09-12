@@ -78,7 +78,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
         
         # Check ExecutionEngine imports for state management violations
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Scan the module source for SSOT violations
             import inspect

@@ -56,7 +56,7 @@
             # REMOVED_SYNTAX_ERROR: sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../netra_backend')))
 
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.models.agent_models import AgentExecutionContext, AgentExecutionResult

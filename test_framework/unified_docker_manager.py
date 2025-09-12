@@ -1349,10 +1349,17 @@ class UnifiedDockerManager:
             repo = git.Repo(search_parent_directories=True)
             project_root = Path(repo.working_dir)
             for file_name in compose_files:
+                # First check git root
                 full_path = project_root / file_name
                 if full_path.exists():
                     _get_logger().info(f"Selected Docker compose file: {full_path} (from git root, Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                     return str(full_path)
+                
+                # Also check docker/ subdirectory in git root
+                docker_path = project_root / "docker" / file_name
+                if docker_path.exists():
+                    _get_logger().info(f"Selected Docker compose file: {docker_path} (from git root docker/, Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
+                    return str(docker_path)
         except Exception as e:
             _get_logger().debug(f"Git root detection failed: {e}, falling back to other methods")
         
@@ -1368,19 +1375,33 @@ class UnifiedDockerManager:
         if project_root:
             project_path = Path(project_root)
             for file_name in compose_files:
+                # First check project root
                 full_path = project_path / file_name
                 if full_path.exists():
                     _get_logger().info(f"Selected Docker compose file: {full_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                     return str(full_path)
+                
+                # Also check docker/ subdirectory
+                docker_path = project_path / "docker" / file_name
+                if docker_path.exists():
+                    _get_logger().info(f"Selected Docker compose file: {docker_path} (from docker/, Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
+                    return str(docker_path)
         
         # Finally check common parent directories
         current_path = Path.cwd()
         for parent in [current_path, current_path.parent, current_path.parent.parent]:
             for file_name in compose_files:
+                # Check parent directory
                 full_path = parent / file_name
                 if full_path.exists():
                     _get_logger().info(f"Selected Docker compose file: {full_path} (Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
                     return str(full_path)
+                
+                # Also check docker/ subdirectory in each parent
+                docker_path = parent / "docker" / file_name
+                if docker_path.exists():
+                    _get_logger().info(f"Selected Docker compose file: {docker_path} (from docker/, Alpine: {self.use_alpine}, Environment: {self.environment_type.value})")
+                    return str(docker_path)
         
         raise RuntimeError(f"No docker-compose files found. Expected: {', '.join(compose_files)}")
     
@@ -4794,9 +4815,13 @@ class UnifiedDockerManager:
             await self._cleanup_stale_test_environment(test_env)
             
             # 2. Use EXACTLY docker-compose.alpine-test.yml
-            compose_file = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent)) / "docker-compose.alpine-test.yml"
+            project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
+            compose_file = project_root / "docker-compose.alpine-test.yml"
             if not compose_file.exists():
-                raise RuntimeError(f"Required E2E compose file not found: {compose_file}")
+                # Also check docker/ subdirectory
+                compose_file = project_root / "docker" / "docker-compose.alpine-test.yml"
+                if not compose_file.exists():
+                    raise RuntimeError(f"Required E2E compose file not found in project root or docker/ subdirectory")
             
             _get_logger().info(f"   [U+1F433] Using compose file: {compose_file}")
             

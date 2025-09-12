@@ -89,7 +89,7 @@ class TestExecutionEngineUserIsolationComprehensive(SSotAsyncTestCase):
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
             # Fallback to testing available ExecutionEngine
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
             
         user_executions = {}
         user_events = {}
@@ -228,7 +228,7 @@ class TestExecutionEngineUserIsolationComprehensive(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
         
         # Track events per user
         user_event_logs = {user['user_id']: [] for user in self.test_users}
@@ -339,7 +339,7 @@ class TestExecutionEngineUserIsolationComprehensive(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
         
         user_engines = {}
         
@@ -453,7 +453,7 @@ class TestExecutionEngineUserIsolationComprehensive(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
         
         # Performance tracking
         user_performance = {}
@@ -595,7 +595,7 @@ class TestExecutionEngineUserIsolationComprehensive(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as UserExecutionEngine
         
         execution_results = {}
         

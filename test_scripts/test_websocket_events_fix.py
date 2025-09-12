@@ -21,7 +21,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Add project root to path
 sys.path.insert(0, '/Users/anthony/Documents/GitHub/netra-apex')
 
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

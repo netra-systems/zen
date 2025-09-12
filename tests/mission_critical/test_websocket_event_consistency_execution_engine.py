@@ -140,7 +140,8 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase, unittest.T
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
             # Fallback to available ExecutionEngine
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
         user_data = self.test_users[0]
         event_capture = self.event_captures[user_data['user_id']]
@@ -227,7 +228,8 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase, unittest.T
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         try:
             # Create execution engine
@@ -329,7 +331,8 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase, unittest.T
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         # Create engines for both users
         user_engines = {}
@@ -428,7 +431,8 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase, unittest.T
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         try:
             # Create engine
@@ -504,7 +508,8 @@ class TestWebSocketEventConsistencyExecutionEngine(SSotAsyncTestCase, unittest.T
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.services.user_execution_context import UserExecutionContext
         except ImportError:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as UserExecutionEngine
+            # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         try:
             # Create engine

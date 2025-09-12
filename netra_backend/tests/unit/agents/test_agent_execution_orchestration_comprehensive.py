@@ -52,7 +52,8 @@ from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocke
 # Real Agent Execution Components - NO mocks allowed
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, 
     AgentExecutionResult

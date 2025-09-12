@@ -43,11 +43,13 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 
 # Core Agent System Imports (Real Production Code)
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext, validate_user_context
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
-from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+# ISSUE #565 SSOT MIGRATION: create_request_scoped_engine migrated to UserExecutionEngine factory method
+# from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 
 # WebSocket Integration (Real Services)

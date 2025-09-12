@@ -52,7 +52,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
         """
         try:
             # Try to import all the different ExecutionEngine implementations
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
             from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
             from netra_backend.app.agents.supervisor.mcp_execution_engine import MCPExecutionEngine
@@ -89,7 +89,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
         """
         try:
             # Import the main ExecutionEngine
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Create two "different user" ExecutionEngine instances
             engine1 = ExecutionEngine()
@@ -158,7 +158,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
                 user_b_events.append((event_type, data))
             
             # Create ExecutionEngine instances for two different users
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             with patch('netra_backend.app.agents.supervisor.execution_engine.ExecutionEngine') as MockEngine:
                 # Configure mock engines with different WebSocket emitters
@@ -208,7 +208,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
         Current Reality: Direct instantiation or singleton patterns violate user isolation.
         """
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Test 1: Direct instantiation should not be allowed
             try:
@@ -276,7 +276,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
         try:
             import gc
             import sys
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Track initial memory state
             gc.collect()  # Clean up before testing

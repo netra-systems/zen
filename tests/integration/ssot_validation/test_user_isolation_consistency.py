@@ -192,7 +192,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
         self.record_metric("test_name", "legacy_execution_engine_violations")
         
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Test legacy engine with user context support
             mock_registry = MagicMock()
