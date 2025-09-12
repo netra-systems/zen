@@ -713,7 +713,7 @@ class EmergencyAuthValidator:
                 "email": "emergency@system.local",
                 "environment": get_env().get("ENVIRONMENT", "emergency"),
                 "emergency_session": True,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "emergency_created_at": datetime.now(timezone.utc).isoformat(),  # Avoid reserved key
                 "audit_required": True
             }
         )
