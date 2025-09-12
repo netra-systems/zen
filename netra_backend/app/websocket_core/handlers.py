@@ -1193,7 +1193,20 @@ class MessageRouter:
         
         Args:
             handler: The message handler to add
+            
+        Raises:
+            TypeError: If handler does not implement the MessageHandler protocol
         """
+        # CRITICAL FIX: Protocol validation to prevent raw function registration
+        # This prevents the 'function' object has no attribute 'can_handle' error
+        if not self._validate_handler_protocol(handler):
+            handler_type = type(handler).__name__
+            raise TypeError(
+                f"Handler {handler_type} does not implement MessageHandler protocol. "
+                f"Handler must have 'can_handle' and 'handle_message' methods. "
+                f"Raw functions are not supported - use a proper handler class instead."
+            )
+        
         # Append to custom handlers list (first registered wins among custom handlers)
         self.custom_handlers.append(handler)
         position = len(self.custom_handlers) - 1
@@ -1294,18 +1307,72 @@ class MessageRouter:
             thread_id=raw_message.get("thread_id")
         )
     
+    def _validate_handler_protocol(self, handler) -> bool:
+        """Validate that handler implements the MessageHandler protocol.
+        
+        CRITICAL FIX: Prevents registration of invalid handlers (like raw functions)
+        that would cause 'function' object has no attribute 'can_handle' errors.
+        
+        Args:
+            handler: The handler to validate
+            
+        Returns:
+            bool: True if handler implements the protocol correctly
+        """
+        try:
+            # Check for required methods
+            if not hasattr(handler, 'can_handle'):
+                logger.error(f"Handler {type(handler).__name__} missing 'can_handle' method")
+                return False
+            
+            if not hasattr(handler, 'handle_message'):
+                logger.error(f"Handler {type(handler).__name__} missing 'handle_message' method")
+                return False
+            
+            # Check that can_handle is callable
+            if not callable(getattr(handler, 'can_handle')):
+                logger.error(f"Handler {type(handler).__name__} 'can_handle' is not callable")
+                return False
+            
+            # Check that handle_message is callable
+            if not callable(getattr(handler, 'handle_message')):
+                logger.error(f"Handler {type(handler).__name__} 'handle_message' is not callable")
+                return False
+            
+            logger.debug(f"Handler {type(handler).__name__} protocol validation passed")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Handler protocol validation error for {type(handler).__name__}: {e}")
+            return False
+    
     def _find_handler(self, message_type: MessageType) -> Optional[MessageHandler]:
-        """Find handler that can process the message type."""
+        """Find handler that can process the message type with improved error handling."""
         logger.debug(f"Finding handler for {message_type}, checking {len(self.handlers)} handlers")
         
         for i, handler in enumerate(self.handlers):
             handler_name = handler.__class__.__name__
-            can_handle = handler.can_handle(message_type)
-            logger.debug(f"  [{i}] {handler_name}.can_handle({message_type}) = {can_handle}")
             
-            if can_handle:
-                logger.info(f"Selected handler [{i}] {handler_name} for {message_type}")
-                return handler
+            try:
+                # CRITICAL FIX: Safe can_handle call with error handling
+                # This prevents crashes if a handler has a buggy can_handle implementation
+                can_handle = handler.can_handle(message_type)
+                logger.debug(f"  [{i}] {handler_name}.can_handle({message_type}) = {can_handle}")
+                
+                if can_handle:
+                    logger.info(f"Selected handler [{i}] {handler_name} for {message_type}")
+                    return handler
+                    
+            except AttributeError as e:
+                # CRITICAL FIX: Catch the specific 'function' object has no attribute 'can_handle' error
+                logger.error(f"Handler [{i}] {handler_name} missing can_handle method: {e}")
+                logger.error(f"This indicates a raw function was registered instead of a proper handler class")
+                continue
+                
+            except Exception as e:
+                # Handle any other errors in can_handle
+                logger.error(f"Handler [{i}] {handler_name}.can_handle({message_type}) failed: {e}")
+                continue
         
         logger.warning(f"No handler found for message type {message_type}")
         return None
