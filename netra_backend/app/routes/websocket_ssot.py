@@ -1511,7 +1511,7 @@ class WebSocketSSOTRouter:
                     "ssot_compliance": True
                 },
                 "active_components": {
-                    "factory": factory is not None,
+                    "manager": manager is not None,
                     "message_router": message_router is not None,
                     "connection_monitor": get_connection_monitor() is not None
                 },
