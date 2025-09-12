@@ -46,8 +46,8 @@ from test_framework.fixtures.id_system.id_format_samples import (
 
 # Target modules for migration testing (REAL imports)
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
-from netra_backend.app.agents.base import AgentBase
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.agents.base_agent import BaseAgent
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Import detection utilities
 import sys
@@ -83,8 +83,8 @@ class TestUUIDViolationDetection(SSotBaseTestCase):
         """
         # Import the target module
         try:
-            from netra_backend.app.agents.user_execution_context import UserExecutionContext
-            context_module = sys.modules['netra_backend.app.agents.user_execution_context']
+            from netra_backend.app.core.user_execution_context import UserExecutionContext
+            context_module = sys.modules['netra_backend.app.core.user_execution_context']
         except ImportError as e:
             pytest.skip(f"UserExecutionContext not available for migration testing: {e}")
         

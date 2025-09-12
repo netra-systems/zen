@@ -173,7 +173,39 @@ markers = [
     "orchestration: Orchestration tests",
     "security: Security tests",
     "validation: Validation tests",
-    "websocket_events: WebSocket event tests"
+    "websocket_events: WebSocket event tests",
+    
+    # Final missing markers
+    "websocket_critical: Critical WebSocket tests",
+    "observability: Observability tests", 
+    "workflow_logic: Workflow logic tests",
+    "timeout_management: Timeout management tests",
+    "config: Configuration tests",
+    "migration: Migration tests",
+    "models: Model tests",
+    "ssot_validation: SSOT validation tests",
+    "toolregistry: Tool registry tests",
+    "docker_required: Tests that require Docker services",
+    
+    # Final batch of missing markers
+    "context_building: Context building tests",
+    "environment: Environment tests", 
+    "performance_monitoring: Performance monitoring tests",
+    "pipeline_execution: Pipeline execution tests",
+    "protocol_parsing: Protocol parsing tests",
+    "workflow_execution: Workflow execution tests",
+    
+    # Final missing markers (last batch)
+    "authentication: Authentication tests",
+    "flow_context: Flow context tests",
+    "ssot_compliance: SSOT compliance tests",
+    "user_engine_delegation: User engine delegation tests", 
+    "websocket_coordination: WebSocket coordination tests",
+    
+    # Truly final markers
+    "bug_reproduction: Bug reproduction tests",
+    "isolation_status: Isolation status tests",
+    "workflow_validation: Workflow validation tests"
 ]
 
 # Coverage settings
