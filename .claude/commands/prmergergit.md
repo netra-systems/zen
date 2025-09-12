@@ -40,43 +40,21 @@ For each PR in PRs_To_MERGE:
     Create PR-WORKLOG
     Do PR-WORKLOG-UPDATE
 
-    1) READ PR : SNST: Use gh to read the PR ${1 : latest open PR} in question.
+    1) READ PR : SNST: Use gh to read the PR and PR comments in question.
     Identify:
     - PR source branch
-    - PR target branch (MUST be develop-long-lived, NOT main)
+    - Verify PR target branch == develop-long-lived OR set = develop-long-lived
     - PR conflicts status
     - PR approval status
     Do PR-WORKLOG-UPDATE
 
-    2) VALIDATE TARGET BRANCH : SNST:
-    CRITICAL: Ensure PR targets develop-long-lived (working branch).
-    If PR targets main branch: 
-    - UPDATE-PR-COMMENT explaining branch policy violation
-    - Change PR target to develop-long-lived using: `gh pr edit [PR#] --base develop-long-lived`
-    - Log this change in PR-WORKLOG
-    Do PR-WORKLOG-UPDATE
-
-    3) BRANCH SAFETY CHECK : SNST:
-    Verify current working branch remains unchanged (develop-long-lived).
-    If branch changed during operations:
-    - STOP immediately 
-    - Log safety violation
-    - Restore to develop-long-lived: `git checkout develop-long-lived`
-    Do PR-WORKLOG-UPDATE
-
-    4) RESOLVE MERGE CONFLICTS : SNST:
-    WITHOUT changing current working branch:
+    2) RESOLVE MERGE CONFLICTS:
     - Use `git fetch origin` to get latest changes
     - Check conflicts with: `gh pr checks [PR#]`
-    - If conflicts exist, use GitHub web interface or:
-    - Create temporary local branch: `git checkout -b temp-merge-[PR#] origin/[PR-source-branch]`
-    - Resolve conflicts on temp branch
-    - Push resolution: `git push origin temp-merge-[PR#]`
-    - Return to working branch: `git checkout develop-long-lived`
-    Stop if conflicts cannot be resolved safely.
+    - If conflicts exist, resolve conflicts safely.
     Do PR-WORKLOG-UPDATE
 
-    5) SAFE MERGE EXECUTION : SNST:
+    3) SAFE MERGE EXECUTION : SNST:
     Using GitHub CLI to merge to develop-long-lived:
     - Verify PR status: `gh pr status [PR#]`
     - Confirm target is develop-long-lived: `gh pr view [PR#] --json baseRefName`
@@ -85,7 +63,7 @@ For each PR in PRs_To_MERGE:
     - UPDATE-PR-COMMENT with merge confirmation
     Do PR-WORKLOG-UPDATE-PUSH
 
-    6) POST-MERGE VERIFICATION : SNST:
+    4) POST-MERGE VERIFICATION:
     - Confirm current branch is still develop-long-lived
     - Verify merged changes appear in develop-long-lived
     - Run basic health check: `git log --oneline -5`
@@ -97,7 +75,7 @@ For each PR in PRs_To_MERGE:
     - NEVER merge to main branch  
     - NEVER change from develop-long-lived during operations
     - ALWAYS verify branch target before merging
-    - STOP if any operation attempts to modify main
+    - SKIP and do something different if any operation attempts to modify main
 
     END PROCESS INSTRUCTIONS
 
