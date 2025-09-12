@@ -3,6 +3,9 @@
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 
+# Redis import fix for Issue #517 - missing redis import causing staging failure
+import redis
+
 # MIGRATED: Use SSOT Redis import pattern
 from shared.isolated_environment import get_env
 from netra_backend.app.logging_config import central_logger
