@@ -186,6 +186,10 @@ markers = [
     "ssot_validation: SSOT validation tests",
     "toolregistry: Tool registry tests",
     "docker_required: Tests that require Docker services",
+    "no_docker: Tests that work without Docker",
+    "skip_if_no_staging: Skip if staging environment not available",
+    "documentation: Documentation and validation tests",
+    "validation: Validation tests",
     
     # Final batch of missing markers
     "context_building: Context building tests",

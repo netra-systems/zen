@@ -37,9 +37,9 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 class TestCircuitBreakerLogic(SSotBaseTestCase):
     """Unit tests for circuit breaker logic and state transitions."""
     
-    def setUp(self):
+    def setup_method(self):
         """Set up test fixtures."""
-        super().setUp()
+        super().setup_method()
         self.timeout_config = TimeoutConfig()
         self.tracker = AgentExecutionTracker()
         self.test_user_id = f"user_{uuid.uuid4().hex[:8]}"
