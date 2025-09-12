@@ -76,12 +76,7 @@ class ExternalServiceIntegration:
         """
         client = None
         try:
-            client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host="localhost",
-                port=6381,  # Test environment port
-                db=db,
-                decode_responses=True
-            )
+            client = await get_redis_client()  # MIGRATED: was redis.Redis(host="localhost", port=6381, db=db, decode_responses=True)
             yield client
         finally:
             if client:

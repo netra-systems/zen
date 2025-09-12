@@ -101,7 +101,8 @@ class DockerRedisTestManager:
                 
                 if "test-redis" in result.stdout and ("Up" in result.stdout or "running" in result.stdout):
                     # Also test actual Redis connectivity
-                    if self._test_redis_ping("localhost", 6381):
+                    import asyncio
+                    if asyncio.get_event_loop().run_until_complete(self._test_redis_ping("localhost", 6381)):
                         logger.info("Redis is healthy and accessible")
                         return True
                 
@@ -114,7 +115,7 @@ class DockerRedisTestManager:
         logger.error("Redis failed to become healthy within timeout")
         return False
     
-    def _test_redis_ping(self, host: str, port: int) -> bool:
+    async def _test_redis_ping(self, host: str, port: int) -> bool:
         """Test Redis connectivity with ping."""
         try:
             # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context

@@ -94,7 +94,7 @@ class TestSSOTRegressionPrevention:
                 pass
         
         try:
-            await redis_client.flushdb()
+            asyncio.get_event_loop().run_until_complete(redis_client.flushdb())
         except:
             pass
             

@@ -398,7 +398,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
                     
         return execution_times
         
-    def _redis_simple_set_get_operation(self, redis_client, scenario_name: str, iteration: int):
+    async def _redis_simple_set_get_operation(self, redis_client, scenario_name: str, iteration: int):
         """Simple Redis SET/GET operation."""
         key = f"perf_test_{scenario_name}_{iteration}"
         value = f"test_value_{iteration}"
@@ -409,7 +409,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
         assert retrieved == value
         await redis_client.delete(key)
         
-    def _redis_pipeline_operations(self, redis_client, scenario_name: str, iteration: int):
+    async def _redis_pipeline_operations(self, redis_client, scenario_name: str, iteration: int):
         """Redis pipeline operations."""
         pipe = await redis_client.pipeline()
         
