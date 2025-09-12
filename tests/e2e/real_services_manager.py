@@ -570,6 +570,25 @@ class RealServicesManager:
         """Get current environment type."""
         return self.env.get("TEST_ENVIRONMENT", "local").lower()
     
+    async def _get_docker_manager(self) -> Optional[UnifiedDockerManager]:
+        """Get or create UnifiedDockerManager instance."""
+        if not DOCKER_MANAGER_AVAILABLE:
+            logger.warning("UnifiedDockerManager not available - Docker integration disabled")
+            return None
+        
+        if self._docker_manager is None:
+            try:
+                self._docker_manager = UnifiedDockerManager(
+                    project_root=self.project_root,
+                    compose_file="docker-compose.test.yml"
+                )
+                logger.info("UnifiedDockerManager initialized for service orchestration")
+            except Exception as e:
+                logger.error(f"Failed to initialize UnifiedDockerManager: {e}")
+                return None
+        
+        return self._docker_manager
+    
     # =============================================================================
     # SERVICE LIFECYCLE MANAGEMENT
     # =============================================================================
