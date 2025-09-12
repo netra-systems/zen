@@ -55,11 +55,55 @@ value = env.get(var_name)
 ### ✅ COMPLETED  
 - [x] **Step 2**: Execute test plan - **4 CRITICAL TEST FILES CREATED & VALIDATED**
 
+### ✅ COMPLETED  
+- [x] **Step 3**: Plan SSOT remediation - **COMPREHENSIVE STRATEGY COMPLETE**
+
 ### 🔄 IN PROGRESS  
-- [ ] **Step 3**: Plan SSOT remediation
 - [ ] **Step 4**: Execute remediation plan
 - [ ] **Step 5**: Test fix loop until all tests pass
 - [ ] **Step 6**: PR creation and closure
+
+## 📋 COMPREHENSIVE REMEDIATION PLAN (STEP 3 COMPLETED)
+
+### STRATEGIC APPROACH
+**Incremental, test-driven remediation prioritizing business continuity with immediate rollback capability.**
+
+### TARGET VIOLATIONS IDENTIFIED
+- **7 direct os.environ violations** + **3 mixed patterns** in auth_startup_validator.py lines 507-516
+- **2,831 total os.environ occurrences** across 593 files system-wide  
+- **Mission critical test infrastructure** using direct os.environ manipulation
+
+### KEY REMEDIATION STRATEGIES
+
+#### **Phase 1: Critical Golden Path Files (Week 1)**
+1. **auth_startup_validator.py** - Replace `_get_env_with_fallback()` with SSOT compliant method
+2. **Test Infrastructure** - Convert mission critical test setup to IsolatedEnvironment patterns
+3. **Cross-Service Integration** - Ensure JWT consistency between auth_service ↔ backend
+
+#### **Safety & Validation Approach**
+- **One file at a time** with test validation after each change
+- **Immediate rollback** if Golden Path functionality breaks
+- **Performance monitoring** (rollback if > 20% degradation)  
+- **Business continuity** protection throughout process
+
+#### **Before/After Code Examples**
+**VIOLATION** (Current):
+```python
+direct_value = os.environ.get(var_name)  # LINE 509
+env_specific_value = self.env.get(env_specific) or os.environ.get(env_specific)  # LINE 516
+```
+
+**SSOT COMPLIANT** (Target):
+```python
+value = self.env.get(var_name)  # Pure IsolatedEnvironment
+env_specific_value = self.env.get(env_specific)  # No fallback patterns
+```
+
+### SUCCESS CRITERIA
+- **Zero os.environ calls** in auth_startup_validator.py
+- **All validation tests PASS** (transition from FAIL to PASS)
+- **Golden Path authentication** remains functional
+- **< 2 second login response time** maintained
 
 ## 🎉 STEP 2 TEST EXECUTION RESULTS - **MISSION ACCOMPLISHED**
 
