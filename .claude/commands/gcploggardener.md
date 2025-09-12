@@ -21,6 +21,19 @@ Use label: "claude-code-generated-issue"
 11. -
 12. LIMIT SCOPE. Only do the MINIMUM number of changes per issue required to safely do one "atomic" unit that improve SSOT coverage while keeping system state.
 
+Example JSON payload to get
+    jsonPayload: {
+        context: {
+        name: "netra_backend.app.websocket_core.handlers"
+        service: "netra-service"
+    }
+    labels: {
+        function: "route_message"
+        line: "1271"
+        module: "netra_backend.app.websocket_core.handlers"
+    }
+    message: "Error routing message from demo-user-001: 'function' object has no attribute 'can_handle'"
+    timestamp: "2025-09-12T23:21:43.625002+00:00"
 
 START:
 1. Get all the ${1 : latest} log notices, warnings and errors for ${2 : backend}.
