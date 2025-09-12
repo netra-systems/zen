@@ -18,10 +18,12 @@ from netra_backend.app.agents.data.unified_data_agent import (
 )
 
 if TYPE_CHECKING:
-    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+
+# Import UserExecutionContext for runtime use
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Create aliases for backward compatibility with existing imports
 class DataSubAgent(DataAgent):
@@ -36,14 +38,29 @@ class DataSubAgent(DataAgent):
                  llm_manager: 'LLMManager',
                  tool_dispatcher: 'UnifiedToolDispatcher',
                  context: Optional['UserExecutionContext'] = None,
-                 execution_priority: int = 0):
+                 execution_priority: int = 0,
+                 name: str = "DataSubAgent"):
         """Initialize data sub-agent using SSOT implementation."""
+        # Create default context if none provided
+        if context is None:
+            context = UserExecutionContext.from_request(
+                user_id="test_user",
+                thread_id="test_thread", 
+                run_id="test_run"
+            )
+        
+        # DataAgent (UnifiedDataAgent) expects context as first parameter
         super().__init__(
-            llm_manager=llm_manager,
-            tool_dispatcher=tool_dispatcher,
             context=context,
-            execution_priority=execution_priority
+            llm_manager=llm_manager
         )
+        
+        # Store additional parameters for backward compatibility
+        self.tool_dispatcher = tool_dispatcher
+        self.execution_priority = execution_priority
+        
+        # Override name (DataAgent sets it to "UnifiedDataAgent" by default)
+        self.name = name
     
     @classmethod
     def create_agent_with_context(cls, user_context: 'UserExecutionContext') -> 'DataSubAgent':

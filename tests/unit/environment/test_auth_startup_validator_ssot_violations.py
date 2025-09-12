@@ -26,7 +26,7 @@ from netra_backend.app.core.auth_startup_validator import (
 )
 from shared.jwt_secret_manager import get_jwt_secret_manager
 from shared.isolated_environment import get_env
-from test_framework.base_unit_test import BaseUnitTest
+from netra_backend.tests.unit.test_base import BaseUnitTest
 
 
 class TestAuthStartupValidatorSSOTViolations(BaseUnitTest):

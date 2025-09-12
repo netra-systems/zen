@@ -1208,17 +1208,72 @@ class IsolatedEnvironment:
         return result
     
     def get_environment_name(self) -> str:
-        """Get the current environment name."""
-        env = self.get("ENVIRONMENT", "development").lower()
-        if env in ["development", "dev", "local"]:
-            return "development"
-        elif env in ["test", "testing"]:
+        """
+        Get the current environment name with enhanced GCP project ID detection.
+        
+        PRIORITY ORDER (Issue #586 Fix):
+        1. GCP Cloud Run markers (K_SERVICE, GCP_PROJECT_ID, GOOGLE_CLOUD_PROJECT)
+        2. Explicit ENVIRONMENT variable
+        3. Test context detection
+        4. Safe fallback to staging (not development)
+        
+        Returns:
+            Environment name: 'development', 'test', 'staging', or 'production'
+        """
+        # PRIORITY 1: Enhanced GCP Project ID Detection (Issue #586 Fix)
+        # Check GCP Cloud Run environment markers first for accurate detection
+        gcp_project_id = self.get("GCP_PROJECT_ID")
+        google_cloud_project = self.get("GOOGLE_CLOUD_PROJECT") 
+        k_service = self.get("K_SERVICE")
+        
+        # GCP Project ID-based detection (most reliable for Cloud Run)
+        if gcp_project_id:
+            if "production" in gcp_project_id.lower() or "prod" in gcp_project_id.lower():
+                return "production"
+            elif "staging" in gcp_project_id.lower() or "stage" in gcp_project_id.lower():
+                return "staging"
+            elif "dev" in gcp_project_id.lower() or "development" in gcp_project_id.lower():
+                return "development"
+        
+        # GOOGLE_CLOUD_PROJECT fallback detection
+        if google_cloud_project:
+            if "production" in google_cloud_project.lower() or "prod" in google_cloud_project.lower():
+                return "production"
+            elif "staging" in google_cloud_project.lower() or "stage" in google_cloud_project.lower():
+                return "staging"
+            elif "dev" in google_cloud_project.lower() or "development" in google_cloud_project.lower():
+                return "development"
+        
+        # K_SERVICE-based detection (Cloud Run service name)
+        if k_service:
+            if "production" in k_service.lower() or "prod" in k_service.lower():
+                return "production"
+            elif "staging" in k_service.lower() or "stage" in k_service.lower():
+                return "staging"
+            elif "dev" in k_service.lower() or "development" in k_service.lower():
+                return "development"
+        
+        # PRIORITY 2: Explicit ENVIRONMENT variable
+        explicit_env = self.get("ENVIRONMENT")
+        if explicit_env:
+            env = explicit_env.lower()
+            if env in ["development", "dev", "local"]:
+                return "development"
+            elif env in ["test", "testing"]:
+                return "test"
+            elif env == "staging":
+                return "staging"
+            elif env in ["production", "prod"]:
+                return "production"
+        
+        # PRIORITY 3: Test context detection
+        if self._is_test_context():
             return "test"
-        elif env == "staging":
-            return "staging"
-        elif env in ["production", "prod"]:
-            return "production"
-        return "development"
+        
+        # PRIORITY 4: Safe fallback (Issue #586 Fix)
+        # Default to staging instead of development for safer timeout configurations
+        # in Cloud Run environments where detection might fail during cold start
+        return "staging"
     
     def is_production(self) -> bool:
         """Check if running in production environment."""

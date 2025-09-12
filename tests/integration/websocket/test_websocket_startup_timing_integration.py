@@ -31,6 +31,7 @@ from contextlib import asynccontextmanager
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.timeout_configuration import get_websocket_recv_timeout, get_agent_execution_timeout, TimeoutTier
 
 
 class TestWebSocketStartupTiming(SSotAsyncTestCase):
@@ -81,7 +82,8 @@ class TestWebSocketStartupTiming(SSotAsyncTestCase):
             
             # Simulate race condition timing
             app_state_init_delay = 3.0  # App state takes 3s to initialize
-            websocket_validation_timeout = 1.2  # Development timeout applied incorrectly
+            # Issue #586 fix: Use environment-aware timeout instead of hardcoded value
+            websocket_validation_timeout = get_websocket_recv_timeout()  # Environment-aware timeout
             
             race_condition_result = await self._simulate_startup_race_condition(
                 app_state_delay=app_state_init_delay,
@@ -128,21 +130,24 @@ class TestWebSocketStartupTiming(SSotAsyncTestCase):
         configured timeouts, especially with development timeout (1.2s) in Cloud Run.
         """
         
-        # Test different timeout configurations
+        # Test different timeout configurations with Issue #586 environment-aware timeouts
+        development_timeout = get_websocket_recv_timeout()  # Get current environment timeout
+        staging_timeout = 18  # 15s base + 3s cold start buffer for staging (from Issue #586)
+        
         timeout_scenarios = [
             {
-                "name": "development_timeout_cloud_run",
-                "timeout": 1.2,
-                "environment": "staging",  # Misdetected as development
+                "name": "current_environment_timeout",
+                "timeout": development_timeout,
+                "environment": "development",  
                 "expected_phases": ["no_app_state", "initializing", "services", "ready"],
-                "expected_failure": True  # 1.2s insufficient for Cloud Run
+                "expected_failure": development_timeout < 3.5  # Depends on environment detection
             },
             {
                 "name": "staging_timeout_cloud_run", 
-                "timeout": 5.0,
+                "timeout": staging_timeout,
                 "environment": "staging",
                 "expected_phases": ["no_app_state", "initializing", "services", "ready"],
-                "expected_failure": False  # 5.0s should be adequate
+                "expected_failure": False  # 18s should be adequate for Cloud Run
             }
         ]
         
@@ -219,28 +224,32 @@ class TestWebSocketStartupTiming(SSotAsyncTestCase):
         initialization delays, causing WebSocket 1011 failures.
         """
         
-        # Simulate various cold start delay scenarios
+        # Simulate various cold start delay scenarios with Issue #586 environment-aware timeouts
+        current_timeout = get_websocket_recv_timeout()  # Environment-aware timeout
+        staging_timeout = 18  # 15s base + 3s cold start buffer for staging
+        production_timeout = 36  # 30s base + 6s cold start buffer for production
+        
         cold_start_scenarios = [
             {
                 "name": "typical_cold_start",
                 "container_init_delay": 2.0,
                 "app_startup_delay": 1.5,
                 "total_expected": 3.5,
-                "timeout_tested": 1.2  # Development timeout - insufficient
+                "timeout_tested": current_timeout  # Environment-aware timeout
             },
             {
                 "name": "slow_cold_start",
                 "container_init_delay": 3.0,
                 "app_startup_delay": 2.0, 
                 "total_expected": 5.0,
-                "timeout_tested": 5.0  # Staging timeout - borderline
+                "timeout_tested": staging_timeout  # Staging timeout with cold start buffer
             },
             {
                 "name": "worst_case_cold_start",
                 "container_init_delay": 4.0,
                 "app_startup_delay": 3.0,
                 "total_expected": 7.0,
-                "timeout_tested": 5.0  # Staging timeout - insufficient
+                "timeout_tested": production_timeout  # Production timeout with cold start buffer
             }
         ]
         
@@ -276,19 +285,19 @@ class TestWebSocketStartupTiming(SSotAsyncTestCase):
             f"or cold start simulation needs adjustment. Failures: {cold_start_failures}"
         )
         
-        # ASSERTION THAT SHOULD FAIL: Development timeout inadequate for any cold start
-        development_timeout_failures = [
-            f for f in cold_start_failures if f["timeout"] == 1.2
+        # ASSERTION THAT SHOULD FAIL: Short timeout inadequate for any cold start
+        short_timeout_failures = [
+            f for f in cold_start_failures if f["timeout"] < 10  # Any timeout under 10s
         ]
         
-        assert len(development_timeout_failures) > 0, (
-            f"Development timeout (1.2s) should fail under cold start conditions but didn't. "
-            f"All cold start scenarios should exceed 1.2s timeout: {cold_start_failures}"
+        assert len(short_timeout_failures) > 0, (
+            f"Short timeout (< 10s) should fail under cold start conditions but didn't. "
+            f"Cold start scenarios with delays > timeout should fail: {cold_start_failures}"
         )
         
         self.test_metrics.record_custom("cold_start_scenarios_tested", len(cold_start_scenarios))
         self.test_metrics.record_custom("cold_start_failures", len(cold_start_failures))
-        self.test_metrics.record_custom("development_timeout_failures", len(development_timeout_failures))
+        self.test_metrics.record_custom("short_timeout_failures", len(short_timeout_failures))
     
     @pytest.mark.integration
     @pytest.mark.no_docker

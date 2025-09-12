@@ -344,6 +344,10 @@ class UnifiedWebSocketManager:
         self.active_connections = {}  # Compatibility mapping
         self.connection_registry = {}  # Registry for connection objects
         
+        # Event listener support for testing
+        self.on_event_emitted: Optional[callable] = None
+        self._event_listeners: List[callable] = []
+        
         logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
     
     def _initialize_unified_mode(self):
@@ -395,6 +399,49 @@ class UnifiedWebSocketManager:
         self._background_tasks = {}
         
         logger.info(f"Isolated mode initialized for user context")
+    
+    def add_event_listener(self, listener: callable) -> None:
+        """Add an event listener for WebSocket events.
+        
+        This method provides compatibility with test frameworks that expect
+        event listener functionality for capturing WebSocket events during testing.
+        
+        Args:
+            listener: Callable that will receive event data when events are emitted
+        """
+        if listener not in self._event_listeners:
+            self._event_listeners.append(listener)
+            logger.debug(f"Added WebSocket event listener: {listener}")
+    
+    def remove_event_listener(self, listener: callable) -> None:
+        """Remove an event listener.
+        
+        Args:
+            listener: Callable to remove from the event listeners list
+        """
+        if listener in self._event_listeners:
+            self._event_listeners.remove(listener)
+            logger.debug(f"Removed WebSocket event listener: {listener}")
+    
+    def _notify_event_listeners(self, event: Dict[str, Any]) -> None:
+        """Notify all event listeners about a WebSocket event.
+        
+        Args:
+            event: Event data to send to listeners
+        """
+        # Call the on_event_emitted callback if set (for compatibility with existing tests)
+        if self.on_event_emitted:
+            try:
+                self.on_event_emitted(**event)
+            except Exception as e:
+                logger.warning(f"Error in on_event_emitted callback: {e}")
+        
+        # Call all registered event listeners
+        for listener in self._event_listeners:
+            try:
+                listener(event)
+            except Exception as e:
+                logger.warning(f"Error in event listener {listener}: {e}")
     
     def _initialize_emergency_mode(self, config: Dict[str, Any]):
         """Initialize emergency mode for service continuity."""
@@ -1090,6 +1137,17 @@ class UnifiedWebSocketManager:
                 
                 try:
                     await self.send_to_user(user_id, message)
+                    
+                    # Notify event listeners for testing/monitoring
+                    event_data = {
+                        "event_type": event_type,
+                        "user_id": str(user_id),
+                        "data": data,
+                        "timestamp": message.get("timestamp"),
+                        "critical": True
+                    }
+                    self._notify_event_listeners(event_data)
+                    
                     # Success! Return immediately
                     return
                 except Exception as e:

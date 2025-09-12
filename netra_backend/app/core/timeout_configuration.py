@@ -242,6 +242,47 @@ class CloudNativeTimeoutManager:
         
         return markers
     
+    def _calculate_cold_start_buffer(self, environment: str, gcp_markers: Dict[str, Any]) -> float:
+        """Calculate cold start buffer for Cloud Run deployments.
+        
+        **Issue #586 Solution**: Implements cold start buffer calculations for GCP Cloud Run
+        to prevent timeout failures during service startup and cold start conditions.
+        
+        Args:
+            environment: Environment name (staging, production, development)
+            gcp_markers: GCP environment markers from _detect_gcp_environment_markers()
+            
+        Returns:
+            float: Cold start buffer in seconds
+        """
+        if not gcp_markers.get('is_gcp_cloud_run'):
+            return 0.0  # No buffer needed for non-Cloud Run environments
+        
+        # Base cold start buffers by environment
+        base_buffers = {
+            'staging': 3.0,     # Staging cold start overhead
+            'production': 5.0,  # Production cold start overhead (more conservative)
+            'development': 2.0  # Local development with Cloud Run
+        }
+        
+        base_buffer = base_buffers.get(environment.lower(), 2.0)
+        
+        # Additional buffer for complex services
+        service_name = gcp_markers.get('service_name') or ''
+        if 'backend' in service_name.lower():
+            base_buffer += 1.0  # Backend services need more time for initialization
+        
+        # Additional buffer for high-tier services requiring longer startup
+        project_id = gcp_markers.get('project_id') or ''
+        if 'production' in project_id.lower():
+            base_buffer += 1.0  # Production gets extra safety buffer
+        
+        logger = logging.getLogger(__name__)
+        logger.debug(f"Cold start buffer calculated: {base_buffer}s for {environment} "
+                    f"(service: {service_name}, project: {project_id})")
+        
+        return base_buffer
+    
     def _log_startup_environment_info(self, logger: logging.Logger) -> None:
         """Log comprehensive environment detection information at startup.
         
@@ -350,55 +391,79 @@ class CloudNativeTimeoutManager:
             return self._apply_tier_enhancements(base_config, tier)
     
     def _get_base_staging_config(self, tier: TimeoutTier) -> TimeoutConfig:
-        """Get base staging configuration."""
+        """Get base staging configuration with Issue #586 cold start buffer integration."""
+        # Calculate cold start buffer for Cloud Run staging environment
+        gcp_markers = self._detect_gcp_environment_markers()
+        cold_start_buffer = self._calculate_cold_start_buffer('staging', gcp_markers)
+        
+        # Base timeouts with cold start buffer applied
+        base_websocket_recv = 15.0  # Issue #586 remedy: 15s base timeout
+        base_agent_execution = 12.0  # Must be < WebSocket recv timeout
+        
+        # Apply cold start buffer
+        websocket_recv_with_buffer = base_websocket_recv + cold_start_buffer
+        agent_execution_with_buffer = base_agent_execution + cold_start_buffer
+        
         return TimeoutConfig(
-            # CRITICAL FIX: WebSocket timeouts for Cloud Run staging (35s > 30s agent)
-            websocket_connection_timeout=60,  # Connection establishment
-            websocket_recv_timeout=35,        # PRIORITY 3 FIX: 3s  ->  35s
-            websocket_send_timeout=30,
-            websocket_heartbeat_timeout=90,
+            # ISSUE #586 FIX: WebSocket timeouts with cold start buffer for Cloud Run staging
+            websocket_connection_timeout=60,                      # Connection establishment with buffer
+            websocket_recv_timeout=int(websocket_recv_with_buffer),  # 15s base + cold start buffer
+            websocket_send_timeout=12 + int(cold_start_buffer),   # Send timeout with buffer
+            websocket_heartbeat_timeout=90,                       # Heartbeat remains high
             
-            # Agent execution timeouts (must be < WebSocket recv timeout)
-            agent_execution_timeout=30,       # PRIORITY 3 FIX: 15s  ->  30s 
-            agent_thinking_timeout=25,
-            agent_tool_timeout=20,
-            agent_completion_timeout=15,
+            # Agent execution timeouts (must be < WebSocket recv timeout) with cold start buffer
+            agent_execution_timeout=int(agent_execution_with_buffer),  # 12s base + cold start buffer
+            agent_thinking_timeout=10 + int(cold_start_buffer),   # Thinking with buffer
+            agent_tool_timeout=8 + int(cold_start_buffer),        # Tool execution with buffer
+            agent_completion_timeout=6 + int(cold_start_buffer),  # Completion with buffer
             
-            # HTTP timeouts for Cloud Run
+            # HTTP timeouts for Cloud Run with cold start consideration
             http_request_timeout=30,
             http_connection_timeout=15,
             
-            # Test timeouts for staging environment
-            test_default_timeout=60,
-            test_integration_timeout=90,
-            test_e2e_timeout=120,
+            # Test timeouts for staging environment - Issue #586 optimized
+            test_default_timeout=30 + int(cold_start_buffer),     # INCREASED for Cloud Run tests
+            test_integration_timeout=45 + int(cold_start_buffer),
+            test_e2e_timeout=60 + int(cold_start_buffer),
             
             tier=tier
         )
     
     def _get_base_production_config(self, tier: TimeoutTier) -> TimeoutConfig:
-        """Get base production configuration."""
+        """Get base production configuration with Issue #586 cold start buffer integration."""
+        # Calculate cold start buffer for Cloud Run production environment
+        gcp_markers = self._detect_gcp_environment_markers()
+        cold_start_buffer = self._calculate_cold_start_buffer('production', gcp_markers)
+        
+        # Base timeouts with conservative production values
+        base_websocket_recv = 30.0  # Production base timeout
+        base_agent_execution = 25.0  # Must be < WebSocket recv timeout
+        
+        # Apply cold start buffer
+        websocket_recv_with_buffer = base_websocket_recv + cold_start_buffer
+        agent_execution_with_buffer = base_agent_execution + cold_start_buffer
+        
         return TimeoutConfig(
-            # Production WebSocket timeouts (slightly higher for reliability)
-            websocket_connection_timeout=90,
-            websocket_recv_timeout=45,        # Production: 45s > 40s agent
-            websocket_send_timeout=40, 
-            websocket_heartbeat_timeout=120,
+            # ISSUE #586 FIX: Production WebSocket timeouts with cold start buffer
+            websocket_connection_timeout=90,                      # Conservative connection timeout
+            websocket_recv_timeout=int(websocket_recv_with_buffer),  # 30s base + cold start buffer
+            websocket_send_timeout=25 + int(cold_start_buffer),   # Send timeout with buffer
+            websocket_heartbeat_timeout=120,                      # Long heartbeat for stability
             
-            # Production agent timeouts (must be < WebSocket recv timeout)
-            agent_execution_timeout=40,       # Production: longer for complex tasks
-            agent_thinking_timeout=35,
-            agent_tool_timeout=30,
-            agent_completion_timeout=20,
+            # Production agent timeouts (must be < WebSocket recv timeout) with cold start buffer
+            agent_execution_timeout=int(agent_execution_with_buffer),  # 25s base + cold start buffer
+            agent_thinking_timeout=20 + int(cold_start_buffer),   # Thinking with buffer
+            agent_tool_timeout=18 + int(cold_start_buffer),       # Tool execution with buffer
+            agent_completion_timeout=15 + int(cold_start_buffer), # Completion with buffer
             
             # Production HTTP timeouts
             http_request_timeout=45,
             http_connection_timeout=20,
             
-            # Production test timeouts (if tests run in prod)
-            test_default_timeout=90,
-            test_integration_timeout=150,
-            test_e2e_timeout=180,
+            # Production test timeouts (if tests run in prod) with cold start buffer
+            test_default_timeout=90 + int(cold_start_buffer),
+            test_integration_timeout=150 + int(cold_start_buffer),
+            test_e2e_timeout=180 + int(cold_start_buffer),
             
             tier=tier
         )

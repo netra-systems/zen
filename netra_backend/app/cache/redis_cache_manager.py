@@ -28,6 +28,11 @@ from dataclasses import dataclass, field
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.core.serialization_sanitizer import (
+    PickleValidator,
+    ObjectSanitizer,
+    is_safe_for_caching
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -140,18 +145,54 @@ class RedisCacheManager:
             return default
     
     async def set(self, key: str, value: Any, ttl: Optional[int] = None, nx: bool = False) -> bool:
-        """Set value in cache - redirects to SSOT Redis manager."""
+        """Set value in cache - redirects to SSOT Redis manager with Issue #585 fix."""
         try:
             redis_key = self._build_key(key)
             
-            # Serialize value
+            # ISSUE #585 FIX: Pre-validate for caching and sanitize if needed
+            serialized_value = None
+            
+            # Try JSON serialization first (fastest and most reliable)
             try:
-                serialized_value = json.dumps(value)
-            except (TypeError, ValueError):
-                try:
-                    serialized_value = pickle.dumps(value)
-                except (pickle.PickleError, TypeError):
-                    serialized_value = str(value)
+                serialized_value = json.dumps(value, default=str)
+                logger.debug(f"Cache key {key}: JSON serialization successful")
+            except (TypeError, ValueError) as json_error:
+                logger.debug(f"Cache key {key}: JSON failed ({json_error}), trying pickle with validation")
+                
+                # Check if safe for pickle before attempting
+                is_safe, safety_error = PickleValidator.validate_for_caching(value)
+                
+                if is_safe:
+                    # Try direct pickle
+                    try:
+                        serialized_value = pickle.dumps(value)
+                        logger.debug(f"Cache key {key}: Direct pickle serialization successful")
+                    except (pickle.PickleError, TypeError) as pickle_error:
+                        logger.info(f"Cache key {key}: Direct pickle failed ({pickle_error}), attempting sanitization")
+                        # Use safe pickle with sanitization
+                        serialized_value = PickleValidator.safe_pickle_dumps(value)
+                        if serialized_value:
+                            logger.info(f"Cache key {key}: Sanitized pickle serialization successful")
+                        else:
+                            raise ValueError("Sanitized pickle serialization failed")
+                else:
+                    logger.info(f"Cache key {key}: Not safe for pickle ({safety_error}), sanitizing object")
+                    
+                    # Sanitize the object and try pickle
+                    sanitized_value = ObjectSanitizer.sanitize_object(value)
+                    serialized_value = PickleValidator.safe_pickle_dumps(sanitized_value)
+                    
+                    if serialized_value:
+                        logger.info(f"Cache key {key}: Sanitized object pickle successful")
+                    else:
+                        # Final fallback: string representation
+                        logger.warning(f"Cache key {key}: All serialization failed, using string fallback")
+                        serialized_value = str(value)
+            
+            if serialized_value is None:
+                # Absolute fallback
+                serialized_value = f"<serialization_failed: {type(value).__name__}>"
+                logger.error(f"Cache key {key}: All serialization methods failed, using fallback")
             
             # Set in Redis using SSOT manager
             result = await self.redis_client.set(redis_key, serialized_value, ex=ttl)

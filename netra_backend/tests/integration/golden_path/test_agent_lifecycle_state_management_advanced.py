@@ -42,6 +42,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.models.agent_execution import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -93,7 +94,7 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_persistence_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize agent registry and execution engine
         agent_registry = AgentRegistry()
@@ -131,13 +132,20 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         }
         
         # Start agent execution
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content=initial_message["content"],
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": initial_message["content"]
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Wait for agent to reach executing state
         await asyncio.sleep(2)
@@ -238,7 +246,7 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_lifecycle_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         agent_registry = AgentRegistry()
@@ -283,13 +291,20 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         run_id = RunID(str(uuid.uuid4()))
         
         # Start complex workflow
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Run comprehensive cost analysis with data validation",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Run comprehensive cost analysis with data validation"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         record_transition(AgentLifecycleStage.PREPARING, AgentLifecycleStage.EXECUTING, 
                          {"agent_id": str(agent_execution.id)})
@@ -403,7 +418,7 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_memory_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         agent_registry = AgentRegistry()
@@ -448,13 +463,20 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
             thread_id = ThreadID(str(uuid.uuid4()))
             run_id = RunID(str(uuid.uuid4()))
             
-            execution = await execution_engine.start_agent_execution(
-                user_id=user_id,
-                thread_id=thread_id,
-                run_id=run_id,
-                message_content=f"Memory intensive task {i} - analyze large dataset with detailed reporting",
-                execution_context=auth_context
+            # Create agent execution context
+            agent_context = AgentExecutionContext(
+                user_id=str(user_id),
+                thread_id=str(thread_id),
+                run_id=str(run_id),
+                agent_name="supervisor_agent",
+                request_id=str(uuid.uuid4()),
+                metadata={
+                    "message": f"Memory intensive task {i} - analyze large dataset with detailed reporting"
+                }
             )
+            
+            # Execute agent with user context
+            execution = await execution_engine.execute_agent(agent_context, auth_context)
             concurrent_executions.append(execution)
             
             # Small delay between starts to stagger resource allocation
@@ -585,13 +607,20 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
             # Each user gets a unique, identifiable task
             unique_content = f"User {user_ctx['user_index']} isolation test - analyze cost data with unique signature {uuid.uuid4()}"
             
-            execution = await execution_engine.start_agent_execution(
-                user_id=user_ctx["user_id"],
-                thread_id=thread_id,
-                run_id=run_id,
-                message_content=unique_content,
-                execution_context=user_ctx["auth_context"]
+            # Create agent execution context
+            agent_context = AgentExecutionContext(
+                user_id=str(user_ctx["user_id"]),
+                thread_id=str(thread_id),
+                run_id=str(run_id),
+                agent_name="supervisor_agent",
+                request_id=str(uuid.uuid4()),
+                metadata={
+                    "message": unique_content
+                }
             )
+            
+            # Execute agent with user context
+            execution = await execution_engine.execute_agent(agent_context, user_ctx["auth_context"])
             
             user_executions.append({
                 "execution": execution,
@@ -719,7 +748,7 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_recovery_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         agent_registry = AgentRegistry()
@@ -759,13 +788,20 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
             "execution_metadata": {"version": "1.0", "timestamp": datetime.now(timezone.utc).isoformat()}
         }
         
-        execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Complex analysis requiring state preservation",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Complex analysis requiring state preservation"
+            }
         )
+        
+        # Execute agent with user context
+        execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Update with complex state
         await execution_engine.update_agent_state(
@@ -924,7 +960,7 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_longrunning_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         agent_registry = AgentRegistry()
@@ -955,13 +991,20 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Long-running comprehensive analysis with state tracking",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Long-running comprehensive analysis with state tracking"
+            }
         )
+        
+        # Execute agent with user context
+        execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 2: Simulate long-running execution with state updates
         base_state = {
