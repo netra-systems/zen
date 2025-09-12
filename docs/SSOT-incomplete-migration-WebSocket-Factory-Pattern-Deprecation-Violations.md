@@ -1,111 +1,144 @@
-# SSOT-incomplete-migration-WebSocket Factory Pattern Deprecation Violations (P0 CRITICAL)
+# SSOT-incomplete-migration-WebSocket-Factory-Pattern-Deprecation-Violations
 
-**GitHub Issue**: https://github.com/netra-systems/netra-apex/issues/506
-**Created**: 2025-09-11
-**Priority**: P0 - CRITICAL BLOCKING
-**Status**: 🔄 DISCOVERY PHASE
+**GitHub Issue**: [#541](https://github.com/netra-systems/netra-apex/issues/541)  
+**Priority**: P0 - CRITICAL (Blocking Golden Path)  
+**Created**: 2025-09-12  
+**Status**: 🚨 **ACTIVE** - Blocking $500K+ ARR  
 
-## Problem Summary
-**BLOCKING GOLDEN PATH**: 49+ files using deprecated `get_websocket_manager_factory()` causing user isolation violations, log pollution, and WebSocket race conditions in GCP deployment.
+## 📊 Executive Summary
 
-## Audit Results
-- **Primary violator**: `/netra_backend/app/routes/websocket_ssot.py` (lines 1394, 1425, 1451)
-- **Total files affected**: 49+ using deprecated factory pattern
-- **Test files affected**: 40+ requiring migration
-- **Business impact**: $500K+ ARR at risk due to user context isolation failures
+**Business Impact**: WebSocket Factory Pattern deprecation violations are blocking the Golden Path (users login → get AI responses) affecting $500K+ ARR due to user isolation failures.
 
-## SSOT Remediation Strategy
-1. **Replace deprecated calls** with direct `WebSocketManager` imports
-2. **Update critical routes** to use canonical implementation  
-3. **Remove deprecated function** once migration complete
-4. **Update test patterns** for proper manager usage
+**Core Problem**: 49+ files still using deprecated `get_websocket_manager_factory()` causing WebSocket race conditions in GCP deployment and preventing users from receiving AI responses.
 
-## Progress Tracking
+---
 
-### Phase 1: Discovery and Test Planning ✅
-- [x] SSOT audit completed  
-- [x] GitHub issue created (#506)
-- [x] Existing test discovery - **73+ tests identified**
-- [x] New test plan creation - **4 new test files planned**
+## 🎯 Current Phase: Step 0 - Issue Discovery & Planning
 
-#### New SSOT Test Plan
-**1. SSOT Violation Detection** (`tests/unit/ssot/test_websocket_factory_deprecation_violations.py`)
-- Detects 49+ files using deprecated factory (SHOULD FAIL initially)
-- Enforces WebSocketManager as canonical SSOT
+### ✅ COMPLETED WORK
 
-**2. Migration Safety** (`tests/integration/ssot/test_websocket_manager_migration_safety.py`)  
-- User isolation preservation (NO DOCKER)
-- Security guarantee maintenance
+#### 0) Discover Next SSOT Issue (SSOT AUDIT)
+- [x] **SSOT Audit Complete** - Identified critical P0 violation
+- [x] **GitHub Issue Created** - Issue #541 created with critical label
+- [x] **Progress Tracker Created** - This document (IND) established
 
-**3. SSOT Compliance** (`tests/mission_critical/test_ssot_websocket_compliance.py`)
-- Critical business value protection  
-- SSOT compliance enforcement
+**Key Findings from Audit**:
+- **49+ files** using deprecated `get_websocket_manager_factory()` pattern
+- **Primary violation location**: `netra_backend/app/routes/websocket_ssot.py` lines 1394, 1425, 1451
+- **Business impact**: User context isolation failures causing WebSocket race conditions
+- **Golden Path impact**: Prevents users from receiving AI responses (90% of platform value)
 
-**4. Golden Path Protection** (`tests/e2e/staging/test_websocket_ssot_golden_path.py`)
-- Complete user login → AI response flow validation
-- Real WebSocket testing in staging GCP
+---
 
-#### Test Discovery Results
-**MISSION CRITICAL (8 files)**: Factory security, user isolation, Golden Path protection
-- `tests/mission_critical/test_websocket_factory_security_validation.py` - User isolation
-- `tests/e2e/golden_path/test_complete_golden_path_business_value.py` - $500K+ ARR protection
-- Resource leak detection and production scenarios (4 additional files)
+## 🔍 Technical Details
 
-**HIGH RISK (17+ tests)**: Direct factory usage - WILL BREAK
-- Tests using `get_websocket_manager_factory()` directly
-- Require immediate migration to `WebSocketManager()` pattern
+### Deprecated Pattern (CURRENT - BROKEN):
+```python
+# DEPRECATED - CAUSES USER ISOLATION FAILURES
+manager_factory = get_websocket_manager_factory()
+manager = manager_factory.create_for_user(user_context)
+```
 
-**LOW RISK (25+ tests)**: Direct WebSocketManager usage - WILL CONTINUE WORKING
-- Already using canonical SSOT pattern
+### SSOT Pattern (TARGET - WORKING):
+```python
+# SSOT - PROPER USER ISOLATION  
+from netra_backend.app.websocket_core.unified_manager import WebSocketManager
+manager = WebSocketManager.create_for_user(user_context)
+```
 
-**MIXED IMPACT (31+ tests)**: Factory pattern validation tests
-- Need updates to validate new direct instantiation pattern
+### Files Requiring Migration (49+ identified):
+- `netra_backend/app/routes/websocket_ssot.py` (lines 1394, 1425, 1451) **PRIMARY TARGET**
+- 46+ additional files across codebase (detailed list to be generated)
 
-### Phase 2: Test Implementation ⏳
-- [x] Create failing SSOT compliance tests - **55+ violations detected!**
-- [x] **Test 1/4**: `test_websocket_factory_deprecation_violations.py` ✅ (FAILING as designed)
-- [ ] **Test 2/4**: `test_websocket_manager_migration_safety.py` (Integration - No Docker)
-- [ ] **Test 3/4**: `test_ssot_websocket_compliance.py` (Mission Critical)
-- [ ] **Test 4/4**: `test_websocket_ssot_golden_path.py` (E2E Staging)
-- [ ] Validate existing tests compatibility  
-- [ ] Run test baseline
+---
 
-#### Test 1 Results: VIOLATION DETECTION SUCCESS ✅
-- **55 deprecated factory usages** found across **14 files** (exceeded estimate of 49+)
-- **SSOT Compliance**: 94.3% current (Target: 100%)
-- **Critical violations confirmed**: websocket_ssot.py lines 1394, 1425, 1451
-- Tests FAILING as designed - ready to guide remediation
+## 📋 SSOT Gardener Process Status
 
-### Phase 3: SSOT Remediation
-- [ ] Replace factory calls in critical routes
-- [ ] Update remaining 49+ file usages
-- [ ] Remove deprecated factory function
-- [ ] Update import patterns
+### Phase 0: ✅ COMPLETE - Issue Discovery 
+- [x] SSOT Audit conducted
+- [x] GitHub Issue #540 created
+- [x] Priority P0 assigned (blocking Golden Path)
+- [x] Progress tracker (IND) established
 
-### Phase 4: Validation
-- [ ] All tests passing
-- [ ] No deprecation warnings in logs
-- [ ] Golden Path user flow functional
-- [ ] GCP staging deployment clean
+### Phase 1: 🔄 NEXT - Discover and Plan Tests
+**Tasks**:
+- [ ] **DISCOVER EXISTING**: Find current tests protecting WebSocket functionality
+- [ ] **PLAN TEST UPDATES**: Design tests for SSOT refactor validation
+- [ ] **IDENTIFY GAPS**: Plan new tests to reproduce SSOT violation (failing tests)
 
-### Phase 5: PR and Closure
+### Phase 2: 📋 PENDING - Execute Test Plan
+- [ ] Create new SSOT validation tests (20% of effort)
+- [ ] Audit and review existing tests (60% of effort)  
+- [ ] Run test validation (20% of effort)
+
+### Phase 3: 📋 PENDING - Plan SSOT Remediation
+- [ ] Plan migration strategy for 49+ files
+- [ ] Identify atomic units for safe refactoring
+- [ ] Design rollback strategy
+
+### Phase 4: 📋 PENDING - Execute SSOT Remediation
+- [ ] Execute planned migration
+- [ ] Replace deprecated factory calls
+- [ ] Verify user isolation working
+
+### Phase 5: 📋 PENDING - Test Validation Loop
+- [ ] Prove system stability maintained
+- [ ] Fix any breaking changes introduced
+- [ ] Ensure all tests pass
+
+### Phase 6: 📋 PENDING - PR and Closure
 - [ ] Create pull request
-- [ ] Link to issue closure
-- [ ] Validate production readiness
+- [ ] Cross-link with issue #540
+- [ ] Close issue on PR merge
 
-## Next Actions
-1. **SNST**: Discover existing tests protecting WebSocket factory usage
-2. **SNST**: Plan new SSOT compliance tests
-3. Begin systematic migration of deprecated calls
+---
 
-## Files Requiring Migration
-- `/netra_backend/app/routes/websocket_ssot.py` (CRITICAL - lines 1394, 1425, 1451)
-- 48+ additional files using `get_websocket_manager_factory()`
-- 40+ test files using deprecated pattern
+## 🧪 Test Strategy
 
-## Success Criteria
-- ✅ All deprecated factory calls eliminated
-- ✅ WebSocketManager as canonical SSOT
-- ✅ User isolation maintained
-- ✅ Golden Path operational
-- ✅ Clean GCP deployment logs
+### Existing Tests to Protect:
+- Mission critical WebSocket tests: `python tests/mission_critical/test_websocket_agent_events_suite.py`
+- WebSocket state regression: `python netra_backend/tests/critical/test_websocket_state_regression.py`
+- E2E WebSocket connection: `python tests/e2e/test_websocket_dev_docker_connection.py`
+
+### New Tests Required:
+- Factory deprecation validation tests
+- User isolation verification tests  
+- WebSocket race condition reproduction tests (failing → passing)
+
+### Test Execution Constraints:
+- **NO DOCKER REQUIRED** - Use staging GCP environment for E2E
+- Focus on unit, integration (non-docker), and E2E staging tests
+- Follow `reports/testing/TEST_CREATION_GUIDE.md`
+
+---
+
+## 💼 Business Value Protection
+
+**Revenue at Risk**: $500K+ ARR
+**Core Value Impact**: Chat functionality = 90% of platform value
+**User Experience**: Golden Path (login → AI responses) currently broken
+**Deployment Impact**: WebSocket race conditions preventing reliable GCP deployment
+
+---
+
+## 🔗 Related Documentation
+
+- **CLAUDE.md**: SSOT compliance requirements
+- **Definition of Done**: `reports/DEFINITION_OF_DONE_CHECKLIST.md` - WebSocket module
+- **Master Status**: `reports/MASTER_WIP_STATUS.md` - WebSocket health tracking
+- **GitHub Style Guide**: `@GITHUB_STYLE_GUIDE.md` for issue updates
+
+---
+
+## 📝 Process Log
+
+### 2025-09-12 14:00 - Issue Discovery Phase Complete
+- SSOT audit identified critical P0 violation
+- GitHub Issue #540 created successfully  
+- Progress tracker established
+- **NEXT**: Spawn sub-agent for test discovery and planning
+
+---
+
+**Last Updated**: 2025-09-12 14:00  
+**Next Update**: After test discovery phase completion
