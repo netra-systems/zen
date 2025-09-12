@@ -167,6 +167,23 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
             # Get LLM manager with user context
             llm_manager = LLMManager(user_context)
             
+            # CRITICAL FIX: Initialize agent registry before creating supervisor
+            # This ensures the agent factory has a populated registry
+            from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+            from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
+            
+            # Initialize the agent class registry if not already done
+            agent_registry = initialize_agent_class_registry()
+            logger.info(f"Agent registry initialized with {len(agent_registry)} agents for demo")
+            
+            # Configure the agent factory with the registry
+            factory = get_agent_instance_factory()
+            factory.configure(
+                agent_class_registry=agent_registry,
+                websocket_bridge=bridge,
+                llm_manager=llm_manager
+            )
+            
             # Import and create supervisor agent using SSOT pattern
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             supervisor = SupervisorAgent(

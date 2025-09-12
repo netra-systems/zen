@@ -613,10 +613,24 @@ class UserExecutionEngine(IExecutionEngine):
         # Note: These components should be stateless or request-scoped
         try:
             # Access infrastructure components through factory
+            registry = None
             if hasattr(self.agent_factory, '_agent_registry'):
                 registry = self.agent_factory._agent_registry
-            else:
-                raise ValueError("Agent registry not available in factory")
+            
+            # CRITICAL FIX: Try to get agent class registry if regular registry is not available
+            if not registry and hasattr(self.agent_factory, '_agent_class_registry'):
+                # Use agent class registry as the registry for AgentExecutionCore
+                registry = self.agent_factory._agent_class_registry
+                logger.info("Using AgentClassRegistry for AgentExecutionCore")
+            
+            if not registry:
+                # Last resort: Try to initialize the registry
+                from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
+                registry = initialize_agent_class_registry()
+                logger.warning("Initialized agent registry as fallback in UserExecutionEngine")
+            
+            if not registry:
+                raise ValueError("Agent registry not available in factory and initialization failed")
             
             if hasattr(self.agent_factory, '_websocket_bridge'):
                 websocket_bridge = self.agent_factory._websocket_bridge
