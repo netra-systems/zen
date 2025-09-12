@@ -61,10 +61,20 @@
 **MIXED IMPACT (31+ tests)**: Factory pattern validation tests
 - Need updates to validate new direct instantiation pattern
 
-### Phase 2: Test Implementation
-- [ ] Create failing SSOT compliance tests
-- [ ] Validate existing tests compatibility
+### Phase 2: Test Implementation ⏳
+- [x] Create failing SSOT compliance tests - **55+ violations detected!**
+- [x] **Test 1/4**: `test_websocket_factory_deprecation_violations.py` ✅ (FAILING as designed)
+- [ ] **Test 2/4**: `test_websocket_manager_migration_safety.py` (Integration - No Docker)
+- [ ] **Test 3/4**: `test_ssot_websocket_compliance.py` (Mission Critical)
+- [ ] **Test 4/4**: `test_websocket_ssot_golden_path.py` (E2E Staging)
+- [ ] Validate existing tests compatibility  
 - [ ] Run test baseline
+
+#### Test 1 Results: VIOLATION DETECTION SUCCESS ✅
+- **55 deprecated factory usages** found across **14 files** (exceeded estimate of 49+)
+- **SSOT Compliance**: 94.3% current (Target: 100%)
+- **Critical violations confirmed**: websocket_ssot.py lines 1394, 1425, 1451
+- Tests FAILING as designed - ready to guide remediation
 
 ### Phase 3: SSOT Remediation
 - [ ] Replace factory calls in critical routes
