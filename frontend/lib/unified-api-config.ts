@@ -139,7 +139,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
         environment: 'production',
         urls: {
           api: 'https://api.netrasystems.ai',
-          websocket: 'wss://api.netrasystems.ai',
+          websocket: 'wss://api.netrasystems.ai/websocket',
           auth: 'https://auth.netrasystems.ai',
           frontend: 'https://app.netrasystems.ai',
         },
@@ -237,7 +237,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
         environment: 'test',
         urls: {
           api: 'http://localhost:8000', // Force port 8000 for backend API
-          websocket: 'ws://localhost:8000', // Force port 8000 for WebSocket
+          websocket: 'ws://localhost:8000/websocket', // Force port 8000 for WebSocket
           auth: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8081',
           frontend: process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3000',
         },
