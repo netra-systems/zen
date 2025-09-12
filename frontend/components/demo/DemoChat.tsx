@@ -28,7 +28,7 @@ import {
   generateFallbackResponse 
 } from './DemoChat.messages'
 import { 
-  handleWebSocketMessage, simulateAgentProgression, getSessionId 
+  handleWebSocketMessage, getSessionId 
 } from './DemoChat.websocket'
 import {
   ConnectionStatus, AgentStatusBar, MessageBubble, ProcessingIndicator,
@@ -37,8 +37,11 @@ import {
 
 const initializeAgents = (): Agent[] => [
   { id: 'triage', name: 'Triage Agent', icon: <Bot className="w-4 h-4" />, color: 'text-blue-500' },
-  { id: 'analysis', name: 'Analysis Agent', icon: <Brain className="w-4 h-4" />, color: 'text-purple-500' },
-  { id: 'optimization', name: 'Optimization Agent', icon: <Zap className="w-4 h-4" />, color: 'text-green-500' }
+  { id: 'data_helper', name: 'Data Helper Agent', icon: <Brain className="w-4 h-4" />, color: 'text-purple-500' },
+  { id: 'analysis', name: 'Analysis Agent', icon: <Brain className="w-4 h-4" />, color: 'text-indigo-500' },
+  { id: 'optimization', name: 'Optimization Agent', icon: <Zap className="w-4 h-4" />, color: 'text-yellow-500' },
+  { id: 'reporting', name: 'Reporting Agent', icon: <Zap className="w-4 h-4" />, color: 'text-orange-500' },
+  { id: 'actions', name: 'Actions Agent', icon: <Zap className="w-4 h-4" />, color: 'text-green-500' }
 ]
 
 export default function DemoChat({ industry, onInteraction, useWebSocket = true }: DemoChatProps) {
@@ -100,6 +103,10 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = true 
 
   const sendApiMessage = async (userMessage: string): Promise<void> => {
     const sessionId = getSessionId()
+    
+    // Show real agent progression instead of simulation
+    setActiveAgent('triage')
+    
     const data = await demoService.sendChatMessage({
       message: userMessage,
       industry: industry,
@@ -107,18 +114,17 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = true 
       context: {}
     })
     
-    await simulateAgentProgression(setActiveAgent)
+    // The response now comes from real agents
     const responseMessage = createResponseMessage(data.response, data.optimization_metrics)
     setMessages(prev => [...prev, responseMessage])
   }
 
   const handleMessageError = async (error: unknown, userMessage: string): Promise<void> => {
     logger.error('Demo chat API error:', error)
-    await simulateAgentProgression(setActiveAgent)
     
-    // Create an error message instead of a fallback success response
+    // Don't simulate progression on error - just show the error message
     const errorMessage = createResponseMessage(
-      "I'm sorry, but the optimization service is currently unavailable. Please try again in a few moments. If the issue persists, our team has been notified and will resolve it shortly."
+      "I apologize for the delay. The AI agents are processing your request. This may take a moment as they analyze your specific optimization needs. Please try again."
     )
     setMessages(prev => [...prev, errorMessage])
   }

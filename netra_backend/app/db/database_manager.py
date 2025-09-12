@@ -1090,7 +1090,7 @@ class DatabaseManager:
             logger.info(f"[U+1F527] Ensuring DatabaseManager initialization for class method access ({operation_type})")
             await manager.initialize()
         
-        async with manager.get_session(name, user_id=user_id, operation_type=operation_type) as session:
+        async with manager.get_session(name, user_context=user_id, operation_type=operation_type) as session:
             yield session
     
     @staticmethod

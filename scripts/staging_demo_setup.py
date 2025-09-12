@@ -21,14 +21,16 @@ from pathlib import Path
 class StagingDemoSetup:
     """Manages staging demo setup and launch."""
     
-    def __init__(self, frontend_mode: str = "gcp"):
+    def __init__(self, frontend_mode: str = "gcp", skip_deploy: bool = False):
         """
         Initialize staging demo setup.
         
         Args:
             frontend_mode: Either 'localhost' or 'gcp' for frontend deployment
+            skip_deploy: Skip deployment of services even if they're not running
         """
         self.frontend_mode = frontend_mode
+        self.skip_deploy = skip_deploy
         self.project_id = "netra-staging"
         self.backend_service = "backend-staging"
         self.frontend_service = "frontend-staging"
@@ -194,6 +196,13 @@ class StagingDemoSetup:
     
     def deploy_services(self, backend_ok: bool, frontend_ok: bool):
         """Deploy services if they're not running."""
+        if self.skip_deploy:
+            if not backend_ok:
+                print("⚠️  Backend service not running (skipping deployment)")
+            if self.frontend_mode == "gcp" and not frontend_ok:
+                print("⚠️  Frontend service not running (skipping deployment)")
+            return
+            
         if not backend_ok:
             print("\n🚀 Deploying backend service to staging...")
             deploy_script = self.project_root / "scripts" / "deploy_to_gcp.py"
@@ -373,10 +382,15 @@ def main():
         default="gcp",
         help="Frontend deployment mode (default: gcp)"
     )
+    parser.add_argument(
+        "--skip-deploy",
+        action="store_true",
+        help="Skip deployment of services even if they're not running"
+    )
     
     args = parser.parse_args()
     
-    setup = StagingDemoSetup(frontend_mode=args.frontend)
+    setup = StagingDemoSetup(frontend_mode=args.frontend, skip_deploy=args.skip_deploy)
     setup.run()
 
 

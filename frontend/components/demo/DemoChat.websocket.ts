@@ -14,17 +14,34 @@ export const handleWebSocketMessage = (
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   setIsProcessing: (processing: boolean) => void
 ): void => {
-  // Handle new agent events from demo WebSocket
+  // Handle real agent events from WebSocket
   switch (data.type) {
     case 'agent_started':
-      setActiveAgent('triage')
+      // Map agent names to our UI agent IDs
+      const agentName = data.agent_name?.toLowerCase() || 'triage'
+      if (agentName.includes('data')) {
+        setActiveAgent('data_helper')
+      } else if (agentName.includes('analysis')) {
+        setActiveAgent('analysis')
+      } else if (agentName.includes('optimization') || agentName.includes('optimize')) {
+        setActiveAgent('optimization')
+      } else if (agentName.includes('report')) {
+        setActiveAgent('reporting')
+      } else if (agentName.includes('action')) {
+        setActiveAgent('actions')
+      } else if (agentName.includes('triage')) {
+        setActiveAgent('triage')
+      } else {
+        // Default to triage for unknown agents
+        setActiveAgent('triage')
+      }
       setIsProcessing(true)
       break
     case 'agent_thinking':
-      setActiveAgent('analysis')
+      // Keep the current agent active during thinking
       break
     case 'tool_executing':
-      setActiveAgent('optimization')
+      // Tool execution is part of agent work
       break
     case 'agent_completed':
       if (data.response) {
@@ -84,22 +101,8 @@ const createWebSocketResponseMessage = (data: WebSocketData): Message => ({
   }
 })
 
-export const simulateAgentProgression = async (
-  setActiveAgent: (agent: string | null) => void
-): Promise<void> => {
-  await progressToAgent('triage', setActiveAgent, 800)
-  await progressToAgent('analysis', setActiveAgent, 1200)
-  await progressToAgent('optimization', setActiveAgent, 1000)
-}
-
-const progressToAgent = async (
-  agentType: string,
-  setActiveAgent: (agent: string | null) => void,
-  delay: number
-): Promise<void> => {
-  await new Promise(resolve => setTimeout(resolve, delay))
-  setActiveAgent(agentType)
-}
+// Removed simulateAgentProgression - we now use real agent events
+// Real agents provide their own progression through WebSocket events
 
 export const getSessionId = (): string => {
   const existingSessionId = localStorage.getItem('demo-session-id')
