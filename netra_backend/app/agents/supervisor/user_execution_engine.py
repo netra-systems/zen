@@ -56,6 +56,11 @@ from netra_backend.app.agents.supervisor.data_access_integration import (
     UserExecutionEngineExtensions
 )
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.serialization_sanitizer import (
+    sanitize_agent_result,
+    SerializableAgentResult,
+    is_safe_for_caching
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -1206,6 +1211,26 @@ class UserExecutionEngine(IExecutionEngine):
             
             # Execute agent with the created context and secure context
             result = await self.execute_agent(agent_context, secure_pipeline_context)
+            
+            # ISSUE #585 FIX: Sanitize result to prevent pickle serialization errors
+            # Check if result is safe for caching and sanitize if needed
+            try:
+                if not is_safe_for_caching(result):
+                    logger.info(f"Sanitizing agent result for {agent_name} to prevent serialization errors")
+                    
+                    # Create clean SerializableAgentResult
+                    sanitized_result = sanitize_agent_result(result)
+                    
+                    # Store reference to sanitized result for caching
+                    self.set_agent_result(f"{agent_name}_sanitized", sanitized_result)
+                    
+                    logger.debug(f"Agent result sanitized for {agent_name} - safe for Redis caching")
+                else:
+                    logger.debug(f"Agent result for {agent_name} already safe for caching")
+                    
+            except Exception as sanitization_error:
+                logger.warning(f"Result sanitization failed for {agent_name}: {sanitization_error}")
+                # Continue with original result - sanitization is not critical for functionality
             
             logger.debug(f"Agent pipeline executed: {agent_name} for user {execution_context.user_id}")
             return result
