@@ -25,10 +25,10 @@ from typing import Set, Dict, List, Tuple
 import pytest
 from unittest.mock import patch
 
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+import unittest
 
 
-class TestDuplicateWebSocketNotifierDetection(SSotBaseTestCase):
+class TestDuplicateWebSocketNotifierDetection(unittest.TestCase):
     """
     CRITICAL SSOT Test: Detect duplicate WebSocketNotifier implementations
     
