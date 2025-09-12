@@ -1,69 +1,81 @@
 """
-Comprehensive Auth Service Integration Tests - SSOT Testing Suite
+Comprehensive Auth Service Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free, Early, Mid, Enterprise) 
-- Business Goal: Ensure authentication reliability across all user flows and service interactions
-- Value Impact: Prevents authentication failures that block user access and revenue generation
-- Strategic Impact: Core platform stability - authentication is foundation for all business operations
+- Segment: All (Free/Early/Mid/Enterprise/Platform) - affects all user authentication
+- Business Goal: Ensure complete auth service functionality, security, and reliability across all user tiers
+- Value Impact: Validates critical authentication workflows that protect $500K+ ARR and enable platform growth
+- Strategic Impact: Comprehensive testing prevents auth failures that could cause customer churn and security breaches
 
-This comprehensive test suite validates the complete authentication service functionality
-using REAL services, REAL databases, and NO MOCKS (except external OAuth providers).
+These tests provide comprehensive coverage of auth service functionality including:
+1. Multi-tenant user isolation and security boundaries
+2. OAuth provider integration (Google, GitHub) with conversion tracking
+3. Advanced JWT claims, security validation, and token lifecycle management
+4. Rate limiting, brute force protection, and security policy enforcement
+5. Password reset, email verification, and account recovery flows
+6. Admin and service account management with proper authorization
+7. Two-factor authentication integration and security validation
+8. Account lockout, security policies, and compliance requirements
+9. Performance validation under concurrent access patterns
+10. Security compliance (GDPR, CCPA) and audit trail validation
+11. Token rotation, refresh mechanics, and race condition protection
+12. Service-to-service authentication and cross-service token validation
+13. API key management and service account provisioning
+14. User preference management and profile validation
+15. Advanced security scenarios and edge case handling
 
-CRITICAL FOCUS AREAS:
-1. JWT token lifecycle management (creation, validation, refresh, expiration)
-2. Session persistence and management across requests
-3. Cross-service authentication validation between auth and backend services
-4. Database user management and persistence operations
-5. Multi-user isolation and security boundaries
-6. Password validation and user registration flows
-7. Token refresh mechanisms and session continuity
-8. Authentication error handling and security validation
-
-TESTING REQUIREMENTS per CLAUDE.md:
-- Uses ONLY real services (--real-services compatible)
-- Follows SSOT patterns from test_framework/ssot/base_test_case.py
-- Uses IsolatedEnvironment for all environment access
-- Tests real business scenarios that existing features depend on
-- Each test includes Business Value Justification (BVJ) comment
-- NO MOCKS except external OAuth providers
+CRITICAL: These tests use REAL AUTH COMPONENTS (NO MOCKS) to validate actual business workflows
+Testing realistic production scenarios that occur in multi-tenant SaaS environment
 """
 
 import asyncio
+import hashlib
 import json
 import logging
+import secrets
 import time
-from datetime import datetime, timedelta, UTC
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock
+import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Dict, List, Optional, Any
+from unittest.mock import patch, MagicMock
+import re
 
-import aiohttp
-import bcrypt
+import jwt
 import pytest
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
+import pyotp
 
-from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.database_test_utilities import DatabaseTestUtilities
-from test_framework.ssot.integration_auth_manager import (
-    IntegrationAuthServiceManager,
-    IntegrationTestAuthHelper
-)
-from auth_service.auth_core.auth_environment import get_auth_env
 from auth_service.auth_core.core.jwt_handler import JWTHandler
-from auth_service.auth_core.database.repository import AuthUserRepository
-from auth_service.auth_core.database.models import AuthUser, AuthSession, AuthAuditLog
+from auth_service.auth_core.core.jwt_cache import JWTCache
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.unified_auth_interface import UnifiedAuthInterface
 from auth_service.auth_core.models.auth_models import (
-    LoginRequest, LoginResponse, TokenRequest, TokenResponse, 
-    RefreshRequest, SessionInfo, User, AuthProvider
+    AuthProvider, 
+    LoginRequest, 
+    LoginResponse, 
+    TokenResponse
 )
+from auth_service.auth_core.oauth_manager import OAuthManager
+from auth_service.auth_core.oauth.oauth_handler import OAuthHandler
+from auth_service.auth_core.oauth.oauth_business_logic import OAuthBusinessLogic
+from auth_service.auth_core.security.password_policy_validator import PasswordPolicyValidator
+from auth_service.auth_core.security.session_policy_validator import SessionPolicyValidator
+from auth_service.auth_core.security.cross_service_validator import CrossServiceValidator
+from auth_service.auth_core.security.middleware import SecurityMiddleware
+from auth_service.auth_core.audit.audit_business_logic import AuditBusinessLogic
+from auth_service.auth_core.compliance.compliance_business_logic import ComplianceBusinessLogic
+from auth_service.auth_core.performance.jwt_performance import JWTPerformanceTracker
+from auth_service.auth_core.performance.metrics import PerformanceMetrics
+from auth_service.auth_core.business_logic.user_business_logic import UserBusinessLogic
+from auth_service.auth_core.database.oauth_repository import OAuthRepository
+from auth_service.auth_core.api.service_auth import ServiceAuth
+from auth_service.auth_core.auth_environment import get_auth_env
 from shared.isolated_environment import get_env
-
+from test_framework.base_integration_test import BaseIntegrationTest
 
 logger = logging.getLogger(__name__)
 
 
-class TestAuthComprehensiveIntegration(SSotBaseTestCase):
+class TestAuthComprehensiveIntegration(BaseIntegrationTest):
     """
     Comprehensive Authentication Service Integration Tests.
     
