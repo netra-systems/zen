@@ -23,7 +23,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.execution_tracker import get_execution_tracker
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -173,14 +173,12 @@ class TestAgentExecutionCoreIntegration:
     @pytest.fixture
     def sample_state(self, auth_helper):
         """Sample agent state with real user context."""
-        state = Mock(spec=DeepAgentState)
-        state.user_id = "test-user-123"
-        state.thread_id = f"test-thread-{uuid4()}"
-        state.__dict__ = {
-            'user_id': state.user_id,
-            'thread_id': state.thread_id,
-            'data': 'sample_data'
-        }
+        # Create real DeepAgentState instance instead of Mock (per CLAUDE.md compliance)
+        state = DeepAgentState(
+            user_request="Integration test request",
+            user_id="test-user-123",
+            chat_thread_id=f"test-thread-{uuid4()}"
+        )
         return state
 
     @pytest.mark.asyncio
