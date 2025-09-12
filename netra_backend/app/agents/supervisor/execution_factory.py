@@ -591,7 +591,7 @@ class IsolatedExecutionEngine:
         """Get or create periodic update manager."""
         if self._periodic_update_manager is None:
             # SECURITY FIX: Use MinimalPeriodicUpdateManager from UserExecutionEngine for compatibility
-    from netra_backend.app.agents.supervisor.user_execution_engine import MinimalPeriodicUpdateManager as PeriodicUpdateManager
+            from netra_backend.app.agents.supervisor.user_execution_engine import MinimalPeriodicUpdateManager as PeriodicUpdateManager
             self._periodic_update_manager = PeriodicUpdateManager(
                 self.websocket_emitter, 
                 self.user_context
