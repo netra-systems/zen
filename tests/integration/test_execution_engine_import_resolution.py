@@ -78,7 +78,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                 metadata={
                     'test_case': 'execution_engine_import_resolution',
                     'user_message': f'Test message from {user_id}',
-                    'created_at': datetime.now(timezone.utc).isoformat(),
+                    'test_created_at': datetime.now(timezone.utc).isoformat(),
                     'isolation_test': True
                 }
             )
@@ -462,10 +462,9 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
             mock_bridge = self._create_mock_websocket_bridge()
             
             return UnifiedWebSocketEmitter(
+                websocket_manager=mock_bridge,  # Use legacy parameter for compatibility
                 user_id=user_context.user_id,
-                thread_id=user_context.thread_id,
-                run_id=user_context.run_id,
-                websocket_bridge=mock_bridge
+                context=user_context
             )
         except ImportError:
             # Fallback to mock emitter
