@@ -9,8 +9,6 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set
 
-from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-
 from netra_backend.app.core.websocket_recovery_types import MessageState
 from netra_backend.app.logging_config import central_logger
 
@@ -145,7 +143,7 @@ class WebSocketMessageHandler:
     
     def generate_message_id(self) -> str:
         """Generate unique message ID."""
-        return UnifiedIdGenerator.generate_base_id("websocket_message")
+        return str(uuid.uuid4())
     
     def get_pending_count(self) -> int:
         """Get count of pending messages."""

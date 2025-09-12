@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 10:07:51
+**Generated:** 2025-09-12 10:23:08
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 4
-- **Passed:** 0 (0.0%)
-- **Failed:** 4 (100.0%)
-- **Skipped:** 0
-- **Duration:** 0.13 seconds
-- **Pass Rate:** 0.0%
+- **Total Tests:** 5
+- **Passed:** 1 (20.0%)
+- **Failed:** 0 (0.0%)
+- **Skipped:** 4
+- **Duration:** 0.71 seconds
+- **Pass Rate:** 20.0%
 
 ## Test Results by Priority
 
@@ -19,61 +19,30 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_staging_health_check_includes_background_task_timeout_info | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
-| test_staging_background_task_creation_with_timeout_validation | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
-| test_staging_startup_validation_logs_timeout_warnings | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
-| test_staging_background_task_timeout_hierarchy_validation | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
-
-## Failed Tests Details
-
-### FAILED: test_staging_health_check_includes_background_task_timeout_info
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:68: in test_staging_health_check_includes_background_task_timeout_info
-    response = self.session.get(
-               ^^^^^^^^^^^^
-E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
-
-### FAILED: test_staging_background_task_creation_with_timeout_validation
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:122: in test_staging_background_task_creation_with_timeout_validation
-    response = self.session.post(
-               ^^^^^^^^^^^^
-E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
-
-### FAILED: test_staging_startup_validation_logs_timeout_warnings
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:188: in test_staging_startup_validation_logs_timeout_warnings
-    logs_response = self.session.get(
-                    ^^^^^^^^^^^^
-E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
-
-### FAILED: test_staging_background_task_timeout_hierarchy_validation
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:247: in test_staging_background_task_timeout_hierarchy_validation
-    config_response = self.session.get(
-                      ^^^^^^^^^^^^
-E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
+| test_staging_auth_registration_business_flow | SKIP skipped | 0.275s | test_auth_service_business_flows_api_fix.py |
+| test_staging_auth_login_business_flow | SKIP skipped | 0.001s | test_auth_service_business_flows_api_fix.py |
+| test_staging_token_validation_business_flow | SKIP skipped | 0.001s | test_auth_service_business_flows_api_fix.py |
+| test_staging_auth_service_health_check | SKIP skipped | 0.001s | test_auth_service_business_flows_api_fix.py |
+| test_docker_api_signature_fails_but_staging_auth_works | PASS passed | 0.193s | test_auth_service_business_flows_api_fix.py |
 
 ## Pytest Output Format
 
 ```
-test_background_task_timeout_e2e.py::test_staging_health_check_includes_background_task_timeout_info FAILED
-test_background_task_timeout_e2e.py::test_staging_background_task_creation_with_timeout_validation FAILED
-test_background_task_timeout_e2e.py::test_staging_startup_validation_logs_timeout_warnings FAILED
-test_background_task_timeout_e2e.py::test_staging_background_task_timeout_hierarchy_validation FAILED
+test_auth_service_business_flows_api_fix.py::test_staging_auth_registration_business_flow SKIPPED
+test_auth_service_business_flows_api_fix.py::test_staging_auth_login_business_flow SKIPPED
+test_auth_service_business_flows_api_fix.py::test_staging_token_validation_business_flow SKIPPED
+test_auth_service_business_flows_api_fix.py::test_staging_auth_service_health_check SKIPPED
+test_auth_service_business_flows_api_fix.py::test_docker_api_signature_fails_but_staging_auth_works PASSED
 
 ==================================================
-0 passed, 4 failed in 0.13s
+1 passed, 0 failed, 4 skipped in 0.71s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
+| Authentication | 4 | 1 | 0 | 25.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

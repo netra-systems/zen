@@ -59,20 +59,20 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         # Initialize Docker manager with Alpine containers for performance
         self.docker_manager = UnifiedDockerManager()
         
-        # Acquire test environment with real services
-        env_info = await self.docker_manager.acquire_environment(
-            env_name="test",
-            use_alpine=True,
-            rebuild_images=True
+        # Start services with smart container reuse
+        success = await self.docker_manager.start_services_smart(
+            services=["postgres", "redis", "auth"],
+            wait_healthy=True
         )
         
-        if not env_info or not env_info.get("success"):
-            raise RuntimeError(f"Failed to start real services: {env_info}")
+        if not success:
+            raise RuntimeError("Failed to start real services")
         
-        # Configure service URLs from environment
-        self.auth_service_url = f"http://localhost:{env_info.get('auth_port', 8081)}"
-        self.postgres_port = env_info.get('postgres_port', 5434)
-        self.redis_port = env_info.get('redis_port', 6381)
+        # Configure service URLs from allocated ports
+        auth_port = self.docker_manager.allocated_ports.get('auth', 8081)
+        self.auth_service_url = f"http://localhost:{auth_port}"
+        self.postgres_port = self.docker_manager.allocated_ports.get('postgres', 5434)
+        self.redis_port = self.docker_manager.allocated_ports.get('redis', 6381)
         
         self.logger.info(f" PASS:  Real services started - Auth: {self.auth_service_url}")
         
@@ -86,7 +86,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         """Clean up Docker services after testing."""
         if self.docker_manager:
             try:
-                await self.docker_manager.release_environment("test")
+                await self.docker_manager.stop_services_smart(["postgres", "redis", "auth"])
                 self.logger.info(" PASS:  Docker services cleaned up successfully")
             except Exception as e:
                 self.logger.error(f" FAIL:  Error cleaning up Docker services: {e}")

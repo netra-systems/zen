@@ -750,6 +750,24 @@ class UnifiedWebSocketManager:
         validated_user_id = ensure_user_id(user_id)
         return self._user_connections.get(validated_user_id, set()).copy()
     
+    def get_connection_thread_id(self, connection_id: Union[str, ConnectionID]) -> Optional[str]:
+        """Get the thread_id for a specific connection."""
+        connection = self.get_connection(connection_id)
+        return connection.thread_id if connection else None
+    
+    def get_user_connections_by_thread(self, user_id: Union[str, UserID], thread_id: str) -> Set[str]:
+        """Get all connections for a user filtered by thread_id."""
+        validated_user_id = ensure_user_id(user_id)
+        user_connections = self._user_connections.get(validated_user_id, set())
+        
+        thread_connections = set()
+        for conn_id in user_connections:
+            connection = self.get_connection(conn_id)
+            if connection and connection.thread_id == thread_id:
+                thread_connections.add(conn_id)
+        
+        return thread_connections
+    
     async def wait_for_connection(self, user_id: str, timeout: float = 5.0, check_interval: float = 0.1) -> bool:
         """
         Wait for a WebSocket connection to be established for a user.
@@ -1223,7 +1241,8 @@ class UnifiedWebSocketManager:
                     'connection_id': conn_id,
                     'active': is_active,
                     'connected_at': connection.connected_at.isoformat(),
-                    'metadata': connection.metadata or {}
+                    'metadata': connection.metadata or {},
+                    'thread_id': connection.thread_id
                 })
         
         return {
@@ -1234,13 +1253,14 @@ class UnifiedWebSocketManager:
             'connections': connection_details
         }
     
-    async def connect_user(self, user_id: str, websocket: Any, connection_id: str = None) -> Any:
+    async def connect_user(self, user_id: str, websocket: Any, connection_id: str = None, thread_id: str = None) -> Any:
         """Legacy compatibility method for connecting a user.
         
         Args:
             user_id: User identifier
             websocket: WebSocket connection
             connection_id: Optional preliminary connection ID to preserve state machine continuity
+            thread_id: Optional thread context to preserve thread isolation
         """
         from datetime import datetime
         
@@ -1262,7 +1282,8 @@ class UnifiedWebSocketManager:
             connection_id=final_connection_id,
             user_id=user_id,
             websocket=websocket,
-            connected_at=datetime.now()
+            connected_at=datetime.now(),
+            thread_id=thread_id
         )
         await self.add_connection(connection)
         

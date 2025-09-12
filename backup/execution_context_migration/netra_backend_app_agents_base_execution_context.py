@@ -13,8 +13,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 import threading
 
-from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-
 logger = logging.getLogger(__name__)
 
 
@@ -69,10 +67,7 @@ class ExecutionContext:
     def __init__(self, 
                  execution_id: Optional[str] = None,
                  metadata: Optional[ExecutionMetadata] = None):
-        self.execution_id = execution_id or UnifiedIdGenerator.generate_agent_execution_id(
-            agent_type=getattr(self, 'agent_type', 'unknown'), 
-            user_id=getattr(self, 'user_id', 'system')
-        )
+        self.execution_id = execution_id or str(uuid.uuid4())
         self.metadata = metadata or ExecutionMetadata()
         self.status = ExecutionStatus.PENDING
         self.resource_usage = ResourceUsage()
