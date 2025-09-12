@@ -32,8 +32,9 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory
-    from netra_backend.app.services.websocket_bridge_factory import UserWebSocketEmitter
+    # SSOT: Import from SSOT WebSocket bridge factory
+    from netra_backend.app.factories.websocket_bridge_factory import WebSocketBridgeFactory, StandardWebSocketBridge
+    from netra_backend.app.services.agent_websocket_bridge import UserWebSocketEmitter
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
     # Legacy import removed - use SSOT from resilience
     # from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
@@ -336,28 +337,34 @@ class ExecutionEngineFactory:
             # Get or create user-specific semaphore
             user_semaphore = await self._get_user_semaphore(user_context.user_id)
             
-            # Create user-specific WebSocket event emitter
-            websocket_emitter = None
+            # SSOT: Create StandardWebSocketBridge using SSOT factory pattern
+            websocket_bridge = None
             if self._websocket_bridge_factory:
                 try:
-                    websocket_emitter = await self._websocket_bridge_factory.create_user_emitter(
-                        user_context.user_id, 
-                        user_context.thread_id,
-                        f"conn_{user_context.user_id}_{int(time.time() * 1000)}"
-                    )
+                    # Create SSOT StandardWebSocketBridge
+                    from netra_backend.app.factories.websocket_bridge_factory import create_standard_websocket_bridge
+                    websocket_bridge = create_standard_websocket_bridge(user_context)
+                    
+                    # Configure bridge with appropriate adapter - check for different factory types
+                    if hasattr(self._websocket_bridge_factory, '_unified_manager') and self._websocket_bridge_factory._unified_manager:
+                        websocket_bridge.set_websocket_manager(self._websocket_bridge_factory._unified_manager)
+                    elif hasattr(self._websocket_bridge_factory, 'get_websocket_manager'):
+                        # Try alternative method if available
+                        manager = getattr(self._websocket_bridge_factory, 'get_websocket_manager', lambda: None)()
+                        if manager:
+                            websocket_bridge.set_websocket_manager(manager)
+                    
                 except Exception as e:
-                    logger.warning(f"Failed to create WebSocket emitter via factory: {e}")
+                    logger.warning(f"Failed to create SSOT WebSocket bridge via factory: {e}")
             
-            # Fallback: Create isolated WebSocket emitter directly
-            if not websocket_emitter:
-                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
-                websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
-                    user_id=user_context.user_id,
-                    thread_id=user_context.thread_id,
-                    run_id=user_context.request_id,
-                    websocket_manager=None  # Will be set when available
-                )
-                logger.info(f"Created fallback WebSocket emitter for user {user_context.user_id}")
+            # Fallback: Create SSOT StandardWebSocketBridge directly
+            if not websocket_bridge:
+                from netra_backend.app.factories.websocket_bridge_factory import create_standard_websocket_bridge
+                websocket_bridge = create_standard_websocket_bridge(user_context)
+                logger.info(f"Created fallback SSOT WebSocket bridge for user {user_context.user_id}")
+            
+            # Compatibility: Create websocket_emitter wrapper for backward compatibility  
+            websocket_emitter = websocket_bridge  # StandardWebSocketBridge implements same interface
             
             # SSOT REMEDIATION PHASE 1: Delegate to UserExecutionEngine
             # This maintains backward compatibility while routing through the preferred engine
@@ -367,11 +374,11 @@ class ExecutionEngineFactory:
                 
                 agent_factory = get_agent_instance_factory()
                 
-                # Create UserExecutionEngine instead of IsolatedExecutionEngine
+                # Create UserExecutionEngine with SSOT WebSocket bridge
                 user_engine = UserExecutionEngine(
                     context=user_context,
                     agent_factory=agent_factory,
-                    websocket_emitter=websocket_emitter
+                    websocket_bridge=websocket_bridge  # SSOT: Use bridge instead of emitter
                 )
                 
                 # Create a delegation wrapper that maintains IsolatedExecutionEngine interface
@@ -379,7 +386,7 @@ class ExecutionEngineFactory:
                     user_engine=user_engine,
                     user_context=user_context,
                     agent_registry=self._agent_registry,
-                    websocket_emitter=websocket_emitter,
+                    websocket_bridge=websocket_bridge,  # SSOT: Use bridge
                     execution_semaphore=user_semaphore,
                     execution_timeout=self.config.execution_timeout_seconds,
                     factory=self
@@ -389,11 +396,11 @@ class ExecutionEngineFactory:
                 
             except Exception as e:
                 logger.warning(f"Failed to create UserExecutionEngine: {e}. Falling back to IsolatedExecutionEngine")
-                # Fallback to original IsolatedExecutionEngine for safety
+                # Fallback to original IsolatedExecutionEngine for safety with SSOT bridge
                 engine = IsolatedExecutionEngine(
                     user_context=user_context,
                     agent_registry=self._agent_registry,  # Shared, immutable
-                    websocket_emitter=websocket_emitter,  # Per-user
+                    websocket_bridge=websocket_bridge,    # SSOT: Per-user bridge
                     execution_semaphore=user_semaphore,   # Per-user
                     execution_timeout=self.config.execution_timeout_seconds,
                     factory=self  # Reference back for cleanup
@@ -401,7 +408,8 @@ class ExecutionEngineFactory:
             
             # Register cleanup callbacks
             user_context.cleanup_callbacks.append(engine.cleanup)
-            user_context.cleanup_callbacks.append(websocket_emitter.cleanup)
+            if hasattr(websocket_bridge, 'cleanup'):
+                user_context.cleanup_callbacks.append(websocket_bridge.cleanup)
             
             # Track active context
             async with self._contexts_lock:
@@ -494,7 +502,7 @@ class UserExecutionEngineWrapper:
                  user_engine: UserExecutionEngine,
                  user_context: UserExecutionContext,
                  agent_registry: 'AgentRegistry',
-                 websocket_emitter: 'UserWebSocketEmitter',
+                 websocket_bridge: 'StandardWebSocketBridge',  # SSOT: Use bridge instead of emitter
                  execution_semaphore: asyncio.Semaphore,
                  execution_timeout: float,
                  factory: ExecutionEngineFactory):
@@ -502,7 +510,8 @@ class UserExecutionEngineWrapper:
         self.user_engine = user_engine  # Primary engine
         self.user_context = user_context
         self.agent_registry = agent_registry
-        self.websocket_emitter = websocket_emitter
+        self.websocket_bridge = websocket_bridge  # SSOT: Store bridge
+        self.websocket_emitter = websocket_bridge  # Compatibility: bridge implements emitter interface
         self.execution_semaphore = execution_semaphore
         self.execution_timeout = execution_timeout
         self.factory = factory
@@ -535,7 +544,7 @@ class IsolatedExecutionEngine:
     def __init__(self, 
                  user_context: UserExecutionContext,
                  agent_registry: 'AgentRegistry',
-                 websocket_emitter: 'UserWebSocketEmitter',
+                 websocket_bridge: 'StandardWebSocketBridge',  # SSOT: Use bridge instead of emitter
                  execution_semaphore: asyncio.Semaphore,
                  execution_timeout: float,
                  factory: ExecutionEngineFactory):
@@ -551,18 +560,14 @@ class IsolatedExecutionEngine:
         self.user_context = user_context
         self.agent_registry = agent_registry  # Shared, immutable
         
-        # CRITICAL: Validate WebSocket emitter
-        if websocket_emitter is None:
-            logger.warning(f"WebSocket emitter is None for user {user_context.user_id} - creating fallback")
-            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as IsolatedWebSocketEventEmitter
-            websocket_emitter = IsolatedWebSocketEventEmitter.create_for_user(
-                user_id=user_context.user_id,
-                thread_id=user_context.thread_id,
-                run_id=user_context.request_id,
-                websocket_manager=None  # Will be set when available
-            )
+        # SSOT: Validate WebSocket bridge
+        if websocket_bridge is None:
+            logger.warning(f"WebSocket bridge is None for user {user_context.user_id} - creating fallback SSOT bridge")
+            from netra_backend.app.factories.websocket_bridge_factory import create_standard_websocket_bridge
+            websocket_bridge = create_standard_websocket_bridge(user_context)
         
-        self.websocket_emitter = websocket_emitter  # Per-user
+        self.websocket_bridge = websocket_bridge  # SSOT: Per-user bridge
+        self.websocket_emitter = websocket_bridge  # Compatibility: bridge implements emitter interface
         self.execution_semaphore = execution_semaphore  # Per-user
         self.execution_timeout = execution_timeout
         self.factory = factory  # Reference for cleanup
