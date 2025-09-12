@@ -47,6 +47,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # Import system under test
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.schemas.registry import AgentStatus
 
@@ -59,6 +60,12 @@ class MockWebSocketManager:
         self.sent_messages: List[Dict[str, Any]] = []
         self.broadcast_messages: List[Dict[str, Any]] = []
         self.sent_to_threads: Dict[str, List[Dict[str, Any]]] = {}
+        # Golden Path notification tracking
+        self.agent_started_calls: List[Dict[str, Any]] = []
+        self.agent_thinking_calls: List[Dict[str, Any]] = []
+        self.tool_executing_calls: List[Dict[str, Any]] = []
+        self.tool_completed_calls: List[Dict[str, Any]] = []
+        self.agent_completed_calls: List[Dict[str, Any]] = []
     
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
         """Mock send_to_thread method."""
@@ -138,13 +145,21 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         self.env.set("ENVIRONMENT", "test", source="websocket_notifier_test")
         self.env.set("WEBSOCKET_TIMEOUT", "5", source="websocket_notifier_test")
         
-        # Initialize mock manager and notifier for each test
+        # Initialize mock manager and execution context for each test
         self.mock_manager = MockWebSocketManager()
+        
+        # Create mock UserExecutionContext with required parameters
+        self.mock_exec_context = UserExecutionContext(
+            user_id="test_user_websocket_notifier",
+            thread_id="test_thread_websocket_notifier", 
+            run_id="test_run_websocket_notifier",
+            websocket_client_id="test_ws_client_websocket_notifier"
+        )
         
         # Suppress deprecation warning during testing
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            self.notifier = WebSocketNotifier.create_for_user(self.mock_manager)
+            self.notifier = WebSocketNotifier.create_for_user(self.mock_manager, self.mock_exec_context)
     
     def teardown_method(self, method):
         """Cleanup method for each test."""
