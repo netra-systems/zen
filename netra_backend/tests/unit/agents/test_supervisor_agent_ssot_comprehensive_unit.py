@@ -178,12 +178,12 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         self.websocket_bridge.notify_agent_error = AsyncMock()
         
         # BVJ: Multi-user context isolation is critical for platform scalability
-        self.test_user_context = UserExecutionContext(
+        self.test_user_context = UserExecutionContext.from_request_supervisor(
             user_id=f"test-user-{uuid.uuid4().hex[:8]}",
             thread_id=f"test-thread-{uuid.uuid4().hex[:8]}",
             run_id=f"test-run-{uuid.uuid4().hex[:8]}",
             request_id=f"test-req-{uuid.uuid4().hex[:8]}",
-            websocket_client_id=f"test-ws-{uuid.uuid4().hex[:8]}",
+            websocket_connection_id=f"test-ws-{uuid.uuid4().hex[:8]}",
             metadata={"user_request": "Optimize my AI infrastructure costs"}
         )
         
@@ -446,12 +446,12 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
                 self.assertEqual(result.status, ExecutionStatus.COMPLETED)
         
         # Test with invalid context
-        invalid_context = UserExecutionContext(
+        invalid_context = UserExecutionContext.from_request_supervisor(
             user_id="",  # Invalid empty user_id
             thread_id="test-thread", 
             run_id="test-run",
             request_id="test-req",
-            websocket_client_id="test-ws"
+            websocket_connection_id="test-ws"
         )
         
         with patch('netra_backend.app.agents.supervisor_ssot.validate_user_context', 
@@ -469,12 +469,12 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         BVJ: Database session requirement = Data consistency = Platform reliability.
         """
         # Create context without database session
-        context_no_db = UserExecutionContext(
+        context_no_db = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread",
             run_id="test-run", 
             request_id="test-req",
-            websocket_client_id="test-ws"
+            websocket_connection_id="test-ws"
         )
         # Explicitly not calling .with_db_session()
         
@@ -577,12 +577,12 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         # Create multiple isolated user contexts
         user_contexts = []
         for i in range(3):
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=f"concurrent-user-{i}",
                 thread_id=f"concurrent-thread-{i}",
                 run_id=f"concurrent-run-{i}",
                 request_id=f"concurrent-req-{i}",
-                websocket_client_id=f"concurrent-ws-{i}",
+                websocket_connection_id=f"concurrent-ws-{i}",
                 metadata={"user_request": f"Concurrent optimization request {i}"}
             ).with_db_session(AsyncMock())
             user_contexts.append(context)
@@ -704,12 +704,12 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
             await self.supervisor.execute(None)
         
         # Test with invalid context that fails SSOT validation
-        invalid_context = UserExecutionContext(
+        invalid_context = UserExecutionContext.from_request_supervisor(
             user_id="",  # Invalid empty user_id
             thread_id="test-thread",
             run_id="test-run",
             request_id="test-req", 
-            websocket_client_id="test-ws"
+            websocket_connection_id="test-ws"
         )
         
         with patch('netra_backend.app.agents.supervisor_ssot.validate_user_context', 
@@ -726,12 +726,12 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
         BVJ: Graceful degradation = Service reliability = User experience continuity.
         """
         # Create context for testing
-        context = UserExecutionContext(
+        context = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread", 
             run_id="test-run",
             request_id="test-req",
-            websocket_client_id="test-ws"
+            websocket_connection_id="test-ws"
         ).with_db_session(AsyncMock())
         
         # Create supervisor with failing WebSocket bridge
@@ -773,12 +773,12 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
         
         BVJ: Resource cleanup = Memory management = System stability.
         """
-        context = UserExecutionContext(
+        context = UserExecutionContext.from_request_supervisor(
             user_id="test-user",
             thread_id="test-thread",
             run_id="test-run", 
             request_id="test-req",
-            websocket_client_id="test-ws"
+            websocket_connection_id="test-ws"
         ).with_db_session(AsyncMock())
         
         # Mock engine that fails execution but tracks cleanup
@@ -857,12 +857,12 @@ class TestSupervisorAgentSSOTPerformance(SSotAsyncTestCase):
         # Create multiple concurrent user contexts
         contexts = []
         for i in range(5):
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=f"perf-user-{i}",
                 thread_id=f"perf-thread-{i}",
                 run_id=f"perf-run-{i}",
                 request_id=f"perf-req-{i}",
-                websocket_client_id=f"perf-ws-{i}",
+                websocket_connection_id=f"perf-ws-{i}",
                 metadata={"performance_test_index": i}
             ).with_db_session(AsyncMock())
             contexts.append(context)
@@ -909,12 +909,12 @@ class TestSupervisorAgentSSOTPerformance(SSotAsyncTestCase):
         # Create contexts with different memory patterns
         contexts = []
         for i in range(3):
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=f"memory-user-{i}",
                 thread_id=f"memory-thread-{i}",
                 run_id=f"memory-run-{i}",
                 request_id=f"memory-req-{i}",
-                websocket_client_id=f"memory-ws-{i}",
+                websocket_connection_id=f"memory-ws-{i}",
                 metadata={"memory_test": True, "data_size": i * 1000}
             ).with_db_session(AsyncMock())
             contexts.append(context)
