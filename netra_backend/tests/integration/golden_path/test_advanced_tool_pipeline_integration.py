@@ -114,7 +114,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_tool_chain_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
@@ -488,7 +488,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_error_recovery_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
@@ -526,13 +526,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Test error recovery mechanisms with various tool failure scenarios",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Test error recovery mechanisms with various tool failure scenarios"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Test various error scenarios
         error_test_cases = [
@@ -820,7 +827,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_parallel_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
@@ -858,13 +865,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Perform parallel analysis across multiple domains with intelligent result aggregation",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Perform parallel analysis across multiple domains with intelligent result aggregation"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Define parallel tool execution groups
         parallel_tool_groups = {
@@ -1174,7 +1188,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_dynamic_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
@@ -1213,13 +1227,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Perform intelligent analysis with dynamic tool selection based on data characteristics and optimization opportunities",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Perform intelligent analysis with dynamic tool selection based on data characteristics and optimization opportunities"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Define adaptive analysis scenarios
         analysis_scenarios = [
@@ -1508,7 +1529,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_timeout_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
@@ -1547,13 +1568,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Test tool timeout and circuit breaker resilience patterns",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Test tool timeout and circuit breaker resilience patterns"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Test various timeout scenarios
         timeout_test_cases = [

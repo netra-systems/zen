@@ -47,6 +47,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.models.agent_execution import AgentExecution
@@ -136,7 +137,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         async def create_user_session(user_index: int) -> UserTestSession:
             """Create isolated user session."""
             auth_context = await create_authenticated_user_context(f"concurrent_user_{user_index}")
-            user_id = UserID(str(uuid.uuid4()))
+            user_id = auth_context.user_id  # Use the same user_id from auth_context
             unique_signature = f"user_{user_index}_{uuid.uuid4().hex[:8]}"
             
             session = UserTestSession(
@@ -173,13 +174,20 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
                 # Start agent execution with unique data
                 unique_content = f"User {session.user_index} isolation test - {session.unique_signature} - analyze data with unique identifiers"
                 
-                session.agent_execution = await execution_engine.start_agent_execution(
-                    user_id=session.user_id,
-                    thread_id=session.thread_id,
-                    run_id=session.run_id,
-                    message_content=unique_content,
-                    execution_context=session.auth_context
+                # Create agent execution context
+                agent_context = AgentExecutionContext(
+                    user_id=str(session.user_id),
+                    thread_id=str(session.thread_id),
+                    run_id=str(session.run_id),
+                    agent_name="supervisor_agent",
+                    request_id=str(uuid.uuid4()),
+                    metadata={
+                        "message": unique_content
+                    }
                 )
+                
+                # Execute agent with user context
+                session.agent_execution = await execution_engine.execute_agent(agent_context, session.auth_context)
                 
                 # Perform multiple operations with user-specific data
                 for op_index in range(operations_per_user):
@@ -409,7 +417,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         
         for user_index in range(num_users):
             auth_context = await create_authenticated_user_context(f"resource_user_{user_index}")
-            user_id = UserID(str(uuid.uuid4()))
+            user_id = auth_context.user_id  # Use the same user_id from auth_context
             
             session = UserTestSession(
                 user_id=user_id,
@@ -437,13 +445,20 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
             
             try:
                 # Start agent execution
-                session.agent_execution = await execution_engine.start_agent_execution(
-                    user_id=session.user_id,
-                    thread_id=session.thread_id,
-                    run_id=session.run_id,
-                    message_content=f"Resource intensive analysis for user {session.user_index}",
-                    execution_context=session.auth_context
+                # Create agent execution context
+                agent_context = AgentExecutionContext(
+                    user_id=str(session.user_id),
+                    thread_id=str(session.thread_id),
+                    run_id=str(session.run_id),
+                    agent_name="supervisor_agent",
+                    request_id=str(uuid.uuid4()),
+                    metadata={
+                        "message": f"Resource intensive analysis for user {session.user_index}"
+                    }
                 )
+                
+                # Execute agent with user context
+                session.agent_execution = await execution_engine.execute_agent(agent_context, session.auth_context)
                 
                 for op_index in range(resource_intensive_operations):
                     operation_start = time.time()
@@ -621,7 +636,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         
         for user_index in range(num_concurrent_users):
             auth_context = await create_authenticated_user_context(f"txn_user_{user_index}")
-            user_id = UserID(str(uuid.uuid4()))
+            user_id = auth_context.user_id  # Use the same user_id from auth_context
             
             session = UserTestSession(
                 user_id=user_id,
@@ -638,13 +653,20 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
             """Execute transactional operations with isolation validation."""
             try:
                 # Start agent execution
-                session.agent_execution = await execution_engine.start_agent_execution(
-                    user_id=session.user_id,
-                    thread_id=session.thread_id,
-                    run_id=session.run_id,
-                    message_content=f"Transaction isolation test for user {session.user_index}",
-                    execution_context=session.auth_context
+                # Create agent execution context
+                agent_context = AgentExecutionContext(
+                    user_id=str(session.user_id),
+                    thread_id=str(session.thread_id),
+                    run_id=str(session.run_id),
+                    agent_name="supervisor_agent",
+                    request_id=str(uuid.uuid4()),
+                    metadata={
+                        "message": f"Transaction isolation test for user {session.user_index}"
+                    }
                 )
+                
+                # Execute agent with user context
+                session.agent_execution = await execution_engine.execute_agent(agent_context, session.auth_context)
                 
                 # Execute multiple transactions
                 for txn_index in range(transactions_per_user):
@@ -894,7 +916,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         
         for user_index in range(num_users):
             auth_context = await create_authenticated_user_context(f"resource_isolation_user_{user_index}")
-            user_id = UserID(str(uuid.uuid4()))
+            user_id = auth_context.user_id  # Use the same user_id from auth_context
             
             session = UserTestSession(
                 user_id=user_id,
@@ -922,13 +944,20 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
             
             try:
                 # Start agent execution
-                session.agent_execution = await execution_engine.start_agent_execution(
-                    user_id=session.user_id,
-                    thread_id=session.thread_id,
-                    run_id=session.run_id,
-                    message_content=f"Normal resource usage test for user {session.user_index}",
-                    execution_context=session.auth_context
+                # Create agent execution context
+                agent_context = AgentExecutionContext(
+                    user_id=str(session.user_id),
+                    thread_id=str(session.thread_id),
+                    run_id=str(session.run_id),
+                    agent_name="supervisor_agent",
+                    request_id=str(uuid.uuid4()),
+                    metadata={
+                        "message": f"Normal resource usage test for user {session.user_index}"
+                    }
                 )
+                
+                # Execute agent with user context
+                session.agent_execution = await execution_engine.execute_agent(agent_context, session.auth_context)
                 
                 # Perform normal operations
                 for op_index in range(5):
@@ -975,13 +1004,20 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
             
             try:
                 # Start agent execution
-                session.agent_execution = await execution_engine.start_agent_execution(
-                    user_id=session.user_id,
-                    thread_id=session.thread_id,
-                    run_id=session.run_id,
-                    message_content=f"RESOURCE INTENSIVE test for user {session.user_index}",
-                    execution_context=session.auth_context
+                # Create agent execution context
+                agent_context = AgentExecutionContext(
+                    user_id=str(session.user_id),
+                    thread_id=str(session.thread_id),
+                    run_id=str(session.run_id),
+                    agent_name="supervisor_agent",
+                    request_id=str(uuid.uuid4()),
+                    metadata={
+                        "message": f"RESOURCE INTENSIVE test for user {session.user_index}"
+                    }
                 )
+                
+                # Execute agent with user context
+                session.agent_execution = await execution_engine.execute_agent(agent_context, session.auth_context)
                 
                 # Perform resource-intensive operations
                 for op_index in range(5):
@@ -1125,7 +1161,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
             """Create individual connection session."""
             try:
                 auth_context = await create_authenticated_user_context(f"massive_conn_user_{conn_index}")
-                user_id = UserID(str(uuid.uuid4()))
+                user_id = auth_context.user_id  # Use the same user_id from auth_context
                 unique_signature = f"massive_{conn_index}_{uuid.uuid4().hex[:8]}"
                 
                 # Track messages for this connection
