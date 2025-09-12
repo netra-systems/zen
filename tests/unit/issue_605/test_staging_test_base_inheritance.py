@@ -137,8 +137,8 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             pytest.skip(f"Required base classes not available: {e}")
     
     def _get_class_methods(self, cls) -> Set[str]:
-        """Get all methods from a class (excluding private methods)."""
-        return {name for name in dir(cls) if not name.startswith('_') and callable(getattr(cls, name, None))}
+        """Get all methods from a class (excluding truly private methods but including protected ones)."""
+        return {name for name in dir(cls) if not name.startswith('__') and callable(getattr(cls, name, None))}
     
     def _check_async_method_compatibility(self, base_class, staging_class) -> List[Dict[str, Any]]:
         """Check for async/sync method compatibility issues."""
