@@ -59,9 +59,9 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
         super().setup_method(method)
         self.env = get_env()
         
-        # Service endpoints (use env vars or staging defaults)
-        self.auth_service_url = os.environ.get("AUTH_SERVICE_URL", "https://staging-auth.netra.ai")
-        self.backend_service_url = os.environ.get("BACKEND_SERVICE_URL", "https://staging-backend.netra.ai")
+        # Service endpoints (use local or staging defaults based on availability)
+        self.auth_service_url = os.environ.get("AUTH_SERVICE_URL", "http://localhost:8081")
+        self.backend_service_url = os.environ.get("BACKEND_SERVICE_URL", "http://localhost:8000")
         
         # Test configuration
         self.timeout = 30
@@ -433,6 +433,8 @@ class CrossServiceAuthFlowTest(SSotAsyncTestCase):
 if __name__ == "__main__":
     async def run_cross_service_debug():
         test_instance = CrossServiceAuthFlowTest()
+        # Initialize the test instance properly
+        test_instance.setup_method(None)
         
         print("🚀 Starting Cross-Service Authentication Flow Analysis")
         print("=" * 60)

@@ -21,6 +21,10 @@ from test_framework.environment_markers import staging_only, env_requires
 
 
 env = get_env()
+
+# Import staging configuration for SSOT compliance
+from tests.e2e.staging_test_config import get_staging_config
+
 class TestAuthRoutes:
     """Test authentication service route availability issues in staging."""
 
@@ -36,7 +40,9 @@ class TestAuthRoutes:
         
         Expected failure: 404 Not Found for /auth/google/login
         """
-        # Auth service URL (adjust based on staging configuration)
+        # Get auth service URL from SSOT staging configuration
+        staging_config = get_staging_config()
+        auth_service_base = staging_config.auth_url
         google_login_route = f"{auth_service_base}/auth/google/login"
         
         route_test_failures = []
@@ -122,6 +128,10 @@ class TestAuthRoutes:
         
         # Auth service base URL
         
+        # Get auth service URL from SSOT staging configuration
+        staging_config = get_staging_config()
+        auth_service_base = staging_config.auth_url
+        
         # OAuth routes that should exist but may be missing
         expected_oauth_routes = [
             "/auth/google/login",      # Primary route from audit
@@ -206,6 +216,9 @@ class TestAuthRoutes:
         """
         import os
         
+        # Get auth service URL from SSOT staging configuration
+        staging_config = get_staging_config()
+        auth_service_base = staging_config.auth_url
         
         # Test basic auth service health vs missing OAuth routes
         route_registration_issues = []
@@ -305,6 +318,9 @@ class TestAuthRoutes:
         """
         import os
         
+        # Get auth service URL from SSOT staging configuration
+        staging_config = get_staging_config()
+        auth_service_base = staging_config.auth_url
         
         # Test different possible OAuth route patterns to find configuration issue
         oauth_route_patterns = [
@@ -411,6 +427,9 @@ class TestAuthRoutes:
         """
         import os
         
+        # Get auth service URL from SSOT staging configuration
+        staging_config = get_staging_config()
+        auth_service_base = staging_config.auth_url
         
         # Test route discovery to understand what blueprints/routers are registered
         blueprint_discovery_failures = []
@@ -518,6 +537,9 @@ class TestAuthRoutes:
         """
         import os
         
+        # Get auth service URL from SSOT staging configuration
+        staging_config = get_staging_config()
+        auth_service_base = staging_config.auth_url
         
         # Test OAuth route availability and service error responses
         oauth_dependency_failures = []

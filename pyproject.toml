@@ -26,7 +26,7 @@ addopts = [
     "--tb=short",
     "--maxfail=10",
     "--import-mode=importlib",  # Faster import mode
-    "--cache-clear-check",  # Clear cache if stale
+    "--cache-clear",  # Clear cache if stale
     "-p no:randomly",  # Disable random test order for consistent collection
 ]
 
@@ -34,21 +34,15 @@ addopts = [
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 
-# Collection optimization
-collect_ignore = [
+# File ignoring (using norecursedirs instead of collect_ignore)
+norecursedirs = [
     "build",
-    "dist",
+    "dist", 
     "node_modules",
     ".venv",
     "venv",
     "__pycache__",
     "*.egg-info"
-]
-
-collect_ignore_glob = [
-    "**/*_backup.py",
-    "**/*_old.py",
-    "**/test_*.py.bak"
 ]
 
 # Test markers (comprehensive list)
@@ -66,6 +60,7 @@ markers = [
     "e2e: End-to-end tests (full workflow)",
     "smoke: Quick validation tests",
     "critical: Essential system tests",
+    "mission_critical: Business-critical functionality tests",
     
     # Service markers
     "backend: Backend service tests",

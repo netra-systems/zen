@@ -67,6 +67,7 @@ Duplicate and conflicting WebSocket URL environment variables create configurati
 ### ✅ Step 2: Execute Test Plan (COMPLETED)
 - [x] Create new SSOT tests for WebSocket configuration 
 - [x] Validate test execution (non-docker)
+- [x] Execute critical SSOT violation detection test
 
 #### New SSOT Tests Created:
 **Test Distribution Implemented:**
@@ -94,6 +95,27 @@ python tests/unified_test_runner.py --category e2e --env staging --pattern "*gol
 **Expected Test Behavior:**
 - **Currently**: Tests MUST FAIL (detecting dual variables by design)
 - **After SSOT Fix**: Tests MUST PASS (confirming consolidation successful)
+
+#### ✅ Critical Test Execution Results (2025-09-11):
+**SSOT Violation Successfully Detected:**
+```bash
+# Test: test_unified_api_config_ssot_violation()
+# Status: FAILED as expected (detecting SSOT violation)
+# Location: frontend/lib/unified-api-config.ts:186
+# Violation: const stagingWsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://api.staging.netrasystems.ai';
+# Required Fix: Replace with process.env.NEXT_PUBLIC_WS_URL
+
+# Comprehensive Scan Results:
+# - Deprecated NEXT_PUBLIC_WEBSOCKET_URL occurrences: 1 (Line 186)
+# - Canonical NEXT_PUBLIC_WS_URL occurrences: 1 (Line 284)
+# - SSOT Violation Confirmed: 🚨 CRITICAL - Remediation needed immediately
+```
+
+**Test Validation Status:**
+- ✅ **Test Infrastructure**: Critical detection test working properly
+- ✅ **Violation Detection**: Line 186 SSOT violation identified precisely  
+- ✅ **Scope Analysis**: 1 deprecated usage vs 1 canonical usage in target file
+- 🚨 **Remediation Required**: Issue #507 confirmed - fix needed for Golden Path
 
 ### ✅ Step 3: Plan SSOT Remediation (COMPLETED)
 - [x] Plan consolidation to single canonical variable
