@@ -17,6 +17,7 @@ SSOT Violations This Module Proves:
 4. Missing standardized import interfaces
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import sys
 import importlib
 import inspect
@@ -29,7 +30,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerImportStandardization(unittest.TestCase):
+class TestWebSocketManagerImportStandardization(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager import standardization violations exist.
     

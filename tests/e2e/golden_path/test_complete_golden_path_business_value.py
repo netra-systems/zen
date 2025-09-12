@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Complete Golden Path: Business Value Delivery E2E Test
 
@@ -38,11 +76,13 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 # SSOT IMPORTS - Following CLAUDE.md absolute import rules
-from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
-from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
-from test_framework.ssot.real_services_test_fixtures import real_services_fixture
-from test_framework.websocket_helpers import (
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.real_services_test_fixtures import real_services_fixture
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.websocket_helpers import (
     WebSocketTestHelpers, assert_websocket_events, WebSocketTestClient
 )
 

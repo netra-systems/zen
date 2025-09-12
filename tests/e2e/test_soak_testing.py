@@ -32,7 +32,7 @@ import logging
 import os
 import psutil
 import pytest
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import threading
 import time
 import tracemalloc

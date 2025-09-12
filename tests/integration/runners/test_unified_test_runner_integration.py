@@ -256,11 +256,11 @@ class TestRealDockerOrchestration(TestUnifiedTestRunnerIntegrationCore):
         postgres_port = postgres_container.attrs["NetworkSettings"]["Ports"]["5432/tcp"][0]["HostPort"]
         
         # Test Redis connection
-        redis_client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
-    redis.Redis(host="localhost", port=int(redis_port), password="test_password")
-        redis_client.ping()  # Should not raise exception
-        redis_client.set("integration_test", "success")
-        self.assertEqual(redis_client.get("integration_test"), b"success")
+        # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host="localhost", port=int(redis_port), password="test_password")
+        await redis_client.ping()  # Should not raise exception
+        await redis_client.set("integration_test", "success")
+        self.assertEqual(await redis_client.get("integration_test"), b"success")
         
         # Test PostgreSQL connection
         postgres_conn = psycopg2.connect(

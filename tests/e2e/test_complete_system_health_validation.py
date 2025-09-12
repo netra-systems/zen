@@ -127,16 +127,16 @@ class TestCompleteSystemHealthValidation:
             try:
                 import redis
                 # Connect to real Redis on port 6381 (test environment)
-                redis_client = redis.Redis(host='localhost', port=6381, decode_responses=True)
+                redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, decode_responses=True)
                 
                 # Test real Redis operations
                 test_key = f"health_check_{int(time.time())}"
-                redis_client.set(test_key, "health_test", ex=10)  # Expire in 10 seconds
-                value = redis_client.get(test_key)
+                await redis_client.set(test_key, "health_test", ex=10)  # Expire in 10 seconds
+                value = await redis_client.get(test_key)
                 assert value == "health_test", f"Redis test value mismatch: {value}"
                 
                 # Cleanup test key
-                redis_client.delete(test_key)
+                await redis_client.delete(test_key)
                 
                 health_checks.append(('redis_connectivity', True))
                 logger.info("✓ Real Redis connectivity check passed")

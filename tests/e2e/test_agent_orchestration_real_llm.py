@@ -1,3 +1,4 @@
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 # REMOVED_SYNTAX_ERROR: '''E2E Test: Agent Orchestration with Real LLM Integration - CLAUDE.md Compliant
 
 # REMOVED_SYNTAX_ERROR: MISSION CRITICAL E2E test for agent orchestration with real LLM API calls.

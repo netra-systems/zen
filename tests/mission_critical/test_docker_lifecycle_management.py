@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -94,7 +95,7 @@
             # REMOVED_SYNTAX_ERROR: logger = logging.getLogger(__name__)
 
 
-# REMOVED_SYNTAX_ERROR: class DockerLifecycleTestSuite(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class DockerLifecycleTestSuite(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Comprehensive test suite for Docker lifecycle management.
 
@@ -1571,7 +1572,7 @@
         # REMOVED_SYNTAX_ERROR: return []
 
 
-# REMOVED_SYNTAX_ERROR: class DockerInfrastructureServiceStartupTests(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class DockerInfrastructureServiceStartupTests(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Service Startup (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod
@@ -1839,7 +1840,7 @@
         # REMOVED_SYNTAX_ERROR: "formatted_string")
 
 
-# REMOVED_SYNTAX_ERROR: class DockerInfrastructureHealthMonitoringTests(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class DockerInfrastructureHealthMonitoringTests(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Health Monitoring (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod
@@ -2212,7 +2213,7 @@
                     # REMOVED_SYNTAX_ERROR: "formatted_string")
 
 
-# REMOVED_SYNTAX_ERROR: class DockerInfrastructureFailureRecoveryTests(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class DockerInfrastructureFailureRecoveryTests(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Failure Recovery (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod
@@ -2604,7 +2605,7 @@
                     # REMOVED_SYNTAX_ERROR: self.assertEqual(service_check.stdout.strip(), 'running', "Service should still be running")
 
 
-# REMOVED_SYNTAX_ERROR: class DockerInfrastructurePerformanceTests(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class DockerInfrastructurePerformanceTests(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Infrastructure Test Category: Performance (5 tests)"""
 
     # REMOVED_SYNTAX_ERROR: @classmethod

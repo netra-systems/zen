@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -51,7 +52,7 @@
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
 
-# REMOVED_SYNTAX_ERROR: class TestTriageAgentSSOTCompliance(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestTriageAgentSSOTCompliance(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test suite to verify TriageSubAgent SSOT compliance after fixes."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):

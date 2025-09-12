@@ -29,6 +29,7 @@ CRITICAL VALIDATION AREAS:
 - Concurrent state change handling
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -123,7 +124,7 @@ class WebSocketConnectionStateMachine:
         }
 
 
-class TestConnectionStateTransitions(unittest.TestCase):
+class TestConnectionStateTransitions(SSotBaseTestCase):
     """Test valid connection state transitions."""
     
     def setUp(self):
@@ -231,7 +232,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertTrue(self.state_machine.is_active())
 
 
-class TestInvalidStateTransitions(unittest.TestCase):
+class TestInvalidStateTransitions(SSotBaseTestCase):
     """Test that invalid state transitions are properly rejected."""
     
     def setUp(self):
@@ -311,7 +312,7 @@ class TestInvalidStateTransitions(unittest.TestCase):
                 self.assertFalse(state_machine.transition_to(state))
 
 
-class TestWebSocketConnectionInfo(unittest.TestCase):
+class TestWebSocketConnectionInfo(SSotBaseTestCase):
     """Test WebSocketConnectionInfo data structure and validation."""
     
     def setUp(self):
@@ -406,7 +407,7 @@ class TestWebSocketConnectionInfo(unittest.TestCase):
         self.assertEqual(conn_info.last_ping, ping_time)
 
 
-class TestStateTransitionHistory(unittest.TestCase):
+class TestStateTransitionHistory(SSotBaseTestCase):
     """Test state transition history tracking and analysis."""
     
     def test_state_history_tracking(self):
@@ -477,7 +478,7 @@ class TestStateTransitionHistory(unittest.TestCase):
         self.assertEqual(state_machine.get_state(), ConnectionState.CONNECTED)
 
 
-class TestConnectionStateEnumProperties(unittest.TestCase):
+class TestConnectionStateEnumProperties(SSotBaseTestCase):
     """Test properties and validation of ConnectionState enum."""
     
     def test_all_connection_states_defined(self):

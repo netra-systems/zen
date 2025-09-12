@@ -17,6 +17,7 @@ This test suite follows CLAUDE.md requirements:
 - Validates service authentication header generation and validation logic
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import unittest
 from unittest.mock import patch, MagicMock
@@ -28,7 +29,7 @@ from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
-class TestServiceAuthComponents(unittest.TestCase):
+class TestServiceAuthComponents(SSotBaseTestCase):
     """
     Unit Tests: Service authentication component logic for Issue #115.
     

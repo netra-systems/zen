@@ -369,7 +369,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
                     
             # Create Redis client
             import redis
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=self.get_env_var('REDIS_HOST', 'localhost'),
                 port=int(self.get_env_var('REDIS_PORT', '6379')),
                 db=0,
@@ -408,15 +408,15 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
         key = f"perf_test_{scenario_name}_{iteration}"
         value = f"test_value_{iteration}"
         
-        redis_client.set(key, value, ex=60)  # Expire in 60 seconds
-        retrieved = redis_client.get(key)
+        await redis_client.set(key, value, ex=60)  # Expire in 60 seconds
+        retrieved = await redis_client.get(key)
         
         assert retrieved == value
-        redis_client.delete(key)
+        await redis_client.delete(key)
         
     def _redis_pipeline_operations(self, redis_client, scenario_name: str, iteration: int):
         """Redis pipeline operations."""
-        pipe = redis_client.pipeline()
+        pipe = await redis_client.pipeline()
         
         for i in range(5):  # 5 operations per pipeline
             key = f"perf_pipeline_{scenario_name}_{iteration}_{i}"
@@ -426,7 +426,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
         results = pipe.execute()
         
         # Cleanup
-        cleanup_pipe = redis_client.pipeline()
+        cleanup_pipe = await redis_client.pipeline()
         for i in range(5):
             key = f"perf_pipeline_{scenario_name}_{iteration}_{i}"
             cleanup_pipe.delete(key)
@@ -438,13 +438,13 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
         
         # Set hash fields
         hash_data = {f"field_{i}": f"value_{i}" for i in range(3)}
-        redis_client.hset(hash_key, mapping=hash_data)
+        await redis_client.hset(hash_key, mapping=hash_data)
         
         # Get hash fields
-        retrieved_data = redis_client.hgetall(hash_key)
+        retrieved_data = await redis_client.hgetall(hash_key)
         
         assert len(retrieved_data) == 3
-        redis_client.delete(hash_key)
+        await redis_client.delete(hash_key)
         
     async def test_http_requests_auto_instrumentation_overhead(self):
         """
@@ -786,7 +786,7 @@ class TestAutoInstrumentationSystemWideOverhead(SSotAsyncTestCase):
         try:
             import redis
             
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=self.get_env_var('REDIS_HOST', 'localhost'),
                 port=int(self.get_env_var('REDIS_PORT', '6379')),
                 db=0,
@@ -794,9 +794,9 @@ class TestAutoInstrumentationSystemWideOverhead(SSotAsyncTestCase):
             )
             
             key = f"system_test_{test_iteration}"
-            redis_client.set(key, "test_value", ex=30)
-            redis_client.get(key)
-            redis_client.delete(key)
+            await redis_client.set(key, "test_value", ex=30)
+            await redis_client.get(key)
+            await redis_client.delete(key)
             
             activities.append("redis")
             

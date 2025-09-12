@@ -169,21 +169,6 @@ class TestIssue263BrokenPatternsSimulation:
     These patterns should NOT be used in real tests - they are for demonstration only.
     """
     
-    def setUp(self):
-        """
-        BROKEN PATTERN: Uses setUp() instead of setup_method().
-        
-        This will cause issues with SSOT base classes that expect setup_method().
-        """
-        # This would fail because SSotAsyncTestCase expects setup_method()
-        self.golden_user_context = UserExecutionContext(
-            user_id="broken_user",
-            thread_id="broken_thread",
-            run_id="broken_run", 
-            request_id="broken_request",
-            websocket_client_id="broken_ws"
-        )
-    
     def test_broken_execution_result_old_pattern(self):
         """
         BROKEN PATTERN: Uses old ExecutionResult interface.

@@ -43,7 +43,7 @@ class TestStatePersistenceGCPStaging(SSotAsyncTestCase):
         cls.id_manager = UnifiedIDManager()
         
         # Real GCP Redis Cloud (Tier 1 - Hot cache)
-        cls.redis_client = redis.Redis(
+        cls.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
             host=cls.env.get("REDIS_HOST", "redis-cloud.googleapis.com"),
             port=int(cls.env.get("REDIS_PORT", 6379)),
             db=0,
@@ -85,9 +85,9 @@ class TestStatePersistenceGCPStaging(SSotAsyncTestCase):
     async def asyncTearDown(self):
         """Clean up test data from all tiers."""
         # Clean Redis test data
-        test_keys = [k for k in self.redis_client.keys() if k.startswith("test_")]
+        test_keys = [k for k in self.await redis_client.keys() if k.startswith("test_")]
         if test_keys:
-            self.redis_client.delete(*test_keys)
+            self.await redis_client.delete(*test_keys)
         
         await super().asyncTearDown()
 

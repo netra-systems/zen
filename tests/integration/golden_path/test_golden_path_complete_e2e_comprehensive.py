@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 GOLDEN PATH COMPLETE E2E COMPREHENSIVE TEST SUITE - CRITICAL P0 BUSINESS VALUE VALIDATION
 =========================================================================================
@@ -57,9 +95,11 @@ import aiohttp
 from loguru import logger
 
 # SSOT Framework Imports
-from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
-from test_framework.ssot.e2e_auth_helper import (
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, 
     E2EWebSocketAuthHelper,
     AuthenticatedUser
@@ -68,7 +108,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
 # No-Docker fixtures for service-independent testing
-from test_framework.fixtures.no_docker_golden_path_fixtures import (
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.fixtures.no_docker_golden_path_fixtures import (
     no_docker_golden_path_services, 
     golden_path_services,
     mock_authenticated_user,

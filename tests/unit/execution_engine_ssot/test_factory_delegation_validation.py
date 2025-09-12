@@ -16,6 +16,7 @@ Business Impact: Protects factory-based user isolation which is critical for
 multi-user AI chat functionality ($500K+ ARR dependency).
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import unittest
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
@@ -38,7 +39,7 @@ except ImportError as e:
     pytest.skip(f"Backend modules not available: {e}", allow_module_level=True)
 
 
-class TestFactoryDelegationValidation(unittest.TestCase):
+class TestFactoryDelegationValidation(SSotAsyncTestCase):
     """Comprehensive validation of ExecutionEngineFactory delegation to UserExecutionEngine"""
     
     def setUp(self):

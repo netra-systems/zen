@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path Test Suite Validation and Execution Summary
 
@@ -37,12 +75,13 @@ from typing import Dict, List, Any, Optional, Set
 from unittest.mock import AsyncMock
 
 # SSOT Test Infrastructure
-from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.base_integration_test import BaseIntegrationTest
+# CONSOLIDATED: from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 
 # No-Docker fixtures for service-independent testing
-from test_framework.fixtures.no_docker_golden_path_fixtures import (
+# CONSOLIDATED: from test_framework.fixtures.no_docker_golden_path_fixtures import (
     no_docker_golden_path_services, 
     golden_path_services,
     mock_authenticated_user,
@@ -53,9 +92,19 @@ from test_framework.fixtures.no_docker_golden_path_fixtures import (
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathSuiteValidation(BaseIntegrationTest):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Golden path test suite validation and execution summary.
     
@@ -112,8 +161,8 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
     # Critical SSOT patterns to validate
     REQUIRED_SSOT_PATTERNS = {
         'imports': [
-            'from test_framework.ssot.base_test_case import SSotAsyncTestCase',
-            'from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context',
+# CONSOLIDATED:             'from test_framework.ssot.base_test_case import SSotAsyncTestCase',
+# CONSOLIDATED:             'from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context',
             'from shared.types.core_types import UserID, ThreadID, RunID'
         ],
         'test_markers': [

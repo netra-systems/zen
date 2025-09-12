@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 MISSION CRITICAL E2E TEST: Real Agent Orchestration for Chat Flow
 
@@ -50,6 +88,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthH
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # ============================================================================
 # REAL WEBSOCKET EVENT VALIDATOR - NO MOCKS
@@ -203,6 +242,15 @@ class RealWebSocketEventValidator:
 # ============================================================================
 
 class RealServiceChatTester:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests real chat flow using actual services with SSOT authentication."""
     
     def __init__(self):
@@ -329,6 +377,15 @@ class RealServiceChatTester:
 # ============================================================================
 
 class TestRealAgentOrchestrationCritical:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """MISSION CRITICAL: Tests real agent orchestration for chat functionality."""
     
     @pytest.mark.asyncio

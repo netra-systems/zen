@@ -29,6 +29,7 @@ import pytest_asyncio
 from netra_backend.app.schemas.user_plan import PlanTier
 from shared.isolated_environment import get_env
 from tests.e2e.agent_conversation_helpers import (
+from netra_backend.app.services.user_execution_context import UserExecutionContext
     AgentConversationTestCore,
     ConversationFlowSimulator,
     ConversationFlowValidator,
@@ -42,6 +43,15 @@ from tests.e2e.agent_conversation_helpers import (
 @pytest.mark.integration
 @pytest.mark.e2e
 class TestAgentOrchestrationRealLLMIntegration:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Test agent orchestration with real LLM integration in integration environment."""
     
     @pytest_asyncio.fixture
@@ -530,6 +540,15 @@ class TestAgentOrchestrationRealLLMIntegration:
 @pytest.mark.integration
 @pytest.mark.e2e
 class TestAgentOrchestrationPerformanceIntegration:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Performance tests for agent orchestration with real LLM in integration environment."""
     
     @pytest.mark.asyncio

@@ -16,6 +16,7 @@ Business Impact: This test protects the $500K+ ARR chat functionality by ensurin
 users get isolated, secure AI responses with proper real-time event notifications.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import unittest
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
@@ -41,7 +42,7 @@ except ImportError as e:
     pytest.skip(f"Backend modules not available: {e}", allow_module_level=True)
 
 
-class TestBusinessFunctionValidation(unittest.TestCase):
+class TestBusinessFunctionValidation(SSotAsyncTestCase):
     """Comprehensive validation of business-critical functions through UserExecutionEngine"""
     
     def setUp(self):

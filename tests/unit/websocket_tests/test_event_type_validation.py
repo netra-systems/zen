@@ -22,6 +22,7 @@ CRITICAL VALIDATION AREAS:
 - Metadata validation for routing safety
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import uuid
 from datetime import datetime, timezone
@@ -37,7 +38,7 @@ from shared.types import (
 )
 
 
-class TestWebSocketEventTypeValidation(unittest.TestCase):
+class TestWebSocketEventTypeValidation(SSotBaseTestCase):
     """Test WebSocketEventType enum validation and constraints."""
     
     def test_all_critical_event_types_defined(self):
@@ -162,7 +163,7 @@ class TestWebSocketEventTypeValidation(unittest.TestCase):
             WebSocketEventType("Agent_Started")
 
 
-class TestStronglyTypedWebSocketEventValidation(unittest.TestCase):
+class TestStronglyTypedWebSocketEventValidation(SSotBaseTestCase):
     """Test StronglyTypedWebSocketEvent validation and construction."""
     
     def setUp(self):
@@ -285,7 +286,7 @@ class TestStronglyTypedWebSocketEventValidation(unittest.TestCase):
         self.assertEqual(event.timestamp.tzinfo, timezone.utc)
 
 
-class TestWebSocketEventTypeConstraints(unittest.TestCase):
+class TestWebSocketEventTypeConstraints(SSotBaseTestCase):
     """Test constraints and validation rules for WebSocket event types."""
     
     def test_event_type_immutability(self):
@@ -362,7 +363,7 @@ class TestWebSocketEventTypeConstraints(unittest.TestCase):
             self.assertIn(expected_type, all_event_types)
 
 
-class TestWebSocketEventValidationEdgeCases(unittest.TestCase):
+class TestWebSocketEventValidationEdgeCases(SSotBaseTestCase):
     """Test edge cases and error conditions for WebSocket event validation."""
     
     def test_none_values_validation(self):

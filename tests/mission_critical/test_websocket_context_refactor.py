@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -130,7 +131,7 @@
                 # REMOVED_SYNTAX_ERROR: return summary
 
 
-# REMOVED_SYNTAX_ERROR: class TestProperWebSocketHandling(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestProperWebSocketHandling(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test that proper WebSocket handling patterns work correctly."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):
@@ -302,7 +303,7 @@
                         # REMOVED_SYNTAX_ERROR: self.loop.run_until_complete(run_test())
 
 
-# REMOVED_SYNTAX_ERROR: class TestConcurrentAgentExecution(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestConcurrentAgentExecution(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test concurrent agent execution with WebSocket notifications."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):
@@ -453,7 +454,7 @@
         # REMOVED_SYNTAX_ERROR: self.loop.run_until_complete(run_test())
 
 
-# REMOVED_SYNTAX_ERROR: class TestErrorHandlingAndRecovery(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestErrorHandlingAndRecovery(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test error handling and recovery in WebSocket operations."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):
@@ -585,7 +586,7 @@
     # REMOVED_SYNTAX_ERROR: self.loop.run_until_complete(run_test())
 
 
-# REMOVED_SYNTAX_ERROR: class TestPerformanceAndMemory(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestPerformanceAndMemory(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test performance and memory efficiency after refactoring."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):

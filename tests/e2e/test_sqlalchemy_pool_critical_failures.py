@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 SQLAlchemy Pool Critical Failures E2E Tests
 
@@ -35,10 +73,11 @@ import websockets
 from urllib.parse import urljoin
 
 # E2E test framework imports
-from test_framework.base_e2e_test import BaseE2ETest  
-from test_framework.real_services_test_fixtures import real_services_fixture
-from test_framework.websocket_helpers import WebSocketTestClient
-from test_framework.ssot.e2e_auth_helper import create_test_user, get_auth_headers
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.base_e2e_test import BaseE2ETest  
+# CONSOLIDATED: from test_framework.real_services_test_fixtures import real_services_fixture
+# CONSOLIDATED: from test_framework.websocket_helpers import WebSocketTestClient
+# CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_test_user, get_auth_headers
 
 # Database imports for mocking broken configurations
 from sqlalchemy.ext.asyncio import create_async_engine

@@ -271,7 +271,7 @@ class TestAutoInstrumentationFrameworkDiscovery(SSotAsyncTestCase):
             )
             
             # Test instrumented Redis operations
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=self.get_env_var('REDIS_HOST', 'localhost'),
                 port=int(self.get_env_var('REDIS_PORT', '6379')),
                 db=0,
@@ -280,15 +280,15 @@ class TestAutoInstrumentationFrameworkDiscovery(SSotAsyncTestCase):
             
             # Perform instrumented operations
             test_key = "auto_instrumentation_test"
-            redis_client.set(test_key, "test_value", ex=60)  # Expire in 60 seconds
-            retrieved_value = redis_client.get(test_key)
+            await redis_client.set(test_key, "test_value", ex=60)  # Expire in 60 seconds
+            retrieved_value = await redis_client.get(test_key)
             
             assert retrieved_value == "test_value", (
                 "Instrumented Redis operations should work correctly"
             )
             
             # Cleanup test key
-            redis_client.delete(test_key)
+            await redis_client.delete(test_key)
             
             self.record_metric("redis_auto_instrumented", True)
             self.record_metric("redis_version", redis_version)

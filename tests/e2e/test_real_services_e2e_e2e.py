@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import asyncpg
 import httpx
 import pytest
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import websockets
 
 # Configure logger

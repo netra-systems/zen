@@ -17,6 +17,7 @@ SSOT Violations This Module Proves:
 4. Factory state not properly isolated between users
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import inspect
 import unittest
@@ -28,7 +29,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerFactoryConsolidation(unittest.TestCase):
+class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager factory fragmentation violations exist.
     

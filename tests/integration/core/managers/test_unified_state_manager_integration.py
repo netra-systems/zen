@@ -83,9 +83,9 @@ class TestUnifiedStateManagerIntegrationCore(SSotAsyncTestCase):
         # Clean up test data from Redis
         for user_id in self.test_user_ids:
             pattern = f"state:{user_id}:*"
-            keys = self.redis_client.keys(pattern)
+            keys = self.await redis_client.keys(pattern)
             if keys:
-                self.redis_client.delete(*keys)
+                self.await redis_client.delete(*keys)
         
         # Clean up test data from PostgreSQL
         cursor = self.postgres_client.cursor()
@@ -124,7 +124,7 @@ class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
         
         # Verify state exists in Redis directly
         redis_key = f"state:{manager.user_id}:thread:{thread_id}"
-        redis_data = self.redis_client.hgetall(redis_key)
+        redis_data = self.await redis_client.hgetall(redis_key)
         self.assertIsNotNone(redis_data)
         
         # Create new manager instance to test persistence
@@ -196,8 +196,8 @@ class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
         original_redis = manager.redis_client
         
         # Temporarily replace with failing client
-        failing_client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
-    redis.Redis(host='nonexistent-host', port=6379)
+        # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+        failing_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='nonexistent-host', port=6379)
         manager.redis_client = failing_client
         
         # Operation should handle failure gracefully
@@ -602,7 +602,7 @@ class TestDisasterRecoveryIntegration(TestUnifiedStateManagerIntegrationCore):
         
         # Simulate corruption by directly modifying Redis data
         redis_key = f"state:{manager.user_id}:thread:{thread_id}"
-        self.redis_client.hset(redis_key, "corrupted_field", "invalid_json{")
+        self.await redis_client.hset(redis_key, "corrupted_field", "invalid_json{")
         
         # Manager should handle corrupted data gracefully
         try:

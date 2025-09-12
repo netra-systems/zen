@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -72,7 +73,7 @@
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
 
-# REMOVED_SYNTAX_ERROR: class TestWebSocketInitializationOrder(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestWebSocketInitializationOrder(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test suite to prevent WebSocket initialization order regression."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):
@@ -320,7 +321,7 @@
                 # REMOVED_SYNTAX_ERROR: "CRITICAL: No agents have WebSocket manager! The bug has regressed!")
 
 
-# REMOVED_SYNTAX_ERROR: class TestInitializationRaceConditions(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestInitializationRaceConditions(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test for potential race conditions in initialization."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):

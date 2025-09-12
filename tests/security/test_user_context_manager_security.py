@@ -413,13 +413,6 @@ class TestUserContextManagerSecurity(SSotBaseTestCase):
 class TestUserContextManagerIntegrationSecurity(SSotBaseTestCase):
     """Integration security tests with UserExecutionContext."""
     
-    def setUp(self):
-        """Set up integration test fixtures."""
-        super().setUp()
-        
-        if not USERCONTEXTMANAGER_EXISTS:
-            self.skipTest(f"UserContextManager not implemented yet. Import error: {IMPORT_ERROR}")
-
     async def test_websocket_isolation_security(self):
         """Test WebSocket connection isolation through UserContextManager."""
         manager = UserContextManager()

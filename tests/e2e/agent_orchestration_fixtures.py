@@ -17,6 +17,7 @@ import pytest
 
 # Absolute imports per CLAUDE.md import_management_architecture.xml
 from tests.e2e.config import CustomerTier
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 # REMOVED: mock_supervisor_agent deprecated fixture per CLAUDE.md
@@ -273,6 +274,15 @@ def performance_metrics_data():
 
 
 class WorkflowTestFixtures:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Test fixtures for workflow orchestration testing
     
     Provides unified access to workflow test fixtures and utilities.
