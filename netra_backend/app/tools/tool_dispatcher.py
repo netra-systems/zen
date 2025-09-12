@@ -32,7 +32,7 @@ ToolDispatcher = UnifiedToolDispatcher
 ToolDispatcherFactory = UnifiedToolDispatcherFactory
 
 # Legacy compatibility methods
-def create_tool_dispatcher(*args, **kwargs):
+async def create_tool_dispatcher(*args, **kwargs):
     """Legacy factory method - redirects to SSOT UnifiedToolDispatcher."""
     import warnings
     warnings.warn(
@@ -41,11 +41,11 @@ def create_tool_dispatcher(*args, **kwargs):
         stacklevel=2
     )
     
-    # If user_context provided, use proper factory
+    # If user_context provided, use proper factory - CRITICAL FIX: await async method
     if 'user_context' in kwargs:
-        return UnifiedToolDispatcher.create_for_user(**kwargs)
+        return await UnifiedToolDispatcher.create_for_user(**kwargs)
     
-    # Legacy fallback - create with minimal context
+    # Legacy fallback - create with minimal context (sync method)
     return ToolDispatcherFactory.create_legacy_global(*args, **kwargs)
 
 # Export for backward compatibility

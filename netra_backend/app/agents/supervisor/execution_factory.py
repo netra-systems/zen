@@ -33,7 +33,7 @@ from netra_backend.app.schemas.core_enums import ExecutionStatus
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     # SSOT: Import from SSOT WebSocket bridge factory
-    from netra_backend.app.factories.websocket_bridge_factory import WebSocketBridgeFactory, StandardWebSocketBridge
+    from netra_backend.app.factories.websocket_bridge_factory import StandardWebSocketBridge
     from netra_backend.app.services.agent_websocket_bridge import UserWebSocketEmitter
     from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
     # Legacy import removed - use SSOT from resilience
@@ -271,7 +271,7 @@ class ExecutionEngineFactory:
         
         # Infrastructure components (shared, immutable)
         self._agent_registry: Optional['AgentRegistry'] = None
-        self._websocket_bridge_factory: Optional['WebSocketBridgeFactory'] = None
+        self._websocket_bridge_factory: Optional[Any] = None  # Generic factory for WebSocket bridges
         self._db_connection_pool: Optional[Any] = None
         
         # Per-user semaphores (infrastructure manages this)
@@ -296,7 +296,7 @@ class ExecutionEngineFactory:
         
     def configure(self, 
                  agent_registry: Optional['AgentRegistry'],
-                 websocket_bridge_factory: 'WebSocketBridgeFactory',
+                 websocket_bridge_factory: Any,  # Generic WebSocket bridge factory
                  db_connection_pool: Any) -> None:
         """Configure factory with infrastructure components.
         
@@ -590,10 +590,7 @@ class IsolatedExecutionEngine:
     async def _get_or_create_periodic_update_manager(self) -> 'PeriodicUpdateManager':
         """Get or create periodic update manager."""
         if self._periodic_update_manager is None:
-<<<<<<< HEAD
-=======
             # SECURITY FIX: Use MinimalPeriodicUpdateManager from UserExecutionEngine for compatibility
->>>>>>> 21e3fd875099b740d7fc9c92d5ed0d343a3a66a0
             from netra_backend.app.agents.supervisor.user_execution_engine import MinimalPeriodicUpdateManager as PeriodicUpdateManager
             self._periodic_update_manager = PeriodicUpdateManager(
                 self.websocket_emitter, 
@@ -826,7 +823,7 @@ class ExecutionFactory:
     
     def configure(self, 
                  agent_registry: Optional['AgentRegistry'],
-                 websocket_bridge_factory: 'WebSocketBridgeFactory',
+                 websocket_bridge_factory: Any,  # Generic WebSocket bridge factory
                  db_connection_pool: Any) -> None:
         """Configure factory with infrastructure components."""
         self.engine_factory.configure(agent_registry, websocket_bridge_factory, db_connection_pool)
