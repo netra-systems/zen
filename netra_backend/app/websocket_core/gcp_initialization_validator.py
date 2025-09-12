@@ -126,8 +126,14 @@ class GCPWebSocketInitializationValidator:
         
         # GCP-specific configuration
         self.environment = self.env_manager.get('ENVIRONMENT', '').lower()
-        self.is_gcp_environment = self.environment in ['staging', 'production']
         self.is_cloud_run = self.env_manager.get('K_SERVICE') is not None
+        # Enhanced GCP environment detection - include K_SERVICE detection for Cloud Run
+        self.is_gcp_environment = (
+            self.environment in ['staging', 'production'] or
+            self.is_cloud_run or
+            self.env_manager.get('GOOGLE_CLOUD_PROJECT') is not None or
+            self.env_manager.get('GAE_APPLICATION') is not None
+        )
         
         # Readiness tracking
         self.current_state = GCPReadinessState.UNKNOWN
@@ -172,6 +178,11 @@ class GCPWebSocketInitializationValidator:
         if self.is_cloud_run:
             # Ensure minimum timeout to prevent race conditions in Cloud Run
             self.min_cloud_run_timeout = 0.5  # Absolute minimum for Cloud Run safety
+            # Cloud Run may have cold start delays, adjust for K_SERVICE environment
+            if self.environment in ['staging', 'production']:
+                # Add extra time for Cloud Run cold starts in production environments
+                self.timeout_multiplier = min(self.timeout_multiplier * 1.5, 2.0)
+                self.max_total_timeout *= 1.2  # 20% increase for cold starts
             
         self.logger.debug(
             f"Environment timeout configuration: {self.environment} "
@@ -645,6 +656,8 @@ class GCPWebSocketInitializationValidator:
         
         start_time = time.time()
         check_interval = 0.1  # Check every 100ms
+        max_iterations = int(timeout_seconds / check_interval) + 100  # Circuit breaker: prevent infinite loops
+        iteration_count = 0
         
         valid_phases = ['services', 'websocket', 'finalize', 'complete']
         phase_order = ['init', 'dependencies', 'database', 'cache', 'services', 'websocket', 'finalize', 'complete']
@@ -657,7 +670,7 @@ class GCPWebSocketInitializationValidator:
         
         self.logger.info(f"Waiting for startup phase to reach '{minimum_phase}' (timeout: {timeout_seconds}s)")
         
-        while time.time() - start_time < timeout_seconds:
+        while time.time() - start_time < timeout_seconds and iteration_count < max_iterations:
             try:
                 if hasattr(self.app_state, 'startup_phase'):
                     current_phase = str(self.app_state.startup_phase).lower()
@@ -688,18 +701,28 @@ class GCPWebSocketInitializationValidator:
                     return False
                 
                 await asyncio.sleep(check_interval)
+                iteration_count += 1
                 
             except Exception as e:
                 self.logger.warning(f"Error checking startup phase: {e}")
                 await asyncio.sleep(check_interval)
+                iteration_count += 1
         
-        # Timeout reached
+        # Timeout or circuit breaker reached
         elapsed = time.time() - start_time
         current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
-        self.logger.warning(
-            f"Timeout waiting for startup phase '{minimum_phase}' - "
-            f"current phase: '{current_phase}' after {elapsed:.2f}s"
-        )
+        
+        if iteration_count >= max_iterations:
+            self.logger.warning(
+                f"Circuit breaker triggered waiting for startup phase '{minimum_phase}' - "
+                f"current phase: '{current_phase}' after {iteration_count} iterations ({elapsed:.2f}s). "
+                f"This prevents infinite loops and test hangs."
+            )
+        else:
+            self.logger.warning(
+                f"Timeout waiting for startup phase '{minimum_phase}' - "
+                f"current phase: '{current_phase}' after {elapsed:.2f}s ({iteration_count} iterations)"
+            )
         return False
 
     async def validate_gcp_readiness_for_websocket(
@@ -942,10 +965,11 @@ class GCPWebSocketInitializationValidator:
         check: ServiceReadinessCheck, 
         timeout_seconds: float
     ) -> bool:
-        """Validate a single service with retry logic."""
+        """Validate a single service with retry logic and circuit breaker protection."""
         start_time = time.time()
+        max_attempts = min(check.retry_count + 1, 10)  # Circuit breaker: limit attempts to prevent hangs
         
-        for attempt in range(check.retry_count + 1):
+        for attempt in range(max_attempts):
             try:
                 # Check if validator is async
                 if asyncio.iscoroutinefunction(check.validator):

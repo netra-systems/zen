@@ -100,7 +100,6 @@ class TestToolRegistryDuplicatePreventionStaging(SSotBaseTestCase):
     @classmethod
     def setup_class(cls):
         """Set up class-level fixtures for staging tests."""
-        super().setup_class()
         cls.staging_config = StagingTestConfig()
         cls.auth_helper = E2EAuthHelper(environment="staging")
         cls.ws_auth_helper = E2EWebSocketAuthHelper(environment="staging")
@@ -504,7 +503,6 @@ class TestWebSocketToolRegistryCleanup(SSotBaseTestCase):
     @classmethod
     def setup_class(cls):
         """Set up class-level fixtures."""
-        super().setup_class()
         cls.ws_auth_helper = E2EWebSocketAuthHelper(environment="staging")
         
     async def test_websocket_disconnect_registry_cleanup(self):

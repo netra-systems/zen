@@ -50,7 +50,6 @@ class TestGCPDeploymentRequirementsBase(BaseE2ETest):
     @classmethod
     def setup_class(cls):
         """Set up test environment and URLs."""
-        super().setup_class()
         
         # Staging URLs - these should be actual deployed URLs
         cls.staging_urls = {

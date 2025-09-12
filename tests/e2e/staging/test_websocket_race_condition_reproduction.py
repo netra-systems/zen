@@ -54,7 +54,6 @@ class TestWebSocketRaceConditionStaging(BaseE2ETest):
     @classmethod
     def setup_class(cls):
         """Set up E2E test environment for staging."""
-        super().setup_class()
         
         # Verify we're running against staging
         env = get_env()
