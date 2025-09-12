@@ -1373,16 +1373,17 @@ class NetraTestingConfig(AppConfig):
         super().__init__(**data)
     
     def _load_api_keys_from_environment_corrected(self, env_dict: dict, data: dict) -> None:
-        """Load API keys from corrected environment dictionary for testing."""
+        """Load API keys and service URLs from corrected environment dictionary for testing."""
         # Helper function to get values from environment dictionary
         def get_env_value(key):
             return env_dict.get(key)
         
-        # Load API keys from environment variables
+        # Load API keys and service URLs from environment variables
         api_key_mappings = {
             'GEMINI_API_KEY': 'gemini_api_key',
             'ANTHROPIC_API_KEY': 'anthropic_api_key', 
             'OPENAI_API_KEY': 'openai_api_key',
+            'AUTH_SERVICE_URL': 'auth_service_url',  # CRITICAL FIX: Load AUTH_SERVICE_URL for Issue #631
         }
         
         for env_var, field_name in api_key_mappings.items():
