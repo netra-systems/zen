@@ -22,6 +22,7 @@ include = ["test_framework*", "shared*", "netra_backend*", "auth_service*"]
 [tool.pytest.ini_options]
 # Optimized pytest configuration for improved test collection
 minversion = "6.0"
+pythonpath = ["."]  # Add project root to Python path for test_framework imports
 testpaths = [
     "tests",
     "netra_backend/tests",
@@ -132,7 +133,47 @@ markers = [
     "database: Database-related tests",
     "id_system: ID system tests",
     "business_requirements: Business requirements tests",
-    "user_isolation: User isolation tests"
+    "user_isolation: User isolation tests",
+    "error_handling: Error handling tests",
+    "isolation_critical: Isolation-critical tests", 
+    "state_persistence: State persistence tests",
+    "phase_transitions: Phase transition tests",
+    "user_context_violations: User context violation tests",
+    "race_conditions: Race condition tests",
+    "id_system_validation: ID system validation tests",
+    "benchmark: Benchmark tests",
+    "integration_points: Integration point tests",
+    "workflow_coordination: Workflow coordination tests",
+    "circuit_breaker: Circuit breaker tests",
+    "auth_validation: Authentication validation tests",
+    "business_workflow: Business workflow tests",
+    "auth_integration: Authentication integration tests",
+    "business_value: Business value tests",
+    "config_validation: Configuration validation tests",
+    "resource_monitoring: Resource monitoring tests",
+    "thread_safety: Thread safety tests",
+    "memory_isolation: Memory isolation tests",
+    "startup_validation: Startup validation tests",
+    "api_integration: API integration tests",
+    "websocket_integration: WebSocket integration tests",
+    "session_management: Session management tests",
+    "token_management: Token management tests",
+    "recovery: Recovery tests",
+    "monitoring: Monitoring tests",
+    "infrastructure: Infrastructure tests",
+    "no_skip: Tests that should never be skipped",
+    "compatibility: Compatibility tests",
+    "comprehensive: Comprehensive tests",
+    "concurrency: Concurrency tests",
+    "coordination: Coordination tests",
+    "enterprise: Enterprise tests",
+    "factory_pattern: Factory pattern tests",
+    "isolation: Isolation tests",
+    "multi_user: Multi-user tests",
+    "orchestration: Orchestration tests",
+    "security: Security tests",
+    "validation: Validation tests",
+    "websocket_events: WebSocket event tests"
 ]
 
 # Coverage settings
