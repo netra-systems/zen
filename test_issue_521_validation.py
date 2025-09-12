@@ -22,8 +22,8 @@ from typing import Dict, Any
 
 # Staging environment configuration
 STAGING_CONFIG = {
-    'backend_url': 'https://netra-backend-staging-1234567890-uc.a.run.app',  # Update with actual URL
-    'auth_url': 'https://netra-auth-staging-1234567890-uc.a.run.app',       # Update with actual URL
+    'backend_url': 'https://netra-backend-staging-701982941522.us-central1.run.app',
+    'auth_url': 'https://netra-auth-service-701982941522.us-central1.run.app',
     'timeout': 30
 }
 

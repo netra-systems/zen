@@ -74,13 +74,12 @@ class TestGoldenPathAuthE2E(SSotAsyncTestCase):
 
     """E2E tests for Golden Path auth workflow on GCP staging"""
     
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """Set up E2E test environment for GCP staging"""
-        super().setUpClass()
+        super().setUp()
         
-        # Configure for GCP staging environment
-        cls.staging_config = {
+        # Configure for GCP staging environment  
+        self.staging_config = {
             'ENVIRONMENT': 'staging',
             'AUTH_SERVICE_URL': 'https://auth-service-staging.example.com',
             'BACKEND_SERVICE_URL': 'https://backend-staging.example.com', 
