@@ -93,6 +93,12 @@ fastmcp==2.11.3
 # --- Google Cloud Services ---
 # Google Cloud Secret Manager for secure secret management
 google-cloud-secret-manager>=2.20.0
+# Google Cloud SQL Admin API client
+google-cloud-sql>=3.22.4
+# Google Cloud Monitoring API client
+google-cloud-monitoring>=2.24.1
+# Google Cloud IAM API client
+google-cloud-iam>=2.17.0
 
 # --- Utilities ---
 # General-purpose retrying library.
