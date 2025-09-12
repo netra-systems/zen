@@ -34,7 +34,7 @@ SIGNIFICANT TIMEOUT REDUCTIONS IMPLEMENTED:
 4. ENVIRONMENT-AWARE CONFIGURATION:
    - Production: Conservative (1.0x multiplier, 20% safety margin)
    - Staging: Balanced (0.7x multiplier, 10% safety margin)
-   - Development: Fast (0.5x multiplier, no safety margin)
+   - Development: Fast (0.3x multiplier, no safety margin)
    - Local/Test: Very Fast (0.3x multiplier, no safety margin)
 
 5. CLOUD RUN SAFETY GUARANTEES:
@@ -124,8 +124,8 @@ class GCPWebSocketInitializationValidator:
         self.logger = central_logger.get_logger(__name__)
         self.env_manager = get_env()
         
-        # GCP-specific configuration
-        self.environment = self.env_manager.get('ENVIRONMENT', '').lower()
+        # GCP-specific configuration - Use enhanced environment detection (Issue #586 Fix)
+        self.environment = self.env_manager.get_environment_name()
         self.is_gcp_environment = self.environment in ['staging', 'production']
         self.is_cloud_run = self.env_manager.get('K_SERVICE') is not None
         
@@ -159,7 +159,7 @@ class GCPWebSocketInitializationValidator:
             self.max_total_timeout = 5.0  # Moderate max timeout
         elif self.environment in ['development', 'dev']:
             # Development: Fast timeouts for rapid development cycles
-            self.timeout_multiplier = 0.5  # 50% faster than production
+            self.timeout_multiplier = 0.3  # 70% faster than production
             self.safety_margin = 1.0  # No safety margin for speed
             self.max_total_timeout = 3.0  # Fast max timeout
         else:
