@@ -56,6 +56,7 @@ from netra_backend.app.core.windows_asyncio_safe import (
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query, Header
 from fastapi.responses import JSONResponse
 from fastapi.websockets import WebSocketState
+from starlette.datastructures import QueryParams
 
 # Core infrastructure imports
 from netra_backend.app.core.tracing import TracingManager
@@ -351,7 +352,7 @@ class WebSocketSSOTRouter:
             "connection_id": connection_id,
             "websocket_url": str(websocket.url),
             "path": websocket.url.path,
-            "query_params": dict(websocket.url.query_params) if websocket.url.query_params else {},
+            "query_params": dict(QueryParams(websocket.url.query)) if websocket.url.query else {},
             "mode_parameter": mode,
             "user_agent": user_agent,
             "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
