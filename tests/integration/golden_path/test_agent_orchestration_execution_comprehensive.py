@@ -215,7 +215,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             # Try to import OptimizationsCoreSubAgent
             try:
                 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-                test_agents.append(("apex_optimizer", OptimizationsCoreSubAgent, "AI optimization strategies"))
+                test_agents.append(("optimization", OptimizationsCoreSubAgent, "AI optimization strategies"))
             except ImportError as e:
                 logger.warning(f"   - Could not import OptimizationsCoreSubAgent: {e}")
             
@@ -246,7 +246,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                         return {"status": "success", "result": "mock_result", "agent": "mock_test"}
                 
                 # Register mock agents for the test agent names
-                for agent_name in ["triage", "data_helper", "apex_optimizer", "reporting"]:
+                for agent_name in ["triage", "data_helper", "optimization", "reporting"]:
                     registry.register(f"{agent_name}", MockTestAgent, f"Mock {agent_name} agent for testing")
                 
                 logger.info("   - Registered 4 mock agents for basic testing")
@@ -574,7 +574,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Execute optimization using context
         result2 = await engine.execute_agent_pipeline(
-            agent_name="apex_optimizer", 
+            agent_name="optimization", 
             execution_context=user_context,
             input_data=execution2_data
         )
@@ -744,7 +744,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Create agent with performance tracking
         factory = get_agent_instance_factory()
         await self._ensure_agent_factory_configured()
-        agent = await factory.create_agent_instance("apex_optimizer", user_context)
+        agent = await factory.create_agent_instance("optimization", user_context)
         
         # Mock slow tool execution
         async def slow_tool_execution(*args, **kwargs):
@@ -904,7 +904,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 "timestamp": datetime.utcnow() 
             },
             {
-                "agent_type": "apex_optimizer",
+                "agent_type": "optimization",
                 "result": {"recommendations": ["optimize_scaling"], "savings": 840},
                 "execution_time": 3.1,
                 "timestamp": datetime.utcnow()
@@ -930,7 +930,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
             },
             "triage_analysis": aggregated_result.get("triage", {}),
             "data_analysis": aggregated_result.get("data_helper", {}),
-            "optimization_results": aggregated_result.get("apex_optimizer", {})
+            "optimization_results": aggregated_result.get("optimization", {})
         })
         
         # Verify aggregation includes all agent outputs
@@ -1129,7 +1129,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Test access control for different agents
         await self._ensure_agent_factory_configured()
         free_agent = await factory.create_agent_instance("triage", free_user_context)
-        enterprise_agent = await factory.create_agent_instance("apex_optimizer", enterprise_user_context)
+        enterprise_agent = await factory.create_agent_instance("optimization", enterprise_user_context)
         
         # Mock permission checker
         def check_agent_permissions(agent_type: str, user_context: UserExecutionContext) -> bool:
@@ -1142,11 +1142,11 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Verify free user can access basic agents
         self.assertTrue(check_agent_permissions("triage", free_user_context))
-        self.assertFalse(check_agent_permissions("apex_optimizer", free_user_context))
+        self.assertFalse(check_agent_permissions("optimization", free_user_context))
         
         # Verify enterprise user can access all agents
         self.assertTrue(check_agent_permissions("triage", enterprise_user_context))
-        self.assertTrue(check_agent_permissions("apex_optimizer", enterprise_user_context))
+        self.assertTrue(check_agent_permissions("optimization", enterprise_user_context))
         
         # Test execution with permission enforcement
         try:
@@ -1325,7 +1325,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         factory = get_agent_instance_factory()
         await self._ensure_agent_factory_configured()
-        agent = await factory.create_agent_instance("apex_optimizer", user_context)
+        agent = await factory.create_agent_instance("optimization", user_context)
         
         # Mock tool dispatcher with metrics
         async def metrics_tool_execution(*args, **kwargs):
@@ -1356,7 +1356,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Record execution metrics
         execution_metrics = {
             "user_id": user_context.user_id,
-            "agent_type": "apex_optimizer",
+            "agent_type": "optimization",
             "execution_time": execution_time,
             "tokens_used": result.get("metrics", {}).get("tokens_used", 0),
             "api_calls": result.get("metrics", {}).get("api_calls", 0),
@@ -1593,7 +1593,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         factory = get_agent_instance_factory()
         await self._ensure_agent_factory_configured()
-        agent = await factory.create_agent_instance("apex_optimizer", user_context)
+        agent = await factory.create_agent_instance("optimization", user_context)
         
         # Mock tool dispatcher that calls external services
         async def external_service_tool_execution(tool_name: str, *args, **kwargs):
