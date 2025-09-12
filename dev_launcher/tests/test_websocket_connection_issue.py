@@ -177,7 +177,7 @@ class TestWebSocketConnectionIssue:
             async def patched_test(endpoint):
                 try:
                     import websockets
-                    async with websockets.connect(endpoint.url, timeout=validator.timeout) as ws:
+                    async with websockets.connect(endpoint.url, open_timeout=validator.timeout) as ws:
                         # Send JSON-RPC format message
                         test_message = {
                             "jsonrpc": "2.0",

@@ -350,7 +350,7 @@ class TestLoadBalancerRoutingValidation(SSotBaseTestCase):
             
             # Attempt WebSocket connection
             try:
-                async with websockets.connect(endpoint, timeout=15) as websocket:
+                async with websockets.connect(endpoint, open_timeout=15) as websocket:
                     return {
                         'handshake_success': True,
                         'upgrade_headers_present': True,
