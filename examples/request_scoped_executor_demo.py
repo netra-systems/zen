@@ -155,10 +155,10 @@ async def demo_user_isolation():
         # Create user-specific state
         # DeepAgentState eliminated - using UserExecutionContext pattern
         test_state_data = {
-            user_request=f"User {user_index+1}'s unique request",
-            user_id=user_context.user_id,
-            run_id=user_context.run_id
-        )
+            "user_request": f"User {user_index+1}'s unique request",
+            "user_id": user_context.user_id,
+            "run_id": user_context.run_id
+        }
         
         # Mock execution
         mock_result = AgentExecutionResult(
