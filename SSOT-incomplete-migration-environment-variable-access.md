@@ -43,21 +43,65 @@ value = env.get(var_name)
 - [x] **Step 0**: SSOT Audit completed - Top 3 violations identified
 - [x] **Issue Creation**: GitHub issue #596 created
 - [x] **Local Tracking**: .md file created
+- [x] **Step 1.1**: Discover existing tests - COMPREHENSIVE ANALYSIS COMPLETE
 
-### 🔄 IN PROGRESS
-- [ ] **Step 1**: Discover and plan tests
+### 🔄 IN PROGRESS  
+- [ ] **Step 1.2**: Plan test creation and updates
 - [ ] **Step 2**: Execute test plan (20% new SSOT tests)
 - [ ] **Step 3**: Plan SSOT remediation
 - [ ] **Step 4**: Execute remediation plan
 - [ ] **Step 5**: Test fix loop until all tests pass
 - [ ] **Step 6**: PR creation and closure
 
-## TEST DISCOVERY PLAN
-Need to find existing tests protecting:
-- Auth startup validation flow
-- JWT secret handling across environments
-- Environment variable access patterns
-- Golden Path authentication integration
+## COMPREHENSIVE TEST DISCOVERY RESULTS
+
+### 🚨 CRITICAL FINDINGS
+**MASSIVE SCOPE DISCOVERED**: 1,944+ files contain environment variable patterns (os.environ, os.getenv, IsolatedEnvironment, get_env)
+
+### EXISTING TESTS ANALYSIS
+
+#### ✅ TESTS USING CORRECT SSOT PATTERNS
+**Working Tests** (Use IsolatedEnvironment correctly):
+- `tests/mission_critical/test_jwt_secret_hard_requirements.py` - **BUT VIOLATED IN SETUP!**
+- `tests/integration/test_jwt_secret_sync.py` - **MOSTLY DISABLED**
+- `tests/mission_critical/test_central_validator_integration.py` - **MOSTLY DISABLED**
+
+#### 🚨 VIOLATIONS IN TEST INFRASTRUCTURE
+**Critical Discovery**: Even MISSION CRITICAL JWT tests are using direct os.environ:
+```python
+# VIOLATION in test_jwt_secret_hard_requirements.py lines 39-41:
+for key in env_keys_to_clear:
+    if key in os.environ:
+        self.original_env[key] = os.environ[key]
+        del os.environ[key]  # DIRECT OS.ENVIRON VIOLATION!
+```
+
+#### 🔍 TARGET FILE VIOLATION CONFIRMATION
+**`auth_startup_validator.py` Lines 507-516**:
+```python
+# MIXED VIOLATION PATTERN (CRITICAL):
+direct_value = os.environ.get(var_name)  # LINE 509 - DIRECT VIOLATION!
+env_specific_value = self.env.get(env_specific) or os.environ.get(env_specific)  # LINE 516 - MIXED VIOLATION!
+```
+
+### DISABLED TEST DISCOVERY
+**Major Finding**: Many environment-related tests have been **DISABLED** with "REMOVED_SYNTAX_ERROR" comments:
+- JWT secret synchronization tests
+- Central validator integration tests  
+- Auth service coordination tests
+
+**Implication**: The test infrastructure protecting environment variable access has been systematically disabled, allowing violations to proliferate.
+
+### TEST CATEGORIES AFFECTED (1,944+ files)
+- **Mission Critical Tests**: JWT, auth, Golden Path - some working, some disabled
+- **Integration Tests**: Environment variable access patterns throughout
+- **Unit Tests**: Test setup/teardown using direct os.environ  
+- **E2E Tests**: Configuration loading and environment handling
+
+### RISK ASSESSMENT
+- **EXTREME**: Test infrastructure itself violates SSOT patterns
+- **HIGH**: Many protecting tests have been disabled
+- **MEDIUM**: Working tests exist but need SSOT remediation
 
 ## SUCCESS CRITERIA
 - [ ] All direct os.environ access replaced with IsolatedEnvironment SSOT
