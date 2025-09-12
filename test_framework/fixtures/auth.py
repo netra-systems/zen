@@ -22,6 +22,8 @@ from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import jwt
+import pytest
+from unittest.mock import AsyncMock, MagicMock
 
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -248,6 +250,53 @@ def create_test_user_token(user_id: Optional[str] = None, permissions: Optional[
     return create_real_jwt_token(user_id, permissions, email)
 
 
+@pytest.fixture
+async def auth_service_client_fixture():
+    """
+    Fixture providing a mock auth service client for integration tests.
+    
+    Returns:
+        Mock auth service client with authentication capabilities
+    """
+    mock_client = AsyncMock()
+    
+    # Mock authentication methods
+    mock_client.validate_token = AsyncMock()
+    mock_client.refresh_token = AsyncMock() 
+    mock_client.revoke_token = AsyncMock()
+    mock_client.create_session = AsyncMock()
+    mock_client.end_session = AsyncMock()
+    
+    # Mock user management
+    mock_client.get_user = AsyncMock()
+    mock_client.create_user = AsyncMock()
+    mock_client.update_user = AsyncMock()
+    mock_client.delete_user = AsyncMock()
+    
+    # Default successful responses
+    mock_client.validate_token.return_value = {
+        "valid": True,
+        "user_id": "test_user",
+        "email": "test@netra-testing.ai",
+        "permissions": ["read", "write"]
+    }
+    
+    mock_client.refresh_token.return_value = {
+        "access_token": create_test_user_token(),
+        "refresh_token": f"refresh_{uuid.uuid4().hex}",
+        "expires_in": 3600
+    }
+    
+    mock_client.get_user.return_value = {
+        "user_id": "test_user",
+        "email": "test@netra-testing.ai",
+        "name": "Test User",
+        "active": True
+    }
+    
+    return mock_client
+
+
 # Export all components for easy importing
 __all__ = [
     'MockOAuthProvider',
@@ -256,5 +305,6 @@ __all__ = [
     'OAuthTokenData',
     'SAMLAssertion',
     'create_real_jwt_token',
-    'create_test_user_token'
+    'create_test_user_token',
+    'auth_service_client_fixture'
 ]

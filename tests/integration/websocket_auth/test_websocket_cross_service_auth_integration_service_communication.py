@@ -33,10 +33,9 @@ from test_framework.ssot.base_test_case import BaseIntegrationTest
 from test_framework.fixtures.auth import auth_service_client_fixture
 from netra_backend.app.services.unified_authentication_service import (
     UnifiedAuthenticationService,
-    AuthenticationContext,
-    AuthenticationResult, 
-    AuthMethodType
+    AuthenticationContext
 )
+from netra_backend.app.auth import AuthenticationResult, AuthMethodType
 from netra_backend.app.clients.auth_client_core import (
     AuthServiceClient,
     AuthServiceError,
