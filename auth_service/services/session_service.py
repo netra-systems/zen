@@ -17,6 +17,7 @@ from datetime import datetime, timedelta, UTC
 from auth_service.auth_core.config import AuthConfig
 from auth_service.services.redis_service import RedisService
 from auth_service.services.jwt_service import JWTService
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +74,9 @@ class SessionService:
             Session information including session ID and expiration
         """
         try:
-            # Generate unique session ID
-            session_id = str(uuid.uuid4())
+            # Generate secure unique session ID using UnifiedIDManager
+            id_manager = UnifiedIDManager()
+            session_id = id_manager.generate_id(IDType.SESSION)
             
             # Set expiration time
             if expires_in is None:
