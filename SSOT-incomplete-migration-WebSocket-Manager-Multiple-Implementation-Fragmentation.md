@@ -14,9 +14,11 @@ WebSocket Manager SSOT fragmentation blocking Golden Path - multiple implementat
 - [x] **Step 0.1**: SSOT Audit completed - violations identified
 - [x] **Step 0.2**: GitHub Issue #564 created with P0 priority  
 - [x] **IND**: Progress tracker created
+- [x] **Step 1.1**: Existing test discovery completed - 100+ tests identified
+- [x] **Step 1.2**: New test planning completed - 8 new SSOT validation tests planned
 
 ### 🔄 CURRENT STATUS
-- Working on: Step 1 - Discover and Plan Test
+- Working on: Step 2 - Execute Test Plan for New SSOT Tests
 
 ### 📋 NEXT STEPS  
 - [ ] **Step 1**: Discover existing tests protecting WebSocket functionality
@@ -52,8 +54,44 @@ class UnifiedWebSocketManager:  # Core implementation
 3. Ensure user isolation in WebSocket event delivery
 4. Validate Golden Path user flow works reliably
 
-## Test Plans
-*To be filled in during Step 1*
+## Test Plans ✅ COMPLETED
+
+### 1.1 EXISTING TEST INVENTORY
+**Mission Critical Tests (MUST PASS):**
+- ✅ `tests/mission_critical/test_websocket_agent_events_suite.py` - Core business value ($500K+ ARR)
+- ✅ `tests/mission_critical/test_ssot_websocket_compliance.py` - SSOT compliance validation
+- ✅ `tests/mission_critical/test_websocket_user_isolation_validation.py` - Multi-user security
+
+**SSOT Violation Discovery Tests (DESIGNED TO FAIL INITIALLY):**
+- ✅ `tests/unit/websocket_ssot/test_ssot_violation_discovery.py` - Proves fragmentation exists
+- ✅ `tests/unit/websocket_ssot/test_manager_factory_consolidation.py` - Factory pattern issues
+- ✅ `tests/unit/websocket_ssot/test_interface_violations.py` - Interface inconsistencies
+
+**Integration Tests:**
+- ✅ `tests/integration/ssot/test_websocket_manager_migration_safety.py` - Migration safety
+- ✅ `tests/integration/ssot/test_websocket_ssot_compliance_validation.py` - Integration compliance
+
+**E2E Tests (GCP Staging):**
+- ✅ `tests/e2e/staging/test_websocket_ssot_golden_path.py` - Complete Golden Path
+- ✅ `tests/e2e/websocket_e2e_tests/test_websocket_race_conditions_golden_path.py` - Race conditions
+
+### 1.2 NEW TEST PLAN (Phase 1: Reproduction Tests)
+**Tests That MUST FAIL Before SSOT Fix:**
+1. `test_websocket_manager_import_path_fragmentation.py` - Prove multiple import paths
+2. `test_websocket_manager_constructor_inconsistency.py` - Prove constructor differences
+3. `test_user_isolation_fails_with_fragmented_managers.py` - Prove user data leakage
+4. `test_websocket_event_delivery_fragmentation_failures.py` - Prove event delivery issues
+
+**Tests That MUST PASS After SSOT Fix:**
+5. `test_single_websocket_manager_ssot_validation.py` - Validate single implementation
+6. `test_websocket_manager_factory_ssot_consolidation.py` - Validate factory consolidation
+7. `test_enhanced_user_isolation_with_ssot_manager.py` - Validate improved isolation
+8. `test_websocket_event_reliability_ssot_improvement.py` - Validate event reliability
+
+### Test Execution Strategy
+**Pre-SSOT Validation:** ~60% existing tests + failure reproduction tests
+**Post-SSOT Validation:** ~20% new SSOT validation tests + business value protection
+**Coverage:** Unit → Integration → E2E GCP Staging (No Docker required)
 
 ## Remediation Plans  
 *To be filled in during Step 3*
