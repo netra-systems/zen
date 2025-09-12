@@ -565,6 +565,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             await asyncio.sleep(0.1)
         
         # Analyze latency patterns
+        violation_rate = 0.0  # Initialize default: no violations when no successful responses
         if latency_metrics["response_times"]:
             response_times = latency_metrics["response_times"]
             avg_latency = sum(response_times) / len(response_times)
