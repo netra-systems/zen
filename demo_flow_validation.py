@@ -30,7 +30,7 @@ class DemoFlowValidator:
         """Establish WebSocket connection"""
         try:
             print(f"🔗 Connecting to {self.websocket_url}...")
-            self.connection = await websockets.connect(self.websocket_url, timeout=10)
+            self.connection = await websockets.connect(self.websocket_url, open_timeout=10)
             print("✅ WebSocket connection established")
             return True
         except Exception as e:

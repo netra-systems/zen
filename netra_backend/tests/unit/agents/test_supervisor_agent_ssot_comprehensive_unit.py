@@ -260,7 +260,7 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         
         # Comprehensive orchestration workflow test
         with patch.object(self.supervisor, '_create_user_execution_engine', mock_create_engine), \
-             patch('netra_backend.app.agents.supervisor_ssot.UserWebSocketEmitter', return_value=mock_websocket_emitter):
+             patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', return_value=mock_websocket_emitter):
             
             # Execute SSOT SupervisorAgent orchestration
             result = await self.supervisor.execute(self.test_user_context, stream_updates=True)
@@ -307,7 +307,7 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
             return mock_engine
         
         with patch.object(self.supervisor, '_create_user_execution_engine', mock_create_engine), \
-             patch('netra_backend.app.agents.supervisor_ssot.UserWebSocketEmitter', return_value=Mock()):
+             patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', return_value=Mock()):
             
             # Execute SupervisorAgent with WebSocket event tracking
             result = await self.supervisor.execute(self.test_user_context, stream_updates=True)
@@ -404,7 +404,7 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
         mock_websocket_emitter = Mock()
         mock_engine = MockUserExecutionEngine(self.test_user_context)
         
-        with patch('netra_backend.app.agents.supervisor_ssot.UserWebSocketEmitter', return_value=mock_websocket_emitter), \
+        with patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', return_value=mock_websocket_emitter), \
              patch('netra_backend.app.agents.supervisor_ssot.UserExecutionEngine', return_value=mock_engine):
             
             # Test SSOT factory engine creation
@@ -599,7 +599,7 @@ class TestSupervisorAgentSSOTCore(SSotAsyncTestCase):
                 return mock_engine
             
             with patch.object(self.supervisor, '_create_user_execution_engine', mock_create_engine), \
-                 patch('netra_backend.app.agents.supervisor_ssot.UserWebSocketEmitter', return_value=Mock()):
+                 patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', return_value=Mock()):
                 
                 result = await self.supervisor.execute(context)
                 execution_results.append({
@@ -753,7 +753,7 @@ class TestSupervisorAgentSSOTErrorScenarios(SSotAsyncTestCase):
             return mock_engine
         
         with patch.object(supervisor_with_failing_ws, '_create_user_execution_engine', mock_create_engine), \
-             patch('netra_backend.app.agents.supervisor_ssot.UserWebSocketEmitter', return_value=Mock()):
+             patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', return_value=Mock()):
             
             # Should complete successfully with graceful WebSocket degradation
             result = await supervisor_with_failing_ws.execute(context)
@@ -872,7 +872,7 @@ class TestSupervisorAgentSSOTPerformance(SSotAsyncTestCase):
             return MockUserExecutionEngine(ctx)
         
         with patch.object(self.supervisor, '_create_user_execution_engine', mock_create_engine), \
-             patch('netra_backend.app.agents.supervisor_ssot.UserWebSocketEmitter', return_value=Mock()):
+             patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', return_value=Mock()):
             
             # Measure concurrent execution performance
             start_time = time.time()
@@ -933,7 +933,7 @@ class TestSupervisorAgentSSOTPerformance(SSotAsyncTestCase):
             return engine
         
         with patch.object(self.supervisor, '_create_user_execution_engine', memory_tracking_engine), \
-             patch('netra_backend.app.agents.supervisor_ssot.UserWebSocketEmitter', return_value=Mock()):
+             patch('netra_backend.app.agents.supervisor.agent_instance_factory.UserWebSocketEmitter', return_value=Mock()):
             
             # Execute all contexts concurrently
             results = await asyncio.gather(*[
