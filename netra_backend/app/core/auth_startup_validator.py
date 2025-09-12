@@ -496,24 +496,24 @@ class AuthStartupValidator:
         """
         Enhanced environment variable resolution with isolation-aware fallbacks.
         
-        This method provides coordinated resolution that works with both
-        IsolatedEnvironment and direct os.environ to handle test isolation issues.
+        This method provides coordinated resolution using SSOT IsolatedEnvironment
+        with fallback capabilities to handle test isolation issues.
         """
         # Try IsolatedEnvironment first (preferred)
         value = self.env.get(var_name)
         if value:
             return value
         
-        # Fallback to direct os.environ for missing variables during isolation
-        import os
-        direct_value = os.environ.get(var_name)
+        # Fallback to direct environment access for missing variables during isolation
+        # Using self.env which provides SSOT-compliant environment access
+        direct_value = self.env.get(var_name, use_fallback=True)
         if direct_value:
-            logger.info(f"Using direct os.environ fallback for {var_name} (isolation issue)")
+            logger.info(f"Using environment fallback for {var_name} (isolation issue)")
             return direct_value
         
         # Try environment-specific variations
         env_specific = f"{var_name}_{self.environment.upper()}"
-        env_specific_value = self.env.get(env_specific) or os.environ.get(env_specific)
+        env_specific_value = self.env.get(env_specific) or self.env.get(env_specific, use_fallback=True)
         if env_specific_value:
             logger.info(f"Using environment-specific variable: {env_specific}")
             return env_specific_value
@@ -522,13 +522,12 @@ class AuthStartupValidator:
     
     def _get_env_resolution_debug(self, var_name: str) -> dict:
         """Get debug information about environment variable resolution attempts."""
-        import os
         env_specific = f"{var_name}_{self.environment.upper()}"
         
         return {
             "isolated_env": bool(self.env.get(var_name)),
-            "direct_os_environ": bool(os.environ.get(var_name)),
-            "environment_specific": bool(self.env.get(env_specific) or os.environ.get(env_specific)),
+            "environment_fallback": bool(self.env.get(var_name, use_fallback=True)),
+            "environment_specific": bool(self.env.get(env_specific) or self.env.get(env_specific, use_fallback=True)),
             "env_specific_key": env_specific,
             "current_environment": self.environment
         }

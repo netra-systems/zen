@@ -717,8 +717,9 @@ class RealWebSocketTestBase:
                 env = get_env()
                 staging_mode = env.get("TEST_MODE") == "staging_fallback"
                 use_staging = env.get("USE_STAGING_SERVICES", "false").lower() == "true"
+                use_staging_fallback = env.get("USE_STAGING_FALLBACK", "false").lower() == "true"
                 
-                if staging_mode or use_staging:
+                if staging_mode or use_staging or use_staging_fallback:
                     logger.warning("Docker services failed - using staging environment fallback")
                     # Update configuration for staging
                     staging_url = env.get("STAGING_WEBSOCKET_URL", "wss://netra-staging.onrender.com/ws")
