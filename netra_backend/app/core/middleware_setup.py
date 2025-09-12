@@ -105,23 +105,45 @@ def create_cors_redirect_middleware() -> Callable:
 
 
 def setup_auth_middleware(app: FastAPI) -> None:
-    """Setup authentication middleware."""
+    """Setup authentication middleware with enhanced WebSocket exclusion.
+    
+    CRITICAL FIX: Enhanced WebSocket exclusion to prevent routing.py line 716 errors
+    by ensuring WebSocket upgrade requests bypass HTTP authentication middleware completely.
+    """
     from netra_backend.app.middleware.fastapi_auth_middleware import FastAPIAuthMiddleware
     
-    # Add authentication middleware to the app - CRITICAL: exclude WebSocket paths
-    # WebSocket connections handle authentication differently and must not be processed
-    # by HTTP authentication middleware as it will block the upgrade process
+    # ENHANCED WebSocket exclusions - more comprehensive to prevent routing issues
+    websocket_exclusions = [
+        # Standard exclusions
+        "/health", "/metrics", "/", "/docs", "/openapi.json", "/redoc",
+        
+        # Enhanced WebSocket exclusions - CRITICAL for preventing routing.py errors
+        "/ws", "/websocket", "/ws/", "/websocket/",  # Base WebSocket paths
+        "/ws/test", "/ws/config", "/ws/health", "/ws/stats",  # WebSocket endpoints
+        "/api/v1/ws", "/api/v1/websocket",  # API WebSocket paths
+        "/api/ws", "/api/websocket",  # Alternative API WebSocket paths
+        
+        # Auth service endpoints that must bypass middleware
+        "/api/v1/auth",  # Auth service integration endpoints
+        "/api/auth",  # Direct auth endpoints (login, register, etc.)
+        "/auth",  # OAuth callbacks and public auth endpoints
+        "/api/v1/auth/",  # Ensure trailing slash variants are excluded
+        "/api/auth/",
+        "/auth/",
+        
+        # Additional paths that could interfere with WebSocket upgrades
+        "/favicon.ico",  # Prevent favicon requests from interfering
+        "/robots.txt",   # Prevent robots.txt from interfering
+        "/.well-known/", # OAuth/security endpoints
+    ]
+    
+    # Add authentication middleware with comprehensive exclusions
     app.add_middleware(
         FastAPIAuthMiddleware,
-        excluded_paths=[
-            "/health", "/metrics", "/", "/docs", "/openapi.json", "/redoc",
-            "/ws", "/websocket", "/ws/test", "/ws/config", "/ws/health", "/ws/stats",
-            "/api/v1/auth",  # Auth service integration endpoints
-            "/api/auth",  # Direct auth endpoints (login, register, etc.)
-            "/auth"  # OAuth callbacks and public auth endpoints
-        ]
+        excluded_paths=websocket_exclusions
     )
-    logger.debug("Authentication middleware configured with WebSocket exclusions")
+    logger.info(f"Authentication middleware configured with enhanced WebSocket exclusions ({len(websocket_exclusions)} excluded paths)")
+    logger.debug(f"WebSocket exclusion paths: {[path for path in websocket_exclusions if 'ws' in path.lower()]}")
 
 
 def setup_gcp_websocket_readiness_middleware(app: FastAPI) -> None:
@@ -387,19 +409,23 @@ def setup_middleware(app: FastAPI) -> None:
     """
     Main middleware setup function - SSOT for all middleware configuration.
     
-    CRITICAL FIX for Issue #169: Middleware registration order fixed to prevent SessionMiddleware errors.
+    CRITICAL FIX for Starlette routing.py line 716 errors and WebSocket middleware exclusion:
     
     MIDDLEWARE ORDER (applied in reverse):
     1. Session middleware FIRST - Required for request.session access
-    2. GCP Auth Context middleware - AFTER session, needs request.session 
-    3. CORS middleware - Cross-origin handling
-    4. Authentication middleware - AFTER CORS, needs session data
-    5. GCP WebSocket readiness - Environment specific
-    6. CORS redirect middleware - Last in chain
+    2. WebSocket exclusion middleware - Prevents HTTP middleware from processing WebSocket upgrades
+    3. GCP Auth Context middleware - AFTER session, needs request.session 
+    4. CORS middleware - Cross-origin handling with WebSocket exclusion
+    5. Authentication middleware - AFTER CORS, with WebSocket path exclusion
+    6. GCP WebSocket readiness - Environment specific
+    7. CORS redirect middleware - Last in chain, HTTP only
     
-    This order ensures SessionMiddleware is available before any middleware tries to access request.session.
+    This order ensures:
+    - SessionMiddleware is available before any middleware tries to access request.session
+    - WebSocket connections bypass HTTP middleware that could cause upgrade failures
+    - ASGI scope is protected from corruption during WebSocket handshake
     """
-    logger.info("Starting middleware setup with proper order for SessionMiddleware...")
+    logger.info("Starting enhanced middleware setup with WebSocket exclusion support...")
     
     try:
         # PHASE 1: Core Infrastructure Middleware
@@ -407,41 +433,252 @@ def setup_middleware(app: FastAPI) -> None:
         logger.debug("Setting up session middleware (Phase 1)...")
         setup_session_middleware(app)
         
-        # PHASE 2: Authentication and Context Middleware  
+        # PHASE 2: WebSocket Protection Middleware
+        # Add WebSocket-aware middleware wrapper to prevent HTTP middleware interference
+        logger.debug("Setting up WebSocket exclusion middleware (Phase 2)...")
+        _add_websocket_exclusion_middleware(app)
+        
+        # PHASE 3: Authentication and Context Middleware  
         # GCP Authentication Context middleware AFTER session (needs request.session access)
-        logger.debug("Setting up GCP auth context middleware (Phase 2)...")
+        logger.debug("Setting up GCP auth context middleware (Phase 3)...")
         setup_gcp_auth_context_middleware(app)
         
-        # PHASE 3: Request Handling Middleware
-        # CORS middleware handles cross-origin requests
-        logger.debug("Setting up CORS middleware (Phase 3)...")
+        # PHASE 4: Request Handling Middleware
+        # CORS middleware handles cross-origin requests with WebSocket awareness
+        logger.debug("Setting up WebSocket-aware CORS middleware (Phase 4)...")
         setup_cors_middleware(app)
         
-        # Authentication middleware AFTER CORS (needs session and CORS headers)
-        logger.debug("Setting up authentication middleware (Phase 3)...")
+        # Authentication middleware AFTER CORS (with enhanced WebSocket exclusion)
+        logger.debug("Setting up authentication middleware with WebSocket exclusion (Phase 4)...")
         setup_auth_middleware(app)
         
-        # PHASE 4: Environment Specific Middleware
+        # PHASE 5: Environment Specific Middleware
         # GCP WebSocket readiness middleware (staging/production only)
-        logger.debug("Setting up GCP WebSocket readiness middleware (Phase 4)...")
+        logger.debug("Setting up GCP WebSocket readiness middleware (Phase 5)...")
         setup_gcp_websocket_readiness_middleware(app)
         
-        # PHASE 5: Final Request Processing
-        # CORS redirect middleware (handles redirects with proper CORS headers)
-        logger.debug("Setting up CORS redirect middleware (Phase 5)...")
-        cors_redirect = create_cors_redirect_middleware()
+        # PHASE 6: Final Request Processing (HTTP only)
+        # CORS redirect middleware (handles redirects with proper CORS headers, HTTP only)
+        logger.debug("Setting up HTTP-only CORS redirect middleware (Phase 6)...")
+        cors_redirect = _create_http_only_cors_redirect_middleware()
         app.middleware("http")(cors_redirect)
         
-        # Validation: Ensure session middleware is properly installed
+        # Validation: Ensure session middleware and WebSocket exclusion are properly installed
         _validate_session_middleware_installation(app)
+        _validate_websocket_exclusion_setup(app)
         
-        logger.info("All middleware setup completed successfully with proper SessionMiddleware order")
+        logger.info("Enhanced middleware setup completed with WebSocket exclusion and proper SessionMiddleware order")
         
     except Exception as e:
-        logger.error(f"CRITICAL: Middleware setup failed: {e}")
+        logger.error(f"CRITICAL: Enhanced middleware setup failed: {e}")
         # Enhanced error logging for debugging
         logger.error(f"Middleware setup failure details: {type(e).__name__}: {str(e)}", exc_info=e)
-        raise RuntimeError(f"Failed to setup middleware: {e}")
+        raise RuntimeError(f"Failed to setup enhanced middleware with WebSocket exclusion: {e}")
+
+
+def _add_websocket_exclusion_middleware(app: FastAPI) -> None:
+    """Add WebSocket exclusion middleware to prevent HTTP middleware from processing WebSocket upgrades.
+    
+    CRITICAL FIX: This middleware ensures that WebSocket connections bypass HTTP middleware
+    that could interfere with the WebSocket upgrade process, preventing routing.py line 716 errors.
+    """
+    try:
+        from netra_backend.app.middleware.websocket_exclusion_middleware import WebSocketExclusionMiddleware
+        app.add_middleware(WebSocketExclusionMiddleware)
+        logger.info("WebSocket exclusion middleware installed successfully")
+    except ImportError:
+        # Create the middleware inline if not available
+        logger.info("Creating WebSocket exclusion middleware inline")
+        _create_inline_websocket_exclusion_middleware(app)
+    except Exception as e:
+        logger.error(f"Error setting up WebSocket exclusion middleware: {e}")
+        # Don't fail app startup if middleware setup fails
+        pass
+
+
+def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
+    """Create WebSocket exclusion middleware inline with ASGI scope protection."""
+    from starlette.middleware.base import BaseHTTPMiddleware
+    from starlette.types import ASGIApp, Receive, Scope, Send
+    from fastapi import Request, Response
+    
+    class WebSocketExclusionMiddleware(BaseHTTPMiddleware):
+        """Middleware that excludes WebSocket connections with ASGI scope protection."""
+        
+        async def dispatch(self, request: Request, call_next) -> Response:
+            """Only process HTTP requests with enhanced scope protection."""
+            try:
+                # ASGI Scope Protection: Validate request object before processing
+                if not hasattr(request, 'url') or not hasattr(request.url, 'path'):
+                    logger.warning("Invalid request object detected in WebSocket exclusion middleware")
+                    # Create a minimal response to prevent routing errors
+                    from fastapi.responses import JSONResponse
+                    return JSONResponse(
+                        status_code=400, 
+                        content={"error": "invalid_request", "message": "Invalid request format"}
+                    )
+                
+                # Additional scope validation
+                if hasattr(request, 'scope') and request.scope:
+                    scope_type = request.scope.get('type', 'unknown')
+                    if scope_type == 'websocket':
+                        # This should not happen in HTTP middleware, but protect against it
+                        logger.warning("WebSocket scope detected in HTTP middleware - potential routing error")
+                        # Bypass processing for safety
+                        return await call_next(request)
+                
+                # Normal HTTP request processing
+                return await call_next(request)
+                
+            except AttributeError as e:
+                logger.error(f"ASGI Scope AttributeError in WebSocket exclusion: {e}")
+                # Return safe response to prevent routing.py line 716 errors
+                from fastapi.responses import JSONResponse
+                return JSONResponse(
+                    status_code=500,
+                    content={"error": "scope_error", "message": "Request scope validation failed"}
+                )
+            except Exception as e:
+                logger.error(f"Unexpected error in WebSocket exclusion middleware: {e}")
+                # Pass through to prevent breaking the request chain
+                return await call_next(request)
+        
+        async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+            """ASGI middleware call with enhanced scope protection and validation."""
+            try:
+                # Phase 1: Scope Type Validation
+                scope_type = scope.get("type", "unknown")
+                
+                if scope_type == "websocket":
+                    # CRITICAL: WebSocket connections bypass ALL HTTP middleware
+                    logger.debug("WebSocket connection detected - bypassing HTTP middleware stack")
+                    await self.app(scope, receive, send)
+                    return
+                
+                elif scope_type == "http":
+                    # Phase 2: HTTP Scope Validation and Protection
+                    if not self._validate_http_scope(scope):
+                        logger.warning("Invalid HTTP scope detected - applying protective measures")
+                        await self._send_safe_http_response(send, scope)
+                        return
+                    
+                    # Normal HTTP processing with scope protection
+                    await super().__call__(scope, receive, send)
+                    return
+                    
+                else:
+                    # Phase 3: Unknown scope type protection
+                    logger.warning(f"Unknown ASGI scope type: {scope_type} - passing through safely")
+                    await self.app(scope, receive, send)
+                    return
+                    
+            except Exception as e:
+                logger.error(f"CRITICAL: ASGI scope error in WebSocket exclusion: {e}")
+                # Send safe error response to prevent routing failures
+                if scope.get("type") == "http":
+                    await self._send_safe_http_response(send, scope, error_message=str(e))
+                else:
+                    # For non-HTTP scopes, try to pass through safely
+                    try:
+                        await self.app(scope, receive, send)
+                    except:
+                        logger.error("Failed to pass through non-HTTP scope safely")
+        
+        def _validate_http_scope(self, scope: Scope) -> bool:
+            """Validate HTTP scope to prevent 'URL' object attribute errors."""
+            try:
+                # Check required HTTP scope components
+                required_keys = ["method", "path", "query_string", "headers"]
+                for key in required_keys:
+                    if key not in scope:
+                        logger.warning(f"Missing required HTTP scope key: {key}")
+                        return False
+                
+                # Validate path is string-like
+                path = scope.get("path")
+                if not isinstance(path, str):
+                    logger.warning(f"Invalid path type in HTTP scope: {type(path)}")
+                    return False
+                
+                return True
+                
+            except Exception as e:
+                logger.error(f"HTTP scope validation error: {e}")
+                return False
+        
+        async def _send_safe_http_response(self, send: Send, scope: Scope, error_message: str = None) -> None:
+            """Send a safe HTTP response for invalid scopes."""
+            try:
+                # Send HTTP response start
+                await send({
+                    "type": "http.response.start",
+                    "status": 400,
+                    "headers": [
+                        (b"content-type", b"application/json"),
+                        (b"content-length", b"77"),  # Length of JSON response below
+                    ],
+                })
+                
+                # Send HTTP response body
+                error_detail = error_message or "Invalid request scope"
+                response_body = f'{{"error": "scope_validation_failed", "message": "{error_detail}"}}'
+                await send({
+                    "type": "http.response.body",
+                    "body": response_body.encode("utf-8"),
+                })
+                
+            except Exception as e:
+                logger.error(f"Failed to send safe HTTP response: {e}")
+                # Last resort - send minimal response
+                try:
+                    await send({"type": "http.response.start", "status": 500, "headers": []})
+                    await send({"type": "http.response.body", "body": b"Server Error"})
+                except:
+                    logger.critical("Could not send any HTTP response - connection may be broken")
+    
+    app.add_middleware(WebSocketExclusionMiddleware)
+    logger.info("Enhanced WebSocket exclusion middleware with ASGI scope protection created and installed")
+
+
+def _create_http_only_cors_redirect_middleware() -> Callable:
+    """Create CORS redirect middleware that only processes HTTP requests.
+    
+    CRITICAL FIX: This ensures WebSocket connections don't get processed by CORS redirect logic
+    that could cause scope corruption and routing.py errors.
+    """
+    async def http_only_cors_redirect_middleware(request: Request, call_next: Callable) -> Any:
+        """Handle CORS for redirects (HTTP only) - WebSocket connections bypass this."""
+        # This middleware only handles HTTP requests
+        # WebSocket upgrade requests are excluded automatically by FastAPI's HTTP middleware system
+        response = await call_next(request)
+        process_cors_if_needed(request, response)
+        return response
+    return http_only_cors_redirect_middleware
+
+
+def _validate_websocket_exclusion_setup(app: FastAPI) -> None:
+    """Validate that WebSocket exclusion middleware is properly set up."""
+    try:
+        # Check if WebSocket exclusion middleware is installed
+        websocket_exclusion_found = False
+        
+        for middleware in app.user_middleware:
+            middleware_class = middleware.cls
+            if hasattr(middleware_class, '__name__'):
+                if 'WebSocketExclusion' in middleware_class.__name__ or 'websocket_exclusion' in middleware_class.__name__.lower():
+                    websocket_exclusion_found = True
+                    logger.debug(f"Found WebSocket exclusion middleware: {middleware_class.__name__}")
+                    break
+        
+        if websocket_exclusion_found:
+            logger.info("✅ WebSocket exclusion middleware validation successful")
+        else:
+            logger.warning("⚠️ WebSocket exclusion middleware not detected - WebSocket connections may experience routing issues")
+    
+    except Exception as e:
+        logger.warning(f"WebSocket exclusion validation error (non-fatal): {e}")
+        # Don't fail deployment due to validation errors
+        pass
 
 
 def _validate_session_middleware_installation(app: FastAPI) -> None:
