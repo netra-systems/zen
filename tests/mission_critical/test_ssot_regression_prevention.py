@@ -41,7 +41,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Process, Queue
 
 # Import real framework components - NO MOCKS
-from netra_backend.app.database.manager import DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
@@ -1416,7 +1416,7 @@ class TestSSOTContinuousCompliance:
             
         logger.info(f"Completed continuous compliance test cleanup: {getattr(self, '_testMethodName', 'unknown')} (ID: {self.test_id})")
     
-    async def test_continuous_system_health_real_services(self):
+    def test_continuous_system_health_real_services(self):
         """
         HEALTH CRITICAL: Continuously monitor system health with REAL services.
         This test runs regularly to ensure all real service components are healthy.
@@ -1430,8 +1430,8 @@ class TestSSOTContinuousCompliance:
             with self.db_manager.get_session() as session:
                 # Test basic database operations
                 test_key = f"health_check_{self.test_id}"
-                await self.redis_client.set(test_key, "healthy")
-                result = await self.redis_client.get(test_key)
+                self.redis_client.set(test_key, "healthy")
+                result = self.redis_client.get(test_key)
                 
                 if result != "healthy":
                     health_issues.append({
@@ -1441,7 +1441,7 @@ class TestSSOTContinuousCompliance:
                         'actual': result
                     })
                 
-                await redis_client.delete(test_key)
+                self.redis_client.delete(test_key)
             
             db_response_time = time.time() - db_start_time
             service_health['database'] = {
@@ -1472,10 +1472,10 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis operations
             test_hash = f"redis_health_{self.test_id}"
-            await redis_client.hset(test_hash, "field1", "value1")
-            await redis_client.hset(test_hash, "field2", "value2")
+            self.redis_client.hset(test_hash, "field1", "value1")
+            self.redis_client.hset(test_hash, "field2", "value2")
             
-            all_fields = await redis_client.hgetall(test_hash)
+            all_fields = self.redis_client.hgetall(test_hash)
             if len(all_fields) != 2 or all_fields.get("field1") != "value1":
                 health_issues.append({
                     'service': 'redis',
@@ -1485,7 +1485,7 @@ class TestSSOTContinuousCompliance:
                     'data': all_fields
                 })
             
-            await redis_client.delete(test_hash)
+            self.redis_client.delete(test_hash)
             
             redis_response_time = time.time() - redis_start_time
             service_health['redis'] = {
@@ -1563,7 +1563,7 @@ class TestSSOTContinuousCompliance:
         assert len(critical_issues) == 0, f"Critical system health issues: {critical_issues}"
         assert len(warning_issues) <= 2, f"Too many warning health issues: {warning_issues}"
     
-    async def test_continuous_regression_monitoring_real_performance(self):
+    def test_continuous_regression_monitoring_real_performance(self):
         """
         REGRESSION CRITICAL: Monitor real system performance to detect regressions.
         This test tracks actual system metrics over time to detect gradual regression.
@@ -1595,15 +1595,15 @@ class TestSSOTContinuousCompliance:
             # Execute database operations
             for i in range(50):
                 key = f"regression_test_{self.test_id}_{i}"
-                await self.redis_client.set(key, f"test_data_{i}")
-                result = await self.redis_client.get(key)
+                self.redis_client.set(key, f"test_data_{i}")
+                result = self.redis_client.get(key)
                 if not result:
                     regression_issues.append({
                         'metric': 'database_operations',
                         'operation': i,
                         'issue': 'data_persistence_failure'
                     })
-                await redis_client.delete(key)
+                self.redis_client.delete(key)
             
             db_time = time.time() - db_start
             regression_metrics['service_metrics']['database_50_ops'] = db_time
@@ -1672,16 +1672,16 @@ class TestSSOTContinuousCompliance:
             isolation_start = time.time()
             
             # Test concurrent isolation operations
-            async def quick_isolation_test(test_id):
+            def quick_isolation_test(test_id):
                 context = TestContext(user_id=f"regression_user_{test_id}")
-                await self.redis_client.set(
+                self.redis_client.set(
                     f"isolation_test:{test_id}",
                     f"data_{test_id}"
                 )
-                return await self.redis_client.get(f"isolation_test:{test_id}")
+                return self.redis_client.get(f"isolation_test:{test_id}")
             
             def run_quick_isolation_test(test_id):
-                return asyncio.run(quick_isolation_test(test_id))
+                return quick_isolation_test(test_id)
                 
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [
@@ -1762,7 +1762,7 @@ class TestSSOTContinuousCompliance:
         assert len(performance_regressions) <= 2, f"Too many performance regressions: {performance_regressions}"
         assert len(regression_issues) <= 5, f"Too many total regression issues: {len(regression_issues)} detected"
     
-    async def _check_real_service_health(self):
+    def _check_real_service_health(self):
         """Check real service health metrics."""
         try:
             health_metrics = {
@@ -1773,7 +1773,7 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis connection
             start_time = time.time()
-            await self.redis_client.ping()
+            self.redis_client.ping()
             health_metrics['service_response_times']['redis'] = time.time() - start_time
             
             # Test Database connection
@@ -1787,7 +1787,7 @@ class TestSSOTContinuousCompliance:
         except Exception as e:
             return {'error': str(e), 'healthy': False}
     
-    async def _measure_real_service_load_time(self):
+    def _measure_real_service_load_time(self):
         """Measure real service initialization load time."""
         start_time = time.time()
         
@@ -1795,10 +1795,16 @@ class TestSSOTContinuousCompliance:
             # Initialize real service components to measure load time
             test_env = IsolatedEnvironment()
             test_db = DatabaseManager()
-            test_redis = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381)
+            from shared.isolated_environment import get_env
+            import redis
+            test_redis = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
             
             # Test basic operations
-            await test_redis.ping()
+            test_redis.ping()
             
             return time.time() - start_time
             
@@ -1837,7 +1843,7 @@ class TestSSOTContinuousCompliance:
                 'session_id': f"SESSION_{context_id}_{uuid.uuid4().hex[:12]}"
             }
         
-        async def isolated_context_operations(context_id):
+        def isolated_context_operations(context_id):
             """Perform operations within an isolated context and check for leakage."""
             violations = []
             
@@ -1850,14 +1856,23 @@ class TestSSOTContinuousCompliance:
                 for op_num in range(operations_per_context):
                     operation_key = f"context:{context_id}:operation:{op_num}"
                     
+                    # Get Redis client
+                    from shared.isolated_environment import get_env
+                    import redis
+                    redis_client = redis.Redis(
+                        host=get_env('REDIS_HOST', 'localhost'),
+                        port=int(get_env('REDIS_PORT', '6379')),
+                        decode_responses=True
+                    )
+                    
                     # Store context-specific secret data
-                    await redis_client.hset(
+                    redis_client.hset(
                         operation_key,
                         "secret_data",
                         secrets['secret_key']
                     )
                     
-                    await redis_client.hset(
+                    redis_client.hset(
                         operation_key,
                         "private_data",
                         secrets['private_data']
@@ -1869,9 +1884,9 @@ class TestSSOTContinuousCompliance:
                             other_secrets = context_secrets[other_context]
                             
                             # Check if current context's data leaked to other context
-                            other_keys = await redis_client.keys(f"context:{other_context}:*")
+                            other_keys = redis_client.keys(f"context:{other_context}:*")
                             for other_key in other_keys:
-                                other_data = await redis_client.hgetall(other_key)
+                                other_data = redis_client.hgetall(other_key)
                                 
                                 # Check for secret leakage
                                 for field, value in other_data.items():
@@ -1889,7 +1904,7 @@ class TestSSOTContinuousCompliance:
                                         })
                             
                             # Check reverse leakage - other context data in current context
-                            current_data = await redis_client.hgetall(operation_key)
+                            current_data = redis_client.hgetall(operation_key)
                             for field, value in current_data.items():
                                 if (other_secrets['secret_key'] in str(value) or 
                                     other_secrets['private_data'] in str(value) or
@@ -1917,7 +1932,13 @@ class TestSSOTContinuousCompliance:
         
         # Wrapper function to run async function in ThreadPoolExecutor
         def isolated_context_operations_wrapper(context_id):
-            return asyncio.run(isolated_context_operations(context_id))
+            # Run the async function in a new event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(isolated_context_operations(context_id))
+            finally:
+                loop.close()
         
         # Execute all contexts concurrently to maximize leakage detection
         with ThreadPoolExecutor(max_workers=num_isolated_contexts) as executor:
@@ -1939,13 +1960,18 @@ class TestSSOTContinuousCompliance:
                     })
         
         # Clean up test data
-        async def cleanup_context_data(context_id):
-            keys_to_delete = await redis_client.keys(f"context:{context_id}:*")
-            if keys_to_delete:
-                await redis_client.delete(*keys_to_delete)
+        from shared.isolated_environment import get_env
+        import redis
+        cleanup_redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
         
         for context_id in range(num_isolated_contexts):
-            asyncio.get_event_loop().run_until_complete(cleanup_context_data(context_id))
+            keys_to_delete = cleanup_redis_client.keys(f"context:{context_id}:*")
+            if keys_to_delete:
+                cleanup_redis_client.delete(*keys_to_delete)
         
         # Verify NO data leakage detected
         if leakage_violations:
@@ -2003,15 +2029,24 @@ class TestSSOTContinuousCompliance:
                                 }
                             }
                             
+                            # Get Redis client for stress test
+                            from shared.isolated_environment import get_env
+                            import redis
+                            redis_client = redis.Redis(
+                                host=get_env('REDIS_HOST', 'localhost'),
+                                port=int(get_env('REDIS_PORT', '6379')),
+                                decode_responses=True
+                            )
+                            
                             # Store complex data
-                            await redis_client.hset(
+                            redis_client.hset(
                                 key,
                                 "complex_data",
                                 str(complex_data)
                             )
                             
                             # Immediate verification
-                            retrieved = await redis_client.hget(key, "complex_data")
+                            retrieved = redis_client.hget(key, "complex_data")
                             if not retrieved or user_data_signature not in retrieved:
                                 failures.append({
                                     'user_id': user_id,
@@ -2026,13 +2061,13 @@ class TestSSOTContinuousCompliance:
                             random_other_users = [u for u in range(num_concurrent_users) if u != user_id]
                             if random_other_users:
                                 random_user = random_other_users[operation_count % len(random_other_users)]
-                                random_keys = await redis_client.keys(f"stress:{random_user}:*")
+                                random_keys = redis_client.keys(f"stress:{random_user}:*")
                                 
                                 if random_keys:
                                     # Sample a few random keys to check for contamination
                                     sample_keys = random_keys[:min(3, len(random_keys))]
                                     for sample_key in sample_keys:
-                                        sample_data = await redis_client.hget(sample_key, "complex_data")
+                                        sample_data = redis_client.hget(sample_key, "complex_data")
                                         if sample_data and user_data_signature in sample_data:
                                             failures.append({
                                                 'user_id': user_id,
@@ -2126,13 +2161,20 @@ class TestSSOTContinuousCompliance:
         
         # Clean up stress test data
         try:
-            keys_to_delete = await redis_client.keys("stress:*")
+            from shared.isolated_environment import get_env
+            import redis
+            cleanup_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            keys_to_delete = cleanup_redis_client.keys("stress:*")
             if keys_to_delete:
                 # Delete in batches to avoid overwhelming Redis
                 batch_size = 100
                 for i in range(0, len(keys_to_delete), batch_size):
                     batch = keys_to_delete[i:i + batch_size]
-                    await redis_client.delete(*batch)
+                    cleanup_redis_client.delete(*batch)
         except Exception as e:
             logger.warning(f"Stress test cleanup warning: {e}")
         
@@ -2152,16 +2194,17 @@ class TestSSOTContinuousCompliance:
         assert len(isolation_stress_failures) <= 20, f"Too many stress test issues: {len(isolation_stress_failures)} detected"
 
 
-async def run_async_tests():
-    """Run async WebSocket isolation tests."""
+def run_websocket_tests():
+    """Run WebSocket isolation tests."""
     test_instance = TestSSOTRegressionPrevention()
     test_instance.setUp()
     
     try:
-        await test_instance.test_websocket_channel_isolation_concurrent_sessions()
-        logger.info("Async WebSocket isolation tests completed successfully")
+        # Run the WebSocket test synchronously by using asyncio.run
+        asyncio.run(test_instance.test_websocket_channel_isolation_concurrent_sessions())
+        logger.info("WebSocket isolation tests completed successfully")
     except Exception as e:
-        logger.error(f"Async WebSocket isolation tests failed: {e}")
+        logger.error(f"WebSocket isolation tests failed: {e}")
         raise
     finally:
         test_instance.tearDown()
@@ -2174,11 +2217,11 @@ if __name__ == '__main__':
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    # Run async tests first
+    # Run WebSocket tests first
     try:
-        asyncio.run(run_async_tests())
+        run_websocket_tests()
     except Exception as e:
-        logger.error(f"Async test execution failed: {e}")
+        logger.error(f"WebSocket test execution failed: {e}")
     
     # Run the synchronous tests
     pytest.main([__file__, '-v', '--tb=short', '--capture=no', '--maxfail=3'])
