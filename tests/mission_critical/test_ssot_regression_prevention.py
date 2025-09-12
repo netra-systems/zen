@@ -434,7 +434,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(isolation_failures) == 0, f"Agent registry isolation failed: {len(isolation_failures)} failures detected"
     
-    def test_race_condition_prevention_concurrent_state_access(self):
+    async def test_race_condition_prevention_concurrent_state_access(self):
         """
         ISOLATION CRITICAL: Test race condition prevention in concurrent state access.
         Verifies state management prevents race conditions and maintains data integrity.
@@ -444,7 +444,7 @@ class TestSSOTRegressionPrevention:
         shared_state_key = f"shared_state_{self.test_id}"
         race_condition_failures = []
         
-        def concurrent_state_operations(worker_id):
+        async def concurrent_state_operations(worker_id):
             """Perform concurrent state operations to detect race conditions."""
             failures = []
             
@@ -516,10 +516,14 @@ class TestSSOTRegressionPrevention:
         # Initialize shared state
         await redis_client.set(shared_state_key, "0")
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_state_operations(worker_id):
+            return asyncio.run(concurrent_state_operations(worker_id))
+            
         # Execute concurrent operations
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
             future_to_worker = {
-                executor.submit(concurrent_state_operations, worker_id): worker_id 
+                executor.submit(run_state_operations, worker_id): worker_id 
                 for worker_id in range(num_workers)
             }
             
@@ -554,7 +558,7 @@ class TestSSOTRegressionPrevention:
         # But fail on critical consistency failures
         assert len(critical_failures) == 0, f"Critical race condition failures detected: {len(critical_failures)} failures"
     
-    def test_security_boundary_validation_user_isolation(self):
+    async def test_security_boundary_validation_user_isolation(self):
         """
         SECURITY CRITICAL: Test security boundary validation between isolated users.
         Verifies users cannot access each other's data or execute unauthorized operations.
@@ -583,7 +587,7 @@ class TestSSOTRegressionPrevention:
                 auth_token
             )
         
-        def attempt_security_breach(attacker_user_id, target_user_id):
+        async def attempt_security_breach(attacker_user_id, target_user_id):
             """Attempt to breach security boundaries between users."""
             failures = []
             
@@ -682,6 +686,10 @@ class TestSSOTRegressionPrevention:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_security_breach(attacker_user_id, target_user_id):
+            return asyncio.run(attempt_security_breach(attacker_user_id, target_user_id))
+            
         # Test all possible user-to-user attack vectors
         with ThreadPoolExecutor(max_workers=num_users) as executor:
             attack_futures = []
@@ -689,7 +697,7 @@ class TestSSOTRegressionPrevention:
             for attacker in range(num_users):
                 for target in range(num_users):
                     if attacker != target:
-                        future = executor.submit(attempt_security_breach, attacker, target)
+                        future = executor.submit(run_security_breach, attacker, target)
                         attack_futures.append(future)
             
             for future in as_completed(attack_futures):
@@ -708,7 +716,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(security_failures) == 0, f"CRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected"
     
-    def test_database_session_isolation_transaction_boundaries(self):
+    async def test_database_session_isolation_transaction_boundaries(self):
         """
         ISOLATION CRITICAL: Test database session isolation with transaction boundaries.
         Verifies each session has proper transaction isolation with no data leakage.
@@ -717,7 +725,7 @@ class TestSSOTRegressionPrevention:
         transactions_per_session = 8
         isolation_failures = []
         
-        def session_transaction_operations(session_id):
+        async def session_transaction_operations(session_id):
             """Perform database transactions within an isolated session."""
             failures = []
             
@@ -807,10 +815,14 @@ class TestSSOTRegressionPrevention:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_session_operations(session_id):
+            return asyncio.run(session_transaction_operations(session_id))
+            
         # Execute concurrent session operations
         with ThreadPoolExecutor(max_workers=num_sessions) as executor:
             future_to_session = {
-                executor.submit(session_transaction_operations, session_id): session_id 
+                executor.submit(run_session_operations, session_id): session_id 
                 for session_id in range(num_sessions)
             }
             

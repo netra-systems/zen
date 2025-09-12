@@ -93,11 +93,18 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
             self.__class__.auth_client = E2EAuthHelper(environment="staging")
         
         if not hasattr(self.__class__, 'test_user') or self.__class__.test_user is None:
-            # Create a fallback test user
+            # Create a fallback test user with proper token
+            user_id = f"fallback_user_{int(time.time())}"
+            user_email = f"fallback_test_{int(time.time())}@netra-testing.ai"
+            # Generate proper token using the auth client
+            access_token = self.__class__.auth_client.create_test_jwt_token(
+                user_id=user_id,
+                email=user_email
+            )
             self.__class__.test_user = {
-                "user_id": f"fallback_user_{int(time.time())}",
-                "email": f"fallback_test_{int(time.time())}@netra-testing.ai",
-                "access_token": "fallback_token_will_be_replaced"
+                "user_id": user_id,
+                "email": user_email,
+                "access_token": access_token
             }
 
     """E2E tests for WebSocket authentication in staging - MISSION CRITICAL"""
