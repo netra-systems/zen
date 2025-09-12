@@ -49,6 +49,9 @@ def execution_engine_context(*args, **kwargs):
     """Deprecated compatibility stub - use UserExecutionContext directly"""
     raise NotImplementedError("Use UserExecutionContext instead")
 
+# Additional compatibility aliases for WebSocket event-related tests
+ExecutionEngineWithWebSocketEvents = ExecutionEngine  # Alias for tests
+
 # Re-export everything for backwards compatibility
 __all__ = [
     'ExecutionEngine', 
@@ -64,5 +67,6 @@ __all__ = [
     'DataExecutionExtension',
     'WebSocketExtension',
     'execute_agent',
-    'execution_engine_context'
+    'execution_engine_context',
+    'ExecutionEngineWithWebSocketEvents'
 ]
