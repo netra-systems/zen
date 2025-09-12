@@ -21,6 +21,8 @@ htmlcov/
 
 # Test output files
 junit.xml
+pytest_output.txt
+*_output.txt
 
 # Dev launcher cache
 .dev_cache/
