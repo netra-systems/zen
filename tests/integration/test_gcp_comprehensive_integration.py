@@ -51,12 +51,28 @@ from shared.isolated_environment import IsolatedEnvironment
 from shared.types.user_types import TestUserData
 
 # Real GCP client libraries (no mocking)
-import google.cloud.secretmanager
-import google.cloud.sql_v1
-import google.cloud.monitoring_v3
-import google.cloud.iam
-import google.auth
-from google.auth.credentials import Credentials
+try:
+    import google.cloud.secretmanager
+    import google.cloud.monitoring_v3
+    import google.cloud.iam
+    import google.auth
+    from google.auth.credentials import Credentials
+    # Try the correct import path for SQL Admin API
+    try:
+        from google.cloud.sql.v1 import SqlInstancesServiceClient
+    except ImportError:
+        try:
+            from google.cloud import sql_v1 as google_cloud_sql_v1
+        except ImportError:
+            # Mock for test collection if dependencies not installed
+            import logging
+            logging.warning("Google Cloud SQL dependencies not installed - tests may be skipped")
+            google_cloud_sql_v1 = None
+            SqlInstancesServiceClient = None
+except ImportError as e:
+    import logging
+    logging.warning(f"Google Cloud dependencies not installed: {e} - tests may be skipped")
+    google = None
 
 logger = logging.getLogger(__name__)
 

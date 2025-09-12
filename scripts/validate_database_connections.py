@@ -367,13 +367,7 @@ class DatabaseConnectionValidator:
             if redis_url:
                 client = redis.from_url(redis_url, decode_responses=True)
             else:
-                client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                    host=host,
-                    port=int(port),
-                    password=password if password else None,
-                    db=int(db),
-                    decode_responses=True
-                )
+                client = await get_redis_client()
             
             start_time = datetime.utcnow()
             
