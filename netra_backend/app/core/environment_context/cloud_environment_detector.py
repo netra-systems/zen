@@ -449,6 +449,8 @@ class CloudEnvironmentDetector:
         """
         Classify environment based on service name patterns.
         
+        Enhanced for Issue #523: Better staging environment detection.
+        
         Args:
             service_name: Service name from Cloud Run or other platform
             
@@ -457,28 +459,44 @@ class CloudEnvironmentDetector:
         """
         service_lower = service_name.lower()
         
-        # Explicit staging patterns
-        staging_patterns = ["staging", "stage", "-stg-", "_staging_"]
+        # ENHANCED: More comprehensive staging patterns (Issue #523 fix)
+        staging_patterns = [
+            "staging", "stage", "-stg-", "_staging_", 
+            "-staging", "-stage", "stg-", "stage-",
+            # Netra-specific patterns
+            "netra-backend-staging", "netra-auth-staging", 
+            "backend-staging", "auth-staging"
+        ]
         if any(pattern in service_lower for pattern in staging_patterns):
             return EnvironmentType.STAGING
         
         # Explicit production patterns  
-        production_patterns = ["production", "prod", "-prod-", "_prod_"]
-        if any(pattern in service_lower for pattern in production_patterns):
-            return EnvironmentType.PRODUCTION
+        production_patterns = [
+            "production", "prod", "-prod-", "_prod_", 
+            "-prod", "prod-", 
+            # Netra-specific patterns  
+            "netra-backend", "netra-auth"
+        ]
+        # Exclude staging services from production matching
+        if not any(stg_pattern in service_lower for stg_pattern in staging_patterns):
+            if any(pattern in service_lower for pattern in production_patterns):
+                return EnvironmentType.PRODUCTION
         
         # Development patterns
-        dev_patterns = ["development", "develop", "dev", "test", "-dev-", "_dev_", "_test_"]
+        dev_patterns = [
+            "development", "develop", "dev", "test", 
+            "-dev-", "_dev_", "_test_", "-dev", "dev-", "test-"
+        ]
         if any(pattern in service_lower for pattern in dev_patterns):
             return EnvironmentType.DEVELOPMENT
         
-        # Special case: netra-backend-staging
-        if "netra-backend-staging" == service_lower:
+        # Special case validation: exact matches with highest priority
+        if service_lower == "netra-backend-staging":
             return EnvironmentType.STAGING
-        
-        # Special case: netra-backend (production)
-        if "netra-backend" == service_lower:
+        elif service_lower == "netra-backend":
             return EnvironmentType.PRODUCTION
+        elif service_lower in ["netra-auth-staging", "backend-staging", "auth-staging"]:
+            return EnvironmentType.STAGING
         
         return EnvironmentType.UNKNOWN
     
