@@ -21,7 +21,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: docker/backend.staging.Dockerfile
+      dockerfile: dockerfiles/backend.staging.Dockerfile
       args:
         - ENVIRONMENT=staging
     environment:
@@ -119,7 +119,7 @@ services:
   auth:
     build:
       context: .
-      dockerfile: docker/auth.staging.Dockerfile
+      dockerfile: dockerfiles/auth.staging.Dockerfile
       args:
         - ENVIRONMENT=staging
     environment:
@@ -191,7 +191,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: docker/frontend.staging.Dockerfile
+      dockerfile: dockerfiles/frontend.staging.Dockerfile
       args:
         - NODE_ENV=production
         - NEXT_PUBLIC_ENVIRONMENT=staging
@@ -350,7 +350,7 @@ services:
   load-tester:
     build:
       context: .
-      dockerfile: docker/load-tester.Dockerfile
+      dockerfile: dockerfiles/load-tester.Dockerfile
     environment:
       TARGET_URL: http://backend:8000
       MAX_USERS: 150
