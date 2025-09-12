@@ -1,6 +1,5 @@
 """
-Import Validation Test Suite
+Import validation test package.
 
-This test suite validates import issues and fixes, specifically focusing on
-dev_launcher import issues and SSOT migration validation.
+This package contains tests to validate and reproduce SSOT import migration issues.
 """
