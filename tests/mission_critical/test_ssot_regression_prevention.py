@@ -1343,7 +1343,7 @@ class TestSSOTContinuousCompliance:
             
         logger.info(f"Completed continuous compliance test cleanup: {self._testMethodName} (ID: {self.test_id})")
     
-    def test_continuous_system_health_real_services(self):
+    async def test_continuous_system_health_real_services(self):
         """
         HEALTH CRITICAL: Continuously monitor system health with REAL services.
         This test runs regularly to ensure all real service components are healthy.
@@ -1357,8 +1357,8 @@ class TestSSOTContinuousCompliance:
             with self.db_manager.get_session() as session:
                 # Test basic database operations
                 test_key = f"health_check_{self.test_id}"
-                await redis_client.set(test_key, "healthy")
-                result = await redis_client.get(test_key)
+                await self.redis_client.set(test_key, "healthy")
+                result = await self.redis_client.get(test_key)
                 
                 if result != "healthy":
                     health_issues.append({
