@@ -6,6 +6,8 @@ argument-hint: "[focus area, defaults to latest]"
 You MUST keep going until the set of issues are closed.
 Have sub agents use built in github tools or direct `git` or `gh` if needed.
 
+By default, ignore issues with the tag "actively-being-worked-on"
+
 ISSUE_LIST: ${1 : all open issues}
  
 SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
