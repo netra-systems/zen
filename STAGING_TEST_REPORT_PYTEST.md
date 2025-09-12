@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 16:43:43
+**Generated:** 2025-09-12 16:46:23
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 5
+- **Total Tests:** 6
 - **Passed:** 0 (0.0%)
-- **Failed:** 5 (100.0%)
-- **Skipped:** 0
-- **Duration:** 0.98 seconds
+- **Failed:** 0 (0.0%)
+- **Skipped:** 6
+- **Duration:** 0.49 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,64 +19,32 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_reproduce_http_403_websocket_handshake | FAIL failed | 0.028s | test_websocket_403_reproduction_staging.py |
-| test_websocket_connection_with_valid_jwt | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
-| test_websocket_connection_with_invalid_jwt | FAIL failed | 0.001s | test_websocket_403_reproduction_staging.py |
-| test_auth_service_url_staging_configuration | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
-| test_websocket_connection_timeout_scenarios | FAIL failed | 0.001s | test_websocket_403_reproduction_staging.py |
-
-## Failed Tests Details
-
-### FAILED: test_reproduce_http_403_websocket_handshake
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.028s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'fail'...
-
-### FAILED: test_websocket_connection_with_valid_jwt
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.000s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'auth_helper'
-
-During handling of the above exception, another exception occurred:
-E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'skipTest'...
-
-### FAILED: test_websocket_connection_with_invalid_jwt
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.001s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'subTest'...
-
-### FAILED: test_auth_service_url_staging_configuration
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.000s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'staging_auth_service_url'...
-
-### FAILED: test_websocket_connection_timeout_scenarios
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.001s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'auth_helper'
-
-During handling of the above exception, another exception occurred:
-E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'skipTest'...
+| test_auth_google_login_route_returns_404 | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_multiple_oauth_routes_missing_404_pattern | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_auth_service_route_registration_incomplete | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_auth_service_route_mapping_configuration_error | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_auth_service_oauth_blueprint_not_registered | SKIP skipped | 0.000s | test_auth_routes.py |
+| test_oauth_route_handler_import_or_dependency_missing | SKIP skipped | 0.000s | test_auth_routes.py |
 
 ## Pytest Output Format
 
 ```
-test_websocket_403_reproduction_staging.py::test_reproduce_http_403_websocket_handshake FAILED
-test_websocket_403_reproduction_staging.py::test_websocket_connection_with_valid_jwt FAILED
-test_websocket_403_reproduction_staging.py::test_websocket_connection_with_invalid_jwt FAILED
-test_websocket_403_reproduction_staging.py::test_auth_service_url_staging_configuration FAILED
-test_websocket_403_reproduction_staging.py::test_websocket_connection_timeout_scenarios FAILED
+test_auth_routes.py::test_auth_google_login_route_returns_404 SKIPPED
+test_auth_routes.py::test_multiple_oauth_routes_missing_404_pattern SKIPPED
+test_auth_routes.py::test_auth_service_route_registration_incomplete SKIPPED
+test_auth_routes.py::test_auth_service_route_mapping_configuration_error SKIPPED
+test_auth_routes.py::test_auth_service_oauth_blueprint_not_registered SKIPPED
+test_auth_routes.py::test_oauth_route_handler_import_or_dependency_missing SKIPPED
 
 ==================================================
-0 passed, 5 failed in 0.98s
+0 passed, 0 failed, 6 skipped in 0.49s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 4 | 0 | 4 | 0.0% |
-| Authentication | 3 | 0 | 3 | 0.0% |
+| Authentication | 6 | 0 | 0 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
