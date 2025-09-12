@@ -24,7 +24,15 @@ import hashlib
 
 from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
 from netra_backend.app.schemas.auth_types import AuthConfig
-from netra_backend.app.core.security import SecurityLevel
+# Create SecurityLevel enum locally due to import conflicts between security.py and security/ directory
+from enum import Enum
+
+class SecurityLevel(str, Enum):
+    """Security level classifications."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 from auth_service.auth_core.security.session_policy_validator import SessionPolicyValidator as SessionPolicy
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.oauth_user import OAuthUser

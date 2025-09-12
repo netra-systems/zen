@@ -44,7 +44,7 @@ from netra_backend.app.services.agent_websocket_bridge import create_agent_webso
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-from netra_backend.app.tools.tool_dispatcher import ToolDispatcher
+from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
 from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
@@ -132,7 +132,12 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
             max_concurrent_executions=3
         )
         
-        tool_dispatcher = ToolDispatcher()
+        # Use factory method for proper user isolation
+        tool_dispatcher_factory = get_tool_dispatcher_factory()
+        tool_dispatcher = await tool_dispatcher_factory.create_for_request(
+            user_context=auth_context,
+            websocket_manager=websocket_manager
+        )
         enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track tool executions and pipeline progress

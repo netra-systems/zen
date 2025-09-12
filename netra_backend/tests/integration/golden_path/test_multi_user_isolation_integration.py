@@ -838,7 +838,7 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
         BVJ: Enterprise - Prevent tool execution cross-contamination
         Test that tool execution isolation prevents users from accessing other users' tools/results.
         """
-        from netra_backend.app.tools.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
         
         # Create users with different tool execution contexts
         users = []
