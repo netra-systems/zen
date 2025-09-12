@@ -105,6 +105,9 @@ class ExecutionEngine:
     
      ALERT:  DEPRECATED - Use UserExecutionEngine instead!
     
+    ⚠️  ISSUE #565 API COMPATIBILITY BRIDGE ⚠️
+    This class now delegates to UserExecutionEngine for seamless migration.
+    
     MIGRATION PATH:
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     
@@ -112,7 +115,7 @@ class ExecutionEngine:
     - create_request_scoped_engine() for isolated instances
     - ExecutionContextManager for automatic cleanup
     
-    Direct instantiation is no longer supported to ensure user isolation.
+    Direct instantiation now automatically uses UserExecutionEngine compatibility bridge.
     
     Features:
     - UserExecutionContext integration for complete user isolation
@@ -122,67 +125,107 @@ class ExecutionEngine:
     - Guaranteed WebSocket event delivery with proper sequencing
     """
     
-    def __init__(self, *args, **kwargs):
-        """Initialize ExecutionEngine with deprecation warning."""
-        import warnings
-        warnings.warn(
-            "supervisor.execution_engine.ExecutionEngine is DEPRECATED and will be REMOVED. "
-            "Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine instead. "
-            "SSOT Compliance: Only UserExecutionEngine should be used for new development.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        # Continue with original initialization (no parent class, so continue with existing init logic below)
-    
-    MAX_HISTORY_SIZE = 100  # Prevent memory leak
-    MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
-    # SSOT COMPLIANCE: Timeout logic moved to AgentExecutionTracker
-    # AGENT_EXECUTION_TIMEOUT = 30.0  # DEPRECATED - Use AgentExecutionTracker.get_timeout_config()
-    
     def __init__(self, registry: 'AgentRegistry', websocket_bridge, 
                  user_context: Optional['UserExecutionContext'] = None):
-        """Private initializer - use factory methods instead.
+        """Initialize ExecutionEngine with automatic UserExecutionEngine delegation.
         
-        Direct instantiation is prevented to ensure user isolation.
-        Use create_request_scoped_engine() for proper request-scoped execution.
+        ⚠️  ISSUE #565 COMPATIBILITY BRIDGE ⚠️
+        This constructor now automatically creates and delegates to UserExecutionEngine
+        to provide seamless migration for the 128 deprecated imports.
         
         Args:
             registry: Agent registry for agent lookup
             websocket_bridge: WebSocket bridge for event emission
-            user_context: Optional UserExecutionContext for per-request isolation
+            user_context: Optional UserExecutionContext for user isolation
         """
-        # DEPRECATION WARNING: This execution engine is being phased out in favor of ConsolidatedExecutionEngine
         import warnings
         warnings.warn(
-            "SupervisorExecutionEngine is deprecated. "
-            "Use ConsolidatedExecutionEngine via UnifiedExecutionEngineFactory instead.",
+            "ExecutionEngine is DEPRECATED and delegates to UserExecutionEngine for Issue #565 migration. "
+            "Use UserExecutionEngine directly for full benefits and security isolation. "
+            "This compatibility bridge maintains functionality during migration.",
             DeprecationWarning,
             stacklevel=2
         )
         
-        # CRITICAL FIX: Allow direct instantiation but require proper parameters for WebSocket integration
-        if registry is None:
-            raise ValueError("AgentRegistry is required for ExecutionEngine initialization")
+        logger.warning(
+            "🔄 Issue #565 AUTOMATIC DELEGATION: ExecutionEngine created - automatically delegating to UserExecutionEngine. "
+            f"Registry: {type(registry).__name__}, WebSocketBridge: {type(websocket_bridge).__name__}. "
+            "MIGRATION: Use UserExecutionEngine directly for optimal performance."
+        )
         
-        # Initialize core properties
-        self.registry = registry
-        self.websocket_bridge = websocket_bridge
-        self.user_context = user_context
+        # Store parameters for deferred initialization
+        self._registry = registry
+        self._websocket_bridge = websocket_bridge
+        self._user_context = user_context
+        self._delegated_engine = None
+        self._initialized = False
         
-        # SECURITY FIX: Enforce mandatory AgentWebSocketBridge usage - no fallbacks allowed
-        if not websocket_bridge:
-            raise RuntimeError(
-                "AgentWebSocketBridge is mandatory for WebSocket security and user isolation. "
-                "No fallback paths allowed."
-            )
+        # Issue #565 Compatibility metadata
+        self._compatibility_mode = True
+        self._migration_issue = "#565"
+        self._delegation_active = True
+    
+    # Legacy constants for compatibility
+    MAX_HISTORY_SIZE = 100  # Prevent memory leak
+    MAX_CONCURRENT_AGENTS = 10  # Support 5 concurrent users (2 agents each)
+    AGENT_EXECUTION_TIMEOUT = 25.0  # Delegated to UserExecutionEngine
+    
+    async def _ensure_delegated_engine(self) -> UserExecutionEngine:
+        """Ensure UserExecutionEngine is initialized for delegation.
         
-        # Initialize remaining components
-        self._init_core_components()
+        Returns:
+            UserExecutionEngine: The delegated engine instance
+            
+        Raises:
+            ValueError: If delegation setup fails
+        """
+        if self._delegated_engine is None:
+            try:
+                logger.debug(
+                    f"🔄 Issue #565: Initializing UserExecutionEngine delegation. "
+                    f"Registry: {type(self._registry).__name__}, WebSocketBridge: {type(self._websocket_bridge).__name__}"
+                )
+                
+                # Use the compatibility bridge to create UserExecutionEngine
+                self._delegated_engine = await UserExecutionEngine.create_from_legacy(
+                    registry=self._registry,
+                    websocket_bridge=self._websocket_bridge,
+                    user_context=self._user_context
+                )
+                
+                self._initialized = True
+                
+                logger.info(
+                    f"✅ Issue #565 DELEGATION: Successfully initialized UserExecutionEngine. "
+                    f"Engine: {self._delegated_engine.engine_id}, User: {self._delegated_engine.context.user_id}"
+                )
+                
+            except Exception as e:
+                logger.error(
+                    f"❌ Issue #565 DELEGATION FAILED: Could not initialize UserExecutionEngine: {e}. "
+                    f"Registry: {type(self._registry)}, WebSocketBridge: {type(self._websocket_bridge)}"
+                )
+                raise ValueError(f"ExecutionEngine delegation to UserExecutionEngine failed: {e}")
         
-        if self.user_context:
-            logger.info(f"ExecutionEngine initialized with UserExecutionContext for user {self.user_context.user_id}")
-        else:
-            logger.info("ExecutionEngine initialized in legacy mode (no UserExecutionContext)")
+        return self._delegated_engine
+    
+    def is_compatibility_mode(self) -> bool:
+        """Check if this is running in Issue #565 compatibility mode."""
+        return self._compatibility_mode
+    
+    def get_delegation_info(self) -> Dict[str, Any]:
+        """Get delegation information for debugging."""
+        return {
+            'compatibility_mode': self._compatibility_mode,
+            'migration_issue': self._migration_issue,
+            'delegation_active': self._delegation_active,
+            'initialized': self._initialized,
+            'registry_type': type(self._registry).__name__,
+            'websocket_bridge_type': type(self._websocket_bridge).__name__,
+            'has_user_context': self._user_context is not None,
+            'delegated_engine_created': self._delegated_engine is not None,
+            'migration_guide': 'Use UserExecutionEngine directly for full benefits'
+        }
     
     def _init_core_components(self) -> None:
         """Initialize core ExecutionEngine components after validation."""
@@ -384,27 +427,46 @@ class ExecutionEngine:
         
     async def execute_agent(self, context: AgentExecutionContext,
                            user_context: Optional['UserExecutionContext'] = None) -> AgentExecutionResult:
-        """Execute a single agent with UserExecutionContext support and concurrency control.
+        """Execute a single agent with automatic UserExecutionEngine delegation.
         
-        NEW: Supports UserExecutionContext for complete user isolation and per-user WebSocket events.
-        RECOMMENDED: Use create_user_engine() or UserExecutionEngine directly for new code.
+        ⚠️  ISSUE #565 API COMPATIBILITY BRIDGE ⚠️
+        This method automatically delegates to UserExecutionEngine for seamless migration.
+        
+        Args:
+            context: Agent execution context
+            user_context: Optional UserExecutionContext (uses instance context if None)
+            
+        Returns:
+            AgentExecutionResult: Results from delegated UserExecutionEngine
         """
-        # NEW: Use UserExecutionContext - prefer passed context over instance context
-        effective_user_context = user_context or self.user_context
-        # CRITICAL FIX: Prevent delegation loops that cause duplicate WebSocket events
-        # Only delegate if not already in a delegated context
-        if effective_user_context and not getattr(self, '_is_user_delegated', False):
-            logger.info(f"Delegating execution to UserExecutionEngine for user {effective_user_context.user_id}")
-            try:
-                user_engine = await self.create_user_engine(effective_user_context)
-                # Mark as delegated to prevent recursion
-                user_engine._execution_engine._is_user_delegated = True
-                result = await user_engine.execute_agent(context, effective_user_context)
-                await user_engine.cleanup()
-                return result
-            except Exception as e:
-                logger.warning(f"UserExecutionEngine delegation failed, falling back to legacy: {e}")
-                # Fall through to legacy execution
+        logger.info(
+            f"🔄 Issue #565 AUTOMATIC DELEGATION: ExecutionEngine.execute_agent() called - delegating to UserExecutionEngine. "
+            f"Agent: {context.agent_name}, User: {context.user_id}"
+        )
+        
+        try:
+            # Ensure the delegated engine is initialized
+            delegated_engine = await self._ensure_delegated_engine()
+            
+            # Use the passed user_context or get from delegated engine
+            effective_user_context = user_context or delegated_engine.get_user_context()
+            
+            # Execute via UserExecutionEngine with full isolation
+            result = await delegated_engine.execute_agent(context, effective_user_context)
+            
+            logger.info(
+                f"✅ Issue #565 DELEGATION SUCCESS: Agent {context.agent_name} executed via UserExecutionEngine. "
+                f"Success: {result.success}, User: {effective_user_context.user_id}"
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(
+                f"❌ Issue #565 DELEGATION FAILED: Could not execute {context.agent_name} via UserExecutionEngine: {e}. "
+                f"User: {context.user_id}, Error: {type(e).__name__}"
+            )
+            raise RuntimeError(f"ExecutionEngine delegation failed: {e}")
         
         # LEGACY: Global state execution (deprecated)
         logger.warning("Using legacy ExecutionEngine with global state - consider migrating to UserExecutionEngine")

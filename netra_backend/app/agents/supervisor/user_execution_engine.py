@@ -464,6 +464,48 @@ class UserExecutionEngine(IExecutionEngine):
         logger.info(f" PASS:  Created UserExecutionEngine {self.engine_id} for user {context.user_id} "
                    f"(max_concurrent: {self.max_concurrent}, run_id: {context.run_id}) with data access capabilities")
     
+    def is_compatibility_mode(self) -> bool:
+        """Check if this engine was created via legacy compatibility bridge.
+        
+        Returns:
+            bool: True if created via create_from_legacy() for Issue #565 compatibility
+        """
+        return getattr(self, '_compatibility_mode', False)
+    
+    def get_compatibility_info(self) -> Dict[str, Any]:
+        """Get compatibility mode information for debugging.
+        
+        Returns:
+            Dictionary with compatibility mode details and migration guidance
+        """
+        if not self.is_compatibility_mode():
+            return {
+                'compatibility_mode': False,
+                'created_via': 'modern_constructor',
+                'migration_needed': False,
+                'message': 'Engine created with modern UserExecutionEngine constructor'
+            }
+        
+        return {
+            'compatibility_mode': True,
+            'migration_issue': getattr(self, '_migration_issue', '#565'),
+            'created_via': 'create_from_legacy',
+            'migration_needed': True,
+            'legacy_registry_type': type(getattr(self, '_legacy_registry', None)).__name__,
+            'legacy_websocket_bridge_type': type(getattr(self, '_legacy_websocket_bridge', None)).__name__,
+            'user_id': self.context.user_id,
+            'is_anonymous_user': self.context.user_id.startswith('legacy_compat_'),
+            'security_risk': self.context.user_id.startswith('legacy_compat_'),
+            'migration_guide': {
+                'step_1': 'Create proper UserExecutionContext with real user authentication',
+                'step_2': 'Use AgentInstanceFactory instead of raw AgentRegistry',
+                'step_3': 'Use UnifiedWebSocketEmitter instead of raw AgentWebSocketBridge',
+                'step_4': 'Call UserExecutionEngine(context, agent_factory, websocket_emitter) directly',
+                'example': 'See UserExecutionEngine docstring for modern usage patterns'
+            },
+            'message': f'Engine created via compatibility bridge for Issue #565. User: {self.context.user_id}'
+        }
+    
     @property
     def user_context(self) -> UserExecutionContext:
         """Get user execution context for this engine."""
