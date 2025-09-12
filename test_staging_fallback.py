@@ -82,15 +82,15 @@ def main():
                 print(f"[UNKNOWN] Unexpected result: {result.stdout}")
                 
         except subprocess.TimeoutExpired:
-            print(f"[⚠️ TIMEOUT] Test timed out after 60 seconds")
+            print(f"[TIMEOUT] Test timed out after 60 seconds")
         except Exception as e:
-            print(f"[❌ ERROR] Exception running test: {e}")
+            print(f"[ERROR] Exception running test: {e}")
     
     print(f"\n" + "=" * 80)
     print("STAGING FALLBACK TEST SUMMARY")
     print("=" * 80)
-    print(f"✅ Staging fallback implementation complete")
-    print(f"📝 Next steps:")
+    print(f"SUCCESS: Staging fallback implementation complete")
+    print(f"NEXT STEPS:")
     print(f"   1. Set USE_STAGING_FALLBACK=true in CI environment")
     print(f"   2. Configure STAGING_WEBSOCKET_URL in deployment")
     print(f"   3. Run full mission critical test suite with fallback")
