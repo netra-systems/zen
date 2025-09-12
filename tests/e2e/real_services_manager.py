@@ -39,6 +39,14 @@ from shared.isolated_environment import IsolatedEnvironment
 from tests.e2e.config import TEST_CONFIG, TestEnvironmentType
 from tests.e2e.test_environment_config import TestEnvironmentConfig
 
+# CRITICAL INTEGRATION: Import UnifiedDockerManager for actual service startup
+try:
+    from test_framework.unified_docker_manager import UnifiedDockerManager
+    DOCKER_MANAGER_AVAILABLE = True
+except ImportError:
+    DOCKER_MANAGER_AVAILABLE = False
+    UnifiedDockerManager = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -495,6 +503,9 @@ class RealServicesManager:
         # Connection managers
         self._http_client: Optional[httpx.AsyncClient] = None
         self._websocket_clients: List[Any] = []
+        
+        # Docker service management integration
+        self._docker_manager: Optional[UnifiedDockerManager] = None
         
         # Status tracking
         self._service_status: Dict[str, ServiceStatus] = {}
