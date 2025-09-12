@@ -22,11 +22,11 @@ import pytest
 # Add parent directories for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from test_framework.ssot.base_test_case import SSOTAsyncTestCase
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestAuthServiceStartupOAuthFailures(SSOTAsyncTestCase):
+class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
     """Test auth service startup failures with missing OAuth configuration."""
 
     def setUp(self):

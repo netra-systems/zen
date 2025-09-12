@@ -16,17 +16,16 @@ from pathlib import Path
 # Add parent directories for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from test_framework.ssot.base_test_case import SSOTBaseTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestOAuthConfigurationValidation(SSOTBaseTestCase):
+class TestOAuthConfigurationValidation(SSotBaseTestCase):
     """Test OAuth configuration validation for deployment."""
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment with clean OAuth config."""
-        super().setUp()
-        self.env = IsolatedEnvironment.get_instance()
+        super().setup_method(method)
         
         # Clear any existing OAuth configuration
         oauth_vars = [
@@ -42,7 +41,7 @@ class TestOAuthConfigurationValidation(SSOTBaseTestCase):
         for var in oauth_vars:
             if var in os.environ:
                 delattr(os.environ, var)
-            self.env.set(var, "", "test_oauth_validation")
+            self._env.set(var, "", "test_oauth_validation")
 
     def test_missing_google_oauth_client_id_staging_validation_failure(self):
         """
