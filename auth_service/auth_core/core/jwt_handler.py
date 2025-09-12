@@ -66,25 +66,65 @@ class JWTHandler:
             raise ValueError("JWT_SECRET_KEY must be at least 32 characters in production")
         
         return secret
+    
+    def _get_token_expiry(self, token_type: str) -> int:
+        """Get token expiry in minutes, with demo mode override."""
+        try:
+            # Check if demo mode is enabled
+            from auth_service.auth_core.auth_environment import get_auth_env
+            auth_env = get_auth_env()
+            
+            if auth_env.is_demo_mode():
+                demo_config = auth_env.get_demo_config()
+                demo_hours = demo_config.get("jwt_expiration_hours", 48)
+                return demo_hours * 60  # Convert hours to minutes
+            
+            # Normal expiry based on token type
+            if token_type == "access":
+                return self.access_expiry
+            elif token_type == "refresh":
+                return self.refresh_expiry * 24 * 60  # days to minutes
+            elif token_type == "service":
+                return self.service_expiry
+            else:
+                return self.access_expiry
+                
+        except Exception as e:
+            logger.warning(f"Error getting token expiry for {token_type}: {e}")
+            # Fallback to normal expiry
+            if token_type == "access":
+                return self.access_expiry
+            elif token_type == "refresh":
+                return self.refresh_expiry * 24 * 60
+            elif token_type == "service":
+                return self.service_expiry
+            else:
+                return self.access_expiry
         
     def create_access_token(self, user_id: str, email: str, 
                            permissions: list = None) -> str:
         """Create access token for user authentication"""
+        # Check for demo mode expiration override
+        expiry_minutes = self._get_token_expiry("access")
+        
         payload = self._build_payload(
             sub=user_id,
             email=email,
             permissions=permissions or [],
             token_type="access",
-            exp_minutes=self.access_expiry
+            exp_minutes=expiry_minutes
         )
         return self._encode_token(payload)
     
     def create_refresh_token(self, user_id: str, email: str = None, permissions: list = None) -> str:
         """Create refresh token for token renewal with optional user data"""
+        # Check for demo mode expiration override
+        expiry_minutes = self._get_token_expiry("refresh")
+        
         payload = self._build_payload(
             sub=user_id,
             token_type="refresh",
-            exp_minutes=self.refresh_expiry * 24 * 60
+            exp_minutes=expiry_minutes
         )
         
         # Include user data in refresh token for proper token refresh

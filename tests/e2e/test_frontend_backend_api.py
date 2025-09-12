@@ -56,7 +56,7 @@ class RetryConfig:
     timeout: float = 30.0
 
 
-class TestFrontendBackendAPIer:
+class FrontendBackendAPITester:
     """
     Comprehensive Frontend-Backend API communication tester.
     Tests real HTTP communication with authentication, CORS, error handling, and retries.

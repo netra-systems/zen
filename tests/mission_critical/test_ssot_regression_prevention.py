@@ -41,7 +41,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Process, Queue
 
 # Import real framework components - NO MOCKS
-from netra_backend.app.database.manager import DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
@@ -82,7 +82,7 @@ class TestSSOTRegressionPrevention:
         self.websocket_connections = {}
         self.database_sessions = {}
         
-        logger.info(f"Starting regression prevention test with REAL services (ID: {self.test_id})")
+        logger.info(f"Starting regression prevention test with REAL services: {getattr(self, '_testMethodName', 'unknown')} (ID: {self.test_id})")
     
     def tearDown(self):
         """Clean up regression prevention test and REAL service connections."""
@@ -137,6 +137,15 @@ class TestSSOTRegressionPrevention:
                 # Perform database operations
                 for op_num in range(operations_per_user):
                     try:
+                        # Get Redis client for this operation
+                        from shared.isolated_environment import get_env
+                        import redis
+                        redis_client = redis.Redis(
+                            host=get_env('REDIS_HOST', 'localhost'),
+                            port=int(get_env('REDIS_PORT', '6379')),
+                            decode_responses=True
+                        )
+                        
                         # Store user-specific data
                         redis_client.hset(
                             f"user:{user_id}:data",
@@ -443,7 +452,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(isolation_failures) == 0, f"Agent registry isolation failed: {len(isolation_failures)} failures detected"
     
-    def test_race_condition_prevention_concurrent_state_access(self):
+    async def test_race_condition_prevention_concurrent_state_access(self):
         """
         ISOLATION CRITICAL: Test race condition prevention in concurrent state access.
         Verifies state management prevents race conditions and maintains data integrity.
@@ -453,7 +462,7 @@ class TestSSOTRegressionPrevention:
         shared_state_key = f"shared_state_{self.test_id}"
         race_condition_failures = []
         
-        def concurrent_state_operations(worker_id):
+        async def concurrent_state_operations(worker_id):
             """Perform concurrent state operations to detect race conditions."""
             failures = []
             
@@ -472,6 +481,15 @@ class TestSSOTRegressionPrevention:
                     
                     # Simulate atomic state updates
                     try:
+                        # Get Redis client for this operation
+                        from shared.isolated_environment import get_env
+                        import redis
+                        redis_client = redis.Redis(
+                            host=get_env('REDIS_HOST', 'localhost'),
+                            port=int(get_env('REDIS_PORT', '6379')),
+                            decode_responses=True
+                        )
+                        
                         # Read current state
                         current_state = redis_client.get(shared_state_key)
                         if current_state is None:
@@ -544,10 +562,14 @@ class TestSSOTRegressionPrevention:
         )
         redis_client.set(shared_state_key, "0")
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_state_operations(worker_id):
+            return asyncio.run(concurrent_state_operations(worker_id))
+            
         # Execute concurrent operations
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
             future_to_worker = {
-                executor.submit(concurrent_state_operations, worker_id): worker_id 
+                executor.submit(run_state_operations, worker_id): worker_id 
                 for worker_id in range(num_workers)
             }
             
@@ -582,7 +604,7 @@ class TestSSOTRegressionPrevention:
         # But fail on critical consistency failures
         assert len(critical_failures) == 0, f"Critical race condition failures detected: {len(critical_failures)} failures"
     
-    def test_security_boundary_validation_user_isolation(self):
+    async def test_security_boundary_validation_user_isolation(self):
         """
         SECURITY CRITICAL: Test security boundary validation between isolated users.
         Verifies users cannot access each other's data or execute unauthorized operations.
@@ -605,6 +627,15 @@ class TestSSOTRegressionPrevention:
             user_secret = f"top_secret_data_for_user_{user_id}_{uuid.uuid4().hex}"
             user_secrets[user_id] = user_secret
             
+            # Get Redis client
+            from shared.isolated_environment import get_env
+            import redis
+            redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            
             # Store user's private data
             sync_redis_client.hset(
                 f"user:{user_id}:private",
@@ -620,7 +651,7 @@ class TestSSOTRegressionPrevention:
                 auth_token
             )
         
-        def attempt_security_breach(attacker_user_id, target_user_id):
+        async def attempt_security_breach(attacker_user_id, target_user_id):
             """Attempt to breach security boundaries between users."""
             failures = []
             
@@ -628,6 +659,15 @@ class TestSSOTRegressionPrevention:
                 # Create attacker's context
                 attacker_env = IsolatedEnvironment()
                 attacker_context = TestContext(user_id=f"user_{attacker_user_id}")
+                
+                # Get Redis client for security test
+                from shared.isolated_environment import get_env
+                import redis
+                redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
                 
                 # Attempt 1: Direct data access to other user's private data
                 try:
@@ -719,6 +759,10 @@ class TestSSOTRegressionPrevention:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_security_breach(attacker_user_id, target_user_id):
+            return asyncio.run(attempt_security_breach(attacker_user_id, target_user_id))
+            
         # Test all possible user-to-user attack vectors
         with ThreadPoolExecutor(max_workers=num_users) as executor:
             attack_futures = []
@@ -726,7 +770,7 @@ class TestSSOTRegressionPrevention:
             for attacker in range(num_users):
                 for target in range(num_users):
                     if attacker != target:
-                        future = executor.submit(attempt_security_breach, attacker, target)
+                        future = executor.submit(run_security_breach, attacker, target)
                         attack_futures.append(future)
             
             for future in as_completed(attack_futures):
@@ -745,7 +789,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(security_failures) == 0, f"CRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected"
     
-    def test_database_session_isolation_transaction_boundaries(self):
+    async def test_database_session_isolation_transaction_boundaries(self):
         """
         ISOLATION CRITICAL: Test database session isolation with transaction boundaries.
         Verifies each session has proper transaction isolation with no data leakage.
@@ -754,7 +798,7 @@ class TestSSOTRegressionPrevention:
         transactions_per_session = 8
         isolation_failures = []
         
-        def session_transaction_operations(session_id):
+        async def session_transaction_operations(session_id):
             """Perform database transactions within an isolated session."""
             failures = []
             
@@ -851,10 +895,14 @@ class TestSSOTRegressionPrevention:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_session_operations(session_id):
+            return asyncio.run(session_transaction_operations(session_id))
+            
         # Execute concurrent session operations
         with ThreadPoolExecutor(max_workers=num_sessions) as executor:
             future_to_session = {
-                executor.submit(session_transaction_operations, session_id): session_id 
+                executor.submit(run_session_operations, session_id): session_id 
                 for session_id in range(num_sessions)
             }
             
@@ -876,7 +924,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(isolation_failures) == 0, f"Database session isolation failed: {len(isolation_failures)} failures detected"
     
-    def test_performance_metrics_concurrent_load_testing(self):
+    async def test_performance_metrics_concurrent_load_testing(self):
         """
         PERFORMANCE CRITICAL: Test performance metrics under concurrent load.
         Verifies system maintains performance standards with high concurrent usage.
@@ -897,7 +945,7 @@ class TestSSOTRegressionPrevention:
             'throughput_metrics': []
         }
         
-        def performance_load_operation(thread_id):
+        async def performance_load_operation(thread_id):
             """Execute performance-intensive operations for load testing."""
             thread_metrics = {
                 'response_times': [],
@@ -982,12 +1030,16 @@ class TestSSOTRegressionPrevention:
         initial_memory = process.memory_info().rss
         initial_cpu = process.cpu_percent()
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_performance_operation(thread_id):
+            return asyncio.run(performance_load_operation(thread_id))
+            
         # Execute concurrent performance operations
         start_time = time.time()
         
         with ThreadPoolExecutor(max_workers=num_concurrent_operations) as executor:
             future_to_thread = {
-                executor.submit(performance_load_operation, thread_id): thread_id 
+                executor.submit(run_performance_operation, thread_id): thread_id 
                 for thread_id in range(num_concurrent_operations)
             }
             
@@ -1678,9 +1730,12 @@ class TestSSOTContinuousCompliance:
                 )
                 return sync_redis_client.get(f"isolation_test:{test_id}")
             
+            def run_quick_isolation_test(test_id):
+                return quick_isolation_test(test_id)
+                
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [
-                    executor.submit(quick_isolation_test, i) 
+                    executor.submit(run_quick_isolation_test, i) 
                     for i in range(10)
                 ]
                 
@@ -1930,10 +1985,20 @@ class TestSSOTContinuousCompliance:
                     'error': str(e)
                 }]
         
+        # Wrapper function to run async function in ThreadPoolExecutor
+        def isolated_context_operations_wrapper(context_id):
+            # Run the async function in a new event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(isolated_context_operations(context_id))
+            finally:
+                loop.close()
+        
         # Execute all contexts concurrently to maximize leakage detection
         with ThreadPoolExecutor(max_workers=num_isolated_contexts) as executor:
             future_to_context = {
-                executor.submit(isolated_context_operations, context_id): context_id 
+                executor.submit(isolated_context_operations_wrapper, context_id): context_id 
                 for context_id in range(num_isolated_contexts)
             }
             
@@ -2181,16 +2246,17 @@ class TestSSOTContinuousCompliance:
         assert len(isolation_stress_failures) <= 20, f"Too many stress test issues: {len(isolation_stress_failures)} detected"
 
 
-async def run_async_tests():
-    """Run async WebSocket isolation tests."""
+def run_websocket_tests():
+    """Run WebSocket isolation tests."""
     test_instance = TestSSOTRegressionPrevention()
     test_instance.setUp()
     
     try:
-        await test_instance.test_websocket_channel_isolation_concurrent_sessions()
-        logger.info("Async WebSocket isolation tests completed successfully")
+        # Run the WebSocket test synchronously by using asyncio.run
+        asyncio.run(test_instance.test_websocket_channel_isolation_concurrent_sessions())
+        logger.info("WebSocket isolation tests completed successfully")
     except Exception as e:
-        logger.error(f"Async WebSocket isolation tests failed: {e}")
+        logger.error(f"WebSocket isolation tests failed: {e}")
         raise
     finally:
         test_instance.tearDown()
@@ -2203,11 +2269,11 @@ if __name__ == '__main__':
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    # Run async tests first
+    # Run WebSocket tests first
     try:
-        asyncio.run(run_async_tests())
+        run_websocket_tests()
     except Exception as e:
-        logger.error(f"Async test execution failed: {e}")
+        logger.error(f"WebSocket test execution failed: {e}")
     
     # Run the synchronous tests
     pytest.main([__file__, '-v', '--tb=short', '--capture=no', '--maxfail=3'])

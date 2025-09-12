@@ -25,6 +25,7 @@ import redis.asyncio as redis
 from redis.exceptions import ConnectionError, AuthenticationError, TimeoutError
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
+from unittest.mock import patch, AsyncMock, MagicMock
 
 from netra_backend.app.config import get_config
 from shared.isolated_environment import IsolatedEnvironment
@@ -180,7 +181,7 @@ class TestRedisConnectionIssues:
                 mock_pool.side_effect = ConnectionError("Redis connection pool initialization failed")
                 
                 try:
-                    redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=mock_pool())
+                    redis_client = redis.from_url('redis://localhost:6379/0', connection_pool=mock_pool())
                     await redis_client.ping()
                     
                     pytest.fail("Expected Redis connection pool initialization to fail")
@@ -202,7 +203,7 @@ class TestRedisConnectionIssues:
     async def test_redis_basic_operations_connectivity_failure(self):
         """Test Redis basic operations fail due to connectivity issues."""
         # Mock Redis client that connects but operations fail
-        mock_redis_client = MagicNone  # TODO: Use real service instance
+        mock_redis_client = MagicMock()  # TODO: Use real service instance
         
         # Mock Redis operations to fail with connection errors
         async def failing_operation(*args, **kwargs):
@@ -412,7 +413,7 @@ class TestRedisConnectionIssues:
     async def test_redis_memory_management_configuration_issues(self):
         """Test Redis memory management configuration issues in staging."""
         # Mock Redis client
-        mock_redis_client = MagicNone  # TODO: Use real service instance
+        mock_redis_client = MagicMock()  # TODO: Use real service instance
         
         # Mock Redis info command to return memory pressure
         async def mock_redis_info():

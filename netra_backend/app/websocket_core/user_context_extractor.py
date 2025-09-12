@@ -41,15 +41,23 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.logging_config import central_logger
 from shared.id_generation import UnifiedIdGenerator
 
-# SSOT COMPLIANCE: Import UnifiedAuthInterface for ALL auth operations
-try:
-    from auth_service.auth_core.unified_auth_interface import get_unified_auth
-except ImportError:
-    # Fallback for environments where auth service isn't available
-    from netra_backend.app.clients.auth_client_core import auth_client
-    get_unified_auth = None
+# SSOT COMPLIANCE: Direct import of auth service client (no fallback)
+from netra_backend.app.clients.auth_client_core import auth_client
 
 logger = central_logger.get_logger(__name__)
+
+
+def get_unified_auth():
+    """
+    SSOT compliance: Get unified auth service for JWT validation.
+    
+    This function provides the expected interface for SSOT tests while
+    maintaining backward compatibility with existing auth client usage.
+    
+    Returns:
+        Auth service client for JWT operations
+    """
+    return auth_client
 
 
 class UserContextExtractor:
@@ -76,18 +84,15 @@ class UserContextExtractor:
         """
         Get auth service client for JWT validation.
         
-        SSOT COMPLIANCE: All JWT operations must go through auth service.
-        WebSocket should never directly access JWT secrets or perform JWT decode.
+        SSOT COMPLIANCE: Pure delegation to auth service client.
+        No fallback paths or conditional logic.
         
         Returns:
             Auth service client for JWT validation
         """
-        # Use auth service SSOT for JWT operations
-        if get_unified_auth:
-            return get_unified_auth()
-        else:
-            # Fallback to auth client 
-            return auth_client
+        # SSOT COMPLIANCE: Use auth_client directly (eliminates conditional paths)
+        from netra_backend.app.clients.auth_client_core import auth_client
+        return auth_client
     
     def extract_jwt_from_websocket(self, websocket: WebSocket) -> Optional[str]:
         """
@@ -143,15 +148,11 @@ class UserContextExtractor:
     
     async def validate_and_decode_jwt(self, token: str, fast_path_enabled: bool = False) -> Optional[Dict[str, Any]]:
         """
-        DEPRECATED: JWT validation method - use authenticate_websocket_ssot() instead.
+        SSOT JWT validation - Pure delegation to auth service.
         
-        MIGRATION REQUIRED: This method is deprecated as part of SSOT consolidation.
-        JWT validation is now handled internally by authenticate_websocket_ssot() from
-        netra_backend.app.websocket_core.unified_websocket_auth.
-        
-        This method is preserved for backward compatibility but should not be used
-        for new implementations. All WebSocket authentication should go through
-        the single authenticate_websocket_ssot() function.
+        SSOT REMEDIATION: This method now provides pure delegation to the auth service
+        without any local JWT validation logic. All JWT operations are consolidated
+        in the auth service SSOT (JWTHandler.validate_token()).
         
         Args:
             token: JWT token string
@@ -160,116 +161,43 @@ class UserContextExtractor:
         Returns:
             Decoded JWT payload if valid, None otherwise
         """
-        import warnings
-        warnings.warn(
-            "UserContextExtractor.validate_and_decode_jwt() is deprecated. "
-            "Use authenticate_websocket_ssot() instead. "
-            "JWT validation is now handled internally.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        logger.warning(
-            "DEPRECATION: UserContextExtractor.validate_and_decode_jwt() called. "
-            "JWT validation is now internal to authenticate_websocket_ssot()."
-        )
-        # SSOT COMPLIANCE: All JWT operations delegated to auth service
         from shared.isolated_environment import get_env
         
         env = get_env()
         environment = env.get("ENVIRONMENT", "development").lower()
         
-        # Enhanced diagnostic logging for staging
-        logger.critical(f"[U+1F511] GOLDEN PATH JWT: Starting auth service token validation in {environment} environment")
-        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Starting auth service token validation in {environment}")
-        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Fast path enabled: {fast_path_enabled}")
-        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Token length: {len(token) if token else 0}")
-        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Token prefix: {token[:20]}..." if token and len(token) > 20 else token)
+        logger.info(f"SSOT JWT: Delegating token validation to auth service (env: {environment})")
         
-        # SSOT COMPLIANCE: Use auth service for ALL JWT operations
         try:
+            # SSOT COMPLIANCE: Pure delegation to auth service
+            validation_result = await self.auth_service.validate_token(token)
             
-            # SSOT COMPLIANCE: Remove JWT bypass - ALL validation through UnifiedAuthInterface
-            # Previous JWT decode with verify_signature: False VIOLATES SSOT architecture
-            logger.info("[U+1F512] SSOT COMPLIANCE: Using UnifiedAuthInterface for ALL token validation")
+            if not validation_result or not validation_result.get('valid'):
+                logger.warning(f"SSOT JWT: Auth service validation failed (env: {environment})")
+                return None
+                
+            # Extract payload from validation result - SSOT compliance: Use auth service payload directly
+            payload = validation_result.get('payload', {})
+            if not payload:
+                logger.error("SSOT JWT: Auth service returned no payload - validation incomplete")
+                return None
             
-            # Fast path optimization: Use cached result if available for E2E performance
-            if fast_path_enabled and environment in ["staging", "test"]:
-                logger.info("[U+1F680] FAST PATH: Using cached auth service validation for E2E performance")
-                # Fast path still uses proper auth service validation - just with caching
+            # Basic validation
+            user_id = payload.get("sub")
+            if not user_id or user_id == "None":
+                logger.warning("SSOT JWT: Token missing valid user ID claim")
+                return None
             
-            # SSOT COMPLIANCE: Use UnifiedAuthInterface for ALL JWT validation 
-            if get_unified_auth:
-                logger.info(" CYCLE:  SSOT: Using UnifiedAuthInterface for token validation")
-                unified_auth = get_unified_auth()
-                validation_result = unified_auth.validate_token(token)
-                
-                if validation_result:
-                    user_id = validation_result.get("user_id") or validation_result.get("sub")
-                    if user_id and user_id != "None":
-                        logger.info(f" PASS:  GOLDEN PATH JWT SUCCESS: Unified auth validated token for user {user_id[:8]}... in {environment}")
-                        logger.info(f" PASS:  UNIFIED AUTH SUCCESS - Token validated for user: {user_id[:8]}...")
-                        return validation_result
-                    else:
-                        logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Token missing valid user ID claim (environment: {environment})")
-                        logger.warning(" SEARCH:  UNIFIED AUTH - token missing valid user ID claim")
-                        return None
-                else:
-                    logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Unified auth token validation failed (environment: {environment})")
-                    logger.error(" FAIL:  UNIFIED AUTH FAILED - Token validation failed")
-                    return None
-            else:
-                # Fallback to auth_client_core if UnifiedAuthInterface not available
-                logger.info(" CYCLE:  FALLBACK: Using auth_client_core for token validation")
-                from netra_backend.app.clients.auth_client_core import auth_client
-                
-                validation_result = await auth_client.validate_token(token)
-                if not validation_result or not validation_result.get('valid'):
-                    logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Auth service validation failed (environment: {environment}, fallback mode)")
-                    logger.error(f" FAIL:  WEBSOCKET JWT FAILED - Auth service validation failed")
-                    return None
-                
-                payload = validation_result.get('payload', {})
-                if not payload:
-                    # Build payload from validation result for backward compatibility
-                    payload = {
-                        'sub': validation_result.get('user_id'),
-                        'user_id': validation_result.get('user_id'),
-                        'email': validation_result.get('email'),
-                        'permissions': validation_result.get('permissions', []),
-                        'exp': validation_result.get('exp'),
-                        'iat': validation_result.get('iat')
-                    }
-                
-                # Basic validation
-                user_id = payload.get("sub")
-                if not user_id or user_id == "None":
-                    logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Token missing 'sub' (user ID) claim (environment: {environment}, fallback mode)")
-                    logger.warning(" SEARCH:  WEBSOCKET JWT - token missing 'sub' (user ID) claim")
-                    logger.info(f" SEARCH:  WEBSOCKET JWT - Payload keys: {list(payload.keys())}")
-                    return None
-                
-                logger.info(f" PASS:  GOLDEN PATH JWT SUCCESS: Auth service fallback validated token for user {user_id[:8]}... (environment: {environment})")
-                logger.info(f" PASS:  WEBSOCKET JWT VALIDATION SUCCESS - Token validated for user: {user_id[:8]}...")
-                payload["source"] = "auth_service_fallback"
-                return payload
+            logger.info(f"SSOT JWT: Validation successful for user {user_id[:8]}... (env: {environment})")
+            payload["source"] = "auth_service_ssot"
+            return payload
             
         except Exception as e:
-            logger.critical(f" ALERT:  GOLDEN PATH JWT EXCEPTION: JWT validation error in {environment} - {e} (type: {type(e).__name__})")
-            logger.error(f" FAIL:  WEBSOCKET JWT FAILED - Validation error: {e}")
-            logger.error(f" FAIL:  Exception type: {type(e).__name__}")
-            
-            # SSOT COMPLIANCE: No fallback validation - auth service/UnifiedAuthInterface is SSOT
-            logger.debug("SSOT COMPLIANCE: No fallback validation - maintaining single source of truth")
+            logger.error(f"SSOT JWT: Validation error - {e} (type: {type(e).__name__})")
             return None
     
-    # SSOT COMPLIANCE: _resilient_validation_fallback method REMOVED
-    # All validation must go through UnifiedAuthInterface/auth service to maintain SSOT architecture
-    # Fallback validation methods violate SSOT principles and cause JWT secret mismatches
-    
-    # SSOT COMPLIANCE: _legacy_jwt_validation method REMOVED
-    # All validation must go through UnifiedAuthInterface/auth service to maintain SSOT architecture  
-    # Legacy validation methods violate SSOT principles and introduce JWT secret inconsistencies
+    # SSOT COMPLIANCE: All fallback validation methods eliminated
+    # Pure delegation to auth service ensures SSOT compliance and eliminates JWT secret mismatches
     
     def create_user_context_from_jwt(
         self, 

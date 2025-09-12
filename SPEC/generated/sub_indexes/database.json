@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "database",
-    "generated_at": "2025-09-11T10:15:35.862773",
+    "generated_at": "2025-09-11T22:48:29.969859",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
-    "total_literals": 369
+    "total_literals": 380
   },
   "literals": {
     "\"GCP_PROJECT_ID\": self.project_id": {
@@ -12,6 +12,20 @@
       "category": "database",
       "locations": [
         "scripts/verify_deployment_env_vars.py:154"
+      ]
+    },
+    "']: expected user_id": {
+      "value": "']: expected user_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/services/user_execution_context.py:421"
+      ]
+    },
+    "- no send method or user_id": {
+      "value": "- no send method or user_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/services/coordination_service.py:451"
       ]
     },
     "... with client_id": {
@@ -28,20 +42,11 @@
         "scripts/find_gtm_account_id.py:168"
       ]
     },
-    "Added foreign key constraint for api_keys.user_id": {
-      "value": "Added foreign key constraint for api_keys.user_id",
+    "Both websocket_client_id and websocket_connection_id provided - using websocket_client_id": {
+      "value": "Both websocket_client_id and websocket_connection_id provided - using websocket_client_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/db/database_initializer.py:382",
-        "netra_backend/app/db/database_initializer.py:578"
-      ]
-    },
-    "Added foreign key constraint for sessions.user_id": {
-      "value": "Added foreign key constraint for sessions.user_id",
-      "category": "database",
-      "locations": [
-        "netra_backend/app/db/database_initializer.py:359",
-        "netra_backend/app/db/database_initializer.py:555"
+        "netra_backend/app/dependencies.py:833"
       ]
     },
     "Cannot create UserExecutionContext: invalid auth_result or missing user_id": {
@@ -55,14 +60,14 @@
       "value": "Connection must have a valid connection_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:442"
+        "netra_backend/app/websocket_core/unified_manager.py:484"
       ]
     },
     "Connection must have a valid user_id": {
       "value": "Connection must have a valid user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:440"
+        "netra_backend/app/websocket_core/unified_manager.py:482"
       ]
     },
     "Data assessment for run_id": {
@@ -76,14 +81,21 @@
       "value": "Empty or invalid connection_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/event_validator.py:480"
+        "netra_backend/app/websocket_core/event_validator.py:653"
       ]
     },
     "Empty or invalid user_id": {
       "value": "Empty or invalid user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/event_validator.py:472"
+        "netra_backend/app/websocket_core/event_validator.py:645"
+      ]
+    },
+    "Event contains different user_id": {
+      "value": "Event contains different user_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/websocket_core/event_validator.py:170"
       ]
     },
     "From": {
@@ -108,14 +120,14 @@
       "category": "database",
       "locations": [
         "netra_backend/app/services/unified_authentication_service.py:604",
-        "netra_backend/app/websocket_core/user_context_extractor.py:320"
+        "netra_backend/app/websocket_core/user_context_extractor.py:252"
       ]
     },
     "PASS-THROUGH FIX: Using provided connection_id": {
       "value": "PASS-THROUGH FIX: Using provided connection_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:1047"
+        "netra_backend/app/websocket_core/unified_manager.py:1237"
       ]
     },
     "Starting synthetic data generation for run_id": {
@@ -150,7 +162,12 @@
       "value": "Update",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/supply_researcher/agent.py:455"
+        "netra_backend/app/agents/supply_researcher/agent.py:455",
+        "scripts/git_commit_gardener_monitor.py:216",
+        "scripts/git_commit_gardener_monitor.py:226",
+        "scripts/git_commit_gardener_monitor.py:238",
+        "scripts/git_commit_gardener_monitor.py:248",
+        "scripts/git_commit_gardener_monitor.py:265"
       ]
     },
     "User approval required for run_id": {
@@ -165,7 +182,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/reporting_sub_agent.py:96",
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:179"
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:260"
       ]
     },
     "UserExecutionContext missing required thread_id": {
@@ -173,7 +190,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/reporting_sub_agent.py:94",
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:177"
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:258"
       ]
     },
     "UserExecutionContext missing required user_id": {
@@ -181,7 +198,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/reporting_sub_agent.py:92",
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:175"
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:256"
       ]
     },
     "UserExecutionContext.*connection_id": {
@@ -202,14 +219,14 @@
       "value": "WebSocket manager factory called without user context or user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/websocket_manager_factory.py:197"
+        "netra_backend/app/websocket_core/websocket_manager_factory.py:203"
       ]
     },
     "WebSocket manager sync factory called without user context or user_id": {
       "value": "WebSocket manager sync factory called without user context or user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/websocket_manager_factory.py:264"
+        "netra_backend/app/websocket_core/websocket_manager_factory.py:270"
       ]
     },
     "_created_at": {
@@ -224,8 +241,8 @@
       "value": "_current_request_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/reporting_sub_agent.py:969",
-        "netra_backend/app/agents/reporting_sub_agent.py:987"
+        "netra_backend/app/agents/reporting_sub_agent.py:978",
+        "netra_backend/app/agents/reporting_sub_agent.py:996"
       ]
     },
     "_pool_id": {
@@ -249,8 +266,9 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/agent_communication.py:109",
-        "netra_backend/app/agents/base_agent.py:1839",
-        "netra_backend/app/services/agent_websocket_bridge.py:2844"
+        "netra_backend/app/agents/base_agent.py:1850",
+        "netra_backend/app/services/agent_websocket_bridge.py:3273",
+        "netra_backend/app/websocket_core/unified_manager.py:865"
       ]
     },
     "aborted_at": {
@@ -308,7 +326,7 @@
       "value": "agent.run_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:241"
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:388"
       ]
     },
     "agent_admin_user_id": {
@@ -330,8 +348,8 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/agent_communication.py:165",
-        "netra_backend/app/agents/supervisor_consolidated.py:1385",
-        "netra_backend/app/agents/supervisor_consolidated.py:1427",
+        "netra_backend/app/agents/supervisor_consolidated.py:1442",
+        "netra_backend/app/agents/supervisor_consolidated.py:1484",
         "netra_backend/app/alembic/versions/882759db46ce_add_missing_tables_for_agent_executions_.py:27",
         "netra_backend/app/alembic/versions/882759db46ce_add_missing_tables_for_agent_executions_.py:45",
         "netra_backend/app/core/cross_service_validators/contract_validators.py:80",
@@ -501,8 +519,8 @@
       "value": "broadcast_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/handlers.py:529",
-        "netra_backend/app/websocket_core/handlers.py:546"
+        "netra_backend/app/websocket_core/handlers.py:645",
+        "netra_backend/app/websocket_core/handlers.py:662"
       ]
     },
     "broke_at": {
@@ -601,7 +619,7 @@
       "value": "child_created_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:634"
+        "netra_backend/app/services/user_execution_context.py:768"
       ]
     },
     "child_id": {
@@ -631,7 +649,7 @@
         "netra_backend/app/routes/auth_routes/oauth_validation.py:31",
         "netra_backend/app/routes/auth_routes/oauth_validation.py:31",
         "netra_backend/app/schemas/config.py:59",
-        "netra_backend/app/schemas/config.py:766"
+        "netra_backend/app/schemas/config.py:812"
       ]
     },
     "closed_at": {
@@ -676,15 +694,15 @@
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:594",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:1027",
         "netra_backend/app/core/interfaces_observability.py:299",
-        "netra_backend/app/db/clickhouse.py:1440",
-        "netra_backend/app/db/clickhouse.py:1440"
+        "netra_backend/app/db/clickhouse.py:1463",
+        "netra_backend/app/db/clickhouse.py:1463"
       ]
     },
     "component_id": {
       "value": "component_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/agent_websocket_bridge.py:732",
+        "netra_backend/app/services/agent_websocket_bridge.py:828",
         "netra_backend/app/websocket_core/event_monitor.py:778",
         "netra_backend/app/websocket_core/event_monitor.py:862"
       ]
@@ -700,9 +718,10 @@
       "value": "connected_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/connection_manager.py:91",
+        "netra_backend/app/websocket_core/connection_manager.py:81",
+        "netra_backend/app/websocket_core/connection_manager.py:113",
         "netra_backend/app/websocket_core/context.py:125",
-        "netra_backend/app/websocket_core/unified_manager.py:1021",
+        "netra_backend/app/websocket_core/unified_manager.py:1211",
         "netra_backend/app/websocket_core/utils.py:787",
         "netra_backend/app/websocket_core/utils.py:863"
       ]
@@ -711,16 +730,16 @@
       "value": "connection_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/supervisor_consolidated.py:847",
+        "netra_backend/app/agents/supervisor_consolidated.py:904",
         "netra_backend/app/agents/unified_tool_execution.py:626",
         "netra_backend/app/agents/unified_tool_execution.py:753",
         "netra_backend/app/core/degradation_strategies.py:233",
         "netra_backend/app/core/error_recovery_integration.py:264",
+        "netra_backend/app/db/database_manager.py:714",
         "netra_backend/app/models/websocket_connection.py:33",
         "netra_backend/app/models/websocket_connection.py:48",
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:113",
-        "netra_backend/app/monitoring/websocket_notification_monitor.py:104",
-        "netra_backend/app/monitoring/websocket_notification_monitor.py:229"
+        "netra_backend/app/monitoring/websocket_notification_monitor.py:104"
       ]
     },
     "connection_user_id": {
@@ -756,7 +775,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/supervisor/execution_factory.py:92",
-        "netra_backend/app/services/user_execution_context.py:352"
+        "netra_backend/app/services/user_execution_context.py:486"
       ]
     },
     "context_id": {
@@ -782,7 +801,7 @@
       "value": "context_set_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:1866"
+        "netra_backend/app/services/user_execution_context.py:2004"
       ]
     },
     "context_user_id": {
@@ -851,9 +870,9 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/github_analyzer/agent.py:116",
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:233",
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:253",
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:267",
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:370",
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:400",
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:414",
         "netra_backend/app/agents/supervisor/flow_data_builders.py:103",
         "netra_backend/app/agents/supervisor/flow_logger.py:205",
         "netra_backend/app/agents/supervisor/observability_flow.py:49",
@@ -935,7 +954,8 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/supervisor/agent_coordination_validator.py:49",
-        "netra_backend/app/services/billing/invoice_generator.py:79"
+        "netra_backend/app/services/billing/invoice_generator.py:79",
+        "scripts/validate_agent_coordination_fixes.py:46"
       ]
     },
     "cycle_id": {
@@ -1064,11 +1084,11 @@
       "locations": [
         "netra_backend/app/admin/tools/unified_admin_dispatcher.py:637",
         "netra_backend/app/agents/request_scoped_tool_dispatcher.py:336",
-        "netra_backend/app/core/tools/unified_tool_dispatcher.py:325",
-        "netra_backend/app/core/tools/unified_tool_dispatcher.py:515",
-        "netra_backend/app/core/tools/unified_tool_dispatcher.py:518",
-        "netra_backend/app/core/tools/unified_tool_dispatcher.py:562",
-        "netra_backend/app/core/tools/unified_tool_dispatcher.py:562"
+        "netra_backend/app/core/tools/unified_tool_dispatcher.py:330",
+        "netra_backend/app/core/tools/unified_tool_dispatcher.py:520",
+        "netra_backend/app/core/tools/unified_tool_dispatcher.py:523",
+        "netra_backend/app/core/tools/unified_tool_dispatcher.py:567",
+        "netra_backend/app/core/tools/unified_tool_dispatcher.py:567"
       ]
     },
     "document_id": {
@@ -1080,7 +1100,14 @@
         "netra_backend/app/routes/corpus.py:346",
         "netra_backend/app/services/audit/example_usage.py:133",
         "netra_backend/app/services/corpus/search_operations.py:405",
-        "netra_backend/app/services/corpus_service.py:132"
+        "netra_backend/app/services/corpus_service.py:133"
+      ]
+    },
+    "emergency_created_at": {
+      "value": "emergency_created_at",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/auth_integration/auth_permissiveness.py:716"
       ]
     },
     "emergency_rollback_triggered_at": {
@@ -1117,8 +1144,8 @@
         "netra_backend/app/agents/supervisor/request_scoped_execution_engine.py:505",
         "netra_backend/app/agents/supervisor/request_scoped_execution_engine.py:539",
         "netra_backend/app/agents/supervisor/user_execution_engine.py:448",
-        "netra_backend/app/agents/supervisor/user_execution_engine.py:928",
-        "netra_backend/app/agents/supervisor/user_execution_engine.py:973"
+        "netra_backend/app/agents/supervisor/user_execution_engine.py:949",
+        "netra_backend/app/agents/supervisor/user_execution_engine.py:994"
       ]
     },
     "ensure_request_id": {
@@ -1198,14 +1225,14 @@
       "locations": [
         "netra_backend/app/agents/tool_event_bus.py:85",
         "netra_backend/app/agents/tool_event_bus.py:112",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:823",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:828",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:828",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:838",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:838",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:846",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:846",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:919"
+        "netra_backend/app/core/cross_service_validators/security_validators.py:852",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:857",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:857",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:867",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:867",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:875",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:875",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:948"
       ]
     },
     "event_user_id": {
@@ -1247,6 +1274,20 @@
         "netra_backend/app/agents/unified_tool_execution.py:604"
       ]
     },
+    "execution_context_run_id": {
+      "value": "execution_context_run_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:140"
+      ]
+    },
+    "execution_context_thread_id": {
+      "value": "execution_context_thread_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:139"
+      ]
+    },
     "execution_id": {
       "value": "execution_id",
       "category": "database",
@@ -1256,11 +1297,11 @@
         "netra_backend/app/agents/execution_tracking/heartbeat.py:345",
         "netra_backend/app/agents/execution_tracking/tracker.py:490",
         "netra_backend/app/agents/execution_tracking/tracker.py:512",
-        "netra_backend/app/agents/supervisor/agent_execution_core.py:897",
+        "netra_backend/app/agents/supervisor/agent_execution_core.py:1119",
         "netra_backend/app/agents/supervisor/execution_engine.py:313",
         "netra_backend/app/agents/supervisor/execution_engine.py:332",
-        "netra_backend/app/agents/supervisor/execution_engine.py:556",
-        "netra_backend/app/agents/supervisor/execution_engine.py:633"
+        "netra_backend/app/agents/supervisor/execution_engine.py:560",
+        "netra_backend/app/agents/supervisor/execution_engine.py:637"
       ]
     },
     "existing_user_id": {
@@ -1276,7 +1317,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/alembic/migrations_helpers/agent_tables.py:140",
-        "netra_backend/app/services/user_execution_context.py:2295"
+        "netra_backend/app/services/user_execution_context.py:2433"
       ]
     },
     "expires_at": {
@@ -1309,7 +1350,7 @@
       "locations": [
         "netra_backend/app/agents/utils.py:56",
         "netra_backend/app/core/startup_validator.py:274",
-        "netra_backend/app/services/user_execution_context.py:242"
+        "netra_backend/app/services/user_execution_context.py:295"
       ]
     },
     "extract_thread_updated_at": {
@@ -1345,9 +1386,9 @@
         "netra_backend/app/services/messaging/dead_letter_queue.py:65",
         "netra_backend/app/services/messaging/dead_letter_queue.py:66",
         "netra_backend/app/services/thread_service.py:180",
-        "netra_backend/app/websocket_core/unified_manager.py:1241",
-        "netra_backend/app/websocket_core/unified_manager.py:1367",
-        "netra_backend/app/websocket_core/unified_manager.py:1436"
+        "netra_backend/app/websocket_core/unified_manager.py:1431",
+        "netra_backend/app/websocket_core/unified_manager.py:1557",
+        "netra_backend/app/websocket_core/unified_manager.py:1626"
       ]
     },
     "fetched_at": {
@@ -1362,8 +1403,8 @@
       "category": "database",
       "locations": [
         "netra_backend/app/admin/corpus/compatibility.py:232",
-        "netra_backend/app/services/corpus_service.py:135",
-        "netra_backend/app/services/corpus_service.py:135",
+        "netra_backend/app/services/corpus_service.py:136",
+        "netra_backend/app/services/corpus_service.py:136",
         "netra_backend/app/services/file_storage_service.py:215",
         "netra_backend/app/services/file_storage_service.py:233",
         "netra_backend/app/services/file_storage_service.py:343",
@@ -1384,7 +1425,7 @@
       "value": "flow_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/supervisor/execution_engine.py:1265",
+        "netra_backend/app/agents/supervisor/execution_engine.py:1269",
         "netra_backend/app/agents/supervisor/flow_data_builders.py:57",
         "netra_backend/app/agents/supervisor/flow_data_builders.py:66",
         "netra_backend/app/agents/supervisor/flow_data_builders.py:76",
@@ -1401,9 +1442,9 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/migration/deepagentstate_adapter.py:388",
-        "netra_backend/app/clients/circuit_breaker.py:275",
-        "netra_backend/app/clients/circuit_breaker.py:298",
-        "netra_backend/app/clients/circuit_breaker.py:318",
+        "netra_backend/app/clients/circuit_breaker.py:277",
+        "netra_backend/app/clients/circuit_breaker.py:300",
+        "netra_backend/app/clients/circuit_breaker.py:320",
         "netra_backend/app/core/registry/universal_registry.py:353",
         "netra_backend/app/db/clickhouse_schema.py:127",
         "netra_backend/app/db/clickhouse_schema.py:132",
@@ -1585,7 +1626,6 @@
       "value": "initialized_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/db/database_initializer.py:711",
         "netra_backend/app/services/token_optimization/context_manager.py:299"
       ]
     },
@@ -1604,7 +1644,7 @@
       "value": "insert",
       "category": "database",
       "locations": [
-        "netra_backend/app/core/service_resilience.py:212",
+        "netra_backend/app/core/service_resilience.py:294",
         "netra_backend/app/db/cache_config.py:192",
         "netra_backend/app/services/database/transaction_coordinator.py:314",
         "netra_backend/app/services/database/transaction_coordinator.py:333",
@@ -1624,7 +1664,7 @@
       "value": "invalid_service_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:793",
+        "netra_backend/app/clients/auth_client_core.py:900",
         "auth_service/auth_core/routes/auth_routes.py:781",
         "auth_service/auth_core/routes/auth_routes.py:956"
       ]
@@ -1633,7 +1673,7 @@
       "value": "invalid_user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:1007"
+        "netra_backend/app/websocket_core/unified_manager.py:1197"
       ]
     },
     "invocation_id": {
@@ -1658,7 +1698,7 @@
       "value": "is already a valid thread_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/agent_websocket_bridge.py:2222"
+        "netra_backend/app/services/agent_websocket_bridge.py:2647"
       ]
     },
     "issue_id": {
@@ -1977,7 +2017,7 @@
       "value": "manager_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:2422"
+        "netra_backend/app/services/user_execution_context.py:2560"
       ]
     },
     "mapping_id": {
@@ -2035,7 +2075,8 @@
       "value": "missing valid run_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/event_validator.py:827"
+        "netra_backend/app/websocket_core/event_validator.py:735",
+        "netra_backend/app/websocket_core/event_validator.py:1250"
       ]
     },
     "missing_client_id": {
@@ -2055,6 +2096,9 @@
         "netra_backend/app/core/schema_sync/validator.py:490",
         "netra_backend/app/services/factory_status/metrics_impact.py:467",
         "netra_backend/app/services/factory_status/metrics_impact.py:480",
+        "scripts/evidence_based_reporting.py:188",
+        "scripts/git_commit_gardener_monitor.py:113",
+        "scripts/git_commit_gardener_monitor.py:128",
         "shared/config_change_tracker.py:28"
       ]
     },
@@ -2083,11 +2127,25 @@
         "netra_backend/app/services/websocket/message_queue.py:655"
       ]
     },
+    "netra_backend.app.routes.utils.thread_handlers.generate_thread_id": {
+      "value": "netra_backend.app.routes.utils.thread_handlers.generate_thread_id",
+      "category": "database",
+      "locations": [
+        "scripts/verify_thread_handler_fixes.py:143"
+      ]
+    },
     "next_retry_at": {
       "value": "next_retry_at",
       "category": "database",
       "locations": [
         "netra_backend/app/services/websocket/message_queue.py:465"
+      ]
+    },
+    "no_id": {
+      "value": "no_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/routes/websocket_ssot.py:1095"
       ]
     },
     "normalized_id": {
@@ -2152,8 +2210,8 @@
         "netra_backend/app/services/analytics/cost_tracker.py:49",
         "netra_backend/app/services/compensation_engine_core.py:150",
         "netra_backend/app/services/compensation_helpers.py:68",
-        "netra_backend/app/services/database/rollback_manager_clickhouse.py:95",
-        "netra_backend/app/services/database/rollback_manager_clickhouse.py:122"
+        "netra_backend/app/services/coordination_service.py:331",
+        "netra_backend/app/services/coordination_service.py:544"
       ]
     },
     "optimized_at": {
@@ -2196,7 +2254,7 @@
       "value": "original_message_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/handlers.py:705"
+        "netra_backend/app/websocket_core/handlers.py:821"
       ]
     },
     "original_operation_id": {
@@ -2247,15 +2305,15 @@
       "category": "database",
       "locations": [
         "netra_backend/app/agents/supervisor/execution_factory.py:163",
-        "netra_backend/app/services/user_execution_context.py:359",
-        "netra_backend/app/services/user_execution_context.py:631",
-        "netra_backend/app/services/user_execution_context.py:835",
-        "netra_backend/app/services/user_execution_context.py:893",
-        "netra_backend/app/services/user_execution_context.py:980",
-        "netra_backend/app/services/user_execution_context.py:1007",
-        "netra_backend/app/services/user_execution_context.py:1008",
-        "netra_backend/app/services/user_execution_context.py:1012",
-        "netra_backend/app/services/user_execution_context.py:1016"
+        "netra_backend/app/services/user_execution_context.py:493",
+        "netra_backend/app/services/user_execution_context.py:765",
+        "netra_backend/app/services/user_execution_context.py:969",
+        "netra_backend/app/services/user_execution_context.py:1027",
+        "netra_backend/app/services/user_execution_context.py:1114",
+        "netra_backend/app/services/user_execution_context.py:1141",
+        "netra_backend/app/services/user_execution_context.py:1142",
+        "netra_backend/app/services/user_execution_context.py:1146",
+        "netra_backend/app/services/user_execution_context.py:1150"
       ]
     },
     "parent_snapshot_id": {
@@ -2355,6 +2413,13 @@
         "netra_backend/app/alembic/versions/bb39e1c49e2d_add_missing_tables_and_columns.py:127"
       ]
     },
+    "preliminary_connection_id": {
+      "value": "preliminary_connection_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/routes/websocket_ssot.py:554"
+      ]
+    },
     "processing_started_at": {
       "value": "processing_started_at",
       "category": "database",
@@ -2368,8 +2433,8 @@
       "value": "project_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/core/environment_context/cloud_environment_detector.py:188",
-        "netra_backend/app/core/environment_context/cloud_environment_detector.py:293",
+        "netra_backend/app/core/environment_context/cloud_environment_detector.py:189",
+        "netra_backend/app/core/environment_context/cloud_environment_detector.py:370",
         "netra_backend/app/services/monitoring/gcp_client_manager.py:129",
         "netra_backend/app/services/monitoring/gcp_error_service.py:383",
         "scripts/audit_oauth_gcp_logs.py:508",
@@ -2480,8 +2545,8 @@
         "netra_backend/app/services/service_mesh/discovery_service.py:235",
         "netra_backend/app/services/service_mesh/load_balancer.py:36",
         "netra_backend/app/websocket_core/state_coordinator.py:246",
-        "netra_backend/app/websocket_core/websocket_manager_factory.py:447",
-        "netra_backend/app/websocket_core/websocket_manager_factory.py:470"
+        "netra_backend/app/websocket_core/websocket_manager_factory.py:453",
+        "netra_backend/app/websocket_core/websocket_manager_factory.py:476"
       ]
     },
     "registry_created_at": {
@@ -2531,7 +2596,7 @@
         "netra_backend/app/agents/supervisor/data_access_integration.py:161",
         "netra_backend/app/agents/supervisor/execution_factory.py:210",
         "netra_backend/app/agents/supervisor/execution_factory.py:776",
-        "netra_backend/app/agents/supervisor/user_execution_engine.py:1129"
+        "netra_backend/app/agents/supervisor/user_execution_engine.py:1150"
       ]
     },
     "requesting_user_id": {
@@ -2678,7 +2743,7 @@
       "value": "section_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/reporting_sub_agent.py:435",
+        "netra_backend/app/agents/reporting_sub_agent.py:444",
         "netra_backend/app/monitoring/websocket_dashboard_config.py:105"
       ]
     },
@@ -2690,10 +2755,10 @@
         "netra_backend/app/agents/tool_discovery_sub_agent.py:196",
         "netra_backend/app/core/performance_query_optimizer.py:102",
         "netra_backend/app/core/windows_asyncio_safe.py:109",
-        "netra_backend/app/db/clickhouse.py:1035",
-        "netra_backend/app/db/clickhouse.py:1050",
+        "netra_backend/app/db/clickhouse.py:1044",
         "netra_backend/app/db/clickhouse.py:1067",
-        "netra_backend/app/db/clickhouse.py:1093",
+        "netra_backend/app/db/clickhouse.py:1084",
+        "netra_backend/app/db/clickhouse.py:1116",
         "netra_backend/app/factories/clickhouse_factory.py:269",
         "netra_backend/app/factories/clickhouse_factory.py:282"
       ]
@@ -2741,16 +2806,16 @@
       "value": "service_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:774",
-        "netra_backend/app/clients/auth_client_core.py:829",
-        "netra_backend/app/clients/auth_client_core.py:1175",
+        "netra_backend/app/clients/auth_client_core.py:881",
+        "netra_backend/app/clients/auth_client_core.py:936",
+        "netra_backend/app/clients/auth_client_core.py:1282",
         "netra_backend/app/core/auth_constants.py:31",
-        "netra_backend/app/core/configuration/base.py:135",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:281",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:302",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:302",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:313",
-        "netra_backend/app/core/cross_service_validators/security_validators.py:313"
+        "netra_backend/app/core/configuration/base.py:152",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:306",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:327",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:327",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:338",
+        "netra_backend/app/core/cross_service_validators/security_validators.py:338"
       ]
     },
     "session_id": {
@@ -2761,12 +2826,12 @@
         "netra_backend/app/agents/supervisor/agent_execution_context_manager.py:429",
         "netra_backend/app/agents/supervisor/agent_execution_context_manager.py:478",
         "netra_backend/app/agents/supervisor/agent_execution_validator.py:544",
+        "netra_backend/app/agents/supervisor_consolidated.py:182",
+        "netra_backend/app/agents/supervisor_ssot.py:113",
         "netra_backend/app/agents/supply_researcher/agent.py:309",
         "netra_backend/app/agents/supply_researcher/research_engine.py:178",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:309",
-        "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:351",
-        "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:579",
-        "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:1048"
+        "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:351"
       ]
     },
     "snapshot_id": {
@@ -2776,8 +2841,8 @@
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:436",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:471",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:480",
-        "netra_backend/app/db/clickhouse.py:1438",
-        "netra_backend/app/db/clickhouse.py:1438",
+        "netra_backend/app/db/clickhouse.py:1461",
+        "netra_backend/app/db/clickhouse.py:1461",
         "netra_backend/app/services/state_persistence.py:1046",
         "netra_backend/app/services/state_persistence.py:1055"
       ]
@@ -2814,12 +2879,19 @@
         "netra_backend/app/alembic/migrations_helpers/agent_tables.py:66",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:465",
         "netra_backend/app/alembic/versions/66e0e5d9662d_add_missing_tables_and_columns_complete.py:478",
-        "netra_backend/app/core/agent_execution_tracker.py:698",
+        "netra_backend/app/core/agent_execution_tracker.py:755",
         "netra_backend/app/core/interfaces_observability.py:297",
         "netra_backend/app/db/models_agent_state.py:206",
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:705",
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:726",
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:738"
+      ]
+    },
+    "state_exec_id": {
+      "value": "state_exec_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/services/coordination_service.py:394"
       ]
     },
     "step_id": {
@@ -2927,10 +2999,10 @@
       "value": "svc_id",
       "category": "database",
       "locations": [
-        "auth_service/auth_core/core/jwt_handler.py:385",
-        "auth_service/auth_core/core/jwt_handler.py:472",
-        "auth_service/auth_core/core/jwt_handler.py:599",
-        "auth_service/auth_core/core/jwt_handler.py:599"
+        "auth_service/auth_core/core/jwt_handler.py:399",
+        "auth_service/auth_core/core/jwt_handler.py:486",
+        "auth_service/auth_core/core/jwt_handler.py:613",
+        "auth_service/auth_core/core/jwt_handler.py:613"
       ]
     },
     "synthetic_data_id": {
@@ -2945,7 +3017,7 @@
       "value": "tagged_at",
       "category": "database",
       "locations": [
-        "netra_backend/app/dependencies.py:811"
+        "netra_backend/app/dependencies.py:852"
       ]
     },
     "target_snapshot_id": {
@@ -2960,7 +3032,7 @@
       "value": "target_user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:1670"
+        "netra_backend/app/clients/auth_client_core.py:1777"
       ]
     },
     "task_id": {
@@ -2976,7 +3048,7 @@
         "netra_backend/app/core/interfaces_observability.py:247",
         "netra_backend/app/services/secure_background_task_manager.py:80",
         "netra_backend/app/services/secure_background_task_manager.py:248",
-        "netra_backend/app/websocket_core/handlers.py:455"
+        "netra_backend/app/websocket_core/handlers.py:571"
       ]
     },
     "template_id": {
@@ -3034,8 +3106,8 @@
         "netra_backend/app/agents/prompts/data_prompts.py:31",
         "netra_backend/app/agents/reporting/templates.py:271",
         "netra_backend/app/agents/reporting/templates.py:271",
-        "netra_backend/app/agents/reporting_sub_agent.py:749",
-        "netra_backend/app/agents/state.py:239"
+        "netra_backend/app/agents/reporting_sub_agent.py:758",
+        "netra_backend/app/agents/reporting_sub_agent.py:1166"
       ]
     },
     "ticket_id": {
@@ -3056,7 +3128,7 @@
       "value": "to invalid user_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:821"
+        "netra_backend/app/websocket_core/unified_manager.py:1011"
       ]
     },
     "todo_id": {
@@ -3074,7 +3146,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/services/unified_authentication_service.py:373",
-        "netra_backend/app/websocket_core/user_context_extractor.py:425",
+        "netra_backend/app/websocket_core/user_context_extractor.py:359",
         "auth_service/auth_core/routes/auth_routes.py:1502"
       ]
     },
@@ -3095,7 +3167,21 @@
       "category": "database",
       "locations": [
         "netra_backend/app/services/unified_authentication_service.py:372",
-        "netra_backend/app/websocket_core/user_context_extractor.py:424"
+        "netra_backend/app/websocket_core/user_context_extractor.py:358"
+      ]
+    },
+    "tool_id": {
+      "value": "tool_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/core/exceptions_tools.py:55",
+        "netra_backend/app/core/exceptions_tools.py:64",
+        "netra_backend/app/core/tool_validator.py:79",
+        "netra_backend/app/core/tool_validator.py:151",
+        "netra_backend/app/core/tool_validator.py:240",
+        "netra_backend/app/core/tool_validator.py:311",
+        "netra_backend/app/core/tool_validator.py:412",
+        "netra_backend/app/core/tool_validator.py:470"
       ]
     },
     "trace_id": {
@@ -3121,11 +3207,13 @@
         "netra_backend/app/core/cross_service_validators/data_consistency_validators.py:647",
         "netra_backend/app/core/cross_service_validators/data_consistency_validators.py:660",
         "netra_backend/app/core/error_recovery_integration.py:176",
+        "netra_backend/app/db/database_manager.py:289",
         "netra_backend/app/routes/database_monitoring/transaction_routes.py:41",
+        "netra_backend/app/services/coordination_service.py:334",
+        "netra_backend/app/services/coordination_service.py:626",
         "netra_backend/app/services/database/transaction_coordinator.py:455",
         "scripts/gtm_api_setup.py:407",
-        "scripts/gtm_api_setup.py:962",
-        "shared/isolation_score_monitor.py:339"
+        "scripts/gtm_api_setup.py:962"
       ]
     },
     "triggered_at": {
@@ -3144,14 +3232,16 @@
       "value": "turn_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/websocket_core/handlers.py:284",
-        "netra_backend/app/websocket_core/handlers.py:299",
-        "netra_backend/app/websocket_core/handlers.py:317",
-        "netra_backend/app/websocket_core/handlers.py:335",
-        "netra_backend/app/websocket_core/handlers.py:354",
-        "netra_backend/app/websocket_core/handlers.py:385",
-        "netra_backend/app/websocket_core/handlers.py:402",
-        "netra_backend/app/websocket_core/handlers.py:402"
+        "netra_backend/app/websocket_core/handlers.py:329",
+        "netra_backend/app/websocket_core/handlers.py:339",
+        "netra_backend/app/websocket_core/handlers.py:358",
+        "netra_backend/app/websocket_core/handlers.py:381",
+        "netra_backend/app/websocket_core/handlers.py:404",
+        "netra_backend/app/websocket_core/handlers.py:428",
+        "netra_backend/app/websocket_core/handlers.py:464",
+        "netra_backend/app/websocket_core/handlers.py:478",
+        "netra_backend/app/websocket_core/handlers.py:497",
+        "netra_backend/app/websocket_core/handlers.py:518"
       ]
     },
     "unknown_service_id": {
@@ -3196,9 +3286,9 @@
         "netra_backend/app/agents/supply_researcher/supply_database_manager.py:60",
         "netra_backend/app/agents/supply_researcher/supply_database_manager.py:185",
         "netra_backend/app/routes/config.py:90",
-        "scripts/e2e_continuous_runner.py:58",
-        "scripts/team_updates_documentation_analyzer.py:176",
-        "scripts/update_spec_timestamps.py:219"
+        "scripts/batch_import_update.py:76",
+        "scripts/batch_import_update.py:99",
+        "scripts/batch_import_update.py:132"
       ]
     },
     "updated_at": {
@@ -3236,21 +3326,21 @@
       "value": "user_correlation_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/supervisor/user_execution_engine.py:1042"
+        "netra_backend/app/agents/supervisor/user_execution_engine.py:1063"
       ]
     },
     "user_engine_id": {
       "value": "user_engine_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/agents/supervisor/user_execution_engine.py:707"
+        "netra_backend/app/agents/supervisor/user_execution_engine.py:723"
       ]
     },
     "user_execution_context_id": {
       "value": "user_execution_context_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:1106"
+        "netra_backend/app/services/user_execution_context.py:1240"
       ]
     },
     "user_id": {
@@ -3265,7 +3355,7 @@
         "netra_backend/app/admin/tools/unified_admin_dispatcher.py:633",
         "netra_backend/app/agents/actions_goals_plan_builder.py:246",
         "netra_backend/app/agents/base/execution_context.py:188",
-        "netra_backend/app/agents/base_agent.py:1839",
+        "netra_backend/app/agents/base_agent.py:1850",
         "netra_backend/app/agents/chat_orchestrator/confidence_manager.py:70"
       ]
     },
@@ -3273,7 +3363,7 @@
       "value": "user_isolation_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/middleware/gcp_auth_context_middleware.py:347"
+        "netra_backend/app/middleware/gcp_auth_context_middleware.py:346"
       ]
     },
     "validate_run_id": {
@@ -3281,7 +3371,7 @@
       "category": "database",
       "locations": [
         "netra_backend/app/core/startup_validator.py:275",
-        "netra_backend/app/services/user_execution_context.py:233"
+        "netra_backend/app/services/user_execution_context.py:286"
       ]
     },
     "validate_service_id": {
@@ -3297,7 +3387,7 @@
       "locations": [
         "netra_backend/app/dependencies.py:147",
         "netra_backend/app/services/unified_authentication_service.py:85",
-        "netra_backend/app/websocket_core/unified_websocket_auth.py:254"
+        "netra_backend/app/websocket_core/unified_websocket_auth.py:255"
       ]
     },
     "validation_id": {
@@ -3342,32 +3432,32 @@
       "value": "websocket_client_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/services/user_execution_context.py:325",
-        "netra_backend/app/services/user_execution_context.py:839",
-        "netra_backend/app/services/user_execution_context.py:1108",
-        "netra_backend/app/websocket_core/event_validator.py:169",
-        "netra_backend/app/websocket_core/event_validator.py:191",
-        "netra_backend/app/websocket_core/unified_manager.py:380",
-        "netra_backend/app/websocket_core/unified_websocket_auth.py:245",
-        "netra_backend/app/websocket_core/unified_websocket_auth.py:720",
-        "scripts/standardize_factory_patterns.py:101",
-        "scripts/standardize_factory_patterns.py:116"
+        "netra_backend/app/routes/websocket_ssot.py:606",
+        "netra_backend/app/routes/websocket_ssot.py:606",
+        "netra_backend/app/routes/websocket_ssot.py:634",
+        "netra_backend/app/routes/websocket_ssot.py:634",
+        "netra_backend/app/routes/websocket_ssot.py:678",
+        "netra_backend/app/routes/websocket_ssot.py:678",
+        "netra_backend/app/services/user_execution_context.py:378",
+        "netra_backend/app/services/user_execution_context.py:973",
+        "netra_backend/app/services/user_execution_context.py:1242",
+        "netra_backend/app/websocket_core/event_validator.py:307"
       ]
     },
     "websocket_connection_id": {
       "value": "websocket_connection_id",
       "category": "database",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:538",
-        "netra_backend/app/routes/websocket_ssot.py:1002",
-        "netra_backend/app/services/user_execution_context.py:844",
+        "netra_backend/app/agents/supervisor_consolidated.py:188",
+        "netra_backend/app/agents/supervisor_consolidated.py:188",
+        "netra_backend/app/agents/supervisor_ssot.py:119",
+        "netra_backend/app/agents/supervisor_ssot.py:119",
+        "netra_backend/app/routes/websocket_ssot.py:776",
+        "netra_backend/app/routes/websocket_ssot.py:1425",
+        "netra_backend/app/services/user_execution_context.py:978",
         "scripts/standardize_factory_patterns.py:100",
         "scripts/standardize_factory_patterns.py:203",
-        "scripts/standardize_factory_patterns.py:386",
-        "scripts/standardize_factory_patterns.py:400",
-        "scripts/standardize_factory_patterns.py:435",
-        "scripts/standardize_factory_patterns.py:579",
-        "scripts/validate_factory_contracts.py:71"
+        "scripts/standardize_factory_patterns.py:386"
       ]
     },
     "websocket_connection_id parameter found - should be websocket_client_id": {
@@ -3377,11 +3467,20 @@
         "shared/interface_governance/interface_evolution_governance.py:598"
       ]
     },
+    "websocket_context_id": {
+      "value": "websocket_context_id",
+      "category": "database",
+      "locations": [
+        "netra_backend/app/websocket_core/agent_handler.py:138",
+        "netra_backend/app/websocket_core/agent_handler.py:189",
+        "netra_backend/app/websocket_core/agent_handler.py:213"
+      ]
+    },
     "websocket_id": {
       "value": "websocket_id",
       "category": "database",
       "locations": [
-        "shared/types/core_types.py:337",
+        "shared/types/core_types.py:349",
         "shared/types/execution_types.py:269",
         "shared/types/execution_types.py:281"
       ]

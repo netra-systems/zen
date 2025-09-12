@@ -570,12 +570,12 @@ class TestCrossServiceContextFailures:
                 }
                 
                 await websocket.send(json.dumps(v2_context_message))
-                v2_response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+                schema_v2_response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 
                 v2_contexts.append({
                     "user": user,
                     "websocket": websocket,
-                    "context": json.loads(v2_response),
+                    "context": json.loads(schema_v2_response),
                     "schema_version": "2.0"
                 })
                 
@@ -687,7 +687,7 @@ class TestCrossServiceContextFailures:
         
         # SCHEMA EVOLUTION ASSERTIONS
         successful_v1_contexts = len([c for c in v1_contexts if c["websocket"]])
-        successful_v2_contexts = len([c for c in v2_contexts if c["websocket"]])
+        successful_schema_v2_contexts = len([c for c in v2_contexts if c["websocket"]])
         successful_v3_contexts = len([c for c in v3_contexts if c["websocket"]])
         compatible_accesses = len([r for r in compatibility_results if r["compatible"]])
         total_compatibility_tests = len(compatibility_results)

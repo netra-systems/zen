@@ -50,6 +50,30 @@ class CircuitBreakerConfig:
     
     # Recovery - CRITICAL FIX: Reduced from 300s to prevent WebSocket blocking
     reset_timeout: float = 60.0  # Reset statistics after this many seconds of success
+    
+    @classmethod
+    def create_demo_config(cls) -> 'CircuitBreakerConfig':
+        """Create relaxed configuration for demo mode.
+        
+        Demo mode settings:
+        - Higher failure threshold (10 instead of 5)
+        - Shorter timeout (30s instead of 60s)
+        - More lenient failure rate (0.7 instead of 0.5)
+        - Faster recovery (30s instead of 60s)
+        
+        Returns:
+            CircuitBreakerConfig with demo mode settings
+        """
+        return cls(
+            failure_threshold=10,  # Relaxed from 5
+            success_threshold=2,   # Keep same
+            timeout=30.0,         # Reduced from 60s
+            half_open_max_calls=5, # Increased from 3
+            failure_rate_threshold=0.7,  # Relaxed from 0.5
+            min_calls_for_rate=5,  # Reduced from 10
+            call_timeout=10.0,     # Increased from 5.0s
+            reset_timeout=30.0     # Reduced from 60s
+        )
 
 
 @dataclass
@@ -384,7 +408,7 @@ def get_circuit_breaker(
     config: Optional[CircuitBreakerConfig] = None,
     fallback: Optional[Callable] = None
 ) -> CircuitBreaker:
-    """Get or create a circuit breaker instance.
+    """Get or create a circuit breaker instance with demo mode support.
     
     Args:
         name: Circuit breaker name
@@ -395,6 +419,17 @@ def get_circuit_breaker(
         CircuitBreaker instance
     """
     if name not in _circuit_breakers:
+        # If no config provided, try to use demo mode config
+        if config is None:
+            try:
+                from netra_backend.app.core.configuration.demo import get_backend_demo_config
+                demo_config = get_backend_demo_config()
+                if demo_config.is_demo_mode():
+                    config = CircuitBreakerConfig.create_demo_config()
+                    logger.info(f"🎭 DEMO MODE: Using relaxed circuit breaker configuration for '{name}'")
+            except Exception as e:
+                logger.warning(f"Failed to load demo config for circuit breaker '{name}': {e}")
+        
         _circuit_breakers[name] = CircuitBreaker(name, config, fallback)
     return _circuit_breakers[name]
 
