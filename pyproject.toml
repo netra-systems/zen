@@ -88,7 +88,19 @@ markers = [
     "skip_ci: Skip in CI environment",
     "manual: Manual tests only",
     "resilience: System resilience tests",
-    "security: Security validation tests"
+    "security: Security validation tests",
+    
+    # Additional high-usage markers
+    "asyncio: Asynchronous test functions",
+    "websocket: WebSocket-related tests",
+    "golden_path: Golden path user flow tests",
+    "deployment: Deployment-related tests",
+    "regression: Regression prevention tests",
+    "timeout: Tests with custom timeout settings",
+    "skipif: Conditional test skipping",
+    "xfail: Expected to fail tests",
+    "parametrize: Parameterized tests",
+    "usefixtures: Tests using specific fixtures"
 ]
 
 # Coverage settings
