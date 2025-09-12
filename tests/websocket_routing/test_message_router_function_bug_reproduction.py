@@ -255,7 +255,11 @@ class TestMessageRouterFunctionBugReproduction:
         
         # Even though we have a good handler, the bad one breaks the system
         with pytest.raises(AttributeError, match="'function' object has no attribute 'can_handle'"):
-            asyncio.run(message_router.route_message("test_user", mock_websocket, sample_message))
+            message_router._find_handler(MessageType.AGENT_REQUEST)
+        
+        # route_message catches error and falls back, returning False
+        result = asyncio.run(message_router.route_message("test_user", mock_websocket, sample_message))
+        assert result is False
 
 
 class TestWebSocketSSOTBugReproductionIntegration:
