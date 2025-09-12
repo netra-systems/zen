@@ -63,6 +63,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
 # Legacy import removed - use SSOT from resilience
 # from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
 from netra_backend.app.core.resilience.fallback import FallbackManager
+# SECURITY FIX: Use MinimalPeriodicUpdateManager from UserExecutionEngine for compatibility
 from netra_backend.app.agents.supervisor.user_execution_engine import MinimalPeriodicUpdateManager as PeriodicUpdateManager
 from netra_backend.app.agents.supervisor.observability_flow import (
     get_supervisor_flow_logger,

@@ -68,7 +68,8 @@ try:
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    # SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     PRODUCTION_COMPONENTS_AVAILABLE = True
 except ImportError:
     logger.warning("Production components not available - tests will use minimal validation")

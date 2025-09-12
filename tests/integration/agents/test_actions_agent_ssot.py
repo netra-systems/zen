@@ -45,7 +45,8 @@ from shared.isolated_environment import IsolatedEnvironment
 # Import production components for integration testing
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher

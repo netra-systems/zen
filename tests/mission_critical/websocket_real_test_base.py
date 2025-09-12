@@ -383,6 +383,16 @@ class RealWebSocketTestBase:
         if self.services_started:
             return True
         
+        # ISSUE #420 RESOLUTION: Skip Docker startup if staging fallback configured
+        env = get_env()
+        staging_mode = env.get("TEST_MODE") == "staging_fallback"
+        use_staging = env.get("USE_STAGING_SERVICES", "false").lower() == "true"
+        
+        if staging_mode or use_staging:
+            logger.info("ISSUE #420 STRATEGIC RESOLUTION: Skipping Docker startup, using staging services directly")
+            self.services_started = True
+            return True
+        
         logger.info("Starting Docker services for WebSocket testing...")
         
         try:
