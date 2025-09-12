@@ -524,6 +524,11 @@ class ExecutionEngine:
     def __repr__(self) -> str:
         """Detailed string representation."""
         return self.__str__()
+
+
+# ============================================================================
+# FACTORY METHODS AND MIGRATION SUPPORT - Issue #565 Compatibility
+# ============================================================================
         
         # Create execution tracking record
         execution_id = self.execution_tracker.create_execution(
