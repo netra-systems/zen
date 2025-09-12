@@ -215,6 +215,9 @@ class GCPWebSocketInitializationValidator:
         self.environment = environment.lower()
         self.is_gcp_environment = is_gcp
         
+        # Re-initialize timeout configuration with new environment
+        self._initialize_environment_timeout_configuration()
+        
         # Re-register service checks with updated environment configuration
         self.readiness_checks.clear()
         self._register_critical_service_checks()
