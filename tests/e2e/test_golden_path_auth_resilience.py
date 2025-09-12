@@ -32,9 +32,9 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
     user workflow and threaten business value delivery.
     """
     
-    async def asyncSetUp(self):
+    def setup_method(self, method=None):
         """Set up E2E test environment targeting GCP staging."""
-        await super().asyncSetUp()
+        super().setup_method(method)
         
         # Verify we're targeting staging environment  
         env = get_env()
@@ -57,11 +57,20 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         print(f"🎯 Auth Service URL: {self.staging_auth_url}")
         print(f"🎯 Test User: {self.test_email}")
     
-    async def asyncTearDown(self):
+    def teardown_method(self, method=None):
         """Clean up E2E test environment."""
-        if self.auth_client._client:
-            await self.auth_client._client.aclose()
-        await super().asyncTearDown()
+        if hasattr(self, 'auth_client') and self.auth_client and hasattr(self.auth_client, '_client') and self.auth_client._client:
+            # Schedule async cleanup for next event loop
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self.auth_client._client.aclose())
+                else:
+                    loop.run_until_complete(self.auth_client._client.aclose())
+            except Exception as e:
+                print(f"Warning: Could not close auth client: {e}")
+        super().teardown_method(method)
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
