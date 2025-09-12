@@ -1835,8 +1835,8 @@ CMD ["npm", "start"]
             
             print(f"Validating OAuth configuration for {environment} environment...")
             
-            # Run OAuth validation
-            validator = OAuthDeploymentValidator(environment)
+            # Run OAuth validation in deployment context
+            validator = OAuthDeploymentValidator(environment, deployment_context=True)
             success, report = validator.validate_all()
             
             # Print validation report
