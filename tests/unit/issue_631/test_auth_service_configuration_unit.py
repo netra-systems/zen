@@ -54,11 +54,6 @@ class TestAuthServiceConfigurationUnit(SSotBaseTestCase):
         
         # ASSERT: AUTH_SERVICE_URL should be accessible from config
         actual_value = getattr(config, 'auth_service_url', None)
-        print(f"DEBUG: actual_value = {actual_value}")
-        print(f"DEBUG: test_auth_url = {test_auth_url}")
-        print(f"DEBUG: os.environ['AUTH_SERVICE_URL'] = {os.environ.get('AUTH_SERVICE_URL')}")
-        print(f"DEBUG: config object type = {type(config)}")
-        print(f"DEBUG: config.__dict__ = {getattr(config, '__dict__', 'NO_DICT')}")
         
         self.assertIsNotNone(
             actual_value,
