@@ -1,4 +1,6 @@
 """ ALERT:  ENHANCED Agent Registry with mandatory user isolation patterns.
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+
 
 CRITICAL SECURITY UPGRADE: This module implements hardened user isolation 
 patterns to prevent concurrent execution contamination and memory leaks.
@@ -844,9 +846,9 @@ class AgentRegistry(BaseAgentRegistry):
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system",
-            request_id=f"websocket_setup_{uuid.uuid4().hex[:8]}",
+            request_id=UnifiedIdGenerator.generate_base_id("websocket_setup"),
             thread_id="test_registry_thread",
-            run_id=f"websocket_run_{uuid.uuid4().hex[:8]}"
+            run_id=UnifiedIdGenerator.generate_base_id("websocket_run")
         )
         
         # Create adapter for SSOT compliance
@@ -931,9 +933,9 @@ class AgentRegistry(BaseAgentRegistry):
         import uuid
         default_context = UserExecutionContext(
             user_id="test_registry_system_async",
-            request_id=f"websocket_setup_async_{uuid.uuid4().hex[:8]}",
+            request_id=UnifiedIdGenerator.generate_base_id("websocket_setup_async"),
             thread_id="test_registry_thread_async",
-            run_id=f"websocket_run_async_{uuid.uuid4().hex[:8]}"
+            run_id=UnifiedIdGenerator.generate_base_id("websocket_run_async")
         )
         
         # Create adapter for SSOT compliance

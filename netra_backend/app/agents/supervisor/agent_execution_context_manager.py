@@ -22,6 +22,7 @@ import uuid
 from dataclasses import dataclass, field
 
 # SSOT Imports - Absolute imports as per CLAUDE.md
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, ensure_user_id
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from netra_backend.app.logging_config import central_logger
@@ -125,7 +126,9 @@ class AgentExecutionContextManager:
         """
         with self._lock:
             try:
-                session_id = f"session_{uuid.uuid4().hex[:12]}"
+                # Generate user-specific context IDs for proper isolation
+        context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
+        session_id = context_ids[0]  # thread_id for session tracking
                 now = datetime.now(timezone.utc)
                 
                 # Create execution context with proper isolation
@@ -419,8 +422,14 @@ class AgentExecutionContextManager:
         """Create isolated execution context with proper boundaries."""
         try:
             # Generate unique identifiers for this context
-            run_id = RunID(f"run_{uuid.uuid4().hex[:12]}")
-            request_id = RequestID(f"req_{uuid.uuid4().hex[:12]}")
+            # Use SSOT context generation for run_id
+        if 'context_ids' not in locals():
+            context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
+        run_id = RunID(context_ids[1])  # run_id from SSOT generation
+            # Use SSOT context generation for request_id
+        if 'context_ids' not in locals():
+            context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
+        request_id = RequestID(context_ids[2])  # request_id from SSOT generation
             
             # Create agent context with isolation boundary
             agent_context = initial_context.copy()
