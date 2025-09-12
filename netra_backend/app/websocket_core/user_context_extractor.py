@@ -47,6 +47,19 @@ from netra_backend.app.clients.auth_client_core import auth_client
 logger = central_logger.get_logger(__name__)
 
 
+def get_unified_auth():
+    """
+    SSOT compliance: Get unified auth service for JWT validation.
+    
+    This function provides the expected interface for SSOT tests while
+    maintaining backward compatibility with existing auth client usage.
+    
+    Returns:
+        Auth service client for JWT operations
+    """
+    return auth_client
+
+
 class UserContextExtractor:
     """
     Utility class for extracting UserExecutionContext from WebSocket connections.
