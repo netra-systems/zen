@@ -249,12 +249,151 @@ class UserExecutionEngine(IExecutionEngine):
     This follows the "Request-Scoped Service" pattern where each user request
     gets its own service instance with completely isolated state. This prevents
     the classic global state problems that cause user context leakage.
+    
+    API Compatibility:
+    - Modern: UserExecutionEngine(context, agent_factory, websocket_emitter)
+    - Legacy: UserExecutionEngine.create_from_legacy(registry, websocket_bridge, user_context=None)
     """
     
     # Constants (immutable, safe to share)
     # CRITICAL REMEDIATION: Reduced timeout for faster feedback and reduced blocking
     AGENT_EXECUTION_TIMEOUT = 25.0  # Reduced from 30s for faster feedback
     MAX_HISTORY_SIZE = 100
+    
+    @classmethod
+    async def create_from_legacy(cls, registry: 'AgentRegistry', websocket_bridge, 
+                               user_context: Optional['UserExecutionContext'] = None) -> 'UserExecutionEngine':
+        """API Compatibility factory method for legacy ExecutionEngine signature.
+        
+        ⚠️  ISSUE #565 API COMPATIBILITY BRIDGE ⚠️
+        
+        This method provides backward compatibility for the 128 deprecated imports
+        that use the old ExecutionEngine(registry, websocket_bridge, user_context=None) signature.
+        
+        Args:
+            registry: Agent registry for agent lookup (legacy parameter)
+            websocket_bridge: WebSocket bridge for event emission (legacy parameter) 
+            user_context: Optional UserExecutionContext (if None, creates anonymous user context)
+            
+        Returns:
+            UserExecutionEngine: Properly configured engine with user isolation
+            
+        Raises:
+            ValueError: If required components cannot be created
+            DeprecationWarning: Always issued to encourage migration
+            
+        Example Legacy Usage:
+            # OLD (deprecated): ExecutionEngine(registry, websocket_bridge)
+            # NEW (compatible): await UserExecutionEngine.create_from_legacy(registry, websocket_bridge)
+        """
+        import warnings
+        warnings.warn(
+            "ExecutionEngine(registry, websocket_bridge, user_context) pattern is DEPRECATED. "
+            "Use UserExecutionEngine with proper UserExecutionContext for Issue #565 migration. "
+            "This compatibility bridge will be removed after migration is complete.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            "🔄 Issue #565 API COMPATIBILITY: Legacy ExecutionEngine signature detected. "
+            "Creating UserExecutionEngine with compatibility bridge. "
+            "MIGRATION REQUIRED: Use proper UserExecutionContext pattern for full benefits."
+        )
+        
+        try:
+            # 1. Create or validate UserExecutionContext
+            if user_context is None:
+                # Create anonymous user context for compatibility
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                import uuid
+                
+                anonymous_user_context = UserExecutionContext(
+                    user_id=f"legacy_compat_{uuid.uuid4().hex[:8]}",
+                    thread_id=f"legacy_thread_{uuid.uuid4().hex[:8]}",
+                    run_id=f"legacy_run_{uuid.uuid4().hex[:8]}",
+                    request_id=f"legacy_req_{uuid.uuid4().hex[:8]}",
+                    metadata={
+                        'compatibility_mode': True,
+                        'migration_issue': '#565',
+                        'created_for': 'legacy_execution_engine_compatibility',
+                        'security_note': 'Anonymous user context - migrate to proper user authentication'
+                    }
+                )
+                user_context = anonymous_user_context
+                
+                logger.warning(
+                    "🔄 Issue #565: Created anonymous UserExecutionContext for compatibility. "
+                    f"User ID: {user_context.user_id}. SECURITY: Use proper user authentication."
+                )
+            
+            # Validate user context
+            user_context = validate_user_context(user_context)
+            
+            # 2. Create AgentInstanceFactory from registry and websocket_bridge
+            from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+            
+            # Convert registry to agent_factory compatible format
+            if hasattr(registry, 'get_agents') or hasattr(registry, 'list_keys'):
+                # Standard AgentRegistry - wrap in factory
+                agent_factory = AgentInstanceFactory(
+                    registry=registry,
+                    websocket_bridge=websocket_bridge
+                )
+                logger.debug("🔄 Created AgentInstanceFactory from legacy AgentRegistry")
+            else:
+                raise ValueError(
+                    f"Registry type {type(registry)} not compatible with AgentInstanceFactory. "
+                    f"Expected AgentRegistry with get_agents() or list_keys() methods."
+                )
+            
+            # 3. Create UserWebSocketEmitter from websocket_bridge
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+            
+            if hasattr(websocket_bridge, 'notify_agent_started'):
+                # Standard AgentWebSocketBridge - wrap in UserWebSocketEmitter
+                websocket_emitter = UnifiedWebSocketEmitter(
+                    user_id=user_context.user_id,
+                    thread_id=user_context.thread_id,
+                    run_id=user_context.run_id,
+                    websocket_bridge=websocket_bridge
+                )
+                logger.debug("🔄 Created UnifiedWebSocketEmitter from legacy websocket_bridge")
+            else:
+                raise ValueError(
+                    f"WebSocket bridge type {type(websocket_bridge)} not compatible. "
+                    f"Expected AgentWebSocketBridge with notify_agent_started() method."
+                )
+            
+            # 4. Create UserExecutionEngine with proper parameters
+            engine = cls(
+                context=user_context,
+                agent_factory=agent_factory,
+                websocket_emitter=websocket_emitter
+            )
+            
+            # 5. Add compatibility metadata for debugging
+            engine._compatibility_mode = True
+            engine._legacy_registry = registry
+            engine._legacy_websocket_bridge = websocket_bridge
+            engine._migration_issue = "#565"
+            
+            logger.info(
+                f"✅ Issue #565 API COMPATIBILITY: Successfully created UserExecutionEngine "
+                f"from legacy signature. User: {user_context.user_id}, "
+                f"Engine: {engine.engine_id}. Migration path available."
+            )
+            
+            return engine
+            
+        except Exception as e:
+            logger.error(
+                f"❌ Issue #565 API COMPATIBILITY FAILED: Could not create UserExecutionEngine "
+                f"from legacy ExecutionEngine signature: {e}. "
+                f"Registry: {type(registry)}, WebSocketBridge: {type(websocket_bridge)}. "
+                f"SOLUTION: Use proper UserExecutionEngine constructor."
+            )
+            raise ValueError(f"Legacy compatibility bridge failed: {e}")
     
     def __init__(self, 
                  context: UserExecutionContext,
