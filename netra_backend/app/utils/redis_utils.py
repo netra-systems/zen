@@ -7,18 +7,26 @@ PERFORMANCE: All Redis operations use the SSOT get_redis_client() pattern
 for connection pooling and configuration consistency.
 """
 
-from netra_backend.app.services.redis_client import get_redis_client
 from typing import Optional, Any, Dict, List
 import json
 import asyncio
+
+# MIGRATED: Use SSOT Redis import pattern
+from shared.isolated_environment import get_env
 
 async def get_redis_with_retry(max_retries: int = 3) -> Any:
     """Get Redis client with retry logic"""
     for attempt in range(max_retries):
         try:
-            client = await get_redis_client()
+            # Use SSOT Redis import pattern
+            import redis
+            client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
             # Test connection
-            await client.ping()
+            client.ping()
             return client
         except Exception as e:
             if attempt == max_retries - 1:

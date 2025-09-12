@@ -1533,13 +1533,13 @@ def _validate_critical_environment_configuration() -> Dict[str, Any]:
         if not database_url:
             validation_result["warnings"].append("DATABASE_URL not configured - may cause service failures")
         
-        # Check 5: JWT/Authentication secrets
+        # Check 5: JWT/Authentication secrets - SSOT compliance: Delegate to auth service
         validation_result["checks_performed"].append("auth_secrets")
-        jwt_secret = env.get("JWT_SECRET")
+        # SSOT REMEDIATION: JWT secrets managed by auth service, no direct access required
         service_secret = env.get("SERVICE_SECRET")
         
-        if not jwt_secret and not service_secret:
-            validation_result["warnings"].append("No JWT_SECRET or SERVICE_SECRET configured - auth may fail")
+        if not service_secret:
+            validation_result["warnings"].append("No SERVICE_SECRET configured - service auth may fail")
         
         # Check 6: Redis configuration for production environments
         current_env = env.get("ENVIRONMENT", "unknown").lower()

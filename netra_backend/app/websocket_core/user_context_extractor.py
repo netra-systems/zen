@@ -163,18 +163,11 @@ class UserContextExtractor:
                 logger.warning(f"SSOT JWT: Auth service validation failed (env: {environment})")
                 return None
                 
-            # Extract payload from validation result
+            # Extract payload from validation result - SSOT compliance: Use auth service payload directly
             payload = validation_result.get('payload', {})
             if not payload:
-                # Build payload from validation result for backward compatibility
-                payload = {
-                    'sub': validation_result.get('user_id'),
-                    'user_id': validation_result.get('user_id'),
-                    'email': validation_result.get('email'),
-                    'permissions': validation_result.get('permissions', []),
-                    'exp': validation_result.get('exp'),
-                    'iat': validation_result.get('iat')
-                }
+                logger.error("SSOT JWT: Auth service returned no payload - validation incomplete")
+                return None
             
             # Basic validation
             user_id = payload.get("sub")
