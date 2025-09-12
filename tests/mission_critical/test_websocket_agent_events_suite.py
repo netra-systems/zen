@@ -361,14 +361,18 @@ class TestRealWebSocketComponents:
     @pytest.mark.critical
     async def test_websocket_notifier_all_methods(self):
         """Test that WebSocketNotifier has ALL required methods and they work."""
-        ws_manager = WebSocketManager()
+        # ISSUE #420 RESOLUTION: Use proper AgentWebSocketBridge.create_user_emitter pattern instead of manager directly
         # Create user context for SSOT pattern
         user_context = UserExecutionContext(
             user_id="test_user",
             thread_id="test_thread",
             run_id="test_run"
         )
-        notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(ws_manager, user_context)
+        
+        # Create proper emitter using AgentWebSocketBridge factory pattern (fixes missing notification methods)
+        bridge = AgentWebSocketBridge()
+        emitter = await bridge.create_user_emitter(user_context)
+        notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter, user_context)
         
         # Verify all methods exist
         required_methods = [
