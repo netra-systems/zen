@@ -844,7 +844,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(isolation_failures) == 0, f"Database session isolation failed: {len(isolation_failures)} failures detected"
     
-    def test_performance_metrics_concurrent_load_testing(self):
+    async def test_performance_metrics_concurrent_load_testing(self):
         """
         PERFORMANCE CRITICAL: Test performance metrics under concurrent load.
         Verifies system maintains performance standards with high concurrent usage.
@@ -865,7 +865,7 @@ class TestSSOTRegressionPrevention:
             'throughput_metrics': []
         }
         
-        def performance_load_operation(thread_id):
+        async def performance_load_operation(thread_id):
             """Execute performance-intensive operations for load testing."""
             thread_metrics = {
                 'response_times': [],
@@ -942,12 +942,16 @@ class TestSSOTRegressionPrevention:
         initial_memory = process.memory_info().rss
         initial_cpu = process.cpu_percent()
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_performance_operation(thread_id):
+            return asyncio.run(performance_load_operation(thread_id))
+            
         # Execute concurrent performance operations
         start_time = time.time()
         
         with ThreadPoolExecutor(max_workers=num_concurrent_operations) as executor:
             future_to_thread = {
-                executor.submit(performance_load_operation, thread_id): thread_id 
+                executor.submit(run_performance_operation, thread_id): thread_id 
                 for thread_id in range(num_concurrent_operations)
             }
             
