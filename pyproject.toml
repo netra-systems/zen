@@ -173,7 +173,18 @@ markers = [
     "orchestration: Orchestration tests",
     "security: Security tests",
     "validation: Validation tests",
-    "websocket_events: WebSocket event tests"
+    "websocket_events: WebSocket event tests",
+    
+    # Final missing markers
+    "websocket_critical: Critical WebSocket tests",
+    "observability: Observability tests", 
+    "workflow_logic: Workflow logic tests",
+    "timeout_management: Timeout management tests",
+    "config: Configuration tests",
+    "migration: Migration tests",
+    "models: Model tests",
+    "ssot_validation: SSOT validation tests",
+    "toolregistry: Tool registry tests"
 ]
 
 # Coverage settings
