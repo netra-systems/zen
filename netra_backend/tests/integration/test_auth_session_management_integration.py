@@ -36,7 +36,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
     """Integration tests for authentication session management with real services."""
     
     @pytest.fixture(autouse=True)
-    def setup_integration_environment(self):
+    async def setup_integration_environment(self):
         """Setup integration environment for session management tests."""
         self.env = get_env()
         self.env.enable_isolation()
@@ -57,7 +57,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         # Connect to test Redis for session verification
         try:
             self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, db=0, decode_responses=True)
-            await redis_client.ping()  # Verify connection
+            await self.redis_client.ping()  # Verify connection
         except Exception as e:
             pytest.skip(f"Redis not available for integration tests: {e}")
         
@@ -66,9 +66,9 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         # Cleanup test data from Redis
         try:
             # Clean up test keys
-            test_keys = await redis_client.keys("test_session:*")
+            test_keys = await self.redis_client.keys("test_session:*")
             if test_keys:
-                await redis_client.delete(*test_keys)
+                await self.redis_client.delete(*test_keys)
         except:
             pass  # Cleanup is best effort
         

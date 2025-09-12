@@ -59,8 +59,9 @@ class TestSSOTRegressionPrevention:
     These tests catch violations before they can cause system-wide issues.
     """
     
-    def setUp(self):
+    async def setUp(self):
         """Set up regression prevention test environment with REAL services."""
+        await super().setUp()
         self.test_id = uuid.uuid4().hex[:8]
         self.project_root = Path(__file__).parent.parent.parent
         

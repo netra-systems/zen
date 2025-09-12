@@ -86,8 +86,9 @@ class TestSSOTBackwardCompatibility:
     These tests ensure existing code continues to work during SSOT migration.
     """
     
-    def setUp(self):
+    async def setUp(self):
         """Set up backward compatibility test environment with REAL services."""
+        await super().setUp()
         self.test_id = uuid.uuid4().hex[:8]
         
         # Initialize REAL service connections for backward compatibility testing
