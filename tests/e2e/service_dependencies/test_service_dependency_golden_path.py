@@ -57,7 +57,6 @@ import uuid
 
 # Service dependency components - now implemented!
 from netra_backend.app.core.service_dependencies import (
-from netra_backend.app.services.user_execution_context import UserExecutionContext
     ServiceDependencyChecker,
     StartupOrchestrator, 
     GoldenPathValidator,
@@ -67,6 +66,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
     DependencyValidationResult,
     GoldenPathValidationResult
 )
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Test framework imports - simplified for now
 # from test_framework.ssot.base_test_case import BaseTestCase
