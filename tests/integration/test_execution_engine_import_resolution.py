@@ -44,7 +44,6 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
     
     async def async_setUp(self):
         """Set up integration test environment with real dependencies."""
-        await super().async_setUp()
         
         # Test user contexts for isolation testing
         self.user_contexts = []
@@ -71,7 +70,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
         try:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             
-            return UserExecutionContext(
+            return UserExecutionContext.from_request_supervisor(
                 user_id=user_id,
                 thread_id=f"thread_{uuid.uuid4().hex[:8]}",
                 run_id=f"run_{uuid.uuid4().hex[:8]}", 
@@ -84,9 +83,9 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                 }
             )
         except ImportError as e:
-            self.fail(f"Failed to import UserExecutionContext for test setup: {e}")
+            assert False, f"Failed to import UserExecutionContext for test setup: {e}"
         except Exception as e:
-            self.fail(f"Failed to create test user context: {e}")
+            assert False, f"Failed to create test user context: {e}"
     
     async def test_legacy_execution_engine_import_and_initialization(self):
         """Test legacy ExecutionEngine import resolution and initialization.
@@ -94,6 +93,9 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
         EXPECTED TO PARTIALLY FAIL: This test should demonstrate compatibility bridge usage
         and potential performance impacts from incomplete migration.
         """
+        # Ensure setup is called
+        await self.async_setUp()
+        
         print(f"\n🔍 TESTING: Legacy ExecutionEngine import and initialization")
         
         try:
@@ -179,7 +181,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                 }
                 
                 # This may be expected in the current migration state
-                self.fail(
+                assert False, (
                     f"🚨 ISSUE #620 INTEGRATION: Legacy ExecutionEngine initialization failed. "
                     f"Error: {init_error}. "
                     f"This indicates import consolidation issues affecting system startup. "
@@ -190,20 +192,23 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
             print(f"   ❌ Legacy import failed: {import_error}")
             
             # This failure demonstrates migration issues
-            self.fail(
+            assert False, (
                 f"🚨 ISSUE #620 CRITICAL: Legacy ExecutionEngine import failed completely. "
                 f"Import error: {import_error}. "
                 f"Business Impact: Existing code depending on legacy imports will break. "
                 f"Requires immediate compatibility bridge repair or code migration."
             )
         except Exception as e:
-            self.fail(f"Unexpected error in legacy ExecutionEngine test: {e}")
+            assert False, f"Unexpected error in legacy ExecutionEngine test: {e}"
     
     async def test_ssot_user_execution_engine_import_and_initialization(self):
         """Test SSOT UserExecutionEngine import and initialization.
         
         This test should PASS as UserExecutionEngine is the consolidation target.
         """
+        # Ensure setup is called
+        await self.async_setUp()
+        
         print(f"\n🎯 TESTING: SSOT UserExecutionEngine import and initialization")
         
         try:
@@ -262,7 +267,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
             except Exception as init_error:
                 print(f"   ❌ SSOT initialization failed: {init_error}")
                 
-                self.fail(
+                assert False, (
                     f"CRITICAL: SSOT UserExecutionEngine initialization failed. "
                     f"Error: {init_error}. "
                     f"This indicates fundamental issues with the consolidation target. "
@@ -270,7 +275,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                 )
                 
         except ImportError as import_error:
-            self.fail(
+            assert False, (
                 f"CRITICAL: SSOT UserExecutionEngine import failed. "
                 f"Import error: {import_error}. "
                 f"The consolidation target is not available - system cannot function."
@@ -282,6 +287,9 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
         EXPECTED TO PARTIALLY FAIL: May demonstrate user context leakage issues
         in compatibility mode or incomplete migration scenarios.
         """
+        # Ensure setup is called
+        await self.async_setUp()
+        
         print(f"\n👥 TESTING: Multi-user isolation integration")
         
         try:
@@ -314,7 +322,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                     continue
             
             if len(user_engines) < 2:
-                self.fail(f"Insufficient user engines for isolation testing: {len(user_engines)}")
+                assert False, f"Insufficient user engines for isolation testing: {len(user_engines)}"
             
             # Test concurrent agent execution with user isolation
             print(f"   🔄 Testing concurrent execution with {len(user_engines)} users")
@@ -376,7 +384,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                     print(f"   ⚠️  Cleanup error: {e}")
             
         except Exception as e:
-            self.fail(f"Multi-user isolation test failed: {e}")
+            assert False, f"Multi-user isolation test failed: {e}"
     
     async def test_websocket_event_integration(self):
         """Test WebSocket event emission during ExecutionEngine operations.
@@ -431,17 +439,20 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
             mock_registry = self._create_mock_agent_registry()
             mock_websocket_bridge = self._create_mock_websocket_bridge()
             
-            return AgentInstanceFactory(
-                registry=mock_registry,
-                websocket_bridge=mock_websocket_bridge
-            )
+            factory = AgentInstanceFactory()
+            # Set the dependencies after creation
+            if hasattr(factory, 'set_registry'):
+                factory.set_registry(mock_registry)
+            if hasattr(factory, 'set_websocket_bridge'):
+                factory.set_websocket_bridge(mock_websocket_bridge)
+            return factory
         except ImportError:
             # Fallback to mock factory
             mock_factory = MagicMock()
             mock_factory.create_agent_instance = AsyncMock(return_value=MagicMock())
             return mock_factory
         except Exception as e:
-            self.fail(f"Failed to create test agent factory: {e}")
+            assert False, f"Failed to create test agent factory: {e}"
     
     async def _create_test_websocket_emitter(self, user_context):
         """Create a test WebSocket emitter for user-specific events."""
@@ -465,7 +476,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
             mock_emitter.cleanup = AsyncMock()
             return mock_emitter
         except Exception as e:
-            self.fail(f"Failed to create test WebSocket emitter: {e}")
+            assert False, f"Failed to create test WebSocket emitter: {e}"
     
     async def _create_test_agent_execution_context(self, user_context, agent_name: str):
         """Create a test agent execution context."""
@@ -488,9 +499,9 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                 }
             )
         except ImportError as e:
-            self.fail(f"Failed to import AgentExecutionContext: {e}")
+            assert False, f"Failed to import AgentExecutionContext: {e}"
         except Exception as e:
-            self.fail(f"Failed to create agent execution context: {e}")
+            assert False, f"Failed to create agent execution context: {e}"
     
     async def _execute_test_agent(self, engine, agent_context, user_context):
         """Execute a test agent and return results."""
@@ -545,7 +556,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
             print(f"   ✅ User {user_id[:8]}... isolation validated")
         
         if isolation_issues:
-            self.fail(
+            assert False, (
                 f"🚨 ISSUE #620 USER ISOLATION: User isolation validation failed in multi-user scenario:\n"
                 f"{'  • ' + chr(10).join(isolation_issues)}\n"
                 f"\nBUSINESS IMPACT: User context leakage in chat functionality (90% platform value). "

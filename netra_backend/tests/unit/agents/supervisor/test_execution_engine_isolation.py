@@ -36,7 +36,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import SSOT components for testing
 # ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine, create_request_scoped_engine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -85,7 +85,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         """Create multiple test user contexts for isolation testing."""
         contexts = []
         for i in range(count):
-            context = UserExecutionContext(
+            context = UserExecutionContext.from_request_supervisor(
                 user_id=f"test_user_{i}_{uuid.uuid4().hex[:8]}",
                 thread_id=f"test_thread_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"test_run_{i}_{uuid.uuid4().hex[:8]}",
