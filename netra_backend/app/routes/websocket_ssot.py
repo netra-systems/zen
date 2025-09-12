@@ -201,7 +201,6 @@ class AgentBridgeHandler:
             MessageType.CHAT,
             MessageType.AGENT_REQUEST,
             MessageType.START_AGENT,
-            MessageType.EXECUTE_AGENT,
             MessageType.AGENT_TASK
         ]
         logger.info(f"AgentBridgeHandler initialized for user {user_context.user_id if user_context else 'unknown'} with {len(self.supported_types)} message types")
