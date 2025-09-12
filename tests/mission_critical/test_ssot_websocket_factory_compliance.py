@@ -53,6 +53,7 @@ from loguru import logger
 
 # Import SSOT components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -148,8 +149,8 @@ class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
         logger.info("[SSOT COMPLIANCE] Testing SSOT WebSocket manager creation...")
         
         try:
-            # Test SSOT pattern - this should always work
-            websocket_manager = WebSocketManager.create_for_user(self.user_context)
+            # Test SSOT pattern - use the factory method
+            websocket_manager = await WebSocketManagerFactory.create_isolated(self.user_context)
             
             # Validate the manager was created successfully
             assert websocket_manager is not None, "SSOT WebSocket manager creation failed"
@@ -161,8 +162,8 @@ class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
             logger.info(f"[SSOT SUCCESS] WebSocket manager created for user: {self.test_user_id}")
             
             # Test that manager provides required functionality
-            assert hasattr(websocket_manager, 'send_event'), "WebSocket manager missing send_event method"
-            assert hasattr(websocket_manager, 'close_connection'), "WebSocket manager missing close_connection method"
+            assert hasattr(websocket_manager, 'send_agent_event'), "WebSocket manager missing send_agent_event method"
+            assert hasattr(websocket_manager, 'remove_connection'), "WebSocket manager missing remove_connection method"
             
             logger.info("[SSOT COMPLIANCE] All SSOT WebSocket manager functionality validated")
             
@@ -199,8 +200,8 @@ class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
         
         try:
             # Create WebSocket managers for both users using SSOT pattern
-            manager1 = WebSocketManager.create_for_user(user1_context)
-            manager2 = WebSocketManager.create_for_user(user2_context)
+            manager1 = await WebSocketManagerFactory.create_isolated(user1_context)
+            manager2 = await WebSocketManagerFactory.create_isolated(user2_context)
             
             # Validate managers are different instances
             assert manager1 is not manager2, "CRITICAL: WebSocket managers not properly isolated"
@@ -243,15 +244,14 @@ class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
         logger.info("[MIGRATION COMPATIBILITY] Testing migration compatibility...")
         
         # Test that all expected WebSocket functionality is available in SSOT pattern
-        manager = WebSocketManager.create_for_user(self.user_context)
+        manager = await WebSocketManagerFactory.create_isolated(self.user_context)
         
         # Required methods that must exist after migration
         required_methods = [
-            'send_event',
-            'close_connection',
+            'send_agent_event',
             'add_connection',
             'remove_connection',
-            'broadcast_event',
+            'broadcast_message',
             'get_connection_count'
         ]
         
@@ -275,7 +275,7 @@ class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
             # This should work without throwing exceptions
             # Note: We don't actually send since no real WebSocket connection
             # Just validate the method signature and basic functionality
-            assert callable(getattr(manager, 'send_event')), "send_event not callable"
+            assert callable(getattr(manager, 'send_agent_event')), "send_agent_event not callable"
             
             logger.info("[MIGRATION COMPATIBILITY SUCCESS] All required functionality available")
             
@@ -283,7 +283,8 @@ class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
             logger.error(f"[MIGRATION COMPATIBILITY FAILURE] Compatibility test failed: {e}")
             pytest.fail(f"CRITICAL: Migration broke existing functionality - {e}")
 
-    def test_factory_pattern_security_validation(self):
+    @pytest.mark.asyncio
+    async def test_factory_pattern_security_validation(self):
         """TEST: Validate SSOT pattern prevents known security issues
         
         PURPOSE: Ensures SSOT pattern prevents the security vulnerabilities
@@ -294,7 +295,7 @@ class TestSSotWebSocketFactoryCompliance(SSotAsyncTestCase):
         logger.info("[SECURITY VALIDATION] Testing factory pattern security...")
         
         # Test 1: Ensure user context cannot be modified by other users
-        manager = WebSocketManager.create_for_user(self.user_context)
+        manager = await WebSocketManagerFactory.create_isolated(self.user_context)
         
         original_user_id = manager.user_context.user_id
         
