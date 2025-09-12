@@ -197,12 +197,16 @@ async def get_unified_websocket_manager(env=None, user_id: str = None):
         )
         return await create_websocket_manager(user_context)
     else:
-        # Create default manager for integration testing
-        factory = get_websocket_manager_factory()
-        return await factory.get_or_create_manager(
+        # SSOT MIGRATION: Use direct manager creation for integration testing
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        test_context = UserExecutionContext(
             user_id="integration_test_user",
-            context=None
+            thread_id="test_thread",
+            request_id="test_request",
+            websocket_connection_id="test_connection",
+            run_id="test_run"
         )
+        return await get_websocket_manager(test_context)
 
 # Critical events that MUST be preserved
 CRITICAL_EVENTS = UnifiedWebSocketEmitter.CRITICAL_EVENTS
