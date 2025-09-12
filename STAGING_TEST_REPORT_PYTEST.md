@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 16:17:55
+**Generated:** 2025-09-12 16:21:13
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 7
+- **Total Tests:** 5
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
-- **Skipped:** 7
-- **Duration:** 0.70 seconds
+- **Failed:** 5 (100.0%)
+- **Skipped:** 0
+- **Duration:** 0.66 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,34 +19,64 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_google_oauth_client_id_missing_from_environment | SKIP skipped | 0.000s | test_oauth_configuration.py |
-| test_google_oauth_client_secret_missing_from_environment | SKIP skipped | 0.000s | test_oauth_configuration.py |
-| test_oauth_configuration_incomplete_for_staging_deployment | SKIP skipped | 0.000s | test_oauth_configuration.py |
-| test_oauth_google_authorization_url_construction_fails | SKIP skipped | 0.001s | test_oauth_configuration.py |
-| test_oauth_token_exchange_endpoint_unreachable | SKIP skipped | 0.000s | test_oauth_configuration.py |
-| test_oauth_redirect_uri_misconfiguration | SKIP skipped | 0.000s | test_oauth_configuration.py |
-| test_oauth_scopes_configuration_incomplete | SKIP skipped | 0.002s | test_oauth_configuration.py |
+| test_reproduce_http_403_websocket_handshake | FAIL failed | 0.014s | test_websocket_403_reproduction_staging.py |
+| test_websocket_connection_with_valid_jwt | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
+| test_websocket_connection_with_invalid_jwt | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
+| test_auth_service_url_staging_configuration | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
+| test_websocket_connection_timeout_scenarios | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
+
+## Failed Tests Details
+
+### FAILED: test_reproduce_http_403_websocket_handshake
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
+- **Duration:** 0.014s
+- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'fail'...
+
+### FAILED: test_websocket_connection_with_valid_jwt
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
+- **Duration:** 0.000s
+- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'auth_helper'
+
+During handling of the above exception, another exception occurred:
+E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'skipTest'...
+
+### FAILED: test_websocket_connection_with_invalid_jwt
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
+- **Duration:** 0.000s
+- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'subTest'...
+
+### FAILED: test_auth_service_url_staging_configuration
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
+- **Duration:** 0.000s
+- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'staging_auth_service_url'...
+
+### FAILED: test_websocket_connection_timeout_scenarios
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
+- **Duration:** 0.000s
+- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'auth_helper'
+
+During handling of the above exception, another exception occurred:
+E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'skipTest'...
 
 ## Pytest Output Format
 
 ```
-test_oauth_configuration.py::test_google_oauth_client_id_missing_from_environment SKIPPED
-test_oauth_configuration.py::test_google_oauth_client_secret_missing_from_environment SKIPPED
-test_oauth_configuration.py::test_oauth_configuration_incomplete_for_staging_deployment SKIPPED
-test_oauth_configuration.py::test_oauth_google_authorization_url_construction_fails SKIPPED
-test_oauth_configuration.py::test_oauth_token_exchange_endpoint_unreachable SKIPPED
-test_oauth_configuration.py::test_oauth_redirect_uri_misconfiguration SKIPPED
-test_oauth_configuration.py::test_oauth_scopes_configuration_incomplete SKIPPED
+test_websocket_403_reproduction_staging.py::test_reproduce_http_403_websocket_handshake FAILED
+test_websocket_403_reproduction_staging.py::test_websocket_connection_with_valid_jwt FAILED
+test_websocket_403_reproduction_staging.py::test_websocket_connection_with_invalid_jwt FAILED
+test_websocket_403_reproduction_staging.py::test_auth_service_url_staging_configuration FAILED
+test_websocket_403_reproduction_staging.py::test_websocket_connection_timeout_scenarios FAILED
 
 ==================================================
-0 passed, 0 failed, 7 skipped in 0.70s
+0 passed, 5 failed in 0.66s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| Authentication | 7 | 0 | 0 | 0.0% |
+| WebSocket | 4 | 0 | 4 | 0.0% |
+| Authentication | 3 | 0 | 3 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

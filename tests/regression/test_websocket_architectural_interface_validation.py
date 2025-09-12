@@ -87,9 +87,9 @@ class ComponentInterface:
 class TestWebSocketArchitecturalInterfaceValidation(SSotAsyncTestCase):
     """Regression tests for WebSocket architectural interface validation."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up regression test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.interface_validator = ComponentInterface()
         self.validation_results = []
         self.architectural_gaps = []

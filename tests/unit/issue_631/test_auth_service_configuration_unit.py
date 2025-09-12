@@ -15,7 +15,7 @@ from unittest.mock import patch, MagicMock
 from typing import Optional
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.config import get_config
+from netra_backend.app.config import get_config, reload_config
 from netra_backend.app.auth_integration.auth_config import AuthPermissivenessConfig, AuthConfigLoader
 from netra_backend.app.clients.auth_client_core import AuthClientCore
 
