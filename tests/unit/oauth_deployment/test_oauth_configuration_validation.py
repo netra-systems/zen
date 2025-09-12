@@ -52,7 +52,7 @@ class TestOAuthConfigurationValidation(SSotBaseTestCase):
         from scripts.validate_oauth_deployment import OAuthDeploymentValidator
         
         # Set up staging environment without OAuth credentials  
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_validation")
+        self._env.set("ENVIRONMENT", "staging", "test_oauth_validation")
         
         # DO NOT set GOOGLE_OAUTH_CLIENT_ID_STAGING - this should cause validation failure
         
@@ -70,9 +70,9 @@ class TestOAuthConfigurationValidation(SSotBaseTestCase):
         from scripts.validate_oauth_deployment import OAuthDeploymentValidator
         
         # Set up staging environment with generic variables only
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_validation")
-        self.env.set("GOOGLE_CLIENT_ID", "123456789012-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "test_oauth_validation")
-        self.env.set("GOOGLE_CLIENT_SECRET", "GOCSPX-abcdefghijklmnop", "test_oauth_validation")
+        self._env.set("ENVIRONMENT", "staging", "test_oauth_validation")
+        self._env.set("GOOGLE_CLIENT_ID", "123456789012-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "test_oauth_validation")
+        self._env.set("GOOGLE_CLIENT_SECRET", "GOCSPX-abcdefghijklmnop", "test_oauth_validation")
         
         # Do NOT set GOOGLE_OAUTH_CLIENT_ID_STAGING - this tests the preference logic
         
@@ -94,9 +94,9 @@ class TestOAuthConfigurationValidation(SSotBaseTestCase):
         from scripts.validate_oauth_deployment import OAuthDeploymentValidator
         
         # Set up production environment with placeholder values (should fail)
-        self.env.set("ENVIRONMENT", "production", "test_oauth_validation")
-        self.env.set("GOOGLE_CLIENT_ID", "REPLACE_WITH_GOOGLE_CLIENT_ID", "test_oauth_validation")
-        self.env.set("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_GOOGLE_CLIENT_SECRET", "test_oauth_validation")
+        self._env.set("ENVIRONMENT", "production", "test_oauth_validation")
+        self._env.set("GOOGLE_CLIENT_ID", "REPLACE_WITH_GOOGLE_CLIENT_ID", "test_oauth_validation")
+        self._env.set("GOOGLE_CLIENT_SECRET", "REPLACE_WITH_GOOGLE_CLIENT_SECRET", "test_oauth_validation")
         
         validator = OAuthDeploymentValidator("production")
         success, report = validator.validate_all()
@@ -165,11 +165,11 @@ class TestOAuthConfigurationValidation(SSotBaseTestCase):
         """Test OAuth credential format validation catches invalid formats."""
         from scripts.validate_oauth_deployment import OAuthDeploymentValidator
         
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_validation")
+        self._env.set("ENVIRONMENT", "staging", "test_oauth_validation")
         
         # Test invalid Google Client ID (too short)
-        self.env.set("GOOGLE_CLIENT_ID", "invalid", "test_oauth_validation")
-        self.env.set("GOOGLE_CLIENT_SECRET", "GOCSPX-validlengthsecret", "test_oauth_validation")
+        self._env.set("GOOGLE_CLIENT_ID", "invalid", "test_oauth_validation")
+        self._env.set("GOOGLE_CLIENT_SECRET", "GOCSPX-validlengthsecret", "test_oauth_validation")
         
         validator = OAuthDeploymentValidator("staging")
         success, report = validator.validate_all()
@@ -179,7 +179,7 @@ class TestOAuthConfigurationValidation(SSotBaseTestCase):
         self.assertIn("TOO SHORT", report)
         
         # Test valid format
-        self.env.set("GOOGLE_CLIENT_ID", "123456789012-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "test_oauth_validation")
+        self._env.set("GOOGLE_CLIENT_ID", "123456789012-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com", "test_oauth_validation")
         
         validator2 = OAuthDeploymentValidator("staging")
         success2, report2 = validator2.validate_all()

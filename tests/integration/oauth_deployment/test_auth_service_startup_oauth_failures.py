@@ -29,10 +29,9 @@ from shared.isolated_environment import IsolatedEnvironment
 class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
     """Test auth service startup failures with missing OAuth configuration."""
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment with missing OAuth configuration."""
-        super().setUp()
-        self.env = IsolatedEnvironment.get_instance()
+        super().setup_method(method)
         
         # Store original values to restore later
         self.original_env = {}
@@ -49,12 +48,12 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
             if var in os.environ:
                 self.original_env[var] = os.environ[var]
                 del os.environ[var]
-            self.env.set(var, "", "test_oauth_startup")
+            self._env.set(var, "", "test_oauth_startup")
             
         # Set environment to staging to trigger OAuth validation
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_startup")
+        self._env.set("ENVIRONMENT", "staging", "test_oauth_startup")
         # Enable fast test mode to skip database initialization
-        self.env.set("AUTH_FAST_TEST_MODE", "true", "test_oauth_startup")
+        self._env.set("AUTH_FAST_TEST_MODE", "true", "test_oauth_startup")
 
     async def test_auth_service_startup_sequence_missing_oauth_config(self):
         """
@@ -64,10 +63,10 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
         Uses real service startup, no mocks.
         """
         # Clear OAuth configuration to simulate the deployment issue
-        self.env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
-        self.env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
-        self.env.set("GOOGLE_CLIENT_ID", "", "test_oauth_startup")
-        self.env.set("GOOGLE_CLIENT_SECRET", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_CLIENT_ID", "", "test_oauth_startup")
+        self._env.set("GOOGLE_CLIENT_SECRET", "", "test_oauth_startup")
         
         # Test the actual startup sequence from main.py
         with self.assertRaises(RuntimeError) as context:
@@ -99,8 +98,8 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
         """Test service health endpoint behavior when OAuth is misconfigured."""
         
         # Set up staging environment with invalid OAuth config
-        self.env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "invalid-client-id", "test_oauth_startup")
-        self.env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "short", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "invalid-client-id", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "short", "test_oauth_startup")
         
         # Since the service won't start with invalid OAuth config, test the validation logic directly
         from auth_service.auth_core.config import AuthConfig
@@ -142,10 +141,10 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
         from scripts.validate_oauth_deployment import OAuthDeploymentValidator
         
         # Set up staging environment with missing OAuth
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_startup")
+        self._env.set("ENVIRONMENT", "staging", "test_oauth_startup")
         # Clear OAuth variables to simulate missing configuration
-        self.env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
-        self.env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
         
         validator = OAuthDeploymentValidator("staging")
         success, report = validator.validate_all()
@@ -166,8 +165,8 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
         """Test OAuth provider initialization fails with real service components."""
         
         # Set up environment with missing OAuth configuration
-        self.env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
-        self.env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
         
         # Test the OAuth manager initialization (real component, no mocks)
         with self.assertRaises(Exception) as context:
@@ -219,8 +218,8 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
         deployer = GCPDeployer("netra-staging")
         
         # Set up missing OAuth configuration
-        self.env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
-        self.env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_ID_STAGING", "", "test_oauth_startup")
+        self._env.set("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "", "test_oauth_startup")
         
         # Test OAuth validation (should fail)
         validation_success = deployer._validate_oauth_configuration()
@@ -236,9 +235,9 @@ class TestAuthServiceStartupOAuthFailures(SSotAsyncTestCase):
         from auth_service.auth_core.config import AuthConfig
         
         # Set up staging environment with missing staging-specific variables
-        self.env.set("ENVIRONMENT", "staging", "test_oauth_startup")
-        self.env.set("GOOGLE_CLIENT_ID", "fallback-client-id", "test_oauth_startup")
-        self.env.set("GOOGLE_CLIENT_SECRET", "fallback-client-secret", "test_oauth_startup")
+        self._env.set("ENVIRONMENT", "staging", "test_oauth_startup")
+        self._env.set("GOOGLE_CLIENT_ID", "fallback-client-id", "test_oauth_startup")
+        self._env.set("GOOGLE_CLIENT_SECRET", "fallback-client-secret", "test_oauth_startup")
         # Don't set GOOGLE_OAUTH_CLIENT_ID_STAGING - this should be preferred
         
         # Test that AuthConfig properly handles missing staging-specific config
