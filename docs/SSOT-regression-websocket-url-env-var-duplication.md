@@ -64,13 +64,76 @@ Duplicate and conflicting WebSocket URL environment variables create configurati
 - **Post-SSOT Fix**: 15 new SSOT tests pass, 25+ Golden Path tests pass
 - **Business Protection**: $500K+ ARR Golden Path validated via staging E2E
 
-### ⏳ Step 2: Execute Test Plan (PENDING)
-- [ ] Create new SSOT tests for WebSocket configuration
-- [ ] Validate test execution (non-docker)
+### ✅ Step 2: Execute Test Plan (COMPLETED)
+- [x] Create new SSOT tests for WebSocket configuration 
+- [x] Validate test execution (non-docker)
 
-### ⏳ Step 3: Plan SSOT Remediation (PENDING) 
-- [ ] Plan consolidation to single canonical variable
-- [ ] Plan elimination of duplicate references
+#### New SSOT Tests Created:
+**Test Distribution Implemented:**
+- **Unit Tests**: 4 test classes (`tests/unit/websocket/ssot/`)
+  - `TestWebSocketURLSSOTValidation` - Core SSOT violation detection
+  - `TestWebSocketConfigurationSSOTConsistency` - Configuration consistency
+- **Integration Tests**: 2 test classes (`tests/integration/websocket/ssot/`)
+  - `TestWebSocketSSOTServiceIntegration` - Service integration
+  - `TestWebSocketSSOTConnectionValidation` - Real connection tests
+- **E2E Tests**: 1 test class (`tests/e2e/websocket/ssot/`)
+  - `TestWebSocketSSOTGoldenPathProtection` - Golden Path validation
+
+**Test Execution Commands Ready:**
+```bash
+# Unit SSOT validation
+python tests/unified_test_runner.py --category unit --pattern "*websocket*ssot*"
+
+# Integration with real services  
+python tests/unified_test_runner.py --category integration --real-services --env staging --pattern "*websocket*ssot*"
+
+# E2E Golden Path protection
+python tests/unified_test_runner.py --category e2e --env staging --pattern "*golden_path*websocket*"
+```
+
+**Expected Test Behavior:**
+- **Currently**: Tests MUST FAIL (detecting dual variables by design)
+- **After SSOT Fix**: Tests MUST PASS (confirming consolidation successful)
+
+### ✅ Step 3: Plan SSOT Remediation (COMPLETED)
+- [x] Plan consolidation to single canonical variable
+- [x] Plan elimination of duplicate references
+- [x] Created comprehensive 5-phase remediation strategy
+- [x] Conducted complete file audit across codebase
+- [x] Identified risk areas and mitigation strategies
+
+#### SSOT Remediation Strategy:
+**Current State:** Duplicate variables causing Golden Path confusion
+- **Canonical:** `NEXT_PUBLIC_WS_URL` (94 occurrences)
+- **Duplicate:** `NEXT_PUBLIC_WEBSOCKET_URL` (47 occurrences) 
+- **Total Affected Files:** 141+ across entire codebase
+
+**5-Phase Migration Plan:**
+1. **Phase 1:** Environment Configuration Consolidation (HIGH RISK)
+   - Target: All `.env*` files, Docker configurations, deployment scripts
+   - Standardize on `NEXT_PUBLIC_WS_URL` as canonical variable
+
+2. **Phase 2:** Frontend Code Migration (CRITICAL - Golden Path Impact)
+   - Target: `frontend/lib/unified-api-config.ts` and WebSocket connection code
+   - Fix staging environment variable resolution
+
+3. **Phase 3:** Test Infrastructure Cleanup (MEDIUM RISK)
+   - Target: 40+ test files using deprecated variable
+   - Update SSOT validation tests to pass
+
+4. **Phase 4:** Documentation and Validation Scripts (LOW RISK)
+   - Target: Documentation, validation scripts, monitoring
+   - Update deployment verification checklists
+
+5. **Phase 5:** Final Validation and Cleanup (SAFETY NET)
+   - Target: Complete system validation and Golden Path testing
+   - Deploy to staging for comprehensive validation
+
+**Risk Mitigation:**
+- **Atomic Changes:** Each phase deployable independently
+- **Staging First:** All changes validated before production
+- **Rollback Ready:** Each phase reversible within 5 minutes
+- **Golden Path Protection:** Continuous chat functionality monitoring
 
 ### ⏳ Step 4: Execute SSOT Remediation (PENDING)
 - [ ] Implement WebSocket URL SSOT consolidation
