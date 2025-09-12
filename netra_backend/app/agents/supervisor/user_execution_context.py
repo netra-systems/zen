@@ -25,11 +25,13 @@ from netra_backend.app.services.user_execution_context import (
     managed_user_context,
     create_isolated_execution_context,
     register_shared_object,
-    clear_shared_object_registry
+    clear_shared_object_registry,
+    _SHARED_OBJECT_REGISTRY
 )
 
-# Backward compatibility alias
+# Backward compatibility aliases
 clear_shared_objects = clear_shared_object_registry
+_SHARED_OBJECTS = _SHARED_OBJECT_REGISTRY
 
 logger = central_logger.get_logger(__name__)
 
@@ -55,5 +57,9 @@ __all__ = [
     'UserContextManager',
     'validate_user_context',
     'managed_user_context',
-    'create_isolated_execution_context'
+    'create_isolated_execution_context',
+    'register_shared_object',
+    'clear_shared_objects',
+    'clear_shared_object_registry',
+    '_SHARED_OBJECTS'
 ]

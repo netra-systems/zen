@@ -145,6 +145,9 @@ class AgentWebSocketBridge(MonitorableComponent):
         # Initialize connection status for test compatibility
         self.is_connected = True  # Bridge is considered "connected" once initialized
         
+        # Initialize event tracking for test validation
+        self._event_history = []  # Track events for Golden Path test validation
+        
         self._initialize_configuration()
         self._initialize_state()
         self._initialize_dependencies()
@@ -258,6 +261,22 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._health_broadcast_interval = 30.0  # 30 seconds
         self._last_broadcasted_state = None
         logger.debug("Monitor observer system initialized")
+    
+    def _track_event_for_tests(self, event_type: str, event_data: Dict[str, Any]) -> None:
+        """Track WebSocket events for Golden Path test validation.
+        
+        This method stores events in _event_history for test assertions.
+        Critical for verifying that agents properly emit WebSocket events.
+        
+        Args:
+            event_type: Type of event (agent_started, agent_thinking, etc.)
+            event_data: Event data including run_id, agent_name, etc.
+        """
+        if not hasattr(self, '_event_history'):
+            self._event_history = []
+        
+        self._event_history.append(event_data)
+        logger.debug(f"📊 EVENT_TRACKED: {event_type} event stored for test validation (run_id={event_data.get('run_id')})")
     
     async def _send_with_retry(self, user_id: str, notification: Dict[str, Any], event_type: str, run_id: str, max_retries: int = 3) -> bool:
         """Send WebSocket notification with retry logic for critical events.
@@ -1330,6 +1349,18 @@ class AgentWebSocketBridge(MonitorableComponent):
                 # PHASE 4 FIX: Raise exception to stop silent execution
                 raise RuntimeError(f"CRITICAL event delivery failure: {error_msg}. Last error: {last_error}")
             
+            # Track event for Golden Path test validation
+            self._track_event_for_tests("agent_started", {
+                "event_type": "agent_started",
+                "type": "agent_started",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "user_id": effective_user_context.user_id,
+                "context": context,
+                "success": success,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            
             return success
             
         except Exception as e:
@@ -1444,6 +1475,21 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → user={user_id} (run_id={run_id}, agent={agent_name})")
                 else:
                     logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
+            
+            # Track event for Golden Path test validation
+            effective_user_context = user_context or self.user_context
+            self._track_event_for_tests("agent_thinking", {
+                "event_type": "agent_thinking",
+                "type": "agent_thinking",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "user_id": effective_user_context.user_id if effective_user_context else 'unknown',
+                "reasoning": reasoning,
+                "step_number": step_number,
+                "progress_percentage": progress_percentage,
+                "success": success,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
             
             return success
             
@@ -1574,6 +1620,20 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.debug(f"Marked legacy event as failed: {event_id}")
                 except Exception as e:
                     logger.warning(f"Failed to mark legacy event as failed {event_id}: {e}")
+            
+            # Track event for Golden Path test validation
+            effective_user_context = user_context or self.user_context
+            self._track_event_for_tests("tool_executing", {
+                "event_type": "tool_executing",
+                "type": "tool_executing",
+                "run_id": run_id,
+                "tool_name": tool_name,
+                "agent_name": agent_name,
+                "user_id": effective_user_context.user_id if effective_user_context else 'unknown',
+                "parameters": parameters,
+                "success": success,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
             
             return success
             
@@ -1708,6 +1768,20 @@ class AgentWebSocketBridge(MonitorableComponent):
                 except Exception as e:
                     logger.warning(f"Failed to mark legacy event as failed {event_id}: {e}")
             
+            # Track event for Golden Path test validation
+            effective_user_context = user_context or self.user_context
+            self._track_event_for_tests("tool_completed", {
+                "event_type": "tool_completed",
+                "type": "tool_completed",
+                "run_id": run_id,
+                "tool_name": tool_name,
+                "agent_name": agent_name,
+                "user_id": effective_user_context.user_id if effective_user_context else 'unknown',
+                "result": result,
+                "success": success,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
+            
             return success
             
         except Exception as e:
@@ -1814,6 +1888,20 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.info(f"✅ EMISSION SUCCESS: agent_completed → user={user_id} (run_id={run_id}, agent={agent_name})")
                 else:
                     logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) - CRITICAL EVENT")
+            
+            # Track event for Golden Path test validation
+            effective_user_context = user_context or self.user_context
+            self._track_event_for_tests("agent_completed", {
+                "event_type": "agent_completed",
+                "type": "agent_completed",
+                "run_id": run_id,
+                "agent_name": agent_name,
+                "user_id": effective_user_context.user_id if effective_user_context else 'unknown',
+                "result": result,
+                "execution_time_ms": execution_time_ms,
+                "success": success,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            })
             
             return success
             
