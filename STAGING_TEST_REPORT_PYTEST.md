@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 16:21:13
+**Generated:** 2025-09-12 16:27:55
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 5
+- **Total Tests:** 1
 - **Passed:** 0 (0.0%)
-- **Failed:** 5 (100.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.66 seconds
+- **Duration:** 3.75 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,64 +19,32 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_reproduce_http_403_websocket_handshake | FAIL failed | 0.014s | test_websocket_403_reproduction_staging.py |
-| test_websocket_connection_with_valid_jwt | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
-| test_websocket_connection_with_invalid_jwt | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
-| test_auth_service_url_staging_configuration | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
-| test_websocket_connection_timeout_scenarios | FAIL failed | 0.000s | test_websocket_403_reproduction_staging.py |
+| test_golden_path_user_login_to_ai_response | FAIL failed | 2.531s | test_golden_path_user_flow_issue_620.py |
 
 ## Failed Tests Details
 
-### FAILED: test_reproduce_http_403_websocket_handshake
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.014s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'fail'...
-
-### FAILED: test_websocket_connection_with_valid_jwt
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.000s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'auth_helper'
-
-During handling of the above exception, another exception occurred:
-E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'skipTest'...
-
-### FAILED: test_websocket_connection_with_invalid_jwt
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.000s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'subTest'...
-
-### FAILED: test_auth_service_url_staging_configuration
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.000s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'staging_auth_service_url'...
-
-### FAILED: test_websocket_connection_timeout_scenarios
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
-- **Duration:** 0.000s
-- **Error:** E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'auth_helper'
-
-During handling of the above exception, another exception occurred:
-E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'skipTest'...
+### FAILED: test_golden_path_user_login_to_ai_response
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_user_flow_issue_620.py
+- **Duration:** 2.531s
+- **Error:** tests\e2e\staging\test_golden_path_user_flow_issue_620.py:78: in test_golden_path_user_login_to_ai_response
+    assert response_time <= self.MAX_RESPONSE_TIME_SECONDS, f"Response time should be ≤{self.MAX_RESPONSE_TIME_SECONDS}s, got {response_time:.2f}s"
+E   AssertionError: Response time should be ≤2.0s, got 2.52s
+E   assert 2.5200624465942383 <= 2.0
+E    +  where 2.0 = <tests.e2e.staging.test_golden_path_user_flow_issue_620.TestGoldenPathUserFlowIssue620 object at 0x000001D3CDA52F90>.MAX_RESPO...
 
 ## Pytest Output Format
 
 ```
-test_websocket_403_reproduction_staging.py::test_reproduce_http_403_websocket_handshake FAILED
-test_websocket_403_reproduction_staging.py::test_websocket_connection_with_valid_jwt FAILED
-test_websocket_403_reproduction_staging.py::test_websocket_connection_with_invalid_jwt FAILED
-test_websocket_403_reproduction_staging.py::test_auth_service_url_staging_configuration FAILED
-test_websocket_403_reproduction_staging.py::test_websocket_connection_timeout_scenarios FAILED
+test_golden_path_user_flow_issue_620.py::test_golden_path_user_login_to_ai_response FAILED
 
 ==================================================
-0 passed, 5 failed in 0.66s
+0 passed, 1 failed in 3.75s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 4 | 0 | 4 | 0.0% |
-| Authentication | 3 | 0 | 3 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
