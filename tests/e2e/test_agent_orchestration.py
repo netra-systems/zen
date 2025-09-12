@@ -30,7 +30,8 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # CLAUDE.MD COMPLIANT: Absolute imports only - corrected import paths
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.state import DeepAgentState

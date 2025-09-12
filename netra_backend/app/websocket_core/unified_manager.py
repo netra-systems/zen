@@ -2534,6 +2534,77 @@ class UnifiedWebSocketManager:
         # Use existing broadcast method
         await self.broadcast(message)
     
+    async def send_message(self, connection_id: str, message: dict) -> bool:
+        """
+        Send direct message to specific WebSocket connection.
+        
+        CRITICAL SSOT INTERFACE COMPLIANCE: This method is required by WebSocket 
+        manager interface validation tests and agent event delivery in Golden Path.
+        Missing this method blocks agent events (agent_started, agent_thinking, 
+        tool_executing, tool_completed, agent_completed) affecting $500K+ ARR.
+        
+        Args:
+            connection_id: Unique connection identifier  
+            message: Message payload to send
+            
+        Returns:
+            bool: Success status of message delivery
+        """
+        try:
+            # Validate connection exists
+            connection = self.get_connection(connection_id)
+            if not connection:
+                logger.warning(f"send_message failed: connection {connection_id} not found")
+                return False
+            
+            if not connection.websocket:
+                logger.warning(f"send_message failed: connection {connection_id} has no websocket")
+                return False
+            
+            # Safely serialize message for WebSocket transmission
+            safe_message = _serialize_message_safely(message)
+            
+            # Send message via WebSocket
+            await connection.websocket.send_json(safe_message)
+            
+            logger.debug(f"✅ Message sent successfully to connection {connection_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ send_message failed for connection {connection_id}: {e}")
+            return False
+    
+    async def send_event(self, connection_id: str, event_type: str, event_data: dict) -> bool:
+        """
+        Send event to specific WebSocket connection.
+        
+        CRITICAL SSOT INTERFACE COMPLIANCE: This method provides standard event 
+        interface expected by WebSocket validation tests and agent systems.
+        
+        Args:
+            connection_id: Unique connection identifier
+            event_type: Type of event being sent
+            event_data: Event payload data
+            
+        Returns:
+            bool: Success status of event delivery
+        """
+        try:
+            # Create event message structure
+            event_message = {
+                "type": event_type,
+                "data": event_data,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "connection_id": connection_id
+            }
+            
+            # Use send_message for actual delivery
+            return await self.send_message(connection_id, event_message)
+            
+        except Exception as e:
+            logger.error(f"❌ send_event failed for connection {connection_id}, event {event_type}: {e}")
+            return False
+    
     async def broadcast_system_message(self, message: Dict[str, Any]) -> None:
         """
         Broadcast system-level message to all connections.

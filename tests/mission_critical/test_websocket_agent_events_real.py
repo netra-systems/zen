@@ -46,7 +46,8 @@ from tests.clients.websocket_client import WebSocketTestClient
 
 # Import production components for validation
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
