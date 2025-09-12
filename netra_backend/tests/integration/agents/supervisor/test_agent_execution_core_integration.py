@@ -117,6 +117,7 @@ class TestAgentExecutionCoreIntegration:
         user_context = UserExecutionContext(
             user_id=test_user_id,
             thread_id="test-thread-integration",
+            run_id="test-run-integration",
             request_id="test-request-integration"
         )
         
