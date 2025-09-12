@@ -89,7 +89,7 @@ class TestAgentExecutionCoreIntegration:
     async def auth_helper(self):
         """Authentication helper for user context."""
         helper = E2EAuthHelper()
-        await helper.setup()
+        # E2EAuthHelper doesn't require async setup - it's ready for use immediately
         return helper
 
     @pytest.fixture
@@ -106,16 +106,22 @@ class TestAgentExecutionCoreIntegration:
         return registry
 
     @pytest.fixture
-    async def real_websocket_bridge(self):
+    async def real_websocket_bridge(self, auth_helper):
         """Real WebSocket bridge for integration testing."""
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         
-        # Create real WebSocket manager (without external connections for testing)
-        websocket_manager = UnifiedWebSocketManager()
+        # Create proper user context for bridge
+        # E2EAuthHelper uses "test-user-123" as default user ID
+        test_user_id = "test-user-123"  # Default test user ID used by E2EAuthHelper
+        user_context = UserExecutionContext(
+            user_id=test_user_id,
+            thread_id="test-thread-integration",
+            request_id="test-request-integration"
+        )
         
-        # Create real bridge with tracking capabilities
-        bridge = AgentWebSocketBridge(websocket_manager)
+        # ✅ CORRECT - Pass UserExecutionContext to bridge
+        bridge = AgentWebSocketBridge(user_context)
         bridge.call_log = []  # Add tracking for test validation
         
         # Wrap methods to track calls while maintaining real behavior
@@ -159,7 +165,7 @@ class TestAgentExecutionCoreIntegration:
             agent_name="integration_test_agent",
             run_id=uuid4(),
             thread_id=f"test-thread-{uuid4()}",
-            user_id=auth_helper.test_user_id,
+            user_id="test-user-123",
             correlation_id=f"test-correlation-{uuid4()}"
         )
 
@@ -167,7 +173,7 @@ class TestAgentExecutionCoreIntegration:
     def sample_state(self, auth_helper):
         """Sample agent state with real user context."""
         state = Mock(spec=DeepAgentState)
-        state.user_id = auth_helper.test_user_id
+        state.user_id = "test-user-123"
         state.thread_id = f"test-thread-{uuid4()}"
         state.__dict__ = {
             'user_id': state.user_id,
@@ -363,11 +369,11 @@ class TestAgentExecutionCoreIntegration:
                 agent_name="integration_test_agent",
                 run_id=uuid4(),
                 thread_id=f"concurrent-thread-{i}",
-                user_id=auth_helper.test_user_id,
+                user_id="test-user-123",
                 correlation_id=f"concurrent-correlation-{i}"
             )
             state = Mock(spec=DeepAgentState)
-            state.user_id = auth_helper.test_user_id
+            state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)
             states.append(state)
@@ -457,11 +463,11 @@ class TestAgentExecutionCoreIntegration:
                 agent_name="integration_test_agent",
                 run_id=uuid4(),
                 thread_id=f"perf-thread-{i}",
-                user_id=auth_helper.test_user_id,
+                user_id="test-user-123",
                 correlation_id=f"perf-correlation-{i}"
             )
             state = Mock(spec=DeepAgentState)
-            state.user_id = auth_helper.test_user_id
+            state.user_id = "test-user-123"
             state.thread_id = context.thread_id
             contexts.append(context)
             states.append(state)
