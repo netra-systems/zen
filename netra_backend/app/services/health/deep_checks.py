@@ -41,8 +41,8 @@ class DeepHealthChecks:
             else:
                 # Fallback to global database manager if available
                 try:
-                    from shared.database.core_database_manager import get_database_manager
-                    self.db_manager = get_database_manager()
+                    from netra_backend.app.db.database_manager import DatabaseManager
+                    self.db_manager = DatabaseManager()
                 except ImportError:
                     logger.warning("Database manager not available - database checks disabled")
                     
@@ -161,8 +161,18 @@ class DeepHealthChecks:
                 status = HealthStatus.HEALTHY
                 message = "Database fully operational"
             
+            # Calculate health score based on test results
+            health_score = 0.0
+            if critical_tables_available:
+                health_score += 0.5
+            if write_test_passed:
+                health_score += 0.3
+            health_score += 0.2  # Basic connectivity working
+            
             return HealthCheckResult(
                 component_name=component_name,
+                success=status == HealthStatus.HEALTHY,
+                health_score=health_score,
                 status=status.value,
                 response_time_ms=response_time_ms,
                 message=message,
@@ -262,8 +272,18 @@ class DeepHealthChecks:
                 status = HealthStatus.HEALTHY
                 message = "Redis fully operational"
             
+            # Calculate health score based on test results
+            health_score = 0.0
+            health_score += 0.3  # Basic connectivity working
+            if pubsub_test_passed:
+                health_score += 0.4
+            if key_ops_test_passed:
+                health_score += 0.3
+            
             return HealthCheckResult(
                 component_name=component_name,
+                success=status == HealthStatus.HEALTHY,
+                health_score=health_score,
                 status=status.value,
                 response_time_ms=response_time_ms,
                 message=message,
@@ -370,8 +390,28 @@ class DeepHealthChecks:
             if not recommendations:
                 recommendations.append("No immediate action required")
             
+            # Calculate health score based on capacity and error metrics
+            health_score = 1.0
+            if capacity_utilization > 0.95:
+                health_score -= 0.5
+            elif capacity_utilization > 0.80:
+                health_score -= 0.3
+            elif capacity_utilization > 0.60:
+                health_score -= 0.1
+                
+            if error_rate > 0.10:
+                health_score -= 0.4
+            elif error_rate > 0.05:
+                health_score -= 0.2
+            elif error_rate > 0.02:
+                health_score -= 0.1
+                
+            health_score = max(0.0, health_score)
+            
             return HealthCheckResult(
                 component_name=component_name,
+                success=status == HealthStatus.HEALTHY,
+                health_score=health_score,
                 status=status.value,
                 response_time_ms=response_time_ms,
                 message=message,
@@ -426,6 +466,8 @@ class DeepHealthChecks:
         
         return HealthCheckResult(
             component_name=component_name,
+            success=False,
+            health_score=0.0,
             status=HealthStatus.UNHEALTHY.value,
             response_time_ms=response_time_ms,
             message=f"{component_name} check failed: {error_message}",
@@ -442,6 +484,8 @@ class DeepHealthChecks:
         
         return HealthCheckResult(
             component_name=component_name,
+            success=False,
+            health_score=0.0,
             status=HealthStatus.UNHEALTHY.value,
             response_time_ms=response_time_ms,
             message=f"{component_name} unavailable: {reason}",
