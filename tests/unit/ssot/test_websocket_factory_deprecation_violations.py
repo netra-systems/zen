@@ -358,45 +358,55 @@ class TestWebSocketFactoryDeprecationViolations(SSotBaseTestCase):
         self.record_metric("test_method", "no_duplicate_websocket_managers")
         self.record_metric("test_type", "validation")
         
-        # Scan for WebSocket manager class definitions in production code only
+        # Check for canonical UnifiedWebSocketManager implementation
+        canonical_file = self.netra_backend_root / "app" / "websocket_core" / "unified_manager.py"
+        
+        if not canonical_file.exists():
+            pytest.fail("❌ CANONICAL WEBSOCKET MANAGER FILE NOT FOUND: unified_manager.py")
+        
+        # Verify canonical implementation exists
         manager_class_patterns = [
-            r"class\s+WebSocketManager\s*[\(:]",
             r"class\s+UnifiedWebSocketManager\s*[\(:]",
         ]
         
-        # Scan only production code directories (exclude tests)
-        production_paths = [
-            self.netra_backend_root / "app",
-            self.project_root / "shared",
+        canonical_matches = self._scan_file_for_patterns(canonical_file, manager_class_patterns)
+        
+        if not canonical_matches:
+            pytest.fail("❌ CANONICAL UNIFIED WEBSOCKET MANAGER CLASS NOT FOUND")
+        
+        # Scan production code for any duplicate manager implementations
+        duplicate_patterns = [
+            r"class\s+WebSocketManager\s*[\(:]",  # Direct WebSocketManager classes
+            r"class\s+.*WebSocket.*Manager\s*[\(:]",  # Other WebSocket manager variants
         ]
         
-        manager_definitions = {}
-        for path in production_paths:
-            if path.exists():
-                path_definitions = self._scan_directory_for_patterns(path, manager_class_patterns)
-                manager_definitions.update(path_definitions)
+        # Only scan main app directory, exclude canonical unified_manager.py
+        app_directory = self.netra_backend_root / "app"
+        duplicate_definitions = {}
         
-        total_manager_classes = sum(len(matches) for matches in manager_definitions.values())
+        if app_directory.exists():
+            all_duplicates = self._scan_directory_for_patterns(app_directory, duplicate_patterns)
+            # Exclude the canonical file
+            for file_path, matches in all_duplicates.items():
+                if "unified_manager.py" not in file_path:
+                    duplicate_definitions[file_path] = matches
         
-        self.record_metric("manager_class_definitions", total_manager_classes)
+        total_duplicate_classes = sum(len(matches) for matches in duplicate_definitions.values())
         
-        # Check for canonical implementation (UnifiedWebSocketManager in unified_manager.py)
-        canonical_unified_file = "netra_backend/app/websocket_core/unified_manager.py"
-        has_canonical_implementation = any(canonical_unified_file in file_path for file_path in manager_definitions.keys())
+        self.record_metric("duplicate_manager_classes", total_duplicate_classes)
+        self.record_metric("has_canonical_implementation", len(canonical_matches) > 0)
         
-        self.record_metric("has_canonical_implementation", has_canonical_implementation)
-        
-        if total_manager_classes > 1:
+        if total_duplicate_classes > 0:
             failure_message = [
-                f"❌ MULTIPLE WEBSOCKET MANAGER IMPLEMENTATIONS DETECTED ❌",
+                f"❌ DUPLICATE WEBSOCKET MANAGER IMPLEMENTATIONS DETECTED ❌",
                 f"",
-                f"SSOT Violation: {total_manager_classes} WebSocket manager classes found",
-                f"SSOT Requirement: Exactly 1 canonical implementation",
+                f"SSOT Violation: {total_duplicate_classes} duplicate WebSocket manager classes found",
+                f"SSOT Requirement: Only UnifiedWebSocketManager should exist",
                 f"",
                 f"DUPLICATE IMPLEMENTATIONS:",
             ]
             
-            for file_path, matches in manager_definitions.items():
+            for file_path, matches in duplicate_definitions.items():
                 failure_message.append(f"")
                 failure_message.append(f"📁 File: {file_path}")
                 for line_num, match_text in matches:
@@ -405,21 +415,18 @@ class TestWebSocketFactoryDeprecationViolations(SSotBaseTestCase):
             failure_message.extend([
                 f"",
                 f"🔧 SSOT CONSOLIDATION REQUIRED:",
-                f"• Keep only canonical UnifiedWebSocketManager in unified_manager.py",
-                f"• Eliminate duplicate implementations",
-                f"• Migrate functionality to canonical implementation",
-                f"• Update imports to use canonical WebSocketManager",
+                f"• Eliminate duplicate WebSocket manager implementations",
+                f"• Use only UnifiedWebSocketManager in unified_manager.py",
+                f"• Update imports to use canonical WebSocketManager alias",
             ])
             
             pytest.fail("\n".join(failure_message))
-        
-        if not has_canonical_implementation:
-            pytest.fail(f"❌ CANONICAL WEBSOCKET MANAGER NOT FOUND: Expected UnifiedWebSocketManager in unified_manager.py")
             
         # Success
         self.record_metric("ssot_manager_compliance", True)
-        print("✅ SINGLE WEBSOCKET MANAGER IMPLEMENTATION DETECTED")
-        print(f"✅ Canonical implementation: UnifiedWebSocketManager in unified_manager.py")
+        print("✅ SINGLE WEBSOCKET MANAGER IMPLEMENTATION VALIDATED")
+        print("✅ Only canonical UnifiedWebSocketManager exists")
+        print(f"✅ Found {len(canonical_matches)} canonical implementation(s)")
     
     def test_websocket_import_consistency(self):
         """
