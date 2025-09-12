@@ -127,6 +127,15 @@ class MinimalPeriodicUpdateManager:
     Maintains SSOT compliance by providing only essential functionality.
     """
     
+    def __init__(self, websocket_bridge=None):
+        """Initialize minimal periodic update manager with optional websocket bridge.
+        
+        Args:
+            websocket_bridge: Optional WebSocket bridge for compatibility (not used in minimal implementation)
+        """
+        self.websocket_bridge = websocket_bridge
+        logger.debug("Initialized MinimalPeriodicUpdateManager with minimal overhead")
+    
     @asynccontextmanager
     async def track_operation(
         self, 

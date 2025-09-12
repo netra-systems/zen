@@ -39,7 +39,8 @@ if TYPE_CHECKING:
     # Legacy import removed - use SSOT from resilience
     # from netra_backend.app.agents.supervisor.fallback_manager import FallbackManager
     from netra_backend.app.core.resilience.fallback import FallbackManager
-    from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
+    # SECURITY FIX: Use MinimalPeriodicUpdateManager from UserExecutionEngine for compatibility
+    from netra_backend.app.agents.supervisor.user_execution_engine import MinimalPeriodicUpdateManager as PeriodicUpdateManager
     from netra_backend.app.core.types import AgentExecutionResult, AgentExecutionContext
     # DeepAgentState removed - using UserExecutionContext pattern
 
@@ -589,7 +590,8 @@ class IsolatedExecutionEngine:
     async def _get_or_create_periodic_update_manager(self) -> 'PeriodicUpdateManager':
         """Get or create periodic update manager."""
         if self._periodic_update_manager is None:
-            from netra_backend.app.agents.supervisor.periodic_update_manager import PeriodicUpdateManager
+            # SECURITY FIX: Use MinimalPeriodicUpdateManager from UserExecutionEngine for compatibility
+    from netra_backend.app.agents.supervisor.user_execution_engine import MinimalPeriodicUpdateManager as PeriodicUpdateManager
             self._periodic_update_manager = PeriodicUpdateManager(
                 self.websocket_emitter, 
                 self.user_context
