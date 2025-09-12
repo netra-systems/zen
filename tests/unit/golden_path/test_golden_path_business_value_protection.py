@@ -19,11 +19,12 @@ TEST STRATEGY:
 
 import asyncio
 import time
+import unittest
 import uuid
 from typing import Dict, Any, List
 from unittest import mock
 
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -31,7 +32,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 
 
-class TestGoldenPathBusinessValueProtection(SSotBaseTestCase):
+class TestGoldenPathBusinessValueProtection(SSotAsyncTestCase, unittest.TestCase):
     """
     Validates unified logging protects $500K+ ARR debugging capabilities.
     

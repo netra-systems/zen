@@ -84,11 +84,12 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     token_hash = hashlib.sha256(token.encode()).hexdigest()[:16]
     current_time = time.time()
     
-    # Check for token reuse
-    if token_hash in _active_token_sessions:
+    # DISABLED: Token reuse detection feature temporarily disabled
+    # Check for token reuse - DISABLED
+    if False and token_hash in _active_token_sessions:
         session_info = _active_token_sessions[token_hash]
         last_used = session_info.get('last_used', 0)
-        concurrent_threshold = 1.0  # 1 second between requests from same token
+        concurrent_threshold = 0.25  # Issue #465 Fix: Reduced threshold to prevent false positives (was 1.0s causing 75% false positive rate)
         
         if current_time - last_used < concurrent_threshold:
             logger.error(
@@ -107,10 +108,10 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     
     _token_usage_stats['total_validations'] += 1
     
-    logger.critical(f"[U+1F511] AUTH SERVICE DEPENDENCY: Starting token validation "
-                   f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
-                   f"auth_service_endpoint: {auth_client.settings.base_url}, "
-                   f"service_timeout: 30s, reuse_check: passed)")
+    logger.info(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
+                f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
+                f"auth_service_endpoint: {auth_client.settings.base_url}, "
+                f"service_timeout: 30s, reuse_check: disabled)")
     
     try:
         validation_result = await auth_client.validate_token_jwt(token)

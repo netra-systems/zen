@@ -188,6 +188,17 @@ class AuthStartupValidator:
         try:
             service_id = self.env.get('SERVICE_ID')
             service_secret = self.env.get('SERVICE_SECRET')
+
+            # TEMPORARY FIX: Fallback to direct os.environ if IsolatedEnvironment doesn't find SERVICE_ID
+            if not service_id:
+                import os
+                service_id = os.environ.get('SERVICE_ID')
+                logger.warning(f"SERVICE_ID not found in IsolatedEnvironment, using direct os.environ fallback: {service_id is not None}")
+
+            if not service_secret:
+                import os
+                service_secret = os.environ.get('SERVICE_SECRET')
+                logger.warning(f"SERVICE_SECRET not found in IsolatedEnvironment, using direct os.environ fallback: {service_secret is not None}")
             
             # Check SERVICE_ID first
             if not service_id:
