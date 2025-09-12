@@ -78,8 +78,9 @@ def require_docker_services_smart() -> None:
         # Use fast check to prevent hangs
         if not manager.is_docker_available_fast():
             # CRITICAL: Check if staging environment fallback is available
-            staging_env = get_env("USE_STAGING_FALLBACK", "false").lower() == "true"
-            staging_websocket_url = get_env("STAGING_WEBSOCKET_URL", "")
+            env = get_env()
+            staging_env = env.get("USE_STAGING_FALLBACK", "false").lower() == "true"
+            staging_websocket_url = env.get("STAGING_WEBSOCKET_URL", "")
             
             if staging_env and staging_websocket_url:
                 logger.warning(
