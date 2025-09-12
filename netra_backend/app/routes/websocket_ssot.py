@@ -1630,6 +1630,104 @@ class WebSocketSSOTRouter:
         except Exception as e:
             logger.error(f"WebSocket protected API failed: {e}")
             raise HTTPException(status_code=401, detail="Authentication required")
+    
+    # PERMISSIVE AUTH ENDPOINTS
+    async def auth_circuit_breaker_status(self):
+        """Get authentication circuit breaker status."""
+        try:
+            circuit_status = get_auth_circuit_status()
+            
+            return {
+                "service": "auth_circuit_breaker",
+                "status": "operational",
+                "circuit_breaker": circuit_status,
+                "remediation_active": True,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Auth circuit breaker status failed: {e}")
+            return {
+                "service": "auth_circuit_breaker",
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+    
+    async def auth_permissiveness_status(self):
+        """Get authentication permissiveness system status."""
+        try:
+            validator = get_auth_permissiveness_validator()
+            validation_stats = validator.get_validation_stats()
+            
+            return {
+                "service": "auth_permissiveness",
+                "status": "operational",
+                "permissiveness_levels": [level.value for level in AuthPermissivenessLevel],
+                "validation_stats": validation_stats,
+                "remediation_active": True,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Auth permissiveness status failed: {e}")
+            return {
+                "service": "auth_permissiveness", 
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+    
+    async def auth_health_status(self):
+        """Get comprehensive authentication health status."""
+        try:
+            # Get circuit breaker status
+            try:
+                circuit_status = get_auth_circuit_status()
+                circuit_healthy = circuit_status.get("circuit_breaker", {}).get("state", "unknown") != "open"
+            except Exception as e:
+                circuit_status = {"error": str(e)}
+                circuit_healthy = False
+            
+            # Get permissiveness validator status
+            try:
+                validator = get_auth_permissiveness_validator()
+                validation_stats = validator.get_validation_stats()
+                permissive_healthy = validation_stats.get("success_rate_percent", 0) > 50
+            except Exception as e:
+                validation_stats = {"error": str(e)}
+                permissive_healthy = False
+            
+            # Overall health assessment
+            overall_healthy = circuit_healthy and permissive_healthy
+            
+            return {
+                "service": "auth_health",
+                "status": "healthy" if overall_healthy else "degraded",
+                "components": {
+                    "circuit_breaker": {
+                        "healthy": circuit_healthy,
+                        "status": circuit_status
+                    },
+                    "permissiveness_validator": {
+                        "healthy": permissive_healthy,
+                        "stats": validation_stats
+                    }
+                },
+                "remediation": {
+                    "active": True,
+                    "websocket_1011_prevention": True,
+                    "graceful_degradation": True,
+                    "multi_level_auth": True
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Auth health status failed: {e}")
+            return {
+                "service": "auth_health",
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
 
 
 # Create SSOT router instance

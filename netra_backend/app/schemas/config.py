@@ -293,6 +293,52 @@ class AppConfig(BaseModel):
         description="Allowed CORS origins - comma-separated string or '*' for all"
     )
     
+    # AUTH PERMISSIVENESS CONFIGURATION (WebSocket 1011 Remediation)
+    auth_permissiveness_enabled: bool = Field(
+        default=True,
+        description="Enable auth permissiveness system to prevent WebSocket 1011 errors"
+    )
+    auth_circuit_breaker_enabled: bool = Field(
+        default=True,
+        description="Enable auth circuit breaker for graceful degradation"
+    )
+    auth_strict_mode: bool = Field(
+        default=None,  # Auto-detect based on environment
+        description="Force strict authentication mode (None=auto-detect)"
+    )
+    auth_demo_mode: bool = Field(
+        default=None,  # Auto-detect from DEMO_MODE env var
+        description="Enable demo mode authentication bypass (None=auto-detect)"
+    )
+    auth_emergency_mode: bool = Field(
+        default=False,
+        description="Enable emergency authentication bypass when auth services are down"
+    )
+    auth_failure_threshold: int = Field(
+        default=5,
+        description="Number of consecutive failures before tripping circuit breaker"
+    )
+    auth_failure_rate_threshold: float = Field(
+        default=0.5,
+        description="Failure rate (0.0-1.0) that trips circuit breaker"
+    )
+    auth_circuit_open_timeout: int = Field(
+        default=30,
+        description="Seconds to keep circuit breaker open before testing recovery"
+    )
+    auth_relaxed_fallback_enabled: bool = Field(
+        default=True,
+        description="Enable relaxed auth fallback when circuit breaker is open"
+    )
+    auth_demo_fallback_enabled: bool = Field(
+        default=True,
+        description="Enable demo auth fallback when circuit breaker is open"
+    )
+    auth_emergency_fallback_enabled: bool = Field(
+        default=True,
+        description="Enable emergency auth fallback when all else fails"
+    )
+    
     # Additional middleware configuration
     disable_https_only: bool = Field(
         default=False,
