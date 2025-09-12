@@ -151,7 +151,7 @@ def cleanup_test_environment():
     clear_service_discovery_files()
 
 
-def clear_test_databases():
+async def clear_test_databases():
     """Clear all test databases using proper repository pattern."""
     # Use repository factory pattern for database cleanup - no direct SQL
     try:
@@ -174,7 +174,7 @@ def clear_test_databases():
     # Clear Redis test data
     try:
         r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, decode_responses=True, db=1)  # Use db=1 for tests
-        r.flushdb()
+        await r.flushdb()
     except Exception:
         pass
 
