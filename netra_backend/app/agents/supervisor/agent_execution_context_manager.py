@@ -127,8 +127,8 @@ class AgentExecutionContextManager:
         with self._lock:
             try:
                 # Generate user-specific context IDs for proper isolation
-        context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
-        session_id = context_ids[0]  # thread_id for session tracking
+                context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
+                session_id = context_ids[0]  # thread_id for session tracking
                 now = datetime.now(timezone.utc)
                 
                 # Create execution context with proper isolation
@@ -423,13 +423,13 @@ class AgentExecutionContextManager:
         try:
             # Generate unique identifiers for this context
             # Use SSOT context generation for run_id
-        if 'context_ids' not in locals():
-            context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
-        run_id = RunID(context_ids[1])  # run_id from SSOT generation
+            if 'context_ids' not in locals():
+                context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
+            run_id = RunID(context_ids[1])  # run_id from SSOT generation
             # Use SSOT context generation for request_id
-        if 'context_ids' not in locals():
-            context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
-        request_id = RequestID(context_ids[2])  # request_id from SSOT generation
+            if 'context_ids' not in locals():
+                context_ids = UnifiedIdGenerator.generate_user_context_ids(user_id, "agent_execution")
+            request_id = RequestID(context_ids[2])  # request_id from SSOT generation
             
             # Create agent context with isolation boundary
             agent_context = initial_context.copy()
