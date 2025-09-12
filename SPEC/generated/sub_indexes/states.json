@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "states",
-    "generated_at": "2025-09-11T22:48:30.248266",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "generated_at": "2025-09-12T05:38:12.801299",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 30
   },
   "literals": {
@@ -85,7 +85,7 @@
         "netra_backend/app/routes/discovery.py:182",
         "netra_backend/app/schemas/config.py:927",
         "netra_backend/app/schemas/config.py:1117",
-        "auth_service/auth_core/core/jwt_handler.py:807",
+        "auth_service/auth_core/core/jwt_handler.py:847",
         "scripts/e2e_continuous_runner.py:50",
         "scripts/validate_websocket_compliance.py:48",
         "shared/config_change_tracker.py:444"
@@ -134,13 +134,13 @@
         "netra_backend/app/agents/base_agent.py:1461",
         "netra_backend/app/agents/validation_sub_agent.py:301",
         "netra_backend/app/agents/validation_sub_agent.py:302",
+        "netra_backend/app/api/health_checks.py:127",
         "netra_backend/app/business/subscription_manager.py:26",
         "netra_backend/app/core/async_connection_pool.py:592",
         "netra_backend/app/core/managers/unified_state_manager.py:72",
         "netra_backend/app/core/telemetry.py:38",
         "netra_backend/app/database/postgresql_pool_manager.py:273",
-        "netra_backend/app/db/health_checks.py:98",
-        "netra_backend/app/db/health_checks.py:106"
+        "netra_backend/app/db/health_checks.py:98"
       ]
     },
     "busy": {
@@ -209,10 +209,10 @@
         "netra_backend/app/core/websocket_recovery_types.py:17",
         "netra_backend/app/db/clickhouse.py:548",
         "netra_backend/app/db/clickhouse.py:1062",
+        "netra_backend/app/db/clickhouse_backup.py:547",
+        "netra_backend/app/db/clickhouse_backup.py:1061",
         "netra_backend/app/db/clickhouse_init.py:145",
-        "netra_backend/app/mcp_client/models.py:29",
-        "netra_backend/app/schemas/core_enums.py:132",
-        "netra_backend/app/schemas/core_enums.py:259"
+        "netra_backend/app/mcp_client/models.py:29"
       ]
     },
     "enabled": {

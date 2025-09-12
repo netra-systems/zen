@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "events",
-    "generated_at": "2025-09-11T22:48:29.972497",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "generated_at": "2025-09-12T05:38:12.381002",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 45
   },
   "literals": {
@@ -128,8 +128,8 @@
         "netra_backend/app/core/tools/unified_tool_dispatcher.py:1124",
         "netra_backend/app/websocket_core/protocols.py:292",
         "netra_backend/app/websocket_core/protocols.py:714",
-        "scripts/P0_SYSTEM_REGRESSION_TEST.py:66",
-        "scripts/generate_websocket_mro_report.py:129"
+        "scripts/generate_websocket_mro_report.py:129",
+        "scripts/P0_SYSTEM_REGRESSION_TEST.py:66"
       ]
     },
     "emit_event": {

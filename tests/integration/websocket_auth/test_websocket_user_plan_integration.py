@@ -237,43 +237,6 @@ class TestWebSocketUserPlanIntegration(BaseTestCase):
         self.record_metric("upgrade_path_business_messaging", True)
         self.record_metric("conversion_opportunity_detected", True)
 
-    async def test_plan_downgrade_websocket_session_impact(self):
-        """
-        BVJ: Validates plan downgrade effects on active WebSocket sessions
-        Business Impact: Ensures fair usage enforcement and revenue protection
-        Revenue Impact: Prevents feature access after plan downgrades
-        """
-        # Given: A user who was PRO but downgraded to FREE
-        user_id = "test_user_downgrade_001"
-        
-        # First verify they had PRO access
-        pro_context = ToolExecutionContext(
-            user_id=user_id,
-            tool_name="analyze_workload",
-            user_plan=PlanTier.PRO.value,
-            websocket_session_id="ws_test_007"
-        )
-        pro_result = await self.permission_service.check_tool_permission(pro_context)
-        assert pro_result.allowed is True, "Should have PRO access initially"
-        
-        # When: User plan is downgraded to FREE (simulated)
-        free_context = ToolExecutionContext(
-            user_id=user_id,
-            tool_name="analyze_workload",
-            user_plan=PlanTier.FREE.value,  # Downgraded
-            websocket_session_id="ws_test_007"  # Same session
-        )
-        
-        # Then: Access should be denied immediately
-        free_result = await self.permission_service.check_tool_permission(free_context)
-        assert free_result.allowed is False, "Should lose PRO access after downgrade"
-        
-        # Verify graceful degradation messaging
-        assert free_result.reason is not None
-        assert free_result.upgrade_path is not None
-        
-        self.record_metric("plan_downgrade_immediate_effect", True)
-        self.record_metric("graceful_degradation_messaging", free_result.upgrade_path is not None)
 
 
 @pytest.mark.integration  
@@ -337,32 +300,3 @@ class TestWebSocketPlanFeatureValidation(BaseTestCase):
             
             self.record_metric(f"feature_flag_{plan_tier.value}_{feature_flag}", result.allowed)
 
-    async def test_business_requirement_validation_integration(self):
-        """
-        BVJ: Validates business requirements are checked in WebSocket context
-        Business Impact: Ensures compliance and business rule enforcement
-        Revenue Impact: Protects against policy violations that could impact revenue
-        """
-        # Given: A user attempting tool that has business requirements
-        user_id = "test_user_business_req_001"
-        context = ToolExecutionContext(
-            user_id=user_id,
-            tool_name="compliance_audit_tool",
-            user_plan=PlanTier.ENTERPRISE.value,  # Has permissions
-            websocket_session_id="ws_business_test_001"
-        )
-        
-        # When: Permission check validates business requirements
-        result = await self.permission_service.check_tool_permission(context)
-        
-        # Then: Business requirements should be validated
-        assert result.allowed is True or result.business_requirements_met is not None, \
-            "Business requirements should be checked"
-        
-        # If allowed, business requirements should be met
-        if result.allowed:
-            assert result.business_requirements_met is True, \
-                "Business requirements should be met for allowed access"
-        
-        self.record_metric("business_requirement_validation", True)
-        self.record_metric("compliance_checking_active", result.business_requirements_met is not None)

@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-11T22:48:30.242394",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
-    "total_literals": 1638
+    "generated_at": "2025-09-12T05:38:12.794023",
+    "root_directory": "C:\\GitHub\\netra-apex",
+    "total_literals": 1641
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -552,7 +552,7 @@
       "value": "/1000",
       "category": "paths",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:2647"
+        "netra_backend/app/websocket_core/unified_manager.py:2661"
       ]
     },
     "/100:": {
@@ -727,6 +727,13 @@
       "category": "paths",
       "locations": [
         "scripts/run_websocket_tdd_tests.py:194"
+      ]
+    },
+    "/?query=SELECT%20version()": {
+      "value": "/?query=SELECT%20version()",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/api/health_checks.py:289"
       ]
     },
     "/FI": {
@@ -2366,6 +2373,7 @@
       "value": "/cache/clear",
       "category": "paths",
       "locations": [
+        "netra_backend/app/api/health_checks.py:542",
         "netra_backend/app/routes/database_monitoring/router.py:97",
         "netra_backend/app/routes/mcp_client.py:468"
       ]
@@ -2440,11 +2448,11 @@
       "locations": [
         "netra_backend/app/core/cross_service_validators/data_consistency_validators.py:311",
         "netra_backend/app/routes/demo.py:63",
+        "frontend/components/chat/ChatFallbackUI.tsx:113",
         "frontend/components/ChatHistorySection.tsx:89",
         "frontend/components/ChatHistorySection.tsx:90",
-        "frontend/components/NavLinks.tsx:16",
-        "frontend/components/chat/ChatFallbackUI.tsx:113",
-        "frontend/components/demo/DemoCompletion.tsx:16"
+        "frontend/components/demo/DemoCompletion.tsx:16",
+        "frontend/components/NavLinks.tsx:16"
       ]
     },
     "/chat/message": {
@@ -2496,6 +2504,13 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/llm_cache.py:65"
+      ]
+    },
+    "/clickhouse": {
+      "value": "/clickhouse",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/api/health_checks.py:474"
       ]
     },
     "/clickhouse_tables": {
@@ -2578,6 +2593,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/agents/supervisor_admin_init.py:245",
+        "netra_backend/app/api/health_checks.py:491",
         "netra_backend/app/routes/auth_proxy.py:375",
         "netra_backend/app/routes/auth_proxy.py:371",
         "netra_backend/app/routes/auth_proxy.py:385",
@@ -2585,8 +2601,7 @@
         "netra_backend/app/routes/config.py:50",
         "netra_backend/app/routes/config.py:62",
         "netra_backend/app/routes/health_check.py:336",
-        "netra_backend/app/routes/mcp/main.py:235",
-        "frontend/components/chat/constants.tsx:27"
+        "netra_backend/app/routes/mcp/main.py:235"
       ]
     },
     "/config - This configuration endpoint": {
@@ -2779,6 +2794,7 @@
       "value": "/database",
       "category": "paths",
       "locations": [
+        "netra_backend/app/api/health_checks.py:440",
         "netra_backend/app/routes/health_check.py:290",
         "netra_backend/app/routes/health_extended.py:37"
       ]
@@ -3100,6 +3116,7 @@
       "value": "/health",
       "category": "paths",
       "locations": [
+        "netra_backend/app/api/health_checks.py:41",
         "netra_backend/app/clients/auth_client_config.py:118",
         "netra_backend/app/clients/auth_client_core.py:571",
         "netra_backend/app/core/app_factory_route_configs.py:93",
@@ -3108,8 +3125,7 @@
         "netra_backend/app/core/health/unified_health_checker.py:65",
         "netra_backend/app/core/health_checkers.py:800",
         "netra_backend/app/core/middleware_setup.py:118",
-        "netra_backend/app/core/network_constants.py:227",
-        "netra_backend/app/core/unified_error_handler.py:1256"
+        "netra_backend/app/core/network_constants.py:227"
       ]
     },
     "/health,/metrics,/docs,/openapi.json": {
@@ -4251,6 +4267,13 @@
         "netra_backend/app/routes/messages_root.py:73"
       ]
     },
+    "/redis": {
+      "value": "/redis",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/api/health_checks.py:457"
+      ]
+    },
     "/redoc": {
       "value": "/redoc",
       "category": "paths",
@@ -4782,6 +4805,7 @@
       "value": "/startup",
       "category": "paths",
       "locations": [
+        "netra_backend/app/api/health_checks.py:559",
         "netra_backend/app/routes/health.py:1029",
         "netra_backend/app/routes/health.py:1030",
         "netra_backend/app/routes/health_check.py:178",
@@ -5471,7 +5495,7 @@
         "netra_backend/app/monitoring/websocket_dashboard.py:638",
         "netra_backend/app/routes/mcp/main.py:243",
         "netra_backend/app/routes/websocket_ssot.py:203",
-        "netra_backend/app/routes/websocket_ssot.py:1594"
+        "netra_backend/app/routes/websocket_ssot.py:1595"
       ]
     },
     "/ws/": {
@@ -5520,7 +5544,7 @@
         "netra_backend/app/core/unified_error_handler.py:1257",
         "netra_backend/app/middleware/security_response_middleware.py:96",
         "netra_backend/app/routes/websocket_ssot.py:218",
-        "netra_backend/app/routes/websocket_ssot.py:1596",
+        "netra_backend/app/routes/websocket_ssot.py:1597",
         "scripts/staging_validation_part2_corrected.py:285",
         "scripts/staging_validation_part2_corrected.py:299",
         "scripts/staging_validation_part2_user_flows.py:328",
@@ -5559,7 +5583,7 @@
         "netra_backend/app/routes/websocket_ssot.py:214",
         "netra_backend/app/routes/websocket_ssot.py:215",
         "netra_backend/app/routes/websocket_ssot.py:216",
-        "netra_backend/app/routes/websocket_ssot.py:1595",
+        "netra_backend/app/routes/websocket_ssot.py:1596",
         "scripts/staging_validation_part2_corrected.py:213",
         "scripts/staging_validation_part2_corrected.py:227",
         "scripts/staging_validation_part2_user_flows.py:240"
