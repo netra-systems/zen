@@ -84,6 +84,17 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     get_websocket_authenticator,
     authenticate_websocket_ssot
 )
+
+# PERMISSIVE AUTH REMEDIATION: Import auth permissiveness and circuit breaker
+from netra_backend.app.auth_integration.auth_permissiveness import (
+    authenticate_with_permissiveness,
+    AuthPermissivenessLevel,
+    get_auth_permissiveness_validator
+)
+from netra_backend.app.auth_integration.auth_circuit_breaker import (
+    authenticate_with_circuit_breaker,
+    get_auth_circuit_status
+)
 from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
 
 # Utilities and state management
@@ -214,6 +225,11 @@ class WebSocketSSOTRouter:
         self.router.get("/api/v1/websocket")(self.websocket_api_info)
         self.router.post("/api/v1/websocket")(self.websocket_api_create)
         self.router.get("/api/v1/websocket/protected")(self.websocket_api_protected)
+        
+        # PERMISSIVE AUTH ENDPOINTS: Auth circuit breaker and permissiveness status
+        self.router.get("/ws/auth/circuit-breaker")(self.auth_circuit_breaker_status)
+        self.router.get("/ws/auth/permissiveness")(self.auth_permissiveness_status)
+        self.router.get("/ws/auth/health")(self.auth_health_status)
         
         # Specialized endpoints for factory and isolated modes
         self.router.get("/ws/factory/status")(self.factory_status_endpoint)
@@ -503,21 +519,45 @@ class WebSocketSSOTRouter:
                 logger.debug("[MAIN MODE] Accepting WebSocket without subprotocol")
                 await websocket.accept()
             
-            # Step 2: SSOT Authentication (preserves full auth pipeline)
-            logger.critical(f"[U+1F511] GOLDEN PATH AUTH: Starting SSOT authentication for connection {connection_id} - user_id: pending, connection_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown'))}, timestamp: {datetime.now(timezone.utc).isoformat()}")
+            # Step 2: PERMISSIVE AUTH REMEDIATION (with circuit breaker protection)
+            logger.critical(f"[U+1F511] GOLDEN PATH AUTH: Starting permissive authentication with circuit breaker for connection {connection_id} - user_id: pending, connection_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown'))}, timestamp: {datetime.now(timezone.utc).isoformat()}")
             
-            auth_result = await authenticate_websocket_ssot(
-                websocket, 
-                preliminary_connection_id=preliminary_connection_id
-            )
+            # Try circuit breaker auth first for graceful degradation
+            try:
+                auth_result = await authenticate_with_circuit_breaker(websocket)
+                logger.info(f"[PERMISSIVE AUTH] Circuit breaker auth result: success={auth_result.success}, level={auth_result.level.value if hasattr(auth_result, 'level') else 'unknown'}")
+            except Exception as circuit_error:
+                logger.warning(f"[PERMISSIVE AUTH] Circuit breaker auth failed, falling back to permissive auth: {circuit_error}")
+                # Fallback to direct permissive auth
+                auth_result = await authenticate_with_permissiveness(websocket)
+            
+            # Convert permissive auth result to WebSocket auth result format for compatibility
+            if hasattr(auth_result, 'user_context') and auth_result.user_context:
+                # Create compatible auth result structure
+                class CompatibleAuthResult:
+                    def __init__(self, permissive_result):
+                        self.success = permissive_result.success
+                        self.user_context = permissive_result.user_context
+                        self.error_message = "; ".join(permissive_result.security_warnings) if permissive_result.security_warnings else None
+                        self.error_code = permissive_result.audit_info.get('error_code', 'PERMISSIVE_AUTH_FAILURE') if not permissive_result.success else None
+                        self.auth_method = permissive_result.auth_method
+                        self.auth_level = permissive_result.level.value if hasattr(permissive_result, 'level') else 'unknown'
+                        self.bypass_reason = permissive_result.bypass_reason
+                        self.security_warnings = permissive_result.security_warnings or []
+                
+                auth_result = CompatibleAuthResult(auth_result)
             
             if not auth_result.success:
-                # CRITICAL AUTH FAILURE LOGGING
+                # CRITICAL AUTH FAILURE LOGGING (Enhanced for permissive auth)
                 auth_failure_context = {
                     "connection_id": connection_id,
                     "preliminary_connection_id": preliminary_connection_id,
                     "error_message": auth_result.error_message,
                     "error_code": getattr(auth_result, 'error_code', 'UNKNOWN'),
+                    "auth_method": getattr(auth_result, 'auth_method', 'unknown'),
+                    "auth_level": getattr(auth_result, 'auth_level', 'unknown'),
+                    "bypass_reason": getattr(auth_result, 'bypass_reason', None),
+                    "security_warnings": getattr(auth_result, 'security_warnings', []),
                     "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
                     "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
                     "headers_available": len(websocket.headers) if websocket.headers else 0,
@@ -526,7 +566,7 @@ class WebSocketSSOTRouter:
                     "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
                     "origin": websocket.headers.get('origin', 'unknown') if websocket.headers else 'unknown',
                     "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "golden_path_impact": "CRITICAL - Blocks user login to AI response flow"
+                    "golden_path_impact": "CRITICAL - Blocks user login to AI response flow despite permissive auth"
                 }
                 
                 logger.critical(f" ALERT:  GOLDEN PATH AUTH FAILURE: WebSocket authentication failed for connection {connection_id} - {auth_result.error_message}")
@@ -559,7 +599,7 @@ class WebSocketSSOTRouter:
             user_context = auth_result.user_context
             user_id = getattr(auth_result.user_context, 'user_id', None) if auth_result.success else None
             
-            # CRITICAL SUCCESS LOGGING
+            # CRITICAL SUCCESS LOGGING (Enhanced for permissive auth)
             auth_success_context = {
                 "connection_id": connection_id,
                 "user_id": user_id[:8] + "..." if user_id else 'unknown',
@@ -568,8 +608,13 @@ class WebSocketSSOTRouter:
                 "run_id": getattr(user_context, 'run_id', 'unknown') if user_context else 'unknown',
                 "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
                 "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
+                "auth_method": getattr(auth_result, 'auth_method', 'unknown'),
+                "auth_level": getattr(auth_result, 'auth_level', 'unknown'),
+                "bypass_reason": getattr(auth_result, 'bypass_reason', None),
+                "security_warnings": getattr(auth_result, 'security_warnings', []),
+                "permissive_auth_active": True,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "golden_path_milestone": "Authentication successful - user can proceed to AI interactions"
+                "golden_path_milestone": "Permissive authentication successful - user can proceed to AI interactions"
             }
             
             logger.info(f" PASS:  GOLDEN PATH AUTH SUCCESS: User {user_id[:8] if user_id else 'unknown'}... authenticated successfully for connection {connection_id}")
