@@ -1797,7 +1797,13 @@ class TestSSOTContinuousCompliance:
             # Initialize real service components to measure load time
             test_env = IsolatedEnvironment()
             test_db = DatabaseManager()
-            test_redis = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381)
+            from shared.isolated_environment import get_env
+            import redis
+            test_redis = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
             
             # Test basic operations
             test_redis.ping()
